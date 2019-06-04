@@ -52,32 +52,32 @@ PredictSatellitePeaks::PredictSatellitePeaks()
 void PredictSatellitePeaks::init() {
   auto latticeValidator = boost::make_shared<OrientedLatticeValidator>();
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "Peaks", "", Direction::Input, latticeValidator),
       "Workspace of Peaks with orientation matrix that indexed the peaks and "
       "instrument loaded");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("SatellitePeaks", "",
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("SatellitePeaks", "",
                                                      Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       string("ModVector1"), "0.0,0.0,0.0"),
                   "Offsets for h, k, l directions ");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       string("ModVector2"), "0.0,0.0,0.0"),
                   "Offsets for h, k, l directions ");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       string("ModVector3"), "0.0,0.0,0.0"),
                   "Offsets for h, k, l directions ");
   declareProperty(
-      make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
       "Maximum order to apply ModVectors. Default = 0");
 
   declareProperty("GetModVectorsFromUB", false,
                   "If false Modulation Vectors will be read from input");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("CrossTerms", false,
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("CrossTerms", false,
                                                        Direction::Input),
                   "Include cross terms (false)");
 
@@ -90,38 +90,38 @@ void PredictSatellitePeaks::init() {
                   "peaks from Peaks workspace "
                   "in input are used");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
+  declareProperty(std::make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
                                                          Direction::Input),
                   "Minimum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
-  declareProperty(make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
+  declareProperty(std::make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
                                                          Direction::Input),
                   "Maximum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
-  declareProperty(make_unique<PropertyWithValue<double>>("MinDSpacing", 0.1,
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MinDSpacing", 0.1,
                                                          Direction::Input),
                   "Minimum d-spacing of peaks to consider. Default = 1.0");
-  declareProperty(make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
                                                          Direction::Input),
                   "Maximum d-spacing of peaks to consider");
 
   setPropertySettings(
       "WavelengthMin",
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      std::make_unique<Kernel::EnabledWhenProperty>(
           string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
       "WavelengthMax",
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      std::make_unique<Kernel::EnabledWhenProperty>(
           string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings(
       "MinDSpacing",
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      std::make_unique<Kernel::EnabledWhenProperty>(
           string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings(
       "MaxDSpacing",
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      std::make_unique<Kernel::EnabledWhenProperty>(
           string("IncludeAllPeaksInRange"), Kernel::IS_EQUAL_TO, "1"));
 }
 

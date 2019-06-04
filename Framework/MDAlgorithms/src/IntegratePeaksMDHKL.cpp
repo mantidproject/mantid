@@ -38,7 +38,7 @@ DECLARE_ALGORITHM(IntegratePeaksMDHKL)
  */
 void IntegratePeaksMDHKL::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "",
                                                    Direction::Input),
       "An input Sample MDHistoWorkspace or MDEventWorkspace in HKL.");
   declareProperty("DeltaHKL", 0.5,
@@ -56,34 +56,34 @@ void IntegratePeaksMDHKL::init() {
   auto solidAngleValidator = fluxValidator->clone();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
                                        PropertyMode::Optional, fluxValidator),
       "An optional input workspace containing momentum dependent flux for "
       "normalization.");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "SolidAngleWorkspace", "", Direction::Input,
                       PropertyMode::Optional, solidAngleValidator),
                   "An optional input workspace containing momentum integrated "
                   "vanadium for normalization "
                   "(a measure of the solid angle).");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
                                                      Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius",
+      std::make_unique<PropertyWithValue<double>>("BackgroundInnerRadius",
                                              EMPTY_DBL(), Direction::Input),
       "Optional:Inner radius to use to evaluate the background of the peak.\n"
       "If omitted background is region of HKL box - peak. ");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius",
+      std::make_unique<PropertyWithValue<double>>("BackgroundOuterRadius",
                                              EMPTY_DBL(), Direction::Input),
       "Optional:Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
@@ -126,7 +126,7 @@ void IntegratePeaksMDHKL::exec() {
       boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
   int npeaks = peakWS->getNumberPeaks();
 
-  auto prog = make_unique<Progress>(this, 0.3, 1.0, npeaks);
+  auto prog = std::make_unique<Progress>(this, 0.3, 1.0, npeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*peakWS))
   for (int i = 0; i < npeaks; i++) {
     PARALLEL_START_INTERUPT_REGION

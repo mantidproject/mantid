@@ -87,11 +87,11 @@ const std::string SpecularReflectionPositionCorrect2::category() const {
  */
 void SpecularReflectionPositionCorrect2::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace to correct.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "TwoTheta", Mantid::EMPTY_DBL(), Direction::Input),
                   "Angle used to correct the detector component [degrees].");
 
@@ -106,7 +106,7 @@ void SpecularReflectionPositionCorrect2::init() {
       Direction::Input);
 
   declareProperty(
-      Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
+      std::make_unique<PropertyWithValue<std::string>>(
           "DetectorComponentName", "", Direction::Input),
       "Name of the detector component to correct, for example point-detector");
   auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
@@ -117,13 +117,13 @@ void SpecularReflectionPositionCorrect2::init() {
                   "are set the latter will be used.");
 
   declareProperty(
-      Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
+      std::make_unique<PropertyWithValue<std::string>>(
           "SampleComponentName", "some-surface-holder", Direction::Input),
       "Name of the sample component; if the given name is not found in the "
       "instrument, the default sample is used.");
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "A workspace with corrected detector position.");
   declareProperty("DetectorFacesSample", false,
@@ -141,7 +141,7 @@ void SpecularReflectionPositionCorrect2::init() {
   declareProperty("PixelSize", EMPTY_DBL(), positiveDouble,
                   "Size of a detector pixel, in metres.");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "DirectLineWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A direct beam workspace for reference.");
 }

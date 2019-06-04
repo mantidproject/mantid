@@ -122,9 +122,9 @@ const std::string CalculateIqt::summary() const {
 void CalculateIqt::init() {
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the sample workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("ResolutionWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ResolutionWorkspace", "",
                                                    Direction::Input),
                   "The name of the resolution workspace.");
 
@@ -141,7 +141,7 @@ void CalculateIqt::init() {
       "SeedValue", DEFAULT_SEED, positiveInt,
       "Seed the random number generator for monte-carlo error calculation.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
 

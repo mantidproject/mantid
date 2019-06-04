@@ -16,7 +16,7 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 
@@ -78,7 +78,7 @@ private:
 public:
   void testShouldLoadFirstTimeRound() {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
     EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
@@ -97,7 +97,7 @@ public:
 
   void testTimeChanged() {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
     EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
@@ -118,7 +118,7 @@ public:
 
   void testLoadInMemoryChanged() {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
     EXPECT_CALL(*mockView, getLoadInMemory())
@@ -139,7 +139,7 @@ public:
 
   void testDepthChanged() {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth())
         .Times(2)
@@ -161,7 +161,7 @@ public:
   void testhasTDimensionWhenIntegrated() {
     // Setup view
     ConcreteMDEWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>());
+        std::make_unique<MockMDLoadingView>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws =
@@ -176,7 +176,7 @@ public:
   void testHasTDimensionWhenNotIntegrated() {
     // Setup view
     ConcreteMDEWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>());
+        std::make_unique<MockMDLoadingView>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws =
@@ -191,7 +191,7 @@ public:
   void testHasTimeLabelWithTDimension() {
     // Setup view
     ConcreteMDEWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>());
+        std::make_unique<MockMDLoadingView>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws =
@@ -206,7 +206,7 @@ public:
   void testCanSetAxisLabelsFrom3DData() {
     // Setup view
     ConcreteMDEWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>());
+        std::make_unique<MockMDLoadingView>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true);
@@ -225,7 +225,7 @@ public:
   void testCanSetAxisLabelsFrom4DData() {
     // Setup view
     ConcreteMDEWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>());
+        std::make_unique<MockMDLoadingView>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true);
@@ -243,7 +243,7 @@ public:
 
   void testCanLoadFileBasedOnExtension() {
     ConcreteMDEWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>());
+        std::make_unique<MockMDLoadingView>());
 
     // constructive tests
     TSM_ASSERT("Should be an exact match",

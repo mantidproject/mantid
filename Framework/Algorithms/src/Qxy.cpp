@@ -41,10 +41,10 @@ void Qxy::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The corrected data in units of wavelength.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the corrected workspace.");
 
@@ -59,7 +59,7 @@ void Qxy::init() {
   declareProperty("IQxQyLogBinning", false,
                   "I(qx,qy) log binning when binning is not specified.",
                   Kernel::Direction::Input);
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "The scaling to apply to each spectrum e.g. for detector "
                   "efficiency, must have just one bin per spectrum and the "
@@ -68,7 +68,7 @@ void Qxy::init() {
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
   declareProperty(
-      make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input,
                                        PropertyMode::Optional, wavVal),
       "The scaling to apply to each bin to account for monitor "
       "counts, transmission fraction, etc. Must be one spectrum "

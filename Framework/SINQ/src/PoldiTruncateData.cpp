@@ -133,14 +133,14 @@ size_t PoldiTruncateData::getCalculatedBinCount() {
 size_t PoldiTruncateData::getActualBinCount() { return m_actualBinCount; }
 
 void PoldiTruncateData::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input workspace containing raw POLDI data.");
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>("ExtraCountsWorkspaceName",
+      std::make_unique<PropertyWithValue<std::string>>("ExtraCountsWorkspaceName",
                                                   "", Direction::Input),
       "Workspace name for extra counts. Leave empty if not required.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output workspace with truncated POLDI data.");
 }
@@ -162,7 +162,7 @@ void PoldiTruncateData::exec() {
 
         std::string extraCountsWorkspaceName =
             getProperty("ExtraCountsWorkspaceName");
-        declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+        declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
             "ExtraCountsWorkspace", extraCountsWorkspaceName,
             Direction::Output));
         setProperty("ExtraCountsWorkspace", extraCounts);

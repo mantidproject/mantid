@@ -16,7 +16,7 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <vtkBox.h>
 
@@ -89,13 +89,13 @@ void applyCOBMatrixSettingsToVtkDataSet(
 std::unique_ptr<vtkMDHexFactory>
 createFactoryChainForEventWorkspace(VisualNormalization normalization,
                                     double time) {
-  auto factory = Mantid::Kernel::make_unique<vtkMDHexFactory>(normalization);
+  auto factory = std::make_unique<vtkMDHexFactory>(normalization);
   factory
       ->setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDQuadFactory>(normalization))
+          std::make_unique<vtkMDQuadFactory>(normalization))
       .setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDLineFactory>(normalization))
-      .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
+          std::make_unique<vtkMDLineFactory>(normalization))
+      .setSuccessor(std::make_unique<vtkMD0DFactory>());
   factory->setTime(time);
   return factory;
 }
@@ -110,16 +110,16 @@ std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>>
 createFactoryChainForHistoWorkspace(VisualNormalization normalization,
                                     double time) {
   auto factory =
-      Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+      std::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
           normalization, time);
   factory
       ->setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(normalization))
+          std::make_unique<vtkMDHistoHexFactory>(normalization))
       .setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(normalization))
+          std::make_unique<vtkMDHistoQuadFactory>(normalization))
       .setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(normalization))
-      .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
+          std::make_unique<vtkMDHistoLineFactory>(normalization))
+      .setSuccessor(std::make_unique<vtkMD0DFactory>());
   return factory;
 }
 

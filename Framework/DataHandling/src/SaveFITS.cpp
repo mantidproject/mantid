@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <fstream>
 #include <iomanip>
@@ -88,12 +88,12 @@ const std::string PROP_BIT_DEPTH = "BitDepth";
  */
 void SaveFITS::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           PROP_INPUT_WS, "", Kernel::Direction::Input,
           boost::make_shared<API::WorkspaceUnitValidator>("Label")),
       "Workspace holding an image (with one spectrum per pixel row).");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       PROP_FILENAME, "", API::FileProperty::Save,
                       std::vector<std::string>(1, ".fits")),
                   "Name of the output file where the image is saved.");

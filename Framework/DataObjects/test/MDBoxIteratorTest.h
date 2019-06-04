@@ -106,7 +106,7 @@ public:
 
   void test_iterator_basic() {
     // Create an iterator
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, false);
 
     // Start with the top one
@@ -136,7 +136,7 @@ public:
 
   void test_depth_limit_1() {
     // Limit depth to 1 (the B level)
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 1, false);
     TS_ASSERT_EQUALS(it->getBox(), A);
     TS_ASSERT(nextIs(it.get(), B0));
@@ -149,7 +149,7 @@ public:
 
   void test_depth_limit_0() {
     // Limit depth to 0 (the A level)
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 0, false);
     TS_ASSERT_EQUALS(it->getBox(), A);
     TS_ASSERT(!it->next());
@@ -158,7 +158,7 @@ public:
 
   void test_starting_deeper() {
     // Start at a depth of 1 (on B0)
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         B0, 20, false);
     TS_ASSERT_EQUALS(it->getBox(), B0);
     TS_ASSERT(nextIs(it.get(), C00));
@@ -171,7 +171,7 @@ public:
 
   void test_leaf_only() {
     // Leaf-only iterator = skips anything with children
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, true);
 
     // This is the first leaf node
@@ -195,7 +195,7 @@ public:
 
   void test_leaf_only_depth_2() {
     // A node is considered a 'leaf' if it is at maxDepth
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 2, true);
 
     // This is the first leaf node
@@ -216,7 +216,7 @@ public:
 
   void test_leaf_only_depth_1() {
     // A node is considered a 'leaf' if it is at maxDepth
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 1, true);
     // This is the first leaf node
     TS_ASSERT_EQUALS(it->getBox(), B0);
@@ -229,7 +229,7 @@ public:
 
   void test_leaf_only_depth_0() {
     // A node is considered a 'leaf' if it is at maxDepth
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 0, true);
     // This is the ONLY leaf node
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -239,7 +239,7 @@ public:
 
   void test_leaf_only_starting_deeper() {
     // Now we start at B2 and look at only leaves
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         B2, 10, true);
     TS_ASSERT_EQUALS(it->getBox(), C20);
     TS_ASSERT(nextIs(it.get(), D210));
@@ -254,7 +254,7 @@ public:
 
   void test_leaf_only_starting_deeper_depth_limited() {
     // Now we start at B2 and look at only leaves up to depth 2
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         B2, 2, true);
     TS_ASSERT_EQUALS(it->getBox(), C20);
     TS_ASSERT(nextIs(it.get(), C21));
@@ -271,7 +271,7 @@ public:
   void test_iterator_just_one_box() {
     // Top level grid box
     ibox_t *A = MDEventsTestHelper::makeMDBox1();
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, false);
     TS_ASSERT_EQUALS(it->getBox(), A);
     TS_ASSERT(!it->next());
@@ -289,7 +289,7 @@ public:
     // Make a MDBox with 10 events
     ibox_t *A = MDEventsTestHelper::makeMDBox1();
     MDEventsTestHelper::feedMDBox<1>(A, 1, 10, 0.5, 1.0);
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, false);
     TS_ASSERT_EQUALS(it->getBox(), A);
     // It has some events!
@@ -315,13 +315,13 @@ public:
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_above11() {
     // Implicit function = only boxes with x > 5.0
-    auto func = Mantid::Kernel::make_unique<MDImplicitFunction>();
+    auto func = std::make_unique<MDImplicitFunction>();
     coord_t normal[1] = {+1.0};
     coord_t origin[1] = {11.0};
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, false, func.get());
 
     // Start with the top one
@@ -349,13 +349,13 @@ public:
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_above11_leafOnly() {
     // Implicit function = only boxes with x > 5.0
-    auto func = Mantid::Kernel::make_unique<MDImplicitFunction>();
+    auto func = std::make_unique<MDImplicitFunction>();
     coord_t normal[1] = {+1.0};
     coord_t origin[1] = {11.0};
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, true, func.get());
 
     // C00-C01 are outside the range, so the first one is C02
@@ -378,13 +378,13 @@ public:
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_above17() {
     // Implicit function = only boxes with x > 17.0
-    auto func = Mantid::Kernel::make_unique<MDImplicitFunction>();
+    auto func = std::make_unique<MDImplicitFunction>();
     coord_t normal[1] = {+1.0};
     coord_t origin[1] = {17.0};
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, false, func.get());
 
     // Start with the top one
@@ -408,7 +408,7 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_between_37_and_39() {
-    auto func = Mantid::Kernel::make_unique<MDImplicitFunction>();
+    auto func = std::make_unique<MDImplicitFunction>();
     coord_t normal[1] = {+1.0};
     coord_t origin[1] = {37.1f};
     func->addPlane(MDPlane(1, normal, origin));
@@ -417,7 +417,7 @@ public:
     func->addPlane(MDPlane(1, normal2, origin2));
 
     // Create an iterator
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, false, func.get());
 
     // Go down to the only two leaf boxes that are in range
@@ -433,7 +433,7 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_between_37_and_39_leafOnly() {
-    auto func = Mantid::Kernel::make_unique<MDImplicitFunction>();
+    auto func = std::make_unique<MDImplicitFunction>();
     coord_t normal[1] = {+1.0};
     coord_t origin[1] = {37.1f};
     func->addPlane(MDPlane(1, normal, origin));
@@ -442,7 +442,7 @@ public:
     func->addPlane(MDPlane(1, normal2, origin2));
 
     // Create an iterator
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, true, func.get());
 
     // Only two leaf boxes are in range
@@ -455,13 +455,13 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_noBoxInRange() {
-    auto func = Mantid::Kernel::make_unique<MDImplicitFunction>();
+    auto func = std::make_unique<MDImplicitFunction>();
     coord_t normal[1] = {+1.0};
     coord_t origin[1] = {234};
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, false, func.get());
 
     // Returns the first box but that's it
@@ -472,13 +472,13 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_noBoxInRange_leafOnly() {
-    auto func = Mantid::Kernel::make_unique<MDImplicitFunction>();
+    auto func = std::make_unique<MDImplicitFunction>();
     coord_t normal[1] = {+1.0};
     coord_t origin[1] = {234};
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, true, func.get());
 
     // Nothing in the iterator!
@@ -519,7 +519,7 @@ public:
 
   void test_skip_masked_detectors() {
     auto setupIterator =
-        Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
                                                                       true);
 
     // mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be
@@ -532,7 +532,7 @@ public:
     setupIterator->next(1);
 
     auto evaluationIterator =
-        Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
                                                                       true);
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
     TSM_ASSERT_EQUALS("Should have skipped to the first non-masked box", 1,
@@ -546,7 +546,7 @@ public:
 
   void test_no_skipping_policy() {
     auto setupIterator =
-        Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
                                                                       true);
 
     // mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be
@@ -559,7 +559,7 @@ public:
     setupIterator->next(1);
 
     auto evaluationIterator =
-        Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
             A, 20, true, new SkipNothing); // Using skip nothing policy.
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
     TSM_ASSERT_EQUALS("Should NOT have skipped to the first box", 1,
@@ -585,7 +585,7 @@ public:
 
     MockSkippingPolicy *mockPolicy = new MockSkippingPolicy;
     auto evaluationIterator =
-        Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
             A, 20, true,
             mockPolicy); // Using custom policy
 
@@ -612,7 +612,7 @@ public:
     // Make a MDBox with 10 events
     ibox_t *A = MDEventsTestHelper::makeMDBox1();
     MDEventsTestHelper::feedMDBox<1>(A, 1, 10, 0.5, 1.0);
-    auto it = Mantid::Kernel::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
         A, 20, true);
 
     // Initially the box is unmasked

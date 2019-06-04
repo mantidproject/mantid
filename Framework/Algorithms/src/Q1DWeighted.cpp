@@ -44,14 +44,14 @@ void Q1DWeighted::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Input workspace containing the SANS 2D data");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Workspace that will contain the I(Q) data");
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "OutputBinning", boost::make_shared<RebinParamsValidator>()),
       "The new bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta "
       "x_2,\\dots,x_n</math>");
@@ -74,7 +74,7 @@ void Q1DWeighted::init() {
   declareProperty("WedgeOffset", 0.0, positiveDouble,
                   "Wedge offset relative to the horizontal axis, in degrees.");
   declareProperty(
-      make_unique<WorkspaceProperty<WorkspaceGroup>>(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "WedgeWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Name for the WorkspaceGroup containing the wedge I(q) distributions.");
 

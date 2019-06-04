@@ -23,11 +23,11 @@ using namespace DataObjects;
 
 void CloneWorkspace::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
                                                 Direction::Input),
       "Name of the input workspace. Must be a MatrixWorkspace (2D or "
       "EventWorkspace), a PeaksWorkspace or a MDEventWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the newly created cloned workspace.");
 }

@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
 
@@ -48,7 +48,7 @@ public:
   void testConstructWithEmptyFileThrows() {
     TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
                       MDEWEventNexusLoadingPresenter(
-                          Mantid::Kernel::make_unique<MockMDLoadingView>(), ""),
+                          std::make_unique<MockMDLoadingView>(), ""),
                       const std::invalid_argument &);
   }
 
@@ -62,13 +62,13 @@ public:
     TSM_ASSERT_THROWS_NOTHING(
         "Object should be created without exception.",
         MDEWEventNexusLoadingPresenter(
-            Mantid::Kernel::make_unique<MockMDLoadingView>(),
+            std::make_unique<MockMDLoadingView>(),
             getSuitableFile()));
   }
 
   void testCanReadFile() {
     MDEWEventNexusLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), getUnhandledFile());
+        std::make_unique<MockMDLoadingView>(), getUnhandledFile());
     TSM_ASSERT(
         "A file of this type cannot and should not be read by this presenter!.",
         !presenter.canReadFile());
@@ -77,7 +77,7 @@ public:
   void testExecution() {
     // Setup view
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*mockView, getLoadInMemory())
@@ -123,7 +123,7 @@ public:
 
   void testCallHasTDimThrows() {
     MDEWEventNexusLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+        std::make_unique<MockMDLoadingView>(), getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.hasTDimensionAvailable(),
                       const std::runtime_error &);
@@ -131,7 +131,7 @@ public:
 
   void testCallGetTDimensionValuesThrows() {
     MDEWEventNexusLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+        std::make_unique<MockMDLoadingView>(), getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getTimeStepValues(),
                       const std::runtime_error &);
@@ -139,14 +139,14 @@ public:
 
   void testCallGetGeometryThrows() {
     MDEWEventNexusLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+        std::make_unique<MockMDLoadingView>(), getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getGeometryXML(), const std::runtime_error &);
   }
 
   void testGetWorkspaceTypeName() {
     MDEWEventNexusLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+        std::make_unique<MockMDLoadingView>(), getSuitableFile());
     TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
                       presenter.getWorkspaceTypeName());
   }
@@ -154,7 +154,7 @@ public:
   void testTimeLabel() {
     // Setup view
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*mockView, getLoadInMemory())
@@ -192,7 +192,7 @@ public:
   void testAxisLabels() {
     // Setup view
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*mockView, getLoadInMemory())

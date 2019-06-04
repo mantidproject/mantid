@@ -11,7 +11,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
@@ -2362,7 +2362,7 @@ public:
     const auto &log = getTestLog();
     // Add the filter
     auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+        std::make_unique<TimeSeriesProperty<bool>>("Filter");
     Mantid::Types::Core::DateAndTime firstStart("2007-11-30T16:17:00"),
         firstEnd("2007-11-30T16:17:15"), secondStart("2007-11-30T16:18:35"),
         secondEnd("2007-11-30T16:18:40");
@@ -2389,7 +2389,7 @@ public:
     const auto &log = getTestLog();
     // Add the filter
     auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+        std::make_unique<TimeSeriesProperty<bool>>("Filter");
     Mantid::Types::Core::DateAndTime firstEnd("2007-11-30T16:17:05"),
         secondStart("2007-11-30T16:17:10"), secondEnd("2007-11-30T16:17:15"),
         thirdStart("2007-11-30T16:18:35");
@@ -2416,7 +2416,7 @@ private:
   std::unique_ptr<TimeSeriesProperty<double>> getTestLog() {
     // Build the log
     auto log =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("DoubleLog");
+        std::make_unique<TimeSeriesProperty<double>>("DoubleLog");
     Mantid::Types::Core::DateAndTime logTime("2007-11-30T16:17:00");
     const double incrementSecs(10.0);
     for (int i = 1; i < 12; ++i) {
@@ -2433,7 +2433,7 @@ private:
     auto log = getTestLog();
     // Add the filter
     auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+        std::make_unique<TimeSeriesProperty<bool>>("Filter");
     filter->addValue("2007-11-30T16:17:00", true);
     filter->addValue("2007-11-30T16:17:15", false);
     filter->addValue("2007-11-30T16:17:25", true);

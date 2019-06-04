@@ -291,7 +291,7 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
   // GenericDataProcessorPresenter
   std::unique_ptr<TimeSlicingInfo> slicing;
   try {
-    slicing = Mantid::Kernel::make_unique<TimeSlicingInfo>(
+    slicing = std::make_unique<TimeSlicingInfo>(
         m_mainPresenter->getTimeSlicingType(m_group),
         m_mainPresenter->getTimeSlicingValues(m_group));
   } catch (const std::runtime_error &ex) {

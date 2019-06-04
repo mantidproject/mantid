@@ -13,7 +13,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidKernel/make_unique.h"
+
 
 namespace {
 using namespace Mantid::API;
@@ -282,7 +282,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
   AnalysisDataService::Instance().addOrReplace(INPUT_AND_GUESS_NAME,
                                                inputAndGuess);
 
-  auto axis = Mantid::Kernel::make_unique<TextAxis>(2);
+  auto axis = std::make_unique<TextAxis>(2);
   axis->setLabel(0, "Sample");
   axis->setLabel(1, "Guess");
   inputAndGuess->replaceAxis(1, axis.release());

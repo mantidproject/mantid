@@ -14,7 +14,7 @@
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/make_unique.h"
+
 #include <map>
 #include <vector>
 
@@ -68,7 +68,7 @@ void ParameterFactory::subscribe(const std::string &className) {
   auto it = s_map.find(className);
   if (!className.empty() && it == s_map.cend()) {
     s_map[className] =
-        Mantid::Kernel::make_unique<Kernel::Instantiator<C, Parameter>>();
+        std::make_unique<Kernel::Instantiator<C, Parameter>>();
   } else {
     throw std::runtime_error("Parameter type" + className +
                              " is already registered.\n");

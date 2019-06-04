@@ -27,17 +27,17 @@ using Geometry::IDetector_const_sptr;
 /// Initialize the algorithm
 void DetectorEfficiencyVariation::init() {
   auto val = boost::make_shared<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "WhiteBeamBase", "", Direction::Input, val),
                   "Name of a white beam vanadium workspace");
   // The histograms, the detectors in each histogram and their first and last
   // bin boundary must match
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("WhiteBeamCompare", "",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("WhiteBeamCompare", "",
                                                       Direction::Input, val),
       "Name of a matching second white beam vanadium run from the same "
       "instrument");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A MaskWorkpace where each spectra that failed the test is "
                   "masked. Each histogram from the input workspace maps to a "

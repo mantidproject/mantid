@@ -69,7 +69,7 @@ public:
     auto res = dae.executeAsync();
 
     FakeAlgorithm alg;
-    alg.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
+    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<specnum_t>>(
         "SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
     std::vector<specnum_t> specs;
@@ -263,7 +263,7 @@ public:
 
     FakeAlgorithm alg;
     alg.declareProperty(
-        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
+        std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 3;
@@ -314,9 +314,9 @@ public:
 
     FakeAlgorithm alg;
     alg.declareProperty(
-        Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
+        std::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
     alg.declareProperty(
-        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
+        std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     alg.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
@@ -371,9 +371,9 @@ public:
 
     FakeAlgorithm alg;
     alg.declareProperty(
-        Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
+        std::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
     alg.declareProperty(
-        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
+        std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     alg.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
@@ -408,7 +408,7 @@ public:
 
     FakeAlgorithm alg;
     alg.declareProperty(
-        Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
+        std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 5; // this period doesn't exist in dae

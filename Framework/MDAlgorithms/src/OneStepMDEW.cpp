@@ -35,11 +35,11 @@ OneStepMDEW::OneStepMDEW() {
  */
 void OneStepMDEW::init() {
   this->declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the Nexus file to\n"
       "attempt to load. The file extension must either be .nxs or .NXS");
 
-  this->declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                             "OutputWorkspace", "", Direction::Output),
                         "Name of the output MDEventWorkspace.");
 }

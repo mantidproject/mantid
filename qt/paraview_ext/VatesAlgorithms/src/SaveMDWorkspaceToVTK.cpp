@@ -16,7 +16,7 @@
 #include "MantidVatesAlgorithms/SaveMDWorkspaceToVTKImpl.h"
 
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/make_unique.h"
+
 
 namespace Mantid {
 namespace VATES {
@@ -24,7 +24,7 @@ namespace VATES {
 DECLARE_ALGORITHM(SaveMDWorkspaceToVTK)
 
 SaveMDWorkspaceToVTK::SaveMDWorkspaceToVTK()
-    : saver(Mantid::Kernel::make_unique<SaveMDWorkspaceToVTKImpl>(this)) {}
+    : saver(std::make_unique<SaveMDWorkspaceToVTKImpl>(this)) {}
 
 SaveMDWorkspaceToVTK::~SaveMDWorkspaceToVTK() {}
 
@@ -47,14 +47,14 @@ const std::string SaveMDWorkspaceToVTK::summary() const {
 
 void SaveMDWorkspaceToVTK::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::IMDWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::IMDWorkspace>>(
           "InputWorkspace", "", Mantid::Kernel::Direction::Input),
       "MDWorkspace to save/export");
 
   std::vector<std::string> extensions = {
       SaveMDWorkspaceToVTKImpl::structuredGridExtension,
       SaveMDWorkspaceToVTKImpl::unstructuredGridExtension};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", Mantid::API::FileProperty::Save,
                       extensions, Mantid::Kernel::Direction::Input),
                   "Save location.");

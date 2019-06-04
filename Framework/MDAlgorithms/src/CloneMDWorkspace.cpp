@@ -27,16 +27,16 @@ DECLARE_ALGORITHM(CloneMDWorkspace)
 /** Initialize the algorithm's properties.
  */
 void CloneMDWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace/MDHistoWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace/MDHistoWorkspace.");
 
   std::vector<std::string> exts(1, ".nxs");
   declareProperty(
-      Kernel::make_unique<FileProperty>("Filename", "",
+      std::make_unique<FileProperty>("Filename", "",
                                         FileProperty::OptionalSave, exts),
       "If the input workspace is file-backed, specify a file to which to save "
       "the cloned workspace.\n"

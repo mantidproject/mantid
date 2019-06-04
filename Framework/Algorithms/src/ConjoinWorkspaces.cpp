@@ -27,18 +27,18 @@ DECLARE_ALGORITHM(ConjoinWorkspaces)
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Direction::InOut),
       "The name of the first input workspace");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Direction::Input),
       "The name of the second input workspace");
-  declareProperty(make_unique<PropertyWithValue<bool>>("CheckOverlapping", true,
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("CheckOverlapping", true,
                                                        Direction::Input),
                   "Verify that the supplied data do not overlap");
-  declareProperty(make_unique<PropertyWithValue<std::string>>("YAxisLabel", "",
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("YAxisLabel", "",
                                                               Direction::Input),
                   "The label to set the Y axis to");
-  declareProperty(make_unique<PropertyWithValue<std::string>>("YAxisUnit", "",
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("YAxisUnit", "",
                                                               Direction::Input),
                   "The unit to set the Y axis to");
 }

@@ -50,11 +50,11 @@ const std::string SpecularReflectionCalculateTheta2::category() const {
  */
 void SpecularReflectionCalculateTheta2::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
                                                       Direction::Input),
       "An Input workspace to calculate the specular relection theta on.");
   this->initCommonProperties();
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "TwoTheta", Mantid::EMPTY_DBL(), Direction::Output),
                   "Calculated two theta scattering angle in degrees.");
 }

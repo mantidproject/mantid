@@ -25,10 +25,10 @@ void ModifyData::init() {
 
   // Declare a 2D input workspace property.
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
 
   // Declare a 2D output workspace property.
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output));
 
   // Switches between two ways of accessing the data in the input workspace

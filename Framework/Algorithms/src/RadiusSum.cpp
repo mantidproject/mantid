@@ -47,10 +47,10 @@ const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
 /** Initialize the algorithm's properties.
  */
 void RadiusSum::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "An output workspace.");
 
@@ -58,7 +58,7 @@ void RadiusSum::init() {
       boost::make_shared<ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Centre", std::move(myInput),
+      std::make_unique<ArrayProperty<double>>("Centre", std::move(myInput),
                                                  std::move(twoOrThreeElements)),
       "Coordinate of the centre of the ring");
 
@@ -66,7 +66,7 @@ void RadiusSum::init() {
   nonNegative->setLower(0);
   declareProperty("MinRadius", 0.0, nonNegative->clone(),
                   "Length of the inner ring. Default=0");
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MaxRadius", std::numeric_limits<double>::max(),
                       std::move(nonNegative)),
                   "Length of the outer ring. Default=ImageSize.");
@@ -86,7 +86,7 @@ void RadiusSum::init() {
                   "If 2, the normalization will be divided by "
                   "the quadratic value of the ring for each "
                   "radius.");
-  setPropertySettings(normOrder, Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings(normOrder, std::make_unique<VisibleWhenProperty>(
                                      normBy, IS_EQUAL_TO, "1"));
 
   const char *groupNorm = "Normalization";

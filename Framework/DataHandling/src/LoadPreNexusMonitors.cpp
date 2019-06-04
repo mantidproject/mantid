@@ -57,13 +57,13 @@ LoadPreNexusMonitors::LoadPreNexusMonitors()
 
 void LoadPreNexusMonitors::init() {
   // Filename for the runinfo file.
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
                   "The filename of the runinfo file for a particular run. "
                   "Allowed Values are: _runinfo.xml");
 
   // The output workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       WORKSPACE_OUT, "", Direction::Output),
                   "The workspace to load the monitors into.");
 

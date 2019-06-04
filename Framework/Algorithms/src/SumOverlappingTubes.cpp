@@ -28,7 +28,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -44,12 +44,12 @@ using namespace DataObjects;
 using namespace Kernel;
 
 void SumOverlappingTubes::init() {
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "InputWorkspaces", boost::make_shared<ADSValidator>()),
                   "The names of the input workspaces as a list. You may also "
                   "group workspaces using the GUI or [[GroupWorkspaces]], and "
                   "specify the name of the group instead.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
   std::vector<std::string> outputTypes{"2DTubes", "2D", "1D"};
@@ -58,7 +58,7 @@ void SumOverlappingTubes::init() {
                   "Whether to have the output in raw 2D, with no "
                   "Debye-Scherrer cone correction, 2D or 1D.");
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "ScatteringAngleBinning", "0.05",
           boost::make_shared<RebinParamsValidator>(), Direction::Input),
       "A comma separated list of the first scattering angle, the scattering "
@@ -67,11 +67,11 @@ void SumOverlappingTubes::init() {
       "the boundary of binning will be determined by minimum and maximum "
       "scattering angle present in the workspaces.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("CropNegativeScatteringAngles",
+      std::make_unique<PropertyWithValue<bool>>("CropNegativeScatteringAngles",
                                            false, Direction::Input),
       "If true the negative scattering angles are cropped (ignored).");
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "HeightAxis", boost::make_shared<RebinParamsValidator>(true, true)),
       "A comma separated list of the first y value, the y value step size and "
       "the final y value. This can also be a single number, which "
@@ -79,13 +79,13 @@ void SumOverlappingTubes::init() {
       "be determined by minimum and maximum y values present in the "
       "workspaces. This can also be two numbers to give the range desired.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
       "If true normalise to the number of entries added for a particular "
       "scattering angle. ");
-  declareProperty(make_unique<PropertyWithValue<bool>>("MirrorScatteringAngles",
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MirrorScatteringAngles",
                                                        false, Direction::Input),
                   "A flag to mirror the signed 2thetas. ");
-  declareProperty(make_unique<PropertyWithValue<bool>>("SplitCounts", false,
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("SplitCounts", false,
                                                        Direction::Input),
                   "A flag to split the counts between adjacent bins");
   auto toleranceValidator =
@@ -95,14 +95,14 @@ void SumOverlappingTubes::init() {
                   "The relative tolerance for the scattering angles before the "
                   "counts are split.");
   setPropertySettings("ScatteringAngleTolerance",
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SplitCounts", IS_NOT_DEFAULT));
 }
 
 void SumOverlappingTubes::exec() {
   getInputParameters();
 
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_workspaceList.size());
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_workspaceList.size());
 
   // we need histogram data with m_numPoints bins
   HistogramData::BinEdges x(

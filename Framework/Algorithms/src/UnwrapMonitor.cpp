@@ -40,11 +40,11 @@ void UnwrapMonitor::init() {
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
                                                       Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
@@ -101,7 +101,7 @@ void UnwrapMonitor::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
 
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, numberOfSpectra);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numberOfSpectra);
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
     if (!spectrumInfo.hasDetectors(i)) {

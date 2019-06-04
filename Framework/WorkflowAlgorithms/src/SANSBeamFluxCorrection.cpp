@@ -23,22 +23,22 @@ DECLARE_ALGORITHM(SANSBeamFluxCorrection)
 
 void SANSBeamFluxCorrection::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Workspace to be corrected");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
                                        Direction::Input),
       "Workspace containing the monitor counts for the sample data");
 
   std::vector<std::string> exts{"_event.nxs", ".nxs", ".nxs.h5"};
   declareProperty(
-      Kernel::make_unique<API::FileProperty>("ReferenceFluxFilename", "",
+      std::make_unique<API::FileProperty>("ReferenceFluxFilename", "",
                                              API::FileProperty::Load, exts),
       "File containing the reference flux spectrum.");
 
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Corrected workspace.");
   declareProperty("OutputMessage", "", Direction::Output);
@@ -54,7 +54,7 @@ void SANSBeamFluxCorrection::exec() {
   // If the beam flux correction algorithm isn't in the reduction properties,
   // add it
   if (!m_reductionManager->existsProperty("BeamFluxAlgorithm")) {
-    auto algProp = make_unique<AlgorithmProperty>("BeamFluxAlgorithm");
+    auto algProp = std::make_unique<AlgorithmProperty>("BeamFluxAlgorithm");
     algProp->setValue(toString());
     m_reductionManager->declareProperty(std::move(algProp));
   }
@@ -135,7 +135,7 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
     // Keep the reference data for later use
     AnalysisDataService::Instance().addOrReplace(fluxRefWSName, fluxRefWS);
     m_reductionManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<>>(entryName, fluxRefWSName,
+        std::make_unique<WorkspaceProperty<>>(entryName, fluxRefWSName,
                                                  Direction::InOut));
     m_reductionManager->setPropertyValue(entryName, fluxRefWSName);
     m_reductionManager->setProperty(entryName, fluxRefWS);

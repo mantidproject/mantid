@@ -8,13 +8,13 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Memory.h"
-#include "MantidKernel/make_unique.h"
+
 
 namespace Mantid {
 namespace API {
 
 Workspace::Workspace(const Parallel::StorageMode storageMode)
-    : m_history(Kernel::make_unique<WorkspaceHistory>()),
+    : m_history(std::make_unique<WorkspaceHistory>()),
       m_storageMode(storageMode) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -23,7 +23,7 @@ Workspace::~Workspace() = default;
 Workspace::Workspace(const Workspace &other)
     : Kernel::DataItem(other), m_title(other.m_title),
       m_comment(other.m_comment), m_name(),
-      m_history(Kernel::make_unique<WorkspaceHistory>(other.getHistory())),
+      m_history(std::make_unique<WorkspaceHistory>(other.getHistory())),
       m_storageMode(other.m_storageMode) {}
 
 /** Set the title of the workspace

@@ -39,7 +39,7 @@ const std::string CreatePolarizationEfficienciesBase::category() const {
 }
 
 void CreatePolarizationEfficienciesBase::initOutputWorkspace() {
-  declareProperty(make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

@@ -36,11 +36,11 @@ DECLARE_ALGORITHM(SaveMask)
 /// Define input parameters
 void SaveMask::init() {
 
-  declareProperty(make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to output masking to XML file");
   declareProperty(
-      make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
+      std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
       "File to save the detectors mask in XML format");
 }
 

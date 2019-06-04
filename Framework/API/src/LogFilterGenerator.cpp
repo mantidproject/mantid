@@ -8,7 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
+
 
 using Mantid::Kernel::LogFilter;
 using Mantid::Kernel::Property;
@@ -56,7 +56,7 @@ LogFilterGenerator::generateFilter(const std::string &logName) const {
 
   // This will throw if the log is not a numeric time series.
   // This behaviour is what we want, so don't catch the exception
-  auto flt = Mantid::Kernel::make_unique<LogFilter>(logData);
+  auto flt = std::make_unique<LogFilter>(logData);
 
   switch (m_filterType) {
   case FilterType::None:

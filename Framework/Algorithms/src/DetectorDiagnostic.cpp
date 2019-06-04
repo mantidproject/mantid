@@ -50,14 +50,14 @@ int DetectorDiagnostic::version() const { return 1; }
 
 void DetectorDiagnostic::init() {
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the integrated detector vanadium (white beam) workspace.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "HardMaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A hard mask to apply to the inputworkspace");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                        Direction::Output),
       "A MaskWorkspace containing the masked spectra as zeroes and ones.");
   auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
@@ -134,7 +134,7 @@ void DetectorDiagnostic::init() {
 
   string detEffVarGrp("Detector Efficiency Variation");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("DetVanCompare", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("DetVanCompare", "", Direction::Input,
                                        PropertyMode::Optional),
       "Name of a matching second detector vanadium run from the same\n"
       "instrument. It must be treated in the same manner as the input detector "
@@ -147,11 +147,11 @@ void DetectorDiagnostic::init() {
   this->setPropertyGroup("DetVanRatioVariation", detEffVarGrp);
   this->setPropertySettings(
       "DetVanRatioVariation",
-      make_unique<EnabledWhenProperty>("DetVanCompare", IS_NOT_DEFAULT));
+      std::make_unique<EnabledWhenProperty>("DetVanCompare", IS_NOT_DEFAULT));
 
   string countsCheck("Check Sample Counts");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("SampleTotalCountsWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("SampleTotalCountsWorkspace", "",
                                        Direction::Input,
                                        PropertyMode::Optional),
       "A sample workspace integrated over the full axis range.");
@@ -159,7 +159,7 @@ void DetectorDiagnostic::init() {
 
   string backgroundCheck("Check Sample Background");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("SampleBackgroundWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("SampleBackgroundWorkspace", "",
                                        Direction::Input,
                                        PropertyMode::Optional),
       "A sample workspace integrated over the background region.");
@@ -186,7 +186,7 @@ void DetectorDiagnostic::init() {
 
   string psdBleedMaskGrp("Create PSD Bleed Mask");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("SampleWorkspace", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("SampleWorkspace", "", Direction::Input,
                                        PropertyMode::Optional),
       "A sample workspace. This is used in the PSD Bleed calculation.");
   this->setPropertyGroup("SampleWorkspace", psdBleedMaskGrp);
@@ -199,7 +199,7 @@ void DetectorDiagnostic::init() {
   this->setPropertyGroup("NIgnoredCentralPixels", psdBleedMaskGrp);
   this->setPropertySettings(
       "NIgnoredCentralPixels",
-      make_unique<EnabledWhenProperty>("MaxTubeFramerate", IS_NOT_DEFAULT));
+      std::make_unique<EnabledWhenProperty>("MaxTubeFramerate", IS_NOT_DEFAULT));
 
   this->declareProperty("NumberOfFailures", 0, Direction::Output);
 }

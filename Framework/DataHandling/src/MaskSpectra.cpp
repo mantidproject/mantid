@@ -38,7 +38,7 @@ void MaskSpectra::init() {
   declareWorkspaceInputProperties<
       MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
       "InputWorkspace", "The input workspace");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 }

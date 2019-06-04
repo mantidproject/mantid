@@ -84,24 +84,24 @@ void LeBailFit::init() {
 
   // Input Data Workspace
   this->declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "Input workspace containing the data to fit by LeBail algorithm.");
 
   // Output Result Data/Model Workspace
-  this->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                             "OutputWorkspace", "", Direction::Output),
                         "Output workspace containing calculated pattern or "
                         "calculated background. ");
 
   // Instrument profile Parameters
-  this->declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                             "InputParameterWorkspace", "", Direction::Input),
                         "Input table workspace containing the parameters "
                         "required by LeBail fit. ");
 
   // Output instrument profile parameters
-  auto tablewsprop1 = Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  auto tablewsprop1 = std::make_unique<WorkspaceProperty<TableWorkspace>>(
       "OutputParameterWorkspace", "", Direction::Output,
       API::PropertyMode::Optional);
   this->declareProperty(std::move(tablewsprop1),
@@ -110,12 +110,12 @@ void LeBailFit::init() {
 
   // Single peak: Reflection (HKL) Workspace, PeaksWorkspace
   this->declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "InputHKLWorkspace", "", Direction::Input),
       "Input table workspace containing the list of reflections (HKL). ");
 
   // Bragg peaks profile parameter output table workspace
-  auto tablewsprop2 = Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  auto tablewsprop2 = std::make_unique<WorkspaceProperty<TableWorkspace>>(
       "OutputPeaksWorkspace", "", Direction::Output,
       API::PropertyMode::Optional);
   this->declareProperty(std::move(tablewsprop2),
@@ -129,7 +129,7 @@ void LeBailFit::init() {
 
   // Interested region
   this->declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<double>>("FitRegion"),
+      std::make_unique<Kernel::ArrayProperty<double>>("FitRegion"),
       "Region of data (TOF) for LeBail fit.  Default is whole range. ");
 
   // Functionality: Fit/Calculation/Background
@@ -157,13 +157,13 @@ void LeBailFit::init() {
 
   // Input background parameters (array)
   this->declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<double>>(
+      std::make_unique<Kernel::ArrayProperty<double>>(
           "BackgroundParameters"),
       "Optional: enter a comma-separated list of background order parameters "
       "from order 0. ");
 
   // Input background parameters (tableworkspace)
-  auto tablewsprop3 = Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  auto tablewsprop3 = std::make_unique<WorkspaceProperty<TableWorkspace>>(
       "BackgroundParametersWorkspace", "", Direction::InOut,
       API::PropertyMode::Optional);
   this->declareProperty(
@@ -180,7 +180,7 @@ void LeBailFit::init() {
   declareProperty("PlotIndividualPeaks", false,
                   "Option to output each individual peak in mode Calculation.");
   setPropertySettings("PlotIndividualPeaks",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "Calculation"));
 
   // Make each reflection visible
@@ -188,7 +188,7 @@ void LeBailFit::init() {
                   "Heigh of peaks (reflections) if its calculated height is "
                   "smaller than user-defined minimum.");
   setPropertySettings("IndicationPeakHeight",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "Calculation"));
 
   // UseInputPeakHeights
@@ -197,7 +197,7 @@ void LeBailFit::init() {
                   "ReflectionWorkspace. "
                   "Otherwise, calcualte peaks' heights. ");
   setPropertySettings("UseInputPeakHeights",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "Calculation"));
 
   /*---------------------------  Properties for Fitting Mode
@@ -211,61 +211,61 @@ void LeBailFit::init() {
                   "The minimizer method applied to do the fit, default is "
                   "Levenberg-Marquardt",
                   Kernel::Direction::InOut);
-  setPropertySettings("Minimizer", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("Minimizer", std::make_unique<VisibleWhenProperty>(
                                        "Function", IS_EQUAL_TO, "LeBailFit"));
 
   declareProperty("Damping", 1.0,
                   "Damping factor if minimizer is 'Damped Gauss-Newton'");
-  setPropertySettings("Damping", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("Damping", std::make_unique<VisibleWhenProperty>(
                                      "Function", IS_EQUAL_TO, "LeBailFit"));
-  setPropertySettings("Damping", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("Damping", std::make_unique<VisibleWhenProperty>(
                                      "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("NumberMinimizeSteps", 100,
                   "Number of Monte Carlo random walk steps.");
   setPropertySettings("NumberMinimizeSteps",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "LeBailFit"));
   setPropertySettings("NumberMinimizeSteps",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "MonteCarlo"));
   setPropertySettings("NumberMinimizeSteps",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "RefineBackground"));
 
   //-----------------  Parameters for Monte Carlo Simulated Annealing
   //--------------------------
-  auto mcwsprop = Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  auto mcwsprop = std::make_unique<WorkspaceProperty<TableWorkspace>>(
       "MCSetupWorkspace", "", Direction::Input, PropertyMode::Optional);
   declareProperty(std::move(mcwsprop),
                   "Name of table workspace containing parameters' "
                   "setup for Monte Carlo simualted annearling. ");
   setPropertySettings("MCSetupWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("RandomSeed", 1, "Random number seed.");
-  setPropertySettings("RandomSeed", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("RandomSeed", std::make_unique<VisibleWhenProperty>(
                                         "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("AnnealingTemperature", 1.0,
                   "Temperature used Monte Carlo.  "
                   "Negative temperature is for simulated annealing. ");
   setPropertySettings("AnnealingTemperature",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("UseAnnealing", true,
                   "Allow annealing temperature adjusted automatically.");
   setPropertySettings("UseAnnealing",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty("DrunkenWalk", false,
                   "Flag to use drunken walk algorithm. "
                   "Otherwise, random walk algorithm is used. ");
   setPropertySettings("DrunkenWalk",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Function", IS_EQUAL_TO, "MonteCarlo"));
 
   declareProperty(

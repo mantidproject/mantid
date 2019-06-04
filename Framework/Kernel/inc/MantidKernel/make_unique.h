@@ -4,15 +4,15 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Mantid_make_unique_h
-#define Mantid_make_unique_h
+#ifndef Mantid_std::make_unique_h
+#define Mantid_std::make_unique_h
 
 #include <cstddef>
 #include <memory>
 #include <type_traits>
 #include <utility>
 
-// implementation of memory::make_unique for platforms that don't currently have
+// implementation of memory::std::make_unique for platforms that don't currently have
 // it.
 // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3656.htm
 
@@ -40,19 +40,19 @@ template <class T, size_t N> struct _Unique_if<T[N]> {
 };
 
 template <class T>
-typename _Unique_if<T>::_Unknown_bound make_unique(size_t n) {
+typename _Unique_if<T>::_Unknown_bound std::make_unique(size_t n) {
   using U = typename std::remove_extent<T>::type;
   return std::unique_ptr<T>(new U[n]());
 }
 
 template <class T, class... Args>
-inline typename _Unique_if<T>::_Single_object make_unique(Args &&... args) {
+inline typename _Unique_if<T>::_Single_object std::make_unique(Args &&... args) {
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
 template <class T, class... Args>
-inline typename _Unique_if<T>::_Known_bound make_unique(Args &&...) = delete;
+inline typename _Unique_if<T>::_Known_bound std::make_unique(Args &&...) = delete;
 #endif // __cplusplus == 201402L
 } // namespace Kernel
 } // namespace Mantid
-#endif // Mantid_make_unique_h
+#endif // Mantid_std::make_unique_h

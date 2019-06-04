@@ -26,10 +26,10 @@ using namespace Geometry;
 
 void CopyInstrumentParameters::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the workspace giving the instrument");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
       "Name of the workspace receiving the instrument");
 }
 

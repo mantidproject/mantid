@@ -41,17 +41,17 @@ DECLARE_ALGORITHM(SaveMD2)
 /** Initialize the algorithm's properties.
  */
 void SaveMD2::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
                                 ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
-  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
                                       "UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 
   declareProperty(
@@ -61,7 +61,7 @@ void SaveMD2::init() {
       "to reflect the current data structure. Filename parameter is ignored.");
   setPropertySettings(
       "UpdateFileBackEnd",
-      make_unique<EnabledWhenProperty>("MakeFileBacked", IS_EQUAL_TO, "0"));
+      std::make_unique<EnabledWhenProperty>("MakeFileBacked", IS_EQUAL_TO, "0"));
 
   declareProperty("MakeFileBacked", false,
                   "For an MDEventWorkspace that was created in memory:\n"
@@ -69,7 +69,7 @@ void SaveMD2::init() {
                   "file-backed one.");
   setPropertySettings(
       "MakeFileBacked",
-      make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
+      std::make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 }
 
 //----------------------------------------------------------------------------------------------

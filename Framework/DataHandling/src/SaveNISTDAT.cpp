@@ -31,10 +31,10 @@ void SaveNISTDAT::init() {
   wsValidator->add(
       boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer"));
   wsValidator->add<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".dat"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".dat"),
       "The filename of the output text file");
 }
 

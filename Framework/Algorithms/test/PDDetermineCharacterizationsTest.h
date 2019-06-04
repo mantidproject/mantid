@@ -179,36 +179,36 @@ public:
 
     PropertyManager_sptr expectedInfo = boost::make_shared<PropertyManager>();
     expectedInfo->declareProperty(
-        make_unique<PropertyWithValue<double>>("frequency", freq));
+        std::make_unique<PropertyWithValue<double>>("frequency", freq));
     expectedInfo->declareProperty(
-        make_unique<PropertyWithValue<double>>("wavelength", wl));
+        std::make_unique<PropertyWithValue<double>>("wavelength", wl));
     expectedInfo->declareProperty(
-        make_unique<PropertyWithValue<int>>("bank", bank));
+        std::make_unique<PropertyWithValue<int>>("bank", bank));
     expectedInfo->declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("vanadium", van));
+        std::make_unique<ArrayProperty<int32_t>>("vanadium", van));
     expectedInfo->declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>(
+        std::make_unique<ArrayProperty<int32_t>>(
             "vanadium_background", vanback));
     expectedInfo->declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("container", can));
+        std::make_unique<ArrayProperty<int32_t>>("container", can));
     expectedInfo->declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("empty_environment",
+        std::make_unique<ArrayProperty<int32_t>>("empty_environment",
                                                             "0"));
     expectedInfo->declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("empty_instrument",
+        std::make_unique<ArrayProperty<int32_t>>("empty_instrument",
                                                             empty));
     expectedInfo->declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<double>>("d_min", dmin));
+        std::make_unique<ArrayProperty<double>>("d_min", dmin));
     expectedInfo->declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<double>>("d_max", dmax));
+        std::make_unique<ArrayProperty<double>>("d_max", dmax));
     expectedInfo->declareProperty(
-        make_unique<PropertyWithValue<double>>("tof_min", tofmin));
+        std::make_unique<PropertyWithValue<double>>("tof_min", tofmin));
     expectedInfo->declareProperty(
-        make_unique<PropertyWithValue<double>>("tof_max", tofmax));
+        std::make_unique<PropertyWithValue<double>>("tof_max", tofmax));
     expectedInfo->declareProperty(
-        make_unique<PropertyWithValue<double>>("wavelength_min", wlmin));
+        std::make_unique<PropertyWithValue<double>>("wavelength_min", wlmin));
     expectedInfo->declareProperty(
-        make_unique<PropertyWithValue<double>>("wavelength_max", wlmax));
+        std::make_unique<PropertyWithValue<double>>("wavelength_max", wlmax));
 
     return expectedInfo;
   }

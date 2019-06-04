@@ -31,25 +31,25 @@ DECLARE_ALGORITHM(SliceMD)
 /** Initialize the algorithm's properties.
  */
 void SliceMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   // Properties for specifying the slice to perform.
   this->initSlicingProps();
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
   declareProperty(
-      make_unique<FileProperty>("OutputFilename", "",
+      std::make_unique<FileProperty>("OutputFilename", "",
                                 FileProperty::OptionalSave, ".nxs"),
       "Optional: Specify a NeXus file to write if you want the output "
       "workspace to be file-backed.");
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("Memory", -1),
+      std::make_unique<PropertyWithValue<int>>("Memory", -1),
       "If OutputFilename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");
@@ -64,7 +64,7 @@ void SliceMD::init() {
                   "Sets the maximum recursion depth to use. Can be used to "
                   "constrain the workspaces internal structure");
   setPropertySettings("MaxRecursionDepth",
-                      make_unique<EnabledWhenProperty>(
+                      std::make_unique<EnabledWhenProperty>(
                           "TakeMaxRecursionDepthFromInput", IS_EQUAL_TO, "0"));
 
   setPropertyGroup("OutputFilename", "File Back-End");
@@ -191,7 +191,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (fileBackedWS)
     API::IMDNode::sortObjByID(boxes);
 
-  auto prog = make_unique<Progress>(this, 0.0, 1.0, boxes.size());
+  auto prog = std::make_unique<Progress>(this, 0.0, 1.0, boxes.size());
 
   // The root of the output workspace
   MDBoxBase<OMDE, ond> *outRootBox = outWS->getBox();

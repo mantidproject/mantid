@@ -15,7 +15,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 
 #include <Poco/Path.h>
@@ -458,7 +458,7 @@ private:
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return Mantid::Kernel::make_unique<KafkaEventStreamDecoder>(broker, "", "",
+    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "",
                                                                 "", "");
   }
 

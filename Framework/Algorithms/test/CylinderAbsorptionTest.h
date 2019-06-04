@@ -80,22 +80,22 @@ public:
     // create the material
     auto material = boost::make_shared<Mantid::Kernel::PropertyManager>();
     material->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("ChemicalFormula", "V"),
+        std::make_unique<StringProperty>("ChemicalFormula", "V"),
         "");
-    material->declareProperty(Mantid::Kernel::make_unique<FloatProperty>(
+    material->declareProperty(std::make_unique<FloatProperty>(
                                   "SampleNumberDensity", 0.07192),
                               "");
 
     // create the geometry
     auto geometry = boost::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "Cylinder"), "");
+        std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     geometry->declareProperty(
-        Mantid::Kernel::make_unique<FloatProperty>("Height", 4), "");
+        std::make_unique<FloatProperty>("Height", 4), "");
     geometry->declareProperty(
-        Mantid::Kernel::make_unique<FloatProperty>("Radius", 0.4), "");
+        std::make_unique<FloatProperty>("Radius", 0.4), "");
     std::vector<double> center{0, 0, 0};
-    geometry->declareProperty(Mantid::Kernel::make_unique<FloatArrayProperty>(
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>(
                                   "Center", std::move(center)),
                               "");
 
@@ -142,22 +142,22 @@ public:
     // create the material
     auto material = boost::make_shared<Mantid::Kernel::PropertyManager>();
     material->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("ChemicalFormula", "V"),
+        std::make_unique<StringProperty>("ChemicalFormula", "V"),
         "");
-    material->declareProperty(Mantid::Kernel::make_unique<FloatProperty>(
+    material->declareProperty(std::make_unique<FloatProperty>(
                                   "SampleNumberDensity", 0.07192),
                               "");
 
     // create the geometry
     auto geometry = boost::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "Cylinder"), "");
+        std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     geometry->declareProperty(
-        Mantid::Kernel::make_unique<FloatProperty>("Height", 4), "");
+        std::make_unique<FloatProperty>("Height", 4), "");
     geometry->declareProperty(
-        Mantid::Kernel::make_unique<FloatProperty>("Radius", 0.4), "");
+        std::make_unique<FloatProperty>("Radius", 0.4), "");
     std::vector<double> center{0, 0, 0};
-    geometry->declareProperty(Mantid::Kernel::make_unique<FloatArrayProperty>(
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>(
                                   "Center", std::move(center)),
                               "");
 

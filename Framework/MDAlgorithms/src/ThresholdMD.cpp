@@ -46,7 +46,7 @@ const std::string ThresholdMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void ThresholdMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
@@ -72,9 +72,9 @@ void ThresholdMD::init() {
                   "Custom overwrite value for the signal. Defaults to zero.");
   setPropertySettings(
       "CustomOverwriteValue",
-      make_unique<EnabledWhenProperty>("OverwriteWithZero", IS_NOT_DEFAULT));
+      std::make_unique<EnabledWhenProperty>("OverwriteWithZero", IS_NOT_DEFAULT));
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output thresholded workspace.");
 }

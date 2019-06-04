@@ -9,7 +9,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -31,7 +31,7 @@ public:
 
   void test_construct() {
     TS_ASSERT_THROWS_NOTHING(
-        pWSWrap = Mantid::Kernel::make_unique<MDEventWSWrapper>());
+        pWSWrap = std::make_unique<MDEventWSWrapper>());
   }
   void test_buildNewWS() {
     IMDEventWorkspace_sptr pws;

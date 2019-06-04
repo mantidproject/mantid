@@ -33,9 +33,9 @@ using namespace Mantid::HistogramData;
 
 void MagFormFactorCorrection::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Workspace must have one axis with units of Q");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Output workspace name.");
   std::vector<std::string> keys = getMagneticIonList();
@@ -43,7 +43,7 @@ void MagFormFactorCorrection::init() {
                   boost::make_shared<StringListValidator>(keys),
                   "The name of the ion: an element symbol with a number "
                   "indicating the valence, e.g. Fe2 for Fe2+ / Fe(II)");
-  declareProperty(make_unique<WorkspaceProperty<>>("FormFactorWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("FormFactorWorkspace", "",
                                                    Direction::Output,
                                                    PropertyMode::Optional),
                   "If specified the algorithm will create a 1D workspace with "

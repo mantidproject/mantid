@@ -405,14 +405,14 @@ size_t PolarizationCorrectionWildes::WorkspaceMap::size() const noexcept {
 /** Initialize the algorithm's properties.
  */
 void PolarizationCorrectionWildes::init() {
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
                       Prop::INPUT_WS, "",
                       boost::make_shared<API::ADSValidator>(),
                       Kernel::Direction::Input),
                   "A list of workspaces to be corrected corresponding to the "
                   "flipper configurations.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+      std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
   const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " +
@@ -431,7 +431,7 @@ void PolarizationCorrectionWildes::init() {
       boost::make_shared<Kernel::ListValidator<std::string>>(setups),
       "Flipper configurations of the input workspaces.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::EFFICIENCIES, "", Kernel::Direction::Input),
       "A workspace containing the efficiency factors P1, P2, F1 and F2 as "
       "histograms");

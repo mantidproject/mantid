@@ -27,7 +27,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 
 namespace Mantid {
 
@@ -79,13 +79,13 @@ void SurfaceFactory::registerSurface()
   Register tallies to be used
 */
 {
-  using Mantid::Kernel::make_unique;
-  SGrid.emplace_back("Plane", make_unique<Plane>());
-  SGrid.emplace_back("Cylinder", make_unique<Cylinder>());
-  SGrid.emplace_back("Cone", make_unique<Cone>());
+  using std::make_unique;
+  SGrid.emplace_back("Plane", std::make_unique<Plane>());
+  SGrid.emplace_back("Cylinder", std::make_unique<Cylinder>());
+  SGrid.emplace_back("Cone", std::make_unique<Cone>());
   // SGrid["Torus"]=new Torus;
-  SGrid.emplace_back("General", make_unique<General>());
-  SGrid.emplace_back("Sphere", make_unique<Sphere>());
+  SGrid.emplace_back("General", std::make_unique<General>());
+  SGrid.emplace_back("Sphere", std::make_unique<Sphere>());
 
   ID['c'] = "Cylinder";
   ID['k'] = "Cone";

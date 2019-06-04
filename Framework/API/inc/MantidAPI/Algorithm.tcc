@@ -43,7 +43,7 @@ template <typename T, const int AllowedIndexTypes, typename... WSPropArgs,
 void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
                                                 const std::string &doc,
                                                 WSPropArgs &&... wsPropArgs) {
-  auto wsProp = Kernel::make_unique<WorkspaceProperty<T>>(
+  auto wsProp = std::make_unique<WorkspaceProperty<T>>(
       propertyName, "", Kernel::Direction::Input,
       std::forward<WSPropArgs>(wsPropArgs)...);
   const auto &wsPropRef = *wsProp;
@@ -51,7 +51,7 @@ void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
 
   auto indexTypePropName =
       IndexTypeProperty::generatePropertyName(propertyName);
-  auto indexTypeProp = Kernel::make_unique<IndexTypeProperty>(
+  auto indexTypeProp = std::make_unique<IndexTypeProperty>(
       indexTypePropName, AllowedIndexTypes);
   const auto &indexTypePropRef = *indexTypeProp;
 
@@ -60,7 +60,7 @@ void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
                   "performance WorkspaceIndex should be preferred;");
 
   auto indexPropName = IndexProperty::generatePropertyName(propertyName);
-  declareProperty(Kernel::make_unique<IndexProperty>(indexPropName, wsPropRef,
+  declareProperty(std::make_unique<IndexProperty>(indexPropName, wsPropRef,
                                                      indexTypePropRef),
                   "An optional set of spectra that will be processed by the "
                   "algorithm; If not set, all spectra will be processed; The "

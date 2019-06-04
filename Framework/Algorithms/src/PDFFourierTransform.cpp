@@ -69,11 +69,11 @@ const std::string PDFFourierTransform::category() const {
 void PDFFourierTransform::init() {
   auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                    Direction::Input, uv),
                   S_OF_Q + ", " + S_OF_Q_MINUS_ONE + ", or " +
                       Q_S_OF_Q_MINUS_ONE);
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Result paired-distribution function");
 

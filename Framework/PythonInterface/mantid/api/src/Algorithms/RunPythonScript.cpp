@@ -54,16 +54,16 @@ bool RunPythonScript::checkGroups() { return false; }
  */
 void RunPythonScript::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An input workspace that the python code will modify."
       "The workspace will be in the python variable named 'input'.");
   declareProperty("Code", "", "Python code (can be on multiple lines).");
-  declareProperty(make_unique<FileProperty>("Filename", "",
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
                                             FileProperty::OptionalLoad, "py"),
                   "A File containing a python script");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "An output workspace to be produced by the python code."
       "The workspace will be in the python variable named 'output'.");

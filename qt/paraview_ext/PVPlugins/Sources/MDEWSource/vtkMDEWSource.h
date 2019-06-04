@@ -7,7 +7,7 @@
 #ifndef _vtkMDEWSource_h
 #define _vtkMDEWSource_h
 
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "vtkUnstructuredGridAlgorithm.h"

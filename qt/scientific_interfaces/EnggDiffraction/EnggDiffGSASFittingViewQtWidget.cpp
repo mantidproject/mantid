@@ -27,9 +27,9 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
     : m_userMessageProvider(userMessageProvider) {
 
   auto multiRunWidgetModel =
-      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetModel>();
+      std::make_unique<EnggDiffMultiRunFittingWidgetModel>();
   m_multiRunWidgetView =
-      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingQtWidget>(
+      std::make_unique<EnggDiffMultiRunFittingQtWidget>(
           pythonRunner);
 
   auto multiRunWidgetPresenter =
@@ -41,7 +41,7 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
 
   setupUI();
 
-  auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
+  auto model = std::make_unique<EnggDiffGSASFittingModel>();
   auto *model_ptr = model.get();
   m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
       std::move(model), this, multiRunWidgetPresenter, mainSettings);

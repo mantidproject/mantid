@@ -102,11 +102,11 @@ public:
   void test_creator() {
     Mantid::Kernel::PropertyManager manager;
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
 
     std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
     MultiDomainCreator multi(&manager, propNames);
@@ -171,11 +171,11 @@ public:
   void test_output_workspace() {
     MultiDomainCreatorTest_Manager manager;
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
 
     std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
     MultiDomainCreator multi(&manager, propNames);
@@ -247,11 +247,11 @@ public:
   void test_setMatrixWorkspace_and_setWorkspace() {
     Mantid::Kernel::PropertyManager manager;
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
     manager.declareProperty(
-        make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
+        std::make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
 
     std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
 

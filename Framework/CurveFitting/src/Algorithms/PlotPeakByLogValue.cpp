@@ -72,7 +72,7 @@ void PlotPeakByLogValue::init() {
       "However, if spectra lists (or workspace-indices/values lists) are "
       "specified in the Input parameter string, \n"
       "or the Spectrum parameter integer, these take precedence.");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output TableWorkspace");
   declareProperty("Function", "",
@@ -143,7 +143,7 @@ void PlotPeakByLogValue::init() {
                   "member of a Composite Function is also output.");
 
   declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
+      std::make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
       "If true and OutputCompositeMembers is true members of any "
       "Convolution are output convolved\n"
       "with corresponding resolution");
@@ -156,7 +156,7 @@ void PlotPeakByLogValue::init() {
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
 
-  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
 

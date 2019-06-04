@@ -39,7 +39,7 @@ DECLARE_ALGORITHM(CalMuonDetectorPhases)
  */
 void CalMuonDetectorPhases::init() {
 
-  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
                   "Name of the reference input workspace");
 
@@ -54,22 +54,22 @@ void CalMuonDetectorPhases::init() {
   declareProperty("Frequency", EMPTY_DBL(),
                   "Starting hint for the frequency in MHz", Direction::Input);
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "DetectorTable", "", Direction::Output),
                   "Name of the TableWorkspace in which to store the list "
                   "of phases and asymmetries");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
                       "DataFitted", "", Direction::Output),
                   "Name of the output workspace holding fitting results");
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("ForwardSpectra", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("ForwardSpectra", Direction::Input),
       "The spectra numbers of the forward group. If not specified "
       "will read from file.");
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("BackwardSpectra", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("BackwardSpectra", Direction::Input),
       "The spectra numbers of the backward group. If not specified "
       "will read from file.");
 }
@@ -399,13 +399,13 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   backward.clear();
 
   const auto instrument = ws->getInstrument();
-  auto loader = Kernel::make_unique<API::GroupingLoader>(instrument);
+  auto loader = std::make_unique<API::GroupingLoader>(instrument);
 
   if (instrument->getName() == "MUSR" || instrument->getName() == "CHRONUS") {
     // Two possibilities for grouping - use workspace log
     auto fieldDir = ws->run().getLogData("main_field_direction");
     if (fieldDir) {
-      loader = Kernel::make_unique<API::GroupingLoader>(instrument,
+      loader = std::make_unique<API::GroupingLoader>(instrument,
                                                         fieldDir->value());
     }
     if (!fieldDir) {

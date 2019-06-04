@@ -268,11 +268,11 @@ bool LoadTBL::getColumnHeadings(std::string line,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadTBL::init() {
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, ".tbl"),
                   "The name of the table file to read, including its full or "
                   "relative path. The file extension must be .tbl");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created.");
 }

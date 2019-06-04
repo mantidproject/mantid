@@ -756,7 +756,7 @@ private:
     auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
     TS_ASSERT(matrixWS);
     auto prop =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(logName);
+        std::make_unique<TimeSeriesProperty<double>>(logName);
     prop->addValues(times, values);
     matrixWS->mutableRun().addLogData(std::move(prop));
   }

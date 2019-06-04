@@ -18,7 +18,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <boost/make_shared.hpp>
 #include <iterator>
@@ -35,7 +35,7 @@ std::unique_ptr<const Geometry::IObject> createCylinderShape(
     const std::map<int, boost::shared_ptr<Geometry::Surface>> &surfaces,
     const std::string &algebra, std::vector<double> &boundingBox,
     Geometry::detail::ShapeInfo &&shapeInfo) {
-  auto shape = Mantid::Kernel::make_unique<Geometry::CSGObject>();
+  auto shape = std::make_unique<Geometry::CSGObject>();
   shape->setObject(21, algebra);
   shape->populate(surfaces);
   // Boundingbox x,y,z:max; x,y,z:min
@@ -205,10 +205,10 @@ createMesh(std::vector<uint32_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices) {
 
   if (Geometry::MeshObject2D::pointsCoplanar(vertices))
-    return Mantid::Kernel::make_unique<Geometry::MeshObject2D>(
+    return std::make_unique<Geometry::MeshObject2D>(
         std::move(triangularFaces), std::move(vertices), Kernel::Material{});
   else
-    return Mantid::Kernel::make_unique<Geometry::MeshObject>(
+    return std::make_unique<Geometry::MeshObject>(
         std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
 } // namespace NexusShapeFactory

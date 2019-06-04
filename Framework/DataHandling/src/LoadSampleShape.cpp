@@ -36,21 +36,21 @@ void LoadSampleShape::init() {
 
   // input workspace
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
                                        wsValidator),
       "The name of the workspace containing the instrument to add the shape");
 
   // shape file
   const std::vector<std::string> extensions{".stl", ".off"};
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
       "The path name of the file containing the shape");
 
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
 
   // Output workspace
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name of the workspace that will contain the loaded "
                   "shape of the sample");

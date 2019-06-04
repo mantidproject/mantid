@@ -57,9 +57,9 @@ const std::string ExtractSpectra::summary() const {
  */
 void ExtractSpectra::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Name of the output workspace");
 
@@ -84,13 +84,13 @@ void ExtractSpectra::init() {
       "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
       "The index number of the last entry in the Workspace to be loaded\n"
       "(default: last entry in the Workspace)");
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "A comma-separated list of individual workspace indices to "
                   "read.  Only used if\n"
                   "explicitly set. The WorkspaceIndexList is only used if the "
                   "DetectorList is empty.");
 
-  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "A comma-separated list of individual detector IDs to read.  "
                   "Only used if\n"
                   "explicitly set. When specifying the WorkspaceIndexList and "

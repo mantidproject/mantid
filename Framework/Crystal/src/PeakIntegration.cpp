@@ -37,15 +37,15 @@ using namespace DataObjects;
  */
 void PeakIntegration::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InPeaksWorkspace", "", Direction::Input),
                   "Name of the peaks workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "A 2D workspace with X values of time of flight");
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
                                                      Direction::Output),
       "Name of the output peaks workspace with integrated intensities.");
   declareProperty("IkedaCarpenterTOF", false,

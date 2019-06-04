@@ -9,7 +9,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidKernel/make_unique.h"
+
 
 namespace Mantid {
 namespace DataObjects {
@@ -23,7 +23,7 @@ HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
 template <> std::unique_ptr<EventWorkspace> createHelper() { return {nullptr}; }
 
 template <> std::unique_ptr<API::HistoWorkspace> createHelper() {
-  return Kernel::make_unique<Workspace2D>();
+  return std::make_unique<Workspace2D>();
 }
 
 template <> std::unique_ptr<API::MatrixWorkspace> createHelper() {

@@ -176,15 +176,15 @@ void ReflectometryBackgroundSubtraction::init() {
                   boost::make_shared<ListValidator<std::string>>(costFuncOpts),
                   "The cost function to be passed to the Fit algorithm.");
 
-  setPropertySettings("DegreeOfPolynomial", make_unique<EnabledWhenProperty>(
+  setPropertySettings("DegreeOfPolynomial", std::make_unique<EnabledWhenProperty>(
                                                 "BackgroundCalculationMethod",
                                                 IS_EQUAL_TO, "Polynomial"));
-  setPropertySettings("CostFunction", make_unique<EnabledWhenProperty>(
+  setPropertySettings("CostFunction", std::make_unique<EnabledWhenProperty>(
                                           "BackgroundCalculationMethod",
                                           IS_EQUAL_TO, "Polynomial"));
 
   // Output workspace
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output,
                                                    PropertyMode::Optional),
                   "The output Workspace containing either the background or "

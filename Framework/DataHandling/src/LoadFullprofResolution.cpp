@@ -50,12 +50,12 @@ std::map<std::string, size_t> LoadFullprofResolution::m_rowNumbers;
  */
 void LoadFullprofResolution::init() {
   // Input file name
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, ".irf"),
                   "Path to an Fullprof .irf file to load.");
 
   // Output table workspace
-  auto wsprop = Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  auto wsprop = std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
       "OutputTableWorkspace", "", Direction::Output, PropertyMode::Optional);
   declareProperty(std::move(wsprop),
                   "Name of the output TableWorkspace containing "
@@ -63,14 +63,14 @@ void LoadFullprofResolution::init() {
 
   // Use bank numbers as given in file
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true,
+      std::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true,
                                                    Direction::Input),
       "Use bank IDs as given in file rather than ordinal number of bank."
       "If the bank IDs in the file are not unique, it is advised to set this "
       "to false.");
 
   // Bank to import
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>("Banks"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("Banks"),
                   "ID(s) of specified bank(s) to load, "
                   "The IDs are as specified by UseBankIDsInFile."
                   "Default is all banks contained in input .irf file.");
@@ -78,14 +78,14 @@ void LoadFullprofResolution::init() {
   // Workspace to put parameters into. It must be a workspace group with one
   // workpace per bank from the IRF file
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "Workspace", "", Direction::InOut, PropertyMode::Optional),
       "A workspace group with the instrument to which we add the "
       "parameters from the Fullprof .irf file with one workspace "
       "for each bank of the .irf file");
 
   // Workspaces for each bank
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>("WorkspacesForBanks"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspacesForBanks"),
                   "For each Fullprof bank,"
                   " the ID of the corresponding workspace in same order as the "
                   "Fullprof banks are specified. "

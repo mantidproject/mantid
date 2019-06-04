@@ -25,7 +25,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void ShowPossibleCells::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -33,14 +33,14 @@ void ShowPossibleCells::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("MaxScalarError", 0.2,
+      std::make_unique<PropertyWithValue<double>>("MaxScalarError", 0.2,
                                              mustBePositive, Direction::Input),
       "Max Scalar Error (0.2)");
 
   this->declareProperty("BestOnly", true,
                         "Show at most one for each Bravais Lattice");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("NumberOfCells", 0,
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>("NumberOfCells", 0,
                                                             Direction::Output),
                         "Gets set with the number of possible cells.");
 

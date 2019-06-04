@@ -9,7 +9,7 @@
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <cassert>
 
@@ -63,7 +63,7 @@ std::unique_ptr<Property> InterpolationOption::property() const {
   using Kernel::StringListValidator;
   using StringProperty = Kernel::PropertyWithValue<std::string>;
 
-  return Kernel::make_unique<StringProperty>(
+  return std::make_unique<StringProperty>(
       PROP_NAME, LINEAR_OPT, boost::make_shared<StringListValidator>(OPTIONS));
 }
 

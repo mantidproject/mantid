@@ -95,7 +95,7 @@ const std::string MDNorm::summary() const {
 /** Initialize the algorithm's properties.
  */
 void MDNorm::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "An input MDEventWorkspace. Must be in Q_sample frame.");
 
@@ -111,23 +111,23 @@ void MDNorm::init() {
   Q2[2] = 1.;
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("QDimension0", Q0, mustBe3D),
+      std::make_unique<ArrayProperty<double>>("QDimension0", Q0, mustBe3D),
       "The first Q projection axis - Default is (1,0,0)");
-  setPropertySettings("QDimension0", make_unique<Kernel::VisibleWhenProperty>(
+  setPropertySettings("QDimension0", std::make_unique<Kernel::VisibleWhenProperty>(
                                          "RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension0", "Q projections RLU");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("QDimension1", Q1, mustBe3D),
+      std::make_unique<ArrayProperty<double>>("QDimension1", Q1, mustBe3D),
       "The second Q projection axis - Default is (0,1,0)");
-  setPropertySettings("QDimension1", make_unique<Kernel::VisibleWhenProperty>(
+  setPropertySettings("QDimension1", std::make_unique<Kernel::VisibleWhenProperty>(
                                          "RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension1", "Q projections RLU");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("QDimension2", Q2, mustBe3D),
+      std::make_unique<ArrayProperty<double>>("QDimension2", Q2, mustBe3D),
       "The thirdtCalculateCover Q projection axis - Default is (0,0,1)");
-  setPropertySettings("QDimension2", make_unique<Kernel::VisibleWhenProperty>(
+  setPropertySettings("QDimension2", std::make_unique<Kernel::VisibleWhenProperty>(
                                          "RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension2", "Q projections RLU");
 
@@ -137,14 +137,14 @@ void MDNorm::init() {
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "SolidAngleWorkspace", "", Direction::Input,
           API::PropertyMode::Optional, solidAngleValidator),
       "An input workspace containing integrated vanadium "
       "(a measure of the solid angle).\n"
       "Mandatory for diffraction, optional for direct geometry inelastic");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
                                        API::PropertyMode::Optional,
                                        fluxValidator),
       "An input workspace containing momentum dependent flux.\n"
@@ -160,14 +160,14 @@ void MDNorm::init() {
     if (i < 3) {
       defaultName = "QDimension" + Strings::toString(i);
     }
-    declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+    declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                         propName, defaultName, Direction::Input),
                     "Name for the " + Strings::toString(i) +
                         "th dimension. Leave blank for NONE.");
     auto atMost3 = boost::make_shared<ArrayLengthValidator<double>>(0, 3);
     std::vector<double> temp;
     declareProperty(
-        Kernel::make_unique<ArrayProperty<double>>(propBinning, temp, atMost3),
+        std::make_unique<ArrayProperty<double>>(propBinning, temp, atMost3),
         "Binning for the " + Strings::toString(i) + "th dimension.\n" +
             "- Leave blank for complete integration\n" +
             "- One value is interpreted as step\n"
@@ -178,20 +178,20 @@ void MDNorm::init() {
   }
 
   // symmetry operations
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "SymmetryOperations", "", Direction::Input),
                   "If specified the symmetry will be applied, "
                   "can be space group name, point group name, or list "
                   "individual symmetries.");
 
   // temporary workspaces
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryDataWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate data from "
                   "multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate normalization "
@@ -200,13 +200,13 @@ void MDNorm::init() {
   setPropertyGroup("TemporaryDataWorkspace", "Temporary workspaces");
   setPropertyGroup("TemporaryNormalizationWorkspace", "Temporary workspaces");
 
-  declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "A name for the normalized output MDHistoWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputDataWorkspace", "", Kernel::Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
@@ -950,7 +950,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
   double progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
-      make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
+      std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
                                  0.3 + progStep * (1. + progIndex), ndets);
   bool safe = true;
   if (m_diffraction) {

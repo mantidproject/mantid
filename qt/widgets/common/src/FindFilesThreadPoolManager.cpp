@@ -12,7 +12,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <Poco/File.h>
 #include <QCoreApplication>
@@ -33,7 +33,7 @@ static std::unique_ptr<QThreadPool> tp = {nullptr};
 const std::unique_ptr<QThreadPool> &
 FindFilesThreadPoolManager::poolInstance() const {
   if (!tp)
-    tp = make_unique<QThreadPool>();
+    tp = std::make_unique<QThreadPool>();
   return tp;
 }
 

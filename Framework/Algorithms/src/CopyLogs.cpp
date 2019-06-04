@@ -37,10 +37,10 @@ const std::string CopyLogs::category() const { return "Utility\\Workspaces"; }
  */
 void CopyLogs::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Workspace to copy logs from.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
       "Workspace to copy logs to.");
 
   // options for the type of strategy to take

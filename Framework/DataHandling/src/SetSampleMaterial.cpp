@@ -41,7 +41,7 @@ using namespace Kernel;
  */
 void SetSampleMaterial::init() {
   using namespace Mantid::Kernel;
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut),
                   "The workspace with which to associate the sample ");
   declareProperty("ChemicalFormula", "",
@@ -113,15 +113,15 @@ void SetSampleMaterial::init() {
 
   // Extra property settings
   setPropertySettings("ChemicalFormula",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "AtomicNumber", Kernel::IS_DEFAULT));
   setPropertySettings("AtomicNumber",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "ChemicalFormula", Kernel::IS_DEFAULT));
-  setPropertySettings("MassNumber", make_unique<Kernel::EnabledWhenProperty>(
+  setPropertySettings("MassNumber", std::make_unique<Kernel::EnabledWhenProperty>(
                                         "ChemicalFormula", Kernel::IS_DEFAULT));
   setPropertySettings("NumberDensityUnit",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SampleNumberDensity", Kernel::IS_NOT_DEFAULT));
 }
 

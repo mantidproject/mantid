@@ -27,15 +27,15 @@ using namespace Kernel;
  * Declare the algorithm properties
  */
 void ExtractMask::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "A workspace whose masking is to be extracted");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
                                                       Direction::Output),
       "A workspace containing the masked spectra as zeroes and ones.");
 
-  declareProperty(make_unique<ArrayProperty<detid_t>>(
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>(
                       "DetectorList", boost::make_shared<NullValidator>(),
                       Direction::Output),
                   "A comma separated list or array containing a list of masked "

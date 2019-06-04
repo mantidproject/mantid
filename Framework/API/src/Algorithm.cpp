@@ -105,7 +105,7 @@ Algorithm::Algorithm()
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
       m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
-      m_communicator(Kernel::make_unique<Parallel::Communicator>()) {}
+      m_communicator(std::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {}
@@ -1913,7 +1913,7 @@ const Parallel::Communicator &Algorithm::communicator() const {
 
 /// Sets the (MPI) communicator of the algorithm.
 void Algorithm::setCommunicator(const Parallel::Communicator &communicator) {
-  m_communicator = Kernel::make_unique<Parallel::Communicator>(communicator);
+  m_communicator = std::make_unique<Parallel::Communicator>(communicator);
 }
 
 //---------------------------------------------------------------------------

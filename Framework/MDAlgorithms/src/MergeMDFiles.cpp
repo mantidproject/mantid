@@ -48,12 +48,12 @@ MergeMDFiles::~MergeMDFiles() { clearEventLoaders(); }
  */
 void MergeMDFiles::init() {
   std::vector<std::string> exts(1, ".nxs");
-  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filenames", exts),
+  declareProperty(std::make_unique<MultipleFileProperty>("Filenames", exts),
                   "Select several MDEventWorkspace NXS files to merge "
                   "together. Files must have common box structure.");
 
   declareProperty(
-      Kernel::make_unique<FileProperty>("OutputFilename", "",
+      std::make_unique<FileProperty>("OutputFilename", "",
                                         FileProperty::OptionalSave, exts),
       "Choose a file to which to save the output workspace. \n"
       "Optional: if specified, the workspace created will be file-backed. \n"
@@ -63,7 +63,7 @@ void MergeMDFiles::init() {
                   "Run the loading tasks in parallel.\n"
                   "This can be faster but might use more memory.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output MDEventWorkspace.");
 }
@@ -237,7 +237,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
 
   size_t numBoxes = m_BoxStruct.getNBoxes();
   // Progress report based on events processed.
-  m_progress = Kernel::make_unique<Progress>(this, 0.1, 0.9, size_t(numBoxes));
+  m_progress = std::make_unique<Progress>(this, 0.1, 0.9, size_t(numBoxes));
   m_progress->setNotifyStep(0.1);
 
   // For tracking progress

@@ -57,45 +57,45 @@ void CreateMDHistoWorkspace::init() {
   auto mandatoryStrArrayValidator =
       boost::make_shared<MandatoryValidator<std::vector<std::string>>>();
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "SignalInput", mandatoryDoubleArrayValidator),
                   "Signal array for n-dimensional workspace");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "ErrorInput", mandatoryDoubleArrayValidator),
                   "Error array for n-dimensional workspace");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("NumberOfEvents",
+      std::make_unique<ArrayProperty<double>>("NumberOfEvents",
                                                  std::vector<double>(0)),
       "Number of pixels array for n-dimensional workspace. Optional, defaults "
       "to 1 per bin.");
-  declareProperty(make_unique<PropertyWithValue<int>>(
+  declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "Dimensionality", -1, validator, Direction::Input),
                   "Dimensionality of the data in the file.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "Extents", mandatoryDoubleArrayValidator),
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
+  declareProperty(std::make_unique<ArrayProperty<int>>(
                       "NumberOfBins", mandatoryIntArrayValidator),
                   "Number of bin in each dimension.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "Names", mandatoryStrArrayValidator),
                   "A comma separated list of the name of each dimension.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "Units", mandatoryStrArrayValidator),
                   "A comma separated list of the units of each dimension.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDHistoWorkspace reflecting the input text file.");
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("Frames"),
+      std::make_unique<ArrayProperty<std::string>>("Frames"),
       " A comma separated list of the frames of each dimension. "
       " The frames can be"
       " **General Frame**: Any frame which is not a Q-based frame."

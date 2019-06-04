@@ -35,11 +35,11 @@ DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
  */
 
 void MonitorEfficiencyCorUser::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace to correct for monitor efficiency");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name of the workspace in which to store the result.");
 }

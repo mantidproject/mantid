@@ -46,7 +46,7 @@ void QueryRemoteFile::init() {
                   Direction::Input);
 
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("FileNames", Direction::Output),
+      std::make_unique<ArrayProperty<std::string>>("FileNames", Direction::Output),
       "The names of all the files that were found");
 }
 

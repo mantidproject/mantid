@@ -259,7 +259,7 @@ void Fit1D::modifyFinalFittedParameters(std::vector<double> &fittedParameter) {
 /** Initialisation method
  */
 void Fit1D::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input Workspace");
 
@@ -621,7 +621,7 @@ void Fit1D::exec() {
           standardDeviations.push_back(sdExtended[i]);
 
       declareProperty(
-          make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+          std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
               "OutputNormalisedCovarianceMatrix", "", Direction::Output),
           "The name of the TableWorkspace in which to store the final "
           "covariance matrix");
@@ -659,12 +659,12 @@ void Fit1D::exec() {
       setProperty("OutputNormalisedCovarianceMatrix", m_covariance);
     }
 
-    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                         "OutputParameters", "", Direction::Output),
                     "The name of the TableWorkspace in which to store the "
                     "final fit parameters");
     declareProperty(
-        make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+        std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
                                                         Direction::Output),
         "Name of the output Workspace holding resulting simlated spectrum");
 

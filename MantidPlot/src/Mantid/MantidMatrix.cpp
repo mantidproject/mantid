@@ -1313,7 +1313,7 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
     // We need to hook up the extension
     extension.model = new MantidMatrixModel(this, m_workspace.get(), m_rows,
                                             m_cols, m_startRow, type);
-    extension.tableView = Mantid::Kernel::make_unique<QTableView>();
+    extension.tableView = std::make_unique<QTableView>();
 
     // Add a new tab
     m_tabs->insertTab(modelTypeToInt(type), extension.tableView.get(),

@@ -67,7 +67,7 @@ void VesuvioL1ThetaResolution::init() {
   positiveDouble->setLower(DBL_EPSILON);
 
   const std::vector<std::string> exts{".par", ".dat"};
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "PARFile", "", FileProperty::FileAction::OptionalLoad,
                       exts, Direction::Input),
                   "PAR file containing calibrated detector positions.");
@@ -88,17 +88,17 @@ void VesuvioL1ThetaResolution::init() {
                   "Bin width for theta distribution.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                        Direction::Output),
       "Output workspace containing mean and standard deviation of resolution "
       "per detector.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("L1Distribution", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("L1Distribution", "",
                                                    Direction::Output,
                                                    PropertyMode::Optional),
                   "Distribution of lengths of the final flight path.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("ThetaDistribution", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaDistribution", "",
                                                    Direction::Output,
                                                    PropertyMode::Optional),
                   "Distribution of scattering angles.");

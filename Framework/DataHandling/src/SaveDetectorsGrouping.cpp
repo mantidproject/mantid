@@ -34,11 +34,11 @@ DECLARE_ALGORITHM(SaveDetectorsGrouping)
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
   declareProperty(
-      make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "GroupingWorkspace to output to XML file (GroupingWorkspace)");
   declareProperty(
-      make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
+      std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
       "File to save the detectors mask in XML format");
 }
 

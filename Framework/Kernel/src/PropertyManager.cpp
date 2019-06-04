@@ -180,7 +180,7 @@ void PropertyManager::filterByProperty(
     if (auto doubleSeries =
             dynamic_cast<TimeSeriesProperty<double> *>(currentProp)) {
       std::unique_ptr<Property> filtered =
-          make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter,
+          std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter,
                                                           transferOwnership);
       // Replace the property in the ordered properties list
       orderedProperty = filtered.get();

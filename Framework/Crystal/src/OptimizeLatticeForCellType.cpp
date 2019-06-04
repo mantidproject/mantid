@@ -37,7 +37,7 @@ using namespace DataObjects;
  */
 void OptimizeLatticeForCellType::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> cellTypes;
@@ -56,11 +56,11 @@ void OptimizeLatticeForCellType::init() {
   declareProperty("Tolerance", 0.12, "Indexing Tolerance");
   declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
-  declareProperty(make_unique<PropertyWithValue<double>>("OutputChi2", 0.0,
+  declareProperty(std::make_unique<PropertyWithValue<double>>("OutputChi2", 0.0,
                                                          Direction::Output),
                   "Returns the goodness of the fit");
   declareProperty(
-      make_unique<FileProperty>("OutputDirectory", ".",
+      std::make_unique<FileProperty>("OutputDirectory", ".",
                                 FileProperty::Directory),
       "The directory where the per run peaks files and orientation matrices "
       "will be written.");

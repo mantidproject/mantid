@@ -9,7 +9,7 @@
 #include "ConvFitDataTablePresenter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/make_unique.h"
+
 
 namespace {
 using namespace Mantid::API;
@@ -28,7 +28,7 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
                                            IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
           model, view,
-          Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
+          std::make_unique<ConvFitDataTablePresenter>(
               model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
@@ -78,7 +78,7 @@ void ConvFitDataPresenter::addModelData(const std::string &name) {
 
 std::unique_ptr<IAddWorkspaceDialog>
 ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = Mantid::Kernel::make_unique<ConvFitAddWorkspaceDialog>(parent);
+  auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
   dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
   return std::move(dialog);

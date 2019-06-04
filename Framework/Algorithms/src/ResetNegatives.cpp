@@ -36,9 +36,9 @@ const std::string ResetNegatives::category() const {
 /// @copydoc Mantid::API::Algorithm::init()
 void ResetNegatives::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "An output workspace.");
   declareProperty(
@@ -46,7 +46,7 @@ void ResetNegatives::init() {
       "Add the minimum value of the spectrum to bring it up to zero.");
   declareProperty("ResetValue", 0.,
                   "Reset negative values to this number (default=0)");
-  setPropertySettings("ResetValue", make_unique<EnabledWhenProperty>(
+  setPropertySettings("ResetValue", std::make_unique<EnabledWhenProperty>(
                                         "AddMinimum", IS_NOT_DEFAULT));
 }
 

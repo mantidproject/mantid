@@ -53,7 +53,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
+          std::make_unique<GenericDataProcessorPresenter>(whitelist,
                                                                      group),
           parent) {}
 
@@ -68,7 +68,7 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
                                            QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+          std::make_unique<GenericDataProcessorPresenter>(
               whitelist, algorithm, group),
           parent) {}
 
@@ -85,7 +85,7 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
                                            QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+          std::make_unique<GenericDataProcessorPresenter>(
               whitelist, preprocessMap.asMap(), algorithm, group),
           parent) {}
 
@@ -101,7 +101,7 @@ QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+          std::make_unique<GenericDataProcessorPresenter>(
               whitelist, algorithm, postprocessor, group),
           parent) {}
 
@@ -119,7 +119,7 @@ QDataProcessorWidget::QDataProcessorWidget(
     const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+          std::make_unique<GenericDataProcessorPresenter>(
               whitelist, preprocessMap.asMap(), algorithm, postprocessor,
               group),
           parent) {}
@@ -165,7 +165,7 @@ void QDataProcessorWidget::addActions(
 
   // Put the commands in the toolbar
   for (auto &command : commands) {
-    m_commands.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
+    m_commands.push_back(std::make_unique<QtCommandAdapter>(
         ui.rowToolBar, std::move(command)));
   }
 

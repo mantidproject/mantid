@@ -9,7 +9,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 
 #include <boost/algorithm/string.hpp>
@@ -107,7 +107,7 @@ EnggDiffMultiRunFittingWidgetPresenter::getAllRunLabels() const {
 
 std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
 EnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
-  return Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetAdder>(
+  return std::make_unique<EnggDiffMultiRunFittingWidgetAdder>(
       m_view);
 }
 

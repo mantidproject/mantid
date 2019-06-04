@@ -24,7 +24,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <Poco/File.h>
 
@@ -51,11 +51,11 @@ public:
 
   void init() override {
     declareProperty(
-        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+        std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
             "InputWorkspace", "", Kernel::Direction::Input),
         "A workspace with units of TOF");
     declareProperty(
-        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+        std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
             "OutputWorkspace", "", Kernel::Direction::Output),
         "The name to use for the output workspace");
     declareProperty("MissingProperty", "rubbish", Kernel::Direction::Input);
@@ -172,7 +172,7 @@ public:
     // set up history for the algorithn which is presumably removed from Mantid
     auto ws = API::FrameworkManager::Instance().getWorkspace(wsName);
     API::WorkspaceHistory &history = ws->history();
-    auto pAlg = Mantid::Kernel::make_unique<NonExistingAlgorithm>();
+    auto pAlg = std::make_unique<NonExistingAlgorithm>();
     pAlg->initialize();
     history.addHistory(boost::make_shared<AlgorithmHistory>(
         API::AlgorithmHistory(pAlg.get())));

@@ -22,10 +22,10 @@ using HistogramData::Histogram;
 
 void SmoothData::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                        Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   std::vector<int> npts0{3};
@@ -33,12 +33,12 @@ void SmoothData::init() {
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0),
+      std::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0),
                                               std::move(min), Direction::Input),
       "The number of points to average over (minimum 3). If an even number is\n"
       "given, it will be incremented by 1 to make it odd (default value 3)");
   declareProperty(
-      make_unique<WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>>(
+      std::make_unique<WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: GroupingWorkspace to use for vector of NPoints.");
 }

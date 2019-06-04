@@ -84,24 +84,24 @@ void CreateChunkingFromInstrument::init() {
 
   std::vector<std::string> extensions{"_event.nxs", ".nxs.h5", ".nxs"};
   this->declareProperty(
-      Kernel::make_unique<FileProperty>(PARAM_IN_FILE, "",
+      std::make_unique<FileProperty>(PARAM_IN_FILE, "",
                                         FileProperty::OptionalLoad, extensions),
       "The name of the event nexus file to read, including its full or "
       "relative path.");
 
   this->declareProperty(
-      Kernel::make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           PARAM_IN_WKSP, "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
   this->declareProperty(
-      Kernel::make_unique<PropertyWithValue<string>>(PARAM_INST_NAME, "",
+      std::make_unique<PropertyWithValue<string>>(PARAM_INST_NAME, "",
                                                      Direction::Input),
       "Optional: Name of the instrument to base the ChunkingWorkpace on which "
       "to base the GroupingWorkspace.");
 
   this->declareProperty(
-      Kernel::make_unique<FileProperty>(PARAM_INST_FILE, "",
+      std::make_unique<FileProperty>(PARAM_INST_FILE, "",
                                         FileProperty::OptionalLoad, ".xml"),
       "Optional: Path to the instrument definition file on which to base the "
       "ChunkingWorkpace.");
@@ -134,7 +134,7 @@ void CreateChunkingFromInstrument::init() {
   declareProperty(PARAM_MAX_BANK_NUM, 300,
                   "Maximum bank number to search for in the instrument");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       PARAM_OUT_WKSP, "", Direction::Output),
                   "An output workspace describing the cunking.");
 }

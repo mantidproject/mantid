@@ -85,10 +85,10 @@ void LoadEventAndCompress::init() {
 
   setPropertySettings(
       "MonitorsLoadOnly",
-      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
+      std::make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
     std::unique_ptr<IPropertySettings> settings =
-        make_unique<VisibleWhenProperty>("MonitorsLoadOnly", IS_EQUAL_TO, "1");
+        std::make_unique<VisibleWhenProperty>("MonitorsLoadOnly", IS_EQUAL_TO, "1");
     return settings;
   };
   setPropertySettings("FilterMonByTofMin", asEventsIsOn());

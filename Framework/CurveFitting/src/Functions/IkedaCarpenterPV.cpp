@@ -19,7 +19,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cmath>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -130,7 +130,7 @@ void IkedaCarpenterPV::init() {
 
 void IkedaCarpenterPV::lowerConstraint0(std::string paramName) {
   auto mixingConstraint =
-      Kernel::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
+      std::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
   mixingConstraint->setPenaltyFactor(1e9);
 
   addConstraint(std::move(mixingConstraint));

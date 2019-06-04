@@ -8,7 +8,7 @@
 #define MANTID_DATAHANDLING_EventWorkspaceCollectionTEST_H_
 
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
@@ -31,9 +31,9 @@ namespace {
 EventWorkspaceCollection_uptr
 makeEventWorkspaceCollection(unsigned int decoratorSize) {
 
-  auto decorator = make_unique<EventWorkspaceCollection>();
+  auto decorator = std::make_unique<EventWorkspaceCollection>();
 
-  auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
 
   decorator->setNPeriods(decoratorSize, periodLog);
 
@@ -67,7 +67,7 @@ public:
   void test_output_multiple_workspaces() {
     EventWorkspaceCollection decorator;
 
-    auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
+    auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
     decorator.setNPeriods(3, periodLog);
 
     WorkspaceGroup_sptr outWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
@@ -154,7 +154,7 @@ public:
 
   void test_setIndexInfo() {
     EventWorkspaceCollection collection;
-    auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
+    auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
     const size_t periods = 2;
     collection.setNPeriods(periods, periodLog);
     // Set some arbitrary data to ensure that it is preserved.

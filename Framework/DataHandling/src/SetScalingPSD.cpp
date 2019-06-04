@@ -39,14 +39,14 @@ SetScalingPSD::SetScalingPSD() : Algorithm(), m_scalingOption(0) {}
 void SetScalingPSD::init() {
   // Declare required input parameters for algorithm
   declareProperty(
-      Kernel::make_unique<FileProperty>(
+      std::make_unique<FileProperty>(
           "ScalingFilename", "", FileProperty::Load,
           std::vector<std::string>{".sca", ".raw"}),
       "The name of the scaling calibrations file to read, including its\n"
       "full or relative path. The file extension must be either .sca or\n"
       ".raw (filenames are case sensitive on linux)");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "The name of the workspace to apply the scaling to. This must be\n"
       "associated with an instrument appropriate for the scaling file");
 

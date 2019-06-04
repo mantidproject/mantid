@@ -47,10 +47,10 @@ void UpdateInstrumentFromFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
                                                       Direction::InOut),
       "The name of the workspace in which to store the imported instrument");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load,
                       std::vector<std::string>{".raw", ".nxs", ".s*"}),
                   "The filename of the input file.\n"

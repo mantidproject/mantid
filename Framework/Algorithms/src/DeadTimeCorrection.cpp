@@ -49,11 +49,11 @@ const std::string DeadTimeCorrection::summary() const {
 /** Initialize the algorithm's properties.
  */
 void DeadTimeCorrection::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                            Direction::Input),
                   "An input workspace.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "GroupingPattern", "", Direction::Input),
                   "See the GroupingPattern documentation of GroupDetectors.");
 
@@ -61,7 +61,7 @@ void DeadTimeCorrection::init() {
   positive->setLower(0.);
   declareProperty("Tau", 0., positive, "The count rate coefficient.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

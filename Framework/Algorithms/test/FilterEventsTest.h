@@ -1167,7 +1167,7 @@ public:
                                       true);
 
     // create a pcharge log
-    auto pchargeLog = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+    auto pchargeLog = std::make_unique<Kernel::TimeSeriesProperty<double>>(
         "proton_charge");
 
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
@@ -1209,7 +1209,7 @@ public:
 
     // add an integer slow log
     auto int_tsp =
-        Kernel::make_unique<Kernel::TimeSeriesProperty<int>>("slow_int_log");
+        std::make_unique<Kernel::TimeSeriesProperty<int>>("slow_int_log");
     int_tsp->setUnits("meter");
     for (size_t i = 0; i < 10; ++i) {
       Types::Core::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);

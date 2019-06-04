@@ -48,10 +48,10 @@ const std::string ConvertAxesToRealSpace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertAxesToRealSpace::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
@@ -73,10 +73,10 @@ void ConvertAxesToRealSpace::init() {
                   "What will be the horizontal axis?\n");
 
   declareProperty(
-      make_unique<Kernel::PropertyWithValue<int>>("NumberVerticalBins", 100),
+      std::make_unique<Kernel::PropertyWithValue<int>>("NumberVerticalBins", 100),
       "The number of bins along the vertical axis.");
   declareProperty(
-      make_unique<Kernel::PropertyWithValue<int>>("NumberHorizontalBins", 100),
+      std::make_unique<Kernel::PropertyWithValue<int>>("NumberHorizontalBins", 100),
       "The number of bins along the horizontal axis.");
 }
 

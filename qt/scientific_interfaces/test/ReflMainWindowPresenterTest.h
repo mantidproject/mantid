@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 
 #include "../ISISReflectometry/ReflMainWindowPresenter.h"
-#include "MantidKernel/make_unique.h"
+
 #include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -41,7 +41,7 @@ public:
     MockEventTabPresenter mockEventTabPresenter;
     MockSettingsTabPresenter mockSettingsTabPresenter;
     auto mockSaveTabPresenter =
-        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
+        std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsTabPresenter, &mockEventTabPresenter,
         &mockSettingsTabPresenter, std::move(mockSaveTabPresenter));
@@ -69,7 +69,7 @@ public:
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
-        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
+        std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -95,7 +95,7 @@ public:
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
-        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
+        std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -122,7 +122,7 @@ public:
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
-        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
+        std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -143,7 +143,7 @@ public:
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
-        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
+        std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -160,7 +160,7 @@ public:
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
-        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
+        std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -176,7 +176,7 @@ public:
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
-        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
+        std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));

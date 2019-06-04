@@ -20,7 +20,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <boost/make_shared.hpp>
 #include <nexus/NeXusFile.hpp>
@@ -1406,7 +1406,7 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
                          const DetectorInfo &detectorInfo) const {
   auto compInfo = componentInfo.cloneWithoutDetectorInfo();
-  auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
+  auto detInfo = std::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   const auto parInstrument = ParComponentFactory::createInstrument(
       boost::shared_ptr<const Instrument>(this, NoDeleting()),

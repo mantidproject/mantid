@@ -9,7 +9,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"

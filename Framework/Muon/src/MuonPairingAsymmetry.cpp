@@ -109,7 +109,7 @@ void MuonPairingAsymmetry::init() {
   std::vector<int> defaultGrouping2 = {2};
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", emptyString, Direction::Output),
       "The workspace which will hold the results of the asymmetry "
       "calculation.");
@@ -129,62 +129,62 @@ void MuonPairingAsymmetry::init() {
 
   // Select groups via workspaces
 
-  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace1", emptyString, Direction::Input,
                       PropertyMode::Optional),
                   "Input workspace containing data from grouped detectors.");
 
-  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace2", emptyString, Direction::Input,
                       PropertyMode::Optional),
                   "Input workspace containing data from grouped detectors.");
 
   setPropertySettings("InputWorkspace1",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "0"));
   setPropertySettings("InputWorkspace2",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "0"));
 
   // Specify groups manually
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "InputWorkspace", emptyString, Direction::Input,
           PropertyMode::Optional),
       "Input workspace containing data from detectors which are to "
       "be grouped.");
   setPropertySettings("InputWorkspace",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
-  declareProperty(make_unique<ArrayProperty<int>>(
+  declareProperty(std::make_unique<ArrayProperty<int>>(
                       "Group1", std::move(defaultGrouping1),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
                   "IDs or hyphenated ranges of IDs.");
-  declareProperty(make_unique<ArrayProperty<int>>(
+  declareProperty(std::make_unique<ArrayProperty<int>>(
                       "Group2", std::move(defaultGrouping2),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
                   "IDs or hyphenated ranges of IDs.");
   setPropertySettings("Group1",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings("Group2",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
-  declareProperty(make_unique<ArrayProperty<int>>("SummedPeriods", "1"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("SummedPeriods", "1"),
                   "A list of periods to sum in multiperiod data.");
   setPropertySettings("SummedPeriods",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
       "A list of periods to subtract in multiperiod data.");
   setPropertySettings("SubtractedPeriods",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   // Group common entries in the interface for clarity.

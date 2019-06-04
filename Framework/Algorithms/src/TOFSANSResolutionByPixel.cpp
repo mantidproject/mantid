@@ -17,7 +17,7 @@
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include "boost/lexical_cast.hpp"
 
@@ -36,13 +36,13 @@ TOFSANSResolutionByPixel::TOFSANSResolutionByPixel()
     : API::Algorithm(), m_wl_resolution(0.) {}
 
 void TOFSANSResolutionByPixel::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelength");
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
                                                 Direction::Output),
       "Name of the newly created workspace which contains the Q resolution.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
@@ -53,7 +53,7 @@ void TOFSANSResolutionByPixel::init() {
                   "Sample aperture radius, R2 (mm).");
   declareProperty("SourceApertureRadius", 0.0, positiveDouble,
                   "Source aperture radius, R1 (mm).");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "SigmaModerator", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Moderator time spread (microseconds) as a"
@@ -165,7 +165,7 @@ void TOFSANSResolutionByPixel::exec() {
     // Gravity correction
     std::unique_ptr<GravitySANSHelper> grav;
     if (doGravity) {
-      grav = Kernel::make_unique<GravitySANSHelper>(spectrumInfo, i,
+      grav = std::make_unique<GravitySANSHelper>(spectrumInfo, i,
                                                     getProperty("ExtraLength"));
     }
 

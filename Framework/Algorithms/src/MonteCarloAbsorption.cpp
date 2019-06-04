@@ -94,11 +94,11 @@ void MonteCarloAbsorption::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.  The input workspace must "
                   "have X units of wavelength.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
   auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
@@ -126,7 +126,7 @@ void MonteCarloAbsorption::init() {
       "Number of detector rows in the detector grid of the sparse instrument.");
   setPropertySettings(
       "NumberOfDetectorRows",
-      Kernel::make_unique<EnabledWhenProperty>(
+      std::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
   auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
   twoOrMore->setLower(2);
@@ -136,7 +136,7 @@ void MonteCarloAbsorption::init() {
                   "of the sparse instrument.");
   setPropertySettings(
       "NumberOfDetectorColumns",
-      Kernel::make_unique<EnabledWhenProperty>(
+      std::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
 
   // Control the number of attempts made to generate a random point in the
@@ -347,7 +347,7 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
     beamWidth = bbox[frame->pointingHorizontal()];
     beamHeight = bbox[frame->pointingUp()];
   }
-  return Mantid::Kernel::make_unique<RectangularBeamProfile>(
+  return std::make_unique<RectangularBeamProfile>(
       *frame, source->getPos(), beamWidth, beamHeight);
 }
 

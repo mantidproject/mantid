@@ -58,11 +58,11 @@ int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadMcStasNexus::init() {
   const std::vector<std::string> exts{".h5", ".nxs"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, exts),
                   "The name of the Nexus file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

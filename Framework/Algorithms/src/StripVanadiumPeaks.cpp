@@ -29,11 +29,11 @@ StripVanadiumPeaks::StripVanadiumPeaks() : API::Algorithm() {}
 
 void StripVanadiumPeaks::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace. If you use the default vanadium peak "
       "positions are used, the workspace must be in units of d-spacing.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                        Direction::Output),
       "The name of the workspace to be created as the output of the "
       "algorithm.\n"

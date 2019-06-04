@@ -69,32 +69,32 @@ RefinePowderInstrumentParameters::RefinePowderInstrumentParameters()
 void RefinePowderInstrumentParameters::init() {
   // Input/output peaks table workspace
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
           "BraggPeakParameterWorkspace", "Anonymous", Direction::Input),
       "TableWorkspace containg all peaks' parameters.");
 
   // Input and output instrument parameters table workspace
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
           "InstrumentParameterWorkspace", "AnonymousInstrument",
           Direction::InOut),
       "TableWorkspace containg instrument's parameters.");
 
   // Output workspace
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
           "OutputWorkspace", "AnonymousOut", Direction::Output),
       "Output Workspace2D for the d-TOF curves. ");
 
   // Workspace to output fitted peak parameters
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputInstrumentParameterWorkspace", "AnonymousOut2",
           Direction::Output),
       "Output TableWorkspace for the fitted peak parameters for each peak.");
 
   // Workspace to output N best MC parameters
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputBestResultsWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output TableWorkspace for the N best MC fitting results. ");
@@ -114,7 +114,7 @@ void RefinePowderInstrumentParameters::init() {
                   "Number of Monte Carlo random walk steps. ");
 
   // Parameters to fit
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
                       "ParametersToFit"),
                   "Names of the parameters to fit. ");
 
@@ -595,7 +595,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // Constraint
     double lowerb = lowerbounds[i];
     double upperb = upperbounds[i];
-    auto newconstraint = Kernel::make_unique<BoundaryConstraint>(
+    auto newconstraint = std::make_unique<BoundaryConstraint>(
         func4fit.get(), parname, lowerb, upperb);
     func4fit->addConstraint(std::move(newconstraint));
   }

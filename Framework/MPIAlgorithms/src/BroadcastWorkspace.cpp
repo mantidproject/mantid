@@ -29,9 +29,9 @@ DECLARE_ALGORITHM(BroadcastWorkspace)
 void BroadcastWorkspace::init() {
   // Input is optional - only the 'BroadcasterRank' process should provide an
   // input workspace
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output));
 
   declareProperty("BroadcasterRank", 0,

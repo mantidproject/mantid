@@ -43,15 +43,15 @@ const std::string RemoveMaskedSpectra::summary() const {
  */
 void RemoveMaskedSpectra::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
                                                    Direction::Input,
                                                    PropertyMode::Optional),
                   "If given but not as a MaskWorkspace, the masking from "
                   "this workspace will be used. If given as a "
                   "MaskWorkspace, the masking is read from its Y values.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "An output workspace.");
 }

@@ -19,7 +19,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/NearestNeighbours.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
@@ -61,12 +61,12 @@ void IntegrateEllipsoidsTwoStep::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input MatrixWorkspace with time-of-flight units along "
                   "X-axis and defined instrument with defined sample");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Workspace with peaks to be integrated");
 
@@ -115,7 +115,7 @@ void IntegrateEllipsoidsTwoStep::init() {
                   "before the background subtraction.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
                                                      Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");

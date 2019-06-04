@@ -36,10 +36,10 @@ void LoadMuonLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
                                                       Direction::InOut),
       "The name of the workspace to which the log data will be added.");
-  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Load),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
                   "The filename (including its full or relative path) of the "
                   "Muon Nexus file.");
 }
@@ -74,9 +74,9 @@ void LoadMuonLog::exec() {
   for (int i = 0; i < nxload.numberOfLogs(); i++) {
     std::string logName = nxload.getLogName(i);
     auto l_PropertyDouble =
-        Kernel::make_unique<TimeSeriesProperty<double>>(logName);
+        std::make_unique<TimeSeriesProperty<double>>(logName);
     auto l_PropertyString =
-        Kernel::make_unique<TimeSeriesProperty<std::string>>(logName);
+        std::make_unique<TimeSeriesProperty<std::string>>(logName);
 
     // Read log file into Property which is then stored in Sample object
     if (!nxload.logTypeNumeric(i)) {

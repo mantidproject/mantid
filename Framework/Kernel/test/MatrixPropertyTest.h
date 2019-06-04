@@ -82,7 +82,7 @@ public:
     boost::shared_ptr<PropertyManager> manager =
         boost::make_shared<PropertyManager>();
     manager->declareProperty(
-        Mantid::Kernel::make_unique<MatrixProperty<>>("Rotation"),
+        std::make_unique<MatrixProperty<>>("Rotation"),
         "Rotation matrix"); // Default is null
     DblMatrix null = manager->getProperty("Rotation");
     TS_ASSERT_EQUALS(null.numRows(), 0);

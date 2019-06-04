@@ -87,25 +87,25 @@ void VesuvioCalculateGammaBackground::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>(false); // point data
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace containing TOF data");
 
   declareProperty(
-      make_unique<API::FunctionProperty>("ComptonFunction", Direction::InOut),
+      std::make_unique<API::FunctionProperty>("ComptonFunction", Direction::InOut),
       "Function that is able to compute the mass spectrum for the input data"
       "This will usually be the output from the Fitting");
 
-  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
                   "Indices of the spectra to include in the correction. If "
                   "provided, the output only include these spectra\n"
                   "(Default: all spectra from input)");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("BackgroundWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("BackgroundWorkspace", "",
                                                    Direction::Output),
                   "A new workspace containing the calculated background.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("CorrectedWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("CorrectedWorkspace", "",
                                        Direction::Output),
       "A new workspace containing the calculated background subtracted from "
       "the input.");
@@ -118,7 +118,7 @@ void VesuvioCalculateGammaBackground::exec() {
   const int64_t nhist = static_cast<int64_t>(m_indices.size());
   const int64_t nreports =
       10 + nhist * (m_npeaks + 2 * m_foils0.size() * NTHETA * NUP * m_npeaks);
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, nreports);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nreports);
 
   PARALLEL_FOR_IF(
       Kernel::threadSafe(*m_inputWS, *m_correctedWS, *m_backgroundWS))

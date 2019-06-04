@@ -142,7 +142,7 @@ public:
 
   void testTheAlg() {
     auto pAlg =
-        Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
+        std::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
@@ -185,7 +185,7 @@ public:
 
   void testCreateWSWithEfixed() {
     auto pAlg =
-        Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
+        std::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
@@ -212,7 +212,7 @@ public:
 
   void testUpdateMasks() {
     auto pAlg =
-        Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
+        std::make_unique<PrepcocessDetectorsToMDTestHelper>();
     // do first run which generates first masks
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
@@ -267,7 +267,7 @@ public:
   }
   void testNoMasksColumnTrhows() {
     auto pAlg =
-        Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
+        std::make_unique<PrepcocessDetectorsToMDTestHelper>();
     // do first run which generates first masks
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
@@ -295,7 +295,7 @@ public:
   }
 
   PreprocessDetectorsToMDTest() {
-    pAlg = Mantid::Kernel::make_unique<PrepcocessDetectorsToMDTestHelper>();
+    pAlg = std::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
     ws2D = WorkspaceCreationHelper::
         createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);

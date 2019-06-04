@@ -11,7 +11,7 @@
 
 #include "IndirectSettingsModel.h"
 
-#include "MantidKernel/make_unique.h"
+
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -24,7 +24,7 @@ public:
   static void destroySuite(IndirectSettingsModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_model = Mantid::Kernel::make_unique<IndirectSettingsModel>();
+    m_model = std::make_unique<IndirectSettingsModel>();
   }
 
   void tearDown() override { m_model.reset(); }

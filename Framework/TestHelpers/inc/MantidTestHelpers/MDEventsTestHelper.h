@@ -23,7 +23,7 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/make_unique.h"
+
 
 namespace {
 template <typename MDE, size_t nd>
@@ -382,7 +382,7 @@ makeMDGridBox(size_t split0 = 10, size_t split1 = 10,
   if (nd > 1)
     splitter->setSplitInto(1, split1);
   // Set the size to 10.0 in all directions
-  auto box = Mantid::Kernel::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
+  auto box = std::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
   for (size_t d = 0; d < nd; d++)
     // carefull! function with the side effects!
     box->setExtents(d, dimensionMin, dimensionMax);
@@ -482,7 +482,7 @@ static MDGridBox<MDLeanEvent<nd>, nd> *makeRecursiveMDGridBox(size_t splitInto,
   // Splits into splitInto x splitInto x ... boxes
   splitter->setSplitInto(splitInto);
   // Set the size to splitInto*1.0 in all directions
-  auto box = Mantid::Kernel::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
+  auto box = std::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
   for (size_t d = 0; d < nd; d++)
     box->setExtents(d, 0.0, static_cast<coord_t>(splitInto));
   // Split into the gridbox.

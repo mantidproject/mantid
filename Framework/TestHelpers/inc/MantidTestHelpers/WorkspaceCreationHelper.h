@@ -31,7 +31,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
-#include "MantidKernel/make_unique.h"
+
 
 namespace Mantid {
 namespace DataObjects {
@@ -75,7 +75,7 @@ public:
 
   Mantid::API::Progress *getProgress() { return m_Progress.get(); }
   void resetProgress(size_t nSteps) {
-    m_Progress = Mantid::Kernel::make_unique<Mantid::API::Progress>(
+    m_Progress = std::make_unique<Mantid::API::Progress>(
         this, 0.0, 1.0, nSteps);
   }
 

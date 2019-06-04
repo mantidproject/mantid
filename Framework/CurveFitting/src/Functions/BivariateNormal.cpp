@@ -15,7 +15,7 @@
 
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -482,7 +482,7 @@ double BivariateNormal::initCommon() {
 
     if (getConstraint(0) == nullptr) {
 
-      addConstraint((Kernel::make_unique<BoundaryConstraint>(
+      addConstraint((std::make_unique<BoundaryConstraint>(
           this, "Background", 0, Attrib[S_int] / Attrib[S_1])));
     }
 
@@ -492,7 +492,7 @@ double BivariateNormal::initCommon() {
       maxIntensity = 100;
 
     if (getConstraint(1) == nullptr) {
-      addConstraint(Kernel::make_unique<BoundaryConstraint>(this, "Intensity",
+      addConstraint(std::make_unique<BoundaryConstraint>(this, "Intensity",
                                                             0, maxIntensity));
     }
 
@@ -500,14 +500,14 @@ double BivariateNormal::initCommon() {
     double maxMeany = MinY * .1 + .9 * MaxY;
 
     if (getConstraint(3) == nullptr) {
-      addConstraint(Kernel::make_unique<BoundaryConstraint>(
+      addConstraint(std::make_unique<BoundaryConstraint>(
           this, "Mrow", minMeany, maxMeany));
     }
 
     double minMeanx = MinX * .9 + .1 * MaxX;
     double maxMeanx = MinX * .1 + .9 * MaxX;
     if (getConstraint(2) == nullptr) {
-      addConstraint(Kernel::make_unique<BoundaryConstraint>(
+      addConstraint(std::make_unique<BoundaryConstraint>(
           this, "Mcol", minMeanx, maxMeanx));
     }
 

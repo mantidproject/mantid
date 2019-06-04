@@ -35,7 +35,7 @@ const std::string ClearMaskFlag::category() const {
 /** Initialize the algorithm's properties.
  */
 void ClearMaskFlag::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "",
                                                            Direction::InOut),
                   "Workspace to clear the mask flag of.");
   declareProperty("ComponentName", "",

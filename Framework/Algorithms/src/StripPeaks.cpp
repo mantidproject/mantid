@@ -26,9 +26,9 @@ using namespace API;
 
 void StripPeaks::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
 
@@ -46,7 +46,7 @@ void StripPeaks::init() {
                   "candidates,\n"
                   "Mariscotti recommends 2 (default 4)");
 
-  declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of the centre of the peaks. Only peaks near "
                   "these positions will be fitted.");

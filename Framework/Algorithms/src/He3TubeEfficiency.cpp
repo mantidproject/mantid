@@ -59,17 +59,17 @@ void He3TubeEfficiency::init() {
   wsValidator->add<API::HistogramValidator>();
   wsValidator->add<API::InstrumentValidator>();
   this->declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input, wsValidator),
       "Name of the input workspace");
   this->declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output workspace, can be the same as the input");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   this->declareProperty(
-      make_unique<Kernel::PropertyWithValue<double>>("ScaleFactor", 1.0,
+      std::make_unique<Kernel::PropertyWithValue<double>>("ScaleFactor", 1.0,
                                                      mustBePositive),
       "Constant factor with which to scale the calculated"
       "detector efficiency. Same factor applies to all efficiencies.");
@@ -78,15 +78,15 @@ void He3TubeEfficiency::init() {
       boost::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   this->declareProperty(
-      make_unique<Kernel::ArrayProperty<double>>("TubePressure", mustBePosArr),
+      std::make_unique<Kernel::ArrayProperty<double>>("TubePressure", mustBePosArr),
       "Provide overriding the default tube pressure. The pressure must "
       "be specified in atm.");
   this->declareProperty(
-      make_unique<Kernel::ArrayProperty<double>>("TubeThickness", mustBePosArr),
+      std::make_unique<Kernel::ArrayProperty<double>>("TubeThickness", mustBePosArr),
       "Provide overriding the default tube thickness. The thickness must "
       "be specified in metres.");
   this->declareProperty(
-      make_unique<Kernel::ArrayProperty<double>>("TubeTemperature",
+      std::make_unique<Kernel::ArrayProperty<double>>("TubeTemperature",
                                                  mustBePosArr),
       "Provide overriding the default tube temperature. The temperature must "
       "be specified in Kelvin.");

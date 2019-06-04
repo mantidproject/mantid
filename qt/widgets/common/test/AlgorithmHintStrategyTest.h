@@ -47,13 +47,13 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
       declareProperty("PositiveIntValue", 0, mustBePositive);
       declareProperty("PositiveIntValue1", 0, mustBePositive);
       declareProperty(
-          Mantid::Kernel::make_unique<Mantid::Kernel::ArrayProperty<int>>(
+          std::make_unique<Mantid::Kernel::ArrayProperty<int>>(
               "IntArray"));
       declareProperty(
-          Mantid::Kernel::make_unique<Mantid::Kernel::ArrayProperty<double>>(
+          std::make_unique<Mantid::Kernel::ArrayProperty<double>>(
               "DoubleArray"));
       declareProperty(
-          Mantid::Kernel::make_unique<
+          std::make_unique<
               Mantid::Kernel::ArrayProperty<std::string>>("StringArray"));
     };
     void exec() override { return; };

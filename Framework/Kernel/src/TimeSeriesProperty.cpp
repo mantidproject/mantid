@@ -9,7 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/make_unique.h"
+
 #include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
@@ -88,7 +88,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
   TYPE v0 = it->value();
 
   it++;
-  auto timeSeriesDeriv = Kernel::make_unique<TimeSeriesProperty<double>>(
+  auto timeSeriesDeriv = std::make_unique<TimeSeriesProperty<double>>(
       this->name() + "_derivative");
   timeSeriesDeriv->reserve(this->m_values.size() - 1);
   for (; it != m_values.end(); it++) {

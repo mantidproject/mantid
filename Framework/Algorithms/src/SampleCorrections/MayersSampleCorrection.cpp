@@ -61,7 +61,7 @@ void MayersSampleCorrection::init() {
   using API::WorkspaceProperty;
   // Inputs
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::Input, createInputWSValidator()),
       "Input workspace with X units in TOF. The workspace must "
       "also have a sample with a cylindrical shape and an "
@@ -83,7 +83,7 @@ void MayersSampleCorrection::init() {
                   "where MultipleScattering=True.",
                   Direction::Input);
   // Outputs
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

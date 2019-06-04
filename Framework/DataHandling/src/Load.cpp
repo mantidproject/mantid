@@ -293,12 +293,12 @@ void Load::init() {
   exts.emplace_back(".bin");
 
   declareProperty(
-      Kernel::make_unique<MultipleFileProperty>("Filename", exts),
+      std::make_unique<MultipleFileProperty>("Filename", exts),
       "The name of the file(s) to read, including the full or relative "
       "path. (N.B. case sensitive if running on Linux). Multiple runs "
       "can be loaded and added together, e.g. INST10,11+12,13.ext");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
                                                         Direction::Output),
       "The name of the workspace that will be created, filled with the "
       "read-in data and stored in the Analysis Data Service. Some algorithms "
@@ -460,7 +460,7 @@ void Load::loadMultipleFiles() {
       Workspace_sptr childWs = group->getItem(childWsName);
       std::string outWsPropName = "OutputWorkspace_" + std::to_string(count);
       ++count;
-      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
           outWsPropName, childWsName, Direction::Output));
       setProperty(outWsPropName, childWs);
     }
@@ -548,7 +548,7 @@ void Load::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
         prop->direction() == Direction::Output) {
       const std::string &name = prop->name();
       if (!this->existsProperty(name)) {
-        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
             name, loader->getPropertyValue(name), Direction::Output));
       }
       Workspace_sptr wkspace = getOutputWorkspace(name, loader);

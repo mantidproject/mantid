@@ -77,22 +77,22 @@ const std::string ParallaxCorrection::summary() const {
  */
 void ParallaxCorrection::init() {
   auto validator = boost::make_shared<Kernel::CompositeValidator>();
-  validator->add(Kernel::make_unique<API::InstrumentValidator>());
+  validator->add(std::make_unique<API::InstrumentValidator>());
   validator->add(
-      Kernel::make_unique<API::WorkspaceUnitValidator>("Wavelength"));
+      std::make_unique<API::WorkspaceUnitValidator>("Wavelength"));
   auto lengthValidator =
       boost::make_shared<Kernel::ArrayLengthValidator<std::string>>();
   lengthValidator->setLengthMin(1);
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input, validator),
       "An input workspace.");
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>("ComponentNames",
+      std::make_unique<Kernel::ArrayProperty<std::string>>("ComponentNames",
                                                               lengthValidator),
       "List of instrument components to perform the corrections for.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "An output workspace.");
 }
@@ -151,7 +151,7 @@ void ParallaxCorrection::exec() {
   const auto &allDetIDs = detectorInfo.detectorIDs();
   const auto &componentInfo = outputWorkspace->componentInfo();
   auto progress =
-      Kernel::make_unique<API::Progress>(this, 0., 1., componentNames.size());
+      std::make_unique<API::Progress>(this, 0., 1., componentNames.size());
   for (const auto &componentName : componentNames) {
     progress->report("Performing parallax correction for component " +
                      componentName);

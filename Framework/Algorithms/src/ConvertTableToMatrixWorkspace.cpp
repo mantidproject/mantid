@@ -29,10 +29,10 @@ using namespace HistogramData;
 using namespace DataObjects;
 
 void ConvertTableToMatrixWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input TableWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "An output Workspace2D.");
   declareProperty("ColumnX", "",

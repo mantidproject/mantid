@@ -11,7 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <cmath>
 #include <fstream>
@@ -55,14 +55,14 @@ const std::string SaveBankScatteringAngles::PROP_FILENAME = "Filename";
 const std::string SaveBankScatteringAngles::PROP_INPUT_WS = "InputWorkspace";
 
 void SaveBankScatteringAngles::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       PROP_INPUT_WS, "", Kernel::Direction::Input),
                   "A GroupWorkspace where every sub-workspace is a "
                   "single-spectra focused run corresponding to a particular "
                   "bank");
 
   const static std::vector<std::string> exts{".txt", ".new"};
-  declareProperty(Kernel::make_unique<FileProperty>(PROP_FILENAME, "",
+  declareProperty(std::make_unique<FileProperty>(PROP_FILENAME, "",
                                                     FileProperty::Save, exts),
                   "The name of the file to save to");
 }

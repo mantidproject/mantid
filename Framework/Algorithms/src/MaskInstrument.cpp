@@ -36,13 +36,13 @@ const std::string MaskInstrument::summary() const {
 }
 
 void MaskInstrument::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "The input workspace", Direction::Input));
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                Direction::Output),
       "Name of the output workspace (can be same as InputWorkspace)");
-  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorIDs"),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorIDs"),
                   "List of detector IDs to mask");
 }
 

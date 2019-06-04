@@ -26,11 +26,11 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void SaveDspacemap::init() {
-  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input OffsetsWorkspace to save.");
 
-  declareProperty(make_unique<FileProperty>("DspacemapFile", "",
+  declareProperty(std::make_unique<FileProperty>("DspacemapFile", "",
                                             FileProperty::Save, ".dat"),
                   "The DspacemapFile on output contains the d-space mapping");
 

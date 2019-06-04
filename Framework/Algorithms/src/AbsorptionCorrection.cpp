@@ -76,10 +76,10 @@ void AbsorptionCorrection::init() {
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
                                        wsValidator),
       "The X values for the input workspace must be in units of wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Output workspace name");
 

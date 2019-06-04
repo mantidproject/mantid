@@ -96,14 +96,14 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
 void PlotAsymmetryByLogValue::init() {
   std::string nexusExt(".nxs");
 
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "FirstRun", "", FileProperty::Load, nexusExt),
                   "The name of the first workspace in the series.");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "LastRun", "", FileProperty::Load, nexusExt),
                   "The name of the last workspace in the series.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                        Direction::Output),
       "The name of the output workspace containing the resulting asymmetries.");
   declareProperty("LogValue", "",
@@ -130,12 +130,12 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty("TimeMax", EMPTY_DBL(),
                   "The end of the time interval used in the calculations.");
 
-  declareProperty(make_unique<ArrayProperty<int>>("ForwardSpectra"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra"),
                   "The list of spectra for the forward group. If not specified "
                   "the following happens. The data will be grouped according "
                   "to grouping information in the data, if available. The "
                   "forward will use the first of these groups.");
-  declareProperty(make_unique<ArrayProperty<int>>("BackwardSpectra"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("BackwardSpectra"),
                   "The list of spectra for the backward group. If not "
                   "specified the following happens. The data will be grouped "
                   "according to grouping information in the data, if "
@@ -149,7 +149,7 @@ void PlotAsymmetryByLogValue::init() {
                   boost::make_shared<StringListValidator>(deadTimeCorrTypes),
                   "Type of Dead Time Correction to apply.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("DeadTimeCorrFile", "",
+  declareProperty(std::make_unique<FileProperty>("DeadTimeCorrFile", "",
                                                     FileProperty::OptionalLoad,
                                                     nexusExt),
                   "Custom file with Dead Times. Will be used only if "

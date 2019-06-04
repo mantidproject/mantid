@@ -72,9 +72,9 @@ int LoadSPE::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadSPE::init() {
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".spe"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".spe"),
       "The name of the SPE file to load.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace");
 }

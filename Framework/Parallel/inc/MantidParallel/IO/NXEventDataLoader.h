@@ -11,7 +11,7 @@
 #include <H5Cpp.h>
 #include <vector>
 
-#include "MantidKernel/make_unique.h"
+
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
 #include "MantidParallel/IO/PulseTimeGenerator.h"
@@ -113,7 +113,7 @@ makeEventDataPartitioner(const H5::Group &group, const int numWorkers) {
     time_zero_offset = Types::Core::DateAndTime(offset).totalNanoseconds();
   }
   H5Aclose(attr_id);
-  return Kernel::make_unique<
+  return std::make_unique<
       EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>>(
       numWorkers, PulseTimeGenerator<IndexType, TimeZeroType>{
                       read<IndexType>(group, "event_index"),

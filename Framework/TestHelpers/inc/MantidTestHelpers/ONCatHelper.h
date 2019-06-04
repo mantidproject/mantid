@@ -10,7 +10,7 @@
 #include "MantidCatalog/ONCat.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <map>
 #include <memory>

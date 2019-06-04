@@ -13,7 +13,7 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <boost/make_shared.hpp>
 

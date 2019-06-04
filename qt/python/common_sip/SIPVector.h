@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidKernel/make_unique.h"
+
 #include "MantidPythonInterface/core/VersionCompat.h"
 #include <boost/optional.hpp>
 #include <memory>
@@ -98,7 +98,7 @@ int transferToSip(boost::optional<T> const &cppValue, T **sipCppPtr,
                   int *sipIsErr, int sipState) {
   if (cppValue.is_initialized()) {
     auto heapValue =
-        ::Mantid::Kernel::make_unique<T>(std::move(cppValue.get()));
+        ::std::make_unique<T>(std::move(cppValue.get()));
     *sipCppPtr = heapValue.release();
     return sipState;
   } else {

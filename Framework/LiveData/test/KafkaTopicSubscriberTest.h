@@ -7,7 +7,7 @@
 #ifndef MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_
 #define MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_
 
-#include "MantidKernel/make_unique.h"
+
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
@@ -31,7 +31,7 @@ public:
 
     // This won't connect yet
     std::vector<std::string> topics = {topic};
-    auto subscriber = Mantid::Kernel::make_unique<KafkaTopicSubscriber>(
+    auto subscriber = std::make_unique<KafkaTopicSubscriber>(
         broker, topics, SubscribeAtOption::LATEST);
 
     TS_ASSERT_EQUALS(topic, subscriber->topics()[0]);

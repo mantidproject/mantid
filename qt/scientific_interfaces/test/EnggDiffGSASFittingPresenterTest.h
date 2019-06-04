@@ -14,7 +14,7 @@
 #include "EnggDiffractionParamMock.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -356,7 +356,7 @@ private:
   MockEnggDiffractionParam *m_mockParamPtr;
 
   std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
-    auto mockModel = Mantid::Kernel::make_unique<
+    auto mockModel = std::make_unique<
         testing::NiceMock<MockEnggDiffGSASFittingModel>>();
     m_mockModelPtr = mockModel.get();
 
@@ -370,7 +370,7 @@ private:
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     m_mockParamPtr = mockParam_sptr.get();
 
-    auto pres_uptr = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
+    auto pres_uptr = std::make_unique<EnggDiffGSASFittingPresenter>(
         std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr,
         mockParam_sptr);
     return pres_uptr;

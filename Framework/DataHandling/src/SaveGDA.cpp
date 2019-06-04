@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <boost/optional.hpp>
 
@@ -120,26 +120,26 @@ const std::string SaveGDA::PROP_PARAMS_FILENAME = "GSASParamFile";
 const std::string SaveGDA::PROP_GROUPING_SCHEME = "GroupingScheme";
 
 void SaveGDA::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       PROP_INPUT_WS, "", Kernel::Direction::Input),
                   "A GroupWorkspace where every sub-workspace is a "
                   "single-spectra focused run corresponding to a particular "
                   "bank");
 
   const static std::vector<std::string> outExts{".gda"};
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       PROP_OUTPUT_FILENAME, "", FileProperty::Save, outExts),
                   "The name of the file to save to");
 
   const static std::vector<std::string> paramsExts{".ipf", ".prm", ".parm",
                                                    ".iprm"};
   declareProperty(
-      Kernel::make_unique<FileProperty>(PROP_PARAMS_FILENAME, "",
+      std::make_unique<FileProperty>(PROP_PARAMS_FILENAME, "",
                                         FileProperty::Load, paramsExts),
       "GSAS calibration file containing conversion factors from D to TOF");
 
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>(PROP_GROUPING_SCHEME),
+      std::make_unique<Kernel::ArrayProperty<int>>(PROP_GROUPING_SCHEME),
       "An array of bank IDs, where the value at element i is the "
       "ID of the bank in " +
           PROP_PARAMS_FILENAME + " to associate spectrum i with");

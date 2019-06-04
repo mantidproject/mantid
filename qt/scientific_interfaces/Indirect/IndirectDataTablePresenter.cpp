@@ -35,8 +35,8 @@ public:
   QWidget *createEditor(QWidget *parent,
                         const QStyleOptionViewItem & /*option*/,
                         const QModelIndex & /*index*/) const override {
-    auto lineEdit = Mantid::Kernel::make_unique<QLineEdit>(parent);
-    auto validator = Mantid::Kernel::make_unique<QRegExpValidator>(
+    auto lineEdit = std::make_unique<QLineEdit>(parent);
+    auto validator = std::make_unique<QRegExpValidator>(
         QRegExp(Regexes::MASK_LIST), parent);
     lineEdit->setValidator(validator.release());
     return lineEdit.release();
@@ -114,7 +114,7 @@ IndirectDataTablePresenter::IndirectDataTablePresenter(
   setHorizontalHeaders(headers);
   m_dataTable->setItemDelegateForColumn(
       headers.size() - 1,
-      Mantid::Kernel::make_unique<ExcludeRegionDelegate>().release());
+      std::make_unique<ExcludeRegionDelegate>().release());
   m_dataTable->verticalHeader()->setVisible(false);
 
   connect(m_dataTable, SIGNAL(cellChanged(int, int)), this,
@@ -518,7 +518,7 @@ void IndirectDataTablePresenter::addTableEntry(std::size_t dataIndex,
   m_dataTable->insertRow(row);
 
   const auto &name = m_model->getWorkspace(dataIndex)->getName();
-  auto cell = Mantid::Kernel::make_unique<QTableWidgetItem>(
+  auto cell = std::make_unique<QTableWidgetItem>(
       QString::fromStdString(name));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
@@ -526,20 +526,20 @@ void IndirectDataTablePresenter::addTableEntry(std::size_t dataIndex,
   setCell(std::move(cell), row, 0);
 
   cell =
-      Mantid::Kernel::make_unique<QTableWidgetItem>(QString::number(spectrum));
+      std::make_unique<QTableWidgetItem>(QString::number(spectrum));
   cell->setFlags(flags);
   setCell(std::move(cell), row, workspaceIndexColumn());
 
   const auto range = m_model->getFittingRange(dataIndex, spectrum);
-  cell = Mantid::Kernel::make_unique<QTableWidgetItem>(makeNumber(range.first));
+  cell = std::make_unique<QTableWidgetItem>(makeNumber(range.first));
   setCell(std::move(cell), row, startXColumn());
 
   cell =
-      Mantid::Kernel::make_unique<QTableWidgetItem>(makeNumber(range.second));
+      std::make_unique<QTableWidgetItem>(makeNumber(range.second));
   setCell(std::move(cell), row, endXColumn());
 
   const auto exclude = m_model->getExcludeRegion(dataIndex, spectrum);
-  cell = Mantid::Kernel::make_unique<QTableWidgetItem>(
+  cell = std::make_unique<QTableWidgetItem>(
       QString::fromStdString(exclude));
   setCell(std::move(cell), row, excludeColumn());
 }

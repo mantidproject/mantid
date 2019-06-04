@@ -7,7 +7,7 @@
 #include "JumpFitDataPresenter.h"
 #include "JumpFitDataTablePresenter.h"
 
-#include "MantidKernel/make_unique.h"
+
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -20,7 +20,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
     : IndirectFitDataPresenter(
           model, view,
-          Mantid::Kernel::make_unique<JumpFitDataTablePresenter>(
+          std::make_unique<JumpFitDataTablePresenter>(
               model, view->getDataTable())),
       m_activeParameterType("Width"), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
@@ -204,7 +204,7 @@ void JumpFitDataPresenter::closeDialog() {
 
 std::unique_ptr<IAddWorkspaceDialog>
 JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = Mantid::Kernel::make_unique<JumpFitAddWorkspaceDialog>(parent);
+  auto dialog = std::make_unique<JumpFitAddWorkspaceDialog>(parent);
   connect(dialog.get(),
           SIGNAL(workspaceChanged(JumpFitAddWorkspaceDialog *,
                                   const std::string &)),

@@ -128,19 +128,19 @@ FindPeaksMD::FindPeaksMD()
 /** Initialize the algorithm's properties.
  */
 void FindPeaksMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace with at least "
                   "3 dimensions.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("PeakDistanceThreshold", 0.1,
+      std::make_unique<PropertyWithValue<double>>("PeakDistanceThreshold", 0.1,
                                              Direction::Input),
       "Threshold distance for rejecting peaks that are found to be too close "
       "from each other.\n"
       "This should be some multiple of the radius of a peak. Default: 0.1.");
 
-  declareProperty(make_unique<PropertyWithValue<int64_t>>("MaxPeaks", 500,
+  declareProperty(std::make_unique<PropertyWithValue<int64_t>>("MaxPeaks", 500,
                                                           Direction::Input),
                   "Maximum number of peaks to find. Default: 500.");
 
@@ -164,7 +164,7 @@ void FindPeaksMD::init() {
       "be larger than 1. Note that this approach does not work for event-based "
       "raw data.\n");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "DensityThresholdFactor", 10.0, Direction::Input),
                   "The overall signal density of the workspace will be "
                   "multiplied by this factor \n"
@@ -173,12 +173,12 @@ void FindPeaksMD::init() {
                   "Default: 10.0");
 
   setPropertySettings("DensityThresholdFactor",
-                      make_unique<EnabledWhenProperty>(
+                      std::make_unique<EnabledWhenProperty>(
                           "PeakFindingStrategy",
                           Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           volumeNormalization));
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "SignalThresholdFactor", 1.5, Direction::Input),
                   "The overal signal value (not density!) normalized by the "
                   "number of events is compared to the specified signal "
@@ -191,7 +191,7 @@ void FindPeaksMD::init() {
                   "Default: 1.50");
 
   setPropertySettings("SignalThresholdFactor",
-                      make_unique<EnabledWhenProperty>(
+                      std::make_unique<EnabledWhenProperty>(
                           "PeakFindingStrategy",
                           Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           numberOfEventsNormalization));
@@ -208,11 +208,11 @@ void FindPeaksMD::init() {
                   "set will use the wavelength parameter on the instrument.");
 
   setPropertySettings("Wavelength",
-                      make_unique<EnabledWhenProperty>(
+                      std::make_unique<EnabledWhenProperty>(
                           "CalculateGoniometerForCW",
                           Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace with the peaks' found positions.");
 
@@ -430,7 +430,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // List of chosen possible peak boxes.
     std::vector<API::IMDNode *> peakBoxes;
 
-    prog = make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
+    prog = std::make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
     // used for selecting method for calculating BinCount
     bool isMDEvent(ws->id().find("MDEventWorkspace") != std::string::npos);
@@ -627,7 +627,7 @@ void FindPeaksMD::findPeaksHisto(
     // List of chosen possible peak boxes.
     std::vector<size_t> peakBoxes;
 
-    prog = make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
+    prog = std::make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
     int64_t numBoxesFound = 0;
     // Now we go (backwards) through the map

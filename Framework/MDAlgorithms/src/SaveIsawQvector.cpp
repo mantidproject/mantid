@@ -58,12 +58,12 @@ void SaveIsawQvector::init() {
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("TOF");
 
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input EventWorkspace with units along X-axis and defined "
                   "instrument with defined sample");
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
                                 ".bin"),
       "Optional path to an hkl file to save.  Vectors returned if no file "
       "requested.");

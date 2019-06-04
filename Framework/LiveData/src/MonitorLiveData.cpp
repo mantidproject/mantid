@@ -43,7 +43,7 @@ int MonitorLiveData::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void MonitorLiveData::init() {
-  declareProperty(make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
+  declareProperty(std::make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
                                                          Direction::Input),
                   "Frequency of updates, in seconds. Default 60.");
 

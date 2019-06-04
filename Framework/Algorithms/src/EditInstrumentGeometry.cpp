@@ -41,7 +41,7 @@ int EditInstrumentGeometry::version() const { return 1; }
  */
 void EditInstrumentGeometry::init() {
   // Input workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "",
                                                            Direction::InOut),
                   "Workspace to edit the detector information");
 
@@ -51,7 +51,7 @@ void EditInstrumentGeometry::init() {
 
   // Spectrum Number for the spectrum to have instrument geometry edited
   declareProperty(
-      Kernel::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
+      std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
       "Spectrum Numbers (note that it is not detector ID or workspace "
       "indices). The list must be either empty or have a size "
       "equal to input workspace's histogram number. ");
@@ -60,23 +60,23 @@ void EditInstrumentGeometry::init() {
 
   // Vector for L2
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("L2", required),
+      std::make_unique<ArrayProperty<double>>("L2", required),
       "Secondary flight (L2) paths for each detector.  Number of L2 "
       "given must be same as number of histogram.");
 
   // Vector for 2Theta
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Polar", required),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Polar", required),
                   "Polar angles (two thetas) for detectors. Number of 2theta "
                   "given must be same as number of histogram.");
 
   // Vector for Azimuthal angle
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Azimuthal"),
+      std::make_unique<ArrayProperty<double>>("Azimuthal"),
       "Azimuthal angles (out-of-plane) for detectors. "
       "Number of azimuthal angles given must be same as number of histogram.");
 
   // Detector IDs
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>("DetectorIDs"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("DetectorIDs"),
                   "User specified detector IDs of the spectra. "
                   "Number of specified detector IDs must be either zero or "
                   "number of histogram");

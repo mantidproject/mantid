@@ -8,7 +8,7 @@
 #define MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H
 
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include <MantidAPI/Workspace.h>
 #include <MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h>
 #include <MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h>

@@ -99,17 +99,17 @@ const double GroupDetectors2::OPENINGFILE = 0.03;
 const double GroupDetectors2::READFILE = 0.15;
 
 void GroupDetectors2::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<CommonBinsValidator>()),
                   "The name of the input 2D workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
   const std::vector<std::string> exts{".map", ".xml"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("MapFile", "",
+      std::make_unique<FileProperty>("MapFile", "",
                                         FileProperty::OptionalLoad, exts),
       "A file that consists of lists of spectra numbers to group. See the "
       "help for the file format");
@@ -117,18 +117,18 @@ void GroupDetectors2::init() {
       "IgnoreGroupNumber", true,
       "If true, use sequential spectrum numbers, otherwise use the group "
       "number from MapFile as spectrum numbers.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "GroupingPattern", "", Direction::Input),
                   "Describes how this algorithm should group the detectors. "
                   "See the help for full instructions.");
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectraList"),
       "An array containing a list of the spectrum numbers to combine "
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
-  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "An array of detector IDs to combine (WorkspaceIndexList is "
                   "ignored if this is set)");
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
   declareProperty(
       "KeepUngroupedSpectra", false,
@@ -145,7 +145,7 @@ void GroupDetectors2::init() {
                   "Keep the output workspace as an EventWorkspace, if the "
                   "input has events.");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "CopyGroupingFromWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "The name of a workspace to copy the grouping from. "

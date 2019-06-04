@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 #include <MantidGeometry/Instrument.h>
-#include <MantidKernel/make_unique.h>
+
 #include <MantidQtWidgets/Common/AlgorithmDialog.h>
 #include <MantidQtWidgets/Common/AlgorithmInputHistory.h>
 #include <MantidQtWidgets/Common/FlowLayout.h>

@@ -32,16 +32,16 @@ DECLARE_ALGORITHM(CreateLogTimeCorrection)
 /** Declare properties
  */
 void CreateLogTimeCorrection::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "Name of the input workspace to generate log correct from.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing the corrections.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("OutputFilename", "",
+  declareProperty(std::make_unique<FileProperty>("OutputFilename", "",
                                                     FileProperty::OptionalSave),
                   "Name of the output time correction file.");
 }

@@ -40,11 +40,11 @@ DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input table workspace for data.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "RunInfoWorkspace", "", Direction::Input),
                   "Input matrix workspace containing sample logs.  "
                   "It can be the RunInfoWorkspace output from LoadSpiceAscii. "
@@ -79,16 +79,16 @@ void ConvertSpiceDataToRealSpace::init() {
   declareProperty("DurationLogName", "time",
                   "Name of the sample log to record the duration of each run.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputMonitorWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DetectorEfficiencyTableWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "Name of a table workspace containing the detectors' efficiency.");

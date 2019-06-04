@@ -31,7 +31,7 @@ private:
 
     void init() override {
       declareProperty(
-          make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+          std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
           "");
       declareProperty("Input1", 2);
       declareProperty("Input2", 1);

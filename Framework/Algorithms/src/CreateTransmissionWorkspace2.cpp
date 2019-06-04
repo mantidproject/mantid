@@ -52,34 +52,34 @@ const std::string CreateTransmissionWorkspace2::category() const {
 void CreateTransmissionWorkspace2::init() {
   auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
                   "First transmission run. Corresponds to the low wavelength "
                   "transmision run if a SecondTransmissionRun is also "
                   "provided.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator->clone()),
                   "High wavelength transmission run. Optional. Causes the "
                   "first transmission run to be treated as the low wavelength "
                   "transmission run.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
                       boost::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
                   "Grouping pattern on spectrum numbers to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMin", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum in angstroms");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMax", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
@@ -93,7 +93,7 @@ void CreateTransmissionWorkspace2::init() {
                   "Whether to enable the output of extra workspaces.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Output workspace in wavelength.");
 }

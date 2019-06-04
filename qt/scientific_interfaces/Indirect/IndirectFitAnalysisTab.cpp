@@ -13,7 +13,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -273,21 +273,21 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 }
 
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter = Mantid::Kernel::make_unique<IndirectFitPlotPresenter>(
+  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
     IndirectSpectrumSelectionView *view) {
   m_spectrumPresenter =
-      Mantid::Kernel::make_unique<IndirectSpectrumSelectionPresenter>(
+      std::make_unique<IndirectSpectrumSelectionPresenter>(
           m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTab::setOutputOptionsView(
     IIndirectFitOutputOptionsView *view) {
   m_outOptionsPresenter =
-      Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(view);
+      std::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(

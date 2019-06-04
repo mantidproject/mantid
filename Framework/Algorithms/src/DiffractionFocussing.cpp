@@ -41,13 +41,13 @@ using API::WorkspaceProperty;
  *
  */
 void DiffractionFocussing::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
-  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
                                             FileProperty::Load, ".cal"),
                   "The name of the CalFile with grouping data");
 }

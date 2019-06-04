@@ -246,7 +246,7 @@ void WorkspaceBuilder::createNeighbourSearch() {
     const auto pos = info.position(i);
     points.emplace_back(pos[0], pos[1], pos[2]);
   }
-  m_detectorSearcher = Kernel::make_unique<NearestNeighbours<3>>(points);
+  m_detectorSearcher = std::make_unique<NearestNeighbours<3>>(points);
 }
 
 /** Rebin the event workspace using the parameters provided

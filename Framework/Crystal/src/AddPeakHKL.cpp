@@ -41,11 +41,11 @@ const std::string AddPeakHKL::summary() const {
 /** Initialize the algorithm's properties.
  */
 void AddPeakHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<Mantid::API::IPeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Mantid::API::IPeaksWorkspace>>(
                       "Workspace", "", Direction::InOut),
                   "An input workspace.");
   // clang-format off
-    declareProperty(make_unique<ArrayProperty<double>>("HKL", boost::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
+    declareProperty(std::make_unique<ArrayProperty<double>>("HKL", boost::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
   // clang-format on
 }
 

@@ -62,7 +62,7 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
                                 LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
@@ -73,7 +73,7 @@ void LoadEmptyInstrument::init() {
                   "Name of instrument. Can be used instead of Filename to "
                   "specify an IDF");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
                                                       Direction::Output),
       "The name of the workspace in which to store the imported instrument");
 
@@ -89,7 +89,7 @@ void LoadEmptyInstrument::init() {
       "display window (default 2)");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("MakeEventWorkspace", false),
+      std::make_unique<PropertyWithValue<bool>>("MakeEventWorkspace", false),
       "Set to True to create an EventWorkspace (with no events) "
       "instead of a Workspace2D.");
 }

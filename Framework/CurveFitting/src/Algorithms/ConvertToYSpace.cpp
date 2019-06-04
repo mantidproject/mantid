@@ -166,7 +166,7 @@ void ConvertToYSpace::init() {
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace in Time of Flight");
 
@@ -176,11 +176,11 @@ void ConvertToYSpace::init() {
   declareProperty("Mass", -1.0, mustBePositive,
                   "The mass defining the recoil peak in AMU");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The output workspace in y-Space");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("QWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("QWorkspace", "",
                                                    Direction::Output,
                                                    PropertyMode::Optional),
                   "The output workspace in q-Space");

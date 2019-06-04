@@ -42,12 +42,12 @@ SaveFullprofResolution::SaveFullprofResolution()
  */
 void SaveFullprofResolution::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "Input TableWorkspace containing the parameters for .irf file.");
 
   std::vector<std::string> exts{".irf"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "OutputFilename", "", API::FileProperty::Save, exts),
                   "Name of the output .irf file.");
 

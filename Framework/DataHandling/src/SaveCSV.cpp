@@ -39,11 +39,11 @@ SaveCSV::SaveCSV() {}
  *
  */
 void SaveCSV::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The filename of the output CSV file");
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".csv"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".csv"),
       "The name of the workspace containing the data you want to save to\n"
       "a CSV file");
   declareProperty(
@@ -56,7 +56,7 @@ void SaveCSV::init() {
                   "character)");
   getPointerToProperty("LineSeparator")->setAutoTrim(false);
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("SaveXerrors", false,
+      std::make_unique<PropertyWithValue<bool>>("SaveXerrors", false,
                                            Direction::Input),
       "This option saves out the x errors if any are present. If you have x "
       "errors\n"

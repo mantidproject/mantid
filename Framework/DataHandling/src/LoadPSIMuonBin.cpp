@@ -74,19 +74,19 @@ bool LoadPSIMuonBin::loadMutipleAsOne() { return false; }
 
 void LoadPSIMuonBin::init() {
   const std::vector<std::string> exts{".bin"};
-  declareProperty(Kernel::make_unique<Mantid::API::FileProperty>(
+  declareProperty(std::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", Mantid::API::FileProperty::Load, exts),
                   "The name of the Bin file to load");
 
   const std::vector<std::string> extsTemps{".mon"};
   declareProperty(
-      Kernel::make_unique<Mantid::API::FileProperty>(
+      std::make_unique<Mantid::API::FileProperty>(
           "TemperatureFilename", "", Mantid::API::FileProperty::OptionalLoad,
           extsTemps),
       "The name of the temperature file to be loaded, this is optional as it "
       "will be automatically searched for if not provided.");
 
-  declareProperty(Kernel::make_unique<
+  declareProperty(std::make_unique<
                       Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "An output workspace.");

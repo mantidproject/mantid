@@ -13,7 +13,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include <numeric>
@@ -146,7 +146,7 @@ private:
 
     // Create the log to be filtered
     auto log =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("TestLog");
+        std::make_unique<TimeSeriesProperty<double>>("TestLog");
     constexpr size_t logSize(12);
     const DateAndTime initialTime("2007-11-30T16:17:00");
     std::vector<DateAndTime> times;
@@ -165,7 +165,7 @@ private:
     // Status ("running") log
     if (hasStatusLog) {
       auto status =
-          Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("running");
+          std::make_unique<TimeSeriesProperty<bool>>("running");
       status->addValue(initialTime, true);
       status->addValue(initialTime + 30.0, false);
       status->addValue(initialTime + 60.0, true);
@@ -175,7 +175,7 @@ private:
     // Period log
     if (hasPeriodLog) {
       auto period =
-          Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("period 1");
+          std::make_unique<TimeSeriesProperty<bool>>("period 1");
       period->addValue(initialTime + 80.0, true);
       period->addValue(initialTime + 110.0, false);
       ws->mutableRun().addLogData(std::move(period));
@@ -183,7 +183,7 @@ private:
 
     // Log that isn't a numeric TSP
     if (hasBadLog) {
-      auto bad = Mantid::Kernel::make_unique<TimeSeriesProperty<std::string>>(
+      auto bad = std::make_unique<TimeSeriesProperty<std::string>>(
           "BadLog");
       bad->addValue(initialTime + 15.0, "hello");
       bad->addValue(initialTime + 45.0, "string");

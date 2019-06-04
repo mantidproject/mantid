@@ -75,7 +75,7 @@ const std::string SetSpecialCoordinates::category() const {
  */
 void SetSpecialCoordinates::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
                                                 Direction::InOut),
       "An input/output workspace. The new log will be added to it. Important "
       "Note: This has now only an effect on PeaksWorkspaces. MDEvent and "

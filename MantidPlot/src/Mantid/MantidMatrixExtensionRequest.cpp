@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrixExtensionRequest.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMatrix.h"
 #include "MantidMatrixDxExtensionHandler.h"
 #include "MantidMatrixModel.h"
@@ -33,7 +33,7 @@ MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
     extension.type = type;
     // Extend the chain of responsibility
     auto dxHandler =
-        Mantid::Kernel::make_unique<MantidMatrixDxExtensionHandler>();
+        std::make_unique<MantidMatrixDxExtensionHandler>();
     dxHandler->setSuccessor(m_extensionHandler);
     m_extensionHandler = std::move(dxHandler);
     return extension;

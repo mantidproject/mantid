@@ -35,13 +35,13 @@ const std::string CombinePeaksWorkspaces::category() const {
 /** Initialises the algorithm's properties.
  */
 void CombinePeaksWorkspaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "LHSWorkspace", "", Direction::Input),
                   "The first set of peaks.");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "RHSWorkspace", "", Direction::Input),
                   "The second set of peaks.");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The combined peaks list.");
 
@@ -55,7 +55,7 @@ void CombinePeaksWorkspaces::init() {
                   "Maximum difference in each component of Q for which peaks "
                   "are considered identical");
   setPropertySettings("Tolerance",
-                      make_unique<EnabledWhenProperty>("CombineMatchingPeaks",
+                      std::make_unique<EnabledWhenProperty>("CombineMatchingPeaks",
                                                        IS_EQUAL_TO, "1"));
 }
 

@@ -33,14 +33,14 @@ DECLARE_ALGORITHM(ApplyDetailedBalance)
 void ApplyDetailedBalance::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("DeltaE");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
   declareProperty(
-      make_unique<PropertyWithValue<string>>("Temperature", "",
+      std::make_unique<PropertyWithValue<string>>("Temperature", "",
                                              Direction::Input),
       "SampleLog variable name that contains the temperature, or a number");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "An output workspace.");
   std::vector<std::string> unitOptions{"Energy", "Frequency"};

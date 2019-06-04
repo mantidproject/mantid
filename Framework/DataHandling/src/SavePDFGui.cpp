@@ -41,10 +41,10 @@ const std::string SavePDFGui::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SavePDFGui::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                            Direction::Input),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".gr"),
                   "The filename to use for the saved data");
 }

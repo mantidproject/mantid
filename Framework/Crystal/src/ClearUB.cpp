@@ -31,11 +31,11 @@ const std::string ClearUB::category() const { return "Crystal\\UBMatrix"; }
 /** Initialize the algorithm's properties.
  */
 void ClearUB::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
                                                             Direction::InOut),
                   "Workspace to clear the UB from.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("DoesClear", false,
+      std::make_unique<PropertyWithValue<bool>>("DoesClear", false,
                                            Direction::Output),
       "Indicates action performed. DoesClear returns true only if one or more "
       "OrientedLattices have been removed.");

@@ -24,7 +24,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -32,12 +32,12 @@ void IndexPeaks::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
+      std::make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
                                              Direction::Input),
       "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
+      std::make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
                                              mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 
@@ -48,32 +48,32 @@ void IndexPeaks::init() {
                         "Index all orientations with a common UB");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
+      std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
       "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
                             "TotalNumIndexed", 0, Direction::Output),
                         "Gets set with the number of Total indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("MainNumIndexed", 0,
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>("MainNumIndexed", 0,
                                                             Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("SateNumIndexed", 0,
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>("SateNumIndexed", 0,
                                                             Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("MainError", 0.0,
+      std::make_unique<PropertyWithValue<double>>("MainError", 0.0,
                                              Direction::Output),
       "Gets set with the average HKL indexing error of Main Peaks.");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
+      std::make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
                                              Direction::Output),
       "Gets set with the average HKL indexing error of Satellite Peaks.");
 }

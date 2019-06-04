@@ -94,10 +94,10 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadIsawPeaks::init() {
   const std::vector<std::string> exts{".peaks", ".integrate"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, exts),
                   "Path to an ISAW-style .peaks filename.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }

@@ -30,9 +30,9 @@ using namespace Mantid::HistogramData;
 
 void FFTDerivative::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Input workspace for differentiation");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Workspace with result derivatives");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();

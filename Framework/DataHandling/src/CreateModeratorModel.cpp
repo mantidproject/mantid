@@ -42,7 +42,7 @@ const std::string CreateModeratorModel::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateModeratorModel::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "",
                                                            Direction::InOut),
                   "An input workspace.");
 

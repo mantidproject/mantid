@@ -36,7 +36,7 @@ public:
 std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>
 createTestSeries(const std::string &name) {
   auto source =
-      Mantid::Kernel::make_unique<Mantid::Kernel::TimeSeriesProperty<double>>(
+      std::make_unique<Mantid::Kernel::TimeSeriesProperty<double>>(
           name);
   source->addValue("2007-11-30T16:17:00", 1);
   source->addValue("2007-11-30T16:17:10", 2);
@@ -74,7 +74,7 @@ public:
 public:
   void setUp() override {
     manager = std::make_unique<PropertyManagerHelper>();
-    auto p = Mantid::Kernel::make_unique<PropertyWithValue<int>>("aProp", 1);
+    auto p = std::make_unique<PropertyWithValue<int>>("aProp", 1);
     manager->declareProperty(std::move(p));
     manager->declareProperty("anotherProp", 1.11);
     manager->declareProperty("yetAnotherProp", "itsValue");
@@ -145,7 +145,7 @@ public:
   void testdeclareProperty_pointer() {
     PropertyManagerHelper mgr;
     std::unique_ptr<Property> p =
-        Mantid::Kernel::make_unique<PropertyWithValue<double>>("myProp", 9.99);
+        std::make_unique<PropertyWithValue<double>>("myProp", 9.99);
     auto copy = std::unique_ptr<Property>(p->clone());
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(std::move(p)));
     TS_ASSERT(mgr.existsProperty(copy->name()));
@@ -164,10 +164,10 @@ public:
                      const Exception::ExistsError &);
     TS_ASSERT_THROWS(
         mgr.declareProperty(
-            Mantid::Kernel::make_unique<PropertyWithValue<int>>("", 0)),
+            std::make_unique<PropertyWithValue<int>>("", 0)),
         const std::invalid_argument &);
     mgr.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("GoodIntProp", 1),
+        std::make_unique<PropertyWithValue<int>>("GoodIntProp", 1),
         "Test doc");
     TS_ASSERT_EQUALS(mgr.getPointerToProperty("GoodIntProp")->documentation(),
                      "Test doc");
@@ -276,7 +276,7 @@ public:
   void testSetProperties_arrayValueString() {
     PropertyManagerHelper mgr;
     mgr.declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<double>>("ArrayProp"));
+        std::make_unique<ArrayProperty<double>>("ArrayProp"));
 
     const std::string jsonString = R"({"ArrayProp":"10,12,23"})";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
@@ -478,7 +478,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Crossing", 42));
     mgr.setPropertySettings(
         "Crossing",
-        make_unique<EnabledWhenProperty>(
+        std::make_unique<EnabledWhenProperty>(
             "Semaphor", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
@@ -521,7 +521,7 @@ public:
   void test_asStringWithArrayProperty() {
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<double>>("ArrayProp")));
+        std::make_unique<ArrayProperty<double>>("ArrayProp")));
 
     ::Json::Reader reader;
     ::Json::Value value;
@@ -549,7 +549,7 @@ public:
     using namespace Mantid::Kernel;
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(
-        make_unique<MockNonSerializableProperty>("PropertyName", 0)));
+        std::make_unique<MockNonSerializableProperty>("PropertyName", 0)));
     TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
     TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
     // Set to non-default value.
@@ -565,25 +565,25 @@ public:
   void testAdditionOperator() {
     PropertyManager mgr1;
     mgr1.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<double>>("double", 12.0),
+        std::make_unique<PropertyWithValue<double>>("double", 12.0),
         "docs");
     mgr1.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("int", 23), "docs");
-    mgr1.declareProperty(Mantid::Kernel::make_unique<PropertyWithValue<double>>(
+        std::make_unique<PropertyWithValue<int>>("int", 23), "docs");
+    mgr1.declareProperty(std::make_unique<PropertyWithValue<double>>(
                              "double_only_in_mgr1", 456.0),
                          "docs");
 
     PropertyManager mgr2;
     mgr2.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<double>>("double", 23.6),
+        std::make_unique<PropertyWithValue<double>>("double", 23.6),
         "docs");
     mgr2.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("int", 34), "docs");
-    mgr2.declareProperty(Mantid::Kernel::make_unique<PropertyWithValue<double>>(
+        std::make_unique<PropertyWithValue<int>>("int", 34), "docs");
+    mgr2.declareProperty(std::make_unique<PropertyWithValue<double>>(
                              "new_double_in_mgr2", 321.0),
                          "docs");
     mgr2.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("new_int", 655),
+        std::make_unique<PropertyWithValue<int>>("new_int", 655),
         "docs");
 
     // Add em together
@@ -622,7 +622,7 @@ public:
     PropertyManagerHelper mgr;
 
     mgr.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
+        std::make_unique<PropertyWithValue<OptionalBool>>(
             "PropertyX", OptionalBool::Unset,
             boost::make_shared<MandatoryValidator<OptionalBool>>(),
             Direction::Input),
@@ -638,10 +638,10 @@ public:
     PropertyManagerHelper mgr;
 
     mgr.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<double>>("double", 12.0),
+        std::make_unique<PropertyWithValue<double>>("double", 12.0),
         "docs");
     mgr.declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("int", 23), "docs");
+        std::make_unique<PropertyWithValue<int>>("int", 23), "docs");
 
     mgr.setPropertiesWithString("double= 13.0 ;int=22 ");
     double d = mgr.getProperty("double");

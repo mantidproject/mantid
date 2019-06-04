@@ -31,12 +31,12 @@ DECLARE_ALGORITHM(RayTracerTester)
  */
 void RayTracerTester::init() {
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
       "The filename (including its full or relative path) of an "
       "instrument definition file");
   declareProperty("NumAzimuth", 100, "Steps in azimuthal angles");
   declareProperty("NumZenith", 50, "Steps in zenith angles");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "An output workspace.");
 }

@@ -54,7 +54,7 @@ void ApplyMuonDetectorGroupPairing::init() {
   std::string emptyString("");
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "InputWorkspaceGroup", emptyString, Direction::InOut,
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
@@ -76,33 +76,33 @@ void ApplyMuonDetectorGroupPairing::init() {
   // Select groups via workspaces
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace1", emptyString, Direction::Input,
           PropertyMode::Optional),
       "Input workspace containing data from grouped detectors.");
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace2", emptyString, Direction::Input,
           PropertyMode::Optional),
       "Input workspace containing data from grouped detectors.");
 
   setPropertySettings("InputWorkspace1",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "0"));
   setPropertySettings("InputWorkspace2",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "0"));
 
   // Specify groups manually
 
-  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", emptyString, Direction::Input,
                       PropertyMode::Optional),
                   "Input workspace containing data from detectors which are to "
                   "be grouped.");
   setPropertySettings("InputWorkspace",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty("Group1", std::to_string(1),
@@ -114,10 +114,10 @@ void ApplyMuonDetectorGroupPairing::init() {
                   "IDs or hyphenated ranges of IDs.",
                   Direction::Input);
   setPropertySettings("Group1",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
   setPropertySettings("Group2",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty("TimeMin", 0.1,
@@ -125,7 +125,7 @@ void ApplyMuonDetectorGroupPairing::init() {
                   "the asymmetry analysis.",
                   Direction::Input);
   setPropertySettings("TimeMin",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty("TimeMax", 32.0,
@@ -133,14 +133,14 @@ void ApplyMuonDetectorGroupPairing::init() {
                   "asymmetry analysis.",
                   Direction::Input);
   setPropertySettings("TimeMax",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty("RebinArgs", emptyString,
                   "Rebin arguments. No rebinning if left empty.",
                   Direction::Input);
   setPropertySettings("RebinArgs",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty("TimeOffset", 0.0,
@@ -148,37 +148,37 @@ void ApplyMuonDetectorGroupPairing::init() {
                   "given corresponds to the bin that will become time 0.0.",
                   Direction::Input);
   setPropertySettings("TimeOffset",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty("SummedPeriods", std::to_string(1),
                   "A list of periods to sum in multiperiod data.",
                   Direction::Input);
   setPropertySettings("SummedPeriods",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty("SubtractedPeriods", emptyString,
                   "A list of periods to subtract in multiperiod data.",
                   Direction::Input);
   setPropertySettings("SubtractedPeriods",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty(
       "ApplyDeadTimeCorrection", false,
       "Whether dead time correction should be applied to input workspace");
   setPropertySettings("ApplyDeadTimeCorrection",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
       "Table with dead time information. Must be specified if "
       "ApplyDeadTimeCorrection is set true.");
   setPropertySettings("DeadTimeTable",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "ApplyDeadTimeCorrection", Kernel::IS_EQUAL_TO, "1"));
 
   // Perform Group Associations.

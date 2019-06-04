@@ -35,22 +35,22 @@ const std::string DgsRemap::category() const { return "Workflow\\Inelastic"; }
  */
 void DgsRemap::init() {
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace to mask and group.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input,
                                        PropertyMode::Optional),
       "A workspace containing masking information.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace containing grouping information");
-  this->declareProperty(make_unique<FileProperty>("OldGroupingFile", "",
+  this->declareProperty(std::make_unique<FileProperty>("OldGroupingFile", "",
                                                   FileProperty::OptionalLoad),
                         "Name of an old grouping format (not XML) file.");
   this->declareProperty("ExecuteOppositeOrder", false,
                         "Execute grouping before masking.");
-  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                          Direction::Output),
                         "The resulting workspace.");
 }

@@ -35,11 +35,11 @@ bool checkNotPositive(const int value) { return value < 0; }
  * Init index properties.
  */
 void ReflectometryWorkflowBase::initIndexInputs() {
-  declareProperty(make_unique<PropertyWithValue<int>>(
+  declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
                   "I0 monitor workspace index");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
                       boost::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
@@ -51,33 +51,33 @@ void ReflectometryWorkflowBase::initIndexInputs() {
  * Init common wavelength inputs.
  */
 void ReflectometryWorkflowBase::initWavelengthInputs() {
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMin", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum in angstroms");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMax", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
                       Direction::Input),
                   "Wavelength minimum for monitor background in angstroms.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
                       Direction::Input),
                   "Wavelength maximum for monitor background in angstroms.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
                       Direction::Input),
                   "Wavelength minimum for integration in angstroms.");
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
                       Direction::Input),
                   "Wavelength maximum for integration in angstroms.");
@@ -88,19 +88,19 @@ void ReflectometryWorkflowBase::initWavelengthInputs() {
  */
 void ReflectometryWorkflowBase::initStitchingInputs() {
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
       "SecondTransmission run is provided.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start wavelength for stitching transmission runs together");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
+      std::make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
                                              Direction::Input),
       "End wavelength (angstroms) for stitching transmission runs together");
 }

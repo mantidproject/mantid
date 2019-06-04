@@ -56,7 +56,7 @@ void GetEi2::init()
   validator->add<InstrumentValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut,
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut,
                                        validator),
       "The X units of this workspace must be time of flight with times in\n"
       "microseconds");

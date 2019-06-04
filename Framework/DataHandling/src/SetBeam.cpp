@@ -77,10 +77,10 @@ void SetBeam::init() {
   // In/out
   auto validator = boost::make_shared<InstrumentValidator>(
       InstrumentValidator::SourcePosition);
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, validator),
                   "An input workspace with an attached instrument.");
-  declareProperty(Kernel::make_unique<PropertyManagerProperty>(
+  declareProperty(std::make_unique<PropertyManagerProperty>(
                       "Geometry", Direction::Input),
                   "A dictionary of geometry parameters for the beam");
 }

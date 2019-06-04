@@ -41,15 +41,15 @@ void Regroup::init() {
   auto wsVal = boost::make_shared<CompositeValidator>();
   wsVal->add<API::HistogramValidator>();
   wsVal->add<API::CommonBinsValidator>();
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsVal),
                   "The input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of regrouping.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>()),
       "The new approximate bin boundaries in the form: x1,dx1,x2,dx2,...,xn");
 }

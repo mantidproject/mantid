@@ -42,12 +42,12 @@ DECLARE_ALGORITHM(SaveNexusProcessed)
  *
  */
 void SaveNexusProcessed::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the workspace to be saved");
   // Declare required input parameters for algorithm
   const std::vector<std::string> fileExts{".nxs", ".nx5", ".xml"};
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Save, fileExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
@@ -64,7 +64,7 @@ void SaveNexusProcessed::init() {
   declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive,
                   "Index of last spectrum to write, only for single period\n"
                   "data.");
-  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
                   "List of spectrum numbers to read, only for single period\n"
                   "data.");
 
@@ -78,7 +78,7 @@ void SaveNexusProcessed::init() {
       "If false, will save the 2D histogram version of the workspace with the "
       "current binning parameters.");
   setPropertySettings("PreserveEvents",
-                      make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
+                      std::make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
                           "InputWorkspace", true));
 
   declareProperty(
@@ -86,7 +86,7 @@ void SaveNexusProcessed::init() {
       "For EventWorkspaces, compress the Nexus data field (default False).\n"
       "This will make smaller files but takes much longer.");
   setPropertySettings("CompressNexus",
-                      make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
+                      std::make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
                           "InputWorkspace", true));
 }
 
@@ -371,7 +371,7 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events,
 void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
                                    const bool uniformSpectra,
                                    const std::vector<int> &spec) {
-  m_progress = make_unique<Progress>(this, m_timeProgInit, 1.0,
+  m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0,
                                      m_eventWorkspace->getNumberEvents() * 2);
 
   // Start by writing out the axes and crap

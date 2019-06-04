@@ -12,7 +12,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
@@ -55,7 +55,7 @@ const std::string MuonProcess::category() const { return "Workflow\\Muon"; }
  */
 void MuonProcess::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input workspace loaded from file (e.g. by LoadMuonNexus)");
 
@@ -71,11 +71,11 @@ void MuonProcess::init() {
                   "of the above.");
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("SummedPeriodSet", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("SummedPeriodSet", Direction::Input),
       "Comma-separated list of periods to be summed");
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("SubtractedPeriodSet", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("SubtractedPeriodSet", Direction::Input),
       "Comma-separated list of periods to be subtracted from the "
       "SummedPeriodSet");
 
@@ -83,12 +83,12 @@ void MuonProcess::init() {
       "ApplyDeadTimeCorrection", false,
       "Whether dead time correction should be applied to loaded workspace");
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
       "Table with dead time information, e.g. from LoadMuonNexus."
       "Must be specified if ApplyDeadTimeCorrection is set true.");
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>("DetectorGroupingTable",
+      std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorGroupingTable",
                                                      "", Direction::Input,
                                                      PropertyMode::Optional),
       "Table with detector grouping information, e.g. from LoadMuonNexus.");
@@ -99,7 +99,7 @@ void MuonProcess::init() {
                   boost::make_shared<MandatoryValidator<double>>(),
                   "Time Zero value loaded from file, e.g. from LoadMuonNexus.");
   declareProperty(
-      make_unique<ArrayProperty<double>>("RebinParams"),
+      std::make_unique<ArrayProperty<double>>("RebinParams"),
       "Params used for rebinning. If empty - rebinning is not done.");
   declareProperty("Xmin", EMPTY_DBL(), "Minimal X value to include");
   declareProperty("Xmax", EMPTY_DBL(), "Maximal X value to include");
@@ -118,7 +118,7 @@ void MuonProcess::init() {
 
   declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the group");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
@@ -190,10 +190,10 @@ void MuonProcess::exec() {
     int groupIndex = getProperty("GroupIndex");
     std::unique_ptr<IMuonAsymmetryCalculator> asymCalc;
     if (outputType == "GroupCounts") {
-      asymCalc = Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
+      asymCalc = std::make_unique<MuonGroupCountsCalculator>(
           allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
     } else if (outputType == "GroupAsymmetry") {
-      asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
+      asymCalc = std::make_unique<MuonGroupAsymmetryCalculator>(
           allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex,
           getProperty("Xmin"), getProperty("Xmax"),
           getProperty("WorkspaceName"));
@@ -201,7 +201,7 @@ void MuonProcess::exec() {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");
       double alpha = getProperty("Alpha");
-      asymCalc = Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
+      asymCalc = std::make_unique<MuonPairAsymmetryCalculator>(
           allPeriodsWS, summedPeriods, subtractedPeriods, first, second, alpha);
     }
     progress.report();

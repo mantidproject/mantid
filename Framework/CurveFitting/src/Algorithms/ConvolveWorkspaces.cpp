@@ -32,14 +32,14 @@ using namespace Geometry;
 using namespace Functions;
 
 void ConvolveWorkspaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>("Workspace1", "",
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("Workspace1", "",
                                                               Direction::Input),
                   "The name of the first input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>("Workspace2", "",
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("Workspace2", "",
                                                               Direction::Input),
                   "The name of the second input workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 }
@@ -60,7 +60,7 @@ void ConvolveWorkspaces::exec() {
     throw std::runtime_error("Size mismatch");
   }
 
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, numHists);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numHists);
   // Now convolve the histograms
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws1, *ws2, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {

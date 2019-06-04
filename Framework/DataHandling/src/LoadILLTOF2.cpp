@@ -66,10 +66,10 @@ LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusDescriptor>() {}
  */
 void LoadILLTOF2::init() {
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "File path of the Data file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace");
 }

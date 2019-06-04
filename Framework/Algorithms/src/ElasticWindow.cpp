@@ -23,15 +23,15 @@ using namespace Kernel;
 using namespace API;
 
 void ElasticWindow::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("DeltaE")),
                   "The input workspace.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputInQ", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputInQ", "", Direction::Output),
       "The name for output workspace with the X axis in units of Q");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputInQSquared", "",
+      std::make_unique<WorkspaceProperty<>>("OutputInQSquared", "",
                                        Direction::Output),
       "The name for output workspace with the X axis in units of Q^2.");
   declareProperty("IntegrationRangeStart", EMPTY_DBL(),

@@ -444,7 +444,7 @@ public:
   }
 
   ConvertToMDTest() {
-    pAlg = Mantid::Kernel::make_unique<Convert2AnyTestHelper>();
+    pAlg = std::make_unique<Convert2AnyTestHelper>();
     Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
         createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
@@ -782,7 +782,7 @@ public:
     inWs2D->mutableRun().addProperty("Ei", 12., "meV", true);
     API::AnalysisDataService::Instance().addOrReplace("TestMatrixWS", inWs2D);
 
-    auto pAlg = Mantid::Kernel::make_unique<PreprocessDetectorsToMD>();
+    auto pAlg = std::make_unique<PreprocessDetectorsToMD>();
     pAlg->initialize();
 
     pAlg->setPropertyValue("InputWorkspace", "TestMatrixWS");
@@ -820,7 +820,7 @@ public:
 
     // this will be used to display progress
     pMockAlgorithm =
-        Mantid::Kernel::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
+        std::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
 
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "CreateSampleWorkspace");

@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/SQWLoadingPresenter.h"
 
@@ -55,7 +55,7 @@ public:
 
   void testConstructWithEmptyFileThrows() {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
                       SQWLoadingPresenter(std::move(view), ""),
                       const std::invalid_argument &);
@@ -69,7 +69,7 @@ public:
 
   void testConstruct() {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     TSM_ASSERT_THROWS_NOTHING(
         "Object should be created without exception.",
         SQWLoadingPresenter(std::move(view), getSuitableFileNamePath()));
@@ -77,20 +77,20 @@ public:
 
   void testCanReadFile() {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+        std::make_unique<MockMDLoadingView>();
     SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
     TSM_ASSERT("Should be readable, valid SQW file.", presenter.canReadFile());
   }
 
   void testCanReadFileWithDifferentCaseExtension() {
-    auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+    auto view = std::make_unique<MockMDLoadingView>();
     SQWLoadingPresenter presenter(std::move(view), "other.Sqw");
     TSM_ASSERT("Should be readable, only different in case.",
                presenter.canReadFile());
   }
 
   void testCannotReadFileWithWrongExtension() {
-    auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+    auto view = std::make_unique<MockMDLoadingView>();
     SQWLoadingPresenter presenter(std::move(view), getUnhandledFileNamePath());
     TSM_ASSERT("Should NOT be readable, completely wrong file type.",
                !presenter.canReadFile());
@@ -99,7 +99,7 @@ public:
   void testExecutionInMemory() {
     using namespace testing;
     // Setup view
-    auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+    auto view = std::make_unique<MockMDLoadingView>();
     EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*view, getLoadInMemory())
         .Times(AtLeast(1))
@@ -153,7 +153,7 @@ public:
 
   void testCallHasTDimThrows() {
     SQWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        std::make_unique<MockMDLoadingView>(),
         getSuitableFileNamePath());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.hasTDimensionAvailable(),
@@ -162,7 +162,7 @@ public:
 
   void testCallGetTDimensionValuesThrows() {
     SQWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        std::make_unique<MockMDLoadingView>(),
         getSuitableFileNamePath());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getTimeStepValues(),
@@ -171,7 +171,7 @@ public:
 
   void testCallGetGeometryThrows() {
     SQWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        std::make_unique<MockMDLoadingView>(),
         getSuitableFileNamePath());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getGeometryXML(), const std::runtime_error &);
@@ -179,7 +179,7 @@ public:
 
   void testExecuteLoadMetadata() {
     SQWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        std::make_unique<MockMDLoadingView>(),
         getSuitableFileNamePath());
     presenter.executeLoadMetadata();
     TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.",
@@ -192,7 +192,7 @@ public:
 
   void testGetWorkspaceTypeName() {
     SQWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        std::make_unique<MockMDLoadingView>(),
         getSuitableFileNamePath());
     TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
                       presenter.getWorkspaceTypeName());
@@ -201,7 +201,7 @@ public:
   void testTimeLabel() {
     using namespace testing;
     // Setup view
-    auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+    auto view = std::make_unique<MockMDLoadingView>();
     EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*view, getLoadInMemory())
         .Times(AtLeast(1))
@@ -243,7 +243,7 @@ public:
   void testAxisLabels() {
     using namespace testing;
     // Setup view
-    auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+    auto view = std::make_unique<MockMDLoadingView>();
     EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*view, getLoadInMemory())
         .Times(AtLeast(1))

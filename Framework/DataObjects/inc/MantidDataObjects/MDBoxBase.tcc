@@ -8,7 +8,7 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/make_shared.hpp>
 #include <limits>
 
@@ -147,7 +147,7 @@ TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(
   numVertices = 1 << nd;
 
   // Allocate the array of the right size
-  auto out = Kernel::make_unique<coord_t[]>(nd * numVertices);
+  auto out = std::make_unique<coord_t[]>(nd * numVertices);
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {
@@ -201,7 +201,7 @@ TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(
   numVertices = (size_t)1 << outDimensions;
 
   // Allocate the array of the right size
-  auto out = Kernel::make_unique<coord_t[]>(outDimensions * numVertices);
+  auto out = std::make_unique<coord_t[]>(outDimensions * numVertices);
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {

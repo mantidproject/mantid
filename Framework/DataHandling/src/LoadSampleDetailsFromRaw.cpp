@@ -31,10 +31,10 @@ DECLARE_ALGORITHM(LoadSampleDetailsFromRaw)
  */
 void LoadSampleDetailsFromRaw::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The sample details are attached to this workspace.");
   const std::vector<std::string> exts{"raw", ".s*"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, exts),
                   "The raw file containing the sample geometry information.");
 }

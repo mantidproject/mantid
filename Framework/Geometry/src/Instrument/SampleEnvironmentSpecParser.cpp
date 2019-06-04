@@ -9,7 +9,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidKernel/MaterialXMLParser.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include "Poco/DOM/AutoPtr.h"
 #include "Poco/DOM/DOMParser.h"
@@ -91,7 +91,7 @@ SampleEnvironmentSpecParser::parse(const std::string &name,
   // Iterating is apparently much faster than getElementsByTagName
   NodeIterator nodeIter(element, NodeFilter::SHOW_ELEMENT);
   Node *node = nodeIter.nextNode();
-  auto spec = Mantid::Kernel::make_unique<SampleEnvironmentSpec>(name);
+  auto spec = std::make_unique<SampleEnvironmentSpec>(name);
   while (node) {
     Element *childElement = static_cast<Element *>(node);
     if (node->nodeName() == MATERIALS_TAG) {

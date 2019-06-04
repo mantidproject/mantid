@@ -44,30 +44,30 @@ DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "PeaksWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Input Peaks Workspace");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("UBMatrix"),
+      std::make_unique<ArrayProperty<double>>("UBMatrix"),
       "A comma seperated list of doubles for UB matrix from (0,0), (0,1)"
       "... (2,1),(2,2)");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace in HKL-space.");
 
-  declareProperty(make_unique<FileProperty>("QSampleFileName", "",
+  declareProperty(std::make_unique<FileProperty>("QSampleFileName", "",
                                             API::FileProperty::OptionalSave),
                   "Name of file for sample sample.");
 
-  declareProperty(make_unique<FileProperty>("HKLFileName", "",
+  declareProperty(std::make_unique<FileProperty>("HKLFileName", "",
                                             API::FileProperty::OptionalSave),
                   "Name of file for HKL.");
 }

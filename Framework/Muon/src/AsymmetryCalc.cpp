@@ -30,17 +30,17 @@ DECLARE_ALGORITHM(AsymmetryCalc)
  */
 void AsymmetryCalc::init() {
 
-  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
                   "Name of the input workspace");
   declareProperty(
-      make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
+      std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
                                             Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  declareProperty(make_unique<ArrayProperty<int>>("ForwardSpectra"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra"),
                   "The spectra numbers of the forward group");
-  declareProperty(make_unique<ArrayProperty<int>>("BackwardSpectra"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("BackwardSpectra"),
                   "The spectra numbers of the backward group");
   declareProperty("Alpha", 1.0, "The balance parameter (default 1)",
                   Direction::Input);

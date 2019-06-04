@@ -53,14 +53,14 @@ const std::string WienerSmooth::summary() const {
 /** Initialize the algorithm's properties.
  */
 void WienerSmooth::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                            Direction::Input),
                   "An input workspace.");
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndexList"),
+      std::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndexList"),
       "Workspace indices for spectra to process. "
       "If empty smooth all spectra.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

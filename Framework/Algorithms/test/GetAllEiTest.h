@@ -91,11 +91,11 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
     return ws;
 
   auto chopDelayLog =
-      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
+      std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
   auto chopSpeedLog =
-      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
+      std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
   auto isRunning =
-      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
+      std::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
 
   for (int i = 0; i < 10; i++) {
     auto time = Types::Core::DateAndTime(10 * i, 0);
@@ -242,7 +242,7 @@ public:
     m_getAllEi.setProperty("FilterBaseLog", "proton_charge");
     m_getAllEi.setProperty("FilterWithDerivative", false);
 
-    auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+    auto chopSpeed = std::make_unique<Kernel::TimeSeriesProperty<double>>(
         "Chopper_Speed");
     for (int i = 0; i < 10; i++) {
       chopSpeed->addValue(Types::Core::DateAndTime(10000 + 10 * i, 0), 1.);
@@ -272,9 +272,9 @@ public:
     TS_ASSERT_DELTA(val, 10., 1.e-6);
 
     // Test sort log by log.
-    auto chopDelay = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+    auto chopDelay = std::make_unique<Kernel::TimeSeriesProperty<double>>(
         "Chopper_Delay");
-    auto goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+    auto goodFram = std::make_unique<Kernel::TimeSeriesProperty<double>>(
         "proton_charge");
 
     for (int i = 0; i < 10; i++) {
@@ -309,7 +309,7 @@ public:
     TSM_ASSERT_DELTA("Chopper delay should have special speed ",
                      (10 * 0.1 + 20) / 12., chop_delay, 1.e-6);
 
-    goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+    goodFram = std::make_unique<Kernel::TimeSeriesProperty<double>>(
         "proton_charge");
     for (int i = 0; i < 10; i++) {
       auto time = Types::Core::DateAndTime(100 + 10 * i, 0);
@@ -339,11 +339,11 @@ public:
     m_getAllEi.setProperty("FilterWithDerivative", true);
 
     // Test select log by log derivative
-    auto chopDelay = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+    auto chopDelay = std::make_unique<Kernel::TimeSeriesProperty<double>>(
         "Chopper_Delay");
-    auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+    auto chopSpeed = std::make_unique<Kernel::TimeSeriesProperty<double>>(
         "Chopper_Speed");
-    auto protCharge = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+    auto protCharge = std::make_unique<Kernel::TimeSeriesProperty<double>>(
         "proton_charge");
 
     double gf(0);

@@ -47,18 +47,18 @@ void DgsProcessDetectorVanadium::init() {
   // auto wsValidator = boost::make_shared<CompositeValidator>();
   // wsValidator->add<WorkspaceUnitValidator>("TOF");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace containing the detector vanadium data in TOF units.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
+      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
                                        Direction::Input,
                                        PropertyMode::Optional),
       "A monitor workspace associated with the input workspace.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input,
+      std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input,
                                        PropertyMode::Optional),
       "A mask workspace");
-  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                          Direction::Output),
                         "The name for the output workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",

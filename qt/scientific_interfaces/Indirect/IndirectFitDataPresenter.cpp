@@ -7,7 +7,7 @@
 #include "IndirectFitDataPresenter.h"
 #include "IndirectAddWorkspaceDialog.h"
 
-#include "MantidKernel/make_unique.h"
+
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -17,7 +17,7 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IndirectFittingModel *model,
                                                    IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
           model, view,
-          Mantid::Kernel::make_unique<IndirectDataTablePresenter>(
+          std::make_unique<IndirectDataTablePresenter>(
               model, view->getDataTable())) {}
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(
@@ -211,7 +211,7 @@ void IndirectFitDataPresenter::showAddWorkspaceDialog() {
 
 std::unique_ptr<IAddWorkspaceDialog>
 IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  return Mantid::Kernel::make_unique<AddWorkspaceDialog>(parent);
+  return std::make_unique<AddWorkspaceDialog>(parent);
 }
 
 void IndirectFitDataPresenter::addData() {

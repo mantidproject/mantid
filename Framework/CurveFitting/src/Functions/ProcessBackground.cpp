@@ -58,7 +58,7 @@ ProcessBackground::ProcessBackground()
 void ProcessBackground::init() {
   // Input and output Workspace
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+      std::make_unique<WorkspaceProperty<Workspace2D>>(
           "InputWorkspace", "Anonymous", Direction::Input),
       "Name of the output workspace containing the processed background.");
 
@@ -67,7 +67,7 @@ void ProcessBackground::init() {
                   "Workspace index for the input workspaces.");
 
   // Output workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output workspace containing processed background");
 
@@ -85,13 +85,13 @@ void ProcessBackground::init() {
   declareProperty("UpperBound", Mantid::EMPTY_DBL(),
                   "Upper boundary of the data to have background processed.");
 
-  auto refwsprop = Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+  auto refwsprop = std::make_unique<WorkspaceProperty<Workspace2D>>(
       "ReferenceWorkspace", "", Direction::Input, PropertyMode::Optional);
   declareProperty(std::move(refwsprop),
                   "Name of the workspace containing the data "
                   "required by function AddRegion.");
   setPropertySettings("ReferenceWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "AddRegion"));
 
   // Optional Function Type
@@ -102,7 +102,7 @@ void ProcessBackground::init() {
       "BackgroundType", "Polynomial", bkgdvalidator,
       "Type of the background. Options include Polynomial and Chebyshev.");
   setPropertySettings("BackgroundType",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   vector<string> funcoptions{"N/A", "FitGivenDataPoints", "UserFunction"};
@@ -113,42 +113,42 @@ void ProcessBackground::init() {
                   "function.  Otherwise, background function will be fitted "
                   "from user's input data points.");
   setPropertySettings("SelectionMode",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   declareProperty("BackgroundOrder", 0,
                   "Order of polynomial or chebyshev background. ");
   setPropertySettings("BackgroundOrder",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
   setPropertySettings("BackgroundOrder",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
 
   // User input background points for "SelectBackground"
   auto arrayproperty =
-      Kernel::make_unique<Kernel::ArrayProperty<double>>("BackgroundPoints");
+      std::make_unique<Kernel::ArrayProperty<double>>("BackgroundPoints");
   declareProperty(std::move(arrayproperty),
                   "Vector of doubles, each of which is the "
                   "X-axis value of the background point "
                   "selected by user.");
   setPropertySettings("BackgroundPoints",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
   setPropertySettings("BackgroundPoints",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "BackgroundTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of the table workspace containing background "
                   "parameters for mode SelectBackgroundPoints.");
   setPropertySettings("BackgroundTableWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
   setPropertySettings("BackgroundTableWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "SelectionMode", IS_EQUAL_TO, "UserFunction"));
 
   // Mode to select background
@@ -159,42 +159,42 @@ void ProcessBackground::init() {
   declareProperty("BackgroundPointSelectMode", "All Background Points",
                   modevalidator, "Mode to select background points. ");
   setPropertySettings("BackgroundPointSelectMode",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
   setPropertySettings("BackgroundPointSelectMode",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
 
   // Background tolerance
   declareProperty("NoiseTolerance", 1.0, "Tolerance of noise range. ");
   setPropertySettings("NoiseTolerance",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Background tolerance
   declareProperty("NegativeNoiseTolerance", EMPTY_DBL(),
                   "Tolerance of noise range for negative number. ");
   setPropertySettings("NegativeNoiseTolerance",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Optional output workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                       "UserBackgroundWorkspace", "_dummy01", Direction::Output),
                   "Output workspace containing fitted background from points "
                   "specified by users.");
   setPropertySettings("UserBackgroundWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Optional output workspace
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputBackgroundParameterWorkspace", "_dummy02", Direction::Output),
       "Output parameter table workspace containing the background fitting "
       "result. ");
   setPropertySettings("OutputBackgroundParameterWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Output background type.
@@ -204,7 +204,7 @@ void ProcessBackground::init() {
   declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,
                   "Type of background to fit with selected background points.");
   setPropertySettings("OutputBackgroundType",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Output background type.
@@ -212,16 +212,16 @@ void ProcessBackground::init() {
       "OutputBackgroundOrder", 6,
       "Order of background to fit with selected background points.");
   setPropertySettings("OutputBackgroundOrder",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Peak table workspac for "RemovePeaks"
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "BraggPeakTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of table workspace containing peaks' parameters. ");
   setPropertySettings("BraggPeakTableWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "RemovePeaks"));
 
   // Number of FWHM to have peak removed
@@ -229,7 +229,7 @@ void ProcessBackground::init() {
       "NumberOfFWHM", 1.0,
       "Number of FWHM to as the peak region to have peak removed. ");
   setPropertySettings("NumberOfFWHM",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "RemovePeaks"));
 }
 

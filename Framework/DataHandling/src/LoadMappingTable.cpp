@@ -9,7 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidKernel/make_unique.h"
+
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,11 +22,11 @@ DECLARE_ALGORITHM(LoadMappingTable)
 LoadMappingTable::LoadMappingTable() : Algorithm() {}
 
 void LoadMappingTable::init() {
-  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Load),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
                   "The name of the RAW file from which to obtain the mapping "
                   "information, including its full or relative path.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("Workspace", "Anonymous",
+      std::make_unique<WorkspaceProperty<>>("Workspace", "Anonymous",
                                        Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
@@ -39,7 +39,7 @@ void LoadMappingTable::exec() {
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   /// ISISRAW class instance which does raw file reading.
-  auto iraw = Kernel::make_unique<ISISRAW2>();
+  auto iraw = std::make_unique<ISISRAW2>();
 
   if (iraw->readFromFile(m_filename.c_str(), false) !=
       0) // ReadFrom File with no data

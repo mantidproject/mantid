@@ -39,23 +39,23 @@ void CalculateTransmissionBeamSpreader::init() {
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>("SampleSpreaderRunWorkspace",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SampleSpreaderRunWorkspace",
                                                    "", Direction::Input,
                                                    wsValidator),
                   "The workspace containing the sample beam-spreader run");
-  declareProperty(make_unique<WorkspaceProperty<>>("DirectSpreaderRunWorkspace",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("DirectSpreaderRunWorkspace",
                                                    "", Direction::Input,
                                                    wsValidator),
                   "The workspace containing the direct beam-spreader run");
-  declareProperty(make_unique<WorkspaceProperty<>>("SampleScatterRunWorkspace",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SampleScatterRunWorkspace",
                                                    "", Direction::Input,
                                                    wsValidator),
                   "The workspace containing the sample scattering run");
-  declareProperty(make_unique<WorkspaceProperty<>>("DirectScatterRunWorkspace",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("DirectScatterRunWorkspace",
                                                    "", Direction::Input,
                                                    wsValidator),
                   "The workspace containing the direct beam scattering run");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The fitted transmission correction");
 
@@ -190,7 +190,7 @@ void CalculateTransmissionBeamSpreader::exec() {
   if (outputRaw) {
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSName += "_unfitted";
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "UnfittedData", outputWSName, Direction::Output));
     setProperty("UnfittedData", transmission);
   }

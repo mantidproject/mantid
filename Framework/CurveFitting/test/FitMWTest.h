@@ -522,7 +522,7 @@ public:
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        std::make_unique<WorkspaceProperty<Workspace>>(
             wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws2);
 
@@ -587,7 +587,7 @@ public:
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        std::make_unique<WorkspaceProperty<Workspace>>(
             wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws);
 
@@ -682,7 +682,7 @@ public:
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        std::make_unique<WorkspaceProperty<Workspace>>(
             wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws);
 
@@ -735,7 +735,7 @@ public:
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        std::make_unique<WorkspaceProperty<Workspace>>(
             wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, data);
 

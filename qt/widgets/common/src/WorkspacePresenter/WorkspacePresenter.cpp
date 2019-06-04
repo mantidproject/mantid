@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 #include <MantidAPI/AlgorithmManager.h>
@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView *view)
-    : m_view(std::move(view)), m_adapter(Kernel::make_unique<ADSAdapter>()) {}
+    : m_view(std::move(view)), m_adapter(std::make_unique<ADSAdapter>()) {}
 
 WorkspacePresenter::~WorkspacePresenter() {}
 

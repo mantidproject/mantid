@@ -66,14 +66,14 @@ const std::string EstimateResolutionDiffraction::category() const {
 
 void EstimateResolutionDiffraction::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "Name of the workspace to have detector resolution calculated");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "DivergenceWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Workspace containing the divergence");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum");
@@ -91,7 +91,7 @@ void EstimateResolutionDiffraction::init() {
                   "Wavelength setting in Angstroms. This overrides what is in "
                   "the dataset.");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "PartialResolutionWorkspaces", "", Direction::Output),
                   "Workspaces created showing the various resolution terms");
 }

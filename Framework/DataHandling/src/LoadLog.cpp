@@ -17,7 +17,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 #include <Poco/DateTimeFormat.h>
@@ -70,12 +70,12 @@ void LoadLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
                                                       Direction::InOut),
       "The name of the workspace to which the log data will be added.");
 
   const std::vector<std::string> exts{".txt", ".log"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, exts),
                   "The filename (including its full or relative path) of a SNS "
                   "text log file (not cvinfo), "
@@ -86,13 +86,13 @@ void LoadLog::init() {
                   "either be .raw or .s when specifying a raw file");
 
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("Names"),
+      std::make_unique<ArrayProperty<std::string>>("Names"),
       "For SNS-style log files only: the names of each column's log, separated "
       "by commas. "
       "This must be one fewer than the number of columns in the file.");
 
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("Units"),
+      std::make_unique<ArrayProperty<std::string>>("Units"),
       "For SNS-style log files only: the units of each column's log, separated "
       "by commas. "
       "This must be one fewer than the number of columns in the file. "
@@ -293,7 +293,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
           prop->addValue(timecolumn, dvalue);
       } else {
         auto logd =
-            Mantid::Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+            std::make_unique<Kernel::TimeSeriesProperty<double>>(
                 propname);
         logd->addValue(timecolumn, dvalue);
         dMap.emplace(propname, std::move(logd));
@@ -305,7 +305,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         if (prop)
           prop->addValue(timecolumn, valuecolumn);
       } else {
-        auto logs = Mantid::Kernel::make_unique<
+        auto logs = std::make_unique<
             Kernel::TimeSeriesProperty<std::string>>(propname);
         logs->addValue(timecolumn, valuecolumn);
         sMap.emplace(propname, std::move(logs));

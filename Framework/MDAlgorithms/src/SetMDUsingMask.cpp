@@ -39,16 +39,16 @@ const std::string SetMDUsingMask::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetMDUsingMask::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace.");
   declareProperty(
-      make_unique<WorkspaceProperty<IMDHistoWorkspace>>("MaskWorkspace", "",
+      std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("MaskWorkspace", "",
                                                         Direction::Input),
       "A mask MDHistoWorkspace, where true indicates where to set the value.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+      std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
           "ValueWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Workspace to copy to the output workspace over the input. Optional - "
       "specify this or Value.");
@@ -58,7 +58,7 @@ void SetMDUsingMask::init() {
                   "workspace. Optional - specify this or "
                   "ValueWorkspace");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output MDHistoWorkspace.");
 }

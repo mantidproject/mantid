@@ -19,7 +19,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include "vtkCommand.h"
 #include "vtkFloatArray.h"
@@ -182,9 +182,9 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
                                        Mantid::API::IMDWorkspace_sptr workspace,
                                        int recursionDepth) const {
   std::unique_ptr<MDLoadingPresenter> presenter = nullptr;
-  auto view = Kernel::make_unique<Mantid::VATES::MDLoadingViewSimple>();
+  auto view = std::make_unique<Mantid::VATES::MDLoadingViewSimple>();
   auto workspaceProvider =
-      Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
+      std::make_unique<SingleWorkspaceProvider>(workspace);
   if (isHistoWorkspace) {
     InMemoryPresenterFactory<MDHWInMemoryLoadingPresenter,
                              EmptyWorkspaceNamePolicy>
@@ -361,7 +361,7 @@ SaveMDWorkspaceToVTKImpl::getDataSetWithOrthogonalCorrection(
   }
 
   auto workspaceProvider =
-      Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
+      std::make_unique<SingleWorkspaceProvider>(workspace);
   applyCOBMatrixSettingsToVtkDataSet(presenter, dataSet,
                                      std::move(workspaceProvider));
   presenter->setAxisLabels(dataSet);

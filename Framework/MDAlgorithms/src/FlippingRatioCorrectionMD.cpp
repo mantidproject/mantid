@@ -55,11 +55,11 @@ const std::string FlippingRatioCorrectionMD::summary() const {
  */
 void FlippingRatioCorrectionMD::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input),
       "An input MDEventWorkspace.");
   declareProperty(
-      Kernel::make_unique<Mantid::Kernel::PropertyWithValue<std::string>>(
+      std::make_unique<Mantid::Kernel::PropertyWithValue<std::string>>(
           "FlippingRatio", "",
           boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>(),
           Direction::Input),
@@ -67,16 +67,16 @@ void FlippingRatioCorrectionMD::init() {
       "the list "
       "of sample logs defined below");
   declareProperty(
-      Kernel::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
           "SampleLogs", Direction::Input),
       "Comma separated list of sample logs that can appear in the formula for "
       "flipping ratio");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
+      std::make_unique<WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace1", "", Direction::Output),
       "Output workspace 1. Equal to Input workspace multiplied by FR/(FR-1).");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
+      std::make_unique<WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace2", "", Direction::Output),
       "Output workspace 2. Equal to Input workspace multiplied by 1/(FR-1).");
 }

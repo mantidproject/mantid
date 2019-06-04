@@ -22,7 +22,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <H5Cpp.h>
 #include <boost/algorithm/string/trim.hpp>
@@ -753,10 +753,10 @@ void SaveNXcanSAS::init() {
   inputWSValidator->add<API::WorkspaceUnitValidator>("MomentumTransfer");
   inputWSValidator->add<API::CommonBinsValidator>();
   declareProperty(
-      Mantid::Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
+      std::make_unique<Mantid::API::WorkspaceProperty<>>(
           "InputWorkspace", "", Kernel::Direction::Input, inputWSValidator),
       "The input workspace, which must be in units of Q");
-  declareProperty(Mantid::Kernel::make_unique<Mantid::API::FileProperty>(
+  declareProperty(std::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
@@ -783,14 +783,14 @@ void SaveNXcanSAS::init() {
                   "sub-directory of the MantidPlot install directory.");
 
   declareProperty(
-      Mantid::Kernel::make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           "Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace. Optional. If given, will be saved at "
       "TransmissionSpectrum");
 
   declareProperty(
-      Mantid::Kernel::make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           "TransmissionCan", "", Kernel::Direction::Input,
           PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),

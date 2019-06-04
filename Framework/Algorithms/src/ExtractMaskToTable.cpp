@@ -29,17 +29,17 @@ DECLARE_ALGORITHM(ExtractMaskToTable)
  */
 void ExtractMaskToTable::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
                                                       Direction::Input),
       "A workspace whose masking is to be extracted or a MaskWorkspace. ");
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "MaskTableWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A mask table workspace containing 3 columns: "
       "XMin, XMax and DetectorIDsList. ");
 
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A comma separated list or array containing a "
                   "list of masked detector ID's ");

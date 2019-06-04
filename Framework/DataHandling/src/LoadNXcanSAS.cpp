@@ -21,7 +21,7 @@
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
+
 
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
@@ -489,10 +489,10 @@ void LoadNXcanSAS::init() {
   // Declare required input parameters for algorithm
   const std::vector<std::string> exts{".nxs", ".h5"};
   declareProperty(
-      Kernel::make_unique<Mantid::API::FileProperty>("Filename", "",
+      std::make_unique<Mantid::API::FileProperty>("Filename", "",
                                                      FileProperty::Load, exts),
       "The name of the NXcanSAS file to read, as a full or relative path.");
-  declareProperty(Kernel::make_unique<
+  declareProperty(std::make_unique<
                       Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
@@ -503,7 +503,7 @@ void LoadNXcanSAS::init() {
                   "multiperiod Mantid files are not generated.");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
+      std::make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
                                                    Direction::Input),
       "Load the transmission related data from the file if it is present "
       "(optional, default False).");
@@ -593,7 +593,7 @@ void LoadNXcanSAS::loadTransmission(H5::Group &entry, const std::string &name) {
   const std::string doc = "The transmission workspace";
 
   declareProperty(
-      Kernel::make_unique<
+      std::make_unique<
           Mantid::API::WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
           propertyName, title, Direction::Output),
       doc);

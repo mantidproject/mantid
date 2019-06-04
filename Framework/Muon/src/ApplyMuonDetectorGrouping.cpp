@@ -74,14 +74,14 @@ void ApplyMuonDetectorGrouping::init() {
 
   std::string emptyString("");
 
-  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", emptyString, Direction::Input,
                       PropertyMode::Mandatory),
                   "Input workspace containing data from detectors which are to "
                   "be grouped.");
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "InputWorkspaceGroup", emptyString, Direction::InOut,
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
@@ -106,7 +106,7 @@ void ApplyMuonDetectorGrouping::init() {
       "Start time for the data in ms. Only used with the asymmetry analysis.",
       Direction::Input);
   setPropertySettings("TimeMin",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
   declareProperty(
@@ -114,7 +114,7 @@ void ApplyMuonDetectorGrouping::init() {
       "End time for the data in ms. Only used with the asymmetry analysis.",
       Direction::Input);
   setPropertySettings("TimeMax",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
   declareProperty("RebinArgs", emptyString,
@@ -137,11 +137,11 @@ void ApplyMuonDetectorGrouping::init() {
       "ApplyDeadTimeCorrection", false,
       "Whether dead time correction should be applied to input workspace");
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
       "Table with dead time information. Must be specified if "
       "ApplyDeadTimeCorrection is set true.");
-  setPropertySettings("DeadTimeTable", make_unique<Kernel::EnabledWhenProperty>(
+  setPropertySettings("DeadTimeTable", std::make_unique<Kernel::EnabledWhenProperty>(
                                            "ApplyDeadTimeCorrection",
                                            Kernel::IS_NOT_DEFAULT, ""));
 

@@ -43,7 +43,7 @@ const std::string PoldiFitPeaks1D::category() const { return "SINQ\\Poldi"; }
 
 void PoldiFitPeaks1D::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "",
                                                   Direction::Input),
       "An input workspace containing a POLDI auto-correlation spectrum.");
   boost::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
@@ -62,14 +62,14 @@ void PoldiFitPeaks1D::init() {
                   "Peak function that will be fitted to all peaks.",
                   Direction::Input);
 
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "PoldiPeakTable", "", Direction::Input),
                   "A table workspace containing POLDI peak data.");
 
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "RefinedPeakTable", Direction::Output),
                   "Output workspace with refined peak data.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "FitPlotsWorkspace", "FitPlots", Direction::Output),
                   "Plots of all peak fits.");
 

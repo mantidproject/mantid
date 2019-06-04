@@ -10,7 +10,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidKernel/make_unique.h"
+
 #include <memory>
 #include <vector>
 
@@ -212,7 +212,7 @@ template <class TYPE>
 void LogManager::addProperty(const std::string &name, const TYPE &value,
                              bool overwrite) {
   addProperty(
-      Mantid::Kernel::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value),
+      std::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value),
       overwrite);
 }
 
@@ -229,7 +229,7 @@ template <class TYPE>
 void LogManager::addProperty(const std::string &name, const TYPE &value,
                              const std::string &units, bool overwrite) {
   auto newProp =
-      Mantid::Kernel::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value);
+      std::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value);
   newProp->setUnits(units);
   addProperty(std::move(newProp), overwrite);
 }
