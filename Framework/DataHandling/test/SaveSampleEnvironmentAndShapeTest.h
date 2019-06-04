@@ -185,7 +185,7 @@ public:
     LoadBinaryStl loader = LoadBinaryStl(m_OutputFile, ScaleUnits::metres);
     TS_ASSERT(loader.isBinarySTL(m_OutputFile))
     auto shape = loader.readStl();
-    return shape;
+    return boost::shared_ptr<MeshObject>(shape.release());
   }
 
   void assertVectorsMatch(const MeshObject &mesh1, const MeshObject &mesh2) {
