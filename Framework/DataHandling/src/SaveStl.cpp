@@ -77,6 +77,7 @@ void SaveStl::writeStl() {
 
     streamWriter << attributeByte;
   }
+  myFile.close();
 }
 
 void SaveStl::writeTriangle(Kernel::BinaryStreamWriter streamWriter,
