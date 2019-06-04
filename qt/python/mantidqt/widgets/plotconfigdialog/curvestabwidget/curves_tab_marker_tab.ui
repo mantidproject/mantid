@@ -52,6 +52,171 @@
         <height>22</height>
        </size>
       </property>
+      <item>
+       <property name="text">
+        <string>point</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>pixel</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>circle</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>triangle_down</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>triangle_up</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>triangle_left</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>triangle_right</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tri_down</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tri_up</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tri_left</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tri_right</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>octagon</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>square</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>pentagon</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>plus (filled)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>star</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>hexagon1</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>hexagon2</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>plus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>x</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>x (filled</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>diamond</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>thin_diamond</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>vline</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>hline</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tickleft</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tickright</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tickup</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tickdown</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>caretleft</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>caretright</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>caretup</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>caretdown</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item row="1" column="0">
@@ -115,6 +280,9 @@
           <width>10</width>
           <height>20</height>
          </size>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -207,28 +375,6 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
-     <widget class="QLineEdit" name="marker_size_lline_edit">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>190</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>211</width>
-        <height>20</height>
-       </size>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="2">
      <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
@@ -244,6 +390,9 @@
           <width>10</width>
           <height>20</height>
          </size>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -276,6 +425,13 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item row="2" column="2">
+     <widget class="QDoubleSpinBox" name="marker_size_spin_box">
+      <property name="decimals">
+       <number>4</number>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

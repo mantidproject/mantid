@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>9</x>
-     <y>101</y>
+     <y>146</y>
      <width>341</width>
      <height>31</height>
     </rect>
@@ -52,7 +52,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>12</y>
+     <y>67</y>
      <width>81</width>
      <height>16</height>
     </rect>
@@ -65,9 +65,9 @@
    <property name="geometry">
     <rect>
      <x>9</x>
-     <y>141</y>
+     <y>181</y>
      <width>351</width>
-     <height>291</height>
+     <height>251</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -78,7 +78,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>70</y>
+     <y>120</y>
      <width>87</width>
      <height>20</height>
     </rect>
@@ -87,11 +87,11 @@
     <string>Hide curve</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>35</y>
+     <y>90</y>
      <width>333</width>
      <height>25</height>
     </rect>
@@ -142,6 +142,47 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>33</y>
+     <width>333</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QComboBox" name="select_axes_combo_box">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>250</width>
+        <height>0</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLabel" name="select_axes_label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Select an axes</string>
+   </property>
   </widget>
  </widget>
  <resources/>

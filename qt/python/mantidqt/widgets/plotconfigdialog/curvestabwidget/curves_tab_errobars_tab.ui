@@ -45,76 +45,10 @@
     <property name="sizeConstraint">
      <enum>QLayout::SetFixedSize</enum>
     </property>
-    <item row="1" column="2">
-     <widget class="QLineEdit" name="x_label_line_edit_11">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>190</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>211</width>
-        <height>20</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QLineEdit" name="x_label_line_edit_12">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>190</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>211</width>
-        <height>20</height>
-       </size>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="0">
      <widget class="QLabel" name="draw_style_label_3">
       <property name="text">
        <string>Capsize</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="2">
-     <widget class="QLineEdit" name="x_label_line_edit_9">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>190</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>211</width>
-        <height>20</height>
-       </size>
       </property>
      </widget>
     </item>
@@ -148,7 +82,7 @@
     <item row="5" column="2">
      <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
-       <widget class="QLineEdit" name="x_label_line_edit_10">
+       <widget class="QLineEdit" name="color_line_edit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -160,6 +94,9 @@
           <width>10</width>
           <height>20</height>
          </size>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -271,25 +208,43 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="2">
-     <widget class="QLineEdit" name="x_label_line_edit_13">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+    <item row="1" column="2">
+     <widget class="QDoubleSpinBox" name="width_spin_box">
+      <property name="decimals">
+       <number>4</number>
       </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QDoubleSpinBox" name="capsize_spin_box">
+      <property name="decimals">
+       <number>4</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QDoubleSpinBox" name="cap_thickness_spin_box">
       <property name="minimumSize">
        <size>
         <width>190</width>
         <height>20</height>
        </size>
       </property>
-      <property name="maximumSize">
+      <property name="decimals">
+       <number>4</number>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="2">
+     <widget class="QSpinBox" name="error_every_spin_box">
+      <property name="minimumSize">
        <size>
-        <width>211</width>
+        <width>190</width>
         <height>20</height>
        </size>
+      </property>
+      <property name="minimum">
+       <number>1</number>
       </property>
      </widget>
     </item>
