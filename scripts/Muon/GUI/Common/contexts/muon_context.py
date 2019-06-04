@@ -16,7 +16,7 @@ from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
-from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
+from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 
 
 class MuonContext(object):
@@ -162,7 +162,7 @@ class MuonContext(object):
         return workspace_options
 
     def get_detectors_excluded_from_default_grouping_tables(self):
-        groups, _ = get_default_grouping(
+        groups, _, _ = get_default_grouping(
             self.data_context.current_workspace, self.data_context.instrument,
             self.data_context.main_field_direction)
         detectors_in_group = []

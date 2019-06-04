@@ -87,6 +87,7 @@ def load_grouping_from_XML(filename):
     root = tree.getroot()
 
     description = root.get('description')
+    default = root.find('default').get('name')
 
     group_names, group_ids = _get_groups_from_XML(root)
     pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
@@ -100,7 +101,7 @@ def load_grouping_from_XML(filename):
                            forward_group_name=pair_groups[i][0],
                            backward_group_name=pair_groups[i][1],
                            alpha=pair_alphas[i])]
-    return groups, pairs, description
+    return groups, pairs, description, default
 
 
 def _get_groups_from_XML(root):

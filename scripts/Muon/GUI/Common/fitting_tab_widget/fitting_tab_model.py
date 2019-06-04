@@ -29,7 +29,7 @@ class FittingTabModel(object):
         self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
         self.add_workspace_to_ADS(fitting_parameters_table, table_name, table_directory)
 
-        return function_string, output_status, output_chi_squared
+        return function_string.clone(), output_status, output_chi_squared
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
@@ -99,7 +99,7 @@ class FittingTabModel(object):
 
             function_string, output_status, output_chi_squared = self.do_single_fit(sub_parameter_dict)
             # This is required so that a new function object is created that is not overwritten in subsequent iterations
-            new_function = FunctionFactory.createInitialized(str(function_string))
+            new_function = function_string.clone()
             function_string_list.append(new_function)
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)

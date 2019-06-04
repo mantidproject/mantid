@@ -46,7 +46,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
     def update_group_pair_list(self):
         group_names = self._model.get_group_names()
         pair_names = self._model.get_pair_names()
-        self._view.populate_group_pair_selector(group_names, pair_names)
+        default_name = self._model.get_default_group_pair()
+        self._view.populate_group_pair_selector(group_names, pair_names, default_name)
 
     def hide_multiperiod_widget_if_data_single_period(self):
         if self._model.is_data_multi_period():

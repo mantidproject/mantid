@@ -58,6 +58,7 @@ set ( TEST_PY_FILES
    utilities/run_string_utils_operator_test.py
    utilities/run_string_utils_conversion_test.py
    help_widget_presenter_test.py
+   xml_utils_test.py
 )
 
 # LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible

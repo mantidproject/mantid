@@ -28,6 +28,7 @@ class FittingTabPresenter(object):
         self.thread_success = True
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
+        self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
         self.run_changed_observer = GenericObserver(self.handle_new_data_loaded)
         self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
         self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(True))
@@ -52,31 +53,20 @@ class FittingTabPresenter(object):
         for key in changed_values.keys():
             if key in ['FirstGoodDataFromFile', 'FirstGoodData']:
                 self.reset_start_time_to_first_good_data_value()
-            if key == 'selected_group_pair' and changed_values[key]:
-                self.update_selected_workspace_guess()
+
+    def handle_selected_group_pair_changed(self):
+        self.update_selected_workspace_guess()
 
     def update_selected_workspace_guess(self):
-        fit_type = self.view.fit_type
-
-        if fit_type == self.view.single_fit:
-            if not self.manual_selection_made:
-                guess_selection = self.context.get_names_of_workspaces_to_fit(runs='All',
-                                                                              group_and_pair='All', phasequad=True,
-                                                                              rebin=not self.view.fit_to_raw)
-            else:
-                guess_selection = self.selected_data
-            self.selected_data = guess_selection
+        if not self.manual_selection_made:
+            guess_selection = self.context.get_names_of_workspaces_to_fit(runs='All',
+                                                                          group_and_pair=self.context.group_pair_context.selected,
+                                                                          phasequad=True,
+                                                                          rebin=not self.view.fit_to_raw)
         else:
-            if not self.manual_selection_made:
-                guess_selection = self.context.get_names_of_workspaces_to_fit(runs='All',
-                                                                              group_and_pair=self.context.gui_context[
-                                                                                  'selected_group_pair'],
-                                                                              phasequad=True,
-                                                                              rebin=not self.view.fit_to_raw)
-            else:
-                guess_selection = self.selected_data
+            guess_selection = self.selected_data
 
-            self.selected_data = guess_selection
+        self.selected_data = guess_selection
 
     def handle_display_workspace_changed(self):
         fit_type = self.view.fit_type
@@ -160,7 +150,7 @@ class FittingTabPresenter(object):
             self._fit_status = fit_status
             self._fit_chi_squared = fit_chi_squared
         elif self.view.fit_type == self.view.single_fit:
-            self._fit_function[index] = FunctionFactory.createInitialized(str(fit_function))
+            self._fit_function[index] = fit_function
             self._fit_status[index] = fit_status
             self._fit_chi_squared[index] = fit_chi_squared
         elif self.view.fit_type == self.view.simultaneous_fit:

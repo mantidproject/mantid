@@ -146,6 +146,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
 
+        self.context.group_pair_context.selected_group_pair_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+
     def setup_alpha_recalculated_observers(self):
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.loadObserver)
