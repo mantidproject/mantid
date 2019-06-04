@@ -120,7 +120,7 @@ set(QT5_TEST_FILES
     test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
-    test/ISISReflectometry/Plotting/PlotterTestQt5.h)
+    test/ISISReflectometry/Common/PlotterTestQt5.h)
 
 find_package(BoostPython REQUIRED)
 
