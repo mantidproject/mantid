@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_IBATCHJOBRUNNER_H_
 
 #include "Common/DllConfig.h"
+#include "GUI/Batch/RowProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
@@ -41,6 +42,7 @@ public:
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   getAlgorithms() = 0;
+  virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

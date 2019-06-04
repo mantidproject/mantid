@@ -270,13 +270,25 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
 
 AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model,
                                                   Row const &row) {
-  auto properties = AlgorithmRuntimeProps();
-  updateEventProperties(properties, model.slicing());
-  updateExperimentProperties(properties, model.experiment());
+  // Create properties for the model
+  auto properties = createAlgorithmRuntimeProps(model);
+  // Update properties specific to this row - the per-angle options based on
+  // the known angle, and the values in the table cells in the row
   updatePerThetaDefaultProperties(properties,
                                   model.defaultsForTheta(row.theta()));
-  updateInstrumentProperties(properties, model.instrument());
   updateRowProperties(properties, row);
+  return properties;
+}
+
+AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model) {
+  auto properties = AlgorithmRuntimeProps();
+  // Update properties from settings in the event, experiment and instrument
+  // tabs
+  updateEventProperties(properties, model.slicing());
+  updateExperimentProperties(properties, model.experiment());
+  updateInstrumentProperties(properties, model.instrument());
+  // Update properties from the wildcard row in the per-theta defaults table
+  updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
   return properties;
 }
 } // namespace CustomInterfaces

@@ -284,6 +284,18 @@ public:
     verifyAndClear();
   }
 
+  void testLiveDataReductionOptions() {
+    auto presenter = makePresenter();
+    auto props = AlgorithmRuntimeProps{{"Prop1", "val1"}, {"Prop2", "val2"}};
+    EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
+        .Times(1)
+        .WillOnce(Return(props));
+    auto result = presenter.liveDataReductionOptions("INTER");
+    auto expected = "GetLiveValueAlgorithm=GetLiveInstrumentValue;Instrument="
+                    "INTER;Prop1=val1;Prop2=val2";
+    TS_ASSERT_EQUALS(result, expected);
+  }
+
   // TODO
   //  void testStartMonitor() {
   //    auto presenter = makePresenter();

@@ -18,8 +18,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "SearchModel.h"
@@ -38,7 +36,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
-using namespace MantidQt::MantidWidgets::DataProcessor;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -476,18 +473,13 @@ std::string RunsPresenter::liveDataReductionAlgorithm() {
 
 std::string
 RunsPresenter::liveDataReductionOptions(const std::string &instrument) {
-  // Get the properties for the reduction algorithm from the settings tab. We
-  // don't have a group associated with live data. This is not ideal but for
-  // now just use the first group.
-  // int const group = 0;
-  OptionsMap options; // TODO replace:
-                      // convertOptionsFromQMap(getProcessingOptions(group));
+  // Get the properties for the reduction algorithm from the settings tabs
+  AlgorithmRuntimeProps options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
-  options["Instrument"] = QString::fromStdString(instrument);
+  options["Instrument"] = instrument;
   options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";
   // Convert the properties to a string to pass to the algorithm
-  auto const optionsString =
-      convertMapToString(options, ';', false).toStdString();
+  auto const optionsString = convertMapToString(options, ';', false);
   return optionsString;
 }
 

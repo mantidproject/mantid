@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IBATCHPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IBATCHPRESENTER_H
 
+#include "GUI/Batch/RowProcessingAlgorithm.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -46,6 +47,7 @@ public:
   virtual bool isAutoreducing() const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
+  virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
 };

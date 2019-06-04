@@ -33,6 +33,21 @@ public:
 
   void testExperimentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto result = createAlgorithmRuntimeProps(model);
+    TS_ASSERT_EQUALS(result["AnalysisMode"], "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(result["ReductionType"], "NonFlatSample");
+    TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
+    TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
+    TS_ASSERT_EQUALS(result["Debug"], "1");
+    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "ParameterFile");
+    TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
+    TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
+    TS_ASSERT_EQUALS(result["StartOverlap"], "7.500000");
+    TS_ASSERT_EQUALS(result["EndOverlap"], "9.200000");
+  }
+
+  void testExperimentSettingsWithEmptyRow() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["AnalysisMode"], "MultiDetectorAnalysis");
@@ -77,6 +92,21 @@ public:
 
   void testInstrumentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto result = createAlgorithmRuntimeProps(model);
+    TS_ASSERT_EQUALS(result["WavelengthMin"], "2.300000");
+    TS_ASSERT_EQUALS(result["WavelengthMax"], "14.400000");
+    TS_ASSERT_EQUALS(result["I0MonitorIndex"], "2");
+    TS_ASSERT_EQUALS(result["NormalizeByIntegratedMonitors"], "1");
+    TS_ASSERT_EQUALS(result["MonitorBackgroundWavelengthMin"], "1.100000");
+    TS_ASSERT_EQUALS(result["MonitorBackgroundWavelengthMax"], "17.200000");
+    TS_ASSERT_EQUALS(result["MonitorIntegrationWavelengthMin"], "3.400000");
+    TS_ASSERT_EQUALS(result["MonitorIntegrationWavelengthMax"], "10.800000");
+    TS_ASSERT_EQUALS(result["CorrectDetectors"], "1");
+    TS_ASSERT_EQUALS(result["DetectorCorrectionType"], "RotateAroundSample");
+  }
+
+  void testInstrumentSettingsWithEmptyRow() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["WavelengthMin"], "2.300000");
@@ -91,7 +121,7 @@ public:
     TS_ASSERT_EQUALS(result["DetectorCorrectionType"], "RotateAroundSample");
   }
 
-  void testSettingsForSlicingByTime() {
+  void testSettingsForSlicingWithEmptyRow() {
     auto slicing = Slicing(UniformSlicingByTime(123.4));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto row = makeEmptyRow();
@@ -99,27 +129,31 @@ public:
     TS_ASSERT_EQUALS(result["TimeInterval"], "123.400000");
   }
 
+  void testSettingsForSlicingByTime() {
+    auto slicing = Slicing(UniformSlicingByTime(123.4));
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
+    auto result = createAlgorithmRuntimeProps(model);
+    TS_ASSERT_EQUALS(result["TimeInterval"], "123.400000");
+  }
+
   void testSettingsForSlicingByNumberOfSlices() {
     auto slicing = Slicing(UniformSlicingByNumberOfSlices(3));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
-    auto row = makeEmptyRow();
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = createAlgorithmRuntimeProps(model);
     TS_ASSERT_EQUALS(result["NumberOfSlices"], "3");
   }
 
   void testSettingsForSlicingByList() {
     auto slicing = Slicing(CustomSlicingByList({3.1, 10.2, 47.35}));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
-    auto row = makeEmptyRow();
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = createAlgorithmRuntimeProps(model);
     TS_ASSERT_EQUALS(result["TimeInterval"], "3.1, 10.2, 47.35");
   }
 
   void testSettingsForSlicingByLog() {
     auto slicing = Slicing(SlicingByEventLog({18.2}, "test_log_name"));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
-    auto row = makeEmptyRow();
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = createAlgorithmRuntimeProps(model);
     TS_ASSERT_EQUALS(result["LogName"], "test_log_name");
     TS_ASSERT_EQUALS(result["LogValueInterval"], "18.200000");
   }
