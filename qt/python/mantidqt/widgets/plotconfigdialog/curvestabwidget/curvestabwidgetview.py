@@ -86,8 +86,8 @@ class CurvesTabWidgetView(QWidget):
         # Marker properties
         self.marker.set_style(curve_props.marker_style)
         self.marker.set_size(curve_props.marker_size)
-        self.marker.set_face_color(curve_props.marker_face_color)
-        self.marker.set_edge_color(curve_props.marker_edge_color)
+        self.marker.face_color_selector_widget.set_color(curve_props.marker_face_color)
+        self.marker.edge_color_selector_widget.set_color(curve_props.marker_edge_color)
 
 
 class LineTabWidget(QWidget):
@@ -136,6 +136,12 @@ class MarkerTabWidget(QWidget):
         self.ui = load_ui(__file__,
                           'curves_tab_marker_tab.ui',
                           baseinstance=self)
+        self.face_color_selector_widget = ColorSelector(parent=self)
+        self.edge_color_selector_widget = ColorSelector(parent=self)
+        self.grid_layout.replaceWidget(self.face_color_dummy_widget,
+                                       self.face_color_selector_widget)
+        self.grid_layout.replaceWidget(self.edge_color_dummy_widget,
+                                       self.edge_color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
     def get_style(self):
@@ -151,16 +157,16 @@ class MarkerTabWidget(QWidget):
         self.marker_size_spin_box.setValue(size)
 
     def get_face_color(self):
-        return self.marker_face_color_line_edit.text()
+        return self.face_color_selector_widget.current_color
 
     def set_face_color(self, color):
-        self.marker_face_color_line_edit.setText(color)
+        self.face_color_selector_widget.set_color(color)
 
     def get_edge_color(self):
-        return self.marker_edge_color_line_edit.text()
+        return self.edge_color_selector_widget.current_color
 
     def set_edge_color(self, color):
-        self.marker_edge_color_line_edit.setText(color)
+        self.edge_color_selector_widget.set_color(color)
 
 
 class ErrorbarsTabWidget(QWidget):

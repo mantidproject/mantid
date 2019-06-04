@@ -9,6 +9,17 @@
 from matplotlib import colors
 from qtpy import QtCore
 
+MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 'TICKDOWN', 'triangle_right': '>',
+              'tickup': 'TICKUP', 'hline': '_', 'vline': '|', 'pentagon': 'p', 'tri_left': '3',
+              'caretdown (centered at tip)': 'CARETDOWN', 'caretright (centered at base)': 'CARETRIGHTBASE',
+              'tickright': 'TICKRIGHT', 'caretright (centered at tip)': 'CARETRIGHT',
+              'caretleft (centered at tip)': 'CARETLEFT', 'tickleft': 'TICKLEFT', 'tri_up': '2', 'circle': 'o',
+              'pixel': ',', 'caretleft (centered at base)': 'CARETLEFTBASE', 'diamond': 'D', 'star': '*',
+              'hexagon1': 'h', 'octagon': '8', 'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
+              'thin_diamond': 'd', 'tri_down': '1', 'triangle_left': '<', 'plus': '+', 'triangle_down': 'v',
+              'triangle_up': '^', 'x': 'x', 'caretup (centered at tip)': 'CARETUP',
+              'caretup (centered at base)': 'CARETUPBASE', 'None': 'None'}
+
 
 def convert_color_to_hex(color):
     """Convert a matplotlib color to its hex form"""
@@ -65,8 +76,8 @@ class CurveProperties:
         # Marker tab entries
         cls.marker_style = line.get_marker()
         cls.marker_size = line.get_markersize()
-        cls.marker_face_color = line.get_markerfacecolor()
-        cls.marker_edge_color = line.get_markeredgecolor()
+        cls.marker_face_color = convert_color_to_hex(line.get_markerfacecolor())
+        cls.marker_edge_color = convert_color_to_hex(line.get_markeredgecolor())
 
         # # Errorbars tab
         # cls.show_errorbars = line.get_show_errorbars()
@@ -74,5 +85,5 @@ class CurveProperties:
         # cls.errorbar_capsize = line.get_errorbar_capsize()
         # cls.errorbar_cap_thickness = line.get_errorbar_cap_thickness()
         # cls.errobar_error_every = line.get_errobar_error_every()
-        # cls.errobar_color = line.get_errobar_color()
+        # cls.errobar_color = convert_color_to_hex(line.get_errobar_color())
         return cls()

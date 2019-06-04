@@ -28,7 +28,7 @@
      <height>134</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="line_options_layout_2">
+   <layout class="QGridLayout" name="grid_layout">
     <property name="sizeConstraint">
      <enum>QLayout::SetFixedSize</enum>
     </property>
@@ -52,6 +52,11 @@
         <height>22</height>
        </size>
       </property>
+      <item>
+       <property name="text">
+        <string>None</string>
+       </property>
+      </item>
       <item>
        <property name="text">
         <string>point</string>
@@ -154,7 +159,7 @@
       </item>
       <item>
        <property name="text">
-        <string>x (filled</string>
+        <string>x (filled)</string>
        </property>
       </item>
       <item>
@@ -217,6 +222,26 @@
         <string>caretdown</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>caretleft (centered at base)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>caretright (centered at base)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>caretup (centered at base)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>caretdown (centered at base)</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item row="1" column="0">
@@ -264,57 +289,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item row="4" column="2">
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <widget class="QLineEdit" name="marker_edge_color_line_edit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="marker_edge_color_line_edit_2">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </item>
     <item row="3" column="0">
      <widget class="QLabel" name="width_label_2">
@@ -375,63 +349,18 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="2">
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
-      <item>
-       <widget class="QLineEdit" name="marker_face_color_line_edit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="marker_face_color_button">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
     <item row="2" column="2">
      <widget class="QDoubleSpinBox" name="marker_size_spin_box">
       <property name="decimals">
        <number>4</number>
       </property>
      </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QWidget" name="face_color_dummy_widget" native="true"/>
+    </item>
+    <item row="4" column="2">
+     <widget class="QWidget" name="edge_color_dummy_widget" native="true"/>
     </item>
    </layout>
   </widget>
