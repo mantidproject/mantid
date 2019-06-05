@@ -208,21 +208,16 @@ def errorbar(axes, workspace, *args, **kwargs):
     x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                                        with_dy=True, with_dx=False)
 
-<< << << < HEAD
-_setLabels1D(axes, workspace, indices)
-# extract the errors visible kwarg before the
-# original errorbar call or it will fail due to unknown kwarg
-errors_visible = kwargs.pop(MantidAxKwargs.ERRORS_VISIBLE, True)
+    plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
+    _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
+    # extract the errors visible kwarg before the
+    # original errorbar call or it will fail due to unknown kwarg
+    errors_visible = kwargs.pop(MantidAxKwargs.ERRORS_VISIBLE, True)
 
-errorbar_container = axes.errorbar(x, y, dy, dx, *args, **kwargs)
-errorbar_container[2][0].set_visible(errors_visible)
+    errorbar_container = axes.errorbar(x, y, dy, dx, *args, **kwargs)
+    errorbar_container[2][0].set_visible(errors_visible)
 
-return errorbar_container
-== == == =
-plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
-_setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
-return axes.errorbar(x, y, dy, dx, *args, **kwargs)
->> >> >> > master
+    return errorbar_container
 
 
 def scatter(axes, workspace, *args, **kwargs):
