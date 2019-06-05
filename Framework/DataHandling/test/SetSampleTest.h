@@ -422,7 +422,6 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, 0.021)));
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
   }
-
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -699,6 +698,18 @@ private:
     return props;
   }
 
+  Mantid::Kernel::PropertyManager_sptr
+  createCylinderWithIndexedAxisGeometryProps() {
+    using namespace Mantid::Kernel;
+    using IntProperty = PropertyWithValue<int>;
+    auto props = createCylinderGeometryProps();
+    // Use the same pointing up direction as in the without axis test
+    int axis = 2;
+    props->declareProperty(
+        Mantid::Kernel::make_unique<IntProperty>("Axis", axis), "");
+    return props;
+  }
+
   Mantid::Kernel::PropertyManager_sptr createHollowCylinderGeometryProps() {
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
@@ -744,6 +755,19 @@ private:
     // Use the same pointing up direction as in the without axis test
     int axis{2};
     props->declareProperty(std::make_unique<IntProperty>("Axis", axis), "");
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr
+  createHollowCylinderWithIndexedAxisGeometryProps() {
+    using namespace Mantid::Kernel;
+    using IntProperty = PropertyWithValue<int>;
+    ;
+    auto props = createHollowCylinderGeometryProps();
+    // Use the same pointing up direction as in the without axis test
+    int axis = 2;
+    props->declareProperty(
+        Mantid::Kernel::make_unique<IntProperty>("Axis", axis), "");
     return props;
   }
 
