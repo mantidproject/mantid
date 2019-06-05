@@ -78,7 +78,8 @@ class Pearl(AbstractInst):
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs, run):
 
-        # set temporary settings, has to be run this way round, removing update_attributes from the if statement fails.
+        # set temporary settings, Check has to occur before updating attributes, 
+        # otherwise it would assumed the longmode vars are cached.
         if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
             self._inst_settings.update_attributes(kwargs=kwargs)
             self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
