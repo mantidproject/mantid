@@ -7,15 +7,15 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
+#include "MantidPythonInterface/core/Converters/DateAndTime.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
-#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
-#include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
+#include "MantidPythonInterface/core/Converters/NumpyFunctions.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include <boost/python/list.hpp>
 #include <string>
 
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define PY_ARRAY_UNIQUE_SYMBOL CORE_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
@@ -53,7 +53,8 @@ PyObject *clone1D(const std::vector<ElementType> &cvector) {
  * Returns a new numpy array with the a copy of the data vector of np.datetime64
  */
 template <>
-PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
+MANTID_PYTHONINTERFACE_CORE_DLL PyObject *
+clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
   // create an empty array
   PyArray_Descr *descr = Converters::descr_ns();
   Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
@@ -78,7 +79,9 @@ PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
  * @param cvector :: A reference to the cvector to clone
  * @return The new cloned array
  */
-template <> PyObject *clone1D(const std::vector<bool> &cvector) {
+template <>
+MANTID_PYTHONINTERFACE_CORE_DLL PyObject *
+clone1D(const std::vector<bool> &cvector) {
   Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
   int datatype = NDArrayTypeIndex<bool>::typenum;
   PyArrayObject *nparray = func_PyArray_NewFromDescr(datatype, 1, &dims[0]);

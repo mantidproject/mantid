@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -48,6 +49,7 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
 }
 
 ContainerSubtraction::~ContainerSubtraction() {
+  m_uiForm.ppPreview->watchADS(false);
   if (m_transformedContainerWS)
     AnalysisDataService::Instance().remove(m_transformedContainerWS->getName());
 }
@@ -577,7 +579,7 @@ IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
 }
 
 void ContainerSubtraction::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 

@@ -1,16 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_ZOOMER_H
-#define MPLCPP_ZOOMER_H
+#ifndef MPLCPP_PANZOOMTOOL_H
+#define MPLCPP_PANZOOMTOOL_H
 
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-
-using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {
@@ -18,21 +16,28 @@ namespace MplCpp {
 class FigureCanvasQt;
 
 /**
- * @brief The Zoomer class adds zooming capabilities to
- * an existing FigureCanvasQt object. The implementation relies on
- * the matplotlib NavigationToolbar2 class corresponding to the backend.
+ * @brief The PanZoomTool class allows pan and zoom tools to be
+ * enabled on a canvas.
  *
  * This object holds a pointer to the FigureCanvasQt object but
  * it will not keep it alive. It is assumed that the canvas lifetime
  * is handled separately.
  */
-class MANTID_MPLCPP_DLL Zoomer : public Common::Python::InstanceHolder {
+class MANTID_MPLCPP_DLL PanZoomTool : public Common::Python::InstanceHolder {
 public:
-  explicit Zoomer(FigureCanvasQt *canvas);
-
+  explicit PanZoomTool(FigureCanvasQt *canvas);
+  /// @name Zoom tools
+  /// @{
   bool isZoomEnabled() const;
-  void enableZoom(bool requestOn);
+  void enableZoom(const bool on);
   void zoomOut();
+  ///@}
+
+  /// @name Zoom tools
+  /// @{
+  bool isPanEnabled() const;
+  void enablePan(const bool on);
+  ///@}
 
 private:
   FigureCanvasQt *m_canvas;
@@ -42,4 +47,4 @@ private:
 } // namespace Widgets
 } // namespace MantidQt
 
-#endif // MPLCPP_ZOOMER_H
+#endif // MPLCPP_PANZOOMTOOL_H
