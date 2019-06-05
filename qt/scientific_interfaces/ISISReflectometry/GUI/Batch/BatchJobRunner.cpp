@@ -203,7 +203,7 @@ AlgorithmRuntimeProps BatchJobRunner::rowProcessingProperties() const {
 void BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->resetOutputNames();
+  jobAlgorithm->item()->resetOutputs();
   jobAlgorithm->item()->setRunning();
 }
 
@@ -220,7 +220,7 @@ void BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto *item = jobAlgorithm->item();
-  item->resetOutputNames();
+  item->resetOutputs();
   item->setError(message);
   // Mark the item as skipped so we don't reprocess it in the current round of
   // reductions.

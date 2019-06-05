@@ -38,12 +38,14 @@ public:
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   double theta() const;
   RangeInQ const &qRange() const;
+  RangeInQ const &qRangeOrOutput() const;
   boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
 
   void setOutputNames(std::vector<std::string> const &outputNames) override;
-  void resetOutputNames() override;
+  void setOutputQRange(RangeInQ qRange);
+  void resetOutputs() override;
   bool hasOutputWorkspace(std::string const &wsName) const;
   void renameOutputWorkspace(std::string const &oldName,
                              std::string const &newName) override;
@@ -56,7 +58,8 @@ public:
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
-  RangeInQ m_qRange;
+  RangeInQ m_qRange;       // user-defined Q values
+  RangeInQ m_qRangeOutput; // output Q values if inputs were not specified
   boost::optional<double> m_scaleFactor;
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;

@@ -121,7 +121,7 @@ void Group::setOutputNames(std::vector<std::string> const &outputNames) {
   m_postprocessedWorkspaceName = outputNames[0];
 }
 
-void Group::resetOutputNames() { m_postprocessedWorkspaceName = ""; }
+void Group::resetOutputs() { m_postprocessedWorkspaceName = ""; }
 
 void Group::appendEmptyRow() {
   Item::resetState();
