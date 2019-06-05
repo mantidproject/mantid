@@ -1174,7 +1174,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
       } else if (descriptiveNames) {
         auto infoiter = infomap.find(wsgroup);
         if (infoiter != infomap.end()) {
-					std::string name = infoiter->second;
+          std::string name = infoiter->second;
           name.erase(remove_if(name.begin(), name.end(), isspace), name.end());
           wsname << name;
         } else {
