@@ -123,7 +123,6 @@ void removeDuplicates(std::vector<size_t> &specList) {
 
 void RemoveSpectra::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  const std::string outputWorkspaceName = getPropertyValue("OutputWorkspace");
   std::vector<size_t> specList = getProperty("WorkspaceIndices");
   const bool removeMaskedSpectra = getProperty("RemoveMaskedSpectra");
   const bool removeSpectraWithNoDetector =
