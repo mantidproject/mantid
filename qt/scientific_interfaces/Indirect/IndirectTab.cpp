@@ -521,7 +521,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
 #else
   using MantidQt::Widgets::MplCpp::plot;
   // Range is inclusive of end
-  const auto nSpectra{specEnd - specStart + 1};
+  const auto nSpectra = specEnd - specStart + 1;
   std::vector<int> wkspIndices(nSpectra);
   std::iota(std::begin(wkspIndices), std::end(wkspIndices), specStart);
   plot(workspaceNames, boost::none, wkspIndices, boost::none, boost::none,
