@@ -28,7 +28,7 @@ void Transpose::init() {
                       boost::make_shared<CommonBinsValidator>()),
                   "The input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The output workspace.");
 }
 

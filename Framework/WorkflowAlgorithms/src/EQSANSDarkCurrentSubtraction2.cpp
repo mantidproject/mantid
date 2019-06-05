@@ -37,12 +37,12 @@ void EQSANSDarkCurrentSubtraction2::init() {
       "InputWorkspace", "", Direction::Input, wsValidator));
 
   declareProperty(
-      std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
-                                     "_event.nxs"),
+      std::make_unique<API::FileProperty>(
+          "Filename", "", API::FileProperty::Load, "_event.nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output));
+                                                        Direction::Output));
   declareProperty("PersistentCorrection", true,
                   "If true, the algorithm will be persistent and re-used when "
                   "other data sets are processed");

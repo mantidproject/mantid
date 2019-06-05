@@ -70,9 +70,9 @@ void SaveDiffCal::init() {
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An Workspace workspace giving which detectors are masked.");
 
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, ".h5"),
-                  "Path to the .h5 file that will be created.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".h5"),
+      "Path to the .h5 file that will be created.");
 }
 
 std::map<std::string, std::string> SaveDiffCal::validateInputs() {

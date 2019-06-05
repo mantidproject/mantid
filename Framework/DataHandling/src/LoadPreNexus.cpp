@@ -73,14 +73,14 @@ void LoadPreNexus::init() {
   // runfile to read in
   declareProperty(
       std::make_unique<FileProperty>(RUNINFO_PARAM, "", FileProperty::Load,
-                                        "_runinfo.xml"),
+                                     "_runinfo.xml"),
       "The name of the runinfo file to read, including its full or relative "
       "path.");
 
   // copied (by hand) from LoadEventPreNexus2
   declareProperty(
-      std::make_unique<FileProperty>(MAP_PARAM, "",
-                                        FileProperty::OptionalLoad, ".dat"),
+      std::make_unique<FileProperty>(MAP_PARAM, "", FileProperty::OptionalLoad,
+                                     ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
@@ -106,12 +106,12 @@ void LoadPreNexus::init() {
                   "  Serial: Use a single core.\n"
                   "  Parallel: Use all available cores.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadMonitors", true,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "LoadMonitors", true, Direction::Input),
                   "Load the monitors from the file.");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output workspace.");
 }
 
@@ -334,7 +334,7 @@ void LoadPreNexus::runLoadMonitors(const double prog_start,
     MatrixWorkspace_sptr mons = alg->getProperty("OutputWorkspace");
     this->declareProperty(
         std::make_unique<WorkspaceProperty<>>("MonitorWorkspace", mon_wsname,
-                                                 Direction::Output),
+                                              Direction::Output),
         "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", mons);
     // Add an internal pointer to monitor workspace in the 'main' workspace

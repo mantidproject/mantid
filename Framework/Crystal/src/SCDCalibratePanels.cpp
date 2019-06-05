@@ -514,30 +514,30 @@ void SCDCalibratePanels::init() {
   const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
   declareProperty(
       std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
-                                        FileProperty::Save, detcalExts),
+                                     FileProperty::Save, detcalExts),
       "Path to an ISAW-style .detcal file to save.");
 
   declareProperty(
       std::make_unique<FileProperty>("XmlFilename", "",
-                                        FileProperty::OptionalSave, ".xml"),
+                                     FileProperty::OptionalSave, ".xml"),
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
   declareProperty(std::make_unique<FileProperty>("ColFilename",
-                                                    "ColCalcvsTheor.nxs",
-                                                    FileProperty::Save, ".nxs"),
+                                                 "ColCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "column of each peak.");
 
   declareProperty(std::make_unique<FileProperty>("RowFilename",
-                                                    "RowCalcvsTheor.nxs",
-                                                    FileProperty::Save, ".nxs"),
+                                                 "RowCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "row of each peak.");
 
   declareProperty(std::make_unique<FileProperty>("TofFilename",
-                                                    "TofCalcvsTheor.nxs",
-                                                    FileProperty::Save, ".nxs"),
+                                                 "TofCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "TOF of each peak.");
 

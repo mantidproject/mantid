@@ -25,12 +25,12 @@ using namespace Mantid::API;
 /** Initialize the algorithm's properties.
  */
 void SaveDaveGrp::init() {
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  this->declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".grp"),
-      "A DAVE grouped data format file that will be created");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "InputWorkspace", "", Direction::Input),
+                        "An input workspace.");
+  this->declareProperty(std::make_unique<FileProperty>(
+                            "Filename", "", FileProperty::Save, ".grp"),
+                        "A DAVE grouped data format file that will be created");
   this->declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                             "ToMicroEV", false, Kernel::Direction::Input),
                         "Transform all energy units from milli eV to micro eV");

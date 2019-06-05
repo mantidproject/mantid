@@ -142,11 +142,11 @@ void PlotPeakByLogValue::init() {
                   "If true and CreateOutput is true then the value of each "
                   "member of a Composite Function is also output.");
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and OutputCompositeMembers is true members of any "
-      "Convolution are output convolved\n"
-      "with corresponding resolution");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "ConvolveMembers", false),
+                  "If true and OutputCompositeMembers is true members of any "
+                  "Convolution are output convolved\n"
+                  "with corresponding resolution");
 
   std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
   declareProperty(

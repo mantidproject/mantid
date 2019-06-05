@@ -18,7 +18,6 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/UnitFactory.h"
 
-
 #include "boost/lexical_cast.hpp"
 
 namespace Mantid {
@@ -43,7 +42,7 @@ void TOFSANSResolutionByPixel::init() {
                   "each pixel and wavelength");
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                Direction::Output),
+                                                     Direction::Output),
       "Name of the newly created workspace which contains the Q resolution.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
@@ -166,7 +165,7 @@ void TOFSANSResolutionByPixel::exec() {
     std::unique_ptr<GravitySANSHelper> grav;
     if (doGravity) {
       grav = std::make_unique<GravitySANSHelper>(spectrumInfo, i,
-                                                    getProperty("ExtraLength"));
+                                                 getProperty("ExtraLength"));
     }
 
     // Get handles on the outputWorkspace

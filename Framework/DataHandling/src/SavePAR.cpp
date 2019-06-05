@@ -36,8 +36,9 @@ void SavePAR::init() {
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The name of the workspace to save.");
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
-                  "The name to give to the saved file.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+      "The name to give to the saved file.");
 }
 
 void SavePAR::exec() {

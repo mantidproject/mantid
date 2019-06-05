@@ -50,7 +50,7 @@ const std::string DeadTimeCorrection::summary() const {
  */
 void DeadTimeCorrection::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+                                                        Direction::Input),
                   "An input workspace.");
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
@@ -61,8 +61,8 @@ void DeadTimeCorrection::init() {
   positive->setLower(0.);
   declareProperty("Tau", 0., positive, "The count rate coefficient.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 }
 

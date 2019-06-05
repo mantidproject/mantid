@@ -106,8 +106,7 @@ public:
 
   void test_iterator_basic() {
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, false);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false);
 
     // Start with the top one
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -136,8 +135,7 @@ public:
 
   void test_depth_limit_1() {
     // Limit depth to 1 (the B level)
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 1, false);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 1, false);
     TS_ASSERT_EQUALS(it->getBox(), A);
     TS_ASSERT(nextIs(it.get(), B0));
     TS_ASSERT(nextIs(it.get(), B1));
@@ -149,8 +147,7 @@ public:
 
   void test_depth_limit_0() {
     // Limit depth to 0 (the A level)
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 0, false);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 0, false);
     TS_ASSERT_EQUALS(it->getBox(), A);
     TS_ASSERT(!it->next());
     TS_ASSERT(!it->next());
@@ -158,8 +155,7 @@ public:
 
   void test_starting_deeper() {
     // Start at a depth of 1 (on B0)
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        B0, 20, false);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(B0, 20, false);
     TS_ASSERT_EQUALS(it->getBox(), B0);
     TS_ASSERT(nextIs(it.get(), C00));
     TS_ASSERT(nextIs(it.get(), C01));
@@ -171,8 +167,7 @@ public:
 
   void test_leaf_only() {
     // Leaf-only iterator = skips anything with children
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, true);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
 
     // This is the first leaf node
     TS_ASSERT_EQUALS(it->getBox(), C00);
@@ -195,8 +190,7 @@ public:
 
   void test_leaf_only_depth_2() {
     // A node is considered a 'leaf' if it is at maxDepth
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 2, true);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 2, true);
 
     // This is the first leaf node
     TS_ASSERT_EQUALS(it->getBox(), C00);
@@ -216,8 +210,7 @@ public:
 
   void test_leaf_only_depth_1() {
     // A node is considered a 'leaf' if it is at maxDepth
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 1, true);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 1, true);
     // This is the first leaf node
     TS_ASSERT_EQUALS(it->getBox(), B0);
     TS_ASSERT(nextIs(it.get(), B1));
@@ -229,8 +222,7 @@ public:
 
   void test_leaf_only_depth_0() {
     // A node is considered a 'leaf' if it is at maxDepth
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 0, true);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 0, true);
     // This is the ONLY leaf node
     TS_ASSERT_EQUALS(it->getBox(), A);
     TS_ASSERT(!it->next());
@@ -239,8 +231,7 @@ public:
 
   void test_leaf_only_starting_deeper() {
     // Now we start at B2 and look at only leaves
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        B2, 10, true);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(B2, 10, true);
     TS_ASSERT_EQUALS(it->getBox(), C20);
     TS_ASSERT(nextIs(it.get(), D210));
     TS_ASSERT(nextIs(it.get(), D211));
@@ -254,8 +245,7 @@ public:
 
   void test_leaf_only_starting_deeper_depth_limited() {
     // Now we start at B2 and look at only leaves up to depth 2
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        B2, 2, true);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(B2, 2, true);
     TS_ASSERT_EQUALS(it->getBox(), C20);
     TS_ASSERT(nextIs(it.get(), C21));
     TS_ASSERT(nextIs(it.get(), C22));
@@ -271,8 +261,7 @@ public:
   void test_iterator_just_one_box() {
     // Top level grid box
     ibox_t *A = MDEventsTestHelper::makeMDBox1();
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, false);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false);
     TS_ASSERT_EQUALS(it->getBox(), A);
     TS_ASSERT(!it->next());
     TS_ASSERT(!it->next());
@@ -289,8 +278,7 @@ public:
     // Make a MDBox with 10 events
     ibox_t *A = MDEventsTestHelper::makeMDBox1();
     MDEventsTestHelper::feedMDBox<1>(A, 1, 10, 0.5, 1.0);
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, false);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false);
     TS_ASSERT_EQUALS(it->getBox(), A);
     // It has some events!
     TS_ASSERT_EQUALS(it->getNumEvents(), 10);
@@ -321,8 +309,8 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, false, func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false,
+                                                                 func.get());
 
     // Start with the top one
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -355,8 +343,8 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, true, func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true,
+                                                                 func.get());
 
     // C00-C01 are outside the range, so the first one is C02
     TS_ASSERT_EQUALS(it->getBox(), C02);
@@ -384,8 +372,8 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, false, func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false,
+                                                                 func.get());
 
     // Start with the top one
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -417,8 +405,8 @@ public:
     func->addPlane(MDPlane(1, normal2, origin2));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, false, func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false,
+                                                                 func.get());
 
     // Go down to the only two leaf boxes that are in range
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -442,8 +430,8 @@ public:
     func->addPlane(MDPlane(1, normal2, origin2));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, true, func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true,
+                                                                 func.get());
 
     // Only two leaf boxes are in range
     TS_ASSERT_EQUALS(it->getBox(), D211);
@@ -461,8 +449,8 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, false, func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, false,
+                                                                 func.get());
 
     // Returns the first box but that's it
     TS_ASSERT_EQUALS(it->getBox(), A);
@@ -478,8 +466,8 @@ public:
     func->addPlane(MDPlane(1, normal, origin));
 
     // Create an iterator
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, true, func.get());
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true,
+                                                                 func.get());
 
     // Nothing in the iterator!
     TS_ASSERT_EQUALS(it->getDataSize(), 0);
@@ -519,8 +507,7 @@ public:
 
   void test_skip_masked_detectors() {
     auto setupIterator =
-        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
-                                                                      true);
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
 
     // mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be
     // unmasked.
@@ -532,8 +519,7 @@ public:
     setupIterator->next(1);
 
     auto evaluationIterator =
-        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
-                                                                      true);
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
     TSM_ASSERT_EQUALS("Should have skipped to the first non-masked box", 1,
                       evaluationIterator->getPosition());
@@ -546,8 +532,7 @@ public:
 
   void test_no_skipping_policy() {
     auto setupIterator =
-        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20,
-                                                                      true);
+        std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
 
     // mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be
     // unmasked.
@@ -612,8 +597,7 @@ public:
     // Make a MDBox with 10 events
     ibox_t *A = MDEventsTestHelper::makeMDBox1();
     MDEventsTestHelper::feedMDBox<1>(A, 1, 10, 0.5, 1.0);
-    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(
-        A, 20, true);
+    auto it = std::make_unique<MDBoxIterator<MDLeanEvent<1>, 1>>(A, 20, true);
 
     // Initially the box is unmasked
     TS_ASSERT_DELTA(it->getNormalizedSignal(), 1.0, 1e-5);

@@ -50,12 +50,12 @@ void SetUB::init() {
                             "Workspace", "", Direction::InOut),
                         "An input workspace.");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>("a", 1.0, mustBePositive->clone(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "a", 1.0, mustBePositive->clone(), Direction::Input),
       "Lattice parameter a");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>("b", 1.0, mustBePositive->clone(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "b", 1.0, mustBePositive->clone(), Direction::Input),
       "Lattice parameter b");
   this->declareProperty(
       std::make_unique<PropertyWithValue<double>>(
@@ -78,7 +78,7 @@ void SetUB::init() {
                         "Vector along k_i, when goniometer is at 0");
   this->declareProperty(
       std::make_unique<ArrayProperty<double>>("v", std::move(v0),
-                                                 std::move(mustBe3D)),
+                                              std::move(mustBe3D)),
       "In plane vector perpendicular to k_i, when goniometer is at 0");
   this->declareProperty(std::make_unique<ArrayProperty<double>>(
                             "UB", std::move(zeroes), threeVthree),

@@ -44,8 +44,8 @@ void MuonPreProcess::init() {
       "grouping/pairing will be applied to.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "The output workspace group with all corrections applied. For single "
       "period data, a group is returned with a single workspace.");
 

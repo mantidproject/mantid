@@ -432,7 +432,8 @@ public:
   }
 
   void test_isICPEventLogNewStyle_works() {
-    auto oldlog = std::make_unique<TimeSeriesProperty<std::string>>("MyOldICPevent");
+    auto oldlog =
+        std::make_unique<TimeSeriesProperty<std::string>>("MyOldICPevent");
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:00", "START"));
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:01", "BEGIN"));
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:02", "PAUSE"));
@@ -440,7 +441,8 @@ public:
     const auto &oldLogm = oldlog->valueAsMultiMap();
     TS_ASSERT(!LogParser::isICPEventLogNewStyle(oldLogm));
 
-    auto newlog = std::make_unique<TimeSeriesProperty<std::string>>("MyNewICPevent");
+    auto newlog =
+        std::make_unique<TimeSeriesProperty<std::string>>("MyNewICPevent");
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:00", "START"));
     TS_ASSERT_THROWS_NOTHING(
         newlog->addValue("2012-07-19T20:00:01", "START_COLLECTION PERIOD 1"));
@@ -697,7 +699,8 @@ public:
 private:
   /// Helper method to run common test code for checking period logs.
   void doTestCurrentPeriodLog(const int &expected_period) {
-    const auto &log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    const auto &log =
+        std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     const LogParser logparser(log.get());
     const auto prop = std::unique_ptr<Property>(
         logparser.createCurrentPeriodLog(expected_period));

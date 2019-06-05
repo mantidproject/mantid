@@ -30,10 +30,10 @@ DECLARE_ALGORITHM(SaveFocusedXYE)
 void SaveFocusedXYE::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
-                                                    Kernel::Direction::Input),
+                                                 Kernel::Direction::Input),
       "The name of the workspace containing the data you wish to save");
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Save),
                   "The filename to use when saving data");
   declareProperty("SplitFiles", true,
                   "Save each spectrum in a different file (default true)");

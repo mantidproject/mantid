@@ -37,7 +37,7 @@ void MedianDetectorTest::init() {
                   "Name of the input workspace");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
       "a zero is also masked on the output");
 

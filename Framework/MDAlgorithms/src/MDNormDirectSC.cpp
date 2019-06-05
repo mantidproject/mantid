@@ -87,7 +87,7 @@ void MDNormDirectSC::init() {
     std::string propName = "AlignedDim" + dim;
     declareProperty(
         std::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                            Direction::Input),
+                                                         Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -99,14 +99,14 @@ void MDNormDirectSC::init() {
   solidAngleValidator->add<CommonBinsValidator>();
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
-                                       Direction::Input, PropertyMode::Optional,
-                                       solidAngleValidator),
+      std::make_unique<WorkspaceProperty<>>(
+          "SolidAngleWorkspace", "", Direction::Input, PropertyMode::Optional,
+          solidAngleValidator),
       "An input workspace containing integrated vanadium (a measure of the "
       "solid angle).");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "SkipSafetyCheck", false, Direction::Input),
                   "If set to true, the algorithm does "
                   "not check history if the workspace was modified since the"
                   "ConvertToMD algorithm was run, and assume that the direct "
@@ -498,9 +498,9 @@ void MDNormDirectSC::calculateNormalization(
   std::vector<std::array<double, 4>> intersections;
   std::vector<coord_t> pos, posNew;
   double progStep = 0.7 / m_numExptInfos;
-  auto prog =
-      std::make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
-                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
+  auto prog = std::make_unique<API::Progress>(
+      this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.),
+      ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, pos, posNew))
 for (int64_t i = 0; i < ndets; i++) {

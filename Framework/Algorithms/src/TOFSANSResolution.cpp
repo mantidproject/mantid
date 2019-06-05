@@ -112,8 +112,8 @@ void TOFSANSResolution::exec() {
   // Create workspaces with each component of the resolution for debugging
   // purposes
   MatrixWorkspace_sptr thetaWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaError", "",
+                                                        Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
   thetaWS->setSharedX(0, iqWS->sharedX(0));

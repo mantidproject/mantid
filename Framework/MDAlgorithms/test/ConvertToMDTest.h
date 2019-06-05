@@ -819,8 +819,7 @@ public:
     Rot.toRotation();
 
     // this will be used to display progress
-    pMockAlgorithm =
-        std::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
+    pMockAlgorithm = std::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
 
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "CreateSampleWorkspace");

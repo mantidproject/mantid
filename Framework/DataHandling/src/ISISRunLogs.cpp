@@ -10,7 +10,6 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-
 namespace Mantid {
 namespace DataHandling {
 namespace {

@@ -70,12 +70,12 @@ void CompareMDWorkspaces::init() {
                   "False, will only look at the box "
                   "structure.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Equals", false, Direction::Output),
-      "Boolean set to true if the workspaces match.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Equals", false,
+                                                            Direction::Output),
+                  "Boolean set to true if the workspaces match.");
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("Result", "",
-                                                  Direction::Output),
+                                                       Direction::Output),
       "String describing the difference found between the workspaces");
   declareProperty("IgnoreBoxID", false,
                   "To ignore box ID-s when comparing MD "

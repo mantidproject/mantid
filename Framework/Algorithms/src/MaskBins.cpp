@@ -33,7 +33,7 @@ void MaskBins::init() {
       "The name of the input workspace. Must contain histogram data.",
       boost::make_shared<HistogramValidator>());
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name of the Workspace containing the masked bins.");
 
   // This validator effectively makes these properties mandatory

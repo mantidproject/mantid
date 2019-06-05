@@ -18,8 +18,8 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
@@ -194,8 +194,8 @@ public:
 
   void testThrowIfVtkDatasetNull() {
     vtkDataSet *dataset = nullptr;
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(
                          dataset, "", std::move(workspaceProvider)),
                      const std::runtime_error &);
@@ -203,8 +203,8 @@ public:
 
   void testThrowsIfWorkspaceNameEmptyAndUsingADSWorkspaceProvider() {
     vtkNew<vtkUnstructuredGrid> dataset;
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     TS_ASSERT_THROWS(
         vtkDataSetToNonOrthogonalDataSet temp(dataset.GetPointer(), "",
                                               std::move(workspaceProvider)),
@@ -213,8 +213,8 @@ public:
 
   void testThrowIfVtkDatasetWrongType() {
     vtkNew<vtkRectilinearGrid> grid;
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(grid.GetPointer(), "name",
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), const std::runtime_error &);
@@ -224,8 +224,8 @@ public:
     std::string wsName = createMantidWorkspace(false);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -236,8 +236,8 @@ public:
     std::string wsName = createMantidWorkspace(false, true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), const std::invalid_argument &);
@@ -247,8 +247,8 @@ public:
     std::string wsName = createMantidWorkspace(false, false, true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), const std::invalid_argument &);
@@ -258,8 +258,8 @@ public:
     std::string wsName = createMantidWorkspace(false, false, false, true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS(converter.execute(), const std::invalid_argument &);
@@ -270,8 +270,8 @@ public:
         createMantidWorkspace(false, false, false, false, true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -281,8 +281,8 @@ public:
     std::string wsName = createMantidWorkspace(true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -329,8 +329,8 @@ public:
         createMantidWorkspace(false, false, false, false, false, 2.0);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -342,8 +342,8 @@ public:
         createMantidWorkspace(true, false, false, false, false, 2.0);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
     ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = std::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+    auto workspaceProvider =
+        std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());

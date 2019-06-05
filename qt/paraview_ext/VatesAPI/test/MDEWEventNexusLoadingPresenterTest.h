@@ -61,9 +61,8 @@ public:
   void testConstruct() {
     TSM_ASSERT_THROWS_NOTHING(
         "Object should be created without exception.",
-        MDEWEventNexusLoadingPresenter(
-            std::make_unique<MockMDLoadingView>(),
-            getSuitableFile()));
+        MDEWEventNexusLoadingPresenter(std::make_unique<MockMDLoadingView>(),
+                                       getSuitableFile()));
   }
 
   void testCanReadFile() {
@@ -76,8 +75,7 @@ public:
 
   void testExecution() {
     // Setup view
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*mockView, getLoadInMemory())
@@ -153,8 +151,7 @@ public:
 
   void testTimeLabel() {
     // Setup view
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*mockView, getLoadInMemory())
@@ -191,8 +188,7 @@ public:
 
   void testAxisLabels() {
     // Setup view
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(1));
     EXPECT_CALL(*mockView, getLoadInMemory())

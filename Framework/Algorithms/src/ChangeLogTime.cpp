@@ -45,7 +45,8 @@ void ChangeLogTime::init() {
                   "The name to use for the output workspace");
   this->declareProperty("LogName", "", "Name of the log to add the offset to");
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("TimeOffset",
+                                                  Direction::Input),
       "Number of seconds (a float) to add to the time of each log value. "
       "Required.");
 }

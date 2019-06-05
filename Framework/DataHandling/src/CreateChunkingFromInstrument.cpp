@@ -85,24 +85,24 @@ void CreateChunkingFromInstrument::init() {
   std::vector<std::string> extensions{"_event.nxs", ".nxs.h5", ".nxs"};
   this->declareProperty(
       std::make_unique<FileProperty>(PARAM_IN_FILE, "",
-                                        FileProperty::OptionalLoad, extensions),
+                                     FileProperty::OptionalLoad, extensions),
       "The name of the event nexus file to read, including its full or "
       "relative path.");
 
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          PARAM_IN_WKSP, "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(PARAM_IN_WKSP, "", Direction::Input,
+                                            PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
   this->declareProperty(
       std::make_unique<PropertyWithValue<string>>(PARAM_INST_NAME, "",
-                                                     Direction::Input),
+                                                  Direction::Input),
       "Optional: Name of the instrument to base the ChunkingWorkpace on which "
       "to base the GroupingWorkspace.");
 
   this->declareProperty(
       std::make_unique<FileProperty>(PARAM_INST_FILE, "",
-                                        FileProperty::OptionalLoad, ".xml"),
+                                     FileProperty::OptionalLoad, ".xml"),
       "Optional: Path to the instrument definition file on which to base the "
       "ChunkingWorkpace.");
 

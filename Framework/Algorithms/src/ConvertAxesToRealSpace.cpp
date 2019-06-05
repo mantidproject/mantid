@@ -72,12 +72,12 @@ void ConvertAxesToRealSpace::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "What will be the horizontal axis?\n");
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>("NumberVerticalBins", 100),
-      "The number of bins along the vertical axis.");
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>("NumberHorizontalBins", 100),
-      "The number of bins along the horizontal axis.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(
+                      "NumberVerticalBins", 100),
+                  "The number of bins along the vertical axis.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(
+                      "NumberHorizontalBins", 100),
+                  "The number of bins along the horizontal axis.");
 }
 
 /** Execute the algorithm.

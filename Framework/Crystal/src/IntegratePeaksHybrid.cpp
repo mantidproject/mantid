@@ -118,8 +118,8 @@ void IntegratePeaksHybrid::init() {
   positiveIntValidator->setLower(0);
 
   declareProperty(std::make_unique<PropertyWithValue<int>>("NumberOfBins", 20,
-                                                      positiveIntValidator,
-                                                      Direction::Input),
+                                                           positiveIntValidator,
+                                                           Direction::Input),
                   "Number of bins to use while creating each local image. "
                   "Defaults to 20. Increase to reduce pixelation");
 

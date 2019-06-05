@@ -47,14 +47,14 @@ public:
 
   void init() override {
     declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
-                                                     Direction::Input));
+                                                          Direction::Input));
     declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
     declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
-    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace1", "",
-                                                     Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace1", "", Direction::Output));
     declareProperty(std::make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
@@ -151,7 +151,7 @@ public:
 
   void init() override {
     declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                     Direction::Input));
+                                                          Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 
@@ -180,9 +180,8 @@ public:
 
   void init() override {
     declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace", "");
-    declareProperty(
-        std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-            "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+        "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
     declareWorkspaceInputProperties<
         MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
         "InputWorkspace3", "");

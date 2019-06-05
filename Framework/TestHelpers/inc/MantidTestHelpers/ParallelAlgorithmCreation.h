@@ -10,7 +10,6 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/Property.h"
 
-
 namespace Mantid {
 namespace Parallel {
 class Communicator;

@@ -32,13 +32,13 @@ void IndexPeaks::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "Tolerance", 0.15, mustBePositive, Direction::Input),
       "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
-                                             mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "ToleranceForSatellite", 0.15, mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 
   this->declareProperty("RoundHKLs", true,
@@ -47,9 +47,9 @@ void IndexPeaks::init() {
   this->declareProperty("CommonUBForAll", false,
                         "Index all orientations with a common UB");
 
-  this->declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 
   this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
@@ -59,22 +59,22 @@ void IndexPeaks::init() {
                             "TotalNumIndexed", 0, Direction::Output),
                         "Gets set with the number of Total indexed peaks.");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>("MainNumIndexed", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "MainNumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>("SateNumIndexed", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "SateNumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
   this->declareProperty(
       std::make_unique<PropertyWithValue<double>>("MainError", 0.0,
-                                             Direction::Output),
+                                                  Direction::Output),
       "Gets set with the average HKL indexing error of Main Peaks.");
 
   this->declareProperty(
       std::make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
-                                             Direction::Output),
+                                                  Direction::Output),
       "Gets set with the average HKL indexing error of Satellite Peaks.");
 }
 

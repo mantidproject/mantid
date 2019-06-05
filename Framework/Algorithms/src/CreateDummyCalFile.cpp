@@ -40,9 +40,9 @@ void CreateDummyCalFile::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The workspace containing the geometry to be calibrated.");
-  declareProperty(
-      std::make_unique<FileProperty>("CalFilename", "", FileProperty::Save, ".cal"),
-      "The name of the output [[CalFile]]");
+  declareProperty(std::make_unique<FileProperty>("CalFilename", "",
+                                                 FileProperty::Save, ".cal"),
+                  "The name of the output [[CalFile]]");
 }
 
 /** Executes the algorithm

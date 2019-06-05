@@ -35,7 +35,7 @@ void NormaliseToUnity::init() {
                   "The name of the input workspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "The name with which to store the output workspace in the [[Analysis "
       "Data Service]]");
 

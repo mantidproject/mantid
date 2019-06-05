@@ -47,8 +47,7 @@ void LoadNexus::init() {
   // Declare required input parameters for all Child Algorithms
   const std::vector<std::string> exts{".nxs", ".nx5", ".xml", ".n*"};
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "The name of the Nexus file to read, as a full or relative path.");
 
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(

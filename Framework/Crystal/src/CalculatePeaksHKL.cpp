@@ -45,9 +45,9 @@ void CalculatePeaksHKL::init() {
       "OverWrite", false,
       "Overwrite existing miller indices as well as empty ones.");
 
-  this->declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 }
 
 /** Execute the algorithm.

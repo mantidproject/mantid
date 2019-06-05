@@ -55,21 +55,20 @@ void SaveNXTomo::init() {
   wsValidator->add<API::HistogramValidator>();
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspaces", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspaces", "",
+                                            Direction::Input, wsValidator),
       "The name of the workspace(s) to save - this can be the name of a single "
       "Workspace2D or the name of a WorkspaceGroup in which case all the "
       "Workspace2Ds included in the group will be saved.");
 
   declareProperty(
-      std::make_unique<API::FileProperty>(
-          "Filename", "", FileProperty::Save,
-          std::vector<std::string>(1, ".nxs")),
+      std::make_unique<API::FileProperty>("Filename", "", FileProperty::Save,
+                                          std::vector<std::string>(1, ".nxs")),
       "The name of the NXTomo file to write, as a full or relative path");
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("OverwriteFile", false,
-                                           Kernel::Direction::Input),
+                                                Kernel::Direction::Input),
       "Replace any existing file of the same name instead of appending data?");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>(

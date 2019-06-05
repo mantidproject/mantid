@@ -33,7 +33,7 @@ void GroupWorkspaces::init() {
       "Add all Workspaces that match Glob expression to Group");
   declareProperty(
       std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
       "Name of the workspace to be created as the output of grouping ");
 }
 

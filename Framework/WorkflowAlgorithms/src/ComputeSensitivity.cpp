@@ -31,14 +31,14 @@ void ComputeSensitivity::init() {
                       "Filename", "", API::FileProperty::Load, "_event.nxs"),
                   "Flood field or sensitivity file.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("PatchWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+                                                        Direction::Input,
+                                                        PropertyMode::Optional),
                   "Workspace defining the area of the detector to be patched. "
                   "All masked pixels in this workspace will be patched.");
   declareProperty("ReductionProperties", "__eqsans_reduction_properties",
                   Direction::Input);
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Workspace containing the sensitivity correction.");
   declareProperty("OutputMessage", "", Direction::Output);
 }

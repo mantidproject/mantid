@@ -7,9 +7,9 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 #define MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 
 #include <QTreeWidget>

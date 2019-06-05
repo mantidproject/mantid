@@ -269,7 +269,7 @@ bool LoadTBL::getColumnHeadings(std::string line,
 /// Initialisation method.
 void LoadTBL::init() {
   declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, ".tbl"),
+                                                 FileProperty::Load, ".tbl"),
                   "The name of the table file to read, including its full or "
                   "relative path. The file extension must be .tbl");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(

@@ -33,9 +33,9 @@ void SaveIsawUB::init() {
                   "An input workspace containing the orientation matrix.");
 
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, exts),
-                  "Path to an ISAW-style UB matrix text file.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
+      "Path to an ISAW-style UB matrix text file.");
 }
 
 double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {

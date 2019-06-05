@@ -71,7 +71,7 @@ void AnnularRingAbsorption::init() {
                   "The input workspace in units of wavelength.");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name to use for the output workspace.");
 
   // -- can properties --

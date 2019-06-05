@@ -51,15 +51,15 @@ const std::string GenerateGroupingPowder::category() const {
 /** Initialize the algorithm's properties.
  */
 void GenerateGroupingPowder::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "A workspace from which to generate the grouping.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "A workspace from which to generate the grouping.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble,
                   "The angle step for grouping, in degrees.");
   declareProperty(std::make_unique<FileProperty>("GroupingFilename", "",
-                                            FileProperty::Save, ".xml"),
+                                                 FileProperty::Save, ".xml"),
                   "A grouping file that will be created.");
   declareProperty("GenerateParFile", true,
                   "If true, a par file with a corresponding name to the "

@@ -162,11 +162,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "specified externally, the former prevail.");
 
   if (hasPostprocessing()) {
-    m_manager =
-        std::make_unique<TwoLevelTreeManager>(this, m_whitelist);
+    m_manager = std::make_unique<TwoLevelTreeManager>(this, m_whitelist);
   } else {
-    m_manager =
-        std::make_unique<OneLevelTreeManager>(this, m_whitelist);
+    m_manager = std::make_unique<OneLevelTreeManager>(this, m_whitelist);
   }
 }
 
@@ -1904,8 +1902,7 @@ std::vector<Command_uptr> GenericDataProcessorPresenter::getTableList() {
   workspaces.reserve(m_workspaceList.size());
   // Create a command for each of the workspaces in the ADS
   for (const auto &name : m_workspaceList) {
-    workspaces.emplace_back(
-        std::make_unique<WorkspaceCommand>(this, name));
+    workspaces.emplace_back(std::make_unique<WorkspaceCommand>(this, name));
   }
   return workspaces;
 }

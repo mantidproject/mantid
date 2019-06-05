@@ -92,7 +92,8 @@ void VesuvioCalculateGammaBackground::init() {
                   "An input workspace containing TOF data");
 
   declareProperty(
-      std::make_unique<API::FunctionProperty>("ComptonFunction", Direction::InOut),
+      std::make_unique<API::FunctionProperty>("ComptonFunction",
+                                              Direction::InOut),
       "Function that is able to compute the mass spectrum for the input data"
       "This will usually be the output from the Fitting");
 
@@ -101,12 +102,12 @@ void VesuvioCalculateGammaBackground::init() {
                   "provided, the output only include these spectra\n"
                   "(Default: all spectra from input)");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("BackgroundWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("BackgroundWorkspace",
+                                                        "", Direction::Output),
                   "A new workspace containing the calculated background.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("CorrectedWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "A new workspace containing the calculated background subtracted from "
       "the input.");
 }

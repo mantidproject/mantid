@@ -10,7 +10,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-
 #include <cassert>
 
 namespace {

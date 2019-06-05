@@ -171,13 +171,13 @@ void LoadSpiceXML2DDet::init() {
   exts.push_back(".xml");
   exts.push_back(".bin");
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::FileAction::Load,
-                                exts),
+      std::make_unique<FileProperty>("Filename", "",
+                                     FileProperty::FileAction::Load, exts),
       "XML file name for one scan including 2D detectors counts from SPICE");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "Name of output matrix workspace. "
       "Output workspace will be an X by Y Workspace2D if instrument "
       "is not loaded. ");
@@ -202,7 +202,7 @@ void LoadSpiceXML2DDet::init() {
 
   declareProperty(
       std::make_unique<FileProperty>("InstrumentFilename", "",
-                                FileProperty::OptionalLoad, ".xml"),
+                                     FileProperty::OptionalLoad, ".xml"),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Note Filename or "

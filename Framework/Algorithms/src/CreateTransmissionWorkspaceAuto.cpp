@@ -75,8 +75,8 @@ void CreateTransmissionWorkspaceAuto::init() {
                   "Start wavelength for stitching transmission runs together");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
       "End wavelength (angstroms) for stitching transmission runs together");
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),

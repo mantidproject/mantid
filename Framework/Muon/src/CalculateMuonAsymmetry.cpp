@@ -86,8 +86,8 @@ void CalculateMuonAsymmetry::init() {
       "Stop after this number of iterations if a good fit is not found");
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
   declareProperty("ChiSquared", 0.0, Kernel::Direction::Output);
-  declareProperty(std::make_unique<API::FunctionProperty>("OutputFunction",
-                                                     Kernel::Direction::Output),
+  declareProperty(std::make_unique<API::FunctionProperty>(
+                      "OutputFunction", Kernel::Direction::Output),
                   "The fitting function after fit.");
 }
 /*

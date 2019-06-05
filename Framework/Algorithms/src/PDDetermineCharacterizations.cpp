@@ -367,8 +367,7 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
   }
   if (!m_propertyManager->existsProperty("vanadium_background")) {
     m_propertyManager->declareProperty(
-        std::make_unique<ArrayProperty<int32_t>>("vanadium_background",
-                                                    "0"));
+        std::make_unique<ArrayProperty<int32_t>>("vanadium_background", "0"));
   }
   if (!m_propertyManager->existsProperty("container")) {
     m_propertyManager->declareProperty(

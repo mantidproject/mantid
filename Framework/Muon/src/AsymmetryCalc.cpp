@@ -30,12 +30,12 @@ DECLARE_ALGORITHM(AsymmetryCalc)
  */
 void AsymmetryCalc::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
+                                                 Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra"),

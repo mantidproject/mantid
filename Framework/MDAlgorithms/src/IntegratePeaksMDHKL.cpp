@@ -39,7 +39,7 @@ DECLARE_ALGORITHM(IntegratePeaksMDHKL)
 void IntegratePeaksMDHKL::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "",
-                                                   Direction::Input),
+                                                        Direction::Input),
       "An input Sample MDHistoWorkspace or MDEventWorkspace in HKL.");
   declareProperty("DeltaHKL", 0.5,
                   "Distance from integer HKL to integrate peak.");
@@ -56,8 +56,9 @@ void IntegratePeaksMDHKL::init() {
   auto solidAngleValidator = fluxValidator->clone();
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional, fluxValidator),
+      std::make_unique<WorkspaceProperty<>>(
+          "FluxWorkspace", "", Direction::Input, PropertyMode::Optional,
+          fluxValidator),
       "An optional input workspace containing momentum dependent flux for "
       "normalization.");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
@@ -73,18 +74,18 @@ void IntegratePeaksMDHKL::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("BackgroundInnerRadius",
-                                             EMPTY_DBL(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "BackgroundInnerRadius", EMPTY_DBL(), Direction::Input),
       "Optional:Inner radius to use to evaluate the background of the peak.\n"
       "If omitted background is region of HKL box - peak. ");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("BackgroundOuterRadius",
-                                             EMPTY_DBL(), Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "BackgroundOuterRadius", EMPTY_DBL(), Direction::Input),
       "Optional:Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
       "BackgroundOuterRadius) is used to estimate the background under the "

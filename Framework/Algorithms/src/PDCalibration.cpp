@@ -31,7 +31,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
-
 #include <algorithm>
 #include <cassert>
 #include <gsl/gsl_multifit_nlin.h>
@@ -177,10 +176,10 @@ void PDCalibration::init() {
                   "Logarithmic binning is used if Step is negative.");
 
   const std::vector<std::string> exts2{".h5", ".cal"};
-  declareProperty(
-      std::make_unique<FileProperty>("PreviousCalibrationFile", "",
-                                        FileProperty::OptionalLoad, exts2),
-      "Previous calibration file");
+  declareProperty(std::make_unique<FileProperty>("PreviousCalibrationFile", "",
+                                                 FileProperty::OptionalLoad,
+                                                 exts2),
+                  "Previous calibration file");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
           "PreviousCalibrationTable", "", Direction::Input,
@@ -204,9 +203,9 @@ void PDCalibration::init() {
   peaksValidator->add(mustBePosArr);
   peaksValidator->add(
       boost::make_shared<MandatoryValidator<std::vector<double>>>());
-  declareProperty(std::make_unique<ArrayProperty<double>>("PeakPositions",
-                                                             peaksValidator),
-                  "Comma delimited d-space positions of reference peaks.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
+      "Comma delimited d-space positions of reference peaks.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);

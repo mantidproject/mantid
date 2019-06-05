@@ -52,8 +52,8 @@ const std::string ExtractQENSMembers::summary() const {
  */
 void ExtractQENSMembers::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "The input workspace used in the fit. Ignored if 'InputWorkspaces' "
       "property is provided.");
   declareProperty(
@@ -65,11 +65,12 @@ void ExtractQENSMembers::init() {
   declareProperty("RenameConvolvedMembers", false,
                   "If true, renames the n-th 'Convolution' member, to the n-th "
                   "supplied name in the ConvolvedMembers property.");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>("ConvolvedMembers"),
-                  "A list of the names of the members which were convolved "
-                  "before being output by the fit routine. These must be "
-                  "provided in the same order as originally provided to the "
-                  "fit.");
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>("ConvolvedMembers"),
+      "A list of the names of the members which were convolved "
+      "before being output by the fit routine. These must be "
+      "provided in the same order as originally provided to the "
+      "fit.");
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace group, containing the fit members.");

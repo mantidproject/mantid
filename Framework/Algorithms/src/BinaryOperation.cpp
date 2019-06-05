@@ -37,8 +37,8 @@ namespace Algorithms {
  */
 void BinaryOperation::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          inputPropName1(), "", Direction::Input),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(inputPropName1(), "",
+                                                           Direction::Input),
       "The name of the input workspace on the left hand side of the operation");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       inputPropName2(), "", Direction::Input),
@@ -48,8 +48,8 @@ void BinaryOperation::init() {
                       outputPropName(), "", Direction::Output),
                   "The name to call the output workspace");
   declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("AllowDifferentNumberSpectra", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("AllowDifferentNumberSpectra",
+                                                false, Direction::Input),
       "Are workspaces with different number of spectra allowed? "
       "For example, the LHSWorkspace might have one spectrum per detector, "
       "but the RHSWorkspace could have its spectra averaged per bank. If true, "
@@ -60,7 +60,7 @@ void BinaryOperation::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("ClearRHSWorkspace", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "For EventWorkspaces only. This will clear out event lists "
       "from the RHS workspace as the binary operation is applied. "
       "This can prevent excessive memory use, e.g. when subtracting "

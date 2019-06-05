@@ -7,7 +7,6 @@
 #ifndef _vtkSplatterPlot_h
 #define _vtkSplatterPlot_h
 
-
 #include "vtkUnstructuredGridAlgorithm.h"
 #include <string>
 

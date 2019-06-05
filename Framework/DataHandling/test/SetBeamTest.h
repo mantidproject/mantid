@@ -113,12 +113,11 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
-    props->declareProperty(
-        std::make_unique<StringProperty>("Shape", "Slit"), "");
-    props->declareProperty(
-        std::make_unique<DoubleProperty>("Width", 1.0), "");
-    props->declareProperty(
-        std::make_unique<DoubleProperty>("Height", 0.75), "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Slit"),
+                           "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Width", 1.0), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 0.75),
+                           "");
     return props;
   }
 };

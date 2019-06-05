@@ -12,7 +12,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
 
-
 #include <cmath>
 #include <fstream>
 
@@ -63,7 +62,7 @@ void SaveBankScatteringAngles::init() {
 
   const static std::vector<std::string> exts{".txt", ".new"};
   declareProperty(std::make_unique<FileProperty>(PROP_FILENAME, "",
-                                                    FileProperty::Save, exts),
+                                                 FileProperty::Save, exts),
                   "The name of the file to save to");
 }
 

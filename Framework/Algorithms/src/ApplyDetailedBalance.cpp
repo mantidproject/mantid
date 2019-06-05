@@ -38,10 +38,10 @@ void ApplyDetailedBalance::init() {
                   "An input workspace.");
   declareProperty(
       std::make_unique<PropertyWithValue<string>>("Temperature", "",
-                                             Direction::Input),
+                                                  Direction::Input),
       "SampleLog variable name that contains the temperature, or a number");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output workspace.");
   std::vector<std::string> unitOptions{"Energy", "Frequency"};
   declareProperty(

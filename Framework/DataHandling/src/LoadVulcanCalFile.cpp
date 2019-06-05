@@ -48,7 +48,7 @@ void LoadVulcanCalFile::init() {
   // LoadVulcanCalFile::getInstrument3WaysInit(this);
 
   declareProperty(std::make_unique<FileProperty>("OffsetFilename", "",
-                                                    FileProperty::Load, ".dat"),
+                                                 FileProperty::Load, ".dat"),
                   "Path to the VULCAN offset file. ");
 
   std::array<std::string, 3> groupoptions = {{"6Modules", "2Banks", "1Bank"}};
@@ -59,13 +59,13 @@ void LoadVulcanCalFile::init() {
       "Choices to output group workspace for 1 bank, 2 banks or 6 modules. ");
 
   declareProperty(std::make_unique<FileProperty>("BadPixelFilename", "",
-                                                    FileProperty::OptionalLoad,
-                                                    ".dat"),
+                                                 FileProperty::OptionalLoad,
+                                                 ".dat"),
                   "Path to the VULCAN bad pixel file. ");
 
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
-                                                          Direction::Input),
+                                                       Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_offsets', '_mask' appended to them.");
 
@@ -79,9 +79,8 @@ void LoadVulcanCalFile::init() {
                   "DIFCs for effective detectors. ");
 
   // Effective geometry: 2theta
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Effective2Thetas"),
-      "2 thetas for effective detectors. ");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Effective2Thetas"),
+                  "2 thetas for effective detectors. ");
 
   // This is the property for testing purpose only!
   declareProperty(

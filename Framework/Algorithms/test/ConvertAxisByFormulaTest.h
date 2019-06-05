@@ -10,10 +10,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
-#include "MantidAlgorithms/ConvertAxisByFormula.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <math.h>
 
 using Mantid::Algorithms::ConvertAxisByFormula;

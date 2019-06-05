@@ -42,13 +42,13 @@ void FixGSASInstrumentFile::init() {
   // Input file
   declareProperty(
       std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
-                                        exts),
+                                     exts),
       "Name of the GSAS instrument parameter file to get fixed for format. ");
 
   // Output file
   declareProperty(
-      std::make_unique<FileProperty>("OutputFilename", "",
-                                        FileProperty::Save, exts),
+      std::make_unique<FileProperty>("OutputFilename", "", FileProperty::Save,
+                                     exts),
       "Name of the output GSAS instrument parameter file to have format "
       "fixed. ");
 }

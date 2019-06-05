@@ -150,8 +150,7 @@ private:
     run.addProperty<double>("dblProp", static_cast<double>(logValue));
     run.addProperty<int>("intProp", logValue);
     run.addProperty<bool>("boolProp", logValue != 0);
-    auto tsp =
-        std::make_unique<TimeSeriesProperty<double>>("timeSeries");
+    auto tsp = std::make_unique<TimeSeriesProperty<double>>("timeSeries");
     std::vector<DateAndTime> times;
     std::vector<double> values;
     for (size_t i = 0; i < 10; ++i) {

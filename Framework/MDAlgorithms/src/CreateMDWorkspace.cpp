@@ -65,9 +65,9 @@ DECLARE_ALGORITHM(CreateMDWorkspace)
 /** Initialize the algorithm's properties.
  */
 void CreateMDWorkspace::init() {
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("Dimensions", 1, Direction::Input),
-      "Number of dimensions that the workspace will have.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("Dimensions", 1,
+                                                           Direction::Input),
+                  "Number of dimensions that the workspace will have.");
 
   std::vector<std::string> propOptions{"MDEvent", "MDLeanEvent"};
   declareProperty("EventType", "MDLeanEvent",
@@ -98,13 +98,14 @@ void CreateMDWorkspace::init() {
   // Set the box controller properties
   this->initBoxControllerProps("5", 1000, 5);
 
-  declareProperty(std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
-                  "Optional. If specified, then all the boxes will be split to "
-                  "this minimum recursion depth. 0 = no splitting, 1 = one "
-                  "level of splitting, etc.\n"
-                  "Be careful using this since it can quickly create a huge "
-                  "number of boxes = (SplitInto ^ (MinRercursionDepth * "
-                  "NumDimensions)).");
+  declareProperty(
+      std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
+      "Optional. If specified, then all the boxes will be split to "
+      "this minimum recursion depth. 0 = no splitting, 1 = one "
+      "level of splitting, etc.\n"
+      "Be careful using this since it can quickly create a huge "
+      "number of boxes = (SplitInto ^ (MinRercursionDepth * "
+      "NumDimensions)).");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
@@ -112,7 +113,7 @@ void CreateMDWorkspace::init() {
                   "Name of the output MDEventWorkspace.");
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+                                     ".nxs"),
       "Optional: to use a file as the back end, give the path to the file to "
       "save.");
 
@@ -121,8 +122,8 @@ void CreateMDWorkspace::init() {
       "If Filename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings(
-      "Memory", std::make_unique<EnabledWhenProperty>("Filename", IS_NOT_DEFAULT));
+  setPropertySettings("Memory", std::make_unique<EnabledWhenProperty>(
+                                    "Filename", IS_NOT_DEFAULT));
 }
 
 /** Finish initialisation

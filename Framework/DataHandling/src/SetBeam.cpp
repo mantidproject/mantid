@@ -80,9 +80,9 @@ void SetBeam::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, validator),
                   "An input workspace with an attached instrument.");
-  declareProperty(std::make_unique<PropertyManagerProperty>(
-                      "Geometry", Direction::Input),
-                  "A dictionary of geometry parameters for the beam");
+  declareProperty(
+      std::make_unique<PropertyManagerProperty>("Geometry", Direction::Input),
+      "A dictionary of geometry parameters for the beam");
 }
 
 /**

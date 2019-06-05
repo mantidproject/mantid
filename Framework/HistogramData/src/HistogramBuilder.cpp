@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/HistogramBuilder.h"
 
-
 namespace Mantid {
 namespace HistogramData {
 
@@ -28,8 +27,7 @@ Histogram HistogramBuilder::build() const {
   if (getHistogramXMode(m_x->size(), m_y->size()) ==
       Histogram::XMode::BinEdges) {
     if (m_isDistribution)
-      histogram =
-          std::make_unique<Histogram>(BinEdges(m_x), Frequencies(m_y));
+      histogram = std::make_unique<Histogram>(BinEdges(m_x), Frequencies(m_y));
     else
       histogram = std::make_unique<Histogram>(BinEdges(m_x), Counts(m_y));
   } else {

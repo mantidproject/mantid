@@ -183,7 +183,8 @@ void GetDetOffsetsMultiPeaks::init() {
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
   declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::OptionalSave, ".cal"),
+                                                 FileProperty::OptionalSave,
+                                                 ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
@@ -194,7 +195,7 @@ void GetDetOffsetsMultiPeaks::init() {
           "NumberPeaksWorkspace", "NumberPeaksFitted", Direction::Output),
       "An output workspace containing the offsets.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output workspace containing the mask.");
   declareProperty("MaxOffset", 1.0,
                   "Maximum absolute value of offsets; default is 1");

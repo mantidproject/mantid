@@ -44,7 +44,7 @@ void SliceMD::init() {
 
   declareProperty(
       std::make_unique<FileProperty>("OutputFilename", "",
-                                FileProperty::OptionalSave, ".nxs"),
+                                     FileProperty::OptionalSave, ".nxs"),
       "Optional: Specify a NeXus file to write if you want the output "
       "workspace to be file-backed.");
 

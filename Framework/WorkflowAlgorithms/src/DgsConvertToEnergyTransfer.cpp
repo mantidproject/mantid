@@ -47,13 +47,13 @@ const std::string DgsConvertToEnergyTransfer::category() const {
 /** Initialize the algorithm's properties.
  */
 void DgsConvertToEnergyTransfer::init() {
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "A sample data workspace.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "InputWorkspace", "", Direction::Input),
+                        "A sample data workspace.");
   this->declareProperty(
       std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
-                                       Direction::Input,
-                                       PropertyMode::Optional),
+                                            Direction::Input,
+                                            PropertyMode::Optional),
       "A monitor workspace associated with the sample workspace.");
   this->declareProperty(
       "IncidentEnergyGuess", EMPTY_DBL(),
@@ -74,11 +74,11 @@ void DgsConvertToEnergyTransfer::init() {
   this->declareProperty(
       "AlternateGroupingTag", "",
       "Allows modification to the OldGroupingFile property name");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                         Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Direction::Output),
                         "The name for the output workspace.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputTibWorkspace",
-                                                         "", Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "OutputTibWorkspace", "", Direction::Output),
                         "The name for the output TIB workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Input);

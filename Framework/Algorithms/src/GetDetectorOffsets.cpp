@@ -52,14 +52,15 @@ void GetDetectorOffsets::init() {
       "Maximum of CrossCorrelation data to search for peak, usually positive");
 
   declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::OptionalSave, ".cal"),
+                                                 FileProperty::OptionalSave,
+                                                 ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output workspace containing the mask.");
   // Only keep peaks
   declareProperty(

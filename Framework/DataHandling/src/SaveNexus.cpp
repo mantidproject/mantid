@@ -39,8 +39,8 @@ void SaveNexus::init() {
                   "Name of the workspace to be saved");
 
   const std::vector<std::string> fileExts{".nxs", ".nx5", ".xml"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Save, fileExts),
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, fileExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
   //

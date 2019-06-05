@@ -23,7 +23,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
@@ -48,15 +47,15 @@ void RemoveBackground::init() {
                       "InputWorkspace", "", Direction::Input, sourceValidator),
                   "Workspace containing the input data");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name to give the output workspace");
 
   auto vsValidator = boost::make_shared<CompositeValidator>();
   vsValidator->add<WorkspaceUnitValidator>("TOF");
   vsValidator->add<HistogramValidator>();
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("BkgWorkspace", "", Direction::Input,
-                                       vsValidator),
+      std::make_unique<WorkspaceProperty<>>("BkgWorkspace", "",
+                                            Direction::Input, vsValidator),
       "An optional histogram workspace in the units of TOF defining background "
       "for removal during rebinning."
       "The workspace has to have single value or contain the same number of "

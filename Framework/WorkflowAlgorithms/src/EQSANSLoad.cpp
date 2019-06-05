@@ -51,7 +51,7 @@ void EQSANSLoad::init() {
                   "straight from LoadEventNexus");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Then name of the output EventWorkspace");
   declareProperty(
       "NoBeamCenter", false,
@@ -519,7 +519,7 @@ void EQSANSLoad::exec() {
   if (!reductionManager->existsProperty("InstrumentName"))
     reductionManager->declareProperty(
         std::make_unique<PropertyWithValue<std::string>>("InstrumentName",
-                                                    "EQSANS"));
+                                                         "EQSANS"));
 
   // Output log
   m_output_message = "";
@@ -723,13 +723,15 @@ void EQSANSLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(std::make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterX", m_center_x));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
+                                                      m_center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", m_center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(std::make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterY", m_center_y));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
+                                                      m_center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", m_center_y);
   }

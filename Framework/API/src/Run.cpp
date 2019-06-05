@@ -12,7 +12,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
-
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/lexical_cast.hpp>
@@ -49,8 +48,8 @@ Kernel::Logger g_log("Run");
 Run::Run() : m_goniometer(std::make_unique<Geometry::Goniometer>()) {}
 
 Run::Run(const Run &other)
-    : LogManager(other), m_goniometer(std::make_unique<Geometry::Goniometer>(
-                             *other.m_goniometer)),
+    : LogManager(other),
+      m_goniometer(std::make_unique<Geometry::Goniometer>(*other.m_goniometer)),
       m_histoBins(other.m_histoBins) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.

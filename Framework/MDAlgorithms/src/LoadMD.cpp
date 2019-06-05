@@ -83,7 +83,8 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadMD::init() {
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                     ".nxs"),
       "The name of the Nexus file to load, as a full or relative path");
 
   declareProperty(
@@ -92,12 +93,14 @@ void LoadMD::init() {
       "loaded workspace will be empty and not file-backed.");
 
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("BoxStructureOnly", false),
+      std::make_unique<Kernel::PropertyWithValue<bool>>("BoxStructureOnly",
+                                                        false),
       "Load partial information about the boxes and events. Redundant property "
       "currently equivalent to MetadataOnly");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
-                  "Set to true to load the data only on demand.");
+  declareProperty(
+      std::make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
+      "Set to true to load the data only on demand.");
   setPropertySettings("FileBackEnd", std::make_unique<EnabledWhenProperty>(
                                          "MetadataOnly", IS_EQUAL_TO, "0"));
 

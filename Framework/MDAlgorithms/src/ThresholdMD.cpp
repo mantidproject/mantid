@@ -70,9 +70,9 @@ void ThresholdMD::init() {
 
   declareProperty("CustomOverwriteValue", 0.0,
                   "Custom overwrite value for the signal. Defaults to zero.");
-  setPropertySettings(
-      "CustomOverwriteValue",
-      std::make_unique<EnabledWhenProperty>("OverwriteWithZero", IS_NOT_DEFAULT));
+  setPropertySettings("CustomOverwriteValue",
+                      std::make_unique<EnabledWhenProperty>("OverwriteWithZero",
+                                                            IS_NOT_DEFAULT));
 
   declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

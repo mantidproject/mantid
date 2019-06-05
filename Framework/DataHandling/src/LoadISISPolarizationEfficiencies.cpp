@@ -67,7 +67,7 @@ void LoadISISPolarizationEfficiencies::init() {
 
   declareProperty(
       std::make_unique<API::FileProperty>(Alpha, "",
-                                             API::FileProperty::OptionalLoad),
+                                          API::FileProperty::OptionalLoad),
       "Path to the file containing the Alpha polarization efficiency "
       "in XYE columns.");
 

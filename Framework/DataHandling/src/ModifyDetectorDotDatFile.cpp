@@ -31,7 +31,7 @@ DECLARE_ALGORITHM(ModifyDetectorDotDatFile)
 void ModifyDetectorDotDatFile::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                Direction::Input),
+                                                     Direction::Input),
       "Workspace with detectors in the positions to be put into the detector "
       "dot dat file");
 
@@ -39,12 +39,12 @@ void ModifyDetectorDotDatFile::init() {
 
   declareProperty(
       std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
-                                        exts),
+                                     exts),
       "Path to a detector dot dat file. Must be of type .dat or .txt");
 
   declareProperty(
-      std::make_unique<FileProperty>("OutputFilename", "",
-                                        FileProperty::Save, exts),
+      std::make_unique<FileProperty>("OutputFilename", "", FileProperty::Save,
+                                     exts),
       "Path to the modified detector dot dat file. Must be of type .dat or "
       ".txt");
 }

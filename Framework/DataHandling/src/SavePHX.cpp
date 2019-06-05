@@ -36,8 +36,9 @@ void SavePHX::init() {
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The input workspace");
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
-                  "The filename to use for the saved data");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+      "The filename to use for the saved data");
 }
 
 void SavePHX::exec() {

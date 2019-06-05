@@ -9,7 +9,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-
 using Mantid::Kernel::LogFilter;
 using Mantid::Kernel::Property;
 using Mantid::Kernel::TimeSeriesProperty;

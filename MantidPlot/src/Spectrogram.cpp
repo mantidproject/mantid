@@ -203,8 +203,7 @@ void Spectrogram::updateData(
   if (d_wsData) {
     if (!d_color_map_autoscale) {
       // Find the color range the data should use
-      range = std::make_unique<const QwtDoubleInterval>(
-          d_wsData->range());
+      range = std::make_unique<const QwtDoubleInterval>(d_wsData->range());
     }
     delete d_wsData;
   }

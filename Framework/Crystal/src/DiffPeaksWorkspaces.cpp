@@ -42,7 +42,7 @@ void DiffPeaksWorkspaces::init() {
                   "The second set of peaks.");
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
       "The set of peaks that are in the first, but not the second, workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();

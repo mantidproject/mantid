@@ -43,14 +43,14 @@ const std::string ExtractUnmaskedSpectra::summary() const {
  */
 void ExtractUnmaskedSpectra::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+                                                        Direction::Input),
                   "An input workspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "MaskWorkspace", "", Direction::Input, API::PropertyMode::Optional),
       "An optional mask workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 }
 

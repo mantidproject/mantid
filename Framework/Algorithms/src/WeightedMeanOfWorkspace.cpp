@@ -36,11 +36,11 @@ const std::string WeightedMeanOfWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void WeightedMeanOfWorkspace::init() {
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                         Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "InputWorkspace", "", Direction::Input),
+                        "An input workspace.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Direction::Output),
                         "An output workspace.");
 }
 

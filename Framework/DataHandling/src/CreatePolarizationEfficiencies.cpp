@@ -60,19 +60,18 @@ const std::vector<std::string> CreatePolarizationEfficiencies::seeAlso() const {
 }
 
 void CreatePolarizationEfficiencies::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input workspace to use the x-values from.");
-
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(Pp, Direction::Input),
-      "Effective polarizing power of the polarizing system. "
-      "Expressed as a ratio 0 < Pp < 1");
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "An input workspace to use the x-values from.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(Ap, Direction::Input),
-      "Effective polarizing power of the analyzing system. "
-      "Expressed as a ratio 0 < Ap < 1");
+  declareProperty(std::make_unique<ArrayProperty<double>>(Pp, Direction::Input),
+                  "Effective polarizing power of the polarizing system. "
+                  "Expressed as a ratio 0 < Pp < 1");
+
+  declareProperty(std::make_unique<ArrayProperty<double>>(Ap, Direction::Input),
+                  "Effective polarizing power of the analyzing system. "
+                  "Expressed as a ratio 0 < Ap < 1");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(Rho, Direction::Input),
@@ -88,21 +87,17 @@ void CreatePolarizationEfficiencies::init() {
       "Values are factors for each term in a polynomial "
       "expression.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(P1, Direction::Input),
-      "Polarizer efficiency.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(P1, Direction::Input),
+                  "Polarizer efficiency.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(P2, Direction::Input),
-      "Analyzer efficiency.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(P2, Direction::Input),
+                  "Analyzer efficiency.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(F1, Direction::Input),
-      "Polarizer flipper efficiency.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(F1, Direction::Input),
+                  "Polarizer flipper efficiency.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(F2, Direction::Input),
-      "Analyzer flipper efficiency.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(F2, Direction::Input),
+                  "Analyzer flipper efficiency.");
 
   initOutputWorkspace();
 }

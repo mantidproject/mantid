@@ -107,8 +107,7 @@ EnggDiffMultiRunFittingWidgetPresenter::getAllRunLabels() const {
 
 std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
 EnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
-  return std::make_unique<EnggDiffMultiRunFittingWidgetAdder>(
-      m_view);
+  return std::make_unique<EnggDiffMultiRunFittingWidgetAdder>(m_view);
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>

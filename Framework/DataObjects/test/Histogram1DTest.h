@@ -16,7 +16,6 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
-
 using namespace Mantid;
 using namespace API;
 using namespace Kernel;

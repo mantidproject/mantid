@@ -18,7 +18,6 @@
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidKernel/UnitFactory.h"
 
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;

@@ -25,10 +25,10 @@ public:
   int version() const override { return 1; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {
-    declareProperty(std::make_unique<ArrayProperty<std::string>>("MyInputWorkspaces",
-                                                            Direction::Input));
+    declareProperty(std::make_unique<ArrayProperty<std::string>>(
+        "MyInputWorkspaces", Direction::Input));
     declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
                     "");
   }
   void exec() override {

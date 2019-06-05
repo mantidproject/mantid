@@ -35,11 +35,11 @@ const std::string ResetNegatives::category() const {
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::Algorithm::init()
 void ResetNegatives::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "An input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output workspace.");
   declareProperty(
       "AddMinimum", true,

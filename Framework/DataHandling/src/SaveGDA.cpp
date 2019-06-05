@@ -14,7 +14,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
 
-
 #include <boost/optional.hpp>
 
 #include <cmath>
@@ -127,15 +126,15 @@ void SaveGDA::init() {
                   "bank");
 
   const static std::vector<std::string> outExts{".gda"};
-  declareProperty(std::make_unique<FileProperty>(
-                      PROP_OUTPUT_FILENAME, "", FileProperty::Save, outExts),
+  declareProperty(std::make_unique<FileProperty>(PROP_OUTPUT_FILENAME, "",
+                                                 FileProperty::Save, outExts),
                   "The name of the file to save to");
 
   const static std::vector<std::string> paramsExts{".ipf", ".prm", ".parm",
                                                    ".iprm"};
   declareProperty(
       std::make_unique<FileProperty>(PROP_PARAMS_FILENAME, "",
-                                        FileProperty::Load, paramsExts),
+                                     FileProperty::Load, paramsExts),
       "GSAS calibration file containing conversion factors from D to TOF");
 
   declareProperty(

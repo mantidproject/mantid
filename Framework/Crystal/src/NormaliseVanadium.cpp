@@ -39,7 +39,7 @@ void NormaliseVanadium::init() {
                   "The X values for the input workspace must be in units of "
                   "wavelength or TOF");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();

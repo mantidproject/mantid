@@ -10,7 +10,6 @@
 
 #include "MantidKernel/MaterialXMLParser.h"
 
-
 #include "Poco/DOM/AutoPtr.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/DOMWriter.h"

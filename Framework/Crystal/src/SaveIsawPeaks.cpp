@@ -45,9 +45,9 @@ void SaveIsawPeaks::init() {
                   "If false, new file (default).");
 
   const std::vector<std::string> exts{".peaks", ".integrate"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, exts),
-                  "Path to an ISAW-style peaks or integrate file to save.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
+      "Path to an ISAW-style peaks or integrate file to save.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace2D>>(

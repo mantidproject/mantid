@@ -86,10 +86,10 @@ void LoadPSIMuonBin::init() {
       "The name of the temperature file to be loaded, this is optional as it "
       "will be automatically searched for if not provided.");
 
-  declareProperty(std::make_unique<
-                      Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
-                  "An output workspace.");
+  declareProperty(
+      std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
+      "An output workspace.");
 
   declareProperty("SearchForTempFile", true,
                   "If no temp file has been given decide whether the algorithm "

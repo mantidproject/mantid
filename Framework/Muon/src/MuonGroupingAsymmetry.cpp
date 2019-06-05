@@ -142,12 +142,11 @@ void MuonGroupingAsymmetry::init() {
   std::vector<int> defaultGrouping = {1};
   std::vector<int> defaultPeriods = {1};
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "InputWorkspace", emptyString, Direction::Input,
-          PropertyMode::Mandatory),
-      "Input workspace containing data from detectors which are to "
-      "be grouped.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "InputWorkspace", emptyString, Direction::Input,
+                      PropertyMode::Mandatory),
+                  "Input workspace containing data from detectors which are to "
+                  "be grouped.");
 
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", emptyString, Direction::Output),
@@ -185,9 +184,9 @@ void MuonGroupingAsymmetry::init() {
                       "SummedPeriods", std::move(defaultPeriods),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "A list of periods to sum in multiperiod data.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
-      "A list of periods to subtract in multiperiod data.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SubtractedPeriods",
+                                                       Direction::Input),
+                  "A list of periods to subtract in multiperiod data.");
 
   // Perform Group Associations.
 

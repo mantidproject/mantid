@@ -198,8 +198,7 @@ void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
   const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "The name of the Nexus file to read, as a full or relative path.");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -230,7 +229,7 @@ void LoadNexusProcessed::init() {
                   "If true, the workspace history will be loaded");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "For multiperiod workspaces. Copy instrument, parameter and x-data "
       "rather than loading it directly for each workspace. Y, E and log "
       "information is always loaded.");

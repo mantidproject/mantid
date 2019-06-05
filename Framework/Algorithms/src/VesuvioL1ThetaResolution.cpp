@@ -89,18 +89,18 @@ void VesuvioL1ThetaResolution::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "Output workspace containing mean and standard deviation of resolution "
       "per detector.");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("L1Distribution", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "Distribution of lengths of the final flight path.");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaDistribution", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "Distribution of scattering angles.");
 }
 

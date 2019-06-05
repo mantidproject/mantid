@@ -107,7 +107,7 @@ void ConvertToMDMinMaxGlobal::init() {
 
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>("OtherDimensions",
-                                              Direction::Input),
+                                                   Direction::Input),
       "List(comma separated) of additional to **Q** and **DeltaE** variables "
       "which form additional "
       "(orthogonal) to **Q** dimensions in the target workspace (e.g. "

@@ -132,15 +132,13 @@ public:
   }
 
   void testThatFindsStrongestPeakWhenAbsoluteBackgroundStrategyIsUsed() {
-    auto backgroundStrategy =
-        std::make_unique<AbsoluteBackgroundStrategy>(3.);
+    auto backgroundStrategy = std::make_unique<AbsoluteBackgroundStrategy>(3.);
     doRunStrongestPeakTest(backgroundStrategy.get());
   }
 
   void testThatFindsAllPeaksWhenAbsoluteBackgroundStrategyIsUsed() {
     // GIVEN
-    auto backgroundStrategy =
-        std::make_unique<AbsoluteBackgroundStrategy>(3.);
+    auto backgroundStrategy = std::make_unique<AbsoluteBackgroundStrategy>(3.);
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             1 /*nhist*/, 15 /*nbins*/);
@@ -195,8 +193,8 @@ public:
     const auto resolution = 0.001;
     auto compareStrategy =
         std::make_unique<RelativeCompareStrategy>(resolution);
-    auto simpleStrategy = std::make_unique<SimpleReduceStrategy>(
-        compareStrategy.get());
+    auto simpleStrategy =
+        std::make_unique<SimpleReduceStrategy>(compareStrategy.get());
 
     std::vector<SXPeak> peaks;
     peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.1 /*intensity*/,
@@ -245,8 +243,7 @@ public:
     auto compareStrategy =
         std::make_unique<RelativeCompareStrategy>(resolution);
     auto findMaxReduceStrategy =
-        std::make_unique<FindMaxReduceStrategy>(
-            compareStrategy.get());
+        std::make_unique<FindMaxReduceStrategy>(compareStrategy.get());
 
     std::vector<SXPeak> peaks;
     peaks.emplace_back(1 /*TOF*/, 0.99 /*phi*/, 0.1 /*intensity*/,
@@ -413,9 +410,8 @@ private:
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // WHEN
-    auto peakFindingStrategy =
-        std::make_unique<StrongestPeaksStrategy>(backgroundStrategy,
-                                                            spectrumInfo);
+    auto peakFindingStrategy = std::make_unique<StrongestPeaksStrategy>(
+        backgroundStrategy, spectrumInfo);
     auto peaks = peakFindingStrategy->findSXPeaks(x, y, workspaceIndex);
 
     // THEN

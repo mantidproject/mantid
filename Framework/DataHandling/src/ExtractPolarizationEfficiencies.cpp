@@ -89,11 +89,12 @@ const std::string ExtractPolarizationEfficiencies::summary() const {
  */
 void ExtractPolarizationEfficiencies::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input),
       "A workspace with attached instrument whose parameters contain "
       "polarization efficiencies.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The workspace with extracted efficiencies.");
   declareProperty<std::string>("CorrectionMethod", "",
                                "Correction method: Fredrikze or Wildes.",

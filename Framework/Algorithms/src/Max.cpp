@@ -29,7 +29,7 @@ void Max::init() {
                       boost::make_shared<HistogramValidator>()),
                   "The name of the Workspace2D to take as input");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name of the workspace in which to store the result");
 
   declareProperty("RangeLower", EMPTY_DBL(),

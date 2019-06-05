@@ -53,11 +53,10 @@ DECLARE_ALGORITHM(ApplyMuonDetectorGroupPairing)
 void ApplyMuonDetectorGroupPairing::init() {
   std::string emptyString("");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "InputWorkspaceGroup", emptyString, Direction::InOut,
-          PropertyMode::Mandatory),
-      "The workspace group to which the output will be added.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "InputWorkspaceGroup", emptyString, Direction::InOut,
+                      PropertyMode::Mandatory),
+                  "The workspace group to which the output will be added.");
 
   declareProperty("PairName", emptyString,
                   "The name of the pair. Must "
@@ -75,17 +74,15 @@ void ApplyMuonDetectorGroupPairing::init() {
 
   // Select groups via workspaces
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace1", emptyString, Direction::Input,
-          PropertyMode::Optional),
-      "Input workspace containing data from grouped detectors.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace1", emptyString, Direction::Input,
+                      PropertyMode::Optional),
+                  "Input workspace containing data from grouped detectors.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace2", emptyString, Direction::Input,
-          PropertyMode::Optional),
-      "Input workspace containing data from grouped detectors.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace2", emptyString, Direction::Input,
+                      PropertyMode::Optional),
+                  "Input workspace containing data from grouped detectors.");
 
   setPropertySettings("InputWorkspace1",
                       std::make_unique<Kernel::EnabledWhenProperty>(

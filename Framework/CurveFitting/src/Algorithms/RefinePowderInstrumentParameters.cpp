@@ -114,9 +114,9 @@ void RefinePowderInstrumentParameters::init() {
                   "Number of Monte Carlo random walk steps. ");
 
   // Parameters to fit
-  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      "ParametersToFit"),
-                  "Names of the parameters to fit. ");
+  declareProperty(
+      std::make_unique<Kernel::ArrayProperty<std::string>>("ParametersToFit"),
+      "Names of the parameters to fit. ");
 
   // Mininum allowed peak's sigma (avoid wrong fitting peak with very narrow
   // width)

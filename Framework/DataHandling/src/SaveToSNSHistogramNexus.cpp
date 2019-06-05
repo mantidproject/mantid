@@ -54,7 +54,7 @@ void SaveToSNSHistogramNexus::init() {
   std::initializer_list<std::string> exts = {".nxs"};
 
   declareProperty(std::make_unique<FileProperty>("InputFilename", "",
-                                                    FileProperty::Load, exts),
+                                                 FileProperty::Load, exts),
                   "The name of the original Nexus file for this data,\n"
                   "as a full or relative path");
 
@@ -63,13 +63,13 @@ void SaveToSNSHistogramNexus::init() {
                   "Name of the workspace to be saved");
 
   declareProperty(std::make_unique<FileProperty>("OutputFilename", "",
-                                                    FileProperty::Save, exts),
+                                                 FileProperty::Save, exts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Compress", false, Direction::Input),
-      "Will the output NXS file data be compressed?");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Compress", false,
+                                                            Direction::Input),
+                  "Will the output NXS file data be compressed?");
 }
 
 //  /** Execute the algorithm.

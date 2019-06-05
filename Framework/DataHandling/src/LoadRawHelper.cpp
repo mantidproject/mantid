@@ -58,11 +58,11 @@ LoadRawHelper::~LoadRawHelper() {}
 /// Initialisation method.
 void LoadRawHelper::init() {
   const std::vector<std::string> exts{".raw", ".s*", ".add"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the RAW file to read, including its full or "
-                  "relative path. The file extension must be .raw or .RAW "
-                  "(N.B. case sensitive if running on Linux).");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the RAW file to read, including its full or "
+      "relative path. The file extension must be .raw or .RAW "
+      "(N.B. case sensitive if running on Linux).");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "

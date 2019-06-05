@@ -36,11 +36,11 @@ using namespace DataObjects;
  *
  */
 void InterpolatingRebin::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace containing the input data");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace containing the input data");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name to give the output workspace");
 
   declareProperty(

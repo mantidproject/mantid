@@ -10,7 +10,6 @@
 #include "MantidCatalog/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 
-
 #include <boost/optional.hpp>
 
 namespace Mantid {

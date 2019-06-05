@@ -257,7 +257,7 @@ void LoadEventPreNexus2::init() {
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   declareProperty(
       std::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
-                                        eventExts),
+                                     eventExts),
       "The name of the neutron event file to read, including its full or "
       "relative path. In most cases, the file typically ends in "
       "neutron_event.dat (N.B. case sensitive if running on Linux).");
@@ -267,8 +267,8 @@ void LoadEventPreNexus2::init() {
                   "File containing the accelerator pulse information; the "
                   "filename will be found automatically if not specified.");
   declareProperty(
-      std::make_unique<FileProperty>(MAP_PARAM, "",
-                                        FileProperty::OptionalLoad, ".dat"),
+      std::make_unique<FileProperty>(MAP_PARAM, "", FileProperty::OptionalLoad,
+                                     ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");

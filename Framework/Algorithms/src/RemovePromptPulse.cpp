@@ -39,7 +39,7 @@ void RemovePromptPulse::init() {
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "An input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output workspace.");
 
   auto validator = boost::make_shared<BoundedValidator<double>>();

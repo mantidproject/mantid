@@ -44,7 +44,7 @@ const std::string PoldiFitPeaks1D::category() const { return "SINQ\\Poldi"; }
 void PoldiFitPeaks1D::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "",
-                                                  Direction::Input),
+                                                       Direction::Input),
       "An input workspace containing a POLDI auto-correlation spectrum.");
   boost::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
       boost::make_shared<BoundedValidator<double>>();

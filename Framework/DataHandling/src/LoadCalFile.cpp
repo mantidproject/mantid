@@ -37,8 +37,8 @@ void LoadCalFile::getInstrument3WaysInit(Algorithm *alg) {
   std::string grpName("Specify the Instrument");
 
   alg->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
   alg->declareProperty(std::make_unique<PropertyWithValue<std::string>>(
@@ -47,11 +47,11 @@ void LoadCalFile::getInstrument3WaysInit(Algorithm *alg) {
                        "GroupingWorkspace on which to base the "
                        "GroupingWorkspace.");
 
-  alg->declareProperty(std::make_unique<FileProperty>("InstrumentFilename", "",
-                                                 FileProperty::OptionalLoad,
-                                                 ".xml"),
-                       "Optional: Path to the instrument definition file on "
-                       "which to base the GroupingWorkspace.");
+  alg->declareProperty(
+      std::make_unique<FileProperty>("InstrumentFilename", "",
+                                     FileProperty::OptionalLoad, ".xml"),
+      "Optional: Path to the instrument definition file on "
+      "which to base the GroupingWorkspace.");
 
   alg->setPropertyGroup("InputWorkspace", grpName);
   alg->setPropertyGroup("InstrumentName", grpName);
@@ -126,28 +126,29 @@ void LoadCalFile::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
   declareProperty(
-      std::make_unique<FileProperty>("CalFilename", "", FileProperty::Load, ".cal"),
+      std::make_unique<FileProperty>("CalFilename", "", FileProperty::Load,
+                                     ".cal"),
       "Path to the old-style .cal grouping/calibration file (multi-column "
       "ASCII). You must also specify the instrument.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("MakeGroupingWorkspace",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "MakeGroupingWorkspace", true, Direction::Input),
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("MakeOffsetsWorkspace",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "MakeOffsetsWorkspace", true, Direction::Input),
                   "Set to true to create a OffsetsWorkspace with called "
                   "WorkspaceName_offsets.");
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("MakeMaskWorkspace", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
-                                                  Direction::Input),
+                                                       Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_cal', '_offsets', '_mask' appended to them.");
 }

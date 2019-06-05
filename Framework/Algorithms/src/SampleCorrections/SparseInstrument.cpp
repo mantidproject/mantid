@@ -20,7 +20,6 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/HistogramIterator.h"
 
-
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 
@@ -206,7 +205,7 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
   // The sparse instrument is build around origin.
   constexpr Kernel::V3D samplePos{0.0, 0.0, 0.0};
   auto sample = std::make_unique<Geometry::ObjComponent>("sample", nullptr,
-                                                            instrument.get());
+                                                         instrument.get());
   sample->setPos(samplePos);
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());
@@ -218,7 +217,7 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
     return p;
   }();
   auto source = std::make_unique<Geometry::ObjComponent>("source", nullptr,
-                                                            instrument.get());
+                                                         instrument.get());
   source->setPos(sourcePos);
   instrument->add(source.get());
   instrument->markAsSource(source.release());

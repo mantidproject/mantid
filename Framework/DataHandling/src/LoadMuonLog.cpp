@@ -36,12 +36,13 @@ void LoadMuonLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
-                                                      Direction::InOut),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "Workspace", "Anonymous", Direction::InOut),
       "The name of the workspace to which the log data will be added.");
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
-                  "The filename (including its full or relative path) of the "
-                  "Muon Nexus file.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
+      "The filename (including its full or relative path) of the "
+      "Muon Nexus file.");
 }
 
 /** Executes the algorithm. Reading in Log entries from the Nexus file

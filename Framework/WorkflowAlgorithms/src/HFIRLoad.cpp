@@ -33,7 +33,7 @@ void HFIRLoad::init() {
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input file to load");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Then name of the output workspace");
   declareProperty(
       "NoBeamCenter", false,
@@ -305,13 +305,15 @@ void HFIRLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(std::make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterX", center_x));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
+                                                      center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(std::make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterY", center_y));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
+                                                      center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", center_y);
 

@@ -42,12 +42,14 @@ DECLARE_ALGORITHM(PaddingAndApodization)
  *
  */
 void PaddingAndApodization::init() {
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "The name of the input 2D workspace.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "The name of the input 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output 2D workspace.");
   declareProperty("ApodizationFunction", "None",
                   boost::make_shared<Mantid::Kernel::StringListValidator>(
                       std::vector<std::string>{"None", "Lorentz", "Gaussian"}),

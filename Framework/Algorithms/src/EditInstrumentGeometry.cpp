@@ -41,9 +41,9 @@ int EditInstrumentGeometry::version() const { return 1; }
  */
 void EditInstrumentGeometry::init() {
   // Input workspace
-  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "",
-                                                           Direction::InOut),
-                  "Workspace to edit the detector information");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "Workspace to edit the detector information");
 
   // L1
   declareProperty("PrimaryFlightPath", EMPTY_DBL(),

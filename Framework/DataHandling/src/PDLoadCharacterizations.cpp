@@ -119,8 +119,8 @@ void PDLoadCharacterizations::init() {
   const auto exts = std::vector<std::string>({".txt"});
   declareProperty(std::make_unique<MultipleFileProperty>("Filename", exts),
                   "Characterizations file");
-  declareProperty(std::make_unique<FileProperty>("ExpIniFilename", "",
-                                            FileProperty::OptionalLoad, "ini"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "ExpIniFilename", "", FileProperty::OptionalLoad, "ini"),
                   "(Optional) exp.ini file used at NOMAD");
 
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
@@ -133,11 +133,11 @@ void PDLoadCharacterizations::init() {
   declareProperty("PrimaryFlightPath", EMPTY_DBL(),
                   "Primary flight path L1 of the powder diffractomer. ",
                   Direction::Output);
-  declareProperty(
-      std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs", Direction::Output),
-      "Spectrum Nos (note that it is not detector ID or workspace "
-      "indices). The list must be either empty or have a size "
-      "equal to input workspace's histogram number. ");
+  declareProperty(std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs",
+                                                           Direction::Output),
+                  "Spectrum Nos (note that it is not detector ID or workspace "
+                  "indices). The list must be either empty or have a size "
+                  "equal to input workspace's histogram number. ");
   declareProperty(
       std::make_unique<ArrayProperty<double>>("L2", Direction::Output),
       "Secondary flight (L2) paths for each detector.  Number of L2 "

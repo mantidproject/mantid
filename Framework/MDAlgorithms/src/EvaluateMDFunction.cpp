@@ -52,10 +52,9 @@ void EvaluateMDFunction::init() {
   declareProperty(
       std::make_unique<API::FunctionProperty>("Function", Direction::InOut),
       "Parameters defining the fitting function and its initial values");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

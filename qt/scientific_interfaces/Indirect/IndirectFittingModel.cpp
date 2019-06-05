@@ -648,9 +648,8 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitData, spectrum);
   else
-    m_fitOutput =
-        std::make_unique<IndirectFitOutput>(createFitOutput(
-            resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
+    m_fitOutput = std::make_unique<IndirectFitOutput>(createFitOutput(
+        resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
   m_previousModelSelected = isPreviousModelSelected();
 }
 

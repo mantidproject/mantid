@@ -9,7 +9,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
-
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
 #include <sstream>

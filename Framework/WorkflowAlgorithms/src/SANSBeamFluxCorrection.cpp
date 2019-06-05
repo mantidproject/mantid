@@ -22,24 +22,24 @@ using namespace API;
 DECLARE_ALGORITHM(SANSBeamFluxCorrection)
 
 void SANSBeamFluxCorrection::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace to be corrected");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace to be corrected");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
-                                       Direction::Input),
+                                            Direction::Input),
       "Workspace containing the monitor counts for the sample data");
 
   std::vector<std::string> exts{"_event.nxs", ".nxs", ".nxs.h5"};
   declareProperty(
       std::make_unique<API::FileProperty>("ReferenceFluxFilename", "",
-                                             API::FileProperty::Load, exts),
+                                          API::FileProperty::Load, exts),
       "File containing the reference flux spectrum.");
 
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Corrected workspace.");
   declareProperty("OutputMessage", "", Direction::Output);
 }
@@ -134,9 +134,8 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
 
     // Keep the reference data for later use
     AnalysisDataService::Instance().addOrReplace(fluxRefWSName, fluxRefWS);
-    m_reductionManager->declareProperty(
-        std::make_unique<WorkspaceProperty<>>(entryName, fluxRefWSName,
-                                                 Direction::InOut));
+    m_reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
+        entryName, fluxRefWSName, Direction::InOut));
     m_reductionManager->setPropertyValue(entryName, fluxRefWSName);
     m_reductionManager->setProperty(entryName, fluxRefWS);
   }

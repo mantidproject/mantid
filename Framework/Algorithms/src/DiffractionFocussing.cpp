@@ -48,7 +48,7 @@ void DiffractionFocussing::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
   declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::Load, ".cal"),
+                                                 FileProperty::Load, ".cal"),
                   "The name of the CalFile with grouping data");
 }
 

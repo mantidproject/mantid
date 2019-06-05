@@ -280,8 +280,8 @@ void LoadMask::init() {
                   "The name of the instrument to apply the mask.");
 
   const std::vector<std::string> maskExts{".xml", ".msk"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "InputFile", "", FileProperty::Load, maskExts),
+  declareProperty(std::make_unique<FileProperty>("InputFile", "",
+                                                 FileProperty::Load, maskExts),
                   "Masking file for masking. Supported file format is XML and "
                   "ISIS ASCII. ");
   declareProperty(

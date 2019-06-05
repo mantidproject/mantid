@@ -17,7 +17,6 @@
 
 #include "MantidKernel/Logger.h"
 
-
 #include <QApplication>
 #include <QClipboard>
 #include <QHBoxLayout>

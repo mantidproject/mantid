@@ -39,13 +39,14 @@ enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
 
 void CalculateFlatBackground::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input),
       "The input workspace must either have constant width bins or is a "
       "distribution\n"
       "workspace. It is also assumed that all spectra have the same X bin "
       "boundaries");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Name to use for the output workspace.");
   declareProperty("StartX", Mantid::EMPTY_DBL(),
                   "The X value at which to start the background fit. Mandatory "
@@ -96,9 +97,9 @@ void CalculateFlatBackground::init() {
   declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(),
                   "The width of the moving average window in bins. Mandatory "
                   "for the Moving Average mode.");
-  setPropertySettings(
-      "AveragingWindowWidth",
-      std::make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
+  setPropertySettings("AveragingWindowWidth",
+                      std::make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO,
+                                                            "Moving Average"));
 }
 
 void CalculateFlatBackground::exec() {

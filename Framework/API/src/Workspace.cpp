@@ -9,7 +9,6 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Memory.h"
 
-
 namespace Mantid {
 namespace API {
 

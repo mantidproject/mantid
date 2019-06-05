@@ -36,8 +36,7 @@ public:
 std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>
 createTestSeries(const std::string &name) {
   auto source =
-      std::make_unique<Mantid::Kernel::TimeSeriesProperty<double>>(
-          name);
+      std::make_unique<Mantid::Kernel::TimeSeriesProperty<double>>(name);
   source->addValue("2007-11-30T16:17:00", 1);
   source->addValue("2007-11-30T16:17:10", 2);
   source->addValue("2007-11-30T16:17:20", 3);
@@ -163,12 +162,10 @@ public:
     TS_ASSERT_THROWS(mgr.declareProperty(std::move(copy)),
                      const Exception::ExistsError &);
     TS_ASSERT_THROWS(
-        mgr.declareProperty(
-            std::make_unique<PropertyWithValue<int>>("", 0)),
+        mgr.declareProperty(std::make_unique<PropertyWithValue<int>>("", 0)),
         const std::invalid_argument &);
     mgr.declareProperty(
-        std::make_unique<PropertyWithValue<int>>("GoodIntProp", 1),
-        "Test doc");
+        std::make_unique<PropertyWithValue<int>>("GoodIntProp", 1), "Test doc");
     TS_ASSERT_EQUALS(mgr.getPointerToProperty("GoodIntProp")->documentation(),
                      "Test doc");
   }
@@ -275,8 +272,7 @@ public:
 
   void testSetProperties_arrayValueString() {
     PropertyManagerHelper mgr;
-    mgr.declareProperty(
-        std::make_unique<ArrayProperty<double>>("ArrayProp"));
+    mgr.declareProperty(std::make_unique<ArrayProperty<double>>("ArrayProp"));
 
     const std::string jsonString = R"({"ArrayProp":"10,12,23"})";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
@@ -565,26 +561,23 @@ public:
   void testAdditionOperator() {
     PropertyManager mgr1;
     mgr1.declareProperty(
-        std::make_unique<PropertyWithValue<double>>("double", 12.0),
-        "docs");
-    mgr1.declareProperty(
-        std::make_unique<PropertyWithValue<int>>("int", 23), "docs");
+        std::make_unique<PropertyWithValue<double>>("double", 12.0), "docs");
+    mgr1.declareProperty(std::make_unique<PropertyWithValue<int>>("int", 23),
+                         "docs");
     mgr1.declareProperty(std::make_unique<PropertyWithValue<double>>(
                              "double_only_in_mgr1", 456.0),
                          "docs");
 
     PropertyManager mgr2;
     mgr2.declareProperty(
-        std::make_unique<PropertyWithValue<double>>("double", 23.6),
-        "docs");
-    mgr2.declareProperty(
-        std::make_unique<PropertyWithValue<int>>("int", 34), "docs");
+        std::make_unique<PropertyWithValue<double>>("double", 23.6), "docs");
+    mgr2.declareProperty(std::make_unique<PropertyWithValue<int>>("int", 34),
+                         "docs");
     mgr2.declareProperty(std::make_unique<PropertyWithValue<double>>(
                              "new_double_in_mgr2", 321.0),
                          "docs");
     mgr2.declareProperty(
-        std::make_unique<PropertyWithValue<int>>("new_int", 655),
-        "docs");
+        std::make_unique<PropertyWithValue<int>>("new_int", 655), "docs");
 
     // Add em together
     mgr1 += mgr2;
@@ -638,10 +631,9 @@ public:
     PropertyManagerHelper mgr;
 
     mgr.declareProperty(
-        std::make_unique<PropertyWithValue<double>>("double", 12.0),
-        "docs");
-    mgr.declareProperty(
-        std::make_unique<PropertyWithValue<int>>("int", 23), "docs");
+        std::make_unique<PropertyWithValue<double>>("double", 12.0), "docs");
+    mgr.declareProperty(std::make_unique<PropertyWithValue<int>>("int", 23),
+                        "docs");
 
     mgr.setPropertiesWithString("double= 13.0 ;int=22 ");
     double d = mgr.getProperty("double");

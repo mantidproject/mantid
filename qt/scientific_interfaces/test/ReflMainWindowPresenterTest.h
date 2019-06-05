@@ -40,8 +40,7 @@ public:
     MockRunsTabPresenter mockRunsTabPresenter;
     MockEventTabPresenter mockEventTabPresenter;
     MockSettingsTabPresenter mockSettingsTabPresenter;
-    auto mockSaveTabPresenter =
-        std::make_unique<MockSaveTabPresenter>();
+    auto mockSaveTabPresenter = std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsTabPresenter, &mockEventTabPresenter,
         &mockSettingsTabPresenter, std::move(mockSaveTabPresenter));
@@ -68,8 +67,7 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    auto mockSaveTabPresenter =
-        std::make_unique<MockSaveTabPresenter>();
+    auto mockSaveTabPresenter = std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -94,8 +92,7 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    auto mockSaveTabPresenter =
-        std::make_unique<MockSaveTabPresenter>();
+    auto mockSaveTabPresenter = std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -121,8 +118,7 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    auto mockSaveTabPresenter =
-        std::make_unique<MockSaveTabPresenter>();
+    auto mockSaveTabPresenter = std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -142,8 +138,7 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    auto mockSaveTabPresenter =
-        std::make_unique<MockSaveTabPresenter>();
+    auto mockSaveTabPresenter = std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -159,8 +154,7 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    auto mockSaveTabPresenter =
-        std::make_unique<MockSaveTabPresenter>();
+    auto mockSaveTabPresenter = std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
@@ -175,8 +169,7 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    auto mockSaveTabPresenter =
-        std::make_unique<MockSaveTabPresenter>();
+    auto mockSaveTabPresenter = std::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));

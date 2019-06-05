@@ -40,9 +40,9 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "The name of the NeXus file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "The name of the NeXus file to load");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace2D to create.");
@@ -56,7 +56,7 @@ void LoadTOFRawNexus::init() {
   mustBePositive->setLower(1);
   declareProperty(
       std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
-                                                mustBePositive),
+                                                     mustBePositive),
       "The index number of the first spectrum to read.  Only used if\n"
       "spectrum_max is set.");
   declareProperty(

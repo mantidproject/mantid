@@ -266,7 +266,7 @@ void DiffractionEventCalibrateDetectors::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("BankName", "",
-                                                  Direction::Input),
+                                                       Direction::Input),
       "Optional: To only calibrate one bank. Any bank whose name does not "
       "match the given string will have no events.");
 

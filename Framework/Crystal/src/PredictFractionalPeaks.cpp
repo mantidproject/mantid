@@ -36,20 +36,20 @@ DECLARE_ALGORITHM(PredictFractionalPeaks)
 void PredictFractionalPeaks::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("Peaks", "",
-                                                     Direction::Input),
+                                                          Direction::Input),
       "Workspace of Peaks with orientation matrix that indexed the peaks and "
       "instrument loaded");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("FracPeaks", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       string("HOffset"), "-0.5,0.0,0.5"),
                   "Offset in the h direction");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      string("KOffset"), "0"),
-                  "Offset in the h direction");
+  declareProperty(
+      std::make_unique<Kernel::ArrayProperty<double>>(string("KOffset"), "0"),
+      "Offset in the h direction");
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       string("LOffset"), "-0.5,0.5"),
                   "Offset in the h direction");
@@ -57,24 +57,24 @@ void PredictFractionalPeaks::init() {
   declareProperty("IncludeAllPeaksInRange", false,
                   "If false only offsets from peaks from Peaks are used");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Hmin", -8.0, Direction::Input),
-      "Minimum H value to use");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Hmax", 8.0, Direction::Input),
-      "Maximum H value to use");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Kmin", -8.0, Direction::Input),
-      "Minimum K value to use");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Kmax", 8.0, Direction::Input),
-      "Maximum K value to use");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Lmin", -8.0, Direction::Input),
-      "Minimum L value to use");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Lmax", 8.0, Direction::Input),
-      "Maximum L value to use");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Hmin", -8.0,
+                                                              Direction::Input),
+                  "Minimum H value to use");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Hmax", 8.0,
+                                                              Direction::Input),
+                  "Maximum H value to use");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Kmin", -8.0,
+                                                              Direction::Input),
+                  "Minimum K value to use");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Kmax", 8.0,
+                                                              Direction::Input),
+                  "Maximum K value to use");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Lmin", -8.0,
+                                                              Direction::Input),
+                  "Minimum L value to use");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Lmax", 8.0,
+                                                              Direction::Input),
+                  "Maximum L value to use");
 
   setPropertySettings(
       "Hmin", std::make_unique<Kernel::EnabledWhenProperty>(

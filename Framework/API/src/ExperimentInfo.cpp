@@ -40,7 +40,6 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 
-
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string.hpp>

@@ -1433,8 +1433,7 @@ public:
 
   /** ~Two million iterations */
   void test_iterator_3D_signalAndErrorOnly() {
-    auto it =
-        std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     do {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
@@ -1445,8 +1444,7 @@ public:
 
   /** ~Two million iterations */
   void test_iterator_3D_withGetVertexes() {
-    auto it =
-        std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     size_t numVertices;
     do {
       signal_t sig = it->getNormalizedSignal();
@@ -1459,8 +1457,7 @@ public:
 
   /** ~Two million iterations */
   void test_iterator_3D_withGetCenter() {
-    auto it =
-        std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     do {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
@@ -1472,8 +1469,7 @@ public:
 
   /** Use jumpTo() */
   void test_iterator_3D_withGetCenter_usingJumpTo() {
-    auto it =
-        std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     int max = int(it->getDataSize());
     for (int i = 0; i < max; i++) {
       it->jumpTo(size_t(i));

@@ -18,7 +18,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
@@ -41,34 +40,35 @@ DECLARE_ALGORITHM(SaveReflectometryAscii)
 void SaveReflectometryAscii::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                      Direction::Input),
+                                                           Direction::Input),
       "The name of the workspace containing the data you want to save.");
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
-                  "The output filename");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+      "The output filename");
   std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
   declareProperty("FileExtension", ".mft",
                   boost::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
-  auto mft =
-      std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "mft");
-  auto cus =
-      std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
+  auto mft = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
+                                                   "mft");
+  auto cus = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
+                                                   "custom");
   declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   setPropertySettings("LogList", std::make_unique<VisibleWhenProperty>(
                                      std::move(mft), std::move(cus), OR));
   declareProperty("WriteHeader", false, "Whether to write header lines.");
-  setPropertySettings(
-      "WriteHeader",
-      std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
+  setPropertySettings("WriteHeader",
+                      std::make_unique<VisibleWhenProperty>(
+                          "FileExtension", IS_EQUAL_TO, "custom"));
   std::vector<std::string> separator = {"comma", "space", "tab"};
   declareProperty(
       "WriteResolution", true,
       "Whether to compute resolution values and write them as fourth "
       "data column.");
-  setPropertySettings(
-      "WriteResolution",
-      std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
+  setPropertySettings("WriteResolution",
+                      std::make_unique<VisibleWhenProperty>(
+                          "FileExtension", IS_EQUAL_TO, "custom"));
   declareProperty("Separator", "tab",
                   boost::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");

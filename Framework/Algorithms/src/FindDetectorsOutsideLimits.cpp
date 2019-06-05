@@ -34,8 +34,8 @@ void FindDetectorsOutsideLimits::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace2D");
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector");
   declareProperty(

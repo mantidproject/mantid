@@ -43,12 +43,12 @@ void LoadParameterFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
-                                                      Direction::InOut),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "Workspace", "Anonymous", Direction::InOut),
       "The name of the workspace to load the instrument parameters into.");
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                ".xml"),
+                                     ".xml"),
       "The filename (including its full or relative path) of a parameter "
       "definition file. The file extension must either be .xml or .XML.");
   declareProperty("ParameterXML", "",

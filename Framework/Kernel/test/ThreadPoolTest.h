@@ -9,11 +9,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/Timer.h"
 
 #include <Poco/Thread.h>

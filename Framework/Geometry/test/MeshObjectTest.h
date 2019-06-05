@@ -224,13 +224,12 @@ public:
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
 
     // Test material through flexible constructor
-    auto obj1 = std::make_unique<MeshObject>(triangles, vertices,
-                                                        testMaterial);
+    auto obj1 = std::make_unique<MeshObject>(triangles, vertices, testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      obj1->material().numberDensity(), 1e-12);
     // Test material through efficient constructor
-    auto obj2 = std::make_unique<MeshObject>(
-        std::move(triangles), std::move(vertices), testMaterial);
+    auto obj2 = std::make_unique<MeshObject>(std::move(triangles),
+                                             std::move(vertices), testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      obj2->material().numberDensity(), 1e-12);
   }

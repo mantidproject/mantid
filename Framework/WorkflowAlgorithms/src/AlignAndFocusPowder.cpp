@@ -131,16 +131,16 @@ void AlignAndFocusPowder::init() {
                   "pulse to remove. 0 disables");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty(std::make_unique<PropertyWithValue<double>>("CompressTolerance",
-                                                         1e-5, mustBePositive,
-                                                         Direction::Input),
-                  "Compress events (in "
-                  "microseconds) within this "
-                  "tolerance. (Default 1e-5)");
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(
+          "CompressTolerance", 1e-5, mustBePositive, Direction::Input),
+      "Compress events (in "
+      "microseconds) within this "
+      "tolerance. (Default 1e-5)");
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
-                                             EMPTY_DBL(), mustBePositive,
-                                             Direction::Input),
+                                                  EMPTY_DBL(), mustBePositive,
+                                                  Direction::Input),
       "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
       "means compressing all wall-clock times together disabling pulsetime "
       "resolution.");

@@ -69,7 +69,7 @@ void IQTransform::init() {
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace must be a distribution with units of Q");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name of the output workspace");
 
   // Extract the keys from the transformations map to pass to the property

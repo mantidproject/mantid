@@ -83,8 +83,8 @@ void MayersSampleCorrection::init() {
                   "where MultipleScattering=True.",
                   Direction::Input);
   // Outputs
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 }
 

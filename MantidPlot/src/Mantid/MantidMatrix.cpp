@@ -12,9 +12,9 @@
 #include "MantidMatrixDialog.h"
 #include "MantidMatrixFunction.h"
 #include "MantidMatrixModel.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "MantidUI.h"
 #include "Preferences.h"
-#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 

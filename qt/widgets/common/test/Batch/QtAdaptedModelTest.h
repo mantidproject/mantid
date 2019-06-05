@@ -7,7 +7,6 @@
 #ifndef MANTID_MANTIDWIDGETS_QTADAPTEDMODELTEST_H
 #define MANTID_MANTIDWIDGETS_QTADAPTEDMODELTEST_H
 
-
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include <QModelIndex>
 #include <QStandardItemModel>

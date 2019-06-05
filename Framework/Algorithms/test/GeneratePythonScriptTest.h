@@ -25,7 +25,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 
-
 #include <Poco/File.h>
 
 #include <fstream>
@@ -50,14 +49,12 @@ public:
   }
 
   void init() override {
-    declareProperty(
-        std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-            "InputWorkspace", "", Kernel::Direction::Input),
-        "A workspace with units of TOF");
-    declareProperty(
-        std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-            "OutputWorkspace", "", Kernel::Direction::Output),
-        "The name to use for the output workspace");
+    declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                        "InputWorkspace", "", Kernel::Direction::Input),
+                    "A workspace with units of TOF");
+    declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                        "OutputWorkspace", "", Kernel::Direction::Output),
+                    "The name to use for the output workspace");
     declareProperty("MissingProperty", "rubbish", Kernel::Direction::Input);
   };
   void exec() override{

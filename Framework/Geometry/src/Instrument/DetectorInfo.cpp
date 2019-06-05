@@ -14,7 +14,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
-
 namespace Mantid {
 namespace Geometry {
 /** Construct DetectorInfo based on an Instrument.

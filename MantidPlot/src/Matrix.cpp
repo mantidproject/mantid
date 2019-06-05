@@ -32,10 +32,10 @@
 #include "Graph.h"
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "MatrixCommand.h"
 #include "ScriptingEnv.h"
 #include "muParserScript.h"
-#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QApplication>
 #include <QClipboard>

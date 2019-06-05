@@ -14,7 +14,6 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
 
-
 namespace Mantid {
 using namespace API;
 using namespace DataObjects;
@@ -47,8 +46,8 @@ void ExtractSpectra2::init() {
   declareWorkspaceInputProperties<
       MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
       "InputWorkspace", "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name of the output workspace");
 }
 

@@ -30,7 +30,7 @@ public:
     // is NOT the default
     auto enabledWhenNotDefault = [this] {
       return std::make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(),
-                                              IS_NOT_DEFAULT);
+                                                   IS_NOT_DEFAULT);
     };
     alg.declareProperty(m_resultPropName, 456);
     alg.setPropertySettings(m_resultPropName, enabledWhenNotDefault());
@@ -97,9 +97,10 @@ public:
     PropertyManagerOwner alg;
     alg.declareProperty(m_propertyOneName, 123);
     alg.declareProperty(m_resultPropName, 456);
-    alg.setPropertySettings(m_resultPropName, std::make_unique<EnabledWhenProperty>(
-                                                  m_propertyOneName.c_str(),
-                                                  IS_NOT_EQUAL_TO, "234"));
+    alg.setPropertySettings(
+        m_resultPropName,
+        std::make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(),
+                                              IS_NOT_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
     if (!prop)
@@ -213,8 +214,7 @@ private:
     if (value.length() == 0) {
       return std::make_unique<EnabledWhenProperty>(propName, criterion);
     } else {
-      return std::make_unique<EnabledWhenProperty>(propName, criterion,
-                                                      value);
+      return std::make_unique<EnabledWhenProperty>(propName, criterion, value);
     }
   }
 

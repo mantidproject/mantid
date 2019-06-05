@@ -11,7 +11,6 @@
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 
-
 using namespace Mantid::Kernel;
 
 namespace Mantid {

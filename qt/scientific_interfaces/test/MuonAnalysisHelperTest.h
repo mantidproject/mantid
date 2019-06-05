@@ -755,8 +755,7 @@ private:
     TS_ASSERT_EQUALS(times.size(), values.size());
     auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
     TS_ASSERT(matrixWS);
-    auto prop =
-        std::make_unique<TimeSeriesProperty<double>>(logName);
+    auto prop = std::make_unique<TimeSeriesProperty<double>>(logName);
     prop->addValues(times, values);
     matrixWS->mutableRun().addLogData(std::move(prop));
   }

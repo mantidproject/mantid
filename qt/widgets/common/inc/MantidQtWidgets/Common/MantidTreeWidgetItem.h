@@ -8,8 +8,8 @@
 #define MANTIDTREEWIDGETITEM_H
 
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <QTreeWidgetItem>
 

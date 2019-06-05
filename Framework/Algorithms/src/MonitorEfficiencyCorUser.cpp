@@ -40,7 +40,7 @@ void MonitorEfficiencyCorUser::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace to correct for monitor efficiency");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name of the workspace in which to store the result.");
 }
 

@@ -108,11 +108,10 @@ void MuonPairingAsymmetry::init() {
   std::vector<int> defaultGrouping1 = {1};
   std::vector<int> defaultGrouping2 = {2};
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", emptyString, Direction::Output),
-      "The workspace which will hold the results of the asymmetry "
-      "calculation.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", emptyString, Direction::Output),
+                  "The workspace which will hold the results of the asymmetry "
+                  "calculation.");
 
   declareProperty("PairName", emptyString,
                   "The name of the pair. Must "
@@ -148,12 +147,11 @@ void MuonPairingAsymmetry::init() {
 
   // Specify groups manually
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "InputWorkspace", emptyString, Direction::Input,
-          PropertyMode::Optional),
-      "Input workspace containing data from detectors which are to "
-      "be grouped.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "InputWorkspace", emptyString, Direction::Input,
+                      PropertyMode::Optional),
+                  "Input workspace containing data from detectors which are to "
+                  "be grouped.");
   setPropertySettings("InputWorkspace",
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
@@ -180,9 +178,9 @@ void MuonPairingAsymmetry::init() {
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
-      "A list of periods to subtract in multiperiod data.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SubtractedPeriods",
+                                                       Direction::Input),
+                  "A list of periods to subtract in multiperiod data.");
   setPropertySettings("SubtractedPeriods",
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));

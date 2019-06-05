@@ -13,7 +13,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/LiveListenerInfo.h"
 
-
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

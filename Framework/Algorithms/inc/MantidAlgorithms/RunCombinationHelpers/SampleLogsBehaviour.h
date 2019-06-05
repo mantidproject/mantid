@@ -7,8 +7,8 @@
 #ifndef MANTID_ALGORITHMS_MERGERUNS_SAMPLELOGSBEHAVIOUR_H_
 #define MANTID_ALGORITHMS_MERGERUNS_SAMPLELOGSBEHAVIOUR_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
 

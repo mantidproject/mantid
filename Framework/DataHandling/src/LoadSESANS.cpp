@@ -140,10 +140,10 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadSESANS::init() {
-  declareProperty(
-      std::make_unique<API::FileProperty>(
-          "Filename", "", API::FileProperty::Load, m_fileExtensions),
-      "Name of the SESANS file to load");
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Load,
+                                                      m_fileExtensions),
+                  "Name of the SESANS file to load");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");

@@ -9,7 +9,6 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 
-
 namespace Mantid {
 namespace VATES {
 
@@ -48,8 +47,8 @@ public:
          Mantid::API::IMDWorkspace_sptr workspace,
          std::unique_ptr<WorkspaceProvider> workspaceProvider) {
     return std::make_unique<Presenter>(std::move(view),
-                                                  workspaceProvider.release(),
-                                                  getWorkspaceName(*workspace));
+                                       workspaceProvider.release(),
+                                       getWorkspaceName(*workspace));
   }
 };
 } // namespace VATES

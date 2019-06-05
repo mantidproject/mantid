@@ -51,10 +51,9 @@ void LoadIsawDetCal::init() {
 
   const auto exts =
       std::vector<std::string>({".DetCal", ".detcal", ".peaks", ".integrate"});
-  declareProperty(
-      std::make_unique<API::MultipleFileProperty>("Filename", exts),
-      "The input filename of the ISAW DetCal file (Two files "
-      "allowed for SNAP) ");
+  declareProperty(std::make_unique<API::MultipleFileProperty>("Filename", exts),
+                  "The input filename of the ISAW DetCal file (Two files "
+                  "allowed for SNAP) ");
 
   declareProperty(std::make_unique<API::FileProperty>(
                       "Filename2", "", API::FileProperty::OptionalLoad, exts),

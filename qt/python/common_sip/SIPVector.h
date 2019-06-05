@@ -97,8 +97,7 @@ template <typename T>
 int transferToSip(boost::optional<T> const &cppValue, T **sipCppPtr,
                   int *sipIsErr, int sipState) {
   if (cppValue.is_initialized()) {
-    auto heapValue =
-        ::std::make_unique<T>(std::move(cppValue.get()));
+    auto heapValue = ::std::make_unique<T>(std::move(cppValue.get()));
     *sipCppPtr = heapValue.release();
     return sipState;
   } else {

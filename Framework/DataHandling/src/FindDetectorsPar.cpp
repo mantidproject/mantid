@@ -40,8 +40,8 @@ void FindDetectorsPar::init() {
   wsValidator->add<API::CommonBinsValidator>();
   // input workspace
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
       "The name of the workspace that will be used as input for the algorithm");
   //
   declareProperty("ReturnLinearRanges", false,
@@ -52,8 +52,8 @@ void FindDetectorsPar::init() {
   const std::vector<std::string> fileExts{".par", ".phx"};
 
   declareProperty(std::make_unique<FileProperty>("ParFile", "not_used.par",
-                                                    FileProperty::OptionalLoad,
-                                                    fileExts),
+                                                 FileProperty::OptionalLoad,
+                                                 fileExts),
                   "An optional file that contains of the list of angular "
                   "parameters for the detectors and detectors groups;\n"
                   "If specified, will use data from file instead of the data, "

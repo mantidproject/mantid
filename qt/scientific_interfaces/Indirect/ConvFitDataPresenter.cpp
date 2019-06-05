@@ -10,7 +10,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 
-
 namespace {
 using namespace Mantid::API;
 
@@ -26,10 +25,9 @@ namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
                                            IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(
-          model, view,
-          std::make_unique<ConvFitDataTablePresenter>(
-              model, view->getDataTable())),
+    : IndirectFitDataPresenter(model, view,
+                               std::make_unique<ConvFitDataTablePresenter>(
+                                   model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 

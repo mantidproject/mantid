@@ -42,8 +42,8 @@ void GetSpiceDataRawCountsFromMD::init() {
                   "input data workspace. ");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "Name of the output MatrixWorkspace containing the raw data required.");
 
   std::array<std::string, 3> vecmode = {{"Pt.", "Detector", "Sample Log"}};

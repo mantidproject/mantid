@@ -90,8 +90,8 @@ void SpecularReflectionPositionCorrect::init() {
                   "An input workspace to correct.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("TwoThetaIn", Mantid::EMPTY_DBL(),
-                                             thetaValidator, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "TwoThetaIn", Mantid::EMPTY_DBL(), thetaValidator, Direction::Input),
       "Input two theta angle in degrees.");
 
   this->initCommonProperties();

@@ -240,8 +240,9 @@ void AccumulateMD::init() {
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("EFix", Direction::Input),
-                  "datasource energy values in meV");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("EFix", Direction::Input),
+      "datasource energy values in meV");
 
   std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
@@ -275,28 +276,31 @@ void AccumulateMD::init() {
           Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("Psi", Direction::Input),
-                  "Psi rotation in degrees. Optional or one entry per run.");
-
-  declareProperty(std::make_unique<ArrayProperty<double>>("Gl", Direction::Input),
-                  "gl rotation in degrees. Optional or one entry per run.");
-
-  declareProperty(std::make_unique<ArrayProperty<double>>("Gs", Direction::Input),
-                  "gs rotation in degrees. Optional or one entry per run.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("Psi", Direction::Input),
+      "Psi rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("InPlace", true, Direction::Input),
-      "Execute conversions to MD and Merge in one-step. Less "
-      "memory overhead.");
+      std::make_unique<ArrayProperty<double>>("Gl", Direction::Input),
+      "gl rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Clean", false, Direction::Input),
-      "Create workspace from fresh rather than appending to "
-      "existing workspace data.");
+      std::make_unique<ArrayProperty<double>>("Gs", Direction::Input),
+      "gs rotation in degrees. Optional or one entry per run.");
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("InPlace", true,
+                                                            Direction::Input),
+                  "Execute conversions to MD and Merge in one-step. Less "
+                  "memory overhead.");
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Clean", false,
+                                                            Direction::Input),
+                  "Create workspace from fresh rather than appending to "
+                  "existing workspace data.");
 
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+                                     ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
   setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(

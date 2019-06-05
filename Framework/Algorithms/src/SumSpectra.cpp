@@ -119,7 +119,7 @@ void SumSpectra::init() {
                   "The workspace containing the spectra to be summed.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm. "
       " A workspace of this name will be created and stored in the Analysis "
       "Data Service.");

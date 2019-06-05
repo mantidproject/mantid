@@ -29,11 +29,11 @@
 #include "ScreenPickerTool.h"
 #include "ApplicationWindow.h"
 #include "Graph.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "Plot.h"
 #include "PlotCurve.h"
 #include "SymbolBox.h"
 #include "Table.h"
-#include "MantidQtWidgets/Common/pixmaps.h"
 #include <QKeyEvent>
 #include <qwt_symbol.h>
 

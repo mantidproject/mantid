@@ -183,12 +183,12 @@ void NormaliseToMonitor::init() {
   validator->add<RawCountValidator>();
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       validator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, validator),
       "Name of the input workspace. Must be a non-distribution histogram.");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Name to use for the output workspace");
   // should be any spectrum number, but named this property MonitorSpectrum to
   // keep compatibility with previous scripts
@@ -216,11 +216,11 @@ void NormaliseToMonitor::init() {
                                        "MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("MonitorWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional, validator),
-      "A workspace containing one or more spectra to normalize the "
-      "InputWorkspace by.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "MonitorWorkspace", "", Direction::Input,
+                      PropertyMode::Optional, validator),
+                  "A workspace containing one or more spectra to normalize the "
+                  "InputWorkspace by.");
   setPropertySettings("MonitorWorkspace",
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "MonitorSpectrum", IS_DEFAULT));
@@ -254,8 +254,8 @@ void NormaliseToMonitor::init() {
       "end of the integration range are also included");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("NormFactorWS", "", Direction::Output,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "NormFactorWS", "", Direction::Output, PropertyMode::Optional),
       "Name of the workspace, containing the normalization factor.\n"
       "If this name is empty, normalization workspace is not returned. If the "
       "name coincides with the output workspace name, _normFactor suffix is "

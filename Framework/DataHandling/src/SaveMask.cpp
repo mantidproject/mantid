@@ -39,9 +39,9 @@ void SaveMask::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to output masking to XML file");
-  declareProperty(
-      std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
-      "File to save the detectors mask in XML format");
+  declareProperty(std::make_unique<FileProperty>("OutputFile", "",
+                                                 FileProperty::Save, ".xml"),
+                  "File to save the detectors mask in XML format");
 }
 
 /// Main body to execute algorithm

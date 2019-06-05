@@ -113,23 +113,20 @@ void GenerateEventsFilter::init() {
 
   declareProperty("MinimumLogValue", EMPTY_DBL(),
                   "Minimum log value for which to keep events.");
-  setPropertySettings(
-      "MinimumLogValue",
-      std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("MinimumLogValue", std::make_unique<VisibleWhenProperty>(
+                                             "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("MaximumLogValue", EMPTY_DBL(),
                   "Maximum log value for which to keep events.");
-  setPropertySettings(
-      "MaximumLogValue",
-      std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("MaximumLogValue", std::make_unique<VisibleWhenProperty>(
+                                             "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueInterval", EMPTY_DBL(),
                   "Delta of log value to be sliced into from min log value and "
                   "max log value.\n"
                   "If not given, then only value ");
-  setPropertySettings(
-      "LogValueInterval",
-      std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("LogValueInterval", std::make_unique<VisibleWhenProperty>(
+                                              "LogName", IS_NOT_EQUAL_TO, ""));
 
   std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty(

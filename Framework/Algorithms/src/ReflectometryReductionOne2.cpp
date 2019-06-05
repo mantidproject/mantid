@@ -169,13 +169,13 @@ void ReflectometryReductionOne2::init() {
   initDebugProperties();
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "Output Workspace IvsQ.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
-                                                   "", Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "OutputWorkspaceWavelength", "", Direction::Output,
+                      PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
 }
 

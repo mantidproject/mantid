@@ -99,7 +99,7 @@ void MonteCarloAbsorption::init() {
                   "The name of the input workspace.  The input workspace must "
                   "have X units of wavelength.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name to use for the output workspace.");
   auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
@@ -347,8 +347,8 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
     beamWidth = bbox[frame->pointingHorizontal()];
     beamHeight = bbox[frame->pointingUp()];
   }
-  return std::make_unique<RectangularBeamProfile>(
-      *frame, source->getPos(), beamWidth, beamHeight);
+  return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(),
+                                                  beamWidth, beamHeight);
 }
 
 void MonteCarloAbsorption::interpolateFromSparse(

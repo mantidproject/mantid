@@ -23,7 +23,6 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/VectorHelper.h"
 
-
 #include <H5Cpp.h>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/make_shared.hpp>

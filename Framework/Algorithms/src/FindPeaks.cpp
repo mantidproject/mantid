@@ -63,9 +63,9 @@ FindPeaks::FindPeaks()
 /** Initialize and declare properties.
  */
 void FindPeaks::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Name of the workspace to search");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the workspace to search");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);

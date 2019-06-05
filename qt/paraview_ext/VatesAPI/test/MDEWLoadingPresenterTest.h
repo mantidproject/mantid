@@ -77,8 +77,7 @@ private:
 
 public:
   void testShouldLoadFirstTimeRound() {
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
     EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
@@ -96,8 +95,7 @@ public:
   }
 
   void testTimeChanged() {
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
     EXPECT_CALL(*mockView, getLoadInMemory()).Times(2);
@@ -117,8 +115,7 @@ public:
   }
 
   void testLoadInMemoryChanged() {
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(2);
     EXPECT_CALL(*mockView, getLoadInMemory())
@@ -138,8 +135,7 @@ public:
   }
 
   void testDepthChanged() {
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth())
         .Times(2)

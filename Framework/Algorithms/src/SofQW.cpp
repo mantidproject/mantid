@@ -80,8 +80,8 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "Reduced data in units of energy transfer DeltaE.\nThe "
                       "workspace must contain histogram data and have common "
                       "bins across all spectra.");
-  alg.declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                       Direction::Output),
+  alg.declareProperty(std::make_unique<WorkspaceProperty<>>(
+                          "OutputWorkspace", "", Direction::Output),
                       "The name to use for the q-omega workspace.");
   alg.declareProperty(
       std::make_unique<ArrayProperty<double>>(

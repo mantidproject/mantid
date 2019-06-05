@@ -68,13 +68,13 @@ int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadSwans::init() {
-  declareProperty(
-      std::make_unique<FileProperty>("FilenameData", "", FileProperty::Load, ".dat"),
-      "The name of the text file to read, including its full or "
-      "relative path. The file extension must be .dat.");
+  declareProperty(std::make_unique<FileProperty>("FilenameData", "",
+                                                 FileProperty::Load, ".dat"),
+                  "The name of the text file to read, including its full or "
+                  "relative path. The file extension must be .dat.");
 
-  declareProperty(std::make_unique<FileProperty>("FilenameMetaData", "",
-                                            FileProperty::Load, "meta.dat"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "FilenameMetaData", "", FileProperty::Load, "meta.dat"),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be meta.dat.");
 

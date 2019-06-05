@@ -22,7 +22,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 
-
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
@@ -490,21 +489,21 @@ void LoadNXcanSAS::init() {
   const std::vector<std::string> exts{".nxs", ".h5"};
   declareProperty(
       std::make_unique<Mantid::API::FileProperty>("Filename", "",
-                                                     FileProperty::Load, exts),
+                                                  FileProperty::Load, exts),
       "The name of the NXcanSAS file to read, as a full or relative path.");
-  declareProperty(std::make_unique<
-                      Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the workspace to be created as the output of "
-                  "the algorithm.  A workspace of this name will be created "
-                  "and stored in the Analysis Data Service. For multiperiod "
-                  "files, one workspace may be generated for each period. "
-                  "Currently only one workspace can be saved at a time so "
-                  "multiperiod Mantid files are not generated.");
+  declareProperty(
+      std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the workspace to be created as the output of "
+      "the algorithm.  A workspace of this name will be created "
+      "and stored in the Analysis Data Service. For multiperiod "
+      "files, one workspace may be generated for each period. "
+      "Currently only one workspace can be saved at a time so "
+      "multiperiod Mantid files are not generated.");
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
-                                                   Direction::Input),
+                                                Direction::Input),
       "Load the transmission related data from the file if it is present "
       "(optional, default False).");
 }

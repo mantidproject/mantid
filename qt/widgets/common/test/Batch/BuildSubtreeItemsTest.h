@@ -7,7 +7,6 @@
 #ifndef MANTID_MANTIDWIDGETS_BUILDSUBTREETEST_H
 #define MANTID_MANTIDWIDGETS_BUILDSUBTREETEST_H
 
-
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"

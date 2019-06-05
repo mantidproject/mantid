@@ -289,16 +289,16 @@ void FindClusterFaces::init() {
                       boost::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings(
-      "MaximumRows", std::make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
+  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
+                                         "LimitRows", IS_DEFAULT));
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "An output table workspace containing cluster face information.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("TruncatedOutput", false,
-                                                       Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "TruncatedOutput", false, Direction::Output),
                   "Indicates that the output results were truncated if True");
 }
 

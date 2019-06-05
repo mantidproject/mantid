@@ -33,8 +33,8 @@ void DetectorEfficiencyVariation::init() {
   // The histograms, the detectors in each histogram and their first and last
   // bin boundary must match
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("WhiteBeamCompare", "",
-                                                      Direction::Input, val),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "WhiteBeamCompare", "", Direction::Input, val),
       "Name of a matching second white beam vanadium run from the same "
       "instrument");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(

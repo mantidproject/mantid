@@ -36,8 +36,8 @@ void CloneMDWorkspace::init() {
 
   std::vector<std::string> exts(1, ".nxs");
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "",
-                                        FileProperty::OptionalSave, exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                     exts),
       "If the input workspace is file-backed, specify a file to which to save "
       "the cloned workspace.\n"
       "If the workspace is file-backed but this parameter is NOT specified, "

@@ -49,7 +49,7 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
 
   declareProperty(
       std::make_unique<PropertyWithValue<int>>("SplitThreshold", SplitThreshold,
-                                          mustBePositive),
+                                               mustBePositive),
       "How many events in a box before it should be split. Default " +
           Strings::toString(SplitThreshold) + ".");
 

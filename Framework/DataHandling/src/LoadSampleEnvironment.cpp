@@ -51,16 +51,16 @@ void LoadSampleEnvironment::init() {
 
   // Environment file
   const std::vector<std::string> extensions{".stl"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
-      "The path name of the file containing the Environment");
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
+                  "The path name of the file containing the Environment");
 
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
 
   // Output workspace
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name of the workspace that will contain the loaded "
                   "Environment of the sample");
 
@@ -147,11 +147,12 @@ void LoadSampleEnvironment::init() {
                                         "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings("UnitCellVolume", std::make_unique<EnabledWhenProperty>(
                                             "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("SampleMassDensity", std::make_unique<EnabledWhenProperty>(
-                                               "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
-      "NumberDensityUnit",
-      std::make_unique<EnabledWhenProperty>("SampleNumberDensity", IS_NOT_DEFAULT));
+      "SampleMassDensity",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("NumberDensityUnit",
+                      std::make_unique<EnabledWhenProperty>(
+                          "SampleNumberDensity", IS_NOT_DEFAULT));
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
@@ -160,13 +161,15 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
   setPropertySettings("CoherentXSection", std::make_unique<EnabledWhenProperty>(
                                               "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("IncoherentXSection", std::make_unique<EnabledWhenProperty>(
-                                                "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "IncoherentXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
       "AttenuationXSection",
       std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("ScatteringXSection", std::make_unique<EnabledWhenProperty>(
-                                                "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "ScatteringXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
 }
 
 std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {

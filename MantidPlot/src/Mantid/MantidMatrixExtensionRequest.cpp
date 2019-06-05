@@ -32,8 +32,7 @@ MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
     extension.label = "X Errors";
     extension.type = type;
     // Extend the chain of responsibility
-    auto dxHandler =
-        std::make_unique<MantidMatrixDxExtensionHandler>();
+    auto dxHandler = std::make_unique<MantidMatrixDxExtensionHandler>();
     dxHandler->setSuccessor(m_extensionHandler);
     m_extensionHandler = std::move(dxHandler);
     return extension;

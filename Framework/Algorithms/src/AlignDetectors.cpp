@@ -129,7 +129,7 @@ void AlignDetectors::init() {
   const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(
       std::make_unique<FileProperty>("CalibrationFile", "",
-                                        FileProperty::OptionalLoad, exts),
+                                     FileProperty::OptionalLoad, exts),
       "Optional: The .cal file containing the position correction factors. "
       "Either this or OffsetsWorkspace needs to be specified.");
 

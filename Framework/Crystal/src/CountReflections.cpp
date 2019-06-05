@@ -18,7 +18,6 @@
 
 #include "MantidKernel/ListValidator.h"
 
-
 namespace Mantid {
 namespace Crystal {
 
@@ -84,7 +83,7 @@ void CountReflections::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("Completeness", 0.0,
-                                                     Direction::Output),
+                                                  Direction::Output),
       "Completeness of the data set as a fraction between 0 and 1.");
 
   declareProperty(std::make_unique<PropertyWithValue<double>>(

@@ -76,7 +76,7 @@ void AppendGeometryToSNSNexus::init() {
   // remove the extra copy once in production.
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("MakeCopy", true,
-                                                   Direction::Input),
+                                                Direction::Input),
       "Copy the NeXus file first before appending (optional, default True).");
 }
 

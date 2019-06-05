@@ -754,14 +754,15 @@ void PoldiIndexKnownCompounds::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Workspace that contains unindexed peaks.");
 
-  declareProperty(std::make_unique<ArrayProperty<std::string>>("CompoundWorkspaces"),
-                  "A comma-separated list of workspace names or a workspace "
-                  "group. Each workspace must contain a list of indexed "
-                  "reflections.");
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>("CompoundWorkspaces"),
+      "A comma-separated list of workspace names or a workspace "
+      "group. Each workspace must contain a list of indexed "
+      "reflections.");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>("Tolerances",
-                                                 std::vector<double>(1, 0.01)),
+                                              std::vector<double>(1, 0.01)),
       "Maximum relative tolerance delta(d)/d for lines to be indexed. Either "
       "one value or one for each compound.");
 

@@ -43,8 +43,8 @@ void SetMDUsingMask::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("MaskWorkspace", "",
-                                                        Direction::Input),
+      std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+          "MaskWorkspace", "", Direction::Input),
       "A mask MDHistoWorkspace, where true indicates where to set the value.");
 
   declareProperty(

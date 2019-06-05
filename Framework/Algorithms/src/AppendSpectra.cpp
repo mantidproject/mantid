@@ -52,7 +52,7 @@ void AppendSpectra::init() {
                   "Append the spectra from InputWorkspace2 multiple times.");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name of the output workspace");
 
   declareProperty("MergeLogs", false,

@@ -32,7 +32,7 @@ void BroadcastWorkspace::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output));
+                                                        Direction::Output));
 
   declareProperty("BroadcasterRank", 0,
                   boost::make_shared<BoundedValidator<int>>(

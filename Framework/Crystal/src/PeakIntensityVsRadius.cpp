@@ -51,7 +51,7 @@ void PeakIntensityVsRadius::init() {
                   "An input MDEventWorkspace containing the SCD data.");
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "",
-                                                     Direction::Input),
+                                                          Direction::Input),
       "The list of peaks to integrate, matching the InputWorkspace.");
 
   declareProperty("RadiusStart", 0.0, "Radius at which to start integrating.");
@@ -92,11 +92,11 @@ void PeakIntensityVsRadius::init() {
   setPropertyGroup("BackgroundOuterRadius", "Fixed Background Shell");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output workspace2D containing intensity vs radius.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace2",
-                                                   "NumberPeaksIntegrated",
-                                                   Direction::Output),
+                                                        "NumberPeaksIntegrated",
+                                                        Direction::Output),
                   "An output workspace2D containing number of peaks at levels "
                   "of I/sigI vs radius.");
 }

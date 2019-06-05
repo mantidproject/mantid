@@ -59,8 +59,8 @@ void RunPythonScript::init() {
       "An input workspace that the python code will modify."
       "The workspace will be in the python variable named 'input'.");
   declareProperty("Code", "", "Python code (can be on multiple lines).");
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                            FileProperty::OptionalLoad, "py"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::OptionalLoad, "py"),
                   "A File containing a python script");
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>(

@@ -49,7 +49,7 @@ void PeaksInRegion::init() {
   extents[1] = +50;
   declareProperty(
       std::make_unique<ArrayProperty<double>>("Extents", std::move(extents),
-                                                 std::move(mandatoryExtents)),
+                                              std::move(mandatoryExtents)),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default +-50 in "
       "each dimension.");

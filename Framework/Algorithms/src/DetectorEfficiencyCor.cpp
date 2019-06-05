@@ -95,11 +95,11 @@ void DetectorEfficiencyCor::init() {
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, val),
+                                                        Direction::Input, val),
                   "The workspace to correct for detector efficiency");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "The name of the workspace in which to store the result. Each histogram "
       "from the input workspace maps to a histogram in this workspace that has "
       "just one value which indicates if there was a bad detector.");

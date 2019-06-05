@@ -54,13 +54,14 @@ void BaseConvertToDiffractionMDWorkspace::init() {
                   "Name of the output MDEventWorkspace. If the workspace "
                   "already exists, then the events will be added to it.");
   declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Append", false, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("Append", false,
+                                                Direction::Input),
       "Append events to the output workspace. The workspace is replaced if "
       "unchecked.");
 
   // Disabled for this version
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("ClearInputWorkspace",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "ClearInputWorkspace", false, Direction::Input),
                   "Clearing the events from the input workspace during "
                   "conversion (to save memory) is not supported by algorithm "
                   "v2");
@@ -70,7 +71,7 @@ void BaseConvertToDiffractionMDWorkspace::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("OneEventPerBin", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "Use the histogram representation (event for event workspaces).\n"
       "One MDEvent will be created for each histogram bin (even empty ones).\n"
       "Warning! This can use significantly more memory!");
@@ -87,8 +88,8 @@ void BaseConvertToDiffractionMDWorkspace::init() {
       "the sample (taking out goniometer rotation).\n"
       "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("LorentzCorrection",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "LorentzCorrection", false, Direction::Input),
                   "Correct the weights of events by multiplying by the Lorentz "
                   "formula: sin(theta)^2 / lambda^4");
 

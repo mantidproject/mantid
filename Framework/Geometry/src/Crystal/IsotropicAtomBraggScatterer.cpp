@@ -109,8 +109,8 @@ void IsotropicAtomBraggScatterer::declareScattererProperties() {
 
   IValidator_sptr occValidator =
       boost::make_shared<BoundedValidator<double>>(0.0, 1.0);
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "Occupancy", 1.0, occValidator),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Occupancy", 1.0,
+                                                              occValidator),
                   "Site occupancy, values on interval [0,1].");
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(

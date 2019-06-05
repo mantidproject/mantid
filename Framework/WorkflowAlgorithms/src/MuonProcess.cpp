@@ -74,10 +74,10 @@ void MuonProcess::init() {
       std::make_unique<ArrayProperty<int>>("SummedPeriodSet", Direction::Input),
       "Comma-separated list of periods to be summed");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("SubtractedPeriodSet", Direction::Input),
-      "Comma-separated list of periods to be subtracted from the "
-      "SummedPeriodSet");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SubtractedPeriodSet",
+                                                       Direction::Input),
+                  "Comma-separated list of periods to be subtracted from the "
+                  "SummedPeriodSet");
 
   declareProperty(
       "ApplyDeadTimeCorrection", false,
@@ -88,9 +88,9 @@ void MuonProcess::init() {
       "Table with dead time information, e.g. from LoadMuonNexus."
       "Must be specified if ApplyDeadTimeCorrection is set true.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorGroupingTable",
-                                                     "", Direction::Input,
-                                                     PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DetectorGroupingTable", "", Direction::Input,
+          PropertyMode::Optional),
       "Table with detector grouping information, e.g. from LoadMuonNexus.");
 
   declareProperty("TimeZero", EMPTY_DBL(),

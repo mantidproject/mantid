@@ -11,10 +11,10 @@
 #include "ApplicationWindow.h"
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "ScriptingEnv.h"
-#include "MantidQtWidgets/Common/pixmaps.h"
 
 // Mantid
 #include "MantidKernel/ConfigService.h"

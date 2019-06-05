@@ -79,7 +79,7 @@ void LoadDiffCal::init() {
 
   const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "",
-                                                    FileProperty::Load, exts),
+                                                 FileProperty::Load, exts),
                   "Path to the .h5 file.");
   declareProperty(std::make_unique<FileProperty>(
                       PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
@@ -97,13 +97,13 @@ void LoadDiffCal::init() {
                   "WorkspaceName_cal.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK,
-                                                   true, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK, true,
+                                                Direction::Input),
       "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
-                                                          Direction::Input),
+                                                       Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_cal', '_mask' appended to them.");
 

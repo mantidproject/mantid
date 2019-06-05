@@ -23,7 +23,7 @@ DECLARE_ALGORITHM(LoadNexusMonitors)
 void LoadNexusMonitors::init() {
   declareProperty(
       std::make_unique<API::FileProperty>("Filename", "",
-                                             API::FileProperty::Load, ".nxs"),
+                                          API::FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the NeXus file to "
       "attempt to load. The file extension must either be .nxs or .NXS");
 

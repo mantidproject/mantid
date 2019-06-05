@@ -43,7 +43,7 @@ void CreateWorkspace::init() {
   unitOptions.emplace_back("Text");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Name to be given to the created workspace.");
 
   auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
@@ -61,8 +61,9 @@ void CreateWorkspace::init() {
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the second Axis (leave blank for "
                   "default Spectra number)");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>("VerticalAxisValues"),
-                  "Values for the VerticalAxis.");
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>("VerticalAxisValues"),
+      "Values for the VerticalAxis.");
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("Distribution", false),
@@ -72,8 +73,8 @@ void CreateWorkspace::init() {
   declareProperty("WorkspaceTitle", "", "Title for Workspace");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("ParentWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+                                                        Direction::Input,
+                                                        PropertyMode::Optional),
                   "Name of a parent workspace.");
   declareProperty(std::make_unique<ArrayProperty<double>>("Dx"),
                   "X error values for workspace (optional).");

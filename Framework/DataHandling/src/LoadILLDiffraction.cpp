@@ -21,7 +21,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-
 #include <H5Cpp.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
@@ -100,9 +99,9 @@ LoadILLDiffraction::LoadILLDiffraction()
  * Initialize the algorithm's properties.
  */
 void LoadILLDiffraction::init() {
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "File path of the data file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "File path of the data file to load");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
@@ -114,7 +113,7 @@ void LoadILLDiffraction::init() {
                   "loaded if available, otherwise the raw data is loaded.");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "Apply vertical and horizontal alignment of tubes as defined in IPF");
 }
 

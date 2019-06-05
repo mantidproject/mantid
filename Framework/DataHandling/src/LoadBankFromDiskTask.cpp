@@ -252,8 +252,7 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
  */
 std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Allocate the array
-  auto event_time_of_flight =
-      std::make_unique<float[]>(m_loadSize[0]);
+  auto event_time_of_flight = std::make_unique<float[]>(m_loadSize[0]);
 
   // Get the list of event_time_of_flight's
   std::string key, tof_unit;

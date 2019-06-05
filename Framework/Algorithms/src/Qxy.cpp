@@ -45,7 +45,7 @@ void Qxy::init() {
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The corrected data in units of wavelength.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name to use for the corrected workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -67,14 +67,14 @@ void Qxy::init() {
   auto wavVal = boost::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input,
-                                       PropertyMode::Optional, wavVal),
-      "The scaling to apply to each bin to account for monitor "
-      "counts, transmission fraction, etc. Must be one spectrum "
-      "with the same binning as the InputWorkspace, the same units "
-      "(counts) and the same [[ConvertToDistribution|distribution "
-      "status]].");
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "WavelengthAdj", "", Direction::Input,
+                      PropertyMode::Optional, wavVal),
+                  "The scaling to apply to each bin to account for monitor "
+                  "counts, transmission fraction, etc. Must be one spectrum "
+                  "with the same binning as the InputWorkspace, the same units "
+                  "(counts) and the same [[ConvertToDistribution|distribution "
+                  "status]].");
   declareProperty("AccountForGravity", false,
                   "Whether to correct for the effects of gravity.",
                   Direction::Input);

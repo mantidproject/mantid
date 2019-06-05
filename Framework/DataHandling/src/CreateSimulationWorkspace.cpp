@@ -119,7 +119,7 @@ void CreateSimulationWorkspace::init() {
                   "bin boundary. See Rebin for more details");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The new workspace");
 
   auto knownUnits = UnitFactory::Instance().getKeys();
@@ -128,8 +128,8 @@ void CreateSimulationWorkspace::init() {
                   "The unit to assign to the X axis", Direction::Input);
 
   declareProperty(std::make_unique<FileProperty>("DetectorTableFilename", "",
-                                            FileProperty::OptionalLoad, "",
-                                            Direction::Input),
+                                                 FileProperty::OptionalLoad, "",
+                                                 Direction::Input),
                   "An optional filename (currently RAW or ISIS NeXus) that "
                   "contains UDET & SPEC tables to access hardware grouping");
 }

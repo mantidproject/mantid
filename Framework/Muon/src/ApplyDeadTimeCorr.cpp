@@ -32,14 +32,16 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
  */
 void ApplyDeadTimeCorr::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<EqualBinSizesValidator>(0.5)),
-                  "The name of the input workspace containing measured counts");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<EqualBinSizesValidator>(0.5)),
+      "The name of the input workspace containing measured counts");
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "DeadTimeTable", "", Direction::Input),
-                  "Name of the Dead Time Table");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "DeadTimeTable", "", Direction::Input),
+      "Name of the Dead Time Table");
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(

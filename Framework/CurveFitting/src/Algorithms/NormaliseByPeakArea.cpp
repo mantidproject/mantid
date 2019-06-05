@@ -86,19 +86,19 @@ void NormaliseByPeakArea::init() {
       "are summed in quadrature to produce the final result");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Input workspace normalised by the fitted peak area");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace",
+                                                        "", Direction::Output),
                   "Input workspace converted to units of Y-space");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("FittedWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "Output from fit of the single mass peakin y-space. The output units are "
       "in momentum (A^-1)");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("SymmetrisedWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "The input data symmetrised about Y=0.  The output units are in momentum "
       "(A^-1)");
 }

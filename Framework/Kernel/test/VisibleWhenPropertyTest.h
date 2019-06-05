@@ -61,8 +61,9 @@ public:
     // Make a property with its validator. Will be Visible when that other one
     // is the default
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", std::make_unique<VisibleWhenProperty>(
-                                                   "MyIntProp", IS_DEFAULT));
+    alg.setPropertySettings(
+        "MyValidatorProp",
+        std::make_unique<VisibleWhenProperty>("MyIntProp", IS_DEFAULT));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -95,9 +96,9 @@ public:
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings(
-        "MyValidatorProp",
-        std::make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_EQUAL_TO, "234"));
+    alg.setPropertySettings("MyValidatorProp",
+                            std::make_unique<VisibleWhenProperty>(
+                                "MyIntProp", IS_NOT_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -221,7 +222,7 @@ private:
                          const VisibleWhenProperty &condTwo,
                          eLogicOperator logicalOperator) {
     return std::make_unique<VisibleWhenProperty>(condOne, condTwo,
-                                                    logicalOperator);
+                                                 logicalOperator);
   }
 };
 

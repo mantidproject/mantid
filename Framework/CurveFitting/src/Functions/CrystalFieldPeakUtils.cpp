@@ -11,7 +11,6 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
-
 #include <algorithm>
 #include <cmath>
 

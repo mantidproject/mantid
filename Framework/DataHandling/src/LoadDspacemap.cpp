@@ -37,9 +37,9 @@ void LoadDspacemap::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
   const std::vector<std::string> exts{".dat", ".bin"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The DspacemapFile containing the d-space mapping.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The DspacemapFile containing the d-space mapping.");
 
   std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII",
                                        "VULCAN-Binary"};

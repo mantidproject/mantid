@@ -30,7 +30,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-
 namespace Mantid {
 namespace Algorithms {
 

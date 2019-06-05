@@ -51,7 +51,7 @@ std::map<std::string, size_t> LoadFullprofResolution::m_rowNumbers;
 void LoadFullprofResolution::init() {
   // Input file name
   declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, ".irf"),
+                                                 FileProperty::Load, ".irf"),
                   "Path to an Fullprof .irf file to load.");
 
   // Output table workspace
@@ -64,7 +64,7 @@ void LoadFullprofResolution::init() {
   // Use bank numbers as given in file
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true,
-                                                   Direction::Input),
+                                                Direction::Input),
       "Use bank IDs as given in file rather than ordinal number of bank."
       "If the bank IDs in the file are not unique, it is advised to set this "
       "to false.");

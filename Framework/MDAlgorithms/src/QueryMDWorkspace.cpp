@@ -71,8 +71,8 @@ void QueryMDWorkspace::init() {
                   "An input MDWorkspace.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The output Tableworkspace "
       "with columns containing key summary information about the MDWorkspace.");
 
@@ -84,8 +84,8 @@ void QueryMDWorkspace::init() {
                       boost::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings(
-      "MaximumRows", std::make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
+  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
+                                         "LimitRows", IS_DEFAULT));
 
   std::vector<std::string> propOptions;
   propOptions.push_back(noNormalisationOption());

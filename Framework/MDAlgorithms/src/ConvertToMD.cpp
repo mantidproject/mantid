@@ -55,7 +55,7 @@ void ConvertToMD::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("OverwriteExisting", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "By default  (\"1\"), existing Output Workspace will be replaced. Select "
       "false (\"0\") if you want to add new events to the workspace, which "
       "already exist. "
@@ -89,7 +89,7 @@ void ConvertToMD::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1,
-                                          mustBeMoreThan1),
+                                               mustBeMoreThan1),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 0 = no splitting, "
       "1 = one level of splitting, etc. \n Be careful using this since it can "
@@ -102,13 +102,13 @@ void ConvertToMD::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "This option causes a split of the top level, i.e. level0, of 50 for the "
       "first four dimensions.");
 
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+                                     ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
   setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(

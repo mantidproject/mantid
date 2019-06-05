@@ -13,7 +13,6 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
-
 using Mantid::Geometry::GeneralFrame;
 using namespace Mantid::Kernel;
 

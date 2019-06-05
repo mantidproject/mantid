@@ -90,8 +90,8 @@ const std::string LoadSpiceAscii::summary() const {
 /** Declaration of properties
  */
 void LoadSpiceAscii::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                            API::FileProperty::Load, ".dat"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".dat"),
                   "Name of SPICE data file.");
 
   // Logs to be float type sample log
@@ -137,8 +137,8 @@ void LoadSpiceAscii::init() {
                   "Name of TableWorkspace containing experimental data.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("RunInfoWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "RunInfoWorkspace", "", Direction::Output),
       "Name of TableWorkspace containing experimental information.");
 }
 

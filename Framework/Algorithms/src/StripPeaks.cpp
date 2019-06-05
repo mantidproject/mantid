@@ -25,11 +25,11 @@ using namespace Kernel;
 using namespace API;
 
 void StripPeaks::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The name of the input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The name of the input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name to use for the output workspace.");
 
   auto min = boost::make_shared<BoundedValidator<int>>();

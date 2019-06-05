@@ -80,11 +80,10 @@ void ApplyMuonDetectorGrouping::init() {
                   "Input workspace containing data from detectors which are to "
                   "be grouped.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "InputWorkspaceGroup", emptyString, Direction::InOut,
-          PropertyMode::Mandatory),
-      "The workspace group to which the output will be added.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "InputWorkspaceGroup", emptyString, Direction::InOut,
+                      PropertyMode::Mandatory),
+                  "The workspace group to which the output will be added.");
 
   declareProperty("GroupName", emptyString,
                   "The name of the group. Must "
@@ -141,9 +140,10 @@ void ApplyMuonDetectorGrouping::init() {
           "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
       "Table with dead time information. Must be specified if "
       "ApplyDeadTimeCorrection is set true.");
-  setPropertySettings("DeadTimeTable", std::make_unique<Kernel::EnabledWhenProperty>(
-                                           "ApplyDeadTimeCorrection",
-                                           Kernel::IS_NOT_DEFAULT, ""));
+  setPropertySettings(
+      "DeadTimeTable",
+      std::make_unique<Kernel::EnabledWhenProperty>(
+          "ApplyDeadTimeCorrection", Kernel::IS_NOT_DEFAULT, ""));
 
   // Perform Group Associations.
 

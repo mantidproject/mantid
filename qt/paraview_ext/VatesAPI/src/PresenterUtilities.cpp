@@ -17,7 +17,6 @@
 
 #include "MantidKernel/Logger.h"
 
-
 #include <vtkBox.h>
 
 #include <algorithm>
@@ -90,11 +89,8 @@ std::unique_ptr<vtkMDHexFactory>
 createFactoryChainForEventWorkspace(VisualNormalization normalization,
                                     double time) {
   auto factory = std::make_unique<vtkMDHexFactory>(normalization);
-  factory
-      ->setSuccessor(
-          std::make_unique<vtkMDQuadFactory>(normalization))
-      .setSuccessor(
-          std::make_unique<vtkMDLineFactory>(normalization))
+  factory->setSuccessor(std::make_unique<vtkMDQuadFactory>(normalization))
+      .setSuccessor(std::make_unique<vtkMDLineFactory>(normalization))
       .setSuccessor(std::make_unique<vtkMD0DFactory>());
   factory->setTime(time);
   return factory;
@@ -109,16 +105,11 @@ createFactoryChainForEventWorkspace(VisualNormalization normalization,
 std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>>
 createFactoryChainForHistoWorkspace(VisualNormalization normalization,
                                     double time) {
-  auto factory =
-      std::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
-          normalization, time);
-  factory
-      ->setSuccessor(
-          std::make_unique<vtkMDHistoHexFactory>(normalization))
-      .setSuccessor(
-          std::make_unique<vtkMDHistoQuadFactory>(normalization))
-      .setSuccessor(
-          std::make_unique<vtkMDHistoLineFactory>(normalization))
+  auto factory = std::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+      normalization, time);
+  factory->setSuccessor(std::make_unique<vtkMDHistoHexFactory>(normalization))
+      .setSuccessor(std::make_unique<vtkMDHistoQuadFactory>(normalization))
+      .setSuccessor(std::make_unique<vtkMDHistoLineFactory>(normalization))
       .setSuccessor(std::make_unique<vtkMD0DFactory>());
   return factory;
 }

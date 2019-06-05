@@ -70,11 +70,11 @@ void PDFFourierTransform::init() {
   auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, uv),
+                                                        Direction::Input, uv),
                   S_OF_Q + ", " + S_OF_Q_MINUS_ONE + ", or " +
                       Q_S_OF_Q_MINUS_ONE);
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Result paired-distribution function");
 
   // Set up input data type

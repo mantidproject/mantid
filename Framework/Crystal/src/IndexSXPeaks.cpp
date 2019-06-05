@@ -82,11 +82,11 @@ void IndexSXPeaks::init() {
   extents[3] = range;
   extents[4] = -range;
   extents[5] = range;
-  declareProperty(std::make_unique<ArrayProperty<int>>("SearchExtents",
-                                                          std::move(extents)),
-                  "A comma separated list of min, max for each of H, K and L,\n"
-                  "Specifies the search extents applied for H K L values "
-                  "associated with the peaks.");
+  declareProperty(
+      std::make_unique<ArrayProperty<int>>("SearchExtents", std::move(extents)),
+      "A comma separated list of min, max for each of H, K and L,\n"
+      "Specifies the search extents applied for H K L values "
+      "associated with the peaks.");
 }
 
 /**

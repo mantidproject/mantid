@@ -24,7 +24,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
 
-
 namespace {
 template <typename MDE, size_t nd>
 boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>

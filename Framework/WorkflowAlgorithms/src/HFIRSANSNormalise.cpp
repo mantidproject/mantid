@@ -23,9 +23,9 @@ using namespace API;
 DECLARE_ALGORITHM(HFIRSANSNormalise)
 
 void HFIRSANSNormalise::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace to be corrected");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace to be corrected");
 
   std::vector<std::string> normOptions{"Monitor", "Timer"};
   this->declareProperty("NormalisationType", "Monitor",
@@ -33,7 +33,7 @@ void HFIRSANSNormalise::init() {
                         "Type of Normalisation to use");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Corrected workspace");
   declareProperty("OutputMessage", "", Direction::Output);
 }

@@ -28,7 +28,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 
-
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/error_of_mean.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
@@ -693,11 +692,10 @@ int CSGObject::procPair(std::string &Ln,
   // Get rules
   auto RRA = std::move(Rlist[Ra]);
   auto RRB = std::move(Rlist[Rb]);
-  auto Join =
-      (type) ? std::unique_ptr<Rule>(std::make_unique<Union>(
-                   std::move(RRA), std::move(RRB)))
-             : std::unique_ptr<Rule>(std::make_unique<Intersection>(
-                   std::move(RRA), std::move(RRB)));
+  auto Join = (type) ? std::unique_ptr<Rule>(std::make_unique<Union>(
+                           std::move(RRA), std::move(RRB)))
+                     : std::unique_ptr<Rule>(std::make_unique<Intersection>(
+                           std::move(RRA), std::move(RRB)));
   Rlist[Ra] = std::move(Join);
   Rlist.erase(Rlist.find(Rb));
 

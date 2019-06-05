@@ -61,20 +61,20 @@ void IntegratePeaksMD::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
-                                             Direction::Input),
+                                                  Direction::Input),
       "Fixed radius around each peak position in which to integrate (in the "
       "same units as the workspace).");
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0,
-                                             Direction::Input),
+                                                  Direction::Input),
       "Inner radius to use to evaluate the background of the peak.\n"
       "If smaller than PeakRadius, then we assume BackgroundInnerRadius = "
       "PeakRadius.");
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0,
-                                             Direction::Input),
+                                                  Direction::Input),
       "Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
       "BackgroundOuterRadius) is used to estimate the background under the "
@@ -87,7 +87,7 @@ void IntegratePeaksMD::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 
@@ -111,12 +111,12 @@ void IntegratePeaksMD::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("CylinderLength", 0.0,
-                                             Direction::Input),
+                                                  Direction::Input),
       "Length of cylinder in which to integrate (in the same units as the "
       "workspace).");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>("PercentBackground",
-                                                         0.0, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "PercentBackground", 0.0, Direction::Input),
                   "Percent of CylinderLength that is background (20 is 20%)");
 
   std::vector<std::string> peakNames =
@@ -138,9 +138,9 @@ void IntegratePeaksMD::init() {
                   "used only with Cylinder integration.");
 
   declareProperty(
-      std::make_unique<FileProperty>(
-          "ProfilesFile", "", FileProperty::OptionalSave,
-          std::vector<std::string>(1, "profiles")),
+      std::make_unique<FileProperty>("ProfilesFile", "",
+                                     FileProperty::OptionalSave,
+                                     std::vector<std::string>(1, "profiles")),
       "Save (Optionally) as Isaw peaks file with profiles included");
 }
 

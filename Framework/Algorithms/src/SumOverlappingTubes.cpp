@@ -29,7 +29,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
-
 #include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
@@ -68,7 +67,7 @@ void SumOverlappingTubes::init() {
       "scattering angle present in the workspaces.");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("CropNegativeScatteringAngles",
-                                           false, Direction::Input),
+                                                false, Direction::Input),
       "If true the negative scattering angles are cropped (ignored).");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
@@ -79,14 +78,15 @@ void SumOverlappingTubes::init() {
       "be determined by minimum and maximum y values present in the "
       "workspaces. This can also be two numbers to give the range desired.");
   declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("Normalise", true,
+                                                Direction::Input),
       "If true normalise to the number of entries added for a particular "
       "scattering angle. ");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("MirrorScatteringAngles",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "MirrorScatteringAngles", false, Direction::Input),
                   "A flag to mirror the signed 2thetas. ");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("SplitCounts", false,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "SplitCounts", false, Direction::Input),
                   "A flag to split the counts between adjacent bins");
   auto toleranceValidator =
       boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
@@ -102,7 +102,8 @@ void SumOverlappingTubes::init() {
 void SumOverlappingTubes::exec() {
   getInputParameters();
 
-  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_workspaceList.size());
+  m_progress =
+      std::make_unique<Progress>(this, 0.0, 1.0, m_workspaceList.size());
 
   // we need histogram data with m_numPoints bins
   HistogramData::BinEdges x(

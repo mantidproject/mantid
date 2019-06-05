@@ -87,11 +87,11 @@ void VesuvioCalculateMS::init() {
 
   auto nonEmptyArray = boost::make_shared<ArrayLengthValidator<double>>();
   nonEmptyArray->setLengthMin(3);
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("AtomicProperties", nonEmptyArray),
-      "Atomic properties of masses within the sample. "
-      "The expected format is 3 consecutive values per mass: "
-      "mass(amu), cross-section (barns) & s.d of Compton profile.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("AtomicProperties",
+                                                          nonEmptyArray),
+                  "Atomic properties of masses within the sample. "
+                  "The expected format is 3 consecutive values per mass: "
+                  "mass(amu), cross-section (barns) & s.d of Compton profile.");
   setPropertyGroup("NoOfMasses", "Sample");
   setPropertyGroup("SampleDensity", "Sample");
   setPropertyGroup("AtomicProperties", "Sample");
@@ -116,11 +116,11 @@ void VesuvioCalculateMS::init() {
 
   // Outputs
   declareProperty(std::make_unique<WorkspaceProperty<>>("TotalScatteringWS", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Workspace to store the calculated total scattering counts");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("MultipleScatteringWS", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "Workspace to store the calculated multiple scattering counts summed for "
       "all orders");
 }
@@ -137,14 +137,13 @@ void VesuvioCalculateMS::exec() {
   MatrixWorkspace_sptr multsc = WorkspaceFactory::Instance().create(m_inputWS);
 
   // Initialize random number generator
-  m_randgen = std::make_unique<
-      CurveFitting::MSVesuvioHelper::RandomVariateGenerator>(
-      getProperty("Seed"));
+  m_randgen =
+      std::make_unique<CurveFitting::MSVesuvioHelper::RandomVariateGenerator>(
+          getProperty("Seed"));
 
   // Setup progress
   const size_t nhist = m_inputWS->getNumberHistograms();
-  m_progress =
-      std::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   for (size_t i = 0; i < nhist; ++i) {
 

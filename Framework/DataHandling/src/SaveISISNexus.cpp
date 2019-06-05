@@ -54,7 +54,7 @@ void SaveISISNexus::init() {
   const std::vector<std::string> inputExts{".raw", ".s*", ".add"};
   declareProperty(
       std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
-                                        inputExts),
+                                     inputExts),
       "The name of the RAW file to read, including its full or relative\n"
       "path. (N.B. case sensitive if running on Linux).");
 

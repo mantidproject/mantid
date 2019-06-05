@@ -50,7 +50,7 @@ DECLARE_ALGORITHM(LoadGSASInstrumentFile)
 void LoadGSASInstrumentFile::init() {
   // Input file name
   declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, ".prm"),
+                                                 FileProperty::Load, ".prm"),
                   "Path to an GSAS file to load.");
 
   // Output table workspace
@@ -63,7 +63,7 @@ void LoadGSASInstrumentFile::init() {
   // Use bank numbers as given in file
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true,
-                                                   Direction::Input),
+                                                Direction::Input),
       "Use bank IDs as given in file rather than ordinal number of bank. "
       "If the bank IDs in the file are not unique, it is advised to set this "
       "to false.");

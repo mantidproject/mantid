@@ -51,8 +51,8 @@ void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
 
   auto indexTypePropName =
       IndexTypeProperty::generatePropertyName(propertyName);
-  auto indexTypeProp = std::make_unique<IndexTypeProperty>(
-      indexTypePropName, AllowedIndexTypes);
+  auto indexTypeProp =
+      std::make_unique<IndexTypeProperty>(indexTypePropName, AllowedIndexTypes);
   const auto &indexTypePropRef = *indexTypeProp;
 
   declareProperty(std::move(indexTypeProp),
@@ -61,7 +61,7 @@ void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
 
   auto indexPropName = IndexProperty::generatePropertyName(propertyName);
   declareProperty(std::make_unique<IndexProperty>(indexPropName, wsPropRef,
-                                                     indexTypePropRef),
+                                                  indexTypePropRef),
                   "An optional set of spectra that will be processed by the "
                   "algorithm; If not set, all spectra will be processed; The "
                   "indices in this list can be workspace indices or possibly "

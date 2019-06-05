@@ -33,7 +33,7 @@ void ConvertTableToMatrixWorkspace::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input TableWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output Workspace2D.");
   declareProperty("ColumnX", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),

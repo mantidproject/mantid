@@ -45,8 +45,8 @@ void PeakIntegration::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "A 2D workspace with X values of time of flight");
   declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+          "OutPeaksWorkspace", "", Direction::Output),
       "Name of the output peaks workspace with integrated intensities.");
   declareProperty("IkedaCarpenterTOF", false,
                   "Integrate TOF using IkedaCarpenter fit.\n"

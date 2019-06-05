@@ -38,11 +38,11 @@ XDataConverter::XDataConverter() : m_sharedX(false) {}
 void XDataConverter::init() {
   using Kernel::Direction;
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+                                                        Direction::Input),
                   "Name of the input workspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                               Direction::Output),
+                                            Direction::Output),
       "Name of the output workspace, can be the same as the input.");
 }
 

@@ -59,7 +59,7 @@ public:
 
   void init() override {
     declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                     Direction::Input));
+                                                          Direction::Input));
   }
 
   void exec() override {}

@@ -47,11 +47,12 @@ const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
 /** Initialize the algorithm's properties.
  */
 void RadiusSum::init() {
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input workspace.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "An input workspace.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   auto twoOrThreeElements =
@@ -59,7 +60,7 @@ void RadiusSum::init() {
   std::vector<double> myInput(3, 0);
   declareProperty(
       std::make_unique<ArrayProperty<double>>("Centre", std::move(myInput),
-                                                 std::move(twoOrThreeElements)),
+                                              std::move(twoOrThreeElements)),
       "Coordinate of the centre of the ring");
 
   auto nonNegative = boost::make_shared<BoundedValidator<double>>();

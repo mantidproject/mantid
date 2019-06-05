@@ -28,7 +28,7 @@ void CopyDetectorMapping::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("IndexBySpectrumNumber", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "Will use mapping indexed by spectrum number rather than the default of"
       "Workspace Index (recommended when both workspaces have a vertical axis "
       "in spectrum number).");

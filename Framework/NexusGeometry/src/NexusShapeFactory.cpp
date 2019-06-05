@@ -19,7 +19,6 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 
-
 #include <boost/make_shared.hpp>
 #include <iterator>
 

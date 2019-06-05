@@ -33,9 +33,9 @@
 #include "ApplicationWindow.h"
 #include "ImportASCIIDialog.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "SortDialog.h"
 #include "muParserScript.h"
-#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QApplication>
 #include <QClipboard>

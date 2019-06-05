@@ -33,15 +33,15 @@ void ShowPossibleCells::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>("MaxScalarError", 0.2,
-                                             mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "MaxScalarError", 0.2, mustBePositive, Direction::Input),
       "Max Scalar Error (0.2)");
 
   this->declareProperty("BestOnly", true,
                         "Show at most one for each Bravais Lattice");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>("NumberOfCells", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumberOfCells", 0, Direction::Output),
                         "Gets set with the number of possible cells.");
 
   this->declareProperty("AllowPermutations", true,

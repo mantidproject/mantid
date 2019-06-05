@@ -20,7 +20,6 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 
-
 #include <algorithm>
 #include <boost/make_shared.hpp>
 #include <numeric>

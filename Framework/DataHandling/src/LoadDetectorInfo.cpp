@@ -52,7 +52,7 @@ void LoadDetectorInfo::init() {
   const std::vector<std::string> exts{".dat", ".raw", ".sca", ".nxs"};
   declareProperty(
       std::make_unique<FileProperty>("DataFilename", "", FileProperty::Load,
-                                        exts),
+                                     exts),
       "A **raw, dat, nxs** or **sca** file that contains information about the "
       "detectors in the "
       "workspace. The description of **dat** and **nxs** file format is "

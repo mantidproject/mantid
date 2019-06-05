@@ -66,7 +66,7 @@ void TransposeMD::init() {
 
   declareProperty(
       std::make_unique<ArrayProperty<int>>("Axes", std::vector<int>(0),
-                                              axisValidator, Direction::Input),
+                                           axisValidator, Direction::Input),
       "Permutes the axes according to the indexes given. Zero "
       "based indexing. Defaults to no transpose.");
 

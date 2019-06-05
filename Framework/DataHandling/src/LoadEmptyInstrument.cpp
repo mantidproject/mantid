@@ -63,7 +63,7 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadEmptyInstrument::init() {
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                LoadGeometry::validExtensions()),
+                                     LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "
@@ -73,8 +73,8 @@ void LoadEmptyInstrument::init() {
                   "Name of instrument. Can be used instead of Filename to "
                   "specify an IDF");
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The name of the workspace in which to store the imported instrument");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();

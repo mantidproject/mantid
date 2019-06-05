@@ -186,17 +186,14 @@ public:
         std::make_unique<PropertyWithValue<int>>("bank", bank));
     expectedInfo->declareProperty(
         std::make_unique<ArrayProperty<int32_t>>("vanadium", van));
-    expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<int32_t>>(
-            "vanadium_background", vanback));
+    expectedInfo->declareProperty(std::make_unique<ArrayProperty<int32_t>>(
+        "vanadium_background", vanback));
     expectedInfo->declareProperty(
         std::make_unique<ArrayProperty<int32_t>>("container", can));
     expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<int32_t>>("empty_environment",
-                                                            "0"));
+        std::make_unique<ArrayProperty<int32_t>>("empty_environment", "0"));
     expectedInfo->declareProperty(
-        std::make_unique<ArrayProperty<int32_t>>("empty_instrument",
-                                                            empty));
+        std::make_unique<ArrayProperty<int32_t>>("empty_instrument", empty));
     expectedInfo->declareProperty(
         std::make_unique<ArrayProperty<double>>("d_min", dmin));
     expectedInfo->declareProperty(

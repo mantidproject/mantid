@@ -15,8 +15,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -664,8 +664,8 @@ void Fit1D::exec() {
                     "The name of the TableWorkspace in which to store the "
                     "final fit parameters");
     declareProperty(
-        std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                        Direction::Output),
+        std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+            "OutputWorkspace", "", Direction::Output),
         "Name of the output Workspace holding resulting simlated spectrum");
 
     setPropertyValue("OutputParameters", output + "_Parameters");

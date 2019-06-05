@@ -33,7 +33,8 @@ makeEventWorkspaceCollection(unsigned int decoratorSize) {
 
   auto decorator = std::make_unique<EventWorkspaceCollection>();
 
-  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+  auto periodLog =
+      std::make_unique<const TimeSeriesProperty<int>>("period_log");
 
   decorator->setNPeriods(decoratorSize, periodLog);
 
@@ -67,7 +68,8 @@ public:
   void test_output_multiple_workspaces() {
     EventWorkspaceCollection decorator;
 
-    auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+    auto periodLog =
+        std::make_unique<const TimeSeriesProperty<int>>("period_log");
     decorator.setNPeriods(3, periodLog);
 
     WorkspaceGroup_sptr outWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
@@ -154,7 +156,8 @@ public:
 
   void test_setIndexInfo() {
     EventWorkspaceCollection collection;
-    auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+    auto periodLog =
+        std::make_unique<const TimeSeriesProperty<int>>("period_log");
     const size_t periods = 2;
     collection.setNPeriods(periods, periodLog);
     // Set some arbitrary data to ensure that it is preserved.

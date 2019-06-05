@@ -120,8 +120,7 @@ const std::string LoadVTK::category() const { return "MDAlgorithms"; }
 void LoadVTK::init() {
   std::vector<std::string> exts{"vtk"};
   this->declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "Binary legacy VTK uniform structured image file to load.");
 
   auto manditorySignalArrayName =
@@ -153,14 +152,14 @@ void LoadVTK::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "MDWorkspace equivalent of vtkStructuredPoints input.");
 
-  declareProperty(std::make_unique<PropertyWithValue<int>>(
-                      "SignalMaximum", 0, Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalMaximum", 0,
+                                                           Direction::Output),
                   "Maximum signal value determined from input array.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>(
-                      "SignalMinimum", 0, Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalMinimum", 0,
+                                                           Direction::Output),
                   "Minimum signal value determined from input array.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>(
-                      "SignalThreshold", 0, Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalThreshold", 0,
+                                                           Direction::Output),
                   "Actual calculated signal threshold determined from "
                   "minimum, and maximum signal.");
 }

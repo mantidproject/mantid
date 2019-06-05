@@ -33,9 +33,9 @@ void SaveNISTDAT::init() {
   wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".dat"),
-      "The filename of the output text file");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".dat"),
+                  "The filename of the output text file");
 }
 
 void SaveNISTDAT::exec() {

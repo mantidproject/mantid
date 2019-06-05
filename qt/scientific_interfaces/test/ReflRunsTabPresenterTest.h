@@ -496,10 +496,8 @@ private:
   // Create the mock objects. The number of groups defines the number of table
   // presenters
   void createMocks(int numGroups) {
-    m_mockRunsTabView =
-        std::make_unique<NiceMock<MockRunsTabView>>();
-    m_mockMainPresenter =
-        std::make_unique<MockMainWindowPresenter>();
+    m_mockRunsTabView = std::make_unique<NiceMock<MockRunsTabView>>();
+    m_mockMainPresenter = std::make_unique<MockMainWindowPresenter>();
     m_mockProgress = std::make_unique<MockProgressableView>();
 
     for (int i = 0; i < numGroups; ++i) {

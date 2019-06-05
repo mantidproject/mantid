@@ -7,8 +7,6 @@
 #include "MantidLiveData/Kafka/KafkaBroker.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
-
-
 namespace Mantid {
 namespace LiveData {
 
@@ -28,7 +26,7 @@ std::unique_ptr<IKafkaStreamSubscriber>
 KafkaBroker::subscribe(std::vector<std::string> topics,
                        SubscribeAtOption subscribeOption) const {
   auto subscriber = std::make_unique<KafkaTopicSubscriber>(m_address, topics,
-                                                              subscribeOption);
+                                                           subscribeOption);
   subscriber->subscribe();
   return std::move(subscriber);
 }
@@ -37,7 +35,7 @@ std::unique_ptr<IKafkaStreamSubscriber>
 KafkaBroker::subscribe(std::vector<std::string> topics, int64_t offset,
                        SubscribeAtOption subscribeOption) const {
   auto subscriber = std::make_unique<KafkaTopicSubscriber>(m_address, topics,
-                                                              subscribeOption);
+                                                           subscribeOption);
   subscriber->subscribe(offset);
   return std::move(subscriber);
 }

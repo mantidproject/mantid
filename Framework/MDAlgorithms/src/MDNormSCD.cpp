@@ -86,7 +86,7 @@ void MDNormSCD::init() {
     std::string propName = "AlignedDim" + dim;
     declareProperty(
         std::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                            Direction::Input),
+                                                         Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -102,14 +102,14 @@ void MDNormSCD::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "FluxWorkspace", "", Direction::Input, fluxValidator),
                   "An input workspace containing momentum dependent flux.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
-                                                   Direction::Input,
-                                                   solidAngleValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace",
+                                                        "", Direction::Input,
+                                                        solidAngleValidator),
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "SkipSafetyCheck", false, Direction::Input),
                   "If set to true, the algorithm does "
                   "not check history if the workspace was modified since the"
                   "ConvertToMD algorithm was run, and assume that the elastic "
@@ -447,9 +447,9 @@ void MDNormSCD::calculateNormalization(
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
   double progStep = 0.7 / m_numExptInfos;
-  auto prog =
-      std::make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
-                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
+  auto prog = std::make_unique<API::Progress>(
+      this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.),
+      ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {

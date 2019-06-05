@@ -44,29 +44,29 @@ void PeaksOnSurface::init() {
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Vertex1", std::vector<double>(), manditoryExtents->clone()),
+      std::make_unique<ArrayProperty<double>>("Vertex1", std::vector<double>(),
+                                              manditoryExtents->clone()),
       "A comma separated list of cartesian coordinates for the "
       "lower left vertex of the surface. Values to be specified in "
       "the CoordinateFrame choosen.");
 
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Vertex2", std::vector<double>(), manditoryExtents->clone()),
+      std::make_unique<ArrayProperty<double>>("Vertex2", std::vector<double>(),
+                                              manditoryExtents->clone()),
       "A comma separated list of cartesian coordinates for the "
       "upper left vertex of the surface. Values to be specified in "
       "the CoordinateFrame choosen.");
 
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Vertex3", std::vector<double>(), manditoryExtents->clone()),
+      std::make_unique<ArrayProperty<double>>("Vertex3", std::vector<double>(),
+                                              manditoryExtents->clone()),
       "A comma separated list of cartesian coordinates for the "
       "upper right vertex of the surface. Values to be specified "
       "in the CoordinateFrame choosen.");
 
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Vertex4", std::vector<double>(), std::move(manditoryExtents)),
+      std::make_unique<ArrayProperty<double>>("Vertex4", std::vector<double>(),
+                                              std::move(manditoryExtents)),
       "A comma separated list of cartesian coordinates for the "
       "lower right vertex of the surface. Values to be specified "
       "in the CoordinateFrame choosen.");

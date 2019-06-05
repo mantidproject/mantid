@@ -11,7 +11,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 
-
 #include <map>
 #include <memory>
 

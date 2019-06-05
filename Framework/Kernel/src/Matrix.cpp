@@ -11,7 +11,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 
-
 #include <algorithm>
 #include <memory>
 #include <sstream>

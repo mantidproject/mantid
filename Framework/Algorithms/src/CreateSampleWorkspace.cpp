@@ -67,7 +67,7 @@ const std::string CreateSampleWorkspace::category() const {
  */
 void CreateSampleWorkspace::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "An output workspace.");
   std::vector<std::string> typeOptions{"Histogram", "Event"};
   declareProperty("WorkspaceType", "Histogram",

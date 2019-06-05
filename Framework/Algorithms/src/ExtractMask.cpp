@@ -31,8 +31,8 @@ void ExtractMask::init() {
                       "InputWorkspace", "", Direction::Input),
                   "A workspace whose masking is to be extracted");
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "A workspace containing the masked spectra as zeroes and ones.");
 
   declareProperty(std::make_unique<ArrayProperty<detid_t>>(

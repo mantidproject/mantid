@@ -13,7 +13,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-
 #include <algorithm>
 #include <cmath>
 #include <fstream>

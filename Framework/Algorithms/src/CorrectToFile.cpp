@@ -28,8 +28,8 @@ void CorrectToFile::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "WorkspaceToCorrect", "", Kernel::Direction::Input),
                   "Name of the input workspace");
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Load),
                   "The file containing the correction factors");
 
   std::vector<std::string> propOptions =

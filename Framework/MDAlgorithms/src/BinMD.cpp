@@ -63,7 +63,7 @@ void BinMD::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("IterateEvents", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "Alternative binning method where you iterate through every event, "
       "placing them in the proper bin.\n"
       "This may be faster for workspaces with few events and lots of output "
@@ -71,7 +71,8 @@ void BinMD::init() {
   setPropertyGroup("IterateEvents", grp);
 
   declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Parallel", false, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("Parallel", false,
+                                                Direction::Input),
       "Temporary parameter: true to run in parallel. This is ignored for "
       "file-backed workspaces, where running in parallel makes things slower "
       "due to disk thrashing.");

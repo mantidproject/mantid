@@ -41,7 +41,7 @@ void ClearMaskedSpectra::init() {
       "InputWorkspace", "The input workspace", Direction::Input));
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                               Direction::Output),
+                                            Direction::Output),
       "Name of the output workspace (can be same as InputWorkspace)");
 }
 

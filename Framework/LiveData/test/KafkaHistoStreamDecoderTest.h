@@ -98,8 +98,7 @@ private:
   std::unique_ptr<Mantid::LiveData::KafkaHistoStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return std::make_unique<KafkaHistoStreamDecoder>(broker, "", "",
-                                                                "", "");
+    return std::make_unique<KafkaHistoStreamDecoder>(broker, "", "", "", "");
   }
 
   // Start decoding and wait until we have gathered enough data to test

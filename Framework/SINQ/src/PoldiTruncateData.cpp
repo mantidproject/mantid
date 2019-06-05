@@ -137,8 +137,8 @@ void PoldiTruncateData::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Input workspace containing raw POLDI data.");
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("ExtraCountsWorkspaceName",
-                                                  "", Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>(
+          "ExtraCountsWorkspaceName", "", Direction::Input),
       "Workspace name for extra counts. Leave empty if not required.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

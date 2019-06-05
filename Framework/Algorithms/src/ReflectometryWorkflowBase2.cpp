@@ -64,8 +64,8 @@ void ReflectometryWorkflowBase2::initReductionProperties() {
 
   // Whether to crop out partial bins when projecting to virtual lambda for Q
   // summation
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("IncludePartialBins",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "IncludePartialBins", false, Direction::Input),
                   "If true then partial bins at the beginning and end of the "
                   "output range are included");
   setPropertySettings("IncludePartialBins",
@@ -94,15 +94,15 @@ void ReflectometryWorkflowBase2::initMonitorProperties() {
 
   // Minimum wavelength for background subtraction
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("MonitorBackgroundWavelengthMin",
-                                             Mantid::EMPTY_DBL(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+          Direction::Input),
       "Wavelength minimum for monitor background subtraction in angstroms.");
   // Maximum wavelength for background subtraction
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("MonitorBackgroundWavelengthMax",
-                                             Mantid::EMPTY_DBL(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+          Direction::Input),
       "Wavelength maximum for monitor background subtraction in angstroms.");
 
   // Minimum wavelength for monitor integration
@@ -176,8 +176,8 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
                   "End wavelength (angstroms) for stitching transmission runs "
                   "together. Only used if a second transmission run is "
                   "provided.");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "ScaleRHSWorkspace", true, Direction::Input),
                   "Scale the right-hand-side or left-hand-side workspace. "
                   "Only used if a second transmission run is provided.");
 }

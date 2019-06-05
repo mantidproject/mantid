@@ -24,7 +24,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-
 #include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -73,20 +72,20 @@ void PredictPeaks::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
-                                             Direction::Input),
+                                                  Direction::Input),
       "Minimum wavelength limit at which to start looking for single-crystal "
       "peaks.");
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
-                                             Direction::Input),
+                                                  Direction::Input),
       "Maximum wavelength limit at which to stop looking for single-crystal "
       "peaks.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>("MinDSpacing", 1.0,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "MinDSpacing", 1.0, Direction::Input),
                   "Minimum d-spacing of peaks to consider. Default = 1.0");
-  declareProperty(std::make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "MaxDSpacing", 100.0, Direction::Input),
                   "Maximum d-spacing of peaks to consider.");
 
   declareProperty("CalculateGoniometerForCW", false,
@@ -97,23 +96,23 @@ void PredictPeaks::init() {
   nonNegativeDbl->setLower(0);
   declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
                   "Wavelength to use when calculating goniometer angle");
-  setPropertySettings(
-      "Wavelength", std::make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
-                                                     IS_NOT_DEFAULT));
+  setPropertySettings("Wavelength",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW", IS_NOT_DEFAULT));
 
   declareProperty(std::make_unique<PropertyWithValue<double>>("MinAngle", -180,
-                                                         Direction::Input),
+                                                              Direction::Input),
                   "Minimum goniometer rotation angle");
-  setPropertySettings(
-      "MinAngle", std::make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
-                                                   IS_NOT_DEFAULT));
+  setPropertySettings("MinAngle",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW", IS_NOT_DEFAULT));
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("MaxAngle", 180, Direction::Input),
-      "Maximum goniometer rotation angle");
-  setPropertySettings(
-      "MaxAngle", std::make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
-                                                   IS_NOT_DEFAULT));
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MaxAngle", 180,
+                                                              Direction::Input),
+                  "Maximum goniometer rotation angle");
+  setPropertySettings("MaxAngle",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW", IS_NOT_DEFAULT));
 
   // Build up a list of reflection conditions to use
   std::vector<std::string> propOptions;
@@ -614,8 +613,8 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
     // The exit point is the vector to the place that we hit a detector
     const auto magnitude = track.back().exitPoint.norm();
-    peak = std::make_unique<Peak>(m_inst, q,
-                                     boost::optional<double>(magnitude));
+    peak =
+        std::make_unique<Peak>(m_inst, q, boost::optional<double>(magnitude));
   }
 
   if (m_edge > 0 && edgePixel(m_inst, peak->getBankName(), peak->getCol(),

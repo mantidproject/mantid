@@ -32,23 +32,23 @@ void CopySample::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::InOut),
                   "An output workspace to wich to copy sample information..");
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("CopyName", true, Direction::Input),
-      "Copy the name of the sample");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("CopyMaterial", true,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("CopyName", true,
+                                                            Direction::Input),
+                  "Copy the name of the sample");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "CopyMaterial", true, Direction::Input),
                   "Copy the material of the sample");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("CopyEnvironment", true,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "CopyEnvironment", true, Direction::Input),
                   "Copy the sample environment");
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("CopyShape", true, Direction::Input),
-      "Copy the sample shape");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("CopyShape", true,
+                                                            Direction::Input),
+                  "Copy the sample shape");
   declareProperty(std::make_unique<PropertyWithValue<bool>>("CopyLattice", true,
-                                                       Direction::Input),
+                                                            Direction::Input),
                   "Copy the sample oriented lattice");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("CopyOrientationOnly",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "CopyOrientationOnly", false, Direction::Input),
                   "Copy the U matrix only, if both origin and destination have "
                   "oriented lattices");
   setPropertySettings("CopyOrientationOnly",
@@ -56,7 +56,7 @@ void CopySample::init() {
                           "CopyLattice", IS_EQUAL_TO, "1"));
   declareProperty(
       std::make_unique<PropertyWithValue<int>>("MDInputSampleNumber", 0,
-                                          Direction::Input),
+                                               Direction::Input),
       "The number of the sample to be copied from, for an MD workspace "
       "(starting from 0)");
   declareProperty(std::make_unique<PropertyWithValue<int>>(

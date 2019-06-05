@@ -20,8 +20,6 @@
 
 #include "MantidDataHandling/Load.h"
 
-
-
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidWorkflowAlgorithms/ExtractQENSMembers.h"

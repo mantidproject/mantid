@@ -116,7 +116,7 @@ void IntegrateEllipsoidsTwoStep::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 }

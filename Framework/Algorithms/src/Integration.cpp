@@ -38,11 +38,11 @@ using namespace HistogramData;
  *
  */
 void Integration::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace to integrate.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The input workspace to integrate.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The output workspace with the results of the integration.");
 
   declareProperty("RangeLower", EMPTY_DBL(),

@@ -67,7 +67,7 @@ void CreateMDHistoWorkspace::init() {
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>("NumberOfEvents",
-                                                 std::vector<double>(0)),
+                                              std::vector<double>(0)),
       "Number of pixels array for n-dimensional workspace. Optional, defaults "
       "to 1 per bin.");
   declareProperty(std::make_unique<PropertyWithValue<int>>(

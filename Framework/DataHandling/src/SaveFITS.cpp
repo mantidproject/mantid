@@ -11,7 +11,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ListValidator.h"
 
-
 #include <fstream>
 #include <iomanip>
 

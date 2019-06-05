@@ -12,7 +12,6 @@
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
 #endif
@@ -246,7 +245,7 @@ protected:
       const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
         std::make_unique<PropertyWithValue<T>>(name, value, validator,
-                                                  direction);
+                                               direction);
     declareProperty(std::move(p), doc);
   }
 

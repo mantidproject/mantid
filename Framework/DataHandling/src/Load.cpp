@@ -299,7 +299,7 @@ void Load::init() {
       "can be loaded and added together, e.g. INST10,11+12,13.ext");
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                        Direction::Output),
+                                                     Direction::Output),
       "The name of the workspace that will be created, filled with the "
       "read-in data and stored in the Analysis Data Service. Some algorithms "
       "can created additional OutputWorkspace properties on the fly, e.g. "

@@ -39,36 +39,37 @@ void Stitch1DMany::init() {
                       Direction::Input),
                   "Rebinning Parameters, see Rebin algorithm for format.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("StartOverlaps", Direction::Input),
-      "Start overlaps for stitched workspaces "
-      "(number of input workspaces minus one).");
+  declareProperty(std::make_unique<ArrayProperty<double>>("StartOverlaps",
+                                                          Direction::Input),
+                  "Start overlaps for stitched workspaces "
+                  "(number of input workspaces minus one).");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>("EndOverlaps", Direction::Input),
       "End overlaps for stitched workspaces "
       "(number of input workspaces minus one).");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "ScaleRHSWorkspace", true, Direction::Input),
                   "Scaling either with respect to first (first hand side, LHS) "
                   "or second (right hand side, RHS) workspace.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseManualScaleFactors",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "UseManualScaleFactors", false, Direction::Input),
                   "True to use provided values for the scale factor.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("ManualScaleFactors",
-                                                     Direction::Input),
+                                                          Direction::Input),
                   "Either a single scale factor which will be applied to all "
                   "input workspaces or individual scale factors "
                   "(number of input workspaces minus one)");
   setPropertySettings("ManualScaleFactors",
-                      std::make_unique<VisibleWhenProperty>("UseManualScaleFactors",
-                                                       IS_EQUAL_TO, "1"));
+                      std::make_unique<VisibleWhenProperty>(
+                          "UseManualScaleFactors", IS_EQUAL_TO, "1"));
 
   declareProperty(
-      std::make_unique<ArrayProperty<double>>("OutScaleFactors", Direction::Output),
+      std::make_unique<ArrayProperty<double>>("OutScaleFactors",
+                                              Direction::Output),
       "The actual used values for the scaling factors at each stitch step.");
 
   auto scaleFactorFromPeriodValidator =

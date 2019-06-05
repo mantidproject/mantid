@@ -14,7 +14,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
 
-
 namespace {
 using namespace Mantid::API;
 

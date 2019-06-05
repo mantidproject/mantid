@@ -21,7 +21,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-
 #include <numeric>
 
 using namespace Mantid::DataObjects;
@@ -126,9 +125,9 @@ void CalculateCountRate::init() {
   // visualization group
   std::string spur_vis_mode("Spurion visualization");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>(
-          "VisualizationWs", "", Kernel::Direction::Output,
-          API::PropertyMode::Optional),
+      std::make_unique<API::WorkspaceProperty<>>("VisualizationWs", "",
+                                                 Kernel::Direction::Output,
+                                                 API::PropertyMode::Optional),
       "Optional name to build 2D matrix workspace for spurion visualization. "
       "If name is provided, a 2D workspace with this name will be created "
       "containing data to visualize counting rate as function of time in the "
@@ -413,9 +412,8 @@ void CalculateCountRate::setOutLogParameters(
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
-          m_tmpLogHolder =
-              std::make_unique<Kernel::TimeSeriesProperty<double>>(
-                  *m_pNormalizationLog->clone());
+          m_tmpLogHolder = std::make_unique<Kernel::TimeSeriesProperty<double>>(
+              *m_pNormalizationLog->clone());
         }
         m_tmpLogHolder->filterByTime(runTMin, runTMax);
         m_pNormalizationLog = m_tmpLogHolder.get();

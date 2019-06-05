@@ -17,7 +17,6 @@
 
 #include "MantidKernel/BoundedValidator.h"
 
-
 namespace Mantid {
 namespace VATES {
 
@@ -46,10 +45,9 @@ const std::string SaveMDWorkspaceToVTK::summary() const {
 }
 
 void SaveMDWorkspaceToVTK::init() {
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::IMDWorkspace>>(
-          "InputWorkspace", "", Mantid::Kernel::Direction::Input),
-      "MDWorkspace to save/export");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::IMDWorkspace>>(
+                      "InputWorkspace", "", Mantid::Kernel::Direction::Input),
+                  "MDWorkspace to save/export");
 
   std::vector<std::string> extensions = {
       SaveMDWorkspaceToVTKImpl::structuredGridExtension,

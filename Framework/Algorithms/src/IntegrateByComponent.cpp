@@ -49,7 +49,7 @@ void IntegrateByComponent::init() {
                       boost::make_shared<HistogramValidator>()),
                   "The input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The output workspace.");
   auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);

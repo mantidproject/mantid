@@ -346,8 +346,8 @@ const std::vector<std::string> QENSFitSequential::seeAlso() const {
 
 void QENSFitSequential::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "The input workspace for the fit. This property will be ignored if "
       "'Input' is provided.");
 
@@ -450,11 +450,11 @@ void QENSFitSequential::init() {
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and OutputCompositeMembers is true members of any "
-      "Convolution are output convolved\n"
-      "with corresponding resolution");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "ConvolveMembers", false),
+                  "If true and OutputCompositeMembers is true members of any "
+                  "Convolution are output convolved\n"
+                  "with corresponding resolution");
 
   const std::array<std::string, 2> evaluationTypes = {
       {"CentrePoint", "Histogram"}};

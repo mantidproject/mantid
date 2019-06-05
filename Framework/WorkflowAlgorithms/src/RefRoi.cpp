@@ -34,7 +34,7 @@ void RefRoi::init() {
                       boost::make_shared<CommonBinsValidator>()),
                   "Workspace to calculate the ROI from");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Workspace containing the summed up region of interest");
   declareProperty("NXPixel", 304, "Number of pixels in the X direction",
                   Kernel::Direction::Input);

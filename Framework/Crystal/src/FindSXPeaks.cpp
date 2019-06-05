@@ -384,8 +384,7 @@ std::unique_ptr<BackgroundStrategy> FindSXPeaks::getBackgroundStrategy() const {
   const std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
   if (peakFindingStrategy == strongestPeakStrategy) {
     const double signalBackground = getProperty("SignalBackground");
-    return std::make_unique<PerSpectrumBackgroundStrategy>(
-        signalBackground);
+    return std::make_unique<PerSpectrumBackgroundStrategy>(signalBackground);
   } else if (peakFindingStrategy == allPeaksStrategy) {
     const double background = getProperty("AbsoluteBackground");
     return std::make_unique<AbsoluteBackgroundStrategy>(background);
@@ -406,8 +405,8 @@ FindSXPeaks::getPeakFindingStrategy(
     return std::make_unique<StrongestPeaksStrategy>(
         backgroundStrategy, spectrumInfo, minValue, maxValue, tofUnits);
   } else if (peakFindingStrategy == allPeaksStrategy) {
-    return std::make_unique<AllPeaksStrategy>(
-        backgroundStrategy, spectrumInfo, minValue, maxValue, tofUnits);
+    return std::make_unique<AllPeaksStrategy>(backgroundStrategy, spectrumInfo,
+                                              minValue, maxValue, tofUnits);
   } else {
     throw std::invalid_argument(
         "The selected peak finding strategy has not been implemented yet.");
@@ -423,8 +422,8 @@ FindSXPeaks::getReducePeakListStrategy(
     return std::make_unique<FindSXPeaksHelper::SimpleReduceStrategy>(
         compareStrategy);
   } else {
-    return std::make_unique<
-        FindSXPeaksHelper::FindMaxReduceStrategy>(compareStrategy);
+    return std::make_unique<FindSXPeaksHelper::FindMaxReduceStrategy>(
+        compareStrategy);
   }
 }
 
@@ -435,15 +434,14 @@ FindSXPeaks::getCompareStrategy() const {
       resolutionStrategy == relativeResolutionStrategy;
   if (useRelativeResolutionStrategy) {
     double resolution = getProperty("Resolution");
-    return std::make_unique<
-        FindSXPeaksHelper::RelativeCompareStrategy>(resolution);
+    return std::make_unique<FindSXPeaksHelper::RelativeCompareStrategy>(
+        resolution);
   } else {
     double xUnitResolution = getProperty("XResolution");
     double phiResolution = getProperty("PhiResolution");
     double twoThetaResolution = getProperty("TwoThetaResolution");
     const auto tofUnits = getWorkspaceXAxisUnit(getProperty("InputWorkspace"));
-    return std::make_unique<
-        FindSXPeaksHelper::AbsoluteCompareStrategy>(
+    return std::make_unique<FindSXPeaksHelper::AbsoluteCompareStrategy>(
         xUnitResolution, phiResolution, twoThetaResolution, tofUnits);
   }
 }

@@ -42,7 +42,7 @@ void CreateLogTimeCorrection::init() {
                   "Name of the output workspace containing the corrections.");
 
   declareProperty(std::make_unique<FileProperty>("OutputFilename", "",
-                                                    FileProperty::OptionalSave),
+                                                 FileProperty::OptionalSave),
                   "Name of the output time correction file.");
 }
 

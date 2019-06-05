@@ -58,9 +58,9 @@ void TransformHKL::init() {
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
       "numbers");
 
-  this->declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 
   this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),

@@ -10,7 +10,6 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 
-
 #include <memory>
 #include <type_traits>
 

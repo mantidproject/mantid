@@ -31,8 +31,6 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
-
-
 namespace Mantid {
 namespace DataObjects {
 class PeaksWorkspace;
@@ -75,8 +73,8 @@ public:
 
   Mantid::API::Progress *getProgress() { return m_Progress.get(); }
   void resetProgress(size_t nSteps) {
-    m_Progress = std::make_unique<Mantid::API::Progress>(
-        this, 0.0, 1.0, nSteps);
+    m_Progress =
+        std::make_unique<Mantid::API::Progress>(this, 0.0, 1.0, nSteps);
   }
 
 private:

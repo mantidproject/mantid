@@ -99,8 +99,8 @@ std::unique_ptr<IReflSaveTabPresenter> QtReflMainWindowView::createSaveTab() {
   m_ui.mainTab->addTab(saveTabView.get(), QString("Save ASCII"));
 
   auto saver = std::make_unique<ReflAsciiSaver>();
-  return std::make_unique<ReflSaveTabPresenter>(
-      std::move(saver), std::move(saveTabView));
+  return std::make_unique<ReflSaveTabPresenter>(std::move(saver),
+                                                std::move(saveTabView));
 }
 
 /**

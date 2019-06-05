@@ -12,7 +12,6 @@
 #include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
 
-
 using namespace Mantid;
 using namespace Indexing;
 

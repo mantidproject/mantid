@@ -39,24 +39,24 @@ void CalculateTransmissionBeamSpreader::init() {
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("SampleSpreaderRunWorkspace",
-                                                   "", Direction::Input,
-                                                   wsValidator),
-                  "The workspace containing the sample beam-spreader run");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("DirectSpreaderRunWorkspace",
-                                                   "", Direction::Input,
-                                                   wsValidator),
-                  "The workspace containing the direct beam-spreader run");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("SampleScatterRunWorkspace",
-                                                   "", Direction::Input,
-                                                   wsValidator),
-                  "The workspace containing the sample scattering run");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("DirectScatterRunWorkspace",
-                                                   "", Direction::Input,
-                                                   wsValidator),
-                  "The workspace containing the direct beam scattering run");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("SampleSpreaderRunWorkspace", "",
+                                            Direction::Input, wsValidator),
+      "The workspace containing the sample beam-spreader run");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("DirectSpreaderRunWorkspace", "",
+                                            Direction::Input, wsValidator),
+      "The workspace containing the direct beam-spreader run");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("SampleScatterRunWorkspace", "",
+                                            Direction::Input, wsValidator),
+      "The workspace containing the sample scattering run");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("DirectScatterRunWorkspace", "",
+                                            Direction::Input, wsValidator),
+      "The workspace containing the direct beam scattering run");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The fitted transmission correction");
 
   auto zeroOrMore = boost::make_shared<BoundedValidator<int>>();

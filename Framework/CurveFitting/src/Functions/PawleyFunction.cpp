@@ -16,7 +16,6 @@
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 
-
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
 

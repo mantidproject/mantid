@@ -65,8 +65,8 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
     const ValueType valueInC = extract<ValueType>(defaultValue)();
     std::unique_ptr<Kernel::Property> valueProp;
     if (isNone(validator)) {
-      valueProp = std::make_unique<PropertyWithValue<ValueType>>(
-          name, valueInC, direction);
+      valueProp = std::make_unique<PropertyWithValue<ValueType>>(name, valueInC,
+                                                                 direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
       valueProp = std::make_unique<PropertyWithValue<ValueType>>(
@@ -131,14 +131,12 @@ struct DLLExport TypedPropertyValueHandler<
         extract<PropertyValueType>(defaultValue)();
     std::unique_ptr<Property> valueProp;
     if (isNone(validator)) {
-      valueProp =
-          std::make_unique<PropertyWithValue<PropertyValueType>>(
-              name, valueInC, direction);
+      valueProp = std::make_unique<PropertyWithValue<PropertyValueType>>(
+          name, valueInC, direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      valueProp =
-          std::make_unique<PropertyWithValue<PropertyValueType>>(
-              name, valueInC, propValidator->clone(), direction);
+      valueProp = std::make_unique<PropertyWithValue<PropertyValueType>>(
+          name, valueInC, propValidator->clone(), direction);
     }
     return valueProp;
   }

@@ -62,10 +62,9 @@ void CalculateDynamicRange::init() {
                       "Workspace", "", Direction::InOut, unitValidator),
                   "An input workspace.");
 
-  declareProperty(
-      std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
-          "ComponentNames"),
-      "List of component names to calculate the q ranges for.");
+  declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
+                      "ComponentNames"),
+                  "List of component names to calculate the q ranges for.");
 }
 
 /**

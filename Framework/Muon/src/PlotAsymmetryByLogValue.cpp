@@ -96,15 +96,15 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
 void PlotAsymmetryByLogValue::init() {
   std::string nexusExt(".nxs");
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "FirstRun", "", FileProperty::Load, nexusExt),
+  declareProperty(std::make_unique<FileProperty>("FirstRun", "",
+                                                 FileProperty::Load, nexusExt),
                   "The name of the first workspace in the series.");
-  declareProperty(std::make_unique<FileProperty>(
-                      "LastRun", "", FileProperty::Load, nexusExt),
+  declareProperty(std::make_unique<FileProperty>("LastRun", "",
+                                                 FileProperty::Load, nexusExt),
                   "The name of the last workspace in the series.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "The name of the output workspace containing the resulting asymmetries.");
   declareProperty("LogValue", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
@@ -150,8 +150,8 @@ void PlotAsymmetryByLogValue::init() {
                   "Type of Dead Time Correction to apply.");
 
   declareProperty(std::make_unique<FileProperty>("DeadTimeCorrFile", "",
-                                                    FileProperty::OptionalLoad,
-                                                    nexusExt),
+                                                 FileProperty::OptionalLoad,
+                                                 nexusExt),
                   "Custom file with Dead Times. Will be used only if "
                   "appropriate DeadTimeCorrType is set.");
 }

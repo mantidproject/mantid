@@ -7,7 +7,6 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H
 
-
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QMenu>
@@ -102,12 +101,11 @@ private:
     QMenu *submenu = menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
     // Add the actions
     auto &children = m_adaptee->getChildren();
-    std::transform(children.begin(), children.end(),
-                   std::back_inserter(m_childAdapters),
-                   [&submenu](Command_uptr &child) {
-                     return std::make_unique<QtCommandAdapter>(
-                         submenu, std::move(child));
-                   });
+    std::transform(
+        children.begin(), children.end(), std::back_inserter(m_childAdapters),
+        [&submenu](Command_uptr &child) {
+          return std::make_unique<QtCommandAdapter>(submenu, std::move(child));
+        });
   }
 
   /**

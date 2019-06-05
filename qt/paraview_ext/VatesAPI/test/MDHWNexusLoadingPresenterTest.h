@@ -59,8 +59,7 @@ private:
   vtkSmartPointer<vtkDataSet> doExecute(std::string filename,
                                         bool performAsserts = true) {
     // Setup view
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getTime()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(0));
@@ -105,10 +104,10 @@ private:
 
 public:
   void testConstructWithEmptyFileThrows() {
-    TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
-                      MDHWNexusLoadingPresenter(
-                          std::make_unique<MockMDLoadingView>(), ""),
-                      const std::invalid_argument &);
+    TSM_ASSERT_THROWS(
+        "Should throw if an empty file string is given.",
+        MDHWNexusLoadingPresenter(std::make_unique<MockMDLoadingView>(), ""),
+        const std::invalid_argument &);
   }
 
   void testConstructWithNullViewThrows() {
@@ -120,14 +119,13 @@ public:
   void testConstruct() {
     TSM_ASSERT_THROWS_NOTHING(
         "Object should be created without exception.",
-        MDHWNexusLoadingPresenter(
-            std::make_unique<MockMDLoadingView>(),
-            getSuitableFile()));
+        MDHWNexusLoadingPresenter(std::make_unique<MockMDLoadingView>(),
+                                  getSuitableFile()));
   }
 
   void testCanReadFile() {
-    MDHWNexusLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), getUnhandledFile());
+    MDHWNexusLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                        getUnhandledFile());
     TSM_ASSERT(
         "A file of this type cannot and should not be read by this presenter!.",
         !presenter.canReadFile());
@@ -168,12 +166,12 @@ public:
         normalizationOption, time);
 
     factory
-        ->setSuccessor(std::make_unique<vtkMDHistoHexFactory>(
-            normalizationOption))
-        .setSuccessor(std::make_unique<vtkMDHistoQuadFactory>(
-            normalizationOption))
-        .setSuccessor(std::make_unique<vtkMDHistoLineFactory>(
-            normalizationOption))
+        ->setSuccessor(
+            std::make_unique<vtkMDHistoHexFactory>(normalizationOption))
+        .setSuccessor(
+            std::make_unique<vtkMDHistoQuadFactory>(normalizationOption))
+        .setSuccessor(
+            std::make_unique<vtkMDHistoLineFactory>(normalizationOption))
         .setSuccessor(std::make_unique<vtkMD0DFactory>());
 
     presenter.executeLoadMetadata();
@@ -182,8 +180,8 @@ public:
 
     // Set the COB
     try {
-      auto workspaceProvider = std::make_unique<
-          ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      auto workspaceProvider =
+          std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
       presenter.makeNonOrthogonal(product, std::move(workspaceProvider),
                                   &mockDrawingProgressAction);
     } catch (...) {
@@ -250,39 +248,38 @@ public:
   }
 
   void testCallHasTDimThrows() {
-    MDHWNexusLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), getSuitableFile());
+    MDHWNexusLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                        getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.hasTDimensionAvailable(),
                       const std::runtime_error &);
   }
 
   void testCallGetTDimensionValuesThrows() {
-    MDHWNexusLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), getSuitableFile());
+    MDHWNexusLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                        getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getTimeStepValues(),
                       const std::runtime_error &);
   }
 
   void testCallGetGeometryThrows() {
-    MDHWNexusLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), getSuitableFile());
+    MDHWNexusLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                        getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getGeometryXML(), const std::runtime_error &);
   }
 
   void testGetWorkspaceTypeName() {
-    MDHWNexusLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), getSuitableFile());
+    MDHWNexusLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                        getSuitableFile());
     TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
                       presenter.getWorkspaceTypeName());
   }
 
   void testTimeLabel() {
     // Setup view
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getTime()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(0));
@@ -315,8 +312,7 @@ public:
 
   void testAxisLabels() {
     // Setup view
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getTime()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(AtLeast(0));

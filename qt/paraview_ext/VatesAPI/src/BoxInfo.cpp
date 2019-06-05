@@ -7,7 +7,6 @@
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 
-
 using namespace Mantid::API;
 
 namespace Mantid {

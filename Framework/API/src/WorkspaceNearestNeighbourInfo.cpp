@@ -9,7 +9,6 @@
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidGeometry/IDetector.h"
 
-
 namespace Mantid {
 namespace API {
 

@@ -73,6 +73,7 @@
 #include "LineDialog.h"
 #include "LogisticFit.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
 #include "MatrixCommand.h"
 #include "MatrixDialog.h"
@@ -114,7 +115,6 @@
 #include "TextEditor.h"
 #include "TiledWindow.h"
 #include "importOPJ.h"
-#include "MantidQtWidgets/Common/pixmaps.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ContourLinesEditor.h"

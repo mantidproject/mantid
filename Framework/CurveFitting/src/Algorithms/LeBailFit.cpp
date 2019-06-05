@@ -84,8 +84,8 @@ void LeBailFit::init() {
 
   // Input Data Workspace
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                           Direction::Input),
       "Input workspace containing the data to fit by LeBail algorithm.");
 
   // Output Result Data/Model Workspace
@@ -110,8 +110,8 @@ void LeBailFit::init() {
 
   // Single peak: Reflection (HKL) Workspace, PeaksWorkspace
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "InputHKLWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<TableWorkspace>>("InputHKLWorkspace",
+                                                          "", Direction::Input),
       "Input table workspace containing the list of reflections (HKL). ");
 
   // Bragg peaks profile parameter output table workspace
@@ -157,8 +157,7 @@ void LeBailFit::init() {
 
   // Input background parameters (array)
   this->declareProperty(
-      std::make_unique<Kernel::ArrayProperty<double>>(
-          "BackgroundParameters"),
+      std::make_unique<Kernel::ArrayProperty<double>>("BackgroundParameters"),
       "Optional: enter a comma-separated list of background order parameters "
       "from order 0. ");
 

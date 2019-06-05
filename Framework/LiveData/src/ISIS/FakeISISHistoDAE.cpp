@@ -328,9 +328,9 @@ void FakeISISHistoDAE::init() {
   declareProperty(
       std::make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
       "Number of periods.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
-      "Number of spectra.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpectra", 100,
+                                                           Direction::Input),
+                  "Number of spectra.");
   declareProperty(
       std::make_unique<PropertyWithValue<int>>("NBins", 30, Direction::Input),
       "Number of bins.");

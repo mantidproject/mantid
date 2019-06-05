@@ -8,7 +8,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-
 #include <cmath>
 #include <sstream>
 

@@ -30,7 +30,7 @@ using namespace DataObjects;
 void CompressEvents::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "",
-                                                     Direction::Input),
+                                                          Direction::Input),
       "The name of the EventWorkspace on which to perform the algorithm");
 
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
@@ -41,15 +41,15 @@ void CompressEvents::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Tolerance", 1e-5, mustBePositive,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "Tolerance", 1e-5, mustBePositive, Direction::Input),
       "The tolerance on each event's X value (normally TOF, but may be a "
       "different unit if you have used ConvertUnits).\n"
       "Any events within Tolerance will be summed into a single event.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("WallClockTolerance", EMPTY_DBL(),
-                                             mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "WallClockTolerance", EMPTY_DBL(), mustBePositive, Direction::Input),
       "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
       "means compressing all wall-clock times together disabling pulsetime "
       "resolution.");

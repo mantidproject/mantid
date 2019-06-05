@@ -39,9 +39,9 @@ void SaveIsawDetCal::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".DetCal"),
-      "Path to an ISAW-style .detcal file to save.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".DetCal"),
+                  "Path to an ISAW-style .detcal file to save.");
 
   declareProperty("TimeOffset", 0.0, "Offsets to be applied to times");
   declareProperty(

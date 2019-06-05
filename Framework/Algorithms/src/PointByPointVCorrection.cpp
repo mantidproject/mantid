@@ -42,7 +42,7 @@ void PointByPointVCorrection::init() {
       std::make_unique<WorkspaceProperty<>>("InputW2", "", Direction::Input),
       "Name of the Vanadium workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Name of the output workspace.");
 }
 

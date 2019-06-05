@@ -53,7 +53,7 @@ void SlicingAlgorithm::initSlicingProps() {
     std::string propName = "AlignedDim" + dim;
     declareProperty(
         std::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                            Direction::Input),
+                                                         Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -78,7 +78,7 @@ void SlicingAlgorithm::initSlicingProps() {
     std::string propName = "BasisVector" + dim;
     declareProperty(
         std::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                            Direction::Input),
+                                                         Direction::Input),
         "Description of the basis vector of the " + Strings::toString(i) +
             "th output dimension."
             "Format: 'name, units, x,y,z,..'.\n"
@@ -97,17 +97,17 @@ void SlicingAlgorithm::initSlicingProps() {
       "Enter as a comma-separated string.\n"
       "Default: 0 in all dimensions (no translation).");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("OutputExtents", Direction::Input),
-      "The minimum, maximum edges of space of each dimension of "
-      "the OUTPUT workspace, as a comma-separated list");
+  declareProperty(std::make_unique<ArrayProperty<double>>("OutputExtents",
+                                                          Direction::Input),
+                  "The minimum, maximum edges of space of each dimension of "
+                  "the OUTPUT workspace, as a comma-separated list");
 
   declareProperty(
       std::make_unique<ArrayProperty<int>>("OutputBins", Direction::Input),
       "The number of bins for each dimension of the OUTPUT workspace.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("NormalizeBasisVectors",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "NormalizeBasisVectors", true, Direction::Input),
                   "Normalize the given basis vectors to unity. \n"
                   "If true, then a distance of 1 in the INPUT dimensions = 1 "
                   "in the OUTPUT dimensions.\n"
@@ -116,7 +116,7 @@ void SlicingAlgorithm::initSlicingProps() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("ForceOrthogonal", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "Force the input basis vectors to form an orthogonal coordinate system. "
       "Only works in 3 dimension!");
 

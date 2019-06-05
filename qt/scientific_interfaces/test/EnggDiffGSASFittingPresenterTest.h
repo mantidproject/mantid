@@ -356,8 +356,8 @@ private:
   MockEnggDiffractionParam *m_mockParamPtr;
 
   std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
-    auto mockModel = std::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffGSASFittingModel>>();
     m_mockModelPtr = mockModel.get();
 
     m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();

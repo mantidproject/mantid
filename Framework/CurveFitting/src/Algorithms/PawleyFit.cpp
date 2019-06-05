@@ -230,7 +230,7 @@ void PawleyFit::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<ITableWorkspace>>("PeakTable", "",
-                                                      Direction::Input),
+                                                           Direction::Input),
       "Table with peak information. Can be used instead of "
       "supplying a list of indices for better starting parameters.");
 
@@ -264,8 +264,8 @@ void PawleyFit::init() {
                   "spectrum and difference curve.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>("RefinedCellTable", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "RefinedCellTable", "", Direction::Output),
       "TableWorkspace with refined lattice parameters, including errors.");
 
   declareProperty(

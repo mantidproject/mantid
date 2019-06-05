@@ -12,7 +12,6 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 
-
 using namespace Mantid;
 using Beamline::DetectorInfo;
 using PosVec = std::vector<Eigen::Vector3d>;

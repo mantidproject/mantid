@@ -42,9 +42,9 @@ const std::string CreateModeratorModel::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateModeratorModel::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "",
-                                                           Direction::InOut),
-                  "An input workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "An input workspace.");
 
   std::array<std::string, 1> keys = {{"IkedaCarpenterModerator"}};
   declareProperty("ModelType", "",

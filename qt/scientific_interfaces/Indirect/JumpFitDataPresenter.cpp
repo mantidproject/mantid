@@ -7,8 +7,6 @@
 #include "JumpFitDataPresenter.h"
 #include "JumpFitDataTablePresenter.h"
 
-
-
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace MantidQt {
@@ -18,10 +16,9 @@ namespace IDA {
 JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
-    : IndirectFitDataPresenter(
-          model, view,
-          std::make_unique<JumpFitDataTablePresenter>(
-              model, view->getDataTable())),
+    : IndirectFitDataPresenter(model, view,
+                               std::make_unique<JumpFitDataTablePresenter>(
+                                   model, view->getDataTable())),
       m_activeParameterType("Width"), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),

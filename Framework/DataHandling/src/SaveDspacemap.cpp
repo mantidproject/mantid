@@ -31,7 +31,7 @@ void SaveDspacemap::init() {
                   "An input OffsetsWorkspace to save.");
 
   declareProperty(std::make_unique<FileProperty>("DspacemapFile", "",
-                                            FileProperty::Save, ".dat"),
+                                                 FileProperty::Save, ".dat"),
                   "The DspacemapFile on output contains the d-space mapping");
 
   declareProperty("PadDetID", 300000, "Pad Data to this number of pixels");

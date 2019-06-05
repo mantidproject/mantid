@@ -113,22 +113,25 @@ void MDNorm::init() {
   declareProperty(
       std::make_unique<ArrayProperty<double>>("QDimension0", Q0, mustBe3D),
       "The first Q projection axis - Default is (1,0,0)");
-  setPropertySettings("QDimension0", std::make_unique<Kernel::VisibleWhenProperty>(
-                                         "RLU", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "QDimension0",
+      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension0", "Q projections RLU");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>("QDimension1", Q1, mustBe3D),
       "The second Q projection axis - Default is (0,1,0)");
-  setPropertySettings("QDimension1", std::make_unique<Kernel::VisibleWhenProperty>(
-                                         "RLU", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "QDimension1",
+      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension1", "Q projections RLU");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>("QDimension2", Q2, mustBe3D),
       "The thirdtCalculateCover Q projection axis - Default is (0,0,1)");
-  setPropertySettings("QDimension2", std::make_unique<Kernel::VisibleWhenProperty>(
-                                         "RLU", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "QDimension2",
+      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension2", "Q projections RLU");
 
   // vanadium
@@ -144,9 +147,9 @@ void MDNorm::init() {
       "(a measure of the solid angle).\n"
       "Mandatory for diffraction, optional for direct geometry inelastic");
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
-                                       API::PropertyMode::Optional,
-                                       fluxValidator),
+      std::make_unique<WorkspaceProperty<>>(
+          "FluxWorkspace", "", Direction::Input, API::PropertyMode::Optional,
+          fluxValidator),
       "An input workspace containing momentum dependent flux.\n"
       "Mandatory for diffraction. No effect on direct geometry inelastic");
   setPropertyGroup("SolidAngleWorkspace", "Vanadium normalization");
@@ -951,7 +954,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   double progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
       std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
-                                 0.3 + progStep * (1. + progIndex), ndets);
+                                      0.3 + progStep * (1. + progIndex), ndets);
   bool safe = true;
   if (m_diffraction) {
     safe = Kernel::threadSafe(*integrFlux);

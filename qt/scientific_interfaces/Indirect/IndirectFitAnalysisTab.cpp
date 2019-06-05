@@ -273,15 +273,14 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 }
 
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
-      m_fittingModel.get(), view);
+  m_plotPresenter =
+      std::make_unique<IndirectFitPlotPresenter>(m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
     IndirectSpectrumSelectionView *view) {
-  m_spectrumPresenter =
-      std::make_unique<IndirectSpectrumSelectionPresenter>(
-          m_fittingModel.get(), view);
+  m_spectrumPresenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
+      m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTab::setOutputOptionsView(

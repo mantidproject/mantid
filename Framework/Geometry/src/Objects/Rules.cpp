@@ -26,7 +26,6 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
-
 namespace Mantid {
 
 namespace Geometry {
@@ -247,14 +246,11 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
           // hence we have to play games with a second
           // gamma->clone()
           std::unique_ptr<Rule> tmp1 =
-              std::make_unique<Intersection>(std::move(alpha),
-                                                        gamma->clone());
+              std::make_unique<Intersection>(std::move(alpha), gamma->clone());
           std::unique_ptr<Rule> tmp2 =
-              std::make_unique<Intersection>(std::move(beta),
-                                                        std::move(gamma));
+              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
           std::unique_ptr<Rule> partReplace =
-              std::make_unique<Union>(std::move(tmp1),
-                                                 std::move(tmp2));
+              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
@@ -367,14 +363,11 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
           // hence we have to play games with a second
           // gamma->clone()
           std::unique_ptr<Rule> tmp1 =
-              std::make_unique<Intersection>(std::move(alpha),
-                                                        gamma->clone());
+              std::make_unique<Intersection>(std::move(alpha), gamma->clone());
           std::unique_ptr<Rule> tmp2 =
-              std::make_unique<Intersection>(std::move(beta),
-                                                        std::move(gamma));
+              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
           std::unique_ptr<Rule> partReplace =
-              std::make_unique<Union>(std::move(tmp1),
-                                                 std::move(tmp2));
+              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //

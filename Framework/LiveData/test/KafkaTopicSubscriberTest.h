@@ -7,7 +7,6 @@
 #ifndef MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_
 #define MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_
 
-
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>

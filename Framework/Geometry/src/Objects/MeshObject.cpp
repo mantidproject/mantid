@@ -14,7 +14,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 
-
 #include <boost/make_shared.hpp>
 
 namespace Mantid {

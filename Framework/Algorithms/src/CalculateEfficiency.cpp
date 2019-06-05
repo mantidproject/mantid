@@ -34,12 +34,12 @@ using namespace DataObjects;
  *
  */
 void CalculateEfficiency::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The workspace containing the flood data");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The workspace containing the flood data");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();

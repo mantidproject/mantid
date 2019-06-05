@@ -24,7 +24,7 @@ using namespace DataObjects;
 void CloneWorkspace::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                Direction::Input),
+                                                     Direction::Input),
       "Name of the input workspace. Must be a MatrixWorkspace (2D or "
       "EventWorkspace), a PeaksWorkspace or a MDEventWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(

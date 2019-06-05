@@ -80,8 +80,8 @@ public:
 
     auto optBool = fromPyObj(value);
     if (isNone(validator)) {
-      return std::make_unique<PropertyWithValue<OptionalBool>>(
-          name, optBool, direction);
+      return std::make_unique<PropertyWithValue<OptionalBool>>(name, optBool,
+                                                               direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
       return std::make_unique<PropertyWithValue<OptionalBool>>(

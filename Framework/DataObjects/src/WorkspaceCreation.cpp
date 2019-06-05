@@ -10,7 +10,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidIndexing/IndexInfo.h"
 
-
 namespace Mantid {
 namespace DataObjects {
 namespace detail {

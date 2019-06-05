@@ -45,9 +45,9 @@ void QueryRemoteFile::init() {
                   "The ID of the transaction who's files we want to list",
                   Direction::Input);
 
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("FileNames", Direction::Output),
-      "The names of all the files that were found");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      "FileNames", Direction::Output),
+                  "The names of all the files that were found");
 }
 
 void QueryRemoteFile::exec() {

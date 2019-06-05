@@ -106,8 +106,8 @@ void SpecularReflectionPositionCorrect2::init() {
       Direction::Input);
 
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>(
-          "DetectorComponentName", "", Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("DetectorComponentName",
+                                                       "", Direction::Input),
       "Name of the detector component to correct, for example point-detector");
   auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
@@ -122,10 +122,9 @@ void SpecularReflectionPositionCorrect2::init() {
       "Name of the sample component; if the given name is not found in the "
       "instrument, the default sample is used.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "A workspace with corrected detector position.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "A workspace with corrected detector position.");
   declareProperty("DetectorFacesSample", false,
                   "If true, a normal vector at the centre of the detector "
                   "always points towards the sample.");

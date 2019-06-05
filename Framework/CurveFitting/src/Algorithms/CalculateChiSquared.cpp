@@ -329,10 +329,11 @@ void CalculateChiSquared::estimateErrors() {
   if (baseName.empty()) {
     baseName = "CalculateChiSquared";
   }
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "PDFs", "", Kernel::Direction::Output),
-                  "The name of the TableWorkspace in which to store the "
-                  "pdfs of fit parameters");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "PDFs", "", Kernel::Direction::Output),
+      "The name of the TableWorkspace in which to store the "
+      "pdfs of fit parameters");
   setPropertyValue("PDFs", baseName + "_pdf");
   setProperty("PDFs", pdfTable);
 
@@ -346,10 +347,11 @@ void CalculateChiSquared::estimateErrors() {
   auto quadraticErrColumn = errorsTable->addColumn("double", "Quadratic Error");
   auto chiMinColumn = errorsTable->addColumn("double", "Chi2 Min");
   errorsTable->setRowCount(nParams);
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "Errors", "", Kernel::Direction::Output),
-                  "The name of the TableWorkspace in which to store the "
-                  "values and errors of fit parameters");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "Errors", "", Kernel::Direction::Output),
+      "The name of the TableWorkspace in which to store the "
+      "values and errors of fit parameters");
   setPropertyValue("Errors", baseName + "_errors");
   setProperty("Errors", errorsTable);
 

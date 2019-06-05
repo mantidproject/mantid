@@ -37,7 +37,7 @@ void CentroidPeaksMD2::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
-                                             Direction::Input),
+                                                  Direction::Input),
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
@@ -47,7 +47,7 @@ void CentroidPeaksMD2::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }

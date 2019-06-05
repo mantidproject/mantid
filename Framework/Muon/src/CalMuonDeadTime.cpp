@@ -32,14 +32,15 @@ DECLARE_ALGORITHM(CalMuonDeadTime)
  */
 void CalMuonDeadTime::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "DeadTimeTable", "", Direction::Output),
-                  "The name of the TableWorkspace in which to store the list "
-                  "of deadtimes for each spectrum");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "DeadTimeTable", "", Direction::Output),
+      "The name of the TableWorkspace in which to store the list "
+      "of deadtimes for each spectrum");
 
   declareProperty("FirstGoodData", 0.5,
                   "The first good data point in units of "

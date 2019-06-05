@@ -257,8 +257,8 @@ const std::string LoadILLPolarizationFactors::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLPolarizationFactors::init() {
-  declareProperty(std::make_unique<API::FileProperty>(
-                      Prop::FILENAME, "", API::FileProperty::Load),
+  declareProperty(std::make_unique<API::FileProperty>(Prop::FILENAME, "",
+                                                      API::FileProperty::Load),
                   "Path to the polarization efficiency file.");
   const auto refWSValidator =
       boost::make_shared<API::IncreasingAxisValidator>();

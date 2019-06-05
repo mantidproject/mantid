@@ -155,16 +155,16 @@ void FakeISISEventDAE::init() {
   declareProperty(
       std::make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
       "Number of periods.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
-      "Number of spectra.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpectra", 100,
+                                                           Direction::Input),
+                  "Number of spectra.");
   declareProperty(
       std::make_unique<PropertyWithValue<int>>("Rate", 20, Direction::Input),
       "Rate of sending the data: stream of NEvents events is sent "
       "every Rate milliseconds.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NEvents", 1000, Direction::Input),
-      "Number of events in each packet.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NEvents", 1000,
+                                                           Direction::Input),
+                  "Number of events in each packet.");
   declareProperty(
       std::make_unique<PropertyWithValue<int>>("Port", 59876, Direction::Input),
       "The port to broadcast on (default 59876, ISISDAE 10000).");

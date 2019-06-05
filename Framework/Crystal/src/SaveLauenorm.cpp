@@ -43,9 +43,9 @@ void SaveLauenorm::init() {
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
-  declareProperty(
-      std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save),
-      "Select the directory and base name for the output files.");
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Save),
+                  "Select the directory and base name for the output files.");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("ScalePeaks", 1.0, mustBePositive,
@@ -71,7 +71,7 @@ void SaveLauenorm::init() {
                   "If false, no change (default).");
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers",
-                                                      Direction::Input),
+                                                   Direction::Input),
       "Comma deliminated string of bank numbers to exclude for example 1,2,5");
   declareProperty("LaueScaleFormat", false, "New format for Lauescale");
 

@@ -29,8 +29,7 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
   auto multiRunWidgetModel =
       std::make_unique<EnggDiffMultiRunFittingWidgetModel>();
   m_multiRunWidgetView =
-      std::make_unique<EnggDiffMultiRunFittingQtWidget>(
-          pythonRunner);
+      std::make_unique<EnggDiffMultiRunFittingQtWidget>(pythonRunner);
 
   auto multiRunWidgetPresenter =
       boost::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(

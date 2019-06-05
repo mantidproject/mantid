@@ -54,8 +54,8 @@ void LiveDataAlgorithm::initProps() {
                       boost::make_shared<StringListValidator>(instruments)),
                   "Name of the instrument to monitor.");
 
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>("Connection", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "Connection", "", Direction::Input),
                   "Selects the listener connection entry to use. "
                   "Default connection will be used if not specified");
 
@@ -65,26 +65,26 @@ void LiveDataAlgorithm::initProps() {
       "Name of the listener class to use. "
       "If specified, overrides class specified by Connection.");
 
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>("Address", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "Address", "", Direction::Input),
                   "Address for the listener to connect to. "
                   "If specified, overrides address specified by Connection.");
 
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>("StartTime", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "StartTime", "", Direction::Input),
                   "Absolute start time, if you selected FromTime.\n"
                   "Specify the date/time in UTC time, in ISO8601 format, e.g. "
                   "2010-09-14T04:20:12.95");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("ProcessingAlgorithm", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("ProcessingAlgorithm",
+                                                       "", Direction::Input),
       "Name of the algorithm that will be run to process each chunk of data.\n"
       "Optional. If blank, no processing will occur.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("ProcessingProperties", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("ProcessingProperties",
+                                                       "", Direction::Input),
       "The properties to pass to the ProcessingAlgorithm, as a single string.\n"
       "The format is propName=value;propName=value");
 
@@ -95,7 +95,8 @@ void LiveDataAlgorithm::initProps() {
                   "user interface.");
 
   declareProperty(std::make_unique<FileProperty>("ProcessingScriptFilename", "",
-                                            FileProperty::OptionalLoad, "py"),
+                                                 FileProperty::OptionalLoad,
+                                                 "py"),
                   "A Python script that will be run to process each chunk of "
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
@@ -133,12 +134,12 @@ void LiveDataAlgorithm::initProps() {
                   "The format is propName=value;propName=value");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("PostProcessingScript", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("PostProcessingScript",
+                                                       "", Direction::Input),
       "A Python script that will be run to process the accumulated data.");
   declareProperty(
       std::make_unique<FileProperty>("PostProcessingScriptFilename", "",
-                                FileProperty::OptionalLoad, "py"),
+                                     FileProperty::OptionalLoad, "py"),
       " Python script that will be run to process the accumulated data.");
 
   std::vector<std::string> runOptions{"Restart", "Stop", "Rename"};

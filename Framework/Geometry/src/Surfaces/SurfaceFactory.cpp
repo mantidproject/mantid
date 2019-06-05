@@ -28,7 +28,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
 
-
 namespace Mantid {
 
 namespace {

@@ -95,8 +95,7 @@ private:
 
     auto Left = std::make_unique<Union>(A->clone(), A->clone());
     auto Right = std::make_unique<Union>(std::move(C), std::move(B));
-    return std::make_unique<Union>(std::move(Left),
-                                              std::move(Right));
+    return std::make_unique<Union>(std::move(Left), std::move(Right));
   }
 
   std::unique_ptr<Rule> createAIntersectionTree() { // A B C A
@@ -118,8 +117,7 @@ private:
     auto Right = std::make_unique<Intersection>();
     Right->setLeaves(std::move(C), std::move(A));
 
-    return std::make_unique<Intersection>(std::move(Left),
-                                                     std::move(Right));
+    return std::make_unique<Intersection>(std::move(Left), std::move(Right));
   }
 
   std::unique_ptr<Rule> createAMixedTree() { // A B : C A

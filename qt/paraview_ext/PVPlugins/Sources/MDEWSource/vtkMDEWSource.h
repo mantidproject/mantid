@@ -7,7 +7,6 @@
 #ifndef _vtkMDEWSource_h
 #define _vtkMDEWSource_h
 
-
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "vtkUnstructuredGridAlgorithm.h"

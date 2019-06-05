@@ -168,7 +168,7 @@ void MaxEnt::init() {
   mustBeNonNegative->setLower(1E-12);
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative,
-                                             Direction::Input),
+                                                  Direction::Input),
       "A maximum entropy constant. This algorithm was first developed for the "
       "ISIS muon group where the default 0.4 was found to give good "
       "reconstructions. "
@@ -213,10 +213,10 @@ void MaxEnt::init() {
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
                   "Maximum number of iterations.");
 
-  declareProperty(std::make_unique<PropertyWithValue<size_t>>("AlphaChopIterations",
-                                                         500, mustBePositive,
-                                                         Direction::Input),
-                  "Maximum number of iterations in alpha chop.");
+  declareProperty(
+      std::make_unique<PropertyWithValue<size_t>>(
+          "AlphaChopIterations", 500, mustBePositive, Direction::Input),
+      "Maximum number of iterations in alpha chop.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
@@ -251,11 +251,11 @@ void MaxEnt::init() {
       std::make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
       "Output workspace containing the evolution of "
       "non-paralellism between S and C.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedImage", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedImage",
+                                                        "", Direction::Output),
                   "The output workspace containing the reconstructed image.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedData", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The output workspace containing the reconstructed data.");
 }
 

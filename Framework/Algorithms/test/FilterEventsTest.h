@@ -1167,8 +1167,8 @@ public:
                                       true);
 
     // create a pcharge log
-    auto pchargeLog = std::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "proton_charge");
+    auto pchargeLog =
+        std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
 
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
       auto &elist = eventWS->getSpectrum(i);

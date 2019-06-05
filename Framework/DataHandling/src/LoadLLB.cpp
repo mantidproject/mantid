@@ -73,11 +73,11 @@ int LoadLLB::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadLLB::init() {
   const std::vector<std::string> exts{".nxs", ".hdf"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the Nexus file to load");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name to use for the output workspace");
 }
 

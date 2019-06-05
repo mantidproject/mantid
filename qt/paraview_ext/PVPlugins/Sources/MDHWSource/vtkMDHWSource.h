@@ -7,7 +7,6 @@
 #ifndef _vtkMDHWSource_h
 #define _vtkMDHWSource_h
 
-
 #include "MantidVatesAPI/Normalization.h"
 #include "vtkStructuredGridAlgorithm.h"
 

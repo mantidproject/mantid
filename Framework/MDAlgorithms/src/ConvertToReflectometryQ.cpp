@@ -248,7 +248,8 @@ void ConvertToReflectometryQ::init() {
                           "OverrideIncidentTheta", IS_EQUAL_TO, "1"));
 
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>("OutputAsMDWorkspace", true),
+      std::make_unique<Kernel::PropertyWithValue<bool>>("OutputAsMDWorkspace",
+                                                        true),
       "Generate the output as a MDWorkspace, otherwise a Workspace2D is "
       "returned.");
 
@@ -276,12 +277,12 @@ void ConvertToReflectometryQ::init() {
       "each polygon will be written out for debugging purposes. "
       "Creates a second output table workspace.");
 
-  setPropertySettings(
-      "NumberBinsQx",
-      std::make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_NOT_DEFAULT));
-  setPropertySettings(
-      "NumberBinsQz",
-      std::make_unique<EnabledWhenProperty>("OutputAsMDWorkspace", IS_NOT_DEFAULT));
+  setPropertySettings("NumberBinsQx",
+                      std::make_unique<EnabledWhenProperty>(
+                          "OutputAsMDWorkspace", IS_NOT_DEFAULT));
+  setPropertySettings("NumberBinsQz",
+                      std::make_unique<EnabledWhenProperty>(
+                          "OutputAsMDWorkspace", IS_NOT_DEFAULT));
 
   // Create box controller properties.
   this->initBoxControllerProps("2,2", 50, 10);

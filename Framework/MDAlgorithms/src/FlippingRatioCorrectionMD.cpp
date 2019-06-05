@@ -54,10 +54,9 @@ const std::string FlippingRatioCorrectionMD::summary() const {
 /** Initialize the algorithm's properties.
  */
 void FlippingRatioCorrectionMD::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
-          "InputWorkspace", "", Kernel::Direction::Input),
-      "An input MDEventWorkspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+                      "InputWorkspace", "", Kernel::Direction::Input),
+                  "An input MDEventWorkspace.");
   declareProperty(
       std::make_unique<Mantid::Kernel::PropertyWithValue<std::string>>(
           "FlippingRatio", "",

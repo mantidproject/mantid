@@ -181,9 +181,10 @@ PolarizationCorrectionFredrikze::add(MatrixWorkspace_sptr &lhsWS,
 /** Initialize the algorithm's properties.
  */
 void PolarizationCorrectionFredrikze::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input workspace to process.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
+          "InputWorkspace", "", Direction::Input),
+      "An input workspace to process.");
 
   auto propOptions = modes();
   declareProperty("PolarizationAnalysis", "PA",
@@ -198,9 +199,10 @@ void PolarizationCorrectionFredrikze::init() {
       "A workspace containing the efficiency factors Pp, Ap, Rho and Alpha "
       "as histograms");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
+          "OutputWorkspace", "", Direction::Output),
+      "An output workspace.");
 }
 
 WorkspaceGroup_sptr

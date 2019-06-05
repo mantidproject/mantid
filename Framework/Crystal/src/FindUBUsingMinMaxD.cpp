@@ -65,8 +65,8 @@ void FindUBUsingMinMaxD::init() {
                         "Number of Peaks to Use on First Pass(20)");
 
   this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "Tolerance", 0.15, mustBePositive, Direction::Input),
       "Indexing Tolerance (0.15)");
 }
 

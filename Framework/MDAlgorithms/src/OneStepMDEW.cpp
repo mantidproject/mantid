@@ -35,7 +35,8 @@ OneStepMDEW::OneStepMDEW() {
  */
 void OneStepMDEW::init() {
   this->declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                     ".nxs"),
       "The name (including its full or relative path) of the Nexus file to\n"
       "attempt to load. The file extension must either be .nxs or .NXS");
 

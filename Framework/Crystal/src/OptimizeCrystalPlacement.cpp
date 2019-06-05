@@ -90,8 +90,8 @@ void OptimizeCrystalPlacement::init() {
                   "NOT be changed");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("ModifiedPeaksWorkspace",
-                                                     "", Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+          "ModifiedPeaksWorkspace", "", Direction::Output),
       "Output Workspace of Peaks with optimized sample Orientations");
 
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(

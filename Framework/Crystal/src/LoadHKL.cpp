@@ -30,7 +30,7 @@ DECLARE_ALGORITHM(LoadHKL)
  */
 void LoadHKL::init() {
   declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, ".hkl"),
+                                                 FileProperty::Load, ".hkl"),
                   "Path to an hkl file to save.");
 
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(

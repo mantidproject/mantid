@@ -13,7 +13,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
 
-
 #include <Poco/File.h>
 #include <QCoreApplication>
 #include <QSharedPointer>

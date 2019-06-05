@@ -63,12 +63,12 @@ void ConvertCWSDMDtoHKL::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace in HKL-space.");
 
-  declareProperty(std::make_unique<FileProperty>("QSampleFileName", "",
-                                            API::FileProperty::OptionalSave),
+  declareProperty(std::make_unique<FileProperty>(
+                      "QSampleFileName", "", API::FileProperty::OptionalSave),
                   "Name of file for sample sample.");
 
-  declareProperty(std::make_unique<FileProperty>("HKLFileName", "",
-                                            API::FileProperty::OptionalSave),
+  declareProperty(std::make_unique<FileProperty>(
+                      "HKLFileName", "", API::FileProperty::OptionalSave),
                   "Name of file for HKL.");
 }
 

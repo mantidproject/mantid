@@ -10,10 +10,9 @@
 #include "MantidCatalog/DllConfig.h"
 #include "MantidCatalog/Exception.h"
 
-
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include <boost/optional.hpp>
 #include <json/json.h>

@@ -34,10 +34,10 @@ Description          : Preferences dialog
 #include "Mantid/MantidUI.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "Matrix.h"
 #include "MultiLayer.h"
 #include "SendToProgramDialog.h"
-#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QApplication>
 #include <QComboBox>

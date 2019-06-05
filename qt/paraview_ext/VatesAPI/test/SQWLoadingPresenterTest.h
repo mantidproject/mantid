@@ -54,8 +54,7 @@ public:
   }
 
   void testConstructWithEmptyFileThrows() {
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
                       SQWLoadingPresenter(std::move(view), ""),
                       const std::invalid_argument &);
@@ -68,16 +67,14 @@ public:
   }
 
   void testConstruct() {
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     TSM_ASSERT_THROWS_NOTHING(
         "Object should be created without exception.",
         SQWLoadingPresenter(std::move(view), getSuitableFileNamePath()));
   }
 
   void testCanReadFile() {
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
     TSM_ASSERT("Should be readable, valid SQW file.", presenter.canReadFile());
   }
@@ -152,35 +149,31 @@ public:
   }
 
   void testCallHasTDimThrows() {
-    SQWLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        getSuitableFileNamePath());
+    SQWLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                  getSuitableFileNamePath());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.hasTDimensionAvailable(),
                       const std::runtime_error &);
   }
 
   void testCallGetTDimensionValuesThrows() {
-    SQWLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        getSuitableFileNamePath());
+    SQWLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                  getSuitableFileNamePath());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getTimeStepValues(),
                       const std::runtime_error &);
   }
 
   void testCallGetGeometryThrows() {
-    SQWLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        getSuitableFileNamePath());
+    SQWLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                  getSuitableFileNamePath());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getGeometryXML(), const std::runtime_error &);
   }
 
   void testExecuteLoadMetadata() {
-    SQWLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        getSuitableFileNamePath());
+    SQWLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                  getSuitableFileNamePath());
     presenter.executeLoadMetadata();
     TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.",
                               presenter.getTimeStepValues());
@@ -191,9 +184,8 @@ public:
   }
 
   void testGetWorkspaceTypeName() {
-    SQWLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        getSuitableFileNamePath());
+    SQWLoadingPresenter presenter(std::make_unique<MockMDLoadingView>(),
+                                  getSuitableFileNamePath());
     TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
                       presenter.getWorkspaceTypeName());
   }

@@ -34,13 +34,14 @@ using namespace DataObjects;
  *
  */
 void SumNeighbours::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
-                  "A workspace containing one or more rectangular area "
-                  "detectors. Each spectrum needs to correspond to only one "
-                  "pixelID (e.g. no grouping or previous calls to "
-                  "SumNeighbours).");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<InstrumentValidator>()),
+      "A workspace containing one or more rectangular area "
+      "detectors. Each spectrum needs to correspond to only one "
+      "pixelID (e.g. no grouping or previous calls to "
+      "SumNeighbours).");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

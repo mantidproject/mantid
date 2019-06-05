@@ -42,8 +42,8 @@ SaveFullprofResolution::SaveFullprofResolution()
  */
 void SaveFullprofResolution::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<TableWorkspace>>("InputWorkspace", "",
+                                                          Direction::Input),
       "Input TableWorkspace containing the parameters for .irf file.");
 
   std::vector<std::string> exts{".irf"};

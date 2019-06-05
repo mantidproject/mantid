@@ -59,7 +59,7 @@ void PredictSatellitePeaks::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>("SatellitePeaks", "",
-                                                     Direction::Output),
+                                                          Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       string("ModVector1"), "0.0,0.0,0.0"),
@@ -78,7 +78,7 @@ void PredictSatellitePeaks::init() {
                   "If false Modulation Vectors will be read from input");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("CrossTerms", false,
-                                                       Direction::Input),
+                                                            Direction::Input),
                   "Include cross terms (false)");
 
   declareProperty(
@@ -90,19 +90,19 @@ void PredictSatellitePeaks::init() {
                   "peaks from Peaks workspace "
                   "in input are used");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "WavelengthMin", 0.1, Direction::Input),
                   "Minimum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
-  declareProperty(std::make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "WavelengthMax", 100.0, Direction::Input),
                   "Maximum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
-  declareProperty(std::make_unique<PropertyWithValue<double>>("MinDSpacing", 0.1,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "MinDSpacing", 0.1, Direction::Input),
                   "Minimum d-spacing of peaks to consider. Default = 1.0");
-  declareProperty(std::make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "MaxDSpacing", 100.0, Direction::Input),
                   "Maximum d-spacing of peaks to consider");
 
   setPropertySettings(

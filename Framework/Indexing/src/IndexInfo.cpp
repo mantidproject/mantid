@@ -32,8 +32,7 @@ IndexInfo::IndexInfo(const size_t globalSize,
                      const Parallel::StorageMode storageMode,
                      const Parallel::Communicator &communicator)
     : m_storageMode(storageMode),
-      m_communicator(
-          std::make_unique<Parallel::Communicator>(communicator)) {
+      m_communicator(std::make_unique<Parallel::Communicator>(communicator)) {
   // Default to spectrum numbers 1...globalSize
   std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
@@ -53,8 +52,7 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
                      const Parallel::StorageMode storageMode,
                      const Parallel::Communicator &communicator)
     : m_storageMode(storageMode),
-      m_communicator(
-          std::make_unique<Parallel::Communicator>(communicator)) {
+      m_communicator(std::make_unique<Parallel::Communicator>(communicator)) {
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
 }
 

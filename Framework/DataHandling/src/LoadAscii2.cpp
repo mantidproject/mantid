@@ -14,9 +14,9 @@
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/StringTokenizer.h"
 
 // String utilities
 #include <boost/algorithm/string.hpp>
@@ -600,11 +600,11 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
 /// Initialisation method.
 void LoadAscii2::init() {
   const std::vector<std::string> exts{".dat", ".txt", ".csv", ""};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the text file to read, including its full or "
-                  "relative path. The file extension must be .txt, .dat, or "
-                  ".csv");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the text file to read, including its full or "
+      "relative path. The file extension must be .txt, .dat, or "
+      ".csv");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, "
@@ -640,12 +640,12 @@ void LoadAscii2::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
-                                                  Direction::Input),
+                                                       Direction::Input),
       "If present, will override any specified choice given to Separator.");
 
   setPropertySettings("CustomSeparator",
-                      std::make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
-                                                       "UserDefined"));
+                      std::make_unique<VisibleWhenProperty>(
+                          "Separator", IS_EQUAL_TO, "UserDefined"));
 
   declareProperty("CommentIndicator", "#",
                   "Character(s) found front of "

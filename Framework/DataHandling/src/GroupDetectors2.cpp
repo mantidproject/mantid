@@ -109,8 +109,8 @@ void GroupDetectors2::init() {
 
   const std::vector<std::string> exts{".map", ".xml"};
   declareProperty(
-      std::make_unique<FileProperty>("MapFile", "",
-                                        FileProperty::OptionalLoad, exts),
+      std::make_unique<FileProperty>("MapFile", "", FileProperty::OptionalLoad,
+                                     exts),
       "A file that consists of lists of spectra numbers to group. See the "
       "help for the file format");
   declareProperty(

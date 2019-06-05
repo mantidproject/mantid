@@ -32,11 +32,11 @@ using namespace Geometry;
 using namespace Functions;
 
 void ConvolveWorkspaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("Workspace1", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
+                      "Workspace1", "", Direction::Input),
                   "The name of the first input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("Workspace2", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
+                      "Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(

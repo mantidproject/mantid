@@ -21,7 +21,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -124,8 +123,8 @@ void SaveGSS::init() {
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The input workspace");
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Save),
                   "The filename to use for the saved data");
 
   declareProperty(

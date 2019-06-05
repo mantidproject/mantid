@@ -27,13 +27,14 @@ void ChangePulsetime::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input event workspace.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("TimeOffset",
+                                                              Direction::Input),
+                  "Number of seconds (a float) to add to each event's pulse "
+                  "time. Required.");
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
-      "Number of seconds (a float) to add to each event's pulse "
-      "time. Required.");
-  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList", ""),
-                  "An optional list of workspace indices to change. If blank, "
-                  "all spectra in the workspace are modified.");
+      std::make_unique<ArrayProperty<int>>("WorkspaceIndexList", ""),
+      "An optional list of workspace indices to change. If blank, "
+      "all spectra in the workspace are modified.");
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");

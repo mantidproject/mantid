@@ -95,8 +95,7 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 void LoadEventNexus::init() {
   const std::vector<std::string> exts{".nxs.h5", ".nxs", "_event.nxs"};
   this->declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "The name of the Event NeXus file to read, including its full or "
       "relative path. "
       "The file name is typically of the form INST_####_event.nxs (N.B. case "
@@ -104,13 +103,13 @@ void LoadEventNexus::init() {
 
   this->declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                Direction::Output),
+                                                     Direction::Output),
       "The name of the output EventWorkspace or WorkspaceGroup in which to "
       "load the EventNexus file.");
 
   declareProperty(
       std::make_unique<PropertyWithValue<string>>("NXentryName", "",
-                                             Direction::Input),
+                                                  Direction::Input),
       "Optional: Name of the NXentry to load if it's not the default.");
 
   declareProperty(std::make_unique<PropertyWithValue<double>>(
@@ -149,21 +148,23 @@ void LoadEventNexus::init() {
       "whose name does not match the given string will have no "
       "events.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("SingleBankPixelsOnly",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "SingleBankPixelsOnly", true, Direction::Input),
                   "Optional: Only applies if you specified a single bank to "
                   "load with BankName. "
                   "Only pixels in the specified bank will be created if true; "
                   "all of the instrument's pixels will be created otherwise.");
-  setPropertySettings("SingleBankPixelsOnly", std::make_unique<VisibleWhenProperty>(
-                                                  "BankName", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "SingleBankPixelsOnly",
+      std::make_unique<VisibleWhenProperty>("BankName", IS_NOT_DEFAULT));
 
   std::string grp2 = "Loading a Single Bank";
   setPropertyGroup("BankName", grp2);
   setPropertyGroup("SingleBankPixelsOnly", grp2);
 
   declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Precount", true, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("Precount", true,
+                                                Direction::Input),
       "Pre-count the number of events in each pixel before allocating memory "
       "(optional, default True). "
       "This can significantly reduce memory use and memory fragmentation; it "
@@ -196,8 +197,8 @@ void LoadEventNexus::init() {
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadMonitors", false,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "LoadMonitors", false, Direction::Input),
                   "Load the monitors from the file (optional, default False).");
 
   std::vector<std::string> options{"", "Events", "Histogram"};
@@ -260,12 +261,12 @@ void LoadEventNexus::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("MetaDataOnly", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "If true, only the meta data and sample logs will be loaded.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
-      "Load the Sample/DAS logs from the file (default True).");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadLogs", true,
+                                                            Direction::Input),
+                  "Load the Sample/DAS logs from the file (default True).");
   std::vector<std::string> loadType{"Default"};
 
 #ifndef _WIN32
@@ -282,8 +283,8 @@ void LoadEventNexus::init() {
                   "'Multiprocess' should work faster for big files and it is "
                   "experimental, available only in Linux");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadNexusInstrumentXML",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "LoadNexusInstrumentXML", true, Direction::Input),
                   "Reads the embedded Instrument XML from the NeXus file "
                   "(optional, default True). ");
 }
@@ -672,7 +673,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
-  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+  auto periodLog =
+      std::make_unique<const TimeSeriesProperty<int>>("period_log");
   if (loadlogs) {
     prog->doReport("Loading DAS logs");
 

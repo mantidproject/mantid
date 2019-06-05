@@ -127,11 +127,11 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1,
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace1", "",
-                                                            Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace1", "", Direction::Input),
                   "The name of the first input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace2", "",
-                                                            Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
   declareProperty(

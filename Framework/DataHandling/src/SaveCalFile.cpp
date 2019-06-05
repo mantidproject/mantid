@@ -43,9 +43,9 @@ void SaveCalFile::init() {
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An Workspace workspace giving which detectors are masked.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".cal"),
-      "Path to the .cal file that will be created.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".cal"),
+                  "Path to the .cal file that will be created.");
 
   auto offsetprecision = boost::make_shared<BoundedValidator<int>>();
   offsetprecision->setLower(7);

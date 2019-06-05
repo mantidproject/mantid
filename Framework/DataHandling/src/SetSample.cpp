@@ -269,7 +269,7 @@ void SetSample::init() {
                   "SetSampleMaterial for all accepted parameters");
   declareProperty(
       std::make_unique<PropertyManagerProperty>(PropertyNames::ENVIRONMENT,
-                                                   Direction::Input),
+                                                Direction::Input),
       "A dictionary of parameters to configure the sample environment");
 }
 
@@ -309,7 +309,7 @@ void SetSample::exec() {
       if (!materialArgs->existsProperty(VOLUME_ARG)) {
         materialArgs->declareProperty(
             std::make_unique<PropertyWithValue<double>>(VOLUME_ARG,
-                                                           sampleVolume));
+                                                        sampleVolume));
       }
     }
     runChildAlgorithm("SetSampleMaterial", workspace, *materialArgs);
@@ -353,8 +353,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   for (auto &direc : environDirs) {
     direc = Poco::Path(direc).append("sampleenvironments").toString();
   }
-  auto finder =
-      std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
+  auto finder = std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);

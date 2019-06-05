@@ -43,7 +43,7 @@ void RemoveBins::init() {
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The name of the output workspace.");
 
   auto mustHaveValue = boost::make_shared<MandatoryValidator<double>>();

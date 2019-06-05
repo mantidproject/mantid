@@ -11,7 +11,6 @@
 #include <H5Cpp.h>
 #include <vector>
 
-
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
 #include "MantidParallel/IO/PulseTimeGenerator.h"

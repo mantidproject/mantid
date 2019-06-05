@@ -24,7 +24,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
 
-
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Document.h>

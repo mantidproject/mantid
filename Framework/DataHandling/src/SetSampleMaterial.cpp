@@ -118,8 +118,9 @@ void SetSampleMaterial::init() {
   setPropertySettings("AtomicNumber",
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "ChemicalFormula", Kernel::IS_DEFAULT));
-  setPropertySettings("MassNumber", std::make_unique<Kernel::EnabledWhenProperty>(
-                                        "ChemicalFormula", Kernel::IS_DEFAULT));
+  setPropertySettings("MassNumber",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "ChemicalFormula", Kernel::IS_DEFAULT));
   setPropertySettings("NumberDensityUnit",
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "SampleNumberDensity", Kernel::IS_NOT_DEFAULT));

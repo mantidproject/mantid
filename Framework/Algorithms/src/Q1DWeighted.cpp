@@ -48,7 +48,7 @@ void Q1DWeighted::init() {
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Input workspace containing the SANS 2D data");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Workspace that will contain the I(Q) data");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(

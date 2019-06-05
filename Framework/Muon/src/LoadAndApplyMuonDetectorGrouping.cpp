@@ -71,8 +71,8 @@ void LoadAndApplyMuonDetectorGrouping::init() {
   std::string emptyString("");
 
   declareProperty(
-      std::make_unique<FileProperty>(
-          "Filename", "", API::FileProperty::Load, ".xml"),
+      std::make_unique<FileProperty>("Filename", "", API::FileProperty::Load,
+                                     ".xml"),
       "The XML file containing the grouping and pairing information");
 
   declareProperty(

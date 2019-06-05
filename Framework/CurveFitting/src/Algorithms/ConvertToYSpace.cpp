@@ -177,12 +177,12 @@ void ConvertToYSpace::init() {
                   "The mass defining the recoil peak in AMU");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "The output workspace in y-Space");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("QWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "The output workspace in q-Space");
 }
 

@@ -49,16 +49,16 @@ const std::string DgsPreprocessData::category() const {
 /** Initialize the algorithm's properties.
  */
 void DgsPreprocessData::init() {
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "InputWorkspace", "", Direction::Input),
+                        "An input workspace.");
   this->declareProperty(
       std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
-                                       Direction::Input,
-                                       PropertyMode::Optional),
+                                            Direction::Input,
+                                            PropertyMode::Optional),
       "A monitor workspace associated with the input workspace.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                         Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Direction::Output),
                         "The name for the output workspace.");
   this->declareProperty("TofRangeOffset", 0.0,
                         "An addition to the TOF axis for monitor integration.");

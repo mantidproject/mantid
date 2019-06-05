@@ -25,7 +25,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -103,7 +102,7 @@ void LoadSQW2::init() {
   // Inputs
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        StringInitializerList({".sqw"})),
+                                     StringInitializerList({".sqw"})),
       "File of type SQW format");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("MetadataOnly", false),
@@ -145,7 +144,7 @@ void LoadSQW2::initFileReader() {
   using API::Progress;
 
   m_file = std::make_unique<std::ifstream>(getPropertyValue("Filename"),
-                                              std::ios_base::binary);
+                                           std::ios_base::binary);
   m_reader = std::make_unique<BinaryStreamReader>(*m_file);
 }
 

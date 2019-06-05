@@ -145,10 +145,10 @@ void Stitch1D::init() {
                   "input workspaces.");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "Scaling either with respect to LHS workspace or RHS workspace");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "UseManualScaleFactor", false, Direction::Input),
                   "True to use a provided value for the scale factor.");
   auto manualScaleFactorValidator =
       boost::make_shared<BoundedValidator<double>>();

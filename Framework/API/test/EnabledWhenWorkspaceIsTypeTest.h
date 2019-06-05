@@ -48,23 +48,21 @@ public:
     PropertyManagerOwner alg;
 
     // Start with a regular property
-    alg.declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                         Direction::Input));
+    alg.declareProperty(std::make_unique<WorkspaceProperty<>>(
+        "InputWorkspace", "", Direction::Input));
 
     // Make a property with its validator. Will be enabled when that other one
     // is NOT the default
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings(
         "MyValidatorProp",
-        std::make_unique<
-            EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>>(
+        std::make_unique<EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>>(
             "InputWorkspace", true));
 
     alg.declareProperty("MyValidatorProp2", 456);
     alg.setPropertySettings(
         "MyValidatorProp2",
-        std::make_unique<
-            EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>>(
+        std::make_unique<EnabledWhenWorkspaceIsType<WorkspaceTesterSubClass>>(
             "InputWorkspace", false));
 
     Property *prop = alg.getPointerToProperty("MyValidatorProp");

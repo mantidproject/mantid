@@ -135,13 +135,13 @@ void FindPeaksMD::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>("PeakDistanceThreshold", 0.1,
-                                             Direction::Input),
+                                                  Direction::Input),
       "Threshold distance for rejecting peaks that are found to be too close "
       "from each other.\n"
       "This should be some multiple of the radius of a peak. Default: 0.1.");
 
-  declareProperty(std::make_unique<PropertyWithValue<int64_t>>("MaxPeaks", 500,
-                                                          Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int64_t>>(
+                      "MaxPeaks", 500, Direction::Input),
                   "Maximum number of peaks to find. Default: 500.");
 
   std::vector<std::string> strategy = {volumeNormalization,

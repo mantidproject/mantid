@@ -98,11 +98,12 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
   boundedArrayValidator->setLower(0);
   declareProperty(
       std::make_unique<ArrayProperty<int>>("SpectrumNumbersOfDetectors",
-                                      boundedArrayValidator, Direction::Input),
+                                           boundedArrayValidator,
+                                           Direction::Input),
       "A list of spectrum numbers making up an effective point detector.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "StrictSpectrumChecking", true, Direction::Input),
                   "Enable, disable strict spectrum checking. Strict spectrum "
                   "checking protects against non-sequential integers in which "
                   "spectrum numbers are not in {min, min+1, ..., max}");

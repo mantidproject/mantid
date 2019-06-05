@@ -38,7 +38,7 @@ void LoadCanSAS1D2::init() {
   LoadCanSAS1D::init();
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "Load the transmission related data from the file if it is present "
       "(optional, default False).");
 }

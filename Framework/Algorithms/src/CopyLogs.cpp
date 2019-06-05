@@ -36,12 +36,12 @@ const std::string CopyLogs::category() const { return "Utility\\Workspaces"; }
 /** Initialize the algorithm's properties.
  */
 void CopyLogs::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace to copy logs from.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
-      "Workspace to copy logs to.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace to copy logs from.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::InOut),
+                  "Workspace to copy logs to.");
 
   // options for the type of strategy to take
   std::vector<std::string> strategies{"WipeExisting", "MergeKeepExisting",

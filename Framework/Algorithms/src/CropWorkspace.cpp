@@ -20,11 +20,11 @@ using namespace Kernel;
 using namespace API;
 
 void CropWorkspace::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The input workspace");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Name of the output workspace");
 
   declareProperty("XMin", EMPTY_DBL(),

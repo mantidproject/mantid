@@ -48,16 +48,16 @@ void LoadInstrument::init() {
                   "into. Any existing instrument will be replaced.");
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                LoadGeometry::validExtensions()),
+                                     LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "
       ".nxs for usage with NeXus Geometry files. Note Filename or "
       "InstrumentName must be specified but not both.");
-  declareProperty(
-      std::make_unique<ArrayProperty<detid_t>>("MonitorList", Direction::Output),
-      "Will be filled with a list of the detector ids of any "
-      "monitors loaded in to the workspace.");
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("MonitorList",
+                                                           Direction::Output),
+                  "Will be filled with a list of the detector ids of any "
+                  "monitors loaded in to the workspace.");
   declareProperty(
       "InstrumentName", "",
       "Name of instrument. Can be used instead of Filename to specify an"

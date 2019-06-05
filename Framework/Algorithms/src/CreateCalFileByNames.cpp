@@ -45,7 +45,7 @@ void CreateCalFileByNames::init() {
       "A workspace that contains a reference to the instrument of interest. "
       "You can use LoadEmptyInstrument to create such a workspace.");
   declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::Save, ".cal"),
+                                                 FileProperty::Save, ".cal"),
                   "The name of the output CalFile");
   declareProperty(
       "GroupNames", "",

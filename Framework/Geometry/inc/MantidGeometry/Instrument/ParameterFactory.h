@@ -67,8 +67,7 @@ template <class C>
 void ParameterFactory::subscribe(const std::string &className) {
   auto it = s_map.find(className);
   if (!className.empty() && it == s_map.cend()) {
-    s_map[className] =
-        std::make_unique<Kernel::Instantiator<C, Parameter>>();
+    s_map[className] = std::make_unique<Kernel::Instantiator<C, Parameter>>();
   } else {
     throw std::runtime_error("Parameter type" + className +
                              " is already registered.\n");

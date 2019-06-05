@@ -33,9 +33,9 @@ void RRFMuon::init() {
           "OutputWorkspace", "", Direction::Output),
       "Name of the output workspace containing the spectra in the RRF");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("Frequency", 0, Direction::Input),
-      "Frequency of the oscillations");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Frequency", 0,
+                                                              Direction::Input),
+                  "Frequency of the oscillations");
 
   std::vector<std::string> unitOptions{"MHz", "Gauss", "Mrad/s"};
   declareProperty("FrequencyUnits", "MHz",

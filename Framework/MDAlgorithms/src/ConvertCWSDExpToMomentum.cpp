@@ -42,7 +42,7 @@ ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
 void ConvertCWSDExpToMomentum::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "",
-                                                      Direction::Input),
+                                                           Direction::Input),
       "Name of table workspace for data file names in the experiment.");
 
   declareProperty(std::make_unique<FileProperty>(
@@ -96,7 +96,7 @@ void ConvertCWSDExpToMomentum::init() {
 
   declareProperty(
       std::make_unique<FileProperty>("Directory", "",
-                                FileProperty::OptionalDirectory),
+                                     FileProperty::OptionalDirectory),
       "Directory where data files are if InputWorkspace gives data file name "
       "as the base file name as indicated by 'IsBaseName'.");
 }

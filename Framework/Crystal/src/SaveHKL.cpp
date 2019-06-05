@@ -66,14 +66,14 @@ void SaveHKL::init() {
   declareProperty("Radius", EMPTY_DBL(), mustBePositive,
                   "Radius of the sample in centimeters");
   declareProperty("PowerLambda", 4.0, "Power of lambda ");
-  declareProperty(std::make_unique<FileProperty>("SpectraFile", "",
-                                            API::FileProperty::OptionalLoad,
-                                            ".dat"),
-                  " Spectrum data read from a spectrum file.");
-
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".hkl"),
-      "Path to an hkl file to save.");
+      std::make_unique<FileProperty>("SpectraFile", "",
+                                     API::FileProperty::OptionalLoad, ".dat"),
+      " Spectrum data read from a spectrum file.");
+
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".hkl"),
+                  "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
   declareProperty("SortBy", histoTypes[2],

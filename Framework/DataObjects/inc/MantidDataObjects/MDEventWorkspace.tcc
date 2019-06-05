@@ -277,8 +277,7 @@ TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>>
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(
-        std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
+    out.push_back(std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
   }
   return out;
 }

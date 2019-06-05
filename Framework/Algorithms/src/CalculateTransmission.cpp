@@ -79,7 +79,7 @@ void CalculateTransmission::init() {
                   "the SampleRunWorkspace.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "The name of the workspace in which to store the fitted transmission "
       "fractions.");
 

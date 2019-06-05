@@ -65,9 +65,10 @@ void GeneratePeaks::init() {
   for (size_t i = 0; i < peakFullNames.size(); ++i)
     g_log.debug() << "Peak function " << i << ": " << peakFullNames[i] << "\n";
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("PeakParameterValues"),
-                  "List of peak parameter values.  They must have a 1-to-1 "
-                  "mapping to PeakParameterNames list. ");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("PeakParameterValues"),
+      "List of peak parameter values.  They must have a 1-to-1 "
+      "mapping to PeakParameterNames list. ");
 
   // Background properties
   std::vector<std::string> bkgdtypes{"Auto",
@@ -108,9 +109,10 @@ void GeneratePeaks::init() {
 
   declareProperty("NumberWidths", 2.,
                   "Number of peak width to evaluate each peak for. Default=2.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Output Workspace to put the calculated data.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "Output Workspace to put the calculated data.");
 
   declareProperty("GenerateBackground", true,
                   "Whether or not to generate the background");

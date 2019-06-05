@@ -74,7 +74,7 @@ void SaveNXSPE::init() {
   std::vector<std::string> fileExts{".par", ".phx"};
   declareProperty(
       std::make_unique<FileProperty>("ParFile", "not_used.par",
-                                        FileProperty::OptionalLoad, fileExts),
+                                     FileProperty::OptionalLoad, fileExts),
       "If provided, will replace detectors parameters in resulting nxspe file with the values taken from the file. \n\
         Should be used only if the parameters, calculated by the [[FindDetectorsPar]] algorithm are not suitable for some reason. \n\
         See [[FindDetectorsPar]] description for the details.");

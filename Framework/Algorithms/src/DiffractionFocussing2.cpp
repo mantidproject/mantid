@@ -47,12 +47,13 @@ void DiffractionFocussing2::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing/Q-spacing");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
 
   declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::OptionalLoad, ".cal"),
+                                                 FileProperty::OptionalLoad,
+                                                 ".cal"),
                   "Optional: The name of the CalFile with grouping data.");
 
   declareProperty(

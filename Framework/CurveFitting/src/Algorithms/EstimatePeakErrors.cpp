@@ -114,9 +114,10 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(std::make_unique<FunctionProperty>("Function", Direction::InOut),
-                  "Fitting function containing peaks. Must have a covariance "
-                  "matrix attached.");
+  declareProperty(
+      std::make_unique<FunctionProperty>("Function", Direction::InOut),
+      "Fitting function containing peaks. Must have a covariance "
+      "matrix attached.");
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(

@@ -411,10 +411,9 @@ void PolarizationCorrectionWildes::init() {
                       Kernel::Direction::Input),
                   "A list of workspaces to be corrected corresponding to the "
                   "flipper configurations.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
-          Prop::OUTPUT_WS, "", Kernel::Direction::Output),
-      "A group of polarization efficiency corrected workspaces.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+                      Prop::OUTPUT_WS, "", Kernel::Direction::Output),
+                  "A group of polarization efficiency corrected workspaces.");
   const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " +
                            Flippers::OnOff + ", " + Flippers::OnOn;
   const std::string missing01 =

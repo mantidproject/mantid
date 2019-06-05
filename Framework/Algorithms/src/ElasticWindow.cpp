@@ -32,7 +32,7 @@ void ElasticWindow::init() {
       "The name for output workspace with the X axis in units of Q");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputInQSquared", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "The name for output workspace with the X axis in units of Q^2.");
   declareProperty("IntegrationRangeStart", EMPTY_DBL(),
                   boost::make_shared<MandatoryValidator<double>>(),

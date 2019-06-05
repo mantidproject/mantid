@@ -8,8 +8,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/Strings.h"
 #include <fstream>
 
 using namespace Mantid::Kernel::Strings;
@@ -30,13 +30,13 @@ using namespace Mantid::API;
 void LoadIsawUB::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                Direction::InOut),
+                                                     Direction::InOut),
       "An input workspace to which to add the lattice information.");
 
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "Path to an ISAW-style UB matrix text file.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "Path to an ISAW-style UB matrix text file.");
 
   declareProperty("CheckUMatrix", true,
                   "If True (default) then a check is "

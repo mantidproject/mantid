@@ -25,8 +25,8 @@ using namespace Kernel;
  */
 void MaskDetectorsIf::init() {
   using namespace Mantid::Kernel;
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input),
                   "A 1D Workspace that contains values to select against");
   const std::vector<std::string> select_mode{"SelectIf", "DeselectIf"};
   declareProperty(
@@ -39,12 +39,12 @@ void MaskDetectorsIf::init() {
                   "Unary operator to compare to given values.");
   declareProperty("Value", 0.0);
   declareProperty(
-      std::make_unique<API::FileProperty>("InputCalFile", "",
-                                     API::FileProperty::OptionalLoad, ".cal"),
+      std::make_unique<API::FileProperty>(
+          "InputCalFile", "", API::FileProperty::OptionalLoad, ".cal"),
       "The name of the CalFile with grouping data.");
   declareProperty(
-      std::make_unique<API::FileProperty>("OutputCalFile", "",
-                                     API::FileProperty::OptionalSave, ".cal"),
+      std::make_unique<API::FileProperty>(
+          "OutputCalFile", "", API::FileProperty::OptionalSave, ".cal"),
       "The name of the CalFile with grouping data.");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Direction::Output,

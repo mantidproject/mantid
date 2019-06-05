@@ -39,8 +39,8 @@ DECLARE_ALGORITHM(CalMuonDetectorPhases)
  */
 void CalMuonDetectorPhases::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the reference input workspace");
 
   declareProperty("FirstGoodData", EMPTY_DBL(),
@@ -54,10 +54,11 @@ void CalMuonDetectorPhases::init() {
   declareProperty("Frequency", EMPTY_DBL(),
                   "Starting hint for the frequency in MHz", Direction::Input);
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "DetectorTable", "", Direction::Output),
-                  "Name of the TableWorkspace in which to store the list "
-                  "of phases and asymmetries");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "DetectorTable", "", Direction::Output),
+      "Name of the TableWorkspace in which to store the list "
+      "of phases and asymmetries");
 
   declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
                       "DataFitted", "", Direction::Output),
@@ -405,8 +406,8 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
     // Two possibilities for grouping - use workspace log
     auto fieldDir = ws->run().getLogData("main_field_direction");
     if (fieldDir) {
-      loader = std::make_unique<API::GroupingLoader>(instrument,
-                                                        fieldDir->value());
+      loader =
+          std::make_unique<API::GroupingLoader>(instrument, fieldDir->value());
     }
     if (!fieldDir) {
       throw std::invalid_argument(

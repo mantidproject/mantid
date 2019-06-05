@@ -21,7 +21,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-
 #include <boost/make_shared.hpp>
 #include <nexus/NeXusFile.hpp>
 #include <queue>

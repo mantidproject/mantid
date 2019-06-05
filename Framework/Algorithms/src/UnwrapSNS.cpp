@@ -178,7 +178,8 @@ void UnwrapSNS::execEvent() {
   auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   // set up the progress bar
-  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress =
+      std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());

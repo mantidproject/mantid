@@ -54,7 +54,7 @@ void MergeMDFiles::init() {
 
   declareProperty(
       std::make_unique<FileProperty>("OutputFilename", "",
-                                        FileProperty::OptionalSave, exts),
+                                     FileProperty::OptionalSave, exts),
       "Choose a file to which to save the output workspace. \n"
       "Optional: if specified, the workspace created will be file-backed. \n"
       "If not, it will be created in memory.");

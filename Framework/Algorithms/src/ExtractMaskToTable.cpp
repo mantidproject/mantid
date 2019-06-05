@@ -30,7 +30,7 @@ DECLARE_ALGORITHM(ExtractMaskToTable)
 void ExtractMaskToTable::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                      Direction::Input),
+                                                           Direction::Input),
       "A workspace whose masking is to be extracted or a MaskWorkspace. ");
 
   declareProperty(

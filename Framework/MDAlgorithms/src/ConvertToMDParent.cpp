@@ -98,15 +98,16 @@ void ConvertToMDParent::init() {
       "depending on the target coordinate "
       "system, defined by the property **OutputDimensions**. ");
 
-  setPropertySettings("Q3DFrames", std::make_unique<Kernel::VisibleWhenProperty>(
-                                       "QDimensions", IS_EQUAL_TO, "Q3D"));
+  setPropertySettings("Q3DFrames",
+                      std::make_unique<Kernel::VisibleWhenProperty>(
+                          "QDimensions", IS_EQUAL_TO, "Q3D"));
   setPropertySettings("QconversionScales",
                       std::make_unique<Kernel::VisibleWhenProperty>(
                           "QDimensions", IS_EQUAL_TO, "Q3D"));
 
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>("OtherDimensions",
-                                              Direction::Input),
+                                                   Direction::Input),
       "List(comma separated) of additional to **Q** and **DeltaE** variables "
       "which form additional "
       "(orthogonal) to **Q** dimensions in the target workspace (e.g. "
@@ -140,7 +141,7 @@ void ConvertToMDParent::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("UpdateMasks", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "if PreprocessDetectorWS is used to build the workspace with "
       "preprocessed detectors at first algorithm call,"
       "and the input workspaces instruments are different by just different "
@@ -154,7 +155,7 @@ void ConvertToMDParent::init() {
   // if one needs to use Lorentz corrections
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("LorentzCorrection", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "Correct the weights of events or signals and errors transformed into "
       "reciprocal space by multiplying them "
       "by the Lorentz multiplier:\n :math:`sin(\\theta)^2/\\lambda^4`. "
@@ -162,7 +163,7 @@ void ConvertToMDParent::init() {
       "and is ignored in any other case.");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("IgnoreZeroSignals", false,
-                                           Direction::Input),
+                                                Direction::Input),
       "Enabling this property forces the algorithm to ignore bins with zero "
       "signal for an input matrix workspace. Input event workspaces are not "
       "affected. "
@@ -189,7 +190,8 @@ void ConvertToMDParent::init() {
                   "coordinate system in **Q3D** mode. - Default (0,0,1)");
   // if one needs no events near the origin of Q
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("AbsMinQ", 0.0, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("AbsMinQ", 0.0,
+                                                  Direction::Input),
       "Do not add events to MD workspace that are closer to the origin "
       "in QSample radius than this value. Needed for 3D"
       "views to remove noise. ");

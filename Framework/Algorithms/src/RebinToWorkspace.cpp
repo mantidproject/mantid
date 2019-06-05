@@ -46,7 +46,7 @@ void RebinToWorkspace::init() {
                   "If this is a problem try ConvertToHistogram.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+                                            Kernel::Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "

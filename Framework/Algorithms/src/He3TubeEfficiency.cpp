@@ -70,7 +70,7 @@ void He3TubeEfficiency::init() {
   mustBePositive->setLower(0.0);
   this->declareProperty(
       std::make_unique<Kernel::PropertyWithValue<double>>("ScaleFactor", 1.0,
-                                                     mustBePositive),
+                                                          mustBePositive),
       "Constant factor with which to scale the calculated"
       "detector efficiency. Same factor applies to all efficiencies.");
 
@@ -78,16 +78,18 @@ void He3TubeEfficiency::init() {
       boost::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   this->declareProperty(
-      std::make_unique<Kernel::ArrayProperty<double>>("TubePressure", mustBePosArr),
+      std::make_unique<Kernel::ArrayProperty<double>>("TubePressure",
+                                                      mustBePosArr),
       "Provide overriding the default tube pressure. The pressure must "
       "be specified in atm.");
   this->declareProperty(
-      std::make_unique<Kernel::ArrayProperty<double>>("TubeThickness", mustBePosArr),
+      std::make_unique<Kernel::ArrayProperty<double>>("TubeThickness",
+                                                      mustBePosArr),
       "Provide overriding the default tube thickness. The thickness must "
       "be specified in metres.");
   this->declareProperty(
       std::make_unique<Kernel::ArrayProperty<double>>("TubeTemperature",
-                                                 mustBePosArr),
+                                                      mustBePosArr),
       "Provide overriding the default tube temperature. The temperature must "
       "be specified in Kelvin.");
 }

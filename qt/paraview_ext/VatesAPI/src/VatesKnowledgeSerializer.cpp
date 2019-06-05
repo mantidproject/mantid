@@ -5,10 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
-#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/shared_ptr.hpp>

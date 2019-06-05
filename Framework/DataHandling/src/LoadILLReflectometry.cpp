@@ -222,8 +222,8 @@ int LoadILLReflectometry::confidence(
 /// Initialize the algorithm's properties.
 void LoadILLReflectometry::init() {
   declareProperty(std::make_unique<FileProperty>("Filename", std::string(),
-                                                    FileProperty::Load, ".nxs",
-                                                    Direction::Input),
+                                                 FileProperty::Load, ".nxs",
+                                                 Direction::Input),
                   "Name of the Nexus file to load");
 
   declareProperty(std::make_unique<WorkspaceProperty<>>(

@@ -7,7 +7,6 @@
 #ifndef MANTID_PARALLEL_THREADINGBACKEND_H_
 #define MANTID_PARALLEL_THREADINGBACKEND_H_
 
-
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
 #include "MantidParallel/Status.h"

@@ -64,7 +64,7 @@ void SaveIsawQvector::init() {
                   "instrument with defined sample");
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".bin"),
+                                     ".bin"),
       "Optional path to an hkl file to save.  Vectors returned if no file "
       "requested.");
   declareProperty("RightHanded", true, "Save the Q-vector as k_f - k_i");

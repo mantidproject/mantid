@@ -69,8 +69,8 @@ public:
     auto res = dae.executeAsync();
 
     FakeAlgorithm alg;
-    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<specnum_t>>(
-        "SpectraList", ""));
+    alg.declareProperty(
+        std::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
     std::vector<specnum_t> specs;
     specs.assign(s, s + 11);

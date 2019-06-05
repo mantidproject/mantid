@@ -34,15 +34,15 @@ void SpectrumAlgorithm::declareWorkspaceIndexSetProperties(
   declareProperty(m_indexMaxPropertyName, EMPTY_INT(), mustBePositive,
                   "The last Workspace index to be included in the summing");
 
-  declareProperty(std::make_unique<Kernel::ArrayProperty<size_t>>(
-                      m_indexRangePropertyName),
-                  "A list of workspace indices as a string with ranges, for "
-                  "example: 5-10,15,20-23. \n"
-                  "Optional: if not specified, then the "
-                  "Start/EndWorkspaceIndex fields are used alone. "
-                  "If specified, the range and the list are combined (without "
-                  "duplicating indices). For example, a range of 10 to 20 and "
-                  "a list '12,15,26,28' gives '10-20,26,28'.");
+  declareProperty(
+      std::make_unique<Kernel::ArrayProperty<size_t>>(m_indexRangePropertyName),
+      "A list of workspace indices as a string with ranges, for "
+      "example: 5-10,15,20-23. \n"
+      "Optional: if not specified, then the "
+      "Start/EndWorkspaceIndex fields are used alone. "
+      "If specified, the range and the list are combined (without "
+      "duplicating indices). For example, a range of 10 to 20 and "
+      "a list '12,15,26,28' gives '10-20,26,28'.");
 }
 
 /** Returns a validated IndexSet refering to spectra in workspace.

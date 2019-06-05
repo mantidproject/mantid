@@ -70,26 +70,24 @@ public:
   }
 
   void testConstructWithNullRepositoryThrows() {
-    TSM_ASSERT_THROWS(
-        "Should throw with null repository.",
-        MDEWInMemoryLoadingPresenter(
-            std::make_unique<MockMDLoadingView>(), nullptr, "_"),
-        const std::invalid_argument &);
+    TSM_ASSERT_THROWS("Should throw with null repository.",
+                      MDEWInMemoryLoadingPresenter(
+                          std::make_unique<MockMDLoadingView>(), nullptr, "_"),
+                      const std::invalid_argument &);
   }
 
   void testConstructWithEmptyWsNameThrows() {
     std::string emptyName = "";
-    TSM_ASSERT_THROWS("Should throw with empty Workspace name.",
-                      MDEWInMemoryLoadingPresenter(
-                          std::make_unique<MockMDLoadingView>(),
-                          new MockWorkspaceProvider, emptyName),
-                      const std::invalid_argument &);
+    TSM_ASSERT_THROWS(
+        "Should throw with empty Workspace name.",
+        MDEWInMemoryLoadingPresenter(std::make_unique<MockMDLoadingView>(),
+                                     new MockWorkspaceProvider, emptyName),
+        const std::invalid_argument &);
   }
 
   void testConstruction() {
     TS_ASSERT_THROWS_NOTHING(MDEWInMemoryLoadingPresenter(
-        std::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_"));
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_"));
   }
 
   void testCanLoadWithInvalidName() {
@@ -100,8 +98,7 @@ public:
 
     // Give a dummy name corresponding to the workspace.
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), repository.release(),
-        "_");
+        std::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     TSM_ASSERT("Should indicate that the workspace cannot be read-out since "
                "the name is not in the Repository.",
@@ -119,8 +116,7 @@ public:
 
     // Give a dummy name corresponding to the workspace.
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), repository.release(),
-        "_");
+        std::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     TSM_ASSERT("Should indicate that the workspace cannot be read-out since it "
                "is not of the right type.",
@@ -137,8 +133,7 @@ public:
 
     // Give a dummy name corresponding to the workspace.
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), repository.release(),
-        "_");
+        std::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     TSM_ASSERT("Should have worked! Workspace is of correct type and "
                "repository says ws is present.!",
@@ -153,8 +148,7 @@ public:
         .WillRepeatedly(Return(ws));
 
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(), repository.release(),
-        "_");
+        std::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     // Test that it doesn't work when not setup.
     TSM_ASSERT_THROWS("::executeLoadMetadata is critical to setup, should "
@@ -171,8 +165,7 @@ public:
 
   void testExecution() {
     // Setup view
-    std::unique_ptr<MDLoadingView> view =
-        std::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     auto mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(1);
     EXPECT_CALL(*mockView, getLoadInMemory())
@@ -221,8 +214,7 @@ public:
 
   void testCallHasTDimThrows() {
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.hasTDimensionAvailable(),
                       const std::runtime_error &);
@@ -230,8 +222,7 @@ public:
 
   void testCallGetTDimensionValuesThrows() {
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getTimeStepValues(),
                       const std::runtime_error &);
@@ -239,24 +230,21 @@ public:
 
   void testCallGetGeometryThrows() {
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getGeometryXML(), const std::runtime_error &);
   }
 
   void testGetWorkspaceTypeName() {
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
                       presenter.getWorkspaceTypeName());
   }
 
   void testGetSpecialCoordinates() {
     MDEWInMemoryLoadingPresenter presenter(
-        std::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_EQUALS("Characterisation Test Failed", -1,
                       presenter.getSpecialCoordinates());
   }

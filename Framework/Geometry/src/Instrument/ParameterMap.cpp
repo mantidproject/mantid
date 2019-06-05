@@ -64,8 +64,8 @@ void checkIsNotMaskingParameter(const std::string &name) {
 ParameterMap::ParameterMap()
     : m_cacheLocMap(
           std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
-      m_cacheRotMap(std::make_unique<
-                    Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
+      m_cacheRotMap(
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
     : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),

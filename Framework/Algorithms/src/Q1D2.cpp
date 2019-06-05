@@ -49,12 +49,12 @@ void Q1D2::init() {
   dataVal->add<HistogramValidator>();
   dataVal->add<InstrumentValidator>();
   dataVal->add<CommonBinsValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>("DetBankWorkspace", "",
-                                                   Direction::Input, dataVal),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "DetBankWorkspace", "", Direction::Input, dataVal),
                   "Particle counts as a function of wavelength");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+                                            Direction::Output),
       "Name of the workspace that will contain the result of the calculation");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
@@ -71,14 +71,15 @@ void Q1D2::init() {
   auto wavVal = boost::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "WavelengthAdj", "", Direction::Input,
+                      PropertyMode::Optional, wavVal),
+                  "Scaling to apply to each bin.\n"
+                  "Must have the same number of bins as the DetBankWorkspace");
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input,
-                                       PropertyMode::Optional, wavVal),
-      "Scaling to apply to each bin.\n"
-      "Must have the same number of bins as the DetBankWorkspace");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("WavePixelAdj", "", Direction::Input,
-                                       PropertyMode::Optional, dataVal),
+      std::make_unique<WorkspaceProperty<>>("WavePixelAdj", "",
+                                            Direction::Input,
+                                            PropertyMode::Optional, dataVal),
       "Scaling that depends on both pixel and wavelength together.\n"
       "Must have the same number of bins and spectra as the DetBankWorkspace.");
   declareProperty("AccountForGravity", false,
@@ -117,7 +118,7 @@ void Q1D2::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("QResolution", "", Direction::Input,
-                                       PropertyMode::Optional, dataVal),
+                                            PropertyMode::Optional, dataVal),
       "Workspace to calculate the Q resolution.\n");
 }
 /**

@@ -366,9 +366,8 @@ void SANSSensitivityCorrection::exec() {
     if (floodWSOutputName.empty()) {
       setPropertyValue("OutputSensitivityWorkspace", floodWSName);
       AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
-      reductionManager->declareProperty(
-          std::make_unique<WorkspaceProperty<>>(entryName, floodWSName,
-                                                   Direction::InOut));
+      reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
+          entryName, floodWSName, Direction::InOut));
       reductionManager->setPropertyValue(entryName, floodWSName);
       reductionManager->setProperty(entryName, floodWS);
     }

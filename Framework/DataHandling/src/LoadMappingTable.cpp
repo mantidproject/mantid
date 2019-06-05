@@ -10,7 +10,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -22,12 +21,13 @@ DECLARE_ALGORITHM(LoadMappingTable)
 LoadMappingTable::LoadMappingTable() : Algorithm() {}
 
 void LoadMappingTable::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
-                  "The name of the RAW file from which to obtain the mapping "
-                  "information, including its full or relative path.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
+      "The name of the RAW file from which to obtain the mapping "
+      "information, including its full or relative path.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("Workspace", "Anonymous",
-                                       Direction::InOut),
+                                            Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
 }

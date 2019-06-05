@@ -1092,9 +1092,8 @@ void FitPeak::init() {
                   boost::make_shared<StringListValidator>(peakFullNames),
                   "Peak function type. ");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<string>>("PeakParameterNames"),
-      "List of peak parameter names. ");
+  declareProperty(std::make_unique<ArrayProperty<string>>("PeakParameterNames"),
+                  "List of peak parameter names. ");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>("PeakParameterValues"),

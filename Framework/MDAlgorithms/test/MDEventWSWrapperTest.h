@@ -30,8 +30,7 @@ public:
   static void destroySuite(MDEventWSWrapperTest *suite) { delete suite; }
 
   void test_construct() {
-    TS_ASSERT_THROWS_NOTHING(
-        pWSWrap = std::make_unique<MDEventWSWrapper>());
+    TS_ASSERT_THROWS_NOTHING(pWSWrap = std::make_unique<MDEventWSWrapper>());
   }
   void test_buildNewWS() {
     IMDEventWorkspace_sptr pws;

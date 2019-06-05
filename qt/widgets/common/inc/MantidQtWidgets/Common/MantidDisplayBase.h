@@ -7,9 +7,9 @@
 #ifndef MANTID_MANTIDWIDGETS_MANTIDDISPLAYBASE_H_
 #define MANTID_MANTIDWIDGETS_MANTIDDISPLAYBASE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DistributionOptions.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include <QStringList>

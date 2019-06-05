@@ -82,7 +82,7 @@ const std::string MaskMD::category() const {
 void MaskMD::init() {
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("ClearExistingMasks", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "Clears any existing masks before applying the provided masking.");
   declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "Workspace", "", Direction::InOut),

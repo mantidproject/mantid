@@ -16,7 +16,6 @@
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
 
-
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
@@ -282,7 +281,7 @@ void ReflectometryReductionOneAuto2::init() {
   // Whether to correct detectors
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
-                                           Direction::Input),
+                                                Direction::Input),
       "Moves detectors to twoTheta if ThetaIn or ThetaLogName is given");
 
   // Detector position correction type

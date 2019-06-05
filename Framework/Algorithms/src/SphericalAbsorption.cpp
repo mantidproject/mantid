@@ -48,11 +48,11 @@ void SphericalAbsorption::init() {
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
       "The X values for the input workspace must be in units of wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();

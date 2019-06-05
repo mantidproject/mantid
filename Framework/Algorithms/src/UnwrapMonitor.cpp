@@ -44,8 +44,8 @@ void UnwrapMonitor::init() {
           "InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto validator = boost::make_shared<BoundedValidator<double>>();

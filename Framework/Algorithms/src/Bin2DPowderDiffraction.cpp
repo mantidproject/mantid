@@ -87,14 +87,14 @@ void Bin2DPowderDiffraction::init() {
   declareProperty(
       std::make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator),
       docString);
-  declareProperty(std::make_unique<ArrayProperty<double>>("dPerpendicularBinning",
-                                                     rebinValidator),
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "dPerpendicularBinning", rebinValidator),
                   docString);
 
   const std::vector<std::string> exts{".txt", ".dat"};
   declareProperty(
-      std::make_unique<FileProperty>("BinEdgesFile", "", FileProperty::OptionalLoad,
-                                exts),
+      std::make_unique<FileProperty>("BinEdgesFile", "",
+                                     FileProperty::OptionalLoad, exts),
       "Optional: The ascii file containing the list of bin edges. "
       "Either this or Axis1- and dPerpendicularBinning need to be specified.");
 

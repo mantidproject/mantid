@@ -52,8 +52,8 @@ const std::string CreateGroupingWorkspace::category() const {
  */
 void CreateGroupingWorkspace::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
@@ -62,12 +62,13 @@ void CreateGroupingWorkspace::init() {
                   "GroupingWorkspace on which to base the GroupingWorkspace.");
 
   declareProperty(std::make_unique<FileProperty>("InstrumentFilename", "",
-                                            FileProperty::OptionalLoad, ".xml"),
+                                                 FileProperty::OptionalLoad,
+                                                 ".xml"),
                   "Optional: Path to the instrument definition file on which "
                   "to base the GroupingWorkspace.");
 
-  declareProperty(std::make_unique<FileProperty>("OldCalFilename", "",
-                                            FileProperty::OptionalLoad, ".cal"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "OldCalFilename", "", FileProperty::OptionalLoad, ".cal"),
                   "Optional: Path to the old-style .cal grouping/calibration "
                   "file (multi-column ASCII). You must also specify the "
                   "instrument.");

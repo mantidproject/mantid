@@ -34,12 +34,13 @@ SaveAscii::SaveAscii() : m_separatorIndex() {}
 /// Initialisation method.
 void SaveAscii::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
   const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Save, asciiExts),
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
@@ -77,13 +78,13 @@ void SaveAscii::init() {
 
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
-                                                  Direction::Input),
+                                                       Direction::Input),
       "If present, will override any specified choice given to Separator.");
   getPointerToProperty("CustomSeparator")->setAutoTrim(false);
 
   setPropertySettings("CustomSeparator",
-                      std::make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
-                                                       "UserDefined"));
+                      std::make_unique<VisibleWhenProperty>(
+                          "Separator", IS_EQUAL_TO, "UserDefined"));
 
   declareProperty("ColumnHeader", true,
                   "If true, put column headers into file. ");

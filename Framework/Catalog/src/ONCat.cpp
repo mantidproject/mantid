@@ -12,7 +12,6 @@
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
 
-
 #include <algorithm>
 #include <sstream>
 
@@ -90,8 +89,8 @@ static const std::string DEFAULT_CLIENT_ID =
  */
 ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
   if (!authenticate) {
-    return std::make_unique<ONCat>(
-        DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE, boost::none, boost::none);
+    return std::make_unique<ONCat>(DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE,
+                                   boost::none, boost::none);
   }
 
   auto &config = Mantid::Kernel::ConfigService::Instance();

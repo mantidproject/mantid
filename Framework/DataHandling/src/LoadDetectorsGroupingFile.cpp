@@ -49,14 +49,14 @@ void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties
 
   const std::vector<std::string> exts{".xml", ".map"};
-  declareProperty(std::make_unique<FileProperty>(
-                      PropertyNames::INPUT_FILE, "", FileProperty::Load, exts),
+  declareProperty(std::make_unique<FileProperty>(PropertyNames::INPUT_FILE, "",
+                                                 FileProperty::Load, exts),
                   "The XML or Map file with full path.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "",
-                                       Direction::Input,
-                                       PropertyMode::Optional),
+                                            Direction::Input,
+                                            PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use. This "
       "will override what is specified in the grouping file.");
 

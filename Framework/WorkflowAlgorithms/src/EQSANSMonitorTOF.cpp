@@ -33,7 +33,7 @@ void EQSANSMonitorTOF::init() {
 
   // Output parameters
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                        Direction::Output),
                   "Workspace to store the corrected data in");
   declareProperty("FrameSkipping", false,
                   "True if the data was taken in frame-skipping mode",

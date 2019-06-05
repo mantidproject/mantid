@@ -51,7 +51,7 @@ const std::string SpecularReflectionCalculateTheta2::category() const {
 void SpecularReflectionCalculateTheta2::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                      Direction::Input),
+                                                           Direction::Input),
       "An Input workspace to calculate the specular relection theta on.");
   this->initCommonProperties();
   declareProperty(std::make_unique<PropertyWithValue<double>>(

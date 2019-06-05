@@ -70,20 +70,20 @@ void LoadLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
-                                                      Direction::InOut),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "Workspace", "Anonymous", Direction::InOut),
       "The name of the workspace to which the log data will be added.");
 
   const std::vector<std::string> exts{".txt", ".log"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The filename (including its full or relative path) of a SNS "
-                  "text log file (not cvinfo), "
-                  "an ISIS log file, or an ISIS raw file. "
-                  "If a raw file is specified all log files associated with "
-                  "that raw file are loaded into the specified workspace. The "
-                  "file extension must "
-                  "either be .raw or .s when specifying a raw file");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The filename (including its full or relative path) of a SNS "
+      "text log file (not cvinfo), "
+      "an ISIS log file, or an ISIS raw file. "
+      "If a raw file is specified all log files associated with "
+      "that raw file are loaded into the specified workspace. The "
+      "file extension must "
+      "either be .raw or .s when specifying a raw file");
 
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>("Names"),
@@ -293,8 +293,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
           prop->addValue(timecolumn, dvalue);
       } else {
         auto logd =
-            std::make_unique<Kernel::TimeSeriesProperty<double>>(
-                propname);
+            std::make_unique<Kernel::TimeSeriesProperty<double>>(propname);
         logd->addValue(timecolumn, dvalue);
         dMap.emplace(propname, std::move(logd));
       }
@@ -305,8 +304,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         if (prop)
           prop->addValue(timecolumn, valuecolumn);
       } else {
-        auto logs = std::make_unique<
-            Kernel::TimeSeriesProperty<std::string>>(propname);
+        auto logs =
+            std::make_unique<Kernel::TimeSeriesProperty<std::string>>(propname);
         logs->addValue(timecolumn, valuecolumn);
         sMap.emplace(propname, std::move(logs));
       }

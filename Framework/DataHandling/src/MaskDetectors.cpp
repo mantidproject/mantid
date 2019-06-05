@@ -59,7 +59,7 @@ using namespace Geometry;
 void MaskDetectors::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
-                                                Direction::InOut),
+                                                     Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
   declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectraList"),
@@ -69,8 +69,8 @@ void MaskDetectors::init() {
   declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "A list of the workspace indices to mask");
   declareProperty(std::make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+                                                        Direction::Input,
+                                                        PropertyMode::Optional),
                   "If given but not as a SpecialWorkspace2D, the masking from "
                   "this workspace will be copied. If given as a "
                   "SpecialWorkspace2D, the masking is read from its Y values.");
@@ -81,8 +81,8 @@ void MaskDetectors::init() {
                   Direction::Input);
   setPropertySettings(
       "ForceInstrumentMasking",
-      std::make_unique<EnabledWhenProperty>("MaskedWorkspace",
-                                       ePropertyCriterion::IS_NOT_DEFAULT));
+      std::make_unique<EnabledWhenProperty>(
+          "MaskedWorkspace", ePropertyCriterion::IS_NOT_DEFAULT));
 
   auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);

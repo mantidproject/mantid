@@ -133,9 +133,9 @@ void CalculateCoverageDGS::init() {
                   "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
                   "must not be coplanar");
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("IncidentEnergy", EMPTY_DBL(),
-                                             std::move(mustBePositive),
-                                             Mantid::Kernel::Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "IncidentEnergy", EMPTY_DBL(), std::move(mustBePositive),
+          Mantid::Kernel::Direction::Input),
       "Incident energy. If set, will override Ei in the input workspace");
 
   std::vector<std::string> options{"Q1", "Q2", "Q3", "DeltaE"};
