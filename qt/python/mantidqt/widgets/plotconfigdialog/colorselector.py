@@ -20,9 +20,9 @@ class ColorSelector(QWidget):
 
         self.initial_color = initial_color
         if not self.initial_color:
-            self.initial_color = QColor(200, 200, 100)
+            self.initial_color = QColor('#1f77b4')  # default matplotlib blue
 
-        # Create line edit and push button and add to horizontal layout
+        # Create line edit and push button and add to a horizontal layout
         self.line_edit = QLineEdit(self)
         self.button = QPushButton(self)
         self.h_layout = QHBoxLayout(self)

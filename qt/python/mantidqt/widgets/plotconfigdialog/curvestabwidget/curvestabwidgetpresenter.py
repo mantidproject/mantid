@@ -61,13 +61,14 @@ class CurvesTabWidgetPresenter:
         props = self.view.get_properties()
         curve = self.get_selected_curve()
 
+        if 'nolegend' not in curve.get_label():
+            self.set_curve_label(curve, props.label)
         if isinstance(curve, ErrorbarContainer):
             self.apply_errorbar_properties(curve, props)
             curve = curve.lines[0]  # This is the line between errorbar points
 
         curve.set_visible(not props.hide_curve)
-        if 'nolegend' not in curve.get_label():
-            self.set_curve_label(curve, props.label)
+
         self.apply_line_properties(curve, props)
         self.apply_marker_properties(curve, props)
 
@@ -211,10 +212,28 @@ class CurvesTabWidgetPresenter:
             if self.view.select_curve_combo_box.count() == 0:
                 self.view.remove_select_axes_combo_box_selected_item()
 
-    def set_curve_label(self, line, label):
+    def set_curve_label(self, curve, label):
         """Set label on curve and update its entry in the combo box"""
-        line.set_label(label)
+        old_label = curve.get_label()
+        self.update_legend_entry(curve, old_label, label)
+        curve.set_label(label)
         self.view.set_selected_curve_selector_text(label)
+
+    @staticmethod
+    def update_legend_entry(curve, old_label, new_label):
+        """Update the entry in the legend for a specific curve"""
+        legend = CurvesTabWidgetPresenter.get_legend_from_curve(curve)
+        text_labels = legend.get_texts()
+        for text in text_labels:
+            if text.get_text() == old_label:
+                text.set_text(new_label)
+
+    @staticmethod
+    def get_legend_from_curve(curve):
+        if isinstance(curve, ErrorbarContainer):
+            return curve.get_children()[0].axes.get_legend()
+        else:
+            return curve.axes.get_legend()
 
     def set_selected_curve_view_properties(self):
         """Update the view's fields with the selected curve's properties"""
