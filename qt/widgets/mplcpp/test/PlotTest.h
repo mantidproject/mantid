@@ -20,22 +20,12 @@ using namespace MantidQt::Widgets::MplCpp;
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 
-namespace {
-void setMatplotlibBackend() {
-  auto mpl = Python::NewRef(PyImport_ImportModule("matplotlib"));
-  mpl.attr("use")("Agg");
-}
-} // namespace
-
 class PlotTest : public CxxTest::TestSuite {
 public:
   static PlotTest *createSuite() { return new PlotTest; }
   static void destroySuite(PlotTest *suite) { delete suite; }
 
-  void setUp() override {
-    setMatplotlibBackend();
-    createTestWorkspaceInADS(m_testws_name);
-  }
+  void setUp() override { createTestWorkspaceInADS(m_testws_name); }
 
   void testPlottingWorksWithWorkspaceIndex() {
     std::vector<std::string> workspaces = {m_testws_name};
