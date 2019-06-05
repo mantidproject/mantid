@@ -11,8 +11,10 @@ from __future__ import (absolute_import, unicode_literals)
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
-from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget.view import ErrorbarsTabWidgetView
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.linetabwidget.view import LineTabWidgetView
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MarkerTabWidgetView
 from mantidqt.utils.qt import load_ui
 
 
@@ -26,11 +28,11 @@ class CurvesTabWidgetView(QWidget):
                           baseinstance=self)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-        self.line = LineTabWidget(self)
+        self.line = LineTabWidgetView(self)
         self.tab_container.addTab(self.line, "Line")
-        self.marker = MarkerTabWidget(self)
+        self.marker = MarkerTabWidgetView(self)
         self.tab_container.addTab(self.marker, "Marker")
-        self.errorbars = ErrorbarsTabWidget(self)
+        self.errorbars = ErrorbarsTabWidgetView(self)
         self.tab_container.addTab(self.errorbars, "Errorbars")
 
     def populate_select_axes_combo_box(self, axes_names):
@@ -116,132 +118,3 @@ class CurvesTabWidgetView(QWidget):
             self.errorbars.set_cap_thickness(curve_props.errorbar_cap_thickness)
             self.errorbars.set_error_every(curve_props.errorbar_error_every)
             self.errorbars.set_color(curve_props.errorbar_color)
-
-
-class LineTabWidget(QWidget):
-
-    def __init__(self, parent=None):
-        super(LineTabWidget, self).__init__(parent=parent)
-
-        self.ui = load_ui(__file__,
-                          'curves_tab_line_tab.ui',
-                          baseinstance=self)
-        self.color_selector_widget = ColorSelector(parent=self)
-        self.grid_layout.replaceWidget(self.color_selector_dummy_widget,
-                                       self.color_selector_widget)
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
-
-    def get_style(self):
-        return self.line_style_combo_box.currentText()
-
-    def set_style(self, line_style):
-        self.line_style_combo_box.setCurrentText(line_style)
-
-    def get_draw_style(self):
-        return self.draw_style_combo_box.currentText()
-
-    def set_draw_style(self, draw_style):
-        self.draw_style_combo_box.setCurrentText(draw_style)
-
-    def get_width(self):
-        return self.line_width_spin_box.value()
-
-    def set_width(self, width):
-        self.line_width_spin_box.setValue(width)
-
-    def get_color(self):
-        return self.color_selector_widget.get_color()
-
-    def set_color(self, color_hex):
-        self.color_selector_widget.set_color(color_hex)
-
-
-class MarkerTabWidget(QWidget):
-
-    def __init__(self, parent=None):
-        super(MarkerTabWidget, self).__init__(parent=parent)
-
-        self.ui = load_ui(__file__,
-                          'curves_tab_marker_tab.ui',
-                          baseinstance=self)
-        self.face_color_selector_widget = ColorSelector(parent=self)
-        self.grid_layout.replaceWidget(self.face_color_dummy_widget,
-                                       self.face_color_selector_widget)
-        self.edge_color_selector_widget = ColorSelector(parent=self)
-        self.grid_layout.replaceWidget(self.edge_color_dummy_widget,
-                                       self.edge_color_selector_widget)
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
-
-    def get_style(self):
-        return self.marker_style_combo_box.currentText()
-
-    def set_style(self, style):
-        self.marker_style_combo_box.setCurrentText(style)
-
-    def get_size(self):
-        return self.marker_size_spin_box.value()
-
-    def set_size(self, size):
-        self.marker_size_spin_box.setValue(size)
-
-    def get_face_color(self):
-        return self.face_color_selector_widget.get_color()
-
-    def set_face_color(self, color):
-        self.face_color_selector_widget.set_color(color)
-
-    def get_edge_color(self):
-        return self.edge_color_selector_widget.get_color()
-
-    def set_edge_color(self, color):
-        self.edge_color_selector_widget.set_color(color)
-
-
-class ErrorbarsTabWidget(QWidget):
-
-    def __init__(self, parent=None):
-        super(ErrorbarsTabWidget, self).__init__(parent=parent)
-
-        self.ui = load_ui(__file__,
-                          'curves_tab_errorbars_tab.ui',
-                          baseinstance=self)
-        self.color_selector_widget = ColorSelector(parent=self)
-        self.layout.replaceWidget(self.color_dummy_widget,
-                                  self.color_selector_widget)
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
-
-    def get_hide(self):
-        return self.hide_errorbars_tickbox.checkState()
-
-    def set_hide(self, state):
-        self.hide_errorbars_tickbox.setCheckState(state)
-
-    def get_width(self):
-        return self.width_spin_box.value()
-
-    def set_width(self, width):
-        self.width_spin_box.setValue(width)
-
-    def get_capsize(self):
-        return self.capsize_spin_box.value()
-
-    def set_capsize(self, size):
-        self.capsize_spin_box.setValue(size)
-
-    def get_cap_thickness(self):
-        return self.cap_thickness_spin_box.value()
-
-    def set_cap_thickness(self, thickness):
-        self.cap_thickness_spin_box.setValue(thickness)
-
-    def get_error_every(self):
-        return self.error_every_spin_box.value()
-
-    def set_error_every(self, error_every):
-        self.error_every_spin_box.setValue(error_every)
-
-    def get_color(self):
-        return self.color_selector_widget.get_color()
-
-    def set_color(self, color):
-        self.color_selector_widget.set_color(color)

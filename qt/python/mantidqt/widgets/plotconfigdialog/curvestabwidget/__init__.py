@@ -88,7 +88,7 @@ class CurveProperties:
             if caps_tuple:
                 props['errorbar_capsize'] = caps_tuple[0].get_markersize()/2
                 props['errorbar_cap_thickness'] = caps_tuple[0].get_markeredgewidth()
-                props['errorbar_color'] = convert_color_to_hex(caps_tuple[0].get_color()[0])
+                props['errorbar_color'] = convert_color_to_hex(caps_tuple[0].get_color())
                 props['hide_errorbars'] = (props['hide_errorbars'] and
                                            not caps_tuple[0].get_visible())
             if bars_tuple:
