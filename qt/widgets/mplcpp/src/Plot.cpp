@@ -144,7 +144,7 @@ Python::Object pcolormesh(const QStringList &workspaces,
   try {
     auto args = constructArgs(workspaces);
     Python::Dict kwargs;
-    if(fig)
+    if (fig)
       kwargs["fig"] = fig.get();
     return functionsModule().attr("pcolormesh")(*args, **kwargs);
   } catch (Python::ErrorAlreadySet &) {

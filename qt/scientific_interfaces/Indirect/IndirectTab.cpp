@@ -682,9 +682,12 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
 
   m_pythonRunner.runPythonCode(pyInput);
 #else
-  Q_UNUSED(workspaceNames);
-  Q_UNUSED(binIndex);
-  throw std::runtime_error("plotTimeBin is not implemented for >= Qt 5.");
+  using MantidQt::Widgets::MplCpp::MantidAxType;
+  using MantidQt::Widgets::MplCpp::plot;
+  QHash<QString, QVariant> plotKwargs{
+      {"axis", static_cast<int>(MantidAxType::Bin)}};
+  plot(workspaceNames, boost::none, std::vector<int>{binIndex}, boost::none,
+       plotKwargs);
 #endif
 }
 
