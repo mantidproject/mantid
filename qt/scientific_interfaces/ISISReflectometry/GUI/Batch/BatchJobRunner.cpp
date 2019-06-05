@@ -7,7 +7,6 @@
 #include "BatchJobRunner.h"
 #include "BatchJobAlgorithm.h"
 #include "GroupProcessingAlgorithm.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "RowProcessingAlgorithm.h"
 
 #include <numeric>
@@ -212,13 +211,7 @@ void BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
 
-  // The workspaces are not in the ADS by default, so add them
-  for (auto &kvp : jobAlgorithm->outputWorkspaceNameToWorkspace()) {
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(kvp.first,
-                                                              kvp.second);
-  }
-
-  jobAlgorithm->item()->setOutputNames(jobAlgorithm->outputWorkspaceNames());
+  jobAlgorithm->updateItem();
   jobAlgorithm->item()->setSuccess();
 }
 
