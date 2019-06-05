@@ -8,7 +8,7 @@
 
 import unittest
 
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.curvestabwidgetpresenter import CurvesTabWidgetPresenter
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTabWidgetPresenter
 
 if __name__ == '__main__':
     unittest.main()

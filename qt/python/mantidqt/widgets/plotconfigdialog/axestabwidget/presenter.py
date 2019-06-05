@@ -10,7 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
-from mantidqt.widgets.plotconfigdialog.axestabwidget.axestabwidgetview import AxesTabWidgetView
+from mantidqt.widgets.plotconfigdialog.axestabwidget.view import AxesTabWidgetView
 
 
 class AxesTabWidgetPresenter:

@@ -8,7 +8,7 @@
 
 import unittest
 
-from mantidqt.widgets.plotconfigdialog.plotconfigdialogpresenter import PlotConfigDialogPresenter
+from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 
 if __name__ == '__main__':
     unittest.main()

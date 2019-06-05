@@ -8,9 +8,9 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.widgets.plotconfigdialog.plotconfigdialogview import PlotConfigDialogView
-from mantidqt.widgets.plotconfigdialog.axestabwidget.axestabwidgetpresenter import AxesTabWidgetPresenter
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.curvestabwidgetpresenter import CurvesTabWidgetPresenter
+from mantidqt.widgets.plotconfigdialog.view import PlotConfigDialogView
+from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTabWidgetPresenter
 
 
 class PlotConfigDialogPresenter:

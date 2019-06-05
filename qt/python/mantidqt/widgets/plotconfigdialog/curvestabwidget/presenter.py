@@ -12,7 +12,7 @@ from matplotlib.axes import ErrorbarContainer
 
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, MARKER_MAP
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.curvestabwidgetview import CurvesTabWidgetView
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 
 
 class BlockQSignals:
