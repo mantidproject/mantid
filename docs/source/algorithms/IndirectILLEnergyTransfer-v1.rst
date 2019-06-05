@@ -115,7 +115,7 @@ Output:
 .. testoutput:: ExIndirectILLEnergyTransferBATS
 
     The output workspace has 2050 spectra
-    and 1120 bins
+    and 1121 bins
 
 .. testcleanup:: ExIndirectILLEnergyTransferBATS
 
