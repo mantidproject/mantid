@@ -33,14 +33,9 @@ previous section into a single view. To achieve this we will create a
 
             grid = QtGui.QVBoxLayout(self)
             self.plot_view = plotView.PlotView(parent=self)
-            x_data = np.linspace(0.0, 10.0, 100)
-            y_data = np.sin(x_data)
-            self.plot_view.addData(x_data, y_data, "b", "x")
-
-            grid.addWidget(self.plot_view)
-
             self.options_view = view.view(parent=self)
 
+            grid.addWidget(self.plot_view)
             grid.addWidget(self.options_view)          
             self.setLayout(grid)
 
@@ -51,38 +46,17 @@ The main only needs to import the masterView:
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
-
-    import PyQt4.QtGui as QtGui 
-    import PyQt4.QtCore as QtCore
-
-    import sys
-
-    import masterView
-
-
-    """
-    A wrapper class for setting the main window
-    """
     class demo(QtGui.QMainWindow):
         def __init__(self, parent=None):
             super(demo, self).__init__(parent)
 
             self.window = QtGui.QMainWindow()
             my_view = masterView.MasterView()
+
             # set the view for the main window
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-        def qapp():
-            if QtGui.QApplication.instance():
-                _app = QtGui.QApplication.instance()
-            else:
-                _app = QtGui.QApplication(sys.argv)
-            return _app
-
-    app = qapp()
-    window = demo()
-    window.show()
-    app.exec_()
-
+You may notice that this main does not incorporate our Presenter.
+Now that we have embedded our two views into masterView, Presenter
+should also be split in the same way.

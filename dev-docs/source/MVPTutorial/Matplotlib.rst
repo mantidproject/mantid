@@ -64,8 +64,9 @@ the plot and creating an empty plot (no data).
         def getWidget(self):
             return FigureCanvas(self.figure)
 
-        def addData(self, xvalues, yvalues, colour, marker):
+        def addData(self, xvalues, yvalues, grid_lines, colour, marker):
             ax = self.draw()
+            ax.grid(grid_lines)
             ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--") 
             self.canvas.draw()
 
