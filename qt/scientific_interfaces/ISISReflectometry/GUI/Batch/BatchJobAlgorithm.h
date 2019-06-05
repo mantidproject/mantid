@@ -23,20 +23,21 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobAlgorithm
     : public IBatchJobAlgorithm,
       public MantidQt::API::ConfiguredAlgorithm {
 public:
+  using UpdateFunction = void (*)(Mantid::API::IAlgorithm_sptr algorithm,
+                                  Item &item);
+
   BatchJobAlgorithm(
       Mantid::API::IAlgorithm_sptr algorithm,
       MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
-      std::vector<std::string> outputWorkspaceProperties, Item *item);
+      UpdateFunction updateFunction, Item *item);
 
   Item *item() override;
-  std::vector<std::string> outputWorkspaceNames() const override;
-  std::map<std::string, Mantid::API::Workspace_sptr>
-  outputWorkspaceNameToWorkspace() const override;
+  void updateItem() override;
 
 private:
   // The data is an item in the table (i.e. a row or group)
   Item *m_item;
-  std::vector<std::string> m_outputWorkspaceProperties;
+  UpdateFunction m_updateFunction;
 };
 
 using BatchJobAlgorithm_sptr = boost::shared_ptr<BatchJobAlgorithm>;

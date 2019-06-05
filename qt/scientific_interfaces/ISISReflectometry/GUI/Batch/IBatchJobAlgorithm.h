@@ -23,9 +23,7 @@ class Item;
 class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobAlgorithm {
 public:
   virtual Item *item() = 0;
-  virtual std::vector<std::string> outputWorkspaceNames() const = 0;
-  virtual std::map<std::string, Mantid::API::Workspace_sptr>
-  outputWorkspaceNameToWorkspace() const = 0;
+  virtual void updateItem() = 0;
 };
 
 } // namespace CustomInterfaces

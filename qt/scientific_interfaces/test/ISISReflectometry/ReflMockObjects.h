@@ -285,6 +285,7 @@ public:
   MOCK_CONST_METHOD0(
       properties, MantidQt::API::IConfiguredAlgorithm::AlgorithmRuntimeProps());
   MOCK_METHOD0(item, Item *());
+  MOCK_METHOD0(updateItem, void());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());
   MOCK_CONST_METHOD0(outputWorkspaceNameToWorkspace,
                      std::map<std::string, Workspace_sptr>());

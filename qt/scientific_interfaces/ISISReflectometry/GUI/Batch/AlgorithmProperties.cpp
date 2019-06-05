@@ -5,12 +5,16 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AlgorithmProperties.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
+using Mantid::API::IAlgorithm_sptr;
+using Mantid::API::Workspace_sptr;
 
 namespace AlgorithmProperties {
 std::string boolToString(bool value) { return value ? "1" : "0"; }
@@ -59,6 +63,18 @@ void updateFromMap(AlgorithmRuntimeProps &properties,
   for (auto kvp : parameterMap) {
     update(kvp.first, kvp.second, properties);
   }
+}
+std::string getOutputWorkspace(IAlgorithm_sptr algorithm,
+                               std::string const &property) {
+  auto const workspaceName = algorithm->getPropertyValue(property);
+  // The workspaces are not in the ADS by default, so add them
+  if (!workspaceName.empty()) {
+    Workspace_sptr workspace = algorithm->getProperty(property);
+    if (workspace)
+      Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName,
+                                                                workspace);
+  }
+  return workspaceName;
 }
 } // namespace AlgorithmProperties
 } // namespace CustomInterfaces

@@ -11,12 +11,14 @@
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
+using Mantid::API::IAlgorithm_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 namespace { // unnamed namespace
 
@@ -54,6 +56,12 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
   }
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);
 }
+
+void updateGroupFromOutputProperties(IAlgorithm_sptr algorithm, Item &group) {
+  auto const stitched =
+      AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
+  group.setOutputNames(std::vector<std::string>{stitched});
+}
 } // unnamed namespace
 
 /** Create a configured algorithm for processing a group. The algorithm
@@ -70,12 +78,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   // Set the algorithm properties from the model
   auto properties = createAlgorithmRuntimeProps(model, group);
 
-  // Store expected output property name
-  std::vector<std::string> outputWorkspaceProperties = {"OutputWorkspace"};
-
   // Return the configured algorithm
   auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
-      alg, properties, outputWorkspaceProperties, &group);
+      alg, properties, updateGroupFromOutputProperties, &group);
   return jobAlgorithm;
 }
 
