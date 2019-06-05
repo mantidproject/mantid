@@ -6,12 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettings.h"
 #include "IndirectInterface.h"
-
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtIcons/Icon.h"
-#endif
 
 constexpr auto SETTINGS_ICON = "mdi.settings";
+#endif
 
 namespace MantidQt {
 namespace CustomInterfaces {
