@@ -20,15 +20,44 @@ class FittingContextTest(unittest.TestCase):
             FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock()))
         self.assertEqual(1, len(self.fitting_context))
 
+    def test_fitinformation_equality_with_no_globals(self):
+        fit_info = FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
+        self.assertEqual(fit_info, fit_info)
+
+    def test_fitinformation_equality_with_globals(self):
+        fit_info = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
+                                  mock.MagicMock(), ['A'])
+        self.assertEqual(fit_info, fit_info)
+
+    def test_fitinformation_inequality_with_globals(self):
+        fit_info1 = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
+                                  mock.MagicMock(), ['A'])
+        fit_info2 = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
+                                  mock.MagicMock(), ['B'])
+        self.assertNotEqual(fit_info1, fit_info2)
+
     def test_items_can_be_added_to_fitting_context(self):
-        fit_information_object = FitInformation(mock.MagicMock(),
-                                                'MuonGuassOsc',
-                                                mock.MagicMock())
+        fit_information_object = FitInformation(
+            mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
 
         self.fitting_context.add_fit(fit_information_object)
 
         self.assertEqual(fit_information_object,
                          self.fitting_context.fit_list[0])
+
+    def test_empty_global_parameters_if_none_specified(self):
+        fit_information_object = FitInformation(mock.MagicMock(),
+                                                mock.MagicMock(),
+                                                mock.MagicMock())
+
+        self.assertEqual([], fit_information_object.global_parameters)
+
+    def test_global_parameters_are_captured(self):
+        fit_information_object = FitInformation(mock.MagicMock(),
+                                                mock.MagicMock(),
+                                                mock.MagicMock(), ['A'])
+
+        self.assertEqual(['A'], fit_information_object.global_parameters)
 
     def test_fitfunctions_gives_list_of_unique_function_names(self):
         test_fit_function = 'MuonGuassOsc'
@@ -67,13 +96,28 @@ class FittingContextTest(unittest.TestCase):
         parameter_workspace = mock.MagicMock()
         input_workspace = mock.MagicMock()
         fit_function_name = 'MuonGuassOsc'
+        fit_information_object = FitInformation(
+            parameter_workspace, fit_function_name, input_workspace)
+
+        self.fitting_context.add_fit_from_values(
+            parameter_workspace, fit_function_name, input_workspace)
+
+        self.assertEqual(fit_information_object,
+                         self.fitting_context.fit_list[0])
+
+    def test_can_add_fits_with_global_parameters_without_creating_fit_information(self):
+        parameter_workspace = mock.MagicMock()
+        input_workspace = mock.MagicMock()
+        fit_function_name = 'MuonGuassOsc'
+        global_params = ['A']
         fit_information_object = FitInformation(parameter_workspace,
                                                 fit_function_name,
-                                                input_workspace)
+                                                input_workspace,
+                                                global_params)
 
         self.fitting_context.add_fit_from_values(parameter_workspace,
                                                  fit_function_name,
-                                                 input_workspace)
+                                                 input_workspace, global_params)
 
         self.assertEqual(fit_information_object,
                          self.fitting_context.fit_list[0])

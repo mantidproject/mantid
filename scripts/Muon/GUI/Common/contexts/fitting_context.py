@@ -12,29 +12,41 @@ from Muon.GUI.Common.observer_pattern import Observable
 class FitInformation(object):
     """Data-object encapsulating a single fit"""
 
-    def __init__(self, parameter_workspace, fit_function_name,
-                 input_workspace):
+    def __init__(self,
+                 parameter_workspace,
+                 fit_function_name,
+                 input_workspace,
+                 global_parameters=None):
         """
         :param parameter_workspace: The workspace wrapper
         that contains all of the parameters from the fit
         :param fit_function_name: The name of the function used
         :param input_workspace: The name of the workspace containing
         the original data
+        :param global_parameters: An optional list of parameters
+        that were tied together during the fit
         """
         self.parameter_workspace = parameter_workspace
         self.fit_function_name = fit_function_name
         self.input_workspace = input_workspace
+        self.global_parameters = global_parameters if global_parameters is not None else []
 
     @property
     def parameter_name(self):
         """Returns the name of the parameter workspace"""
         return self.parameter_workspace.workspace_name
 
+    @property
+    def parameters(self):
+        """Returns the dictionary of the fit parameters"""
+        return self.parameter_workspace.workspace.toDict()
+
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
         return self.parameter_workspace == other.parameter_workspace and \
             self.fit_function_name == other.fit_function_name and \
-            self.input_workspace == other.input_workspace
+            self.input_workspace == other.input_workspace and \
+            self.global_parameters == other.global_parameters
 
 
 class FittingContext(object):
@@ -58,15 +70,18 @@ class FittingContext(object):
         """
         return len(self.fit_list)
 
-    def add_fit_from_values(self, parameter_workspace, fit_function_name,
-                            input_workspace):
+    def add_fit_from_values(self,
+                            parameter_workspace,
+                            fit_function_name,
+                            input_workspace,
+                            global_parameters=None):
         """
         Add a new fit information object based on the raw values.
         See FitInformation constructor for details are arguments
         """
         self.add_fit(
             FitInformation(parameter_workspace, fit_function_name,
-                           input_workspace))
+                           input_workspace, global_parameters))
 
     def add_fit(self, fit):
         """
