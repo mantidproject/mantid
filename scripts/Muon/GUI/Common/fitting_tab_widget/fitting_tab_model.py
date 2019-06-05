@@ -123,9 +123,21 @@ class FittingTabModel(object):
 
     def get_function_name(self, function):
         if function.getNumberDomains() > 1:
-            return function.getFunction(0).name()
+            function_temp = function.getFunction(0)
         else:
-            return function.name()
+            function_temp = function
+
+        try:
+            function_string_list = []
+            for i in range(function_temp.nFunctions()):
+                function_string_list.append(function_temp.getFunction(i).name())
+            if len(function_string_list) > 3:
+                function_string_list = function_string_list[:3]
+                function_string_list.append('...')
+            function_string = ','.join(function_string_list)
+            return function_string
+        except AttributeError:
+            return function_temp.name()
 
     def add_fit_to_context(self, parameter_workspace, function,
                            input_workspace):
