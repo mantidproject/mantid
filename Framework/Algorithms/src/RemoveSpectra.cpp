@@ -105,20 +105,6 @@ bool evaluateIfSpectrumIsInList(std::vector<size_t> &specList, T spectrum) {
       std::find(specList.begin(), specList.end(), spectrum->getSpectrumNo());
   return it != specList.end();
 }
-
-void removeDuplicates(std::vector<size_t> &specList) {
-  // It is faster to default construct a set/unordered_set and insert the
-  // elements than use the range-based constructor directly.
-  // See https://stackoverflow.com/a/24477023:
-  //   "the constructor actually constructs a new node for every element,
-  //   before checking its value to determine if it should actually be
-  //   inserted."
-  std::unordered_set<size_t> uniqueList;
-  for (const auto &spec : specList) {
-    uniqueList.insert(spec);
-  }
-  specList.assign(std::begin(uniqueList), std::end(uniqueList));
-}
 } // namespace
 
 void RemoveSpectra::exec() {
@@ -150,10 +136,6 @@ void RemoveSpectra::exec() {
     setProperty("OutputWorkspace", inputWS);
     return;
   }
-
-  // Guarantee there are no duplicates in speclist - I don't know if this is
-  // useful yet.
-  removeDuplicates(specList);
 
   auto outputWS = copySpectraFromInputToOutput(inputWS, specList);
 
