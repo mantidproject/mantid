@@ -352,7 +352,7 @@ class PlotSelectorPresenter(object):
             plot_name = self.model.get_plot_name_from_number(plot_number)
             plot_name = self._replace_special_characters(plot_name)
             if plot_name in plots.values():
-                plot_name = self._std::make_unique_name(plot_name, plots)
+                plot_name = self._make_unique_name(plot_name, plots)
             plots[plot_number] = plot_name
 
             self._export_plot(plot_number, plot_name, dir_name, extension)
@@ -367,7 +367,7 @@ class PlotSelectorPresenter(object):
         """
         return re.sub(r'[<>:"/|\\?*]', r'-', string)
 
-    def _std::make_unique_name(self, name, dictionary):
+    def _make_unique_name(self, name, dictionary):
         """
         Given a name and a dictionary, make a unique name that does
         not already exist in the dictionary values by appending
