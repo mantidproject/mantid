@@ -14,6 +14,7 @@ from mantid.simpleapi import RenameWorkspace
 class FittingTabModel(object):
     def __init__(self, context):
         self.context = context
+        self.function_name = ''
 
     def do_single_fit(self, parameter_dict):
         fit_group_name = parameter_dict.pop('FitGroupName')
@@ -47,21 +48,22 @@ class FittingTabModel(object):
     def create_fitted_workspace_name(self, input_workspace_name, function_name, group_name):
         directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
                                                 self.context.workspace_suffix)
-        name = input_workspace_name + '; Fitted; ' + self.get_function_name(function_name)
+        name = input_workspace_name + '; Fitted; ' + self.function_name
 
         return name, directory
 
     def create_multi_domain_fitted_workspace_name(self, input_workspace, function, group_name):
         directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
                                                 self.context.workspace_suffix)
-        name = input_workspace + '+ ...; Fitted; ' + self.get_function_name(function)
+        name = input_workspace + '+ ...; Fitted; ' + self.function_name
 
         return name, directory
 
     def create_parameter_table_name(self, input_workspace_name, function_name, group_name):
         directory = get_fit_workspace_directory(group_name, '_parameter_tables', self.context.data_context.base_directory,
                                                 self.context.workspace_suffix)
-        name = input_workspace_name + '; Fitted Parameters; ' + self.get_function_name(function_name)
+        name = input_workspace_name + '; Fitted Parameters; ' + self.function_name
+
         return name, directory
 
     def do_simultaneous_fit(self, parameter_dict):
@@ -126,12 +128,24 @@ class FittingTabModel(object):
 
     def get_function_name(self, function):
         if function.getNumberDomains() > 1:
-            return function.getFunction(0).name()
+            function_temp = function.getFunction(0)
         else:
-            return function.name()
+            function_temp = function
+
+        try:
+            function_string_list = []
+            for i in range(function_temp.nFunctions()):
+                function_string_list.append(function_temp.getFunction(i).name())
+            if len(function_string_list) > 3:
+                function_string_list = function_string_list[:3]
+                function_string_list.append('...')
+            function_string = ','.join(function_string_list)
+            return function_string
+        except AttributeError:
+            return function_temp.name()
 
     def add_fit_to_context(self, parameter_workspace, function,
                            input_workspace):
         self.context.fitting_context.add_fit_from_values(
-            parameter_workspace, self.get_function_name(function),
+            parameter_workspace, self.function_name,
             input_workspace)
