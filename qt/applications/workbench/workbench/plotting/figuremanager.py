@@ -185,6 +185,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if self.toolbar is not None:
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
+            self.toolbar.home_clicked.connect(self.on_home_clicked)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
             self.toolbar.setFloatable(False)
@@ -282,6 +283,19 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # It seems that when the python session is killed,
             # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
+
+    def on_home_clicked(self):
+        ax = self.canvas.figure.axes[0]
+        min_bounds = []
+        max_bounds = []
+        for container in ax.containers:
+            caps = container[1]
+            if caps != ():
+                min_bounds.extend(caps[0].get_ydata())
+                max_bounds.extend(caps[1].get_ydata())
+        if min_bounds and max_bounds:
+            # Set ylim if we have caps
+            ax.set_ylim((min(min_bounds), max(max_bounds)))
 
     def grid_toggle(self):
         """
