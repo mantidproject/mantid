@@ -24,14 +24,15 @@ class HomePlotWidgetModel(object):
         for workspace in workspace_list:
             plotting.plot(title, workspace)
 
-        plotting.set_all_values_to([0.0, 15.0], [-30., 30])
+        plotting.set_all_values_to([0.0, 15.0], [-1., 1])
 
         return plot_window
 
     def get_workspaces_to_plot(self):
         current_group_pair = self.context.group_pair_context.selected
-        return self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names()
+        return self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(self.context.data_context.current_runs)
 
     def get_plot_title(self):
-        return self.context.data_context.instrument + run_list_to_string(self.context.data_context.current_runs) +\
+        flattened_run_list = [item for sublist in self.context.data_context.current_runs for item in sublist]
+        return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' +\
                self.context.group_pair_context.selected

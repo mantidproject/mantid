@@ -28,7 +28,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
     def handle_new_data_loaded(self):
         if self._plot_window:
             self._plot_window.close()
-        self._plot_window = self._model.create_new_plot(self._model.get_workspaces_to_plot(), self._model.get_plot_title)
+        self._plot_window = self._model.create_new_plot(self._model.get_workspaces_to_plot(), self._model.get_plot_title())
         self._plot_window.show()
 
     def handle_plot_button_clicked(self):
