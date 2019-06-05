@@ -71,16 +71,16 @@ class CurveProperties:
         if isinstance(curve, ErrorbarContainer):
             line = curve.lines[0]
             caps_tuple = curve.lines[1]
-            bars = curve.lines[2][0]
+            bars_tuple = curve.lines[2]
 
             # TODO: if cyclic values set for these, set to None and disable option
             cls.hide_errorbars = (not curve.lines[2][0].get_visible())
-            cls.errorbar_width = bars.get_linewidth()[0]
+            cls.errorbar_width = bars_tuple[0].get_linewidth()[0]
             cls.errorbar_capsize = caps_tuple[0].get_markersize()/2
             cls.errorbar_cap_thickness = caps_tuple[0].get_markeredgewidth()
             # cls.errorbar_error_every = curve.get_error_every()
             cls.errorbar_error_every = 1
-            cls.errorbar_color = convert_color_to_hex(bars.get_color()[0])
+            cls.errorbar_color = convert_color_to_hex(bars_tuple[0].get_color()[0])
         else:
             line = curve
 

@@ -48,15 +48,15 @@ class CurvesTabWidgetView(QWidget):
     def populate_select_curve_combo_box(self, curve_names):
         self.select_curve_combo_box.addItems(curve_names)
 
-    def set_current_curve_selector_text(self, new_text):
+    def set_selected_curve_selector_text(self, new_text):
         current_index = self.select_curve_combo_box.currentIndex()
         self.select_curve_combo_box.setItemText(current_index, new_text)
 
-    def remove_select_axes_combo_box_current_item(self):
+    def remove_select_axes_combo_box_selected_item(self):
         current_index = self.select_axes_combo_box.currentIndex()
         self.select_axes_combo_box.removeItem(current_index)
 
-    def remove_select_curve_combo_box_current_item(self):
+    def remove_select_curve_combo_box_selected_item(self):
         current_index = self.select_curve_combo_box.currentIndex()
         self.select_curve_combo_box.removeItem(current_index)
 
