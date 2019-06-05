@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
+from mantid.kernel import Property, StringPropertyWithValue
 from testhelpers import create_algorithm, run_algorithm
 import numpy as np
 import sys
@@ -27,6 +28,12 @@ class PropertyWithValueTest(unittest.TestCase):
         if self._mask_dets is None:
             self.__class__._mask_dets = create_algorithm("MaskDetectors")
             self.__class__._mask_dets.initialize()
+
+    def test_construction_by_name(self):
+        prop = StringPropertyWithValue("testprop", "default")
+        self.assertTrue(isinstance(prop, Property))
+        self.assertEqual(prop.name, "testprop")
+        self.assertEqual(prop.value, "default")
 
     def test_value_setting_as_string_gives_expected_value_for_correct_type(self):
         prop = self.__class__._integration.getProperty("RangeLower")
