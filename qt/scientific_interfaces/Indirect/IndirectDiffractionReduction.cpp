@@ -13,6 +13,10 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/MplCpp/Plot.h"
+#endif
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
@@ -26,6 +30,14 @@ Mantid::Kernel::Logger g_log("IndirectDiffractionReduction");
 std::string toStdString(const QString &qString) {
   return qString.toStdString();
 }
+
+QStringList toQStringList(std::vector<std::string> const &input) {
+  QStringList output;
+  for (auto const &element : input)
+    output << QString::fromStdString(element);
+  return output;
+}
+
 } // namespace
 
 DECLARE_SUBWINDOW(IndirectDiffractionReduction)
@@ -203,6 +215,7 @@ void IndirectDiffractionReduction::plotResults() {
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
 
   if (plotType == "Spectra" || plotType == "Both") {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     for (const auto &it : m_plotWorkspaces) {
       const auto workspaceExists =
           AnalysisDataService::Instance().doesExist(it);
@@ -212,9 +225,14 @@ void IndirectDiffractionReduction::plotResults() {
         showInformationBox(QString::fromStdString(
             "Workspace '" + it + "' not found\nUnable to plot workspace"));
     }
+#else
+    using MantidQt::Widgets::MplCpp::plot;
+    plot(m_plotWorkspaces, boost::none, std::vector<int>{0});
+#endif
   }
 
   if (plotType == "Contour" || plotType == "Both") {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     for (const auto &it : m_plotWorkspaces) {
       const auto workspaceExists =
           AnalysisDataService::Instance().doesExist(it);
@@ -224,6 +242,10 @@ void IndirectDiffractionReduction::plotResults() {
         showInformationBox(QString::fromStdString(
             "Workspace '" + it + "' not found\nUnable to plot workspace"));
     }
+#else
+    using MantidQt::Widgets::MplCpp::pcolormesh;
+    pcolormesh(toQStringList(m_plotWorkspaces));
+#endif
   }
 
   runPythonCode(pyInput);

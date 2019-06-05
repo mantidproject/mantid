@@ -264,11 +264,15 @@ set(
   IndirectDiffractionReduction.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
+  IndirectLoadILL.cpp
   IndirectSettings.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
   IndirectTab.cpp
+  IndirectTools.cpp
+  IndirectToolsTab.cpp
+  IndirectTransmissionCalc.cpp
 )
 
 set(
@@ -283,10 +287,14 @@ set(
   IndirectDiffractionReduction.h
   IndirectInstrumentConfig.h
   IndirectInterface.h
+  IndirectLoadILL.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
   IndirectSettingsView.h
   IndirectTab.h
+  IndirectTools.h
+  IndirectToolsTab.h
+  IndirectTransmissionCalc.h
 )
 
 set(INC_FILES)
@@ -301,7 +309,10 @@ set(
   IndirectDiffractionReduction.ui
   IndirectInstrumentConfig.ui
   IndirectInterfaceSettings.ui
+  IndirectLoadILL.ui
   IndirectSettings.ui
+  IndirectTools.ui
+  IndirectTransmissionCalc.ui
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)
