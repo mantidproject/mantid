@@ -206,8 +206,7 @@ void LoadILLIndirect2::initWorkSpace() {
  * Load data found in nexus file
  * @param entry :: The Nexus entry
  */
-void LoadILLIndirect2::loadDataIntoTheWorkSpace(
-    NeXus::NXEntry &entry) {
+void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
 
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -240,29 +239,30 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
 
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(index)
-          .assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->dataY(index).assign(data_p,
+                                            data_p + m_numberOfChannels);
 
       // Assign Error
       MantidVec &E = m_localWorkspace->dataE(index);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     [](const double v){return std::sqrt(v);});
+                     [](const double v) { return std::sqrt(v); });
     }
   }
 
   // Then add Simple Detector (SD)
-  size_t offset = m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors;
+  size_t offset =
+      m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors;
   for (auto &index : m_activeSDIndices) {
 
     // Assign Y, note that index starts from 1
     int *dataSD_p = &dataSD(index - 1, 0, 0);
-    m_localWorkspace->dataY(offset)
-        .assign(dataSD_p, dataSD_p + m_numberOfChannels);
+    m_localWorkspace->dataY(offset).assign(dataSD_p,
+                                           dataSD_p + m_numberOfChannels);
 
     // Assign Error
     MantidVec &E = m_localWorkspace->dataE(offset);
     std::transform(dataSD_p, dataSD_p + m_numberOfChannels, E.begin(),
-                   [](const double v){return std::sqrt(v);});
+                   [](const double v) { return std::sqrt(v); });
     ++offset;
   }
 }

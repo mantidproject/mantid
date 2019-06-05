@@ -62,9 +62,7 @@ public:
     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
   }
 
-  void test_bats() {
-      doExecTest(m_batsFile);
-  }
+  void test_bats() { doExecTest(m_batsFile); }
 
   void doExecTest(const std::string &file, int numHist = 2051,
                   int numChannels = 2048) {
