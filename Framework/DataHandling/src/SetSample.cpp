@@ -588,14 +588,22 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   // cylinder
   V3D baseCentre;
   std::ostringstream XMLString;
-  if (args.existsProperty("Axis")) {
-    std::vector<double> axis = getPropertyAsVectorDouble(args, ShapeArgs::AXIS);
-    XMLString << axisXML(axis);
-    baseCentre = cylBaseCentre(centre, height, axis);
+  if (args.existsProperty(ShapeArgs::AXIS)) {
+    try {
+      const int axisInt = args.getProperty(ShapeArgs::AXIS);
+      const unsigned axisId = static_cast<unsigned>(axisInt);
+      XMLString << axisXML(axisId);
+      baseCentre = cylBaseCentre(centre, height, axisId);
+    } catch (std::runtime_error &) {
+      const std::vector<double> axis =
+          getPropertyAsVectorDouble(args, ShapeArgs::AXIS);
+      XMLString << axisXML(axis);
+      baseCentre = cylBaseCentre(centre, height, axis);
+    }
   } else {
-    const unsigned axis = static_cast<unsigned>(refFrame.pointingUp());
-    XMLString << axisXML(axis);
-    baseCentre = cylBaseCentre(centre, height, axis);
+    const unsigned axisId = static_cast<unsigned>(refFrame.pointingUp());
+    XMLString << axisXML(axisId);
+    baseCentre = cylBaseCentre(centre, height, axisId);
   }
 
   std::ostringstream xmlShapeStream;
