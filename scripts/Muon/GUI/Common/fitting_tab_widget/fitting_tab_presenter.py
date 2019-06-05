@@ -24,6 +24,7 @@ class FittingTabPresenter(object):
         self._fit_chi_squared = [0.0]
         self._fit_function = [None]
         self.manual_selection_made = False
+        self.automatically_update_fit_name = True
         self.thread_success = True
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
@@ -174,6 +175,16 @@ class FittingTabPresenter(object):
         index = self.view.get_index_for_start_end_times()
         self.update_end_x(index, value)
 
+    def handle_fit_name_changed_by_user(self):
+        self.automatically_update_fit_name = False
+        self.model.function_name = self.view.function_name
+
+    def handle_function_structure_changed(self):
+        self.clear_fit_information()
+        if self.automatically_update_fit_name:
+            self.view.function_name = self.model.get_function_name(self.view.fit_object)
+            self.model.function_name = self.view.function_name
+
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()
 
@@ -194,7 +205,7 @@ class FittingTabPresenter(object):
 
     def _get_shared_parameters(self):
         params = {}
-        params['Function'] = self.view.fit_string
+        params['Function'] = self.view.fit_object
         params['Minimizer'] = self.view.minimizer
         params['EvaluationType'] = self.view.evaluation_type
         params['FitGroupName'] = self.view.group_name

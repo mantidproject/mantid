@@ -14,6 +14,7 @@ from mantid.simpleapi import RenameWorkspace
 class FittingTabModel(object):
     def __init__(self, context):
         self.context = context
+        self.function_name = ''
 
     def do_single_fit(self, parameter_dict):
         fit_group_name = parameter_dict.pop('FitGroupName')
@@ -44,21 +45,21 @@ class FittingTabModel(object):
         workspace_wrapper.show()
         return workspace_wrapper
 
-    def create_fitted_workspace_name(self, input_workspace_name, function_name, fit_group_name):
+    def create_fitted_workspace_name(self, input_workspace_name, function, fit_group_name):
         directory = get_fit_workspace_directory(fit_group_name, '_workspaces')
-        name = input_workspace_name + '; Fitted; ' + self.get_function_name(function_name)
+        name = input_workspace_name + '; Fitted; ' + self.function_name
 
         return name, directory
 
     def create_multi_domain_fitted_workspace_name(self, input_workspace, function, group_name):
         directory = get_fit_workspace_directory(group_name, '_workspaces')
-        name = input_workspace + '+ ...; Fitted; ' + self.get_function_name(function)
+        name = input_workspace + '+ ...; Fitted; ' + self.function_name
 
         return name, directory
 
-    def create_parameter_table_name(self, input_workspace_name, function_name, group_name):
+    def create_parameter_table_name(self, input_workspace_name, function, group_name):
         directory = get_fit_workspace_directory(group_name, '_parameter_tables')
-        name = input_workspace_name + '; Fitted Parameters; ' + self.get_function_name(function_name)
+        name = input_workspace_name + '; Fitted Parameters; ' + self.function_name
         return name, directory
 
     def do_simultaneous_fit(self, parameter_dict):
@@ -142,5 +143,5 @@ class FittingTabModel(object):
     def add_fit_to_context(self, parameter_workspace, function,
                            input_workspace):
         self.context.fitting_context.add_fit_from_values(
-            parameter_workspace, self.get_function_name(function),
+            parameter_workspace, self.function_name,
             input_workspace)
