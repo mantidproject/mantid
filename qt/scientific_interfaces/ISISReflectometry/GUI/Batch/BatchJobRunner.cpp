@@ -123,11 +123,10 @@ template <typename T> bool BatchJobRunner::isSelected(T const &item) {
 
 bool BatchJobRunner::hasSelectedRowsRequiringProcessing(Group const &group) {
   // If the group itself is selected, consider its rows to also be selected
-  if (m_processAll || isSelected(group))
-    return true;
+  auto processAllRowsInGroup = (m_processAll || isSelected(group));
 
   for (auto const &row : group.rows()) {
-    if (row && isSelected(row.get()) &&
+    if (row && (processAllRowsInGroup || isSelected(row.get())) &&
         row->requiresProcessing(m_reprocessFailed))
       return true;
   }
