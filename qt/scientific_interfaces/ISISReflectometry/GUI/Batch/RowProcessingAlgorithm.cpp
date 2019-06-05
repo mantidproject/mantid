@@ -244,8 +244,10 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
 
 boost::optional<double> getDoubleOrNone(IAlgorithm_sptr algorithm,
                                         std::string const &property) {
-  if (algorithm->existsProperty(property))
-    return algorithm->getProperty(property);
+  if (!algorithm->isExecuted()) {
+    double result = algorithm->getProperty(property);
+    return result;
+  }
   return boost::none;
 }
 

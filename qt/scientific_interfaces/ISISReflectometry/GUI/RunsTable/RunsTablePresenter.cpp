@@ -555,8 +555,10 @@ void RunsTablePresenter::notifyRowStateChanged() {
 
       if (!row)
         forAllCellsAt(rowPath, applyInvalidStateStyling);
-      else
+      else {
+        m_jobViewUpdater.rowModified(groupOf(rowPath), rowOf(rowPath), *row);
         setRowStylingForItem(rowPath, *row);
+      }
 
       ++rowIndex;
     }

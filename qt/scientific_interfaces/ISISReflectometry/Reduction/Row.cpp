@@ -41,7 +41,7 @@ double Row::theta() const { return m_theta; }
 
 RangeInQ const &Row::qRange() const { return m_qRange; }
 
-RangeInQ const &Row::qRangeOrOutput() const {
+RangeInQ Row::qRangeOrOutput() const {
   return RangeInQ(qRange().min() ? qRange().min() : m_qRangeOutput.min(),
                   qRange().step() ? qRange().step() : m_qRangeOutput.step(),
                   qRange().max() ? qRange().max() : m_qRangeOutput.max());
