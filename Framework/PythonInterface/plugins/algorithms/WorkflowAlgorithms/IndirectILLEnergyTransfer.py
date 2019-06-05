@@ -26,6 +26,10 @@ def _ws_or_none(s):
     return mtd[s] if s != '' else None
 
 
+def _make_name(name, suffix):
+    return '__'+name+'_'+suffix
+
+
 def _extract_workspace(ws, ws_out, x_start, x_end):
     """
     Extracts a part of the workspace and
@@ -480,7 +484,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param elastic_tof_equator : elastic time-of-flight of the equatorial line
         """
         run = mtd[ws].getRun()
-        mon_ws = '__' + ws + '_mon'
+        mon_ws = _make_name(ws, 'mon')
         ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws, MonitorWorkspace=mon_ws)
         delay_offset = run.getLogData('monitor.time_of_flight_2').value - run.getLogData('PSD.time_of_flight_2').value
         ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=delay_offset, Operation='Add')
@@ -517,10 +521,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         input_epp = self.getProperty('InputElasticChannelWorkspace').value
 
         if not input_epp:
-            equator_epp_ws = '__'+ws+'_eq_epp'
-            equator_ws = '__'+ws+'_eq'
-            grouped_ws = '__'+ws+'_gr'
-            epp_ws = '__'+ ws+'_epp'
+            equator_epp_ws = _make_name(ws, 'eq_epp')
+            equator_ws = _make_name(ws, 'eq')
+            grouped_ws = _make_name(ws, 'gr')
+            epp_ws = _make_name(ws, 'epp')
             equator_grouping_filename = self._instrument.getStringParameter('EquatorialGroupingFile')[0]
             grouping_file = os.path.join(config['groupingFiles.directory'], equator_grouping_filename)
             GroupDetectors(InputWorkspace=ws, OutputWorkspace=equator_ws, MapFile=grouping_file)
@@ -551,7 +555,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             self.log().information('T0 Offset is {0} [sec]'.format(t0_offset))
             self._convert_to_energy_bats(mtd[ws], input_epp, t0_offset)
 
-        rebin_ws = '__'+ws+'_rebin'
+        rebin_ws = _make_name(ws, 'rebin')
         ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Indirect')
         ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=rebin_ws, WorkspaceIndex=int(N_PIXELS_PER_TUBE/2))
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
