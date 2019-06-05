@@ -95,10 +95,12 @@ void BatchJobRunner::reductionResumed() {
   m_batch.resetSkippedItems();
 }
 
-void BatchJobRunner::reductionPaused() { m_isProcessing = false; }
+void BatchJobRunner::reductionPaused() {
+  m_isProcessing = false;
+  m_rowLocationsToProcess.clear();
+}
 
 void BatchJobRunner::autoreductionResumed() {
-  m_rowLocationsToProcess.clear();
   m_isAutoreducing = true;
   m_isProcessing = true;
   m_reprocessFailed = true;
@@ -106,7 +108,10 @@ void BatchJobRunner::autoreductionResumed() {
   m_batch.resetSkippedItems();
 }
 
-void BatchJobRunner::autoreductionPaused() { m_isAutoreducing = false; }
+void BatchJobRunner::autoreductionPaused() {
+  m_isAutoreducing = false;
+  m_rowLocationsToProcess.clear();
+}
 
 void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
   m_reprocessFailed = reprocessFailed;
