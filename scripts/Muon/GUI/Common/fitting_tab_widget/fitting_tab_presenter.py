@@ -199,7 +199,7 @@ class FittingTabPresenter(object):
         params['Function'] = self.view.fit_string
         params['Minimizer'] = self.view.minimizer
         params['EvaluationType'] = self.view.evaluation_type
-        params['GroupName'] = self.view.group_name
+        params['FitGroupName'] = self.view.group_name
         return params
 
     @property

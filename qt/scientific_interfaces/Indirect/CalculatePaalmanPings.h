@@ -10,7 +10,10 @@
 #include "CorrectionsTab.h"
 #include "ui_CalculatePaalmanPings.h"
 
+#include "MantidGeometry/Instrument_fwd.h"
+
 #include <boost/optional.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
