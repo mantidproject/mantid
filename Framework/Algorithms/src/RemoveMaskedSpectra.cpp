@@ -97,7 +97,7 @@ void RemoveMaskedSpectra::makeIndexList(
   if (mask) {
     for (size_t i = 0; i < mask->getNumberHistograms(); ++i) {
       if (mask->y(i)[0] == 0.0) {
-        indices.push_back(static_cast<size_t>(i));
+        indices.push_back(i);
       }
     }
   } else {
@@ -106,7 +106,7 @@ void RemoveMaskedSpectra::makeIndexList(
       if (!spectrumInfo.hasDetectors(i))
         continue;
       if (!spectrumInfo.isMasked(i))
-        indices.push_back(static_cast<size_t>(i));
+        indices.push_back(i);
     }
   }
 }

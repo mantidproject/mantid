@@ -948,6 +948,7 @@ set(TEST_FILES
     RemoveLowResTOFTest.h
     RemoveMaskedSpectraTest.h
     RemovePromptPulseTest.h
+    RemoveSpectraTest.h
     RemoveWorkspaceHistoryTest.h
     RenameWorkspaceTest.h
     RenameWorkspacesTest.h
