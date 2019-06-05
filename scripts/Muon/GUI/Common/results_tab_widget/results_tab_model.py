@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty
-from mantid.py3compat import string_types
+from mantid.py3compat import iterkeys, string_types
 import numpy as np
 
 from Muon.GUI.Common.observer_pattern import GenericObserver
@@ -148,7 +148,7 @@ class ResultsTabModel(object):
                         log_value = np.nan
                     row_dict.update({log_name: log_value})
             # fit parameters
-            parameter_dict = fit.parameter_workspace.workspace.toDict()
+            parameter_dict = fit.parameters
             for name, value, error in zip(parameter_dict['Name'],
                                           parameter_dict['Value'],
                                           parameter_dict['Error']):
@@ -160,7 +160,8 @@ class ResultsTabModel(object):
                 results_table.addRow(row_dict)
             except ValueError:
                 msg = "Incompatible fits for results table:\n"
-                msg += " fit 1 and {} have a different parameters".format(position + 1)
+                msg += " fit 1 and {} have a different parameters".format(
+                    position + 1)
                 raise RuntimeError(msg)
 
         AnalysisDataService.Instance().addOrReplace(self.results_table_name(),
@@ -180,7 +181,7 @@ class ResultsTabModel(object):
             table.addColumn('float', log_name)
         # assume all fit functions are the same in fit_selection and take
         # the parameter names from the first fit.
-        parameters = self._first_fit_parameters(results_selection)
+        parameters = self._find_parameters_for_table(results_selection)
         for name in parameters['Name']:
             table.addColumn('float', name)
             if name not in RESULTS_TABLE_COLUMNS_NO_ERRS:
@@ -206,15 +207,35 @@ class ResultsTabModel(object):
 
         self.set_selected_fit_function(function_name)
 
-    def _first_fit_parameters(self, results_selection):
+    def _find_parameters_for_table(self, results_selection):
         """
-        Return the first fit in the selected list.
+        Return the parameters that should be inserted into the
+        results table. This takes into account any global parameters
+        that are set
 
         :param results_selection: The list of selected results
-        :return: The parameters of the first fit
+        :return: The parameters for the table
         """
         first_fit = self._fit_context.fit_list[results_selection[0][1]]
-        return first_fit.parameter_workspace.workspace.toDict()
+        return self._remove_duplicate_globals(first_fit.parameters,
+                                              first_fit.global_parameters)
+
+    def _remove_duplicate_globals(self, parameters, global_parameters):
+        """
+        Remove any duplicate parameters that were marked as global
+        and leave the first one.
+
+        :param parameters: The full list of fitted parameters
+        :param global_parameters: The list of parameters marked global
+        :return: An updated dictionary of parameters with a single
+        parameter/error value for each global
+        """
+        if not global_parameters:
+            return parameters
+
+        # PRUNE HERE
+
+        return parameters
 
 
 # Public helper functions

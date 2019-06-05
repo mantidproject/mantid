@@ -77,7 +77,7 @@ class FittingContext(object):
                             global_parameters=None):
         """
         Add a new fit information object based on the raw values.
-        See FitInformation constructor for details are arguments
+        See FitInformation constructor for details are arguments.
         """
         self.add_fit(
             FitInformation(parameter_workspace, fit_function_name,

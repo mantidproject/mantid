@@ -120,7 +120,7 @@ class FittingTabModelTest(unittest.TestCase):
                           'Minimizer': 'Levenberg-Marquardt',
                           'StartX': [0.0], 'EndX': [100.0], 'EvaluationType': 'CentrePoint',
                           'FitGroupName': 'SimulFit'}
-        self.model.do_simultaneous_fit(parameter_dict)
+        self.model.do_simultaneous_fit(parameter_dict, global_parameters=[])
 
         fit_context = self.model.context.fitting_context
         self.assertEqual(1, len(fit_context))
@@ -138,7 +138,7 @@ class FittingTabModelTest(unittest.TestCase):
                           'Minimizer': 'Levenberg-Marquardt',
                           'StartX': [0.0]*2, 'EndX': [100.0]*2, 'EvaluationType': 'CentrePoint',
                           'FitGroupName': 'SimulFit'}
-        self.model.do_simultaneous_fit(parameter_dict)
+        self.model.do_simultaneous_fit(parameter_dict, global_parameters=[])
 
         fit_context = self.model.context.fitting_context
         self.assertEqual(1, len(fit_context))

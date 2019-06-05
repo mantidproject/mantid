@@ -122,6 +122,22 @@ class FittingContextTest(unittest.TestCase):
         self.assertEqual(fit_information_object,
                          self.fitting_context.fit_list[0])
 
+    def test_can_add_fits_with_global_parameters_without_creating_fit_information(self):
+        parameter_workspace = mock.MagicMock()
+        input_workspace = mock.MagicMock()
+        fit_function_name = 'MuonGuassOsc'
+        global_params = ['A']
+        fit_information_object = FitInformation(parameter_workspace,
+                                                fit_function_name,
+                                                input_workspace,
+                                                global_params)
+
+        self.fitting_context.add_fit_from_values(parameter_workspace,
+                                                 fit_function_name,
+                                                 input_workspace, global_params)
+
+        self.assertEqual(fit_information_object,
+                         self.fitting_context.fit_list[0])
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
