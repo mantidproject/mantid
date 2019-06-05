@@ -21,7 +21,8 @@ Row::Row( // cppcheck-suppress passedByValue
     // cppcheck-suppress passedByValue
     ReductionWorkspaces reducedWorkspaceNames)
     : Item(), m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)),
-      m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
+      m_qRange(std::move(qRange)), m_qRangeOutput(),
+      m_scaleFactor(std::move(scaleFactor)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)),
       m_reductionOptions(std::move(reductionOptions)) {
@@ -39,6 +40,12 @@ TransmissionRunPair const &Row::transmissionWorkspaceNames() const {
 double Row::theta() const { return m_theta; }
 
 RangeInQ const &Row::qRange() const { return m_qRange; }
+
+RangeInQ const &Row::qRangeOrOutput() const {
+  return RangeInQ(qRange().min() ? qRange().min() : m_qRangeOutput.min(),
+                  qRange().step() ? qRange().step() : m_qRangeOutput.step(),
+                  qRange().max() ? qRange().max() : m_qRangeOutput.max());
+}
 
 boost::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
 
@@ -58,7 +65,14 @@ void Row::setOutputNames(std::vector<std::string> const &outputNames) {
                                          outputNames[2]);
 }
 
-void Row::resetOutputNames() { m_reducedWorkspaceNames.resetOutputNames(); }
+void Row::setOutputQRange(RangeInQ qRange) {
+  m_qRangeOutput = std::move(qRange);
+}
+
+void Row::resetOutputs() {
+  m_reducedWorkspaceNames.resetOutputNames();
+  m_qRangeOutput = RangeInQ();
+}
 
 Row mergedRow(Row const &rowA, Row const &rowB) {
   return rowA.withExtraRunNumbers(rowB.runNumbers());

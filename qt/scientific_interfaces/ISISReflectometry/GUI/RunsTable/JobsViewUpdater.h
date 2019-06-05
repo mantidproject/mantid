@@ -33,11 +33,11 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
        MantidQt::MantidWidgets::Batch::Cell(
            row.transmissionWorkspaceNames().secondRunList()),
        MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.qRange().min())),
+           optionalToString(row.qRangeOrOutput().min())),
        MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.qRange().max())),
+           optionalToString(row.qRangeOrOutput().max())),
        MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.qRange().step())),
+           optionalToString(row.qRangeOrOutput().step())),
        MantidQt::MantidWidgets::Batch::Cell(
            optionalToString(row.scaleFactor())),
        MantidQt::MantidWidgets::Batch::Cell(

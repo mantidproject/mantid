@@ -242,7 +242,16 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
-void updateRowFromOutputProperties(IAlgorithm_sptr algorithm, Item &row) {
+boost::optional<double> getDoubleOrNone(IAlgorithm_sptr algorithm,
+                                        std::string const &property) {
+  if (algorithm->existsProperty(property))
+    return algorithm->getProperty(property);
+  return boost::none;
+}
+
+void updateRowFromOutputProperties(IAlgorithm_sptr algorithm, Item &item) {
+  auto &row = dynamic_cast<Row &>(item);
+
   auto const iVsLam = AlgorithmProperties::getOutputWorkspace(
       algorithm, "OutputWorkspaceWavelength");
   auto const iVsQ =
@@ -250,6 +259,11 @@ void updateRowFromOutputProperties(IAlgorithm_sptr algorithm, Item &row) {
   auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(
       algorithm, "OutputWorkspaceBinned");
   row.setOutputNames(std::vector<std::string>{iVsLam, iVsQ, iVsQBin});
+
+  auto qRange = RangeInQ(getDoubleOrNone(algorithm, "MomentumTransferMin"),
+                         getDoubleOrNone(algorithm, "MomentumTransferStep"),
+                         getDoubleOrNone(algorithm, "MomentumTransferMax"));
+  row.setOutputQRange(qRange);
 }
 } // unnamed namespace
 

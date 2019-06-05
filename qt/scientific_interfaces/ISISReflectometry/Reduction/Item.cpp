@@ -16,7 +16,7 @@ State Item::state() const { return m_itemState.state(); }
 std::string Item::message() const { return m_itemState.message(); }
 
 void Item::resetState() {
-  resetOutputNames();
+  resetOutputs();
   m_itemState.reset();
 }
 
