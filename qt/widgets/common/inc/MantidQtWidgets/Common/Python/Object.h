@@ -34,6 +34,9 @@ using Dict = boost::python::dict;
 // Alias for handle wrapping a raw PyObject*
 template <typename T = PyObject> using Handle = boost::python::handle<T>;
 
+// Alias for type to convert a C++ object to a Python object
+template <typename T> using ToPythonValue = boost::python::to_python_value<T>;
+
 // Helper to forward to boost python
 inline ssize_t Len(const Python::Object &obj) {
   return boost::python::len(obj);
@@ -79,8 +82,8 @@ public:
   InstanceHolder(Object obj, const char *attr) : m_instance(std::move(obj)) {
     Mantid::PythonInterface::GlobalInterpreterLock lock;
     if (PyObject_HasAttrString(pyobj().ptr(), attr) == 0) {
-      throw std::invalid_argument(std::string("object has no attribute ") +
-                                  attr);
+      throw std::invalid_argument(std::string(pyobj().ptr()->ob_type->tp_name) +
+                                  " has no attribute " + attr);
     }
   }
 

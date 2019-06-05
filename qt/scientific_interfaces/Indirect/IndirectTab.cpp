@@ -660,19 +660,6 @@ void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
   plotTimeBin(workspaceNames, binIndex);
 }
 
-/*
- * Resizes the range (y-axis) of the specified plot preview given the specified
- * range
- *
- * @param preview The plot preview whose range to resize.
- * @param range   The range to resize to, as a pair of minimum and maximum value
- */
-void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
-                                  QPair<double, double> range) {
-  preview->resizeX();
-  preview->setAxisRange(range, QwtPlot::yLeft);
-}
-
 /**
  * Sets the edge bounds of plot to prevent the user inputting invalid values
  * Also sets limits for range selector movement

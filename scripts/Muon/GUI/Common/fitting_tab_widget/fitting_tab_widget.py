@@ -12,7 +12,7 @@ from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FittingTabModel
 class FittingTabWidget(object):
     def __init__(self, context, parent):
         self.fitting_tab_view = FittingTabView(parent)
-        self.fitting_tab_model = FittingTabModel()
+        self.fitting_tab_model = FittingTabModel(context)
 
         self.fitting_tab_presenter = FittingTabPresenter(self.fitting_tab_view, self.fitting_tab_model, context)
 

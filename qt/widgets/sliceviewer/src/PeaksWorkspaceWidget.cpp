@@ -387,13 +387,13 @@ void PeaksWorkspaceWidget::onAddPeaksToggled(bool on) {
 }
 
 void PeaksWorkspaceWidget::exitClearPeaksMode() {
-  SignalBlocker<QPushButton> scopedBlocker(ui.btnRemovePeak);
-  scopedBlocker->setChecked(false);
+  SignalBlocker scopedBlocker(ui.btnRemovePeak);
+  ui.btnRemovePeak->setChecked(false);
 }
 
 void PeaksWorkspaceWidget::exitAddPeaksMode() {
-  SignalBlocker<QPushButton> scopedBlocker(ui.btnAddPeak);
-  scopedBlocker->setChecked(false);
+  SignalBlocker scopedBlocker(ui.btnAddPeak);
+  ui.btnAddPeak->setChecked(false);
 }
 
 void PeaksWorkspaceWidget::onForegroundColorCrossClicked() {

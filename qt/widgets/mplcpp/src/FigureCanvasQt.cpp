@@ -38,14 +38,15 @@ Python::Object createPyCanvasFromFigure(Figure fig) {
 /**
  * @param subplotspec A matplotlib subplot spec defined as a 3-digit
  * integer.
+ * @param projection A string denoting the projection to use
  * @return A new FigureCanvasQT object
  */
-Python::Object createPyCanvas(int subplotspec) {
+Python::Object createPyCanvas(const int subplotspec, const QString projection) {
   Figure fig{true};
   fig.setFaceColor(DEFAULT_FACECOLOR);
 
   if (subplotspec > 0)
-    fig.addSubPlot(subplotspec);
+    fig.addSubPlot(subplotspec, projection);
   return createPyCanvasFromFigure(std::move(fig));
 }
 } // namespace
@@ -69,11 +70,13 @@ QWidget *initLayout(FigureCanvasQt *cppCanvas) {
  * See
  * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_subplot#matplotlib.figure.Figure.add_subplot
  * @param subplotspec A matplotlib subplot spec defined as a 3-digit integer
- * @param facecolor String denoting the figure's facecolor
+ * @param projection A string denoting the projection to use on the canvas
  * @param parent The owning parent widget
  */
-FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
-    : QWidget(parent), InstanceHolder(createPyCanvas(subplotspec), "draw"),
+FigureCanvasQt::FigureCanvasQt(const int subplotspec, const QString projection,
+                               QWidget *parent)
+    : QWidget(parent),
+      InstanceHolder(createPyCanvas(subplotspec, projection), "draw"),
       m_figure(Figure(Python::Object(pyobj().attr("figure")))) {
   // Cannot use delegating constructor here as InstanceHolder needs to be
   // initialized before the axes can be created

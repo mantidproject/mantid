@@ -59,8 +59,16 @@ Data Objects
 Python
 ------
 
+New
+###
+
 - The ``mantid.plots`` module now registers a ``power`` and ``square`` scale type to be used with ``set_xscale`` and ``set_xscale`` functions.
 - In :class:`mantid.kernel.DateAndTime`, the method :py:meth:`~mantid.kernel.DateAndTime.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.DateAndTime.totalNanoseconds` should be used instead.
 - In :class:`mantid.kernel.time_duration`, The method :py:meth:`~mantid.kernel.time_duration.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.time_duration.totalNanoseconds` should be used instead.
+
+Bugfixes
+########
+
+- The TypeError raised when calibrating tubes has been fixed.
 
 :ref:`Release 4.1.0 <v4.1.0>`
