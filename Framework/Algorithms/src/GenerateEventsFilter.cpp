@@ -673,11 +673,11 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   ss << "Log." << m_dblLog->name() << ".From." << minvalue << ".To." << maxvalue
      << ".Value-change-direction:";
   if (filterincrease && filterdecrease) {
-    ss << ".both ";
+    ss << "both";
   } else if (filterincrease) {
-    ss << ".increase";
+    ss << "increase";
   } else {
-    ss << ".decrease";
+    ss << "decrease";
   }
   row << 0 << ss.str();
 }

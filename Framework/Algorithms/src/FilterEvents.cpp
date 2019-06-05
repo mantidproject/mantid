@@ -1008,7 +1008,7 @@ int64_t timeInSecondsToNanoseconds(const int64_t offset_ns,
 
 int64_t timeInNanosecondsToSeconds(const int64_t offset_ns,
                                    const double time_sec) {
-  return offset_ns + static_cast<int64_t>(time_sec / 1.E9);
+  return offset_ns + time_sec / 1.E9;
 }
 } // anonymous namespace
 
@@ -1142,31 +1142,49 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   double numnewws = static_cast<double>(m_targetWorkspaceIndexSet.size());
   double wsgindex = 0.;
 
-  bool splitByTime = true;
-  if (numnewws != m_splittersWorkspace->getNumberSplitters() + 1) {
-    splitByTime = false;
-  }
+  // Work out the  how it has been split so the naming can be done
+  // if generateEventsFilter has been used the infoWS will contain time or log
+  // otherwise it is assumed that it has been split by time.
   bool descriptiveNames = getProperty("DescriptiveOutputNames");
+  bool splitByTime = false;
+  if (descriptiveNames) {
+    splitByTime = true;
+    if ((m_hasInfoWS && infomap[0].find("Log") != -1) ||
+        numnewws - 1 != m_splitters.size()) {
+      splitByTime = false;
+    }
+  }
 
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
     bool add2output = true;
     std::stringstream wsname;
-
+    wsname << m_outputWSNameBase << "_";
     if (wsgroup >= 0) {
-      if (descriptiveNames && splitByTime) {
+      // splitByTime will only be true if descriptiveNames is true
+      if (splitByTime) {
         auto splitter = m_splitters[wsgroup];
-        auto startTime = splitter.start() - m_runStartTime;
-        auto stopTime = splitter.stop() - m_runStartTime;
-        wsname << m_outputWSNameBase << "_" << startTime.total_seconds() << "_"
-               << stopTime.total_seconds();
-      } else if (descriptiveNames && m_hasInfoWS) {
-        wsname << infomap[wsgroup];
+        auto startTimeInSeconds =
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(
+                splitter.start() - m_runStartTime);
+        auto stopTimeInSeconds =
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(
+                splitter.stop() - m_runStartTime);
+        wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
+      } else if (descriptiveNames) {
+        auto infoiter = infomap.find(wsgroup);
+        if (infoiter != infomap.end()) {
+					std::string name = infoiter->second;
+          name.erase(remove_if(name.begin(), name.end(), isspace), name.end());
+          wsname << name;
+        } else {
+          wsname << wsgroup + delta_wsindex;
+        }
       } else {
-        wsname << m_outputWSNameBase << "_" << (wsgroup + delta_wsindex);
+        wsname << wsgroup + delta_wsindex;
       }
     } else {
-      wsname << m_outputWSNameBase << "_unfiltered";
+      wsname << "unfiltered";
       if (from1)
         add2output = false;
     }
@@ -1243,7 +1261,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   setProperty("NumberOutputWS", numoutputws);
 
   g_log.information("Output workspaces are created. ");
-}
+} // namespace Algorithms
 
 //----------------------------------------------------------------------------------------------
 /** Create output EventWorkspaces in the case that the splitters are given by
@@ -1826,9 +1844,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 //----------------------------------------------------------------------------------------------
 /** Generate a vector of integer time series property for each splitter
  * corresponding to each target (in integer)
- * in each splitter-time-series-property, 1 stands for include and 0 stands for
- * time for neutrons to be discarded.
- * If there is no UN-DEFINED
+ * in each splitter-time-series-property, 1 stands for include and 0 stands
+ * for time for neutrons to be discarded. If there is no UN-DEFINED
  * @brief FilterEvents::generateSplitterTSP
  * @param split_tsp_vec
  */
@@ -1842,7 +1859,8 @@ void FilterEvents::generateSplitterTSP(
     Kernel::TimeSeriesProperty<int> *split_tsp =
         new Kernel::TimeSeriesProperty<int>("splitter");
     split_tsp_vec.push_back(split_tsp);
-    // add initial value if the first splitter time is after the run start time
+    // add initial value if the first splitter time is after the run start
+    // time
     split_tsp->addValue(Types::Core::DateAndTime(m_runStartTime), 0);
   }
 

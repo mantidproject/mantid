@@ -821,7 +821,7 @@ public:
    *    TableWorkspace filter format
    *    and the time given for splitters is relative
    *
-   *  It is exacly the same as unit test: test_FilterRelativeTime()
+   *  It is exactly the same as unit test: test_FilterRelativeTime()
    *
    *  Event workspace:
    * (1) 10 detectors
@@ -860,7 +860,6 @@ public:
     filter.setProperty("SplitterWorkspace", "TableSplitter1");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
-    filter.setProperty("RelativeTime", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -1016,7 +1015,6 @@ public:
     filter.setProperty("SplitterWorkspace", "TableSplitter2");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
-    filter.setProperty("RelativeTime", true);
 
     std::vector<std::string> prop_vec;
     prop_vec.push_back("LogB");
@@ -1090,7 +1088,6 @@ public:
     filter.setProperty("SplitterWorkspace", "TableSplitter2");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
-    filter.setProperty("RelativeTime", true);
     filter.setProperty("GroupWorkspaces", true);
 
     // Execute
@@ -1131,7 +1128,6 @@ public:
     filter.setProperty("SplitterWorkspace", "TableSplitter2");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
-    filter.setProperty("RelativeTime", true);
     filter.setProperty("GroupWorkspaces", true);
 
     // Execute
@@ -1140,6 +1136,135 @@ public:
     // clean workspaces
     AnalysisDataService::Instance().remove("Test13");
     AnalysisDataService::Instance().remove("TableSplitter2");
+
+    return;
+  }
+
+  /** test for the case that the input workspace names are of the form
+   * basename_startTime_stopTime
+   */
+  void test_descriptiveWorkspaceNamesTime() {
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
+
+    EventWorkspace_sptr inpWS =
+        createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("InputWS", inpWS);
+
+    SplittersWorkspace_sptr splws =
+        boost::shared_ptr<SplittersWorkspace>(new SplittersWorkspace);
+    for (int i = 0; i < 5; i++) {
+      auto t0 = runstart_i64 + i * pulsedt;
+      auto t1 = runstart_i64 + (i + 1) * pulsedt;
+      Kernel::SplittingInterval interval2(t0, t1, i);
+      splws->addSplitter(interval2);
+    }
+    AnalysisDataService::Instance().addOrReplace("TableSplitter", splws);
+
+    DataObjects::TableWorkspace_sptr infows =
+        createInformationWorkspace(3, true);
+    AnalysisDataService::Instance().addOrReplace("InfoWorkspace", infows);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "InputWS");
+    filter.setProperty("OutputWorkspaceBaseName", "BaseName");
+    filter.setProperty("SplitterWorkspace", "TableSplitter");
+    filter.setProperty("InformationWorkspace", "InfoWorkspace");
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("DescriptiveOutputNames", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    std::vector<std::string> output_ws_vector =
+        filter.getProperty("OutputWorkspaceNames");
+
+    std::string expectedName = "BaseName_unfiltered";
+    TS_ASSERT_EQUALS(output_ws_vector[0], expectedName);
+
+    for (int i = 0; i < 5; i++) {
+      auto t0 = i * pulsedt / 1.E9;
+      auto t1 = (i + 1) * pulsedt / 1.E9;
+      std::stringstream expectedName;
+      expectedName << "BaseName_" << t0 << "_" << t1;
+      TS_ASSERT_EQUALS(output_ws_vector[i + 1], expectedName.str());
+    }
+
+    // clean workspaces
+    AnalysisDataService::Instance().remove("InputWS");
+    AnalysisDataService::Instance().remove("TableSplitter");
+    AnalysisDataService::Instance().remove("InfoWorkspace");
+
+    return;
+  }
+
+  /** test for the case that the input workspace names are of the form
+   * basename_startTime_stopTime
+   */
+  void test_descriptiveWorkspaceNamesLog() {
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
+
+    EventWorkspace_sptr inpWS =
+        createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("InputWS", inpWS);
+
+    DataObjects::TableWorkspace_sptr splws =
+        createSplittersWorkspace(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("TableSplitter", splws);
+
+    DataObjects::TableWorkspace_sptr infows =
+        createInformationWorkspace(3, false);
+    AnalysisDataService::Instance().addOrReplace("InfoWorkspace", infows);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "InputWS");
+    filter.setProperty("OutputWorkspaceBaseName", "BaseName");
+    filter.setProperty("SplitterWorkspace", "TableSplitter");
+    filter.setProperty("InformationWorkspace", "InfoWorkspace");
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("DescriptiveOutputNames", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    std::vector<std::string> output_ws_vector =
+        filter.getProperty("OutputWorkspaceNames");
+
+    std::vector<std::string> infoWsTitles;
+    for (size_t ir = 0; ir < infows->rowCount(); ++ir) {
+      API::TableRow row = infows->getRow(ir);
+      auto title = row.String(1);
+      infoWsTitles.push_back(title);
+    }
+
+    std::string expectedName = "BaseName_unfiltered";
+    TS_ASSERT_EQUALS(output_ws_vector[0], expectedName);
+
+    for (int i = 0; i < 3; i++) {
+      std::stringstream expectedName;
+      expectedName << "BaseName_" << infoWsTitles[i];
+      TS_ASSERT_EQUALS(output_ws_vector[i + 1], expectedName.str());
+    }
+
+    // clean workspaces
+    AnalysisDataService::Instance().remove("InputWS");
+    AnalysisDataService::Instance().remove("TableSplitter");
+    AnalysisDataService::Instance().remove("InfoWorkspace");
 
     return;
   }
@@ -1530,6 +1655,38 @@ public:
     }
 
     return tablesplitter;
+  }
+
+  /** Create an InformationWorkspace
+   * @param noOfRows: number of rows in the information workspace
+   * @param splitByTime: whether the workspace has been split by time or log
+   * @return InformationWorkspace
+   */
+  DataObjects::TableWorkspace_sptr
+  createInformationWorkspace(int noOfRows, bool splitByTime) {
+    // create table workspace
+    DataObjects::TableWorkspace_sptr infoWorkspace =
+        boost::make_shared<DataObjects::TableWorkspace>();
+    infoWorkspace->addColumn("int", "workspacegroup");
+    infoWorkspace->addColumn("str", "title");
+
+    for (int row_index = 0; row_index < noOfRows; row_index++) {
+      infoWorkspace->appendRow();
+      std::stringstream rowTitle;
+      infoWorkspace->cell<int>(row_index, 0) = row_index;
+      // The start and end values in the information workspace title are not
+      // needed for test so title contains row_index instead
+      if (splitByTime) {
+        rowTitle << "Time.Interval.From.start" << row_index << ".To.end"
+                 << row_index;
+      } else {
+        rowTitle << "Log.proton_charge.From.start" << row_index << ".To.end"
+                 << row_index << ".Value-change-direction:both";
+      }
+      infoWorkspace->cell<std::string>(row_index, 1) = rowTitle.str();
+    }
+
+    return infoWorkspace;
   }
 
   //----------------------------------------------------------------------------------------------
