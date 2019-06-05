@@ -90,7 +90,7 @@ void Axes::removeArtists(const char *containerAttr, const QString label) {
   const auto lineNameAsUnicode =
       Python::NewRef(PyUnicode_FromString(label.toLatin1().constData()));
   try {
-    auto container = pyobj().attr(containerAttr);
+    const auto container = pyobj().attr(containerAttr);
     auto containerLength = Python::Len(container);
     decltype(containerLength) index(0);
     while (index < containerLength) {

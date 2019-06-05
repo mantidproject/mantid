@@ -44,9 +44,9 @@ Python::Object constructArgs(const std::vector<std::string> &workspaces) {
  * @return A new Python list object
  */
 Python::Object constructArgs(const QStringList &workspaces) {
-  auto sipAPI = Python::Detail::sipAPI();
-  auto copy = new QStringList(workspaces);
-  auto *sobj = sipAPI->api_convert_from_new_type(
+  const auto sipAPI = Python::Detail::sipAPI();
+  const auto copy = new QStringList(workspaces);
+  const auto *sobj = sipAPI->api_convert_from_new_type(
       copy, sipAPI->api_find_type("QStringList"), Py_None);
   return Python::NewRef(Py_BuildValue("(O)", sobj));
 }
@@ -97,8 +97,9 @@ Python::Object plot(const Python::Object &args,
                     boost::optional<QHash<QString, QVariant>> axProperties,
                     boost::optional<std::string> windowTitle, bool errors,
                     bool overplot) {
-  auto kwargs = constructKwargs(spectrumNums, wkspIndices, fig, plotKwargs,
-                                axProperties, windowTitle, errors, overplot);
+  const auto kwargs =
+      constructKwargs(spectrumNums, wkspIndices, fig, plotKwargs, axProperties,
+                      windowTitle, errors, overplot);
   try {
     return functionsModule().attr("plot")(*args, **kwargs);
   } catch (Python::ErrorAlreadySet &) {
@@ -142,7 +143,7 @@ Python::Object pcolormesh(const QStringList &workspaces,
                           boost::optional<Python::Object> fig) {
   GlobalInterpreterLock lock;
   try {
-    auto args = constructArgs(workspaces);
+    const auto args = constructArgs(workspaces);
     Python::Dict kwargs;
     if (fig)
       kwargs["fig"] = fig.get();
