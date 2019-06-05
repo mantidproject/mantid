@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -73,25 +74,13 @@ std::map<std::string, std::string> RemoveSpectra::validateInputs() {
 }
 
 namespace {
-template <class T> bool evaluateSpectrumForDetectors(T spectrum) {
-  const auto detectors = spectrum->getDetectorIDs();
-  return detectors.empty();
-}
-
 std::vector<size_t>
 discoverSpectraWithNoDetector(const MatrixWorkspace_sptr &inputWS) {
   std::vector<size_t> specIDs;
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (auto i = 0u; i < inputWS->getNumberHistograms(); ++i) {
-    const Histogram1D *spectrum1D =
-        dynamic_cast<const Histogram1D *>(&inputWS->getSpectrum(i));
-    const EventList *spectrumEvent =
-        dynamic_cast<const EventList *>(&inputWS->getSpectrum(i));
-    if (spectrumEvent &&
-        evaluateSpectrumForDetectors<const EventList *>(spectrumEvent)) {
-
-    } else if (spectrum1D &&
-               evaluateSpectrumForDetectors<const Histogram1D *>(spectrum1D)) {
-    }
+    if (!spectrumInfo.hasDetectors(i))
+      specIDs.emplace_back(i);
   }
   return specIDs;
 }
@@ -99,8 +88,11 @@ discoverSpectraWithNoDetector(const MatrixWorkspace_sptr &inputWS) {
 std::vector<size_t>
 discoverSpectraWithMask(const MatrixWorkspace_sptr &inputWS) {
   std::vector<size_t> specIDs;
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (auto i = 0u; i < inputWS->getNumberHistograms(); ++i) {
-    if (inputWS->hasMaskedBins(i)) {
+    if (!spectrumInfo.hasDetectors(i))
+      continue;
+    if (spectrumInfo.isMasked(i)) {
       specIDs.emplace_back(i);
     }
   }
@@ -140,6 +132,7 @@ void RemoveSpectra::exec() {
   if (specList.empty() && removeMaskedSpectra && removeSpectraWithNoDetector) {
     g_log.warning("Nothing passed to the RemoveSpectra algorithm to remove so "
                   "nothing happened");
+    setProperty("OutputWorkspace", inputWS);
     return;
   }
 
@@ -155,6 +148,7 @@ void RemoveSpectra::exec() {
 
   if (specList.empty()) {
     g_log.debug("No spectra to delete in RemoveSpectra");
+    setProperty("OutputWorkspace", inputWS);
     return;
   }
 
@@ -166,7 +160,6 @@ void RemoveSpectra::exec() {
 
   g_log.debug(std::to_string(specList.size()) + " spectra removed.");
 
-  AnalysisDataService::Instance().addOrReplace(outputWorkspaceName, outputWS);
   setProperty("OutputWorkspace", outputWS);
 }
 
@@ -180,7 +173,7 @@ MatrixWorkspace_sptr RemoveSpectra::copySpectraFromInputToOutput(
   }
 
   if (indicesToExtract.empty()) {
-    return MatrixWorkspace_sptr();
+    return inputWS;
   }
 
   auto extractSpectra = createChildAlgorithm("ExtractSpectra");

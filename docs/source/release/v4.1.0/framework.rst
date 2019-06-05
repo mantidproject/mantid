@@ -17,6 +17,11 @@ Concepts
 Algorithms
 ----------
 
+New
+###
+
+- :ref: `RemoveSpectra <algm-RemoveSpectra>` is a new general purpose algorithm that enables you to optionally remove spectra from an algorithm given one of 3 criteria, if it's masked, if it doesn't have a detector, and if presented in a user defined list.
+
 Improvements
 ############
 
