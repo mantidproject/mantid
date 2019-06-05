@@ -1,5 +1,6 @@
 import unittest
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FittingTabModel
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory, AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
 from mantid.py3compat import mock
@@ -7,7 +8,7 @@ from mantid.py3compat import mock
 
 class FittingTabModelTest(unittest.TestCase):
     def setUp(self):
-        self.model = FittingTabModel()
+        self.model = FittingTabModel(setup_context())
 
     def test_convert_function_string_into_dict(self):
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -94,7 +95,6 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEqual(self.model.do_single_fit.call_count, 5)
         self.model.do_single_fit.assert_called_with({'Function': mock.ANY, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'})
-
 
 
 if __name__ == '__main__':
