@@ -10,11 +10,16 @@ import os
 import math
 import numpy as np
 from mantid import config, mtd, logger
+from mantid.dataobjects import TableWorkspace
 from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator, \
     FloatArrayProperty, FloatArrayLengthValidator, IntBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     WorkspaceGroupProperty, FileAction, Progress, WorkspaceProperty, PropertyMode
 from mantid.simpleapi import *
+
+
+N_TUBES = 16
+N_PIXELS_PER_TUBE = 128
 
 
 def _ws_or_none(s):
@@ -158,13 +163,17 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if not self.getPropertyValue('MapFile'):
             if len(self._psd_int_range) != 2:
                 issues['ManualPSDIntegrationRange'] = 'Specify comma separated pixel range, e.g. 1,128'
-            elif self._psd_int_range[0] < 1 or self._psd_int_range[1] > 128 \
+            elif self._psd_int_range[0] < 1 or self._psd_int_range[1] > N_PIXELS_PER_TUBE \
                     or self._psd_int_range[0] >= self._psd_int_range[1]:
                 issues['ManualPSDIntegrationRange'] = 'Start or end pixel number out is of range [1-128], or has wrong order'
 
         group_by = self.getProperty('GroupPixelsBy').value
         if group_by % 2 != 0:
             issues['GroupPixelsBy'] = 'Group by must be a power of 2, e.g. 2, 4, 8, 16 ... 128'
+
+        epp_ws = self.getProperty('InputElasticChannelWorkspace').value
+        if epp_ws and not isinstance(epp_ws, TableWorkspace):
+            issues['InputElasticChannelWorkspace'] = 'Input EPP workspace must be a TableWorkspace.'
 
         return issues
 
@@ -185,7 +194,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._fit_option = self.getPropertyValue('ElasticPeakFitting')
         self._group_by = self.getProperty('GroupPixelsBy').value
 
-        if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == 128):
+        if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == N_PIXELS_PER_TUBE):
             self._use_map_file = True
         else:
             self._use_map_file = False
@@ -409,6 +418,13 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         return - (shifted_chopper_phase - center_chopper_phase) / center_chopper_speed / 6 + (shifted_psd_delay - center_psd_delay) * 1E-6
 
+    def _set_source_distance(self, ws):
+        """
+        Sets the source distance based on chopper configuration
+        """
+        #TODO
+        pass
+
     def _convert_to_energy_bats(self, ws, epp_ws, t0_offset=0.):
         """
         Converts the workspace to TOF for Bats mode.
@@ -418,7 +434,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         detector_info = ws.detectorInfo()
         l1 = detector_info.l1()
-        l2_equator = (detector_info.l2(64) + detector_info.l2(65)) / 2.
+        middle = int(N_PIXELS_PER_TUBE / 2)
+        l2_equator = (detector_info.l2(middle) + detector_info.l2(middle+1)) / 2.
         v_fixed = self._instrument.getNumberParameter('Vfixed')[0]
         elastic_tof_equator = ((l1 + l2_equator) / v_fixed + t0_offset) * 1E+6
         run = ws.getRun()
@@ -434,7 +451,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             elastic_channel_equator = epp_ws.cell('PeakCentre', rows-1)
             x = ws.extractX()
             for pixel in range(ws.getNumberHistograms()):
-                if 0 < pixel < 2049:
+                if 0 < pixel < N_PIXELS_PER_TUBE * N_TUBES + 1:
                     group = int((pixel - 1) / self._group_by)
                     if epp_ws.cell('FitStatus', group) == 'success':
                         l2 = detector_info.l2(pixel)
@@ -496,6 +513,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         x,y,z = self._sample_coords
         if x**2+y**2+z**2 != 0.:
             MoveInstrumentComponent(Workspace=ws, ComponentName='sample-position', X=x, Y=y, Z=z, RelativePosition=False)
+        self._set_source_distance(ws)
         input_epp = self.getProperty('InputElasticChannelWorkspace').value
 
         if not input_epp:
@@ -535,7 +553,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         rebin_ws = '__'+ws+'_rebin'
         ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Indirect')
-        ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=rebin_ws, WorkspaceIndex=64)
+        ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=rebin_ws, WorkspaceIndex=int(N_PIXELS_PER_TUBE/2))
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
         GroupWorkspaces(InputWorkspaces=[ws],OutputWorkspace=self._red_ws)
         DeleteWorkspaces([rebin_ws])
@@ -545,9 +563,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         Groups pixels in the tubes by the factor, which should be a power of 2.
         """
         pattern = ''
-        for i in range(16):
-            for j in range(int(128/by)):
-                start = i * 128 + j * by + 1
+        for i in range(N_TUBES):
+            for j in range(int(N_PIXELS_PER_TUBE/by)):
+                start = i * N_PIXELS_PER_TUBE + j * by + 1
                 end = start + by
                 pattern += str(start)+'-'+str(end)+','
         return pattern[:-1]
@@ -602,16 +620,16 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         pattern = ''
 
-        for tube in range(1,17):
-            pattern += str((tube - 1) * 128 + self._psd_int_range[0])
+        for tube in range(1,N_TUBES+1):
+            pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[0])
             pattern += '-'
-            pattern += str((tube - 1) * 128 + self._psd_int_range[1])
+            pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[1])
             pattern += ','
 
-        num_single_det = mtd[ws].getNumberHistograms()-16*128-1
+        num_single_det = mtd[ws].getNumberHistograms()- N_TUBES * N_PIXELS_PER_TUBE - 1
 
         for single_det in range(num_single_det):
-            sd_index = 16*128 + single_det + 1
+            sd_index = N_TUBES * N_PIXELS_PER_TUBE + single_det + 1
             pattern += str(sd_index)
             pattern += ','
 
