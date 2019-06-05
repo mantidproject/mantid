@@ -38,13 +38,12 @@ class ColorSelector(QWidget):
         self.button.clicked.connect(self.launch_qcolor_dialog)
         self.line_edit.textChanged.connect(self.update_color_button)
 
-    @property
-    def current_color(self):
+    def get_color(self):
         return self.line_edit.text()
 
     def launch_qcolor_dialog(self):
         color_dialog = QColorDialog(self)
-        color_dialog.setCurrentColor(QColor(self.current_color))
+        color_dialog.setCurrentColor(QColor(self.get_color()))
         color_dialog.colorSelected.connect(
             lambda: self.set_line_edit(color_dialog.selectedColor().name())
         )
@@ -58,7 +57,7 @@ class ColorSelector(QWidget):
 
     def update_color_button(self):
         palette = QPalette(self.button.palette())
-        qcolor = QColor(self.current_color)
+        qcolor = QColor(self.get_color())
         palette.setColor(QPalette.Button, qcolor)
         self.button.setAutoFillBackground(True)
         self.button.setPalette(palette)

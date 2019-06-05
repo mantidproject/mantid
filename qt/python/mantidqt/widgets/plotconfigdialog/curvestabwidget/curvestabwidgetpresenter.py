@@ -39,8 +39,8 @@ class CurvesTabWidgetPresenter:
         self.axes_names_dict = get_axes_names_dict(self.fig)
         self.populate_select_axes_combo_box()
         self.populate_select_curve_combo_box()
-        self.view.show_errorbars_tab(self.get_selected_curve_errorbars())
         self.set_selected_curve_view_properties()
+        self.enable_correct_tabs()
 
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
@@ -53,8 +53,23 @@ class CurvesTabWidgetPresenter:
             self.remove_selected_curve
         )
         self.view.select_curve_combo_box.currentIndexChanged.connect(
-            lambda: self.view.show_errorbars_tab(self.get_selected_curve_errorbars())
+            self.enable_correct_tabs
         )
+
+    def enable_correct_tabs(self):
+        """
+        Enable/disable line, marker and errorbar tabs for selected curve
+        """
+        curve = self.get_selected_curve()
+        if isinstance(curve, ErrorbarContainer):
+            self.view.enable_errorbars_tab()
+            if not curve.lines[0]:  # Errorbars can be plotted without a joining line
+                self.view.disable_line_tab()
+                self.view.disable_marker_tab()
+        else:
+            self.view.enable_line_tab()
+            self.view.enable_marker_tab()
+            self.view.disable_errorbars_tab()
 
     def apply_properties(self):
         """Update the curve's properties from values in the view"""
@@ -66,11 +81,10 @@ class CurvesTabWidgetPresenter:
         if isinstance(curve, ErrorbarContainer):
             self.apply_errorbar_properties(curve, props)
             curve = curve.lines[0]  # This is the line between errorbar points
-
-        curve.set_visible(not props.hide_curve)
-
-        self.apply_line_properties(curve, props)
-        self.apply_marker_properties(curve, props)
+        if curve:
+            curve.set_visible(not props.hide_curve)
+            self.apply_line_properties(curve, props)
+            self.apply_marker_properties(curve, props)
 
     @staticmethod
     def apply_line_properties(line, props):
@@ -116,7 +130,6 @@ class CurvesTabWidgetPresenter:
         for caps in caps_tuple:
             caps.set_visible(visible)
 
-    # Getters
     def get_selected_ax_errorbars(self):
         """Get all errobar containers in selected axes"""
         ax = self.get_selected_ax()
@@ -223,13 +236,15 @@ class CurvesTabWidgetPresenter:
     def update_legend_entry(curve, old_label, new_label):
         """Update the entry in the legend for a specific curve"""
         legend = CurvesTabWidgetPresenter.get_legend_from_curve(curve)
-        text_labels = legend.get_texts()
-        for text in text_labels:
-            if text.get_text() == old_label:
-                text.set_text(new_label)
+        if legend:
+            text_labels = legend.get_texts()
+            for text in text_labels:
+                if text.get_text() == old_label:
+                    text.set_text(new_label)
 
     @staticmethod
     def get_legend_from_curve(curve):
+        """Get the legend from Line2D or ErrobarContainer object"""
         if isinstance(curve, ErrorbarContainer):
             return curve.get_children()[0].axes.get_legend()
         else:

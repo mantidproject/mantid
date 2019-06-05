@@ -10,6 +10,8 @@ from matplotlib import colors
 from matplotlib.axes import ErrorbarContainer
 from qtpy.QtCore import Qt
 
+LINESTYLE_MAP = {'-': 'solid', '--': 'dashed', '-.': 'dashdot', ':': 'dotted',
+                 'None': 'None'}
 MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
               'triangle_right': '>', 'tickup': 2, 'hline': '_', 'vline': '|',
               'pentagon': 'p', 'tri_left': '3', 'caretdown': 7,
@@ -32,13 +34,19 @@ def convert_color_to_hex(color):
         return colors.to_hex(color)
 
 
+def get_marker_name(marker):
+    for name, short_name in MARKER_MAP.items():
+        if short_name == marker:
+            return name
+
+
 class CurveProperties:
 
     def __init__(self):
         pass
 
     @classmethod
-    def from_view(cls, view, errorbars=None):
+    def from_view(cls, view):
         # Top level entries
         cls.label = view.get_curve_label()
         cls.hide_curve = (view.get_hide_curve() == Qt.Checked)
@@ -56,7 +64,7 @@ class CurveProperties:
         cls.marker_edge_color = view.marker.get_edge_color()
 
         # Errorbars tab
-        if view.errorbars:
+        if view.errorbars.isEnabled():
             cls.hide_errorbars = (view.errorbars.get_hide() == Qt.Checked)
             cls.errorbar_width = view.errorbars.get_width()
             cls.errorbar_capsize = view.errorbars.get_capsize()
@@ -67,13 +75,13 @@ class CurveProperties:
 
     @classmethod
     def from_curve(cls, curve):
-        # Top level entries
+        cls.label = curve.get_label()
+
         if isinstance(curve, ErrorbarContainer):
             line = curve.lines[0]
             caps_tuple = curve.lines[1]
             bars_tuple = curve.lines[2]
 
-            # TODO: if cyclic values set for these, set to None and disable option
             cls.hide_errorbars = (not curve.lines[2][0].get_visible())
             cls.errorbar_width = bars_tuple[0].get_linewidth()[0]
             cls.errorbar_capsize = caps_tuple[0].get_markersize()/2
@@ -84,19 +92,21 @@ class CurveProperties:
         else:
             line = curve
 
-        cls.label = curve.get_label()
-        cls.hide_curve = (not line.get_visible())
 
-        # Line tab entries
-        cls.line_style = line.get_linestyle()
-        cls.draw_style = line.get_drawstyle()
-        cls.line_width = line.get_linewidth()
-        cls.line_color = convert_color_to_hex(line.get_color())
 
-        # Marker tab entries
-        cls.marker_style = line.get_marker()
-        cls.marker_size = line.get_markersize()
-        cls.marker_face_color = convert_color_to_hex(line.get_markerfacecolor())
-        cls.marker_edge_color = convert_color_to_hex(line.get_markeredgecolor())
+        if line:
+            cls.hide_curve = (not line.get_visible())
+
+            # Line tab entries
+            cls.line_style = LINESTYLE_MAP[line.get_linestyle()]
+            cls.draw_style = line.get_drawstyle()
+            cls.line_width = line.get_linewidth()
+            cls.line_color = convert_color_to_hex(line.get_color())
+
+            # Marker tab entries
+            cls.marker_style = get_marker_name(line.get_marker())
+            cls.marker_size = line.get_markersize()
+            cls.marker_face_color = convert_color_to_hex(line.get_markerfacecolor())
+            cls.marker_edge_color = convert_color_to_hex(line.get_markeredgecolor())
 
         return cls()
