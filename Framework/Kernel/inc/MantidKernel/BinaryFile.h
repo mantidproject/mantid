@@ -12,6 +12,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 

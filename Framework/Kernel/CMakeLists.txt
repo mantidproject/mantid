@@ -378,7 +378,6 @@ set(TEST_FILES
     MagneticFormFactorTableTest.h
     MagneticIonTest.h
     MakeCowTest.h
-    MakeUniqueTest.h
     MandatoryValidatorTest.h
     MaskedPropertyTest.h
     MaterialBuilderTest.h

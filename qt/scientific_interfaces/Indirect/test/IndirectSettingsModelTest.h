@@ -8,10 +8,9 @@
 #define MANTIDQT_INDIRECTSETTINGSMODELTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 #include "IndirectSettingsModel.h"
-
-
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -23,9 +22,7 @@ public:
 
   static void destroySuite(IndirectSettingsModelTest *suite) { delete suite; }
 
-  void setUp() override {
-    m_model = std::make_unique<IndirectSettingsModel>();
-  }
+  void setUp() override { m_model = std::make_unique<IndirectSettingsModel>(); }
 
   void tearDown() override { m_model.reset(); }
 

@@ -10,8 +10,8 @@
 #include "MantidKernel/ANN/ANN.h"
 #include "MantidKernel/DllConfig.h"
 
-
 #include <Eigen/Core>
+#include <memory>
 #include <vector>
 
 /**
@@ -102,14 +102,15 @@ public:
       std::runtime_error(
           "Need at least one point to initialise NearestNeighbours.");
 
-    m_dataPoints = std::make_unique<NNDataPoints>(numPoints, static_cast<int>(N));
+    m_dataPoints =
+        std::make_unique<NNDataPoints>(numPoints, static_cast<int>(N));
 
     for (size_t i = 0; i < points.size(); ++i) {
       Eigen::Map<VectorType>(m_dataPoints->mutablePoint(static_cast<int>(i)), N,
                              1) = points[i];
     }
     m_kdTree = std::make_unique<ANNkd_tree>(m_dataPoints->rawData(), numPoints,
-                                       static_cast<int>(N));
+                                            static_cast<int>(N));
   }
 
   ~NearestNeighbours() { annClose(); }
