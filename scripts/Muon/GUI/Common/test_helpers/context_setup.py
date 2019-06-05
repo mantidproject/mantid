@@ -11,7 +11,7 @@ from mantid.py3compat import mock
 def setup_context_for_tests(parent_object):
     parent_object.loaded_data = MuonLoadData()
     parent_object.loaded_data.get_main_field_direction = mock.MagicMock(return_value='transverse')
-    parent_object.data_context = MuonDataContext(parent_object.loaded_data)
+    parent_object.data_context = MuonDataContext(load_data=parent_object.loaded_data)
     parent_object.gui_context = MuonGuiContext()
     parent_object.group_context = MuonGroupPairContext(parent_object.data_context.check_group_contains_valid_detectors)
     parent_object.phase_table_context = PhaseTableContext()
@@ -24,7 +24,7 @@ def setup_context_for_tests(parent_object):
 def setup_context():
     loaded_data = MuonLoadData()
     loaded_data.get_main_field_direction = mock.MagicMock(return_value='transverse')
-    data_context = MuonDataContext(loaded_data)
+    data_context = MuonDataContext(load_data=loaded_data)
     gui_context = MuonGuiContext()
     group_context = MuonGroupPairContext(data_context.check_group_contains_valid_detectors)
     phase_table_context = PhaseTableContext()

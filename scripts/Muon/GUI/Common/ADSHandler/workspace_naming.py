@@ -110,9 +110,9 @@ def get_phase_table_workspace_group_name(insertion_workspace_name, instrument, w
     return group
 
 
-def get_fft_workspace_group_name(insertion_workspace_name, instrument):
+def get_fft_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' FFT/'
+    group = get_base_run_name(run, instrument) + ' FFT' + workspace_suffix + '/'
 
     return group
 
@@ -136,9 +136,9 @@ def get_maxent_workspace_name(input_workspace):
     return input_workspace + '; MaxEnt'
 
 
-def get_maxent_workspace_group_name(insertion_workspace_name, instrument):
+def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' Maxent/'
+    group = get_base_run_name(run, instrument) + ' Maxent' + workspace_suffix + '/'
 
     return group
 
