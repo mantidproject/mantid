@@ -574,6 +574,26 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
       periodLog.reset(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
+
+      // Sanity check here that period_log only contains period numbers up to
+      // nperiods. These values can be different due to instrument noise, and
+      // cause undescriptive crashes if not caught.
+      // We throw here to make it clear
+      // that the file is corrupted and must be manually assessed.
+      const auto valuesAsVector = periodLog->valuesAsVector();
+      const auto nPeriodsInLog =
+          *std::max_element(valuesAsVector.begin(), valuesAsVector.end());
+      if (nPeriodsInLog != nPeriods) {
+        const auto msg =
+            "File " + nexusfilename +
+            " has been corrupted. The log framelog/period_log/value "
+            "contains " +
+            std::to_string(nPeriodsInLog) +
+            " periods, but periods/number contains " +
+            std::to_string(nPeriods) +
+            ". This file should be manually inspected and corrected.";
+        throw InvalidLogPeriods(msg);
+      }
     }
 
     // If successful, we can try to load the pulse times
@@ -611,6 +631,8 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
       localWorkspace->mutableRun().setGoniometer(gm, true);
     } catch (std::runtime_error &) {
     }
+  } catch (const InvalidLogPeriods &e) {
+    throw e;
   } catch (...) {
     alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some "
                                "sample logs may be missing."

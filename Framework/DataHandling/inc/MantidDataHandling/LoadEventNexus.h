@@ -40,6 +40,17 @@
 namespace Mantid {
 namespace DataHandling {
 
+/** @class InvalidLogPeriods
+ * Custom exception extending std::invalid_argument
+ * Thrown when nperiods does not match period_log
+ * Custom exception so we can re-propagate this error and
+ * handle all other errors.
+ */
+class InvalidLogPeriods : public std::invalid_argument {
+public:
+  InvalidLogPeriods(const std::string &msg) : std::invalid_argument(msg) {}
+};
+
 bool exists(::NeXus::File &file, const std::string &name);
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
