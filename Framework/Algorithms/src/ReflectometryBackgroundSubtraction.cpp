@@ -219,9 +219,9 @@ void ReflectometryBackgroundSubtraction::init() {
 
   auto lengthArray = boost::make_shared<ArrayLengthValidator<int>>(2);
 
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("PeakRange", "147, 163", lengthArray),
-      "Pixel range defining the reflectivity peak");
+  declareProperty(std::make_unique<ArrayProperty<int>>("PeakRange", "147, 163",
+                                                       lengthArray),
+                  "Pixel range defining the reflectivity peak");
   declareProperty("SumPeak", false,
                   "If True, the resulting peak will be summed");
 
