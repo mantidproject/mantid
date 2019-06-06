@@ -109,6 +109,7 @@ Tools
    FlowchartCreation
    VisualStudioBuildImpact
    GettingStartedWithPyCharm
+   VSCode
    Eclipse
 
 :doc:`ToolsOverview`
@@ -125,6 +126,9 @@ Tools
 
 :doc:`GettingStartedWithPyCharm`
    Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
+
+:doc:`VSCode`
+   Guide to using VSCode for C++ with Mantid.
 
 :doc:`Eclipse`
    Guide to setting up Eclipse on Ubuntu
