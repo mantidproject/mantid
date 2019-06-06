@@ -580,9 +580,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
       // cause undescriptive crashes if not caught.
       // We throw here to make it clear
       // that the file is corrupted and must be manually assessed.
-      const auto valuesAsVector = periodLog->valuesAsVector();
-      const auto nPeriodsInLog =
-          *std::max_element(valuesAsVector.begin(), valuesAsVector.end());
+      const auto nPeriodsInLog = periodLog->valuesAsVector().back();
       if (nPeriodsInLog != nPeriods) {
         const auto msg =
             "File " + nexusfilename +
