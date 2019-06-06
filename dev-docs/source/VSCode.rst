@@ -1,8 +1,8 @@
 .. _VSCode:
 
-.. |extensions| image:: ../images/VSCode/extension-button.png
-.. |debug| image:: ../images/VSCode/debug-button.png
-.. |debug-cog| image:: ../images/VSCode/debug-cog-button.png
+.. |extensions| image:: /images/VSCode/extension-button.png
+.. |debug| image:: /images/VSCode/debug-button.png
+.. |debug-cog| image:: /images/VSCode/debug-cog-button.png
 
 ======
 VSCode
@@ -99,7 +99,7 @@ attempt to make a useful task for you. However it may be better to use this exam
 This assumes that you have generated in CMake using the ninja the commands can be
 switched out with the command and various args for whatever you have generated with.
 
-.. code-block:: json
+.. code-block:: javascript
 
     {
         "version": "2.0.0",
@@ -157,7 +157,7 @@ If this fails
 For this section the guide will show you how to use GDB debugging. Inside the launch.json
 you will want to make your file look something a little like this:
 
-.. code-block:: json
+.. code-block:: javascript
 
     {
         "version": "0.2.0",
@@ -191,7 +191,7 @@ For this section of the guide it will discuss use of the MSVC debugger. Please
 follow on with the `guide <https://code.visualstudio.com/docs/cpp/config-msvc>`_.
 The launch.json should end up looking a little like this:
 
-.. code-block:: json
+.. code-block:: javascript
 
     {
        "version": "0.2.0",
@@ -226,7 +226,7 @@ from the Debug terminal window.
 In your launch.json we will need a new launch task for this, this new task should look
 like this:
 
-.. code-block:: json
+.. code-block:: javascript
 
         {
             "name": "(gdb) Attach Workbench Python 2.7",
@@ -255,7 +255,7 @@ Debugging C++ Tests
 First thing to do is make sure that the test you are testing is built. You can do this
 by building via one of the test targets. An example Task for AlgorithmsTest:
 
-.. code-block:: json
+.. code-block:: javascript
 
     {
         "label": "Build Mantid AlgorithmsTest",
@@ -276,7 +276,7 @@ To debug the individual tests you won't want to be running all tests, so you wil
 select the executable for your tests i.e. "bin/AlgorithmsTest" in your build directory.
 Then pass as an argument the specific test you want to be debugging. As an example:
 
-.. code-block:: json
+.. code-block:: javascript
 
     {
         "name": "(gdb) Launch Ctest",
