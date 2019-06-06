@@ -174,7 +174,7 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
   LRBgd->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace"));
   LRBgd->execute();
 
-  auto outputWS = LRBgd->getPropertyValue("OutputWorkspace");
+  Workspace_sptr outputWS = LRBgd->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
 }
 
@@ -220,16 +220,16 @@ void ReflectometryBackgroundSubtraction::init() {
   auto lengthArray = boost::make_shared<ArrayLengthValidator<int>>(2);
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("PeakRange", "147, 163", lengthArray),
+      std::make_unique<ArrayProperty<int>>("PeakRange", "147, 163", lengthArray),
       "Pixel range defining the reflectivity peak");
   declareProperty("SumPeak", false,
                   "If True, the resulting peak will be summed");
 
-  setPropertySettings("PeakRange", make_unique<EnabledWhenProperty>(
+  setPropertySettings("PeakRange", std::make_unique<EnabledWhenProperty>(
                                        "BackgroundCalculationMethod",
                                        IS_EQUAL_TO, "AveragePixelFit"));
 
-  setPropertySettings("SumPeak", make_unique<EnabledWhenProperty>(
+  setPropertySettings("SumPeak", std::make_unique<EnabledWhenProperty>(
                                      "BackgroundCalculationMethod", IS_EQUAL_TO,
                                      "AveragePixelFit"));
 
