@@ -632,7 +632,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     } catch (std::runtime_error &) {
     }
   } catch (const InvalidLogPeriods &e) {
-    throw e;
+    throw;
   } catch (...) {
     alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some "
                                "sample logs may be missing."
