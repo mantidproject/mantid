@@ -117,7 +117,7 @@ Here are some tables that show it in more detail:
 +------------------------------+-------------------------------------------+-------------------------------------+
 
 Invalid Period Logs Error
-#######################
+#########################
 
 There is an issue specific to ISIS, particularly on long runs, where noise on data collection instruments can change the period
 of the data. This can cause the period associated with certain data points to exceed the total number of periods we expect.
