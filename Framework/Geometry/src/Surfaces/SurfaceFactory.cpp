@@ -78,7 +78,6 @@ void SurfaceFactory::registerSurface()
   Register tallies to be used
 */
 {
-  using std::make_unique;
   SGrid.emplace_back("Plane", std::make_unique<Plane>());
   SGrid.emplace_back("Cylinder", std::make_unique<Cylinder>());
   SGrid.emplace_back("Cone", std::make_unique<Cone>());

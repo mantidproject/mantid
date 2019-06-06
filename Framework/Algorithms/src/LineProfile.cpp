@@ -43,7 +43,6 @@ using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::ListValidator;
 using Mantid::Kernel::MandatoryValidator;
-using std::make_unique;
 
 namespace {
 /// An enum specifying a line profile orientation.
