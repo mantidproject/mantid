@@ -114,7 +114,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
                   MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
         pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
-        mock_load.return_value = (groups, pairs, 'description')
+        mock_load.return_value = (groups, pairs, 'description', None)
 
         self.view.load_grouping_button.clicked.emit(True)
 

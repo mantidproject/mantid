@@ -28,7 +28,7 @@ def get_grouping_psi(workspace):
             sample_log_value = workspace_run.getProperty(sample_log_label_name).value
         grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
 
-    return grouping_list, []
+    return grouping_list, [], None
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
