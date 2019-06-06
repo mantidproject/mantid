@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectLoadILL.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
@@ -35,31 +34,46 @@ std::string constructRunName(bool isILL, std::string const &instrumentName,
 }
 
 std::string constructPrefix(std::string const &runName,
+                            std::string const &analyser,
+                            std::string const &reflection) {
+  auto const prefix = runName + '_' + analyser + reflection;
+  return (!analyser.empty() && !reflection.empty()) ? prefix + "_" : prefix;
+}
+
+std::string constructPrefix(std::string const &runName,
                             Instrument_const_sptr instrument) {
   auto const analyser = getInstrumentParameter(instrument, "analyser", "");
   auto const reflection = getInstrumentParameter(instrument, "reflection", "");
+  return constructPrefix(runName, analyser, reflection);
+}
 
-  auto prefix = runName + '_' + analyser + reflection;
-  if (!analyser.empty() && !reflection.empty())
-    prefix += '_';
-  return prefix;
+std::string getWorkspacePrefix(MatrixWorkspace_const_sptr workspace,
+                               std::string const &facility) {
+  auto const instrument = workspace->getInstrument();
+  auto const runName =
+      constructRunName(facility == "ILL", instrument->getName(),
+                       std::to_string(workspace->getRunNumber()));
+  return constructPrefix(runName, instrument);
 }
 
 std::string getWorkspacePrefix(std::string const &workspaceName) {
-  if (!workspaceName.empty()) {
-    auto const workspace =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            workspaceName);
+  auto &ads = AnalysisDataService::Instance();
+  if (!workspaceName.empty() && ads.doesExist(workspaceName)) {
+    auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
     auto const facility =
         ConfigService::Instance().getString("default.facility");
-
-    auto const instrument = workspace->getInstrument();
-    auto const runName =
-        constructRunName(facility == "ILL", instrument->getName(),
-                         std::to_string(workspace->getRunNumber()));
-    return constructPrefix(runName, instrument);
+    return getWorkspacePrefix(workspace, facility);
   }
   return "";
+}
+
+void renameWorkspace(std::string const &inputName,
+                     std::string const &outputName) {
+  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+  renamer->initialize();
+  renamer->setProperty("InputWorkspace", inputName);
+  renamer->setProperty("OutputWorkspace", outputName);
+  renamer->execute();
 }
 
 } // namespace
@@ -142,18 +156,9 @@ void IndirectLoadILL::run() {
 
   if (instrument == "IN16B") {
     auto const temporaryName = "__tmp_IndirectLoadASCII_IN16B";
-    auto loader = AlgorithmManager::Instance().create("LoadILLIndirect");
-    loader->initialize();
-    loader->setProperty("Filename", filename.toStdString());
-    loader->setProperty("OutputWorkspace", temporaryName);
-    loader->execute();
 
-    auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
-    renamer->initialize();
-    renamer->setProperty("InputWorkspace", temporaryName);
-    renamer->setProperty("OutputWorkspace",
-                         getWorkspacePrefix(temporaryName) + "red");
-    renamer->execute();
+    loadILLData(filename.toStdString(), temporaryName);
+    renameWorkspace(temporaryName, getWorkspacePrefix(temporaryName) + "red");
   } else {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     QString pyInput("");
@@ -183,12 +188,21 @@ void IndirectLoadILL::run() {
                plot + "'," + save + ")";
     runPythonScript(pyInput);
 #else
-    emit showMessageBox("IN16B is currently the only instrument supported on "
-                        "the workbench in LoadILL.");
+    emit showMessageBox("IN16B is currently the only instrument supported in "
+                        "LoadILL on Mantid Workbench.");
 #endif
   }
 
   setRunIsRunning(false);
+}
+
+void IndirectLoadILL::loadILLData(std::string const &filename,
+                                  std::string const &outputName) {
+  auto loader = AlgorithmManager::Instance().create("LoadILLIndirect");
+  loader->initialize();
+  loader->setProperty("Filename", filename);
+  loader->setProperty("OutputWorkspace", outputName);
+  loader->execute();
 }
 
 /**

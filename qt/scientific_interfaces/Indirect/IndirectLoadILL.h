@@ -8,12 +8,12 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTLOADILL_H_
 
 #include "IndirectToolsTab.h"
-#include "MantidAPI/ExperimentInfo.h"
 #include "ui_IndirectLoadILL.h"
 
-#include <QComboBox>
 #include <QMap>
+#include <QSettings>
 #include <QStringList>
+#include <QWidget>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -37,6 +37,8 @@ private slots:
   void runClicked();
 
 private:
+  void loadILLData(std::string const &filename, std::string const &outputName);
+
   void setRunIsRunning(bool running);
   void setRunEnabled(bool enabled);
   void setPlotOptionsEnabled(bool enabled);
