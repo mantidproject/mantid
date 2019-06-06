@@ -77,7 +77,7 @@ class FittingTabPresenterTest(GuiTest):
 
         self.presenter.model.do_single_fit.assert_called_once_with(
             {'Function': mock.ANY, 'InputWorkspace': 'Input Workspace Name',
-             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint'})
+             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint', 'FitGroupName': 'Fitting Results'})
 
         self.assertEqual(str(self.presenter.model.do_single_fit.call_args[0][0]['Function']), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 
@@ -89,7 +89,7 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual(result, {'Function': mock.ANY,
                                   'InputWorkspace': 'Input Workspace Name',
                                   'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0,
-                                  'EvaluationType': 'CentrePoint'}
+                                  'EvaluationType': 'CentrePoint', 'FitGroupName': 'Fitting Results'}
                          )
 
     def test_for_single_fit_mode_when_display_workspace_changes_updates_fitting_browser_with_new_name(self):
@@ -259,8 +259,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter._end_x = [0.56, 0.78, 0.34]
         self.presenter._fit_status = ['success', 'failure with message', 'success']
         self.presenter._fit_chi_squared = [12.3, 3.4, 0.35]
-        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        fit_function_1 = FunctionFactory.createInitialized('name=GausOsc,A=0.6,Sigma=0.6,Frequency=0.6,Phi=0')
+
         self.presenter._fit_function = [fit_function, fit_function_1, fit_function]
 
         self.view.parameter_display_combo.setCurrentIndex(1)
@@ -282,6 +281,20 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter.selected_data = []
 
         self.assertEqual(self.view.fit_status_success_failure.text(), 'No Fit')
+
+    def test_updating_function_updates_displayed_fit_name(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
+
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+        self.assertEqual(self.view.function_name, 'GausOsc')
+
+    def test_fit_name_not_updated_if_already_changed_by_user(self):
+        self.view.function_name = 'test function'
+
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+        self.assertEqual(self.view.function_name, 'test function')
 
 
 if __name__ == '__main__':
