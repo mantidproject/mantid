@@ -30,7 +30,7 @@ Track::Track() : m_line(V3D(), V3D(0., 0., 1.)) {}
  */
 Track::Track(const V3D &startPt, const V3D &unitVector)
     : m_line(startPt, unitVector) {
-  if (!unitVector.unitVector(1.e-3)) {
+  if (!unitVector.unitVector()) {
     throw std::invalid_argument(
         "Failed to construct track: direction is not a unit vector.");
   }
@@ -42,7 +42,7 @@ Track::Track(const V3D &startPt, const V3D &unitVector)
  * @param direction :: The new direction. Must be a unit vector!
  */
 void Track::reset(const V3D &startPoint, const V3D &direction) {
-  if (!direction.unitVector(1.e-3)) {
+  if (!direction.unitVector()) {
     throw std::invalid_argument(
         "Failed to reset track: direction is not a unit vector.");
   }
