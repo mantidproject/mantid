@@ -590,7 +590,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   std::ostringstream XMLString;
   if (args.existsProperty(ShapeArgs::AXIS)) {
     try {
-      const int axisInt = args.getProperty(ShapeArgs::AXIS);
+      int axisInt = std::stoi(args.getPropertyValue(ShapeArgs::AXIS));
       const unsigned axisId = static_cast<unsigned>(axisInt);
       XMLString << axisXML(axisId);
       baseCentre = cylBaseCentre(centre, height, axisId);
