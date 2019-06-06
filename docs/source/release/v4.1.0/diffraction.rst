@@ -82,6 +82,8 @@ Improvements
 
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
 
+- New TOPAZ instrument geometry for 2019B run cycle
+
 
 Imaging
 -------
