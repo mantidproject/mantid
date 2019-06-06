@@ -175,10 +175,10 @@ public:
 
     TS_ASSERT_THROWS(
         fName = FileFinder::Instance().makeFileName("ABCD", instrument),
-        std::invalid_argument);
+        const std::invalid_argument &);
     TS_ASSERT_THROWS(
         fName = FileFinder::Instance().makeFileName("123456", instrument),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     fName = FileFinder::Instance().makeFileName("0", instrument);
     TS_ASSERT_EQUALS(fName, "HRP00000");
@@ -310,19 +310,19 @@ public:
     std::vector<std::string> files;
     TS_ASSERT_THROWS(files =
                          FileFinder::Instance().findRuns("MUSR15189-n15193"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(files =
                          FileFinder::Instance().findRuns("MUSR15189n-15193"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(files =
                          FileFinder::Instance().findRuns("MUSR15189-15193n"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(files =
                          FileFinder::Instance().findRuns("MUSR15189-151n93"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(files =
                          FileFinder::Instance().findRuns("MUSR15n189-151n93"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
     TS_ASSERT_THROWS_NOTHING(
         files = FileFinder::Instance().findRuns("MUSR15189-15193"));
     TS_ASSERT_EQUALS(files.size(), 5);
@@ -622,7 +622,7 @@ public:
     std::string accidentalEndOfRange = "99999";
     range << startOfRange << "-" << accidentalEndOfRange;
     TS_ASSERT_THROWS(files = fileFinder.findRuns(range.str().c_str()),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
 
     fileFinder.setCaseSensitive(startingCaseOption);
   }

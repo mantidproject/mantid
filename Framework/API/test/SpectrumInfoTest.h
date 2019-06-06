@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -80,7 +80,7 @@ public:
 
   void test_l1_no_instrument() {
     TS_ASSERT_THROWS(m_workspaceNoInstrument.spectrumInfo().l1(),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_isMonitor() {
@@ -169,8 +169,8 @@ public:
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(2), 0.0199973, 1e-6);
     // Monitors
-    TS_ASSERT_THROWS(spectrumInfo.twoTheta(3), std::logic_error);
-    TS_ASSERT_THROWS(spectrumInfo.twoTheta(4), std::logic_error);
+    TS_ASSERT_THROWS(spectrumInfo.twoTheta(3), const std::logic_error &);
+    TS_ASSERT_THROWS(spectrumInfo.twoTheta(4), const std::logic_error &);
   }
 
   void test_twoTheta_grouped() {
@@ -220,8 +220,8 @@ public:
     TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(2), 0.0199973, 1e-6);
     // Monitors
-    TS_ASSERT_THROWS(spectrumInfo.signedTwoTheta(3), std::logic_error);
-    TS_ASSERT_THROWS(spectrumInfo.signedTwoTheta(4), std::logic_error);
+    TS_ASSERT_THROWS(spectrumInfo.signedTwoTheta(3), const std::logic_error &);
+    TS_ASSERT_THROWS(spectrumInfo.signedTwoTheta(4), const std::logic_error &);
   }
 
   void test_grouped_signedTwoTheta() {
@@ -427,16 +427,16 @@ public:
   void test_no_detector() {
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
     TS_ASSERT_THROWS(spectrumInfo.detector(0),
-                     Kernel::Exception::NotFoundError);
+                     const Kernel::Exception::NotFoundError &);
   }
 
   void test_no_detector_twice() {
     // Regression test: Make sure that *repeated* access also fails.
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
     TS_ASSERT_THROWS(spectrumInfo.detector(0),
-                     Kernel::Exception::NotFoundError);
+                     const Kernel::Exception::NotFoundError &);
     TS_ASSERT_THROWS(spectrumInfo.detector(0),
-                     Kernel::Exception::NotFoundError);
+                     const Kernel::Exception::NotFoundError &);
   }
 
   void test_ExperimentInfo_basics() {
@@ -487,7 +487,7 @@ public:
     // needs to be able to rely on this.
     det2group_map mapping{{1, {1, 2}}};
     TS_ASSERT_THROWS(m_workspace.cacheDetectorGroupings(mapping),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   /**
@@ -601,7 +601,7 @@ private:
   WorkspaceTester m_grouped;
 
   std::unique_ptr<MatrixWorkspace> makeWorkspace(size_t numSpectra) {
-    auto ws = Kernel::make_unique<WorkspaceTester>();
+    auto ws = std::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {

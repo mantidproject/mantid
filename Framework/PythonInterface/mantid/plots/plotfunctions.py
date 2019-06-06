@@ -22,6 +22,7 @@ import numpy
 
 import mantid.api
 import mantid.kernel
+from mantid.kernel import config
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
@@ -37,12 +38,14 @@ _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 # ================================================
 
 
-def _setLabels1D(axes, workspace, indices=None):
+def _setLabels1D(axes, workspace, indices=None, plot_as_dist=True,
+                 axis=MantidAxType.SPECTRUM):
     '''
     helper function to automatically set axes labels for 1D plots
     '''
-    labels = get_axes_labels(workspace, indices)
-    axes.set_xlabel(labels[1])
+    labels = get_axes_labels(workspace, indices, plot_as_dist)
+    # We assume that previous checking has ensured axis can only be 1 of 2 types
+    axes.set_xlabel(labels[1 if axis == MantidAxType.SPECTRUM else 2])
     axes.set_ylabel(labels[0])
 
 
@@ -58,6 +61,8 @@ def _setLabels2D(axes, workspace, indices=None, transpose=False):
         axes.set_xlabel(labels[1])
         axes.set_ylabel(labels[2])
     axes.set_title(labels[-1])
+    if hasattr(workspace, 'isCommonLogBins') and workspace.isCommonLogBins():
+        axes.set_xscale('log')
 
 
 def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
@@ -66,8 +71,9 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         indices, kwargs = get_indices(workspace, **kwargs)
         (x, y, dy) = get_md_data1d(workspace, normalization, indices)
         dx = None
+        axis = None
     else:
-        axis = kwargs.pop("axis", MantidAxType.SPECTRUM)
+        axis = MantidAxType(kwargs.pop("axis", MantidAxType.SPECTRUM))
         workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
             # Overwrite any user specified xlabel
@@ -78,7 +84,15 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         else:
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
-    return x, y, dy, dx, indices, kwargs
+    return x, y, dy, dx, indices, axis, kwargs
+
+
+def on_off_to_bool(on_or_off):
+    if on_or_off.lower() == 'on':
+        return True
+    if on_or_off.lower() == 'off':
+        return False
+    raise ValueError("Argument 'on_or_off' must be either 'On' or 'Off")
 
 
 # ========================================================
@@ -101,8 +115,10 @@ def _plot_impl(axes, workspace, args, kwargs):
             axes.set_xlabel('Time')
         kwargs['linestyle'] = 'steps-post'
     else:
-        x, y, _, _, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs)
-        _setLabels1D(axes, workspace, indices)
+        x, y, _, _, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs)
+        plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
+        _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution,
+                     axis=axis)
     return x, y, args, kwargs
 
 
@@ -135,8 +151,8 @@ def plot(axes, workspace, *args, **kwargs):
     :param ExperimentInfo: for MD Workspaces with multiple :class:`mantid.api.ExperimentInfo` is the
                            ExperimentInfo object from which to extract the log. It's 0 by default
     :param axis: Specify which axis will be plotted. Use axis=MantidAxType.BIN to plot a bin,
-                  and axis=MantidAxType.SPECTRUM to plot a spectrum.
-                  The default value is axis=1, plotting spectra by default.
+                 and axis=MantidAxType.SPECTRUM to plot a spectrum.
+                 The default value is axis=1, plotting spectra by default.
     :param indices: Specify which slice of an MDHistoWorkspace to use when plotting. Needs to be a tuple
                     and will be interpreted as a list of indices. You need to use ``slice(None)`` to
                     select which dimension to plot. *e.g.* to select the second axis to plot from a
@@ -192,9 +208,11 @@ def errorbar(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
+    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                                        with_dy=True, with_dx=False)
-    _setLabels1D(axes, workspace, indices)
+    plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
+    _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution,
+                 axis=axis)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
 
@@ -710,7 +728,6 @@ def update_colorplot_datalimits(axes, mappables):
         xmin, xmax, ymin, ymax = get_colorplot_extents(mappable)
         xmin_all, xmax_all = min(xmin_all, xmin), max(xmax_all, xmax)
         ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
-
     axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
     axes.autoscale()
 

@@ -47,6 +47,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   void plotInPreview(const QString &curveName,
                      Mantid::API::MatrixWorkspace_sptr &ws,
@@ -57,6 +58,7 @@ private:
   getADSWorkspace(std::string const &name) const;
 
   std::string createOutputName();
+  void removeOutput();
 
   Mantid::API::MatrixWorkspace_sptr
   requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace) const;
@@ -116,7 +118,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_csSubtractedWS;
   Mantid::API::MatrixWorkspace_sptr m_transformedContainerWS;
 
-  size_t m_spectra;
+  std::size_t m_spectra;
 };
 
 } // namespace CustomInterfaces

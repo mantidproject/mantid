@@ -15,7 +15,7 @@ class DeltaEModeTest(unittest.TestCase):
 
         modes = DeltaEMode.availableTypes()
 
-        self.assertEquals(3, len(modes))
+        self.assertEqual(3, len(modes))
         self.assertTrue("Elastic" in modes)
         self.assertTrue("Direct" in modes)
         self.assertTrue("Indirect" in modes)

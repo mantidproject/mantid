@@ -38,30 +38,32 @@ DECLARE_ALGORITHM(EstimateMuonAsymmetryFromCounts)
  *
  */
 void EstimateMuonAsymmetryFromCounts::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "The name of the input 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "The name of the input 2D workspace.");
   declareProperty("WorkspaceName", "",
                   "The name used in the normalization "
                   "table. If this is blank the "
                   "InputWorkspace's name will be used.");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output 2D workspace.");
   declareProperty(
       "OutputUnNormData", false,
       "If to output the data with just the exponential decay removed.");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputUnNormWorkspace", "unNormalisedData",
-                      Direction::Output, API::PropertyMode::Optional),
-                  "The name of the output unnormalized workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputUnNormWorkspace", "unNormalisedData", Direction::Output,
+          API::PropertyMode::Optional),
+      "The name of the output unnormalized workspace.");
 
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra",
-                                                      std::move(empty)),
+      std::make_unique<Kernel::ArrayProperty<int>>("Spectra", std::move(empty)),
       "The workspace indices to remove the exponential decay from.");
   declareProperty(
       "StartX", 0.1,
@@ -75,7 +77,7 @@ void EstimateMuonAsymmetryFromCounts::init() {
                   "instead of being estimated.");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "NormalizationTable", "", Direction::InOut,
           API::PropertyMode::Optional),
       "Name of the table containing the normalizations for the asymmetries.");

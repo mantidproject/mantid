@@ -29,23 +29,23 @@ class LoadPresenterTest(unittest.TestCase):
         self.presenter.co_model.loaded_runs = 5
         self.presenter.load_model.loaded_runs = 10
         self.presenter.equalise_loaded_runs()
-        self.assertEquals(self.presenter.co_model.loaded_runs, 10)
+        self.assertEqual(self.presenter.co_model.loaded_runs, 10)
 
     def test_update_models(self):
         self.presenter.load_model = LoadModel()
         self.presenter.co_model = CoLoadModel()
         test_value = 10
         self.presenter.update_models(test_value)
-        self.assertEquals(self.presenter.load_model.run, test_value)
-        self.assertEquals(self.presenter.co_model.run, test_value)
+        self.assertEqual(self.presenter.load_model.run, test_value)
+        self.assertEqual(self.presenter.co_model.run, test_value)
 
     def test_enable_buttons(self):
         self.presenter.enable_buttons()
-        self.assertEquals(self.view.enable_buttons.call_count, 1)
+        self.assertEqual(self.view.enable_buttons.call_count, 1)
 
     def test_disable_buttons(self):
         self.presenter.disable_buttons()
-        self.assertEquals(self.view.disable_buttons.call_count, 1)
+        self.assertEqual(self.view.disable_buttons.call_count, 1)
 
 
 if __name__ == "__main__":

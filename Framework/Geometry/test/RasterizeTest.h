@@ -187,7 +187,7 @@ public:
     const auto sphere = createSphere(true);
     TS_ASSERT_THROWS(
         Rasterize::calculateCylinder(V3D(0., 0., 1.), sphere, 3, 3),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_calculateArbitraryOnCylinder() {

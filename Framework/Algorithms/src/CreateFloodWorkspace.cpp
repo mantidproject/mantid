@@ -72,7 +72,7 @@ void CreateFloodWorkspace::init() {
   const FacilityInfo &defaultFacility = ConfigService::Instance().getFacility();
   std::vector<std::string> exts = defaultFacility.extensions();
 
-  declareProperty(make_unique<MultipleFileProperty>(Prop::FILENAME, exts),
+  declareProperty(std::make_unique<MultipleFileProperty>(Prop::FILENAME, exts),
                   "The name of the flood run file(s) to read. Multiple runs "
                   "can be loaded and added together, e.g. INST10+11+12+13.ext");
 
@@ -81,7 +81,7 @@ void CreateFloodWorkspace::init() {
   declareProperty(Prop::END_X, EMPTY_DBL(),
                   "End value of the fitting interval");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(Prop::EXCLUDE),
+  declareProperty(std::make_unique<ArrayProperty<double>>(Prop::EXCLUDE),
                   "Spectra to exclude");
 
   declareProperty(Prop::RANGE_LOWER, EMPTY_DBL(),
@@ -102,7 +102,7 @@ void CreateFloodWorkspace::init() {
   declareProperty(Prop::BACKGROUND, "Linear", backgroundValidator,
                   "Background function.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::OUTPUT_WORKSPACE, "", Direction::Output),
                   "The flood correction workspace.");
 }

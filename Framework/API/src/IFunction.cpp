@@ -30,11 +30,10 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <algorithm>
 #include <limits>
@@ -181,7 +180,7 @@ void IFunction::unfix(size_t i) {
  */
 void IFunction::tie(const std::string &parName, const std::string &expr,
                     bool isDefault) {
-  auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
+  auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());
     fix(getParameterIndex(*ti));
@@ -1346,6 +1345,11 @@ void IFunction::setAttributeValue(const std::string &attName,
   Attribute att = getAttribute(attName);
   att.setString(value);
   setAttribute(attName, att);
+}
+
+/// Returns the pointer to a child function
+IFunction_sptr IFunction::getFunction(std::size_t) const {
+  throw std::runtime_error("Function " + name() + " doesn't have children.");
 }
 
 /// Returns a list of attribute names

@@ -1228,6 +1228,8 @@ template MANTID_KERNEL_DLL std::string toString(const uint64_t &value);
 template MANTID_KERNEL_DLL std::string toString(const std::string &value);
 
 template MANTID_KERNEL_DLL std::string toString(const std::vector<int> &value);
+template MANTID_KERNEL_DLL std::string
+toString(const std::vector<size_t> &value);
 
 // this block should generate the vector ones as well
 template MANTID_KERNEL_DLL std::string toString(const std::set<int> &value);

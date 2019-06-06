@@ -349,7 +349,8 @@ public:
 
     // Test that asking not to load the logs did what it should
     // Make sure that we throw if we try to read a log (that shouldn't be there)
-    TS_ASSERT_THROWS(WS->getLog("proton_charge"), std::invalid_argument);
+    TS_ASSERT_THROWS(WS->getLog("proton_charge"),
+                     const std::invalid_argument &);
 
     //----- Now we re-load with precounting and compare memory use ----
     LoadEventNexus ld2;

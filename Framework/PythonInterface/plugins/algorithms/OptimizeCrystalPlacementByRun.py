@@ -46,7 +46,7 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
         stat_col = stats.column('Statistic')
         minR = int(stats.column('RunNumber')[stat_col.index('Minimum')])
         maxR = int(stats.column('RunNumber')[stat_col.index('Maximum')]) + 1
-        AnalysisDataService.remove(stats.getName())
+        AnalysisDataService.remove(stats.name())
         group = []
         for run in range(minR, maxR):
             FilterPeaks(InputWorkspace=ws, OutputWorkspace=str(run), FilterVariable='RunNumber',

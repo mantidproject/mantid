@@ -24,7 +24,7 @@ class SortDetectorsTest(unittest.TestCase):
         self.assertTrue(array_equal(x[0],array([2])))
         self.assertTrue(array_equal(x[1],array([7.])))
         self.assertTrue(array_equal(x[2],array([0, 1, 3, 4, 5, 6, 7, 8, 9])))
-        self.assertTrue(x[3][0]==5.)
+        self.assertEqual(x[3][0], 5.)
 
 if __name__ == '__main__':
     unittest.main()

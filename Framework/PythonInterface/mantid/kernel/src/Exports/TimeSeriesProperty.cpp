@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidPythonInterface/core/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
-#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 

@@ -10,14 +10,20 @@ set(QT5_SRC_FILES
     src/BoolPropertyWidget.cpp
     src/DataSelector.cpp
     src/DropEventHelper.cpp
+    src/EditLocalParameterDialog.cpp
     src/FileDialogHandler.cpp
     src/FilePropertyWidget.cpp
     src/FindFilesThreadPoolManager.cpp
     src/FindFilesWorker.cpp
     src/FindReplaceDialog.cpp
+    src/FitOptionsBrowser.cpp
     src/FitPropertyBrowser.cpp
     src/FlowLayout.cpp
+    src/FunctionBrowser/FunctionBrowserUtils.cpp
     src/FunctionBrowser.cpp
+    src/FunctionModel.cpp
+    src/FunctionMultiDomainPresenter.cpp
+    src/FunctionTreeView.cpp
     src/GenericDialog.cpp
     src/HelpWindow.cpp
     src/Hint.cpp
@@ -25,9 +31,14 @@ set(QT5_SRC_FILES
     # todo: move this to the instrument view library when the slice
     # viewer library is removed
     src/InputController.cpp
+    src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
     src/LineEditWithClear.cpp
     src/ListPropertyWidget.cpp
+    src/LocalParameterEditor.cpp
+    src/LocalParameterItemDelegate.cpp
+    src/LogValueFinder.cpp
+    src/LogValueSelector.cpp
     src/ManageUserDirectories.cpp
     src/MantidDesktopServices.cpp
     src/MantidHelpInterface.cpp
@@ -108,7 +119,8 @@ set(QT5_SRC_FILES
     src/QtPropertyBrowser/qtvariantproperty.cpp
     src/QtPropertyBrowser/StringDialogEditor.cpp
     src/QtPropertyBrowser/StringEditorFactory.cpp
-    src/QtPropertyBrowser/WorkspaceEditorFactory.cpp)
+    src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
+    src/Python/Sip.cpp)
 
 set(
   QT5_MOC_FILES
@@ -120,20 +132,27 @@ set(
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
   inc/MantidQtWidgets/Common/DataSelector.h
+  inc/MantidQtWidgets/Common/EditLocalParameterDialog.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
+  inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
+  inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
+  inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/GenericDialog.h
-  inc/MantidQtWidgets/Common/Hint.h
+  inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/InputController.h
-  inc/MantidQtWidgets/Common/InterfaceManager.h
+  inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
+  inc/MantidQtWidgets/Common/LocalParameterEditor.h
+  inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
+  inc/MantidQtWidgets/Common/LogValueSelector.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
   inc/MantidQtWidgets/Common/MantidHelpWindow.h
@@ -160,7 +179,6 @@ set(
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
   inc/MantidQtWidgets/Common/VatesViewerInterface.h
-  inc/MantidQtWidgets/Common/WorkspaceIcons.h
   inc/MantidQtWidgets/Common/WorkspaceObserver.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
@@ -201,8 +219,13 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FlowLayout.h
+    inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
+    inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
+    inc/MantidQtWidgets/Common/IFunctionView.h
+    inc/MantidQtWidgets/Common/InterfaceManager.h
+    inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
@@ -211,6 +234,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
+    inc/MantidQtWidgets/Common/WorkspaceIcons.h
     inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
     inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
     inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
@@ -233,10 +257,15 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
-    inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h)
+    inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
+    inc/MantidQtWidgets/Common/Python/Sip.h
+    inc/MantidQtWidgets/Common/Python/Object.h
+    inc/MantidQtWidgets/Common/Python/QHashToDict.h)
 
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/DataSelector.ui
+    inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
+    inc/MantidQtWidgets/Common/LogValueSelector.ui
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MWRunFiles.ui
@@ -257,14 +286,19 @@ set(SRC_FILES
     src/BatchAlgorithmRunner.cpp
     src/BoolPropertyWidget.cpp
     src/DropEventHelper.cpp
+    src/EditLocalParameterDialog.cpp
     src/FileDialogHandler.cpp
     src/FilePropertyWidget.cpp
     src/GenericDialog.cpp
     src/HelpWindow.cpp
     src/FlowLayout.cpp
     src/Hint.cpp
+    src/IndirectFitPropertyBrowser.cpp
     src/InterfaceManager.cpp
     src/ListPropertyWidget.cpp
+    src/LocalParameterEditor.cpp
+    src/LocalParameterItemDelegate.cpp
+    src/LogValueFinder.cpp
     src/ManageUserDirectories.cpp
     src/MantidDesktopServices.cpp
     src/MantidDialog.cpp
@@ -354,9 +388,12 @@ set(SRC_FILES
     src/FindReplaceDialog.cpp
     src/FitOptionsBrowser.cpp
     src/FitPropertyBrowser.cpp
+    src/FunctionBrowser/FunctionBrowserUtils.cpp
     src/FunctionBrowser.cpp
+    src/FunctionModel.cpp
+    src/FunctionMultiDomainPresenter.cpp
+    src/FunctionTreeView.cpp
     src/HintingLineEdit.cpp
-    src/IndirectFitPropertyBrowser.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/LineEditWithClear.cpp
@@ -417,9 +454,14 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
+  inc/MantidQtWidgets/Common/EditLocalParameterDialog.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/GenericDialog.h
+  inc/MantidQtWidgets/Common/IFunctionView.h
+  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
+  inc/MantidQtWidgets/Common/LocalParameterEditor.h
+  inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
   inc/MantidQtWidgets/Common/MantidDialog.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
@@ -461,11 +503,12 @@ set(
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
+  inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
+  inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/CatalogSearch.h
   inc/MantidQtWidgets/Common/CatalogSelector.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
-  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MantidTreeModel.h
@@ -534,8 +577,10 @@ set(
   inc/MantidQtWidgets/Common/DistributionOptions.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
+  inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/IProjectSerialisable.h
+  inc/MantidQtWidgets/Common/LogValueFinder.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
   inc/MantidQtWidgets/Common/MantidAlgorithmMetatype.h
   inc/MantidQtWidgets/Common/MdConstants.h
@@ -606,6 +651,8 @@ set(
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
   inc/MantidQtWidgets/Common/ParseKeyValueString.h
   inc/MantidQtWidgets/Common/ParseNumerics.h
+  inc/MantidQtWidgets/Common/FunctionModel.h
+  inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
@@ -673,6 +720,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/CatalogSearch.ui
     inc/MantidQtWidgets/Common/CatalogSelector.ui
+    inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
     inc/MantidQtWidgets/Common/LogValueSelector.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
@@ -775,6 +823,8 @@ mtd_add_qt_library(TARGET_NAME
                    LINUX_INSTALL_RPATH
                    "\$ORIGIN/../${LIB_DIR}")
 
+find_package(BoostPython REQUIRED)
+
 mtd_add_qt_library(TARGET_NAME
                    MantidQtWidgetsCommon
                    QT_VERSION
@@ -794,9 +844,12 @@ mtd_add_qt_library(TARGET_NAME
                    ${_webengine_def}
                    INCLUDE_DIRS
                    inc
+                   ../../../Framework/PythonInterface/core/inc
                    ${PYTHON_INCLUDE_PATH}
                    LINK_LIBS
                    ${TARGET_LIBRARIES}
+                   ${Boost_LIBRARIES}
+                   ${PYTHON_LIBRARIES}
                    QT5_LINK_LIBS
                    Qt5::Concurrent
                    Qt5::Help
@@ -820,6 +873,9 @@ set(TEST_FILES
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
+    test/FunctionModelTest.h
+    test/FunctionMultiDomainPresenterTest.h
+    test/LogValueFinderTest.h
     test/InterfaceManagerTest.h
     test/NonOrthogonalTest.h
     test/ParseKeyValueStringTest.h
@@ -888,6 +944,10 @@ set(QT5_TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h)
 
+if(NOT APPLE)
+  list(APPEND QT5_TEST_FILES test/Python/SipTest.h)
+endif()
+
 mtd_add_qt_tests(TARGET_NAME
                  MantidQtWidgetsCommonTest
                  QT_VERSION
@@ -906,6 +966,9 @@ mtd_add_qt_tests(TARGET_NAME
                  ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
                  LINK_LIBS
                  ${TARGET_LIBRARIES}
+                 ${PYTHON_LIBRARIES}
+                 ${Boost_LIBRARIES}
+                 PythonInterfaceCore
                  DataObjects
                  ${GMOCK_LIBRARIES}
                  ${GTEST_LIBRARIES}

@@ -17,6 +17,23 @@ Improvements
 
 - The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
 
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has a new property, ``OffsetData``, which adds a constant to the data at the very end of the reduction.
+
+- Added two new options to the HRPD scripts `do_solid_angle_corrections` and `subtract_empty_instrument` allowing setting whether or not these actions should take place.
+
+- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` has a new property, ``RemoveTemp``, which allows the user to inspect temporary workspaces is left unchecked.
+
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now correctly takes into account scale for translation. Rotation is now applied before translation to reduce confusion.
+
+- The Pearl scripts now automatically disable attenuation on long-mode.
+
+Bug Fixes
+#########
+
+- HRPD Absorption corrections now correctly takes into account the thickness of the slab.
+
+- Pearl no longer produces an output of NaN when long-mode is changed after focusing.
+
 Engineering Diffraction
 -----------------------
 
@@ -32,6 +49,13 @@ Bug Fixes
 - Prevented crash caused by canceling algorithms called by GUI.
 
 - Prevented GUI breaking bug caused by entering files from the wrong instrument to calibration.
+
+- Prevented issue with reading CSV files on python 3
+
+- GUI now correctly loads the file browsed to instead of looking for a run number in every folder along the path to that file.
+
+- :ref:`MDNorm <algm-MDNorm>` will not crash if the detector is masked in the flux workspace, but not in the input workspace.
+
 
 Single Crystal Diffraction
 --------------------------

@@ -39,7 +39,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/make_unique.h"
 
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -524,7 +523,7 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
   if (m_spectrumInfo)
     m_spectrumDefinitionNeedsUpdate.clear();
   m_spectrumDefinitionNeedsUpdate.resize(count, 1);
-  m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(count);
+  m_spectrumInfo = std::make_unique<Beamline::SpectrumInfo>(count);
   m_spectrumInfoWrapper = nullptr;
 }
 
@@ -1134,7 +1133,7 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
       cacheDefaultDetectorGrouping();
     if (!m_spectrumInfoWrapper) {
       static_cast<void>(detectorInfo());
-      m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(
+      m_spectrumInfoWrapper = std::make_unique<SpectrumInfo>(
           *m_spectrumInfo, *this, m_parmap->mutableDetectorInfo());
     }
   }
@@ -1191,7 +1190,7 @@ ComponentInfo &ExperimentInfo::mutableComponentInfo() {
 void ExperimentInfo::setSpectrumDefinitions(
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
   if (spectrumDefinitions) {
-    m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(
+    m_spectrumInfo = std::make_unique<Beamline::SpectrumInfo>(
         std::move(spectrumDefinitions));
     m_spectrumDefinitionNeedsUpdate.resize(0);
     m_spectrumDefinitionNeedsUpdate.resize(m_spectrumInfo->size(), 0);

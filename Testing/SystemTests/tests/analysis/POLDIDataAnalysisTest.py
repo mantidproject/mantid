@@ -50,7 +50,7 @@ class POLDIDataAnalysisTestSiIndividual(POLDIDataAnalysisTestSi):
 
         # check the refined peaks.
         refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
-        self.assertEquals(refinedPeaks.rowCount(), 11)
+        self.assertEqual(refinedPeaks.rowCount(), 11)
 
         # make sure there are no unindexed peaks
         self.assertFalse(AnalysisDataService.doesExist('poldi_data_6904_peaks_refined_1d_unindexed'))
@@ -86,7 +86,7 @@ class POLDIDataAnalysisTestSiIndividualDiscardUnindexed(POLDIDataAnalysisTestSi)
 
         # check that only one set of peaks has been refined
         refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
-        self.assertEquals(refinedPeaks.rowCount(), 8)
+        self.assertEqual(refinedPeaks.rowCount(), 8)
 
         # Run again with option to keep unindexed peaks.
         output_keep = PoldiDataAnalysis(InputWorkspace=data,
@@ -122,7 +122,7 @@ class POLDIDataAnalysisTestSiIndividualPseudoVoigtTied(POLDIDataAnalysisTestSi):
 
         # check the refined peaks.
         refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
-        self.assertEquals(refinedPeaks.rowCount(), 10)
+        self.assertEqual(refinedPeaks.rowCount(), 10)
 
         # check that raw parameters exist
         self.assertTrue(AnalysisDataService.doesExist('poldi_data_6904_raw_fit_parameters'))
@@ -137,7 +137,7 @@ class POLDIDataAnalysisTestSiIndividualPseudoVoigtTied(POLDIDataAnalysisTestSi):
             if "Mixing" in parameterName:
                 mixingValues.add(rawFitParameters.cell(i, 1))
 
-        self.assertEquals(len(mixingValues), 1)
+        self.assertEqual(len(mixingValues), 1)
 
 
 class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):

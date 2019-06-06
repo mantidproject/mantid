@@ -51,7 +51,7 @@ class MultiPlotWidgetTest(unittest.TestCase):
     def test_add_subplot(self):
         with mock.patch("MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
             self.widget.add_subplot("test")
-            self.assertEquals(qe_patch.call_count,1)
+            self.assertEqual(qe_patch.call_count,1)
 
     def test_plot(self):
         with mock.patch("MultiPlotting.subplot.subplot.subplot.plot") as patch:
@@ -60,7 +60,7 @@ class MultiPlotWidgetTest(unittest.TestCase):
              specNum = 4
              self.widget.plot(subplotName, ws, specNum)
              patch.assert_called_with(subplotName, ws, specNum=specNum)
-             self.assertEquals(patch.call_count,1)
+             self.assertEqual(patch.call_count,1)
 
     def test_setAllValues(self):
         self.widget._context.subplots = data()
@@ -83,7 +83,7 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget.quickEdit._if_empty_close = mock.Mock()
 
         self.widget._update_quick_edit("no match")
-        self.assertEquals(self.widget.quickEdit.rm_subplot.call_count, 1)
+        self.assertEqual(self.widget.quickEdit.rm_subplot.call_count, 1)
 
     def test_updateQuickEdit1Match(self):
         self.widget._context.subplots = data()
@@ -104,8 +104,8 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget.quickEdit.set_plot_y_range = mock.MagicMock()
 
         self.widget._update_quick_edit("three")
-        self.assertEquals(self.widget.quickEdit.set_plot_x_range.call_count,0)
-        self.assertEquals(self.widget.quickEdit.set_plot_y_range.call_count,0)
+        self.assertEqual(self.widget.quickEdit.set_plot_x_range.call_count,0)
+        self.assertEqual(self.widget.quickEdit.set_plot_y_range.call_count,0)
 
     def test_updateQuickEditMany(self):
         self.widget._context.subplots = data()
@@ -171,7 +171,7 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget._context.set_xBounds = mock.MagicMock()
         self.widget.plots.set_plot_x_range = mock.MagicMock()
         self.widget._x_range_changed(xbounds)
-        self.assertEquals(self.widget._context.set_xBounds.call_count, 0)
+        self.assertEqual(self.widget._context.set_xBounds.call_count, 0)
         self.widget.plots.set_plot_x_range.assert_called_with(names,xbounds)
 
     def test_yRangeChanged(self):
@@ -193,26 +193,26 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget._context.set_yBounds = mock.MagicMock()
         self.widget.plots.set_plot_y_range = mock.MagicMock()
         self.widget._y_range_changed(ybounds)
-        self.assertEquals(self.widget._context.set_yBounds.call_count, 0)
+        self.assertEqual(self.widget._context.set_yBounds.call_count, 0)
         self.widget.plots.set_plot_y_range.assert_called_with(names,ybounds)
 
     def test_checkAllErrorsFalse(self):
         context = data()
         self.widget._context.subplots = context
-        self.assertEquals(self.widget._check_all_errors(context.keys()),False)
+        self.assertEqual(self.widget._check_all_errors(context.keys()),False)
 
     def test_checkAllErrorsTrue(self):
         context = data()
         for name in context.keys():
             context[name].error = True
         self.widget._context.subplots = context
-        self.assertEquals(self.widget._check_all_errors(context.keys()),True)
+        self.assertEqual(self.widget._check_all_errors(context.keys()),True)
 
     def test_checkAllErrors1True(self):
         context = data()
         context["two"].error = True
         self.widget._context.subplots = context
-        self.assertEquals(self.widget._check_all_errors(context.keys()),False)
+        self.assertEqual(self.widget._check_all_errors(context.keys()),False)
 
 
 if __name__ == "__main__":

@@ -93,7 +93,7 @@ public:
     TSM_ASSERT_THROWS("The transformation to plane defined by two parallel "
                       "vectors should throw",
                       theCell.setUFromVectors(V3D(0, 1, 0), V3D(0, 1, 0)),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   /** @author Alex Buts, fixed by Andrei Savici */

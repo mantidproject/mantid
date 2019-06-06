@@ -242,27 +242,27 @@ const std::string CutMD::InvAngstromMethod = "Q in A^-1";
 //----------------------------------------------------------------------------------------------
 
 void CutMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "MDWorkspace to slice");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "Projection", "", Direction::Input, PropertyMode::Optional),
       "Projection");
 
-  declareProperty(make_unique<ArrayProperty<double>>("P1Bin"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("P1Bin"),
                   "Projection 1 binning.");
-  declareProperty(make_unique<ArrayProperty<double>>("P2Bin"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("P2Bin"),
                   "Projection 2 binning.");
-  declareProperty(make_unique<ArrayProperty<double>>("P3Bin"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("P3Bin"),
                   "Projection 3 binning.");
-  declareProperty(make_unique<ArrayProperty<double>>("P4Bin"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("P4Bin"),
                   "Projection 4 binning.");
-  declareProperty(make_unique<ArrayProperty<double>>("P5Bin"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("P5Bin"),
                   "Projection 5 binning.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output cut workspace");
   declareProperty("NoPix", false,

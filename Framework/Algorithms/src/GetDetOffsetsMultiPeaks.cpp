@@ -148,12 +148,12 @@ GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void GetDetOffsetsMultiPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D matrix workspace with X values of d-spacing");
 
-  declareProperty(make_unique<ArrayProperty<double>>("DReference"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("DReference"),
                   "Enter a comma-separated list of the expected X-position of "
                   "the centre of the peaks. Only peaks near these positions "
                   "will be fitted.");
@@ -162,7 +162,7 @@ void GetDetOffsetsMultiPeaks::init() {
                   "Optional: The maximum width of the fitting window. If this "
                   "is <=0 the window is not specified to FindPeaks");
 
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "FitwindowTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of the input Tableworkspace containing peak fit window "
@@ -182,19 +182,20 @@ void GetDetOffsetsMultiPeaks::init() {
 
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
-  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::OptionalSave, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
+                                                 FileProperty::OptionalSave,
+                                                 ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
   declareProperty(
-      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+      std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "NumberPeaksWorkspace", "NumberPeaksFitted", Direction::Output),
       "An output workspace containing the offsets.");
-  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
+                                                        Direction::Output),
                   "An output workspace containing the mask.");
   declareProperty("MaxOffset", 1.0,
                   "Maximum absolute value of offsets; default is 1");
@@ -224,24 +225,24 @@ void GetDetOffsetsMultiPeaks::init() {
   gsl_set_error_handler_off();
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputResolutionWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "Name of the optional input resolution (delta(d)/d) workspace. ");
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "SpectraFitInfoTableWorkspace", "FitInfoTable", Direction::Output),
       "Name of the output table workspace containing "
       "spectra peak fit information.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output),
       "Name of an output table workspace containing peaks' offset data.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FittedResolutionWorkspace", "ResolutionWS", Direction::Output),
       "Name of the resolution workspace containing "
       "delta(d)/d for each unmasked spectrum. ");

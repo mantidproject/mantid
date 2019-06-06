@@ -92,8 +92,7 @@ public:
     // Create a top-level PropertyManager, add a PropertyManagerProperty
     // as a nested PropertyManager
     auto topMgr = boost::make_shared<PropertyManager>();
-    topMgr->declareProperty(
-        Mantid::Kernel::make_unique<PropertyManagerProperty>("Args"));
+    topMgr->declareProperty(std::make_unique<PropertyManagerProperty>("Args"));
     topMgr->setProperty("Args", createPropMgrWithInt());
 
     PropertyManager_sptr args;
@@ -241,7 +240,8 @@ public:
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Empty_Name_Is_Not_Accepted() {
-    TS_ASSERT_THROWS(PropertyManagerProperty(""), std::invalid_argument);
+    TS_ASSERT_THROWS(PropertyManagerProperty(""),
+                     const std::invalid_argument &);
   }
 
   void test_String_Not_Holding_Valid_Json_or_Global_PM_Name_Returns_Error() {
@@ -261,7 +261,7 @@ private:
 
     auto testMgr = boost::make_shared<PropertyManager>();
     testMgr->declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("Prop1", 1));
+        std::make_unique<PropertyWithValue<int>>("Prop1", 1));
 
     return testMgr;
   }

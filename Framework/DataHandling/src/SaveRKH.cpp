@@ -28,11 +28,11 @@ using namespace API;
  * Initialise the algorithm
  */
 void SaveRKH::init() {
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The name of the workspace to save");
   const std::vector<std::string> fileExts{".txt", ".Q", ".dat"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, fileExts),
                   "The name to use when saving the file");
   declareProperty(

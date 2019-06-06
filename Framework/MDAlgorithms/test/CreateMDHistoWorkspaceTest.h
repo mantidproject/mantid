@@ -67,7 +67,7 @@ public:
     alg->setProperty(
         "SignalInput",
         "1"); // Only one signal value provided, but NumberOfBins set to 5!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     AnalysisDataService::Instance().remove(outWSName);
   }
 
@@ -77,7 +77,7 @@ public:
     alg->setProperty(
         "ErrorInput",
         "1"); // Only one error value provided, but NumberOfBins set to 5!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     AnalysisDataService::Instance().remove(outWSName);
   }
 
@@ -87,7 +87,7 @@ public:
     alg->setProperty("NumberOfEvents", "1"); // Only one number of events value
                                              // provided, but NumberOfBins set
                                              // to 5!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     AnalysisDataService::Instance().remove(outWSName);
   }
 

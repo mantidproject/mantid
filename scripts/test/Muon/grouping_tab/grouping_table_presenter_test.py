@@ -301,7 +301,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_first_good_data.setChecked(False)
 
         self.assertEqual(self.gui_context['GroupRangeMin'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMin': 1.12})
 
     def test_disabling_range_min_editing_removes_context_variable(self):
         number = '1.12'
@@ -309,7 +309,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_first_good_data.setChecked(False)
 
         self.assertEqual(self.gui_context['GroupRangeMin'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMin': 1.12})
 
         self.view.group_range_use_first_good_data.setChecked(True)
 
@@ -322,7 +322,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_last_data.setChecked(False)
 
         self.assertEqual(self.gui_context['GroupRangeMax'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMax': 1.12})
 
     def test_disabling_range_max_editing_removes_context_variable(self):
         number = '1.12'
@@ -330,7 +330,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_use_last_data.setChecked(False)
 
         self.assertEqual(self.gui_context['GroupRangeMax'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMax': 1.12})
 
         self.view.group_range_use_last_data.setChecked(True)
 

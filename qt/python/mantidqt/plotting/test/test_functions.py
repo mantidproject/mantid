@@ -13,21 +13,22 @@ from __future__ import absolute_import
 from unittest import TestCase, main
 
 # third party imports
-# register mantid projection
-import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
 
 # local imports
+# register mantid projection
+import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.kernel import config
 from mantid.plots import MantidAxes
+from mantid.py3compat import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
                                          manage_workspace_names, plot, plot_from_names,
                                          pcolormesh_from_names)
-from mantid.py3compat import mock
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -67,10 +68,10 @@ class FunctionsTest(TestCase):
         plt.pcolormesh(np.arange(9.).reshape(3,3))
         allowed, msg = can_overplot()
         self.assertFalse(allowed)
-        self.assertTrue(len(msg) > 0)
+        self.assertGreater(len(msg), 0)
 
     def test_current_figure_or_none_returns_none_if_no_figures_exist(self):
-        self.assertTrue(current_figure_or_none() is None)
+        self.assertEqual(current_figure_or_none(), None)
 
     def test_figure_title_with_single_string(self):
         self.assertEqual("test-1", figure_title("test", 1))
@@ -96,7 +97,7 @@ class FunctionsTest(TestCase):
         try:
             result_workspaces = workspace_names_dummy_func([ws_name1])
         except ValueError:
-            self.assertFalse(True, "Passing workspace names should not raise a value error.")
+            self.fail("Passing workspace names should not raise a value error.")
         else:
             # The list of workspace names we pass in should have been converted
             # to a list of workspaces
@@ -209,6 +210,14 @@ class FunctionsTest(TestCase):
         self.assertEqual(len(mantid_ax.lines), 2)
         self.assertIsInstance(mantid_ax, MantidAxes)
 
+    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars(self):
+        config['graph1d.autodistribution'] = 'Off'
+        self._compare_errorbar_labels_and_title()
+
+    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_plot_as_dist(self):
+        config['graph1d.autodistribution'] = 'On'
+        self._compare_errorbar_labels_and_title()
+
     # ------------- Failure tests -------------
 
     def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):
@@ -216,14 +225,14 @@ class FunctionsTest(TestCase):
         table_name = 'test_plot_from_names_with_non_plottable_workspaces_returns_None'
         AnalysisDataService.Instance().addOrReplace(table_name, table)
         result = plot_from_names([table_name], errors=False, overplot=False)
-        self.assertTrue(result is None)
+        self.assertEqual(result, None)
 
     def test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None(self):
         table = WorkspaceFactory.Instance().createTable()
         table_name = 'test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None'
         AnalysisDataService.Instance().addOrReplace(table_name, table)
         result = pcolormesh_from_names([table_name])
-        self.assertTrue(result is None)
+        self.assertEqual(result, None)
 
     def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
         ws = ["some_workspace", self._test_ws]
@@ -250,6 +259,21 @@ class FunctionsTest(TestCase):
                 self.assertTrue(label_part in line.get_label(),
                                 msg="Label fragment '{}' not found in line label".format(label_part))
         return fig
+
+    def _compare_errorbar_labels_and_title(self):
+        ws = self._test_ws
+        ws.setYUnitLabel("MyLabel")
+        ws.getAxis(0).setUnit("TOF")
+        for distribution_ws in [True, False]:
+            ws.setDistribution(distribution_ws)
+            ax = plot([ws], wksp_indices=[1]).get_axes()[0]
+            err_ax = plot([ws], wksp_indices=[1], errors=True).get_axes()[0]
+            # Compare y-labels
+            self.assertEqual(ax.get_ylabel(), err_ax.get_ylabel())
+            # Compare x-labels
+            self.assertEqual(ax.get_xlabel(), err_ax.get_xlabel())
+            # Compare title
+            self.assertEqual(ax.get_title(), err_ax.get_title())
 
 
 if __name__ == '__main__':

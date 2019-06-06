@@ -21,18 +21,18 @@ from sans.common.enums import (SANSInstrument, ISISReductionMode)
 class GuiCommonTest(unittest.TestCase):
     def _assert_same(self, collection1, collection2):
         for element1, element2 in zip(collection1, collection2):
-            self.assertTrue(element1 == element2)
+            self.assertEqual(element1,  element2)
 
     def _assert_same_map(self, map1, map2):
-        self.assertTrue(len(map1) == len(map2))
+        self.assertEqual(len(map1),  len(map2))
 
         for key, value in map1.items():
             self.assertTrue(key in map2)
-            self.assertTrue(map1[key] == map2[key])
+            self.assertEqual(map1[key],  map2[key])
 
     def do_test_reduction_mode_string(self, instrument, reduction_mode, reduction_mode_string):
         setting = get_string_for_gui_from_reduction_mode(reduction_mode, instrument)
-        self.assertTrue(setting == reduction_mode_string)
+        self.assertEqual(setting,  reduction_mode_string)
 
     def test_that_gets_reduction_mode_string_for_gui(self):
         sans_settings = get_reduction_mode_strings_for_gui(SANSInstrument.SANS2D)

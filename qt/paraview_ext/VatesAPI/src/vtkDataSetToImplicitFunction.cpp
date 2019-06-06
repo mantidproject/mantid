@@ -8,7 +8,7 @@
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include <vtkDataSet.h>
@@ -46,7 +46,7 @@ Mantid::Geometry::MDImplicitFunction *vtkDataSetToImplicitFunction::execute() {
   using Mantid::Geometry::MDGeometryXMLDefinitions;
   using Mantid::Geometry::NullImplicitFunction;
   std::unique_ptr<Mantid::Geometry::MDImplicitFunction> function =
-      Mantid::Kernel::make_unique<NullImplicitFunction>();
+      std::make_unique<NullImplicitFunction>();
 
   FieldDataToMetadata convert;
   std::string xmlString =

@@ -30,7 +30,7 @@ public:
     NullWeighting strategy;
     V3D distance;
     TSM_ASSERT_THROWS("NullWeighting should always throw in usage",
-                      strategy.weightAt(distance), std::runtime_error);
+                      strategy.weightAt(distance), const std::runtime_error &);
   }
 
   void testNullWeightingStrategyRectangularThrows() {
@@ -41,7 +41,7 @@ public:
     int iy = 0;
     TSM_ASSERT_THROWS("NullWeighting should always throw in usage",
                       strategy.weightAt(adjX, adjY, ix, iy),
-                      std::runtime_error);
+                      const std::runtime_error &);
   }
 
   void testFlatWeightingStrategyAtRadius() {
@@ -161,9 +161,11 @@ public:
 
   void testGaussiannDConstructor() {
     TSM_ASSERT_THROWS("GaussianWeighting2D should not allow unsigned cuttoff",
-                      GaussianWeightingnD(-1, 1), std::invalid_argument);
+                      GaussianWeightingnD(-1, 1),
+                      const std::invalid_argument &);
     TSM_ASSERT_THROWS("GaussianWeighting2D should not allow unsigned sigma",
-                      GaussianWeightingnD(1, -1), std::invalid_argument);
+                      GaussianWeightingnD(1, -1),
+                      const std::invalid_argument &);
     TSM_ASSERT_THROWS_NOTHING("GaussianWeighting2D should have constructed "
                               "with the valid provided arguments",
                               GaussianWeightingnD(1, 1));

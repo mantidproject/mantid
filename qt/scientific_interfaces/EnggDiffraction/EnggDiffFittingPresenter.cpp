@@ -37,12 +37,11 @@ RunLabel runLabelFromListWidgetLabel(const std::string &listLabel) {
   const auto runNumber = listLabel.substr(0, underscorePosition);
   const auto bank = listLabel.substr(underscorePosition + 1);
 
-  return RunLabel(std::atoi(runNumber.c_str()), std::atoi(bank.c_str()));
+  return RunLabel(runNumber, std::atoi(bank.c_str()));
 }
 
 std::string listWidgetLabelFromRunLabel(const RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
-         std::to_string(runLabel.bank);
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank);
 }
 
 // Remove commas at the start and end of the string,
@@ -202,8 +201,8 @@ EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) const {
   return m_mainParam->outFilesUserDir(addToDir);
 }
 
-std::string
-EnggDiffFittingPresenter::userHDFRunFilename(const int runNumber) const {
+std::string EnggDiffFittingPresenter::userHDFRunFilename(
+    const std::string &runNumber) const {
   return m_mainParam->userHDFRunFilename(runNumber);
 }
 
@@ -318,7 +317,7 @@ void EnggDiffFittingPresenter::processLoad() {
   } catch (std::invalid_argument &ex) {
     warnFileNotFound(ex);
     return;
-  } catch (Mantid::Kernel::Exception::NotFoundError &ex) {
+  } catch (std::runtime_error &ex) {
     warnFileNotFound(ex);
     return;
   }
@@ -505,7 +504,7 @@ void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
       // A userError should be used for this message once the threading has been
       // looked into
       return;
-    } catch (Mantid::API::Algorithm::CancelException) {
+    } catch (const Mantid::API::Algorithm::CancelException &) {
       g_log.error() << "Fit terminated by user.\n";
       return;
     }
@@ -661,8 +660,8 @@ bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
 void EnggDiffFittingPresenter::warnFileNotFound(const std::exception &ex) {
   m_view->showStatus("Error while loading focused run");
   m_view->userWarning("Invalid file selected",
-                      "Mantid could not load the selected file. "
-                      "Are you sure it exists? "
+                      "Mantid could not load the selected file, "
+                      "or was unable to get necessary information."
                       "See the logger for more information");
   g_log.error("Failed to load file. Error message: ");
   g_log.error(ex.what());
@@ -729,7 +728,7 @@ void EnggDiffFittingPresenter::plotAlignedWorkspace(
                             generateXAxisLabel(ws->getAxis(0)->unit()));
       m_view->showStatus("Peaks fitted successfully");
     }
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "
            "engggui_fitting_focused_fitpeaks  workspace. Error "

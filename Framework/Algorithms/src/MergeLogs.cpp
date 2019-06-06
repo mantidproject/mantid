@@ -20,7 +20,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(MergeLogs)
 
 void MergeLogs::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "Workspace to have logs merged");
   declareProperty("LogName1", "",

@@ -18,6 +18,11 @@ New Instruments
 Algorithms
 ----------
 
+New Algorithms
+##############
+
+- :ref:`algm-FlippingRatioCorrectionMD` algorithm was introduced to account for polarization effects on HYSPEC, but it's not instrument specific.
+
 Removed
 #######
 
@@ -36,6 +41,8 @@ Improvements
 
 Bugfixes
 ########
+
+- :ref:`MDNorm <algm-MDNorm>` now allows completely integrating the energy transfer dimension.
 
 Python
 ------

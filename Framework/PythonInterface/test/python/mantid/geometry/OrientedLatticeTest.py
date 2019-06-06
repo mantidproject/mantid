@@ -19,8 +19,8 @@ class OrientedLatticeTest(unittest.TestCase):
 
     def test_simple_values(self):
         u1 = OrientedLattice()
-        self.assertEquals(u1.a1(),1)
-        self.assertEquals(u1.alpha(),90)
+        self.assertEqual(u1.a1(),1)
+        self.assertEqual(u1.alpha(),90)
 
         u2 = OrientedLattice(3,4,5)
         self.assertAlmostEqual(u2.b1(),1./3.,10)

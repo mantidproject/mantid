@@ -53,7 +53,7 @@ bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
         sampleEnvTopic(m_instrumentName +
                        KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX);
 
-    m_decoder = Kernel::make_unique<KafkaHistoStreamDecoder>(
+    m_decoder = std::make_unique<KafkaHistoStreamDecoder>(
         std::make_shared<KafkaBroker>(address.toString()), histoTopic,
         runInfoTopic, spDetInfoTopic, sampleEnvTopic);
   } catch (std::exception &exc) {

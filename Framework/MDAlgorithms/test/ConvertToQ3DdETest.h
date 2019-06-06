@@ -12,7 +12,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -52,7 +52,7 @@ public:
 
     TSM_ASSERT_THROWS(" the workspace X axis does not have units ",
                       pAlg->setPropertyValue("InputWorkspace", ws2D->getName()),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
   }
@@ -498,7 +498,7 @@ public:
   }
 
   ConvertToQ3DdETest() {
-    pAlg = Mantid::Kernel::make_unique<ConvertTo3DdETestHelper>();
+    pAlg = std::make_unique<ConvertTo3DdETestHelper>();
     pAlg->initialize();
     // initialize (load)Matid algorithm framework -- needed to run this test
     // separately

@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {

@@ -95,14 +95,14 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup),
-                        "{0} should be a group workspace".format(wsgroup.getName()))
+                        "{0} should be a group workspace".format(wsgroup.name()))
 
-        self.assertEquals(wsgroup.getNumberOfEntries(),nentries,
-                          "{0} should contain {1} workspaces".format(wsgroup.getName(),nentries))
+        self.assertEqual(wsgroup.getNumberOfEntries(),nentries,
+                          "{0} should contain {1} workspaces".format(wsgroup.name(),nentries))
 
         item = wsgroup.getItem(0)
 
-        name = item.getName()
+        name = item.name()
 
         self.assertTrue(isinstance(item, MatrixWorkspace),
                         "{0} should be a matrix workspace".format(name))
@@ -110,10 +110,10 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self.assertEqual(item.getAxis(0).getUnit().unitID(), "DeltaE",
                          "{0} should have DeltaE units in X-axis".format(name))
 
-        self.assertEquals(item.getNumberHistograms(),nspectra,
+        self.assertEqual(item.getNumberHistograms(),nspectra,
                           "{0} should contain {1} spectra".format(name,nspectra))
 
-        self.assertEquals(item.blocksize(), nbins,
+        self.assertEqual(item.blocksize(), nbins,
                           "{0} should contain {1} bins".format(name, nbins))
 
         self.assertTrue(item.getSampleDetails(),

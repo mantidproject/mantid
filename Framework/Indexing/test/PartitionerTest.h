@@ -40,8 +40,8 @@ public:
   static void destroySuite(PartitionerTest *suite) { delete suite; }
 
   void test_constructor_failures() {
-    TS_ASSERT_THROWS(PartitionerHelper(-1), std::logic_error);
-    TS_ASSERT_THROWS(PartitionerHelper(0), std::logic_error);
+    TS_ASSERT_THROWS(PartitionerHelper(-1), const std::logic_error &);
+    TS_ASSERT_THROWS(PartitionerHelper(0), const std::logic_error &);
     TS_ASSERT_THROWS_NOTHING(PartitionerHelper(
         1, PartitionIndex(13),
         Partitioner::MonitorStrategy::CloneOnEachPartition,
@@ -51,7 +51,7 @@ public:
             1, PartitionIndex(13),
             Partitioner::MonitorStrategy::DedicatedPartition,
             std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)}),
-        std::logic_error);
+        const std::logic_error &);
     TS_ASSERT_THROWS_NOTHING(PartitionerHelper(
         2, PartitionIndex(13), Partitioner::MonitorStrategy::DedicatedPartition,
         std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)}));
@@ -67,10 +67,12 @@ public:
 
   void test_checkValid() {
     PartitionerHelper p(42);
-    TS_ASSERT_THROWS(p.checkValid(PartitionIndex(-1)), std::out_of_range);
+    TS_ASSERT_THROWS(p.checkValid(PartitionIndex(-1)),
+                     const std::out_of_range &);
     TS_ASSERT_THROWS_NOTHING(p.checkValid(PartitionIndex(0)));
     TS_ASSERT_THROWS_NOTHING(p.checkValid(PartitionIndex(41)));
-    TS_ASSERT_THROWS(p.checkValid(PartitionIndex(42)), std::out_of_range);
+    TS_ASSERT_THROWS(p.checkValid(PartitionIndex(42)),
+                     const std::out_of_range &);
   }
 
   void test_numberOfPartitions() {

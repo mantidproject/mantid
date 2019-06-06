@@ -118,29 +118,29 @@ void AlignDetectors::init() {
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<RawCountValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A workspace with units of TOF");
 
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
   const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("CalibrationFile", "",
-                                        FileProperty::OptionalLoad, exts),
+      std::make_unique<FileProperty>("CalibrationFile", "",
+                                     FileProperty::OptionalLoad, exts),
       "Optional: The .cal file containing the position correction factors. "
       "Either this or OffsetsWorkspace needs to be specified.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+      std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
       "this or CalibrationFile needs to be specified.");
@@ -281,7 +281,7 @@ void AlignDetectors::align(const ConversionFactors &converter,
 
       auto &x = outputWS.mutableX(i);
       std::transform(x.begin(), x.end(), x.begin(), toDspacing);
-    } catch (Exception::NotFoundError &) {
+    } catch (const Exception::NotFoundError &) {
       // Zero the data in this case
       outputWS.setHistogram(i, BinEdges(outputWS.x(i).size()),
                             Counts(outputWS.y(i).size()));

@@ -938,7 +938,7 @@ public:
     // Check that the GroupingPattern was recognised as invalid
     TS_ASSERT(!groupAlg.validateInputs()["GroupingPattern"].empty());
     // And that we're not allowed to run
-    TS_ASSERT_THROWS(groupAlg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(groupAlg.execute(), const std::runtime_error &);
   }
 
   void test_grouping_with_time_indexes() {

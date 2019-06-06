@@ -23,7 +23,7 @@
 #include <nexus/NeXusFile.hpp>
 
 #include "MantidKernel/IPropertySettings.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <type_traits>
 #include <vector>
 
@@ -399,12 +399,13 @@ void PropertyWithValue<TYPE>::replaceValidator(IValidator_sptr newValidator) {
 template <typename TYPE>
 std::string
 PropertyWithValue<TYPE>::setValueFromProperty(const Property &right) {
-  auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right);
-  if (!prop) {
-    return "Could not set value: properties have different type.";
+
+  if (auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right)) {
+    m_value = prop->m_value;
+    return "";
+  } else {
+    return setValue(right.value());
   }
-  m_value = prop->m_value;
-  return "";
 }
 
 /**

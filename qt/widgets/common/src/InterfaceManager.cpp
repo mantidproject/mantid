@@ -24,6 +24,7 @@
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Environment.h>
+#include <QPointer>
 #include <QStringList>
 
 using namespace MantidQt::API;
@@ -39,6 +40,12 @@ std::once_flag DLLS_LOADED;
 
 // Track if message saying offline help is unavailable has been shown
 bool offlineHelpMsgDisplayed = false;
+
+QList<QPointer<UserSubWindow>> &existingInterfaces() {
+  static QList<QPointer<UserSubWindow>> existingInterfaces;
+  return existingInterfaces;
+}
+
 } // namespace
 
 // initialise VATES factory
@@ -164,10 +171,38 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
     user_win->setParent(parent);
     user_win->setInterfaceName(interface_name);
     user_win->initializeLayout();
+
+    notifyExistingInterfaces(user_win);
+
   } else {
     g_log.error() << "Error creating interface " << iname << "\n";
   }
   return user_win;
+}
+
+/**
+ * Notifies the existing interfaces that a new interface has been created, and
+ * then notifies the new interface about the other interfaces which already
+ * exist. This can be used to connect signals between interfaces (override
+ * otherUserSubWindowCreated in the interface class).
+ *
+ * @param newWindow :: The interface just created
+ */
+void InterfaceManager::notifyExistingInterfaces(UserSubWindow *newWindow) {
+  auto &existingWindows = existingInterfaces();
+  existingWindows.erase(std::remove_if(existingWindows.begin(),
+                                       existingWindows.end(),
+                                       [](QPointer<UserSubWindow> &window) {
+                                         return window.isNull();
+                                       }),
+                        existingWindows.end());
+
+  for (auto &window : existingWindows)
+    window->otherUserSubWindowCreated(newWindow);
+
+  newWindow->otherUserSubWindowCreated(existingWindows);
+
+  existingWindows.append(newWindow);
 }
 
 /**

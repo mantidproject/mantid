@@ -29,7 +29,7 @@ void PolynomialCorrection::defineProperties() {
   // We need an array property for the coefficients of the polynomial: C0 + C1*x
   // + C2*x*x + ....
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Coefficients",
           boost::make_shared<MandatoryValidator<std::vector<double>>>()),
       "Array Property containing the coefficients of the polynomial correction "

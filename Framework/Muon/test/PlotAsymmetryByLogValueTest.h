@@ -445,7 +445,7 @@ public:
     alg.setPropertyValue("LastRun", firstRun);
     alg.setPropertyValue("OutputWorkspace", ws);
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

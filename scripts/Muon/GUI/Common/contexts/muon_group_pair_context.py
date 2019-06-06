@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
@@ -22,8 +28,8 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = instrument_directory + grouping_file
-    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
-    return new_groups, new_pairs
+    new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
+    return new_groups, new_pairs, default
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -73,6 +79,7 @@ class MuonGroupPairContext(object):
     def __init__(self, check_group_contains_valid_detectors=lambda x : True):
         self._groups = []
         self._pairs = []
+        self._selected = ''
 
         self.message_notifier = MessageNotifier(self)
 
@@ -97,6 +104,15 @@ class MuonGroupPairContext(object):
 
     def clear_pairs(self):
         self._pairs = []
+
+    @property
+    def selected(self):
+        return self._selected
+
+    @selected.setter
+    def selected(self, value):
+        if value in self.group_names + self.pair_names and self._selected != value:
+            self._selected = value
 
     @property
     def group_names(self):
@@ -139,10 +155,46 @@ class MuonGroupPairContext(object):
         self[name].show(str(run))
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
-        self._groups, self._pairs = get_default_grouping(workspace, instrument, main_field_direction)
+        self._groups, self._pairs, self._selected = get_default_grouping(workspace, instrument, main_field_direction)
 
     def _check_name_unique(self, name):
         for item in self._groups + self.pairs:
             if item.name == name:
                 return False
         return True
+
+    def get_group_workspace_names(self, runs, groups, rebin):
+        workspace_list = []
+
+        for group_name in groups:
+            group = self[group_name]
+            if rebin:
+                sub_list = group.get_asymmetry_workspace_names_rebinned(runs)
+            else:
+                sub_list = group.get_asymmetry_workspace_names(runs)
+
+            workspace_list += sub_list
+
+        return workspace_list
+
+    def get_pair_workspace_names(self, runs, pairs, rebin):
+        workspace_list = []
+
+        for pair_name in pairs:
+            pair = self[pair_name]
+            if rebin:
+                sub_list = pair.get_asymmetry_workspace_names_rebinned(runs)
+            else:
+                sub_list = pair.get_asymmetry_workspace_names(runs)
+
+            workspace_list += sub_list
+
+        return workspace_list
+
+    def get_equivalent_group_pair(self, workspace_name):
+        for item in self._groups + self._pairs:
+            equivalent_name = item.get_rebined_or_unbinned_version_of_workspace_if_it_exists(workspace_name)
+            if equivalent_name:
+                return equivalent_name
+
+        return None

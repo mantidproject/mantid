@@ -47,11 +47,11 @@ public:
   size_t size() const;
 
 private:
-  std::set<int> getAllRunNumbers() const;
+  std::set<std::string> getAllRunNumbers() const;
 
   void validateBankID(const size_t bank) const;
 
-  std::array<std::unordered_map<int, T>, NumBanks> m_map;
+  std::array<std::unordered_map<std::string, T>, NumBanks> m_map;
 };
 
 } // namespace CustomInterfaces

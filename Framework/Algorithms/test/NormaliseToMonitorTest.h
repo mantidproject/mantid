@@ -93,7 +93,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
   if (!norm.isInitialized())
     norm.initialize();
   // Check it fails if properties haven't been set
-  TS_ASSERT_THROWS(norm.execute(), std::runtime_error)
+  TS_ASSERT_THROWS(norm.execute(), const std::runtime_error &)
   TS_ASSERT(!norm.isExecuted())
   TS_ASSERT_THROWS_NOTHING(norm.setPropertyValue("InputWorkspace", "normMon"))
   std::string outputWS("normMon");
@@ -337,7 +337,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         norm5.setPropertyValue("OutputWorkspace", "normMon5"));
 
-    auto pID = Mantid::Kernel::make_unique<MonIDPropChanger>(
+    auto pID = std::make_unique<MonIDPropChanger>(
         "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace");
 
     // property is enabled but the conditions have not changed;
@@ -378,7 +378,7 @@ public:
         norm6.setPropertyValue("InputWorkspace", "normMon"));
     TS_ASSERT_THROWS_NOTHING(
         norm6.setPropertyValue("OutputWorkspace", "normMon6"));
-    auto pID = Mantid::Kernel::make_unique<MonIDPropChanger>(
+    auto pID = std::make_unique<MonIDPropChanger>(
         "InputWorkspace", "MonitorSpectrum", "MonitorWorkspace");
     // first time in a row the condition has changed as it shluld read the
     // monitors from the workspace

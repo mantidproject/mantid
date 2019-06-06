@@ -8,16 +8,17 @@
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadOff.h"
-#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 
-#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 
-#include <Poco/File.h>
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -35,22 +36,22 @@ void LoadSampleShape::init() {
 
   // input workspace
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
       "The name of the workspace containing the instrument to add the shape");
 
   // shape file
   const std::vector<std::string> extensions{".stl", ".off"};
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
-      "The path name of the file containing the shape");
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
+                  "The path name of the file containing the shape");
 
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
 
   // Output workspace
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace that will contain the loaded "
                   "shape of the sample");
 }
@@ -75,19 +76,11 @@ void LoadSampleShape::exec() {
   if (filetype == "off") {
     auto offReader = LoadOff(filename, scaleType);
     shape = offReader.readOFFshape();
-  } else /* stl */ {
-
-    auto asciiStlReader = LoadAsciiStl(filename, scaleType);
-    auto binaryStlReader = LoadBinaryStl(filename, scaleType);
-    if (binaryStlReader.isBinarySTL(filename)) {
-      shape = binaryStlReader.readStl();
-    } else if (asciiStlReader.isAsciiSTL(filename)) {
-      shape = asciiStlReader.readStl();
-    } else {
-      throw Kernel::Exception::ParseError(
-          "Could not read file, did not match either STL Format", filename, 0);
-    }
+  } else {
+    shape = loadStl(filename, scaleType);
   }
+  // rotate shape
+  rotate(*shape, inputWS);
 
   // Put shape into sample.
   Sample &sample = outputWS->mutableSample();
@@ -97,5 +90,38 @@ void LoadSampleShape::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
+/**
+ * Rotates the Shape by a provided matrix
+ * @param sampleMesh The Shape to rotate
+ * @param inputWS The workspace to get the rotation from
+ * @returns a shared pointer to the newly rotated Shape
+ */
+void rotate(MeshObject &sampleMesh, MatrixWorkspace_const_sptr inputWS) {
+  const std::vector<double> rotationMatrix =
+      inputWS->run().getGoniometer().getR();
+  sampleMesh.rotate(rotationMatrix);
+}
+
+/**
+ * Handles the loading of STL files
+ * @param filename The file to load
+ * @param scaleType The units of the scale to use mm, cm or m
+ * @returns a shared pointer to the loaded meshobject
+ */
+boost::shared_ptr<MeshObject> loadStl(std::string filename,
+                                      ScaleUnits scaleType) {
+  boost::shared_ptr<MeshObject> shape = nullptr;
+  auto asciiStlReader = LoadAsciiStl(filename, scaleType);
+  auto binaryStlReader = LoadBinaryStl(filename, scaleType);
+  if (binaryStlReader.isBinarySTL(filename)) {
+    shape = binaryStlReader.readStl();
+  } else if (asciiStlReader.isAsciiSTL(filename)) {
+    shape = asciiStlReader.readStl();
+  } else {
+    throw Kernel::Exception::ParseError(
+        "Could not read file, did not match either STL Format", filename, 0);
+  }
+  return shape;
+}
 } // namespace DataHandling
 } // namespace Mantid

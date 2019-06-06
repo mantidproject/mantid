@@ -61,6 +61,7 @@ procedure is used when trying to find a named definition, e.g ``CRYO-01``:
 
   - otherwise if the file does not exist continue onto the next ``INSTDIR``
 
+  - repeat for the facility directories if not found in for the specific instrument
 
 Geometry
 ########
@@ -138,6 +139,19 @@ The following example uses a test file called ``CRYO-01.xml`` in the
              Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
                        'SampleNumberDensity': 0.1})
+
+**Example - Specify height and mass of preset cylinder sample**
+
+.. testcode:: Ex2
+
+   # A fake host workspace, replace this with your real one.
+   ws = CreateSampleWorkspace()
+   # Use geometry from environment but set different height for sample
+   # and calculate density with supplied sample mass
+   SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
+             Geometry={'Height': 4.0},
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                       'SampleMass': 3.0})
 
 **Example - Override complete sample geometry**
 

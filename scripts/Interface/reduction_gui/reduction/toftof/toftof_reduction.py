@@ -451,7 +451,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             self.l("names = []")
             self.l("for ws in {}:" .format(gDataRuns))
-            self.l("    name = ws.getName() + 'Norm'")
+            self.l("    name = ws.name() + 'Norm'")
             self.l("    names.append(name)")
             self.l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)"
                    .format(self.get_time('ws')))

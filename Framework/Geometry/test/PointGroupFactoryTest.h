@@ -58,7 +58,7 @@ public:
         PointGroupFactory::Instance().createPointGroup("triclinic"));
 
     TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("cubicC"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testGetAllPointGroupSymbols() {
@@ -96,7 +96,7 @@ public:
 
     TS_ASSERT_THROWS(
         PointGroupFactory::Instance().createPointGroup("monoclinicA"),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     PointGroupFactory::Instance().subscribePointGroup("monoclinicA", "x,y,-z",
                                                       "test");

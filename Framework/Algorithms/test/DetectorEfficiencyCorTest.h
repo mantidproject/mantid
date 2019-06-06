@@ -53,7 +53,7 @@ public:
     corrector.setProperty("InputWorkspace", dummyWS);
     corrector.setPropertyValue("OutputWorkspace", "__unused");
 
-    TS_ASSERT_THROWS(corrector.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(corrector.execute(), const std::invalid_argument &);
   }
 
   void testDataWithUngroupedDetectors() {

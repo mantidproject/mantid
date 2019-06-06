@@ -12,7 +12,7 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
