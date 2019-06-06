@@ -78,32 +78,32 @@ void LoadDiffCal::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
   const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
-  declareProperty(Kernel::make_unique<FileProperty>(PropertyNames::CAL_FILE, "",
-                                                    FileProperty::Load, exts),
+  declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "",
+                                                 FileProperty::Load, exts),
                   "Path to the .h5 file.");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
                       std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
                       PropertyNames::MAKE_GRP, true, Direction::Input),
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
                       PropertyNames::MAKE_CAL, true, Direction::Input),
                   "Set to true to create a CalibrationWorkspace with called "
                   "WorkspaceName_cal.");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK,
-                                                   true, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK, true,
+                                                Direction::Input),
       "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
-                                                          Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
+                                                       Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_cal', '_mask' appended to them.");
 
@@ -111,7 +111,7 @@ void LoadDiffCal::init() {
   declareProperty("TofMin", 0., "Minimum for TOF axis. Defaults to 0.");
   declareProperty("TofMax", EMPTY_DBL(),
                   "Maximum for TOF axis. Defaults to Unused.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
                       "FixConversionIssues", true, Direction::Input),
                   "Set DIFA and TZERO to zero if there is an error and the "
                   "pixel is masked");
@@ -134,7 +134,7 @@ bool endswith(const std::string &str, const std::string &ending) {
 void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
                         GroupingWorkspace_sptr wksp) {
   alg->declareProperty(
-      Kernel::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
       "Set the the output GroupingWorkspace, if any.");
   alg->setProperty("OutputGroupingWorkspace", wksp);
@@ -143,7 +143,7 @@ void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
 void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
                        MaskWorkspace_sptr wksp) {
   alg->declareProperty(
-      Kernel::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
       "Set the the output MaskWorkspace, if any.");
   alg->setProperty("OutputMaskWorkspace", wksp);
@@ -152,7 +152,7 @@ void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
 void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
                       ITableWorkspace_sptr wksp) {
   alg->declareProperty(
-      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "OutputCalWorkspace", prefix + "_cal", Direction::Output),
       "Set the output Diffraction Calibration workspace, if any.");
   alg->setProperty("OutputCalWorkspace", wksp);

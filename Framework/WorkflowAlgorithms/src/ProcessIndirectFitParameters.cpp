@@ -238,7 +238,7 @@ void ProcessIndirectFitParameters::init() {
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The table workspace to convert to a MatrixWorkspace.");
 
@@ -247,7 +247,7 @@ void ProcessIndirectFitParameters::init() {
       "The column in the table to use for the x values.", Direction::Input);
 
   declareProperty(
-      make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           "ParameterNames",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "List of the parameter names to add to the workspace.");
@@ -268,7 +268,7 @@ void ProcessIndirectFitParameters::init() {
       "EndRowIndex", EMPTY_INT(), positiveInt,
       "The end row index to include in the output matrix workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace");
 }

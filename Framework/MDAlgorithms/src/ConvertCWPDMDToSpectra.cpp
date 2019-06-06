@@ -34,25 +34,25 @@ const double BIGNUMBER = 1.0E100;
 
 void ConvertCWPDMDToSpectra::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputMonitorWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores monitor "
                   "counts from a constant-wave powder diffraciton experiment.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("BinningParams"),
+      std::make_unique<ArrayProperty<double>>("BinningParams"),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
       "pairs.\n"
       "Negative width values indicate logarithmic binning.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace for reduced data.");
 
@@ -75,7 +75,7 @@ void ConvertCWPDMDToSpectra::init() {
   declareProperty("ScaleFactor", 1.0,
                   "Scaling factor on the normalized counts.");
 
-  declareProperty(make_unique<ArrayProperty<int>>("ExcludedDetectorIDs"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("ExcludedDetectorIDs"),
                   "A comma separated list of integers to indicate the IDs of "
                   "the detectors that will be excluded from binning.");
 

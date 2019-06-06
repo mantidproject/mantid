@@ -7,7 +7,6 @@
 #ifndef MANTID_PARALLEL_EVENTLOADERHELPERS_H_
 #define MANTID_PARALLEL_EVENTLOADERHELPERS_H_
 
-#include "MantidKernel/make_unique.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"

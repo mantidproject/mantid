@@ -242,13 +242,13 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void ReplicateMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "ShapeWorkspace", "", Direction::Input),
                   "An input workspace defining the shape of the output.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "DataWorkspace", "", Direction::Input),
                   "An input workspace containing the data to replicate.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace with replicated data.");
 }

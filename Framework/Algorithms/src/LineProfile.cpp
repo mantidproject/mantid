@@ -43,7 +43,6 @@ using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::ListValidator;
 using Mantid::Kernel::MandatoryValidator;
-using Mantid::Kernel::make_unique;
 
 namespace {
 /// An enum specifying a line profile orientation.
@@ -135,7 +134,7 @@ void setAxesAndUnits(Workspace2D &outWS, const MatrixWorkspace &ws,
   std::vector<double> vertBins(2);
   vertBins.front() = dir == LineDirection::horizontal ? box.top : box.left;
   vertBins.back() = dir == LineDirection::horizontal ? box.bottom : box.right;
-  auto outVertAxis = make_unique<BinEdgeAxis>(vertBins);
+  auto outVertAxis = std::make_unique<BinEdgeAxis>(vertBins);
   axisIndex = dir == LineDirection::horizontal ? 1 : 0;
   if (ws.getAxis(axisIndex)->isSpectra()) {
     outVertAxis->setUnit("Empty");
@@ -329,11 +328,11 @@ void LineProfile::init() {
   const auto inputWorkspaceValidator = boost::make_shared<CompositeValidator>();
   inputWorkspaceValidator->add(boost::make_shared<CommonBinsValidator>());
   inputWorkspaceValidator->add(boost::make_shared<IncreasingAxisValidator>());
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
                       inputWorkspaceValidator),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
                   "A single histogram workspace containing the profile.");
   declareProperty(PropertyNames::CENTRE, EMPTY_DBL(), mandatoryDouble,

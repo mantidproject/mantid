@@ -326,16 +326,16 @@ using namespace API;
  */
 void FakeISISHistoDAE::init() {
   declareProperty(
-      make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
       "Number of periods.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpectra", 100,
+                                                           Direction::Input),
+                  "Number of spectra.");
   declareProperty(
-      make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input),
-      "Number of spectra.");
-  declareProperty(
-      make_unique<PropertyWithValue<int>>("NBins", 30, Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("NBins", 30, Direction::Input),
       "Number of bins.");
   declareProperty(
-      make_unique<PropertyWithValue<int>>("Port", 56789, Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("Port", 56789, Direction::Input),
       "The port to broadcast on (default 56789, ISISDAE 6789).");
 }
 

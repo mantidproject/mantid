@@ -8,7 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
@@ -76,29 +76,29 @@ std::vector<Command_uptr> OneLevelTreeManager::publishCommands() {
 
   std::vector<Command_uptr> commands;
 
-  addCommand(commands, make_unique<OpenTableCommand>(m_presenter));
-  addCommand(commands, make_unique<NewTableCommand>(m_presenter));
-  addCommand(commands, make_unique<SaveTableCommand>(m_presenter));
-  addCommand(commands, make_unique<SaveTableAsCommand>(m_presenter));
-  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<ImportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<ExportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<OptionsCommand>(m_presenter));
-  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<ProcessCommand>(m_presenter));
-  addCommand(commands, make_unique<PauseCommand>(m_presenter));
-  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<PlotRowCommand>(m_presenter));
-  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<AppendRowCommand>(m_presenter));
-  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<CopySelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<CutSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<PasteSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<ClearSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DeleteRowCommand>(m_presenter));
+  addCommand(commands, std::make_unique<OpenTableCommand>(m_presenter));
+  addCommand(commands, std::make_unique<NewTableCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SaveTableCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SaveTableAsCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SeparatorCommand>(m_presenter));
+  addCommand(commands, std::make_unique<ImportTableCommand>(m_presenter));
+  addCommand(commands, std::make_unique<ExportTableCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SeparatorCommand>(m_presenter));
+  addCommand(commands, std::make_unique<OptionsCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SeparatorCommand>(m_presenter));
+  addCommand(commands, std::make_unique<ProcessCommand>(m_presenter));
+  addCommand(commands, std::make_unique<PauseCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SeparatorCommand>(m_presenter));
+  addCommand(commands, std::make_unique<PlotRowCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SeparatorCommand>(m_presenter));
+  addCommand(commands, std::make_unique<AppendRowCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SeparatorCommand>(m_presenter));
+  addCommand(commands, std::make_unique<CopySelectedCommand>(m_presenter));
+  addCommand(commands, std::make_unique<CutSelectedCommand>(m_presenter));
+  addCommand(commands, std::make_unique<PasteSelectedCommand>(m_presenter));
+  addCommand(commands, std::make_unique<ClearSelectedCommand>(m_presenter));
+  addCommand(commands, std::make_unique<SeparatorCommand>(m_presenter));
+  addCommand(commands, std::make_unique<DeleteRowCommand>(m_presenter));
   return commands;
 }
 

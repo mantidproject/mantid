@@ -354,18 +354,18 @@ void LoadSassena::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   const std::vector<std::string> exts{".h5", ".hd5"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, exts),
                   "A Sassena file");
   // Declare the OutputWorkspace property
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the group workspace to be created.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                       "TimeUnit", 1.0, Kernel::Direction::Input),
                   "The Time unit in between data points, in picoseconds. "
                   "Default is 1.0 picosec.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "SortByQVectors", true, Kernel::Direction::Input),
                   "Sort structure factors by increasing momentum transfer?");
 }

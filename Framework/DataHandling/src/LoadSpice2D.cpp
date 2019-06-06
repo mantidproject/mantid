@@ -27,7 +27,7 @@
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -137,10 +137,10 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadSpice2D::init() {
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input xml file to load");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the Output workspace");
 

@@ -27,19 +27,19 @@ using namespace API;
 using namespace DataObjects;
 
 void ExtractFFTSpectrum::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The input workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(make_unique<WorkspaceProperty<>>("InputImagWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputImagWorkspace",
+                                                        "", Direction::Input,
+                                                        PropertyMode::Optional),
                   "The optional input workspace for the imaginary part.");
   declareProperty("FFTPart", 2, boost::make_shared<BoundedValidator<int>>(0, 5),
                   "Spectrum number, one of the six possible spectra output by "
                   "the FFT algorithm");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The output workspace.");
 }
 

@@ -1067,16 +1067,16 @@ FitPeak::FitPeak()
 /** Declare properties
  */
 void FitPeak::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace for peak fitting.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing fitted peak.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "ParameterTableWorkspace", "", Direction::Output),
       "Name of the table workspace containing the fitted parameters. ");
 
@@ -1092,16 +1092,15 @@ void FitPeak::init() {
                   boost::make_shared<StringListValidator>(peakFullNames),
                   "Peak function type. ");
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<string>>("PeakParameterNames"),
-      "List of peak parameter names. ");
+  declareProperty(std::make_unique<ArrayProperty<string>>("PeakParameterNames"),
+                  "List of peak parameter names. ");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
+      std::make_unique<ArrayProperty<double>>("PeakParameterValues"),
       "List of peak parameter values.  They must have a 1-to-1 "
       "mapping to PeakParameterNames list. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "FittedPeakParameterValues", Direction::Output),
                   "Fitted peak parameter values. ");
 
@@ -1113,25 +1112,25 @@ void FitPeak::init() {
                   "Type of Background.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<string>>("BackgroundParameterNames"),
+      std::make_unique<ArrayProperty<string>>("BackgroundParameterNames"),
       "List of background parameter names. ");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
+      std::make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
       "List of background parameter values.  "
       "They must have a 1-to-1 mapping to BackgroundParameterNames list. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "FittedBackgroundParameterValues", Direction::Output),
                   "Fitted background parameter values. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("FitWindow"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("FitWindow"),
                   "Enter a comma-separated list of the expected X-position of "
                   "windows to fit. "
                   "The number of values must be 2.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PeakRange"),
+      std::make_unique<ArrayProperty<double>>("PeakRange"),
       "Enter a comma-separated list of expected x-position as peak range. "
       "The number of values must be 2.");
 
