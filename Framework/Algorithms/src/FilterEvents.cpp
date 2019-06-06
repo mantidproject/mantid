@@ -1389,16 +1389,17 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 
     if (wsgroup > 0) {
       if (descriptiveNames) {
-        size_t startIndex;
+        size_t startIndex = 0;
         for (size_t itr = 0; itr < m_vecSplitterGroup.size(); ++itr) {
           if (m_vecSplitterGroup[itr] == wsgroup)
             startIndex = itr;
         }
-        auto startTime = (m_vecSplitterTime[startIndex] -
-                          m_runStartTime.totalNanoseconds()) /
-                         1.E9;
-        auto stopTime = (m_vecSplitterTime[startIndex + 1] -
-                         m_runStartTime.totalNanoseconds()) /
+        auto startTime =
+            static_cast<double>(m_vecSplitterTime[startIndex] -
+                                m_runStartTime.totalNanoseconds()) /
+            1.E9;
+        auto stopTime = static_cast<double>(m_vecSplitterTime[startIndex + 1] -
+                                            m_runStartTime.totalNanoseconds()) /
                         1.E9;
         wsname << m_outputWSNameBase << "_" << startTime << "_" << stopTime;
       } else {

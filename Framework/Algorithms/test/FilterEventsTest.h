@@ -1190,8 +1190,8 @@ public:
     TS_ASSERT_EQUALS(output_ws_vector[0], expectedName);
 
     for (int i = 0; i < 5; i++) {
-      auto t0 = i * pulsedt / 1.E9;
-      auto t1 = (i + 1) * pulsedt / 1.E9;
+      auto t0 = static_cast<double>(i * pulsedt) / 1.E9;
+      auto t1 = static_cast<double>((i + 1) * pulsedt) / 1.E9;
       std::stringstream expectedName;
       expectedName << "BaseName_" << t0 << "_" << t1;
       TS_ASSERT_EQUALS(output_ws_vector[i + 1], expectedName.str());
