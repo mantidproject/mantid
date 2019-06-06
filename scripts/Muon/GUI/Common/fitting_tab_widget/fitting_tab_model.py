@@ -123,6 +123,9 @@ class FittingTabModel(object):
         return function_object_list, output_status_list, output_chi_squared_list
 
     def get_function_name(self, function):
+        if function is None:
+            return ''
+
         if function.getNumberDomains() > 1:
             function_temp = function.getFunction(0)
         else:
