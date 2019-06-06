@@ -1005,11 +1005,6 @@ int64_t timeInSecondsToNanoseconds(const int64_t offset_ns,
                                    const double time_sec) {
   return offset_ns + static_cast<int64_t>(time_sec * 1.E9);
 }
-
-int64_t timeInNanosecondsToSeconds(const int64_t offset_ns,
-                                   const double time_sec) {
-  return offset_ns + time_sec / 1.E9;
-}
 } // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
@@ -1150,7 +1145,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   if (descriptiveNames) {
     splitByTime = true;
     if ((m_hasInfoWS && infomap[0].find("Log") != std::string::npos) ||
-        numnewws - 1 != m_splitters.size()) {
+        m_targetWorkspaceIndexSet.size() - 1 != m_splitters.size()) {
       splitByTime = false;
     }
   }
@@ -1175,7 +1170,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
         auto infoiter = infomap.find(wsgroup);
         if (infoiter != infomap.end()) {
           std::string name = infoiter->second;
-          name.erase(remove_if(name.begin(), name.end(), isspace), name.end());
+          name.erase(std::remove_if(name.begin(), name.end(), isspace), name.end());
           wsname << name;
         } else {
           wsname << wsgroup + delta_wsindex;
@@ -1395,17 +1390,17 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     if (wsgroup > 0) {
       if (descriptiveNames) {
         int startIndex;
-        for (auto itr = 0; itr < m_vecSplitterGroup.size(); ++itr) {
+        for (size_t itr = 0; itr < m_vecSplitterGroup.size(); ++itr) {
           if (m_vecSplitterGroup[itr] == wsgroup)
             startIndex = itr;
         }
-        auto startTime =
-            m_vecSplitterTime[startIndex] - m_runStartTime.totalNanoseconds();
-        auto stopTime = m_vecSplitterTime[startIndex + 1] -
-                        m_runStartTime.totalNanoseconds();
-        wsname << m_outputWSNameBase << "_"
-               << timeInNanosecondsToSeconds(0, startTime) << "_"
-               << timeInNanosecondsToSeconds(0, stopTime);
+        auto startTime = (m_vecSplitterTime[startIndex] -
+                          m_runStartTime.totalNanoseconds()) /
+                         1.E9;
+        auto stopTime = (m_vecSplitterTime[startIndex + 1] -
+                         m_runStartTime.totalNanoseconds()) /
+                        1.E9;
+        wsname << m_outputWSNameBase << "_" << startTime << "_" << stopTime;
       } else {
         std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
         wsname << m_outputWSNameBase << "_" << target_name;
