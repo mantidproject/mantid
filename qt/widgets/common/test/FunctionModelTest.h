@@ -51,8 +51,8 @@ public:
     model.setCurrentDomainIndex(1);
     TS_ASSERT_EQUALS(model.currentDomainIndex(), 1);
     TS_ASSERT_THROWS_EQUALS(model.setCurrentDomainIndex(2),
-      std::runtime_error & e, std::string(e.what()),
-      "Domain index is out of range: 2 out of 2");
+                            std::runtime_error & e, std::string(e.what()),
+                            "Domain index is out of range: 2 out of 2");
     {
       auto fun = model.getCurrentFunction();
       TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
@@ -72,8 +72,8 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
     }
     TS_ASSERT_THROWS_EQUALS(model.getSingleFunction(2), std::runtime_error & e,
-      std::string(e.what()),
-      "Domain index is out of range: 2 out of 2");
+                            std::string(e.what()),
+                            "Domain index is out of range: 2 out of 2");
     {
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->name(), "MultiDomainFunction");
@@ -121,7 +121,8 @@ public:
     MultiDomainFunctionModel model;
     {
       model.addFunction("", "name=LinearBackground,A0=1,A1=2");
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 2);
@@ -130,7 +131,8 @@ public:
     }
     {
       model.addFunction("", "name=LinearBackground,A0=1,A1=2");
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 4);
@@ -141,7 +143,9 @@ public:
     }
     {
       model.addFunction("", "name=LinearBackground,A0=1,A1=2");
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6;name=LinearBackground,A0=7,A1=8");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6;"
+          "name=LinearBackground,A0=7,A1=8");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 6);
@@ -156,10 +160,12 @@ public:
 
   void test_add_function_nested() {
     MultiDomainFunctionModel model;
-    model.addFunction("", "name=LinearBackground,A0=1,A1=2;(composite=CompositeFunction)");
+    model.addFunction(
+        "", "name=LinearBackground,A0=1,A1=2;(composite=CompositeFunction)");
     {
       model.addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 4);
@@ -170,8 +176,9 @@ public:
     }
     {
       model.addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4;"
-        "(name=LinearBackground,A0=5,A1=6;name=LinearBackground,A0=7,A1=8)");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4;"
+          "(name=LinearBackground,A0=5,A1=6;name=LinearBackground,A0=7,A1=8)");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 6);
@@ -184,8 +191,10 @@ public:
     }
     {
       model.addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4;"
-        "(name=LinearBackground,A0=5,A1=6;name=LinearBackground,A0=7,A1=8;name=LinearBackground,A0=9,A1=10)");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4;"
+          "(name=LinearBackground,A0=5,A1=6;name=LinearBackground,A0=7,A1=8;"
+          "name=LinearBackground,A0=9,A1=10)");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 8);
@@ -202,9 +211,13 @@ public:
 
   void test_remove_function() {
     MultiDomainFunctionModel model;
-    model.addFunction("", "name=LinearBackground,A0=1,A1=2;name=LinearBackground,A0=1,A1=2;name=LinearBackground,A0=1,A1=2");
+    model.addFunction("", "name=LinearBackground,A0=1,A1=2;name="
+                          "LinearBackground,A0=1,A1=2;name=LinearBackground,A0="
+                          "1,A1=2");
     {
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6;name=LinearBackground,A0=7,A1=8");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6;"
+          "name=LinearBackground,A0=7,A1=8");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 6);
@@ -217,7 +230,8 @@ public:
     }
     {
       model.removeFunction("f1.");
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 4);
@@ -228,7 +242,8 @@ public:
     }
     {
       model.removeFunction("f1.");
-      auto testFun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=3,A1=4");
+      auto testFun = FunctionFactory::Instance().createInitialized(
+          "name=LinearBackground,A0=3,A1=4");
       model.updateMultiDatasetParameters(*testFun);
       auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 2);
