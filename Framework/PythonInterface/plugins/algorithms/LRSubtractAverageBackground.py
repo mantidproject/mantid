@@ -61,14 +61,21 @@ class LRSubtractAverageBackground(PythonAlgorithm):
 
         sum_peak = self.getProperty("SumPeak").value
 
+        # Number of pixels in each direction
         detector = self.getProperty("TypeOfDetector").value
         if detector == "LinearDetector":
             number_of_pixels_x = 1
             number_of_pixels_y = int(workspace.getNumberHistograms())
         else:
             # TODO: revisit this when we update the IDF
-            number_of_pixels_x = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-            number_of_pixels_y = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            if workspace.getInstrument().hasParameter("number-of-x-pixels"):
+                number_of_pixels_x = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            else:
+                raise RuntimeError("Instrument does not have parameter number-of-x-pixels")
+            if workspace.getInstrument().hasParameter("number-of-x-pixels").size() != 0:
+                number_of_pixels_y = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            else:
+                raise RuntimeError("Instrument does not have parameter number-of-y-pixels")
 
         left_bck = None
         if peak_min > bck_min:
@@ -113,17 +120,18 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                              YPixelMax=bck_max,
                              ErrorWeighting = True,
                              SumPixels=True, NormalizeSum=True)
+
+        output_name = self.getPropertyValue("OutputWorkspace")
         # Integrate over the low-res direction
-        workspace = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                           NXPixel=number_of_pixels_x,
-                           NYPixel=number_of_pixels_y,
-                           XPixelMin=x_min,
-                           XPixelMax=x_max,
-                           ConvertToQ=False,
-                           SumPixels=sum_peak,
-                           OutputWorkspace=str(workspace))
-        workspace = Minus(LHSWorkspace=workspace, RHSWorkspace=average,
-                          OutputWorkspace=str(workspace))
+        output = RefRoi(InputWorkspace=workspace, IntegrateY=False,
+                        NXPixel=number_of_pixels_x,
+                        NYPixel=number_of_pixels_y,
+                        XPixelMin=x_min,
+                        XPixelMax=x_max,
+                        ConvertToQ=False,
+                        SumPixels=sum_peak,
+                        OutputWorkspace=output_name)
+        Minus(LHSWorkspace=output, RHSWorkspace=average, OutputWorkspace=output_name)
         # Avoid leaving trash behind
         average_name = str(average)
         if AnalysisDataService.doesExist(str(left_bck)):
@@ -133,7 +141,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         if AnalysisDataService.doesExist(average_name):
             AnalysisDataService.remove(average_name)
 
-        self.setProperty('OutputWorkspace', workspace)
+        self.setProperty("OutputWorkspace", output_name)
 
 
 AlgorithmFactory.subscribe(LRSubtractAverageBackground)

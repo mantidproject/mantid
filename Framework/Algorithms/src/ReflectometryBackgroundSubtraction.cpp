@@ -161,14 +161,9 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
   const std::vector<int> backgroundRange{static_cast<int>(indexList.front()),
                                          static_cast<int>(indexList.back())};
 
-  auto outputWSName = getPropertyValue("OutputWorkspace");
-
-  MatrixWorkspace_sptr workspace = inputWS->clone();
-  AnalysisDataService::Instance().addOrReplace(outputWSName, workspace);
-
   IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
-  LRBgd->setProperty("InputWorkspace", workspace);
+  LRBgd->setProperty("InputWorkspace", inputWS);
   LRBgd->setProperty("PeakRange", getPropertyValue("PeakRange"));
   LRBgd->setProperty("BackgroundRange", Strings::toString(backgroundRange));
   LRBgd->setProperty("SumPeak", getPropertyValue("SumPeak"));
@@ -176,10 +171,10 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
   // will need to change if ISIS reflectometry get a 2D detector
   LRBgd->setProperty("LowResolutionRange", "0,0");
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
-  LRBgd->setProperty("OutputWorkspace", outputWSName);
-  LRBgd->executeAsChildAlg();
+  LRBgd->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace"));
+  LRBgd->execute();
 
-  auto outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+  auto outputWS = LRBgd->getPropertyValue("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
 }
 
