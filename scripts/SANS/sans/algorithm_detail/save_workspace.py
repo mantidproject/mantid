@@ -55,6 +55,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options, transmission_
         file_name = get_file_name(file_format_bundle, file_name, "", ".xml")
         save_name = "SaveCanSAS1D"
         save_options.update(transmission_workspaces)
+        save_options.update(additional_run_numbers)
     elif file_format is SaveType.NXcanSAS:
         file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
