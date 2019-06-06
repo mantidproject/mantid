@@ -12,9 +12,6 @@ from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget.view import ErrorbarsTabWidgetView
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.linetabwidget.view import LineTabWidgetView
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MarkerTabWidgetView
 from mantidqt.utils.qt import load_ui
 
 
@@ -27,13 +24,6 @@ class CurvesTabWidgetView(QWidget):
                           'curves_tab.ui',
                           baseinstance=self)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-
-        self.line = LineTabWidgetView(self)
-        self.tab_container.addTab(self.line, "Line")
-        self.marker = MarkerTabWidgetView(self)
-        self.tab_container.addTab(self.marker, "Marker")
-        self.errorbars = ErrorbarsTabWidgetView(self)
-        self.tab_container.addTab(self.errorbars, "Errorbars")
 
     def populate_select_axes_combo_box(self, axes_names):
         self.select_axes_combo_box.addItems(axes_names)
@@ -89,7 +79,10 @@ class CurvesTabWidgetView(QWidget):
         return self.hide_curve_check_box.checkState()
 
     def set_hide_curve(self, state):
-        self.hide_curve_check_box.setCheckState(state)
+        if state:
+            self.hide_curve_check_box.setCheckState(Qt.Checked)
+        else:
+            self.hide_curve_check_box.setCheckState(Qt.Unchecked)
 
     # Property object getters and setters
     def get_properties(self):
@@ -109,7 +102,6 @@ class CurvesTabWidgetView(QWidget):
             self.marker.set_size(curve_props.marker.size)
             self.marker.face_color_selector_widget.set_color(curve_props.marker.face_color)
             self.marker.edge_color_selector_widget.set_color(curve_props.marker.edge_color)
-        # Errorbar properties
         if curve_props.errorbars:
             self.errorbars.set_hide(curve_props.errorbars.hide)
             self.errorbars.set_width(curve_props.errorbars.width)

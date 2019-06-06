@@ -12,35 +12,35 @@ from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
 
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget import ErrorbarProperties
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget import ErrorbarsProperties
 
 
-class ErrobarPropertiesTest(unittest.TestCase):
+class errorbarPropertiesTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         fig = figure()
         cls.ax = fig.add_subplot(111)
 
-    def test_errobar_curve_properties_read_correctly(self):
+    def test_errorbar_curve_properties_read_correctly(self):
         plot_args = {'fmt': '--o', 'ecolor': 'r', 'elinewidth': 0.1,
                      'capsize': 1.1, 'capthick': 1.2, 'errorevery': 1}
         expected = {'capsize': 1.1, 'cap_thickness': 1.2, 'color': '#ff0000',
                     'width': 0.1, 'hide': False}
         curve = self.ax.errorbar([0, 1], [0, 1], [0.1, 0.1], [0.1, 0.1],
                                  **plot_args)
-        err_props = ErrorbarProperties.from_container(curve)
+        err_props = ErrorbarsProperties.from_container(curve)
         for prop, value in expected.items():
             self.assertEqual(value, getattr(err_props, prop))
 
-    def test_errobar_curve_with_no_line_properties_read_correctly(self):
+    def test_errorbar_curve_with_no_line_properties_read_correctly(self):
         plot_args = {'fmt': 'none', 'ecolor': 'r', 'elinewidth': 0.1,
                      'capsize': 1.1, 'capthick': 1.2, 'errorevery': 1}
         expected = {'capsize': 1.1, 'cap_thickness': 1.2, 'color': '#ff0000',
                     'width': 0.1, 'hide': False}
         curve = self.ax.errorbar([0, 1], [0, 1], [0.1, 0.1], [0.1, 0.1],
                                  **plot_args)
-        err_props = ErrorbarProperties.from_container(curve)
+        err_props = ErrorbarsProperties.from_container(curve)
         for prop, value in expected.items():
             self.assertEqual(value, getattr(err_props, prop))
 
@@ -50,7 +50,7 @@ class ErrobarPropertiesTest(unittest.TestCase):
         expected = {'color': '#ff0000', 'width': 0.1, 'hide': False}
         curve = self.ax.errorbar([0, 1], [0, 1], [0.1, 0.1], [0.1, 0.1],
                                  **plot_args)
-        err_props = ErrorbarProperties.from_container(curve)
+        err_props = ErrorbarsProperties.from_container(curve)
         for prop, value in expected.items():
             self.assertEqual(value, getattr(err_props, prop))
 
@@ -58,7 +58,7 @@ class ErrobarPropertiesTest(unittest.TestCase):
         self.assertFalse(hasattr(err_props, 'cap_thickness'))
 
     def test_returns_none_if_not_passed_errorbar_container(self):
-        self.assertEqual(None, ErrorbarProperties.from_container([]))
+        self.assertEqual(None, ErrorbarsProperties.from_container([]))
 
 
 if __name__ == '__main__':

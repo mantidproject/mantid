@@ -20,7 +20,7 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
               'circle': 'o', 'pixel': ',', 'caretleft (centered at base)': 8,
               'diamond': 'D', 'star': '*', 'hexagon1': 'h', 'octagon': '8',
               'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
-              'thin_diamond': 'd', 'tri_down': 1, 'triangle_left': '<',
+              'thin_diamond': 'd', 'tri_down': '1', 'triangle_left': '<',
               'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
               'caretup': 6, 'caretup (centered at base)': 10,
               'caretdown (centered at base)': 11, 'None': 'None'}
@@ -40,13 +40,13 @@ class MarkerProperties:
 
     @classmethod
     def from_view(cls, view):
-        if not view.marker.isEnabled():
+        if not view.isEnabled():
             return None
         props = dict()
-        props['style'] = view.marker.get_style()
-        props['size'] = view.marker.get_size()
-        props['face_color'] = view.marker.get_face_color()
-        props['edge_color'] = view.marker.get_edge_color()
+        props['style'] = view.get_style()
+        props['size'] = view.get_size()
+        props['face_color'] = view.get_face_color()
+        props['edge_color'] = view.get_edge_color()
         return cls(props)
 
     @classmethod

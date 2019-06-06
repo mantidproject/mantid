@@ -24,13 +24,13 @@ class LineProperties:
 
     @classmethod
     def from_view(cls, view):
-        if not view.line.isEnabled():
+        if not view.isEnabled():
             return None
         props = dict()
-        props['style'] = view.line.get_style()
-        props['draw_style'] = view.line.get_draw_style()
-        props['width'] = view.line.get_width()
-        props['color'] = view.line.get_color()
+        props['style'] = view.get_style()
+        props['draw_style'] = view.get_draw_style()
+        props['width'] = view.get_width()
+        props['color'] = view.get_color()
         return cls(props)
 
     @classmethod

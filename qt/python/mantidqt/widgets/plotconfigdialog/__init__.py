@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from matplotlib.axes import ErrorbarContainer
+
 
 def generate_ax_name(ax):
     """
@@ -29,3 +31,24 @@ def get_axes_names_dict(fig):
     for ax in fig.get_axes():
         axes_names[generate_ax_name(ax)] = ax
     return axes_names
+
+
+def curves_in_figure(fig):
+    for ax in fig.get_axes():
+        if line_in_ax(ax) or errorbars_in_ax(ax):
+            return True
+    return False
+
+
+def curve_in_ax(ax):
+    if line_in_ax(ax) or errorbars_in_ax(ax):
+        return True
+    return False
+
+
+def line_in_ax(ax):
+    return len(ax.get_lines()) > 1
+
+
+def errorbars_in_ax(ax):
+    return any(isinstance(c, ErrorbarContainer) for c in ax.containers)

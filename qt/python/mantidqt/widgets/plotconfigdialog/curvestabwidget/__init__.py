@@ -9,7 +9,7 @@
 from matplotlib.axes import ErrorbarContainer
 from qtpy.QtCore import Qt
 
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget import ErrorbarProperties, errorbars_hidden
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget import ErrorbarsProperties, errorbars_hidden
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.linetabwidget import LineProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget import MarkerProperties
 
@@ -19,6 +19,25 @@ def curve_hidden(curve):
         return errorbars_hidden(curve)
     else:
         return not curve.get_visible()
+
+
+def hide_curve(curve, hide, hide_bars=False):
+    if isinstance(curve, ErrorbarContainer):
+        if curve[0]:
+            curve[0].set_visible(not hide)
+        if hide_bars:
+            hide_errorbars(curve, hide)
+    else:
+        curve.set_visible(not hide)
+
+
+def hide_errorbars(container, hide):
+    if container[1]:
+        for caps in container[1]:
+            caps.set_visible(not hide)
+    if container[2]:
+        for bars in container[2]:
+            bars.set_visible(not hide)
 
 
 def set_attrs_from_dict(obj, attr_dict):
@@ -35,22 +54,12 @@ class CurveProperties:
     def from_view(cls, view):
         props = dict()
         props['label'] = view.get_curve_label()
-        props['hide_curve'] = (view.get_hide_curve() == Qt.Checked)
-        props['line'] = LineProperties.from_view(view)
-        props['marker'] = MarkerProperties.from_view(view)
-        props['errorbars'] = ErrorbarProperties.from_view(view)
+        props['hide'] = (view.get_hide_curve() == Qt.Checked)
         return cls(props)
 
     @classmethod
     def from_curve(cls, curve):
         props = dict()
         props['label'] = curve.get_label()
-        props['hide_curve'] = curve_hidden(curve)
-        if isinstance(curve, ErrorbarContainer):
-            props['errorbars'] = ErrorbarProperties.from_container(curve)
-            curve = curve[0]
-        else:
-            props['errorbars'] = None
-        props['line'] = LineProperties.from_line(curve)
-        props['marker'] = MarkerProperties.from_line(curve)
+        props['hide'] = curve_hidden(curve)
         return cls(props)

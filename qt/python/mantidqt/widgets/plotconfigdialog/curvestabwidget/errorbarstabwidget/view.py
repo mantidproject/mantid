@@ -40,17 +40,26 @@ class ErrorbarsTabWidgetView(QWidget):
     def set_width(self, width):
         self.width_spin_box.setValue(width)
 
+    def set_width_enabled(self, enabled):
+        self.width_spin_box.setEnabled(enabled)
+
     def get_capsize(self):
         return self.capsize_spin_box.value()
 
     def set_capsize(self, size):
         self.capsize_spin_box.setValue(size)
 
+    def set_capsize_enabled(self, enabled):
+        self.capsize_spin_box.setEnabled(enabled)
+
     def get_cap_thickness(self):
         return self.cap_thickness_spin_box.value()
 
     def set_cap_thickness(self, thickness):
         self.cap_thickness_spin_box.setValue(thickness)
+
+    def set_cap_thickness_enabled(self, enabled):
+        self.cap_thickness_spin_box.setEnabled(enabled)
 
     def get_error_every(self):
         return self.error_every_spin_box.value()

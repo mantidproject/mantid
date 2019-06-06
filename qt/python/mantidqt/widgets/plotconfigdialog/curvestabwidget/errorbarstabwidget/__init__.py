@@ -25,7 +25,7 @@ def errorbars_hidden(err_container):
     return hidden
 
 
-class ErrorbarProperties:
+class ErrorbarsProperties:
 
     def __init__(self, props):
         for prop, value in props.items():
@@ -33,15 +33,15 @@ class ErrorbarProperties:
 
     @classmethod
     def from_view(cls, view):
-        if not view.errorbars.isEnabled():
+        if not view.isEnabled():
             return None
         props = dict()
-        props['hide'] = view.errorbars.get_hide()
-        props['width'] = view.errorbars.get_width()
-        props['capsize'] = view.errorbars.get_capsize()
-        props['cap_thickness'] = view.errorbars.get_cap_thickness()
-        props['error_every'] = view.errorbars.get_error_every()
-        props['color'] = view.errorbars.get_color()
+        props['hide'] = view.get_hide()
+        props['width'] = view.get_width()
+        props['capsize'] = view.get_capsize()
+        props['cap_thickness'] = view.get_cap_thickness()
+        props['error_every'] = view.get_error_every()
+        props['color'] = view.get_color()
         return cls(props)
 
     @classmethod

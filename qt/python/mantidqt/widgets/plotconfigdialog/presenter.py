@@ -8,6 +8,9 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib.axes import ErrorbarContainer
+
+from mantidqt.widgets.plotconfigdialog import curves_in_figure
 from mantidqt.widgets.plotconfigdialog.view import PlotConfigDialogView
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTabWidgetPresenter
@@ -28,7 +31,7 @@ class PlotConfigDialogPresenter:
         self.tab_widget_presenters.append(axes_tab)
         self.tab_widget_views.append((axes_tab.view, "Axes"))
         # Curves tab (only add if curves present in figure)
-        if self._curves_in_figure():
+        if curves_in_figure(self.fig):
             curves_tab = CurvesTabWidgetPresenter(self.fig, parent=self.view)
             self.tab_widget_presenters.append(curves_tab)
             self.tab_widget_views.append((curves_tab.view, "Curves"))
@@ -43,11 +46,13 @@ class PlotConfigDialogPresenter:
     def _add_tab_widget_views(self):
         self.view.add_tab_widgets(self.tab_widget_views)
 
-    def _curves_in_figure(self):
-        for ax in self.fig.get_axes():
-            if len(ax.get_lines()) > 0:
-                return True
-        return False
+    @staticmethod
+    def _line_in_ax(ax):
+        return len(ax.get_lines()) > 1
+
+    @staticmethod
+    def _errorbars_in_ax(ax):
+        return any(isinstance(c, ErrorbarContainer) for c in ax.containers)
 
     def apply_properties(self):
         for tab in self.tab_widget_presenters:
