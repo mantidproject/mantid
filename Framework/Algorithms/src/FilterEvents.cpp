@@ -1149,7 +1149,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   bool splitByTime = false;
   if (descriptiveNames) {
     splitByTime = true;
-    if ((m_hasInfoWS && infomap[0].find("Log") != -1) ||
+    if ((m_hasInfoWS && infomap[0].find("Log") != std::string::npos) ||
         numnewws - 1 != m_splitters.size()) {
       splitByTime = false;
     }
