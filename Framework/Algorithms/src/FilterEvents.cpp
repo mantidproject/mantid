@@ -1170,8 +1170,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
         auto infoiter = infomap.find(wsgroup);
         if (infoiter != infomap.end()) {
           std::string name = infoiter->second;
-          name.erase(std::remove_if(name.begin(), name.end(), isspace),
-                     name.end());
+          name = Kernel::Strings::removeSpace(name);
           wsname << name;
         } else {
           wsname << wsgroup + delta_wsindex;
@@ -1390,7 +1389,7 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 
     if (wsgroup > 0) {
       if (descriptiveNames) {
-        int startIndex;
+        size_t startIndex;
         for (size_t itr = 0; itr < m_vecSplitterGroup.size(); ++itr) {
           if (m_vecSplitterGroup[itr] == wsgroup)
             startIndex = itr;

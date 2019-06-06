@@ -1245,19 +1245,14 @@ public:
     std::vector<std::string> output_ws_vector =
         filter.getProperty("OutputWorkspaceNames");
 
-    std::vector<std::string> infoWsTitles;
-    for (size_t ir = 0; ir < infows->rowCount(); ++ir) {
-      API::TableRow row = infows->getRow(ir);
-      auto title = row.String(1);
-      infoWsTitles.push_back(title);
-    }
-
     std::string expectedName = "BaseName_unfiltered";
     TS_ASSERT_EQUALS(output_ws_vector[0], expectedName);
 
     for (int i = 0; i < 3; i++) {
       std::stringstream expectedName;
-      expectedName << "BaseName_" << infoWsTitles[i];
+      expectedName << "BaseName_"
+                   << "Log.proton_charge.From.start" << i << ".To.end" << i
+                   << ".Value-change-direction:both";
       TS_ASSERT_EQUALS(output_ws_vector[i + 1], expectedName.str());
     }
 
@@ -1680,7 +1675,7 @@ public:
         rowTitle << "Time.Interval.From.start" << row_index << ".To.end"
                  << row_index;
       } else {
-        rowTitle << "Log.proton_charge.From.start" << row_index << ".To.end"
+        rowTitle << "Log.proton_charge.From.start " << row_index << ".To.end"
                  << row_index << ".Value-change-direction:both";
       }
       infoWorkspace->cell<std::string>(row_index, 1) = rowTitle.str();
