@@ -260,15 +260,20 @@ set(
   CalculatePaalmanPings.cpp
   ContainerSubtraction.cpp
   CorrectionsTab.cpp
+  DensityOfStates.cpp
   IndirectCorrections.cpp
   IndirectDiffractionReduction.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
   IndirectLoadILL.cpp
+  IndirectMolDyn.cpp
+  IndirectSassena.cpp
   IndirectSettings.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
+  IndirectSimulation.cpp
+  IndirectSimulationTab.cpp
   IndirectTab.cpp
   IndirectTools.cpp
   IndirectToolsTab.cpp
@@ -282,15 +287,20 @@ set(
   CalculatePaalmanPings.h
   ContainerSubtraction.h
   CorrectionsTab.h
+  DensityOfStates.h
   IIndirectSettingsView.h
   IndirectCorrections.h
   IndirectDiffractionReduction.h
   IndirectInstrumentConfig.h
   IndirectInterface.h
   IndirectLoadILL.h
+  IndirectMolDyn.h
+  IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
   IndirectSettingsView.h
+  IndirectSimulation.h
+  IndirectSimulationTab.h
   IndirectTab.h
   IndirectTools.h
   IndirectToolsTab.h
@@ -305,12 +315,16 @@ set(
   ApplyAbsorptionCorrections.ui
   CalculatePaalmanPings.ui
   ContainerSubtraction.ui
+  DensityOfStates.ui
   IndirectCorrections.ui
   IndirectDiffractionReduction.ui
   IndirectInstrumentConfig.ui
   IndirectInterfaceSettings.ui
   IndirectLoadILL.ui
+  IndirectMolDyn.ui
+  IndirectSassena.ui
   IndirectSettings.ui
+  IndirectSimulation.ui
   IndirectTools.ui
   IndirectTransmissionCalc.ui
 )
