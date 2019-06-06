@@ -632,6 +632,8 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     } catch (std::runtime_error &) {
     }
   } catch (const InvalidLogPeriods &) {
+    // Rethrow so LoadEventNexus fails.
+    // If we don't, Mantid will crash.
     throw;
   } catch (...) {
     alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some "
