@@ -45,8 +45,8 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         run_algorithm('DirectILLIntegrateVanadium', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        self.assertEqual(outWS.blocksize(), 1)
         for i in range(outWS.getNumberHistograms()):
             self.assertGreater(outWS.readY(i)[0], float(i + 1) * numBins)
             self.assertGreater(outWS.readE(i)[0], numpy.sqrt(float(i + 1) * numBins))
@@ -70,10 +70,10 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         run_algorithm('DirectILLIntegrateVanadium', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        self.assertEqual(outWS.blocksize(), 1)
         for i in range(outWS.getNumberHistograms()):
-            self.assertEquals(outWS.readY(i)[0], float(i + 1) * numBins)
+            self.assertEqual(outWS.readY(i)[0], float(i + 1) * numBins)
             self.assertAlmostEqual(outWS.readE(i)[0], numpy.sqrt(float(i + 1) * numBins))
 
     def testZeroMasking(self):
@@ -93,12 +93,12 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         run_algorithm('DirectILLIntegrateVanadium', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        self.assertEqual(outWS.blocksize(), 1)
         spectrumInfo = outWS.spectrumInfo()
         for i in range(outWS.getNumberHistograms()):
             if i in zeroIndices:
-                self.assertEquals(outWS.readY(i)[0], 0.)
+                self.assertEqual(outWS.readY(i)[0], 0.)
                 self.assertTrue(spectrumInfo.isMasked(i))
             else:
                 self.assertGreater(outWS.readY(i)[0], 0.)

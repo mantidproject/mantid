@@ -20,9 +20,9 @@ class GoniometerTest(unittest.TestCase):
 
     def test_getEulerAngles(self):
         g = Goniometer()
-        self.assertEquals(g.getEulerAngles()[0], 0)
-        self.assertEquals(g.getEulerAngles()[1], 0)
-        self.assertEquals(g.getEulerAngles()[2], 0)
+        self.assertEqual(g.getEulerAngles()[0], 0)
+        self.assertEqual(g.getEulerAngles()[1], 0)
+        self.assertEqual(g.getEulerAngles()[2], 0)
         
     def test_setR_getR(self):
         g = Goniometer()

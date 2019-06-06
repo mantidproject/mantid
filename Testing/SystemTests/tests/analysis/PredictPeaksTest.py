@@ -34,7 +34,7 @@ class PredictPeaksTestWISH(systemtesting.MantidSystemTest):
 
         lists_match, message = self._compare_hkl_lists(hkls_predicted, hkls_reference)
 
-        self.assertEquals(lists_match, True, message)
+        self.assertEqual(lists_match, True, message)
 
     def _get_hkls(self, peaksWorkspace):
         h_list = peaksWorkspace.column('h')
@@ -97,7 +97,7 @@ class PredictPeaksCalculateStructureFactorsTest(systemtesting.MantidSystemTest):
                              MinDSpacing=0.5, MaxDSpacing=10,
                              CalculateStructureFactors=True)
 
-        self.assertEquals(peaks.getNumberPeaks(), self.expected_num_peaks)
+        self.assertEqual(peaks.getNumberPeaks(), self.expected_num_peaks)
 
         for i in range(self.expected_num_peaks):
             peak = peaks.getPeak(i)
@@ -110,4 +110,4 @@ class PredictPeaksCalculateStructureFactorsTest(systemtesting.MantidSystemTest):
 
         for i in range(self.expected_num_peaks):
             peak = peaks_no_sf.getPeak(i)
-            self.assertEquals(0.0, peak.getIntensity())
+            self.assertEqual(0.0, peak.getIntensity())

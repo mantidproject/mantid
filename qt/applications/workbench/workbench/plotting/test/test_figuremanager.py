@@ -25,7 +25,7 @@ class FigureManagerWorkbenchTest(GuiTest):
         fig = MagicMock()
         canvas = FigureCanvasQTAgg(fig)
         fig_mgr = FigureManagerWorkbench(canvas, 1)
-        self.assertTrue(fig_mgr is not None)
+        self.assertNotEqual(fig_mgr, None)
 
 
 if __name__ == "__main__":

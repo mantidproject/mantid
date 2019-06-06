@@ -21,7 +21,7 @@ class SubplotADSObserverTest(unittest.TestCase):
         self.subplot._rm_ws_from_plots = mock.Mock()
         self.obs.deleteHandle("test", mock.Mock())
 
-        self.assertEquals(self.subplot._rm_ws_from_plots.call_count, 1)
+        self.assertEqual(self.subplot._rm_ws_from_plots.call_count, 1)
         self.subplot._rm_ws_from_plots.assert_called_with("test")
 
     def test_replace(self):
@@ -30,7 +30,7 @@ class SubplotADSObserverTest(unittest.TestCase):
         ws = mock.Mock()
         self.obs.replaceHandle("test", ws)
 
-        self.assertEquals(self.subplot._replaced_ws.call_count, 1)
+        self.assertEqual(self.subplot._replaced_ws.call_count, 1)
         self.subplot._replaced_ws.assert_called_with(ws)
 
 

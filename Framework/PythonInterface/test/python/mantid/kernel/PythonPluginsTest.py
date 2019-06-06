@@ -51,7 +51,7 @@ class PythonPluginsTest(unittest.TestCase):
 
     def test_loading_python_algorithm_increases_registered_algs_by_one(self):
         loaded = plugins.load(self._testdir)
-        self.assertTrue(len(loaded) > 0)
+        self.assertGreater(len(loaded), 0)
         expected_name = 'TestPyAlg'
         # Has the name appear in the module dictionary
         self.assertTrue(expected_name in sys.modules)
@@ -61,8 +61,8 @@ class PythonPluginsTest(unittest.TestCase):
         # Can it be created?
         try:
             test_alg = AlgorithmManager.createUnmanaged(expected_name)
-            self.assertEquals(expected_name, test_alg.name())
-            self.assertEquals(1, test_alg.version())
+            self.assertEqual(expected_name, test_alg.name())
+            self.assertEqual(1, test_alg.version())
         except RuntimeError as exc:
             self.fail("Failed to create plugin algorithm from the manager: '%s' " %s)
 
