@@ -809,10 +809,15 @@ void SaveNXcanSAS::init() {
       "The transmission workspace of the Can. Optional. If given, will be "
       "saved at TransmissionSpectrum");
 
-  declareProperty("SampleTransmissionRunNumber", "", "The run number for the sample transmission workspace. Optional.");
-  declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
-  declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
-  declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
+  declareProperty(
+      "SampleTransmissionRunNumber", "",
+      "The run number for the sample transmission workspace. Optional.");
+  declareProperty("SampleDirectRunNumber", "",
+                  "The run number for the sample direct workspace. Optional.");
+  declareProperty("CanScatterRunNumber", "",
+                  "The run number for the can scatter workspace. Optional.");
+  declareProperty("CanDirectRunNumber", "",
+                  "The run number for the can direct workspace. Optional.");
 }
 
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {

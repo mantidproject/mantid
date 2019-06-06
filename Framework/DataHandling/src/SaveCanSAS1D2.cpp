@@ -75,10 +75,15 @@ void SaveCanSAS1D2::init() {
       "The transmission workspace of the Can. Optional. If given, will be "
       "saved at TransmissionSpectrum");
 
-  declareProperty("SampleTransmissionRunNumber", "", "The run number for the sample transmission workspace. Optional.");
-  declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
-  declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
-  declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
+  declareProperty(
+      "SampleTransmissionRunNumber", "",
+      "The run number for the sample transmission workspace. Optional.");
+  declareProperty("SampleDirectRunNumber", "",
+                  "The run number for the sample direct workspace. Optional.");
+  declareProperty("CanScatterRunNumber", "",
+                  "The run number for the can scatter workspace. Optional.");
+  declareProperty("CanDirectRunNumber", "",
+                  "The run number for the can direct workspace. Optional.");
 }
 
 /// Overwrites Algorithm method
@@ -220,7 +225,8 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   if (m_trans_ws) {
     // Add other run numbers
     // SampleTransmission
-    const auto sample_trans_run = getPropertyValue("SampleTransmissionRunNumber");
+    const auto sample_trans_run =
+        getPropertyValue("SampleTransmissionRunNumber");
     sasProcess += "\n\t\t\t<term name=\"sample_trans_run\">";
     sasProcess += sample_trans_run + "</term>";
 

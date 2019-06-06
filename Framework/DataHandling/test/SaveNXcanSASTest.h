@@ -62,18 +62,22 @@ public:
 
   void test_that_can_set_run_numbers_as_string_properties() {
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-       "SaveNXcanSAS");
+        "SaveNXcanSAS");
     saveAlg->setChild(true);
     saveAlg->initialize();
 
-    TSM_ASSERT_THROWS_NOTHING("Should be able to set SampleTransmissionRunNumber property",
-            saveAlg->setProperty("SampleTransmissionRunNumber", "5"));
-    TSM_ASSERT_THROWS_NOTHING("Should be able to set SampleDirectRunNumber property",
-            saveAlg->setProperty("SampleDirectRunNumber", "6"));
-    TSM_ASSERT_THROWS_NOTHING("Should be able to set CanScatterRunNumber property",
-            saveAlg->setProperty("CanScatterRunNumber", "7"));
-    TSM_ASSERT_THROWS_NOTHING("Should be able to set CanDirectRunNumber property",
-            saveAlg->setProperty("CanDirectRunNumber", "8"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set SampleTransmissionRunNumber property",
+        saveAlg->setProperty("SampleTransmissionRunNumber", "5"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set SampleDirectRunNumber property",
+        saveAlg->setProperty("SampleDirectRunNumber", "6"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set CanScatterRunNumber property",
+        saveAlg->setProperty("CanScatterRunNumber", "7"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set CanDirectRunNumber property",
+        saveAlg->setProperty("CanDirectRunNumber", "8"));
   }
 
   void
