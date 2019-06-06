@@ -46,11 +46,10 @@ class ErrorbarProperties:
     @classmethod
     def from_container(cls, err_container):
         if not isinstance(err_container, ErrorbarContainer):
-            raise ValueError("'{}' is not an instance of an ErrorbarContainer."
-                             "".format(err_container))
+            return None
+
         caps_tuple = err_container.lines[1]
         bars_tuple = err_container.lines[2]
-
         props = dict()
         props['hide'] = errobars_hidden(err_container)
         if caps_tuple:

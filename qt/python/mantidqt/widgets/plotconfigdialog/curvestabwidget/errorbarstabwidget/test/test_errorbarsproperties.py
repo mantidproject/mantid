@@ -57,6 +57,9 @@ class ErrobarPropertiesTest(unittest.TestCase):
         self.assertFalse(hasattr(err_props, 'capsize'))
         self.assertFalse(hasattr(err_props, 'cap_thickness'))
 
+    def test_returns_none_if_not_passed_errorbar_container(self):
+        self.assertEqual(None, ErrorbarProperties.from_container([]))
+
 
 if __name__ == '__main__':
     unittest.main()

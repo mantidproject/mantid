@@ -8,9 +8,19 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib import colors
+
 from qtpy.QtGui import QColor, QPalette
 from qtpy.QtWidgets import (QWidget, QLineEdit, QPushButton, QHBoxLayout,
                             QColorDialog)
+
+
+def convert_color_to_hex(color):
+    """Convert a matplotlib color to its hex form"""
+    try:
+        return colors.cnames[color]
+    except (KeyError, TypeError):
+        return colors.to_hex(color)
 
 
 class ColorSelector(QWidget):
