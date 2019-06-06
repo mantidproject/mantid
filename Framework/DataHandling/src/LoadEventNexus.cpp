@@ -631,7 +631,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
       localWorkspace->mutableRun().setGoniometer(gm, true);
     } catch (std::runtime_error &) {
     }
-  } catch (const InvalidLogPeriods &e) {
+  } catch (const InvalidLogPeriods &) {
     throw;
   } catch (...) {
     alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some "
