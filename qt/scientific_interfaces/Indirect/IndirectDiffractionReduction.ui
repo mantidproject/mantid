@@ -40,8 +40,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>530</width>
-         <height>586</height>
+         <width>533</width>
+         <height>755</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -861,10 +861,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../../MantidPlot/icons/icons.qrc">
-          <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
-        </property>
        </widget>
       </item>
       <item>
@@ -916,14 +912,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
-   <extends>QComboBox</extends>
-   <header>IndirectInstrumentConfig.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
+   <extends>QComboBox</extends>
+   <header>IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -948,9 +944,7 @@
   <tabstop>pbHelp</tabstop>
   <tabstop>pbManageDirs</tabstop>
  </tabstops>
- <resources>
-  <include location="../../../MantidPlot/icons/icons.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>ckUseCan</sender>

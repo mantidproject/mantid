@@ -35,6 +35,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
@@ -44,6 +45,7 @@ public:
     LoadPSIMuonBin alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
@@ -57,6 +59,7 @@ public:
     LoadPSIMuonBin alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
@@ -69,21 +72,22 @@ public:
     TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->getTitle(), "BNFSO      - Run:1529");
-    TS_ASSERT_EQUALS(ws->getLog("Field")->value(), "0.000G");
+    TS_ASSERT_EQUALS(ws->getLog("sample_magn_field")->value(), "0");
     TS_ASSERT_EQUALS(
         ws->getComment(),
         "Ba3NbFe3Si2O14, crystal                                       ");
-    TS_ASSERT_EQUALS(ws->getLog("Actual Temperature1")->value(), "4.999610");
-    TS_ASSERT_EQUALS(ws->getLog("Actual Temperature2")->value(), "5.197690");
+    TS_ASSERT_DELTA(std::stod(ws->getLog("Spectra 1 Temperature")->value()),
+                    4.99961, 0.00001)
+    TS_ASSERT_DELTA(std::stod(ws->getLog("Spectra 2 Temperature")->value()),
+                    5.19769, 0.00001)
     TS_ASSERT_EQUALS(ws->getLog("end_time")->value(), "2011-07-04T11:56:24");
     TS_ASSERT_EQUALS(ws->getLog("start_time")->value(), "2011-07-04T10:40:23");
-    TS_ASSERT_EQUALS(ws->getLog("Spectra0 label and scalar")->value(),
-                     "Forw - 14493858");
-    TS_ASSERT_EQUALS(ws->getLog("Spectra3 label and scalar")->value(),
-                     "Rite - 38247601");
-    TS_ASSERT_EQUALS(ws->getLog("Length of Run")->value(),
-                     "10.000000MicroSeconds");
-    TS_ASSERT_EQUALS(ws->getLog("Set Temperature")->value(), "5.000K");
+    TS_ASSERT_EQUALS(ws->getLog("Label Spectra 0")->value(), "Forw");
+    TS_ASSERT_EQUALS(ws->getLog("Scalar Spectra 0")->value(), "14493858");
+    TS_ASSERT_EQUALS(ws->getLog("Label Spectra 3")->value(), "Rite");
+    TS_ASSERT_EQUALS(ws->getLog("Scalar Spectra 3")->value(), "38247601");
+    TS_ASSERT_EQUALS(ws->getLog("Length of Run")->value(), "10");
+    TS_ASSERT_EQUALS(ws->getLog("sample_temp")->value(), "5");
 
     TS_ASSERT_EQUALS(ws->x(0).size(), 10241);
     TS_ASSERT_EQUALS(ws->y(0).size(), 10240);
@@ -105,6 +109,7 @@ public:
     LoadPSIMuonBin alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("pid_offset_vulcan_new.dat.bin")));
@@ -131,6 +136,56 @@ public:
     FileDescriptor descriptor1(
         getTestFilePath("pid_offset_vulcan_new.dat.bin"));
     TS_ASSERT_EQUALS(alg.confidence(descriptor1), 0);
+  }
+
+  void test_outputProperties() {
+    LoadPSIMuonBin alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    double firstGoodData = std::stod(alg.getPropertyValue("FirstGoodData"));
+    double lastGoodData = std::stod(alg.getPropertyValue("LastGoodData"));
+    double timeZero = std::stod(alg.getPropertyValue("TimeZero"));
+
+    TS_ASSERT_DELTA(firstGoodData, 0.167, 0.001);
+    TS_ASSERT_DELTA(lastGoodData, 9.989, 0.001);
+    TS_ASSERT_DELTA(timeZero, 0.158, 0.001);
+  }
+
+  void test_temperatureFileLoaded() {
+    LoadPSIMuonBin alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
+    TS_ASSERT(ws);
+
+    // These values rely on run_1529_templs0.mon being found and loaded by
+    // LoadPSIMuonBin
+    TS_ASSERT_EQUALS(ws->getLog("Temp_Heater")->value().substr(0, 28),
+                     "2011-Jul-04 10:40:23  4.9906")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_Analog")->value().substr(0, 28),
+                     "2011-Jul-04 10:40:23  5.1805")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelA")->value().substr(0, 28),
+                     "2011-Jul-04 10:40:23  4.9921")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelB")->value().substr(0, 28),
+                     "2011-Jul-04 10:40:23  5.1804")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelC")->value().substr(0, 28),
+                     "2011-Jul-04 10:40:23  314.36")
+    TS_ASSERT_EQUALS(ws->getLog("Temp_ChannelD")->value().substr(0, 28),
+                     "2011-Jul-04 10:40:23  314.46")
   }
 
 private:

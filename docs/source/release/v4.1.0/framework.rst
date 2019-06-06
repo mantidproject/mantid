@@ -12,6 +12,8 @@ Framework Changes
 Concepts
 --------
 
+- :class:`mantid.kernel.IntArrayProperty` now supports specifying step sizes
+
 Algorithms
 ----------
 
@@ -34,12 +36,12 @@ Improvements
 - :ref:`Pseudo-Voigt <func-PseudoVoigt>` has been modified to be more in line with FULLPROF and GSAS.  One of its basic parameter, Height, is changed to Intensity.
 - 10x performance improvement in calls to ``Mantid::PhysicalConstants::getAtom``.
 - ARCS, CNCS, HYSPEC, NOMAD, POWGEN, SEQUOIA, SNAP, and VULCAN have had the axis that signed two-theta is calculated against changed from ``+y`` to ``+x``
-- :ref: `SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
+- :ref:`SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
 - :ref:`algm-FilterEvent` has a property `InformativeOutputNames` which changes the name of output workspace to include the start and end time of the slice.
 
 Bug fixes
 #########
-- :ref: `SetSample <algm-SetSample>` now correctly handles the Sample number density being passed as a string, before the algorithm would execute, but silently ignored the provided number density, the number density is now properly used.
+- :ref:`SetSample <algm-SetSample>` now correctly handles the Sample number density being passed as a string, before the algorithm would execute, but silently ignored the provided number density, the number density is now properly used.
 
 Removed
 #######
@@ -53,8 +55,16 @@ Data Objects
 Python
 ------
 
+New
+###
+
 - The ``mantid.plots`` module now registers a ``power`` and ``square`` scale type to be used with ``set_xscale`` and ``set_xscale`` functions.
-- The method `total_nanoseconds` in `DateAndTime` has been deprecated. `totalNanoseconds` should be used instead.
-- The method `total_nanoseconds` in `time_duration` has been deprecated. `totalNanoseconds` should be used instead.
+- In :class:`mantid.kernel.DateAndTime`, the method :py:meth:`~mantid.kernel.DateAndTime.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.DateAndTime.totalNanoseconds` should be used instead.
+- In :class:`mantid.kernel.time_duration`, The method :py:meth:`~mantid.kernel.time_duration.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.time_duration.totalNanoseconds` should be used instead.
+
+Bugfixes
+########
+
+- The TypeError raised when calibrating tubes has been fixed.
 
 :ref:`Release 4.1.0 <v4.1.0>`

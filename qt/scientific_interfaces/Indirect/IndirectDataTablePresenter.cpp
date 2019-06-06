@@ -259,7 +259,7 @@ void IndirectDataTablePresenter::addData(std::size_t index) {
 }
 
 void IndirectDataTablePresenter::addNewData(std::size_t index) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   const auto start = m_dataTable->rowCount();
 
   const auto addRow = [&](std::size_t spectrum) {
@@ -279,7 +279,7 @@ void IndirectDataTablePresenter::updateData(std::size_t index) {
 }
 
 void IndirectDataTablePresenter::updateExistingData(std::size_t index) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   auto position = m_dataPositions[index];
   const auto nextPosition = getNextPosition(index);
   const auto initialSize = nextPosition - position;
@@ -312,7 +312,7 @@ void IndirectDataTablePresenter::collapseData(int from, int to, int initialSize,
 }
 
 void IndirectDataTablePresenter::removeSelectedData() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   auto selectedIndices = m_dataTable->selectionModel()->selectedIndexes();
   const auto modifiedIndicesAndCount = removeTableRows(selectedIndices);
   const auto &modifiedCount = modifiedIndicesAndCount.second;
@@ -411,7 +411,7 @@ void IndirectDataTablePresenter::setGlobalFittingRange(bool global) {
 
 void IndirectDataTablePresenter::updateAllFittingRangeFrom(int row,
                                                            int column) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   if (startXColumn() == column)
     setStartX(getDouble(row, column));
   else if (endXColumn() == column)
@@ -421,7 +421,7 @@ void IndirectDataTablePresenter::updateAllFittingRangeFrom(int row,
 }
 
 void IndirectDataTablePresenter::enableGlobalFittingRange() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   const auto range = m_model->getFittingRange(0, 0);
   setStartX(range.first);
   setEndX(range.second);
@@ -449,7 +449,7 @@ void IndirectDataTablePresenter::clearTable() {
 }
 
 void IndirectDataTablePresenter::setStartX(double startX, int index) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
     setStartX(startX);
   else
@@ -457,7 +457,7 @@ void IndirectDataTablePresenter::setStartX(double startX, int index) {
 }
 
 void IndirectDataTablePresenter::setEndX(double endX, int index) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
     setEndX(endX);
   else
@@ -466,7 +466,7 @@ void IndirectDataTablePresenter::setEndX(double endX, int index) {
 
 void IndirectDataTablePresenter::setExcludeRegion(const std::string &exclude,
                                                   int index) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
     setExcludeRegion(exclude);
   else
@@ -492,7 +492,7 @@ void IndirectDataTablePresenter::setExcludeRegion(const QString &exclude) {
 
 void IndirectDataTablePresenter::setColumnValues(int column,
                                                  const QString &value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
+  MantidQt::API::SignalBlocker blocker(m_dataTable);
   for (int i = 0; i < m_dataTable->rowCount(); ++i)
     m_dataTable->item(i, column)->setText(value);
 }

@@ -11,8 +11,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-class QwtPlotCurve;
-class QwtPlot;
 class QSettings;
 class QString;
 
@@ -78,8 +76,6 @@ public:
   void setPlotErrorBars(bool errorBars);
 
 protected:
-  /// Function to run a string as python code
-  void runPythonScript(const QString &pyInput);
   /// Check the binning between two workspaces match
   bool
   checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,

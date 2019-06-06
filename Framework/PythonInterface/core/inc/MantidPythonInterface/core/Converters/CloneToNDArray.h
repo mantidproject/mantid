@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_CLONETONUMPY_H_
-#define MANTID_PYTHONINTERFACE_CLONETONUMPY_H_
+#ifndef MANTID_PYTHONINTERFACE_CLONETONDARRAY_H_
+#define MANTID_PYTHONINTERFACE_CLONETONDARRAY_H_
 
 #include "MantidKernel/System.h"
 #include <boost/python/detail/prefix.hpp>
@@ -55,4 +55,4 @@ struct Clone {
 } // namespace PythonInterface
 } // namespace Mantid
 
-#endif //
+#endif // MANTID_PYTHONINTERFACE_CLONETONDARRAY_H_

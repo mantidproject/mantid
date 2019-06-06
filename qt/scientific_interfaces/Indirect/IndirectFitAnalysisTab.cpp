@@ -424,12 +424,12 @@ void IndirectFitAnalysisTab::setDataTableExclude(const std::string &exclude) {
 }
 
 void IndirectFitAnalysisTab::setBrowserStartX(double startX) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->setStartX(startX);
 }
 
 void IndirectFitAnalysisTab::setBrowserEndX(double endX) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->setEndX(endX);
 }
 
@@ -819,7 +819,7 @@ void IndirectFitAnalysisTab::updateAttributeValues(
  * Updates the attribute values in the the fit property browser.
  */
 void IndirectFitAnalysisTab::updateFitBrowserAttributeValues() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->updateAttributes();
 }
 
@@ -874,7 +874,7 @@ void IndirectFitAnalysisTab::updateParameterValues(
 }
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->updateParameters();
 }
 

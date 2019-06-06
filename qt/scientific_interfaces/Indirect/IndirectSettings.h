@@ -19,6 +19,8 @@
 
 #include <QVariant>
 
+class QIcon;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -32,6 +34,7 @@ public:
 
   static std::string name() { return "Settings"; }
   static QString categoryInfo() { return "Indirect"; }
+  static QIcon icon();
 
   void initLayout() override;
   void loadSettings();
