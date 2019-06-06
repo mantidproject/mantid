@@ -38,7 +38,7 @@ The Presenter initialisation should now be:
         # connect statements
         self.view.plotSignal.connect(self.updatePlot)
 
-And the Main module should now pass the two models into the presenter:
+And the Main module should now pass the two models into the Presenter:
 
 .. code-block:: python
 

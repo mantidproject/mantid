@@ -2,7 +2,7 @@
 Presenter Exercise
 ==================
 
-In this exercise you will create a Presenter for View.py.
+In this exercise you will create a Presenter for ``view.py.``
 
 Using the View from the previous exercise (the one which contains a
 table) create a Presenter to handle the button press. When the button

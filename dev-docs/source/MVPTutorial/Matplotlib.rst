@@ -11,13 +11,13 @@ For the purposes of this tutorial it is assumed that the user is
 familiar with Matplotlib, if not see `Matplotlib documentation
 <https://matplotlib.org/users/pyplot_tutorial.html>`_.
 
-The Matplotlib functions could be considered to be a Model or a View
-and there is no correct answer to which. It could be a Model as it
+The Matplotlib functions could be considered to be a model or a view
+and there is no correct answer to which. It could be a model as it
 does something with the data, however it could be considered to be a
 view as (in this case) it is used purely as a visual
 representation. This ambiguity is why MVP is only a pattern and not a
 set of rules. On this occasion it has been decided that it should be a
-View.
+view.
 
 This view will exist alongside with the view from the exercise. So we
 will need to call it something different, such as PlotView.

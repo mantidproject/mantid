@@ -17,8 +17,8 @@ Complete GUI from Exercises
     import sys
 
     import model
-    import masterView
-    import masterPresenter
+    import master_view
+    import master_presenter
 
     
     """
@@ -33,8 +33,8 @@ Complete GUI from Exercises
 
             self.window = QtGui.QMainWindow()
 
-            my_view = masterView.MasterView(parent=self)
-            self.master_presenter = masterPresenter.MasterPresenter(my_view, data_model, colour_model)
+            my_view = master_view.MasterView(parent=self)
+            self.master_presenter = master_presenter.MasterPresenter(my_view, data_model, colour_model)
 
             # set the view for the main window
             self.setCentralWidget(my_view)
@@ -56,7 +56,7 @@ which has the addition of the data and colour models being passed to
 the Presenter. This makes it easier for us to replace the Model at a
 later date.
 
-``masterView.py``
+``master_view.py``
 #################
 
 .. code-block:: python
@@ -66,7 +66,7 @@ later date.
     import PyQt4.QtCore as QtCore
 
     import view
-    import plotView
+    import plot_view
 
     import numpy as np
 
@@ -76,7 +76,7 @@ later date.
             super(MasterView, self).__init__(parent)
 
             grid = QtGui.QVBoxLayout(self)
-            self.plot_view = plotView.PlotView()
+            self.plot_view = plot_view.PlotView()
             self.options_view=view.view()
 
             grid.addWidget(self.plot_view)          
@@ -90,7 +90,7 @@ later date.
         def getPlotView(self):
             return self.plot_view
 
-``masterPresenter.py``
+``master_presenter.py``
 ######################
 
 .. code-block:: python
@@ -99,7 +99,7 @@ later date.
 
     import model
     import presenter
-    import plotPresenter
+    import plot_presenter
 
     class MasterPresenter(object):
 
@@ -112,7 +112,7 @@ later date.
         colours = self.colour_model.getColourSelection()
 
         self.presenter = presenter.Presenter(self.view.getOptionView(), colours)
-        self.plot_presenter = plotPresenter.PlotPresenter(self.view.getPlotView())
+        self.plot_presenter = plot_presenter.PlotPresenter(self.view.getPlotView())
         # connect statements
         self.view.getOptionView().plotSignal.connect(self.updatePlot)             
        
@@ -130,7 +130,7 @@ later date.
 
 The signal from the View is caught here and the models are used to create the correct plot.
 
-``plotPresenter.py``
+``plot_presenter.py``
 ####################
 
 .. code-block:: python
@@ -145,7 +145,7 @@ The signal from the View is caught here and the models are used to create the co
         def plot(self, x_data, y_data, grid_lines, colour_code):
             self.view.addData(x_data, y_data, grid_lines, colour_code, "x")
 
-``plotView.py``
+``plot_view.py``
 ###############
 
 .. code-block:: python

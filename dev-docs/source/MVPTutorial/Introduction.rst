@@ -2,7 +2,7 @@
 MVP Introduction
 ================
 
-The MVP (model, view, presenter) pattern is a set of guidelines for
+The MVP (Model, View, Presenter) pattern is a set of guidelines for
 creating easy to maintain GUIs (graphical user interfaces). In
 general:
 
@@ -19,7 +19,7 @@ result of the Model to the View. The Presenter will contain the GUI
 logic and is tested using **mocking**.
 
 These are guidelines and do not form a set of rules. It is sometimes
-open to interpretation if some files are classed as a View or a Model
+open to interpretation if some files are classed as a view or a model
 (this will be discussed in detail later).
 
 A more thorough explanation of MVP can be found at

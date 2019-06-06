@@ -58,7 +58,7 @@ custom signal and will be caught by the Presenter.
 
 The Presenter is initialised with the View and must be a member of the
 Presenter class. It is therefore possible to change the View by
-passing a different one to the presenter. For example you may want to
+passing a different one to the Presenter. For example you may want to
 have the widgets in a grid or in a table. The Presenter connects the
 custom signal from the View to its own function (``handleButton``).
 

@@ -23,7 +23,7 @@ previous section into a single view. To achieve this we will create a
     import PyQt4.QtCore as QtCore
 
     import numpy as np
-    import plotView
+    import plot_view
     import view
 
     class MasterView(QtGui.QWidget):
@@ -32,7 +32,7 @@ previous section into a single view. To achieve this we will create a
             super(MasterView, self).__init__(parent)
 
             grid = QtGui.QVBoxLayout(self)
-            self.plot_view = plotView.PlotView(parent=self)
+            self.plot_view = plot_view.PlotView(parent=self)
             self.options_view = view.view(parent=self)
 
             grid.addWidget(self.plot_view)
@@ -40,9 +40,9 @@ previous section into a single view. To achieve this we will create a
             self.setLayout(grid)
 
 The important thing to note here is that when the PlotView and View
-are created the parent is set to be the masterView.
+are created the parent is set to be the MasterView.
 
-The main only needs to import the masterView:
+The main only needs to import the master_view:
 
 .. code-block:: python
 
@@ -51,12 +51,12 @@ The main only needs to import the masterView:
             super(demo, self).__init__(parent)
 
             self.window = QtGui.QMainWindow()
-            my_view = masterView.MasterView()
+            my_view = master_view.MasterView()
 
             # set the view for the main window
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-You may notice that this main does not incorporate our Presenter.
-Now that we have embedded our two views into masterView, Presenter
+You may notice that this main does not incorporate the Presenter.
+Now that we have embedded our two views into MasterView, Presenter
 should also be split in the same way.
