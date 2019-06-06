@@ -78,10 +78,13 @@ class Pearl(AbstractInst):
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs, run):
 
-        # set temporary settings
+        # set temporary settings, Check has to occur before updating attributes,
+        # otherwise it would assumed the longmode vars are cached.
         if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
+            self._inst_settings.update_attributes(kwargs=kwargs)
             self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        self._inst_settings.update_attributes(kwargs=kwargs)
+        else:
+            self._inst_settings.update_attributes(kwargs=kwargs)
 
         # check that cache exists
         run_number_string_key = self._generate_run_details_fingerprint(run,
@@ -206,3 +209,5 @@ class Pearl(AbstractInst):
 
     def _switch_long_mode_inst_settings(self, long_mode_on):
         self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on))
+        if long_mode_on:
+            setattr(self._inst_settings, "perform_atten", False)
