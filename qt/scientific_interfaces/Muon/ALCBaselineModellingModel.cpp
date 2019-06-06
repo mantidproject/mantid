@@ -11,7 +11,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "Poco/ActiveResult.h"

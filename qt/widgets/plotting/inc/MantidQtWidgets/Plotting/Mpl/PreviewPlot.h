@@ -47,6 +47,9 @@ public:
   ~PreviewPlot();
 
   void watchADS(bool on);
+
+  Widgets::MplCpp::FigureCanvasQt *canvas() const;
+
   void addSpectrum(
       const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws,
       const size_t wsIndex = 0, const QColor &lineColour = QColor(),
@@ -59,6 +62,7 @@ public:
   void removeSpectrum(const QString &lineName);
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
+  std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
 
 public slots:
   void clear();
@@ -67,6 +71,9 @@ public slots:
   void setCanvasColour(QColor colour);
   void setLinesWithErrors(QStringList labels);
   void showLegend(const bool visible);
+
+signals:
+  void mouseDragged(int x, int y);
 
 public:
   QColor canvasColour() const;
@@ -79,6 +86,8 @@ protected:
 private:
   bool handleMousePressEvent(QMouseEvent *evt);
   bool handleMouseReleaseEvent(QMouseEvent *evt);
+  void mouseMoveEvent(QMouseEvent *evt) override;
+
   void showContextMenu(QMouseEvent *evt);
 
   void createLayout();

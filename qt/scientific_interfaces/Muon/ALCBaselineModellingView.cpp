@@ -6,12 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCBaselineModellingView.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-
-#include <boost/scoped_array.hpp>
 
 #include <QMenu>
 #include <QMessageBox>
@@ -155,21 +150,17 @@ void ALCBaselineModellingView::addSectionSelector(
   m_rangeSelectors[index] = newSelector;
 
   // Set initial values
-  newSelector->setRange(values.first, values.second);
-  setSelectorValues(newSelector, values);
-
-  // m_ui.dataPlot->replot();
+  // newSelector->setRange(values.first, values.second);
+  // setSelectorValues(newSelector, values);
 }
 
 void ALCBaselineModellingView::deleteSectionSelector(int index) {
-  // auto rangeSelector = m_rangeSelectors[index];
-  // m_rangeSelectors.erase(index);
+  auto rangeSelector = m_rangeSelectors[index];
+  m_rangeSelectors.erase(index);
 
-  // rangeSelector->detach(); // This is not done when it's deleted
-  // m_selectorModifiedMapper->removeMappings(rangeSelector);
-  // delete rangeSelector;
-
-  // m_ui.dataPlot->replot();
+  rangeSelector->detach(); // This is not done when it's deleted
+  m_selectorModifiedMapper->removeMappings(rangeSelector);
+  delete rangeSelector;
 }
 
 void ALCBaselineModellingView::updateSectionSelector(

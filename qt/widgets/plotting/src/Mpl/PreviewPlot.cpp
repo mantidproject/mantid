@@ -86,6 +86,14 @@ void PreviewPlot::watchADS(bool on) {
 }
 
 /**
+ * Gets the canvas used by the preview plot
+ * @return The canvas
+ */
+Widgets::MplCpp::FigureCanvasQt *PreviewPlot::canvas() const {
+  return m_canvas;
+}
+
+/**
  * Add a line for a given spectrum to the plot
  * @param lineName A string label for the line
  * @param ws A MatrixWorkspace that contains the data
@@ -168,6 +176,20 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
   case AxisID::YLeft:
     m_canvas->gca().setYLim(range.first, range.second);
     break;
+  }
+}
+
+/**
+ * Gets the range of the specified axis
+ * @param axisID An enumeration defining the axis
+ * @return The axis range
+ */
+std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
+  switch (axisID) {
+  case AxisID::XBottom:
+    return m_canvas->gca().getXLim();
+  case AxisID::YLeft:
+    return m_canvas->gca().getYLim();
   }
 }
 
@@ -272,6 +294,11 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
     showContextMenu(evt);
   }
   return stopEvent;
+}
+
+void PreviewPlot::mouseMoveEvent(QMouseEvent *evt) {
+  const auto position = evt->pos();
+  emit mouseDragged(position.x(), position.y());
 }
 
 /**

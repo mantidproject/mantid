@@ -7,6 +7,7 @@
 #ifndef MANTIDQT_PLOTTING_MPL_RANGESELECTOR_H_
 #define MANTIDQT_PLOTTING_MPL_RANGESELECTOR_H_
 
+#include "MantidQtWidgets/MplCpp/VerticalMarker.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include <QWidget>
 
@@ -24,7 +25,8 @@ public:
   enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
 
   RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
-                bool visible = true, bool infoOnly = false);
+                bool visible = true, bool infoOnly = false,
+                const QColor &colour = Qt::black);
 
   /// convenience overload
   void setRange(const std::pair<double, double> &range);
@@ -40,16 +42,20 @@ public slots:
   void setColour(QColor colour);
 
 private:
+  /// The preview plot containing the range selector
+  PreviewPlot *m_plot;
   /// Type of selection
   SelectType m_type;
+  /// The minimum and maximum limits for the range selector
+  std::pair<double, double> m_limits;
   /// Current position of the line marking the minimum
-  double m_min;
+  double m_minimum;
   /// Current position of the line marking the maximum
-  double m_max;
-  /// Lowest allowed position of the lines
-  double m_lower;
-  /// Highest allowed position of the lines
-  double m_higher;
+  double m_maximum;
+  /// The minimum marker
+  MantidQt::Widgets::MplCpp::VerticalMarker m_minMarker;
+  /// The maximum marker
+  // MantidQt::Widgets::MplCpp::VerticalMarker m_maxMarker;
 };
 
 } // namespace MantidWidgets

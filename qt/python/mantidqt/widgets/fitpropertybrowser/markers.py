@@ -73,6 +73,12 @@ class VerticalMarker(QObject):
         vertices[1] = self.x, y1
         self.ax.draw_artist(self.patch)
 
+    def set_color(self, color):
+        """
+        Set the colour of the marker
+        """
+        self.patch.set_edgecolor(color)
+
     def get_x_in_pixels(self):
         """
         Get the x coordinate in screen pixels.
