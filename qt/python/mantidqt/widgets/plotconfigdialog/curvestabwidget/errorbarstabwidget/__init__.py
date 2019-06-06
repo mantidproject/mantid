@@ -9,12 +9,11 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.axes import ErrorbarContainer
-from qtpy.QtCore import Qt
 
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 
 
-def errobars_hidden(err_container):
+def errorbars_hidden(err_container):
     hidden = True
     for lines in err_container.lines:
         try:
@@ -34,13 +33,15 @@ class ErrorbarProperties:
 
     @classmethod
     def from_view(cls, view):
+        if not view.errorbars.isEnabled():
+            return None
         props = dict()
-        props['hide'] = (view.get_hide() == Qt.Checked())
-        props['width'] = view.get_width()
-        props['capsize'] = view.get_capsize()
-        props['cap_thickness'] = view.get_cap_thickness()
-        props['error_every'] = view.get_error_every()
-        props['color'] = view.get_color()
+        props['hide'] = view.errorbars.get_hide()
+        props['width'] = view.errorbars.get_width()
+        props['capsize'] = view.errorbars.get_capsize()
+        props['cap_thickness'] = view.errorbars.get_cap_thickness()
+        props['error_every'] = view.errorbars.get_error_every()
+        props['color'] = view.errorbars.get_color()
         return cls(props)
 
     @classmethod
@@ -51,13 +52,20 @@ class ErrorbarProperties:
         caps_tuple = err_container.lines[1]
         bars_tuple = err_container.lines[2]
         props = dict()
-        props['hide'] = errobars_hidden(err_container)
+        props['hide'] = errorbars_hidden(err_container)
+        props['error_every'] = 1
         if caps_tuple:
             props['capsize'] = caps_tuple[0].get_markersize()/2
             props['cap_thickness'] = caps_tuple[0].get_markeredgewidth()
             props['color'] = convert_color_to_hex(caps_tuple[0].get_color())
+            props['caps'] = True
+        else:
+            props['caps'] = None
         if bars_tuple:
             props['width'] = bars_tuple[0].get_linewidth()[0]
-            # Bar color overides cap color
+            # Bar color overrides cap color
             props['color'] = convert_color_to_hex(bars_tuple[0].get_color()[0])
+            props['bars'] = True
+        else:
+            props['bars'] = None
         return cls(props)

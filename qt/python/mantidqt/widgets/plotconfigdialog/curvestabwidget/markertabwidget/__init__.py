@@ -40,11 +40,13 @@ class MarkerProperties:
 
     @classmethod
     def from_view(cls, view):
+        if not view.marker.isEnabled():
+            return None
         props = dict()
-        props['style'] = view.get_style()
-        props['size'] = view.get_size()
-        props['face_color'] = view.get_face_color()
-        props['edge_color'] = view.get_edge_color()
+        props['style'] = view.marker.get_style()
+        props['size'] = view.marker.get_size()
+        props['face_color'] = view.marker.get_face_color()
+        props['edge_color'] = view.marker.get_edge_color()
         return cls(props)
 
     @classmethod

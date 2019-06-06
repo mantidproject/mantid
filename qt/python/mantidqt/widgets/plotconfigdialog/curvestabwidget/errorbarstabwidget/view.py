@@ -29,7 +29,7 @@ class ErrorbarsTabWidgetView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
     def get_hide(self):
-        return self.hide_errorbars_tickbox.checkState()
+        return self.hide_errorbars_tickbox.checkState() == Qt.Checked
 
     def set_hide(self, state):
         self.hide_errorbars_tickbox.setCheckState(state)

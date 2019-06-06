@@ -11,7 +11,8 @@ from __future__ import (absolute_import, unicode_literals)
 from matplotlib.axes import ErrorbarContainer
 
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict
-from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, MARKER_MAP
+from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget import MARKER_MAP
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 
 
@@ -88,35 +89,35 @@ class CurvesTabWidgetPresenter:
 
     @staticmethod
     def apply_line_properties(line, props):
-        line.set_linestyle(props.line_style)
-        line.set_drawstyle(props.draw_style)
-        line.set_linewidth(props.line_width)
-        line.set_color(props.line_color)
+        line.set_linestyle(props.line.style)
+        line.set_drawstyle(props.line.draw_style)
+        line.set_linewidth(props.line.width)
+        line.set_color(props.line.color)
 
     @staticmethod
     def apply_marker_properties(line, props):
-        line.set_marker(MARKER_MAP[props.marker_style])
-        line.set_markersize(props.marker_size)
-        line.set_markerfacecolor(props.marker_face_color)
-        line.set_markeredgecolor(props.marker_edge_color)
+        line.set_marker(MARKER_MAP[props.marker.style])
+        line.set_markersize(props.marker.size)
+        line.set_markerfacecolor(props.marker.face_color)
+        line.set_markeredgecolor(props.marker.edge_color)
 
     def apply_errorbar_properties(self, container, props):
         caps_tuple = container.lines[1]
         bars_tuple = container.lines[2]
         for bars in bars_tuple:
-            self.hide_errorbars(not props.hide_errorbars, caps_tuple, bars)
-            bars.set_linewidth(props.errorbar_width)
+            self.hide_errorbars(not props.errorbars.hide, caps_tuple, bars)
+            bars.set_linewidth(props.errorbars.width)
             self.apply_error_cap_properties(caps_tuple, props)
             # self.set_error_every()
-            bars.set_color(props.errorbar_color)
+            bars.set_color(props.errorbars.color)
 
     @staticmethod
     def apply_error_cap_properties(caps_tuple, props):
         """Apply properties to errorbar caps"""
         for caps in caps_tuple:
-            caps.set_markersize(2*props.errorbar_capsize)
-            caps.set_markeredgewidth(props.errorbar_cap_thickness)
-            caps.set_color(props.errorbar_color)
+            caps.set_markersize(2*props.errorbars.capsize)
+            caps.set_markeredgewidth(props.errorbars.cap_thickness)
+            caps.set_color(props.errorbars.color)
 
     @staticmethod
     def hide_errorbars(visible, caps_tuple, bars):

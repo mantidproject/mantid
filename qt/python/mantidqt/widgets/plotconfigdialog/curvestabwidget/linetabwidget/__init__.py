@@ -24,6 +24,8 @@ class LineProperties:
 
     @classmethod
     def from_view(cls, view):
+        if not view.line.isEnabled():
+            return None
         props = dict()
         props['style'] = view.line.get_style()
         props['draw_style'] = view.line.get_draw_style()

@@ -98,23 +98,22 @@ class CurvesTabWidgetView(QWidget):
     def set_properties(self, curve_props):
         """Set all fields in the view from CurveProperties object"""
         self.set_curve_label(curve_props.label)
-        if hasattr(curve_props, 'hide_curve'):
-            self.set_hide_curve(curve_props.hide_curve)
-            # Line properties
-            self.line.set_style(curve_props.line_style)
-            self.line.set_draw_style(curve_props.draw_style)
-            self.line.set_width(curve_props.line_width)
-            self.line.set_color(curve_props.line_color)
-            # Marker properties
-            self.marker.set_style(curve_props.marker_style)
-            self.marker.set_size(curve_props.marker_size)
-            self.marker.face_color_selector_widget.set_color(curve_props.marker_face_color)
-            self.marker.edge_color_selector_widget.set_color(curve_props.marker_edge_color)
+        self.set_hide_curve(curve_props.hide_curve)
+        if curve_props.line:
+            self.line.set_style(curve_props.line.style)
+            self.line.set_draw_style(curve_props.line.draw_style)
+            self.line.set_width(curve_props.line.width)
+            self.line.set_color(curve_props.line.color)
+        if curve_props.marker:
+            self.marker.set_style(curve_props.marker.style)
+            self.marker.set_size(curve_props.marker.size)
+            self.marker.face_color_selector_widget.set_color(curve_props.marker.face_color)
+            self.marker.edge_color_selector_widget.set_color(curve_props.marker.edge_color)
         # Errorbar properties
-        if hasattr(curve_props, 'hide_errorbars'):
-            self.errorbars.set_hide(curve_props.hide_errorbars)
-            self.errorbars.set_width(curve_props.errorbar_width)
-            self.errorbars.set_capsize(curve_props.errorbar_capsize)
-            self.errorbars.set_cap_thickness(curve_props.errorbar_cap_thickness)
-            self.errorbars.set_error_every(curve_props.errorbar_error_every)
-            self.errorbars.set_color(curve_props.errorbar_color)
+        if curve_props.errorbars:
+            self.errorbars.set_hide(curve_props.errorbars.hide)
+            self.errorbars.set_width(curve_props.errorbars.width)
+            self.errorbars.set_capsize(curve_props.errorbars.capsize)
+            self.errorbars.set_cap_thickness(curve_props.errorbars.cap_thickness)
+            self.errorbars.set_error_every(curve_props.errorbars.error_every)
+            self.errorbars.set_color(curve_props.errorbars.color)
