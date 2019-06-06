@@ -32,7 +32,7 @@ RecordPythonScript::RecordPythonScript()
  */
 void RecordPythonScript::init() {
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".py"),
                   "The file into which the Python script will be generated.");
 }

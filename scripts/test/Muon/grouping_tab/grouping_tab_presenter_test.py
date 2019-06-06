@@ -130,7 +130,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         with mock.patch(
                 "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs
-            mock_load.return_value = (groups, pairs, 'description')
+            mock_load.return_value = (groups, pairs, 'description', 'pair1')
             self.view.load_grouping_button.clicked.emit(True)
 
             six.assertCountEqual(self, self.model.group_names, ["grp1", "grp2"])
@@ -148,7 +148,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         with mock.patch(
                 "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs
-            mock_load.return_value = (groups, pairs, 'description')
+            mock_load.return_value = (groups, pairs, 'description', 'pair1')
             self.view.load_grouping_button.clicked.emit(True)
 
             self.view.display_warning_box.assert_called_once_with('Invalid detectors in group grp2')

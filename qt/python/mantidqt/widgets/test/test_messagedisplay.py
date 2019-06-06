@@ -21,7 +21,7 @@ class MessageDisplayTest(GuiTest):
 
     def test_widget_creation(self):
         display = MessageDisplay()
-        self.assertTrue(display is not None)
+        self.assertNotEqual(display, None)
 
 
 if __name__ == "__main__":

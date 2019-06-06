@@ -52,14 +52,14 @@ DECLARE_ALGORITHM(MaskBinsIf)
 /** Initialize the algorithm's properties.
  */
 void MaskBinsIf::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   declareProperty("Criterion", "",
                   "Masking criterion as a muparser expression; y: bin count, "
                   "e: bin error, x: bin center, dx: bin center error, s: "
                   "spectrum axis value.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -99,7 +99,7 @@ void MaskBinsIf::exec() {
   }
   const int64_t numberHistograms =
       static_cast<int64_t>(outputWorkspace->getNumberHistograms());
-  auto progress = make_unique<Progress>(this, 0., 1., numberHistograms);
+  auto progress = std::make_unique<Progress>(this, 0., 1., numberHistograms);
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (int64_t index = 0; index < numberHistograms; ++index) {
     PARALLEL_START_INTERUPT_REGION

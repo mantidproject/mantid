@@ -18,12 +18,12 @@ DECLARE_ALGORITHM(InvertMask)
 
 void InvertMask::init() {
   this->declareProperty(
-      make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "InputWorkspace", "Anonymous", Direction::Input),
       "MaskWorkspace to be inverted. ");
 
   this->declareProperty(
-      make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputWorkspace", "AnonynmousOutput", Direction::Output),
       "MaskWorkspace has inverted bits from input MaskWorkspace.");
 }

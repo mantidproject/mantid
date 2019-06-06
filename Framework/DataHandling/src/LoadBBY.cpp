@@ -121,24 +121,24 @@ void LoadBBY::init() {
   // file to load.
   exts.clear();
   exts.emplace_back(".tar");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       FilenameStr, "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
 
   // mask
   exts.clear();
   exts.emplace_back(".xml");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       MaskStr, "", API::FileProperty::OptionalLoad, exts),
                   "The input filename of the mask data");
 
   // OutputWorkspace
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output));
 
   // FilterByTofMin
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                       FilterByTofMinStr, 0, Kernel::Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
@@ -146,7 +146,7 @@ void LoadBBY::init() {
                   "blank to load all events.");
 
   // FilterByTofMax
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                       FilterByTofMaxStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
@@ -155,14 +155,14 @@ void LoadBBY::init() {
 
   // FilterByTimeStart
   declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+      std::make_unique<Kernel::PropertyWithValue<double>>(
           FilterByTimeStartStr, 0.0, Kernel::Direction::Input),
       "Optional: To only include events after the provided start time, in "
       "seconds (relative to the start of the run).");
 
   // FilterByTimeStop
   declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+      std::make_unique<Kernel::PropertyWithValue<double>>(
           FilterByTimeStopStr, EMPTY_DBL(), Kernel::Direction::Input),
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");

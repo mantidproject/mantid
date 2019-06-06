@@ -127,7 +127,7 @@ public:
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
     size_t block_size = 10;
-    auto data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    auto data = std::make_unique<DasEvent[]>(block_size);
     size_t loaded_size = file.loadBlock(data.get(), block_size);
     // Yes, we loaded that amount
     TS_ASSERT_EQUALS(loaded_size, block_size);
@@ -138,7 +138,7 @@ public:
 
     // Now try to load a lot more - going past the end
     block_size = 10;
-    data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    data = std::make_unique<DasEvent[]>(block_size);
     loaded_size = file.loadBlock(data.get(), block_size);
     TS_ASSERT_EQUALS(loaded_size, 10);
 
@@ -158,7 +158,7 @@ public:
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
     size_t block_size = 10;
-    auto data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    auto data = std::make_unique<DasEvent[]>(block_size);
     size_t loaded_size = file.loadBlockAt(data.get(), 5, block_size);
     // Yes, we loaded that amount
     TS_ASSERT_EQUALS(loaded_size, block_size);
@@ -169,7 +169,7 @@ public:
 
     // Now try to load a lot more - going past the end
     block_size = 10;
-    data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    data = std::make_unique<DasEvent[]>(block_size);
     loaded_size = file.loadBlock(data.get(), block_size);
     TS_ASSERT_EQUALS(loaded_size, 5);
     file.close();

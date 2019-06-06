@@ -50,8 +50,8 @@ class AxisChangerTwoViewTest(unittest.TestCase):
 
     def test_clear_bounds(self):
         self.view.clear_bounds()
-        self.assertEquals(self.view.lower_bound.clear.call_count, 1)
-        self.assertEquals(self.view.upper_bound.clear.call_count, 1)
+        self.assertEqual(self.view.lower_bound.clear.call_count, 1)
+        self.assertEqual(self.view.upper_bound.clear.call_count, 1)
 
     def test_bound_changed(self):
         self.view._bound_changed()

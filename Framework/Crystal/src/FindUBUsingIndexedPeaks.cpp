@@ -26,7 +26,7 @@ const int MIN_INDEXED_PEAKS = 3;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Input Peaks Workspace");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();

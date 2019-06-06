@@ -81,7 +81,7 @@ public:
   void setPlotErrorBars(bool errorBars);
 
   /// Plot a spectrum plot of a given workspace
-  void plotSpectrum(const QString &workspaceName, const int &spectraIndex = 0);
+  void plotSpectrum(const QString &workspaceName, const int &wsIndex = 0);
 
 public slots:
   void runTab();

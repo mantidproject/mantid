@@ -188,7 +188,7 @@ public:
   }
 
   void testGetPeakRadiusWhenNotIntegrated() {
-    auto mockWorkspace = Mantid::Kernel::make_unique<MockPeaksWorkspace>();
+    auto mockWorkspace = std::make_unique<MockPeaksWorkspace>();
     const double expectedRadius = -1; // The default
     // Note that no PeaksRadius property has been set.
 
@@ -199,7 +199,7 @@ public:
   }
 
   void testIsPeaksWorkspaceIntegratedWhenNotIntegrated() {
-    auto mockWorkspace = Mantid::Kernel::make_unique<MockPeaksWorkspace>();
+    auto mockWorkspace = std::make_unique<MockPeaksWorkspace>();
     // Note that no PeaksRadius property has been set.
 
     vtkPeakMarkerFactory factory("signal");
@@ -210,7 +210,7 @@ public:
   }
 
   void testGetPeakRadiusWhenIntegrated() {
-    auto mockWorkspace = Mantid::Kernel::make_unique<MockPeaksWorkspace>();
+    auto mockWorkspace = std::make_unique<MockPeaksWorkspace>();
     const double expectedRadius = 4;
     mockWorkspace->mutableRun().addProperty("PeakRadius", expectedRadius,
                                             true); // Has a PeaksRadius so must
@@ -224,7 +224,7 @@ public:
   }
 
   void testIsPeaksWorkspaceIntegratedWhenIntegrated() {
-    auto mockWorkspace = Mantid::Kernel::make_unique<MockPeaksWorkspace>();
+    auto mockWorkspace = std::make_unique<MockPeaksWorkspace>();
     const double expectedRadius = 4;
     mockWorkspace->mutableRun().addProperty("PeakRadius", expectedRadius,
                                             true); // Has a PeaksRadius so must

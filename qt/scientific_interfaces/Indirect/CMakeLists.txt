@@ -334,6 +334,7 @@ mtd_add_qt_library(
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
     MantidQtWidgetsMplCpp
+    MantidQtIcons
   INSTALL_DIR_BASE ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS

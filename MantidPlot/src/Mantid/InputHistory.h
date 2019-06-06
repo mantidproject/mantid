@@ -7,7 +7,7 @@
 #ifndef INPUTHISTORY_H
 #define INPUTHISTORY_H
 
-#include <MantidKernel/SingletonHolder.h>
+#include "MantidKernel/SingletonHolder.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QList>

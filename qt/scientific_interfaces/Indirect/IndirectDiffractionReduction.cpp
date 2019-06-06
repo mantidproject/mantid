@@ -47,6 +47,7 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction() {
 void IndirectDiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
 
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,

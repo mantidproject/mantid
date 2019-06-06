@@ -131,7 +131,7 @@ void QtReflRunsTabView::addToMenu(QMenu *menu,
                                   DataProcessor::Command_uptr command) {
 
   m_commands.push_back(
-      Mantid::Kernel::make_unique<QtCommandAdapter>(menu, std::move(command)));
+      std::make_unique<QtCommandAdapter>(menu, std::move(command)));
 }
 
 /**

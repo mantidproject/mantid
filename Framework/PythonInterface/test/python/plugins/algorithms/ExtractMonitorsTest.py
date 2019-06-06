@@ -25,14 +25,14 @@ class ExtractMonitorsTest(unittest.TestCase):
         ExtractMonitors(InputWorkspace = 'testWS', DetectorWorkspace = 'det')
         detectors = mtd['det']
 
-        self.assertEquals(detectors.getNumberHistograms(), 200)
+        self.assertEqual(detectors.getNumberHistograms(), 200)
 
     def test_workspace_with_only_monitor_output_gives_only_monitors_in_output(self):
         CreateSampleWorkspace(OutputWorkspace='testWS', NumMonitors = 3)
         ExtractMonitors(InputWorkspace = 'testWS', MonitorWorkspace = 'mon')
         monitors = mtd['mon']
 
-        self.assertEquals(monitors.getNumberHistograms(), 3)
+        self.assertEqual(monitors.getNumberHistograms(), 3)
 
     def test_workspace_with_detector_and_monitor_output_gives_two_workspaces_with_detectors_and_monitors(self):
         CreateSampleWorkspace(OutputWorkspace='testWS', NumMonitors = 3)
@@ -40,9 +40,9 @@ class ExtractMonitorsTest(unittest.TestCase):
         detectors = mtd['det']
         monitors = mtd['mon']
 
-        self.assertEquals(detectors.getNumberHistograms(), 200)
-        self.assertEquals(monitors.getNumberHistograms(), 3)
-        self.assertEquals(detectors.getMonitorWorkspace().name(), "mon")
+        self.assertEqual(detectors.getNumberHistograms(), 200)
+        self.assertEqual(monitors.getNumberHistograms(), 3)
+        self.assertEqual(detectors.getMonitorWorkspace().name(), "mon")
 
     def test_workspace_with_linked_monitors_throws_error(self):
         CreateSampleWorkspace(OutputWorkspace='testWS', NumMonitors = 3)
@@ -68,7 +68,7 @@ class ExtractMonitorsTest(unittest.TestCase):
         self.assertRaises(KeyError, mtd.retrieve, 'det')
         monitors = mtd['mon']
 
-        self.assertEquals(monitors.getNumberHistograms(), 3)
+        self.assertEqual(monitors.getNumberHistograms(), 3)
 
     def test_workspace_with_no_monitors_gives_no_monitor_workspace(self):
         CreateSampleWorkspace(OutputWorkspace='testWS', NumMonitors = 0)
@@ -77,7 +77,7 @@ class ExtractMonitorsTest(unittest.TestCase):
         detectors = mtd['det']
         self.assertRaises(KeyError, mtd.retrieve, 'mon')
 
-        self.assertEquals(detectors.getNumberHistograms(), 200)
+        self.assertEqual(detectors.getNumberHistograms(), 200)
 
     def test_workspace_with_same_input_ws_and_detector_ws_names(self):
         CreateSampleWorkspace(OutputWorkspace='testWS', NumMonitors = 3)
@@ -85,9 +85,9 @@ class ExtractMonitorsTest(unittest.TestCase):
         detectors = mtd['testWS']
         monitors = mtd['mon']
 
-        self.assertEquals(detectors.getNumberHistograms(), 200)
-        self.assertEquals(monitors.getNumberHistograms(), 3)
-        self.assertEquals(detectors.getMonitorWorkspace().name(), "mon")
+        self.assertEqual(detectors.getNumberHistograms(), 200)
+        self.assertEqual(monitors.getNumberHistograms(), 3)
+        self.assertEqual(detectors.getMonitorWorkspace().name(), "mon")
 
         spectrumInfo = monitors.spectrumInfo()
         for i in range(monitors.getNumberHistograms()):

@@ -126,7 +126,7 @@ SliceViewer::SliceViewer(QWidget *parent)
                    this, SLOT(colorRangeChanged()));
 
   // ---- Set the color map on the data ------
-  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
+  m_data = std::make_unique<API::QwtRasterDataMD>();
   m_spect->setColorMap(m_colorBar->getColorMap());
   m_plot->autoRefresh();
   // Make the splitter use the minimum size for the controls and not stretch out
@@ -721,7 +721,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
     // Transfer the current settings
-    auto tempData = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+    auto tempData = std::make_unique<API::QwtRasterDataMDNonOrthogonal>();
     transferSettings(m_data.get(), tempData.get());
     m_data = std::move(tempData);
     applyNonOrthogonalAxisScaleDraw();
@@ -729,7 +729,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
     applyOrthogonalAxisScaleDraw();
 
     // Transfer the current settings
-    auto tempData = Kernel::make_unique<API::QwtRasterDataMD>();
+    auto tempData = std::make_unique<API::QwtRasterDataMD>();
     transferSettings(m_data.get(), tempData.get());
     m_data = std::move(tempData);
   }

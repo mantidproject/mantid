@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include <MantidKernel/System.h>
 #include <vector>
 
 #ifndef INTERFACES_MANTID_EV_WORKER_H

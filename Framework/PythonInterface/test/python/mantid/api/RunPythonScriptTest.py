@@ -88,12 +88,12 @@ if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace
         CreateWorkspace(OutputWorkspace='ws_1',DataX='1,2,3,4',DataY='1,2,3',DataE='1,2,3')
         CreateWorkspace(OutputWorkspace='ws_2',DataX='1,2,3,4',DataY='1,2,3',DataE='1,2,3')
         GroupWorkspaces(InputWorkspaces='ws_1,ws_2',OutputWorkspace='ws')
-        self.assertEquals(3,mtd.size())
+        self.assertEqual(3,mtd.size())
 
         code = "Scale(input,OutputWorkspace=output,Factor=5)"
         RunPythonScript(InputWorkspace='ws',Code=code,OutputWorkspace='ws')
 
-        self.assertEquals(3,mtd.size())
+        self.assertEqual(3,mtd.size())
         group = mtd['ws']
         self.assertTrue(isinstance(group, WorkspaceGroup))
         self.assertAlmostEqual(5.0, mtd['ws_1'].readY(0)[0], 8)

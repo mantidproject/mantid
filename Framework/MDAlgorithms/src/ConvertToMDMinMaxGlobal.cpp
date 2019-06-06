@@ -56,7 +56,7 @@ void ConvertToMDMinMaxGlobal::init() {
   // histogram needed by ConvertUnits
   ws_valid->add<HistogramValidator>();
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, ws_valid),
       "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
@@ -89,7 +89,7 @@ void ConvertToMDMinMaxGlobal::init() {
                   Direction::InOut);
 
   setPropertySettings("dEAnalysisMode",
-                      make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
   std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
@@ -102,12 +102,12 @@ void ConvertToMDMinMaxGlobal::init() {
       "laboratory or sample frame."
       "  **HKL** - reciprocal lattice units");
 
-  setPropertySettings("Q3DFrames", make_unique<VisibleWhenProperty>(
+  setPropertySettings("Q3DFrames", std::make_unique<VisibleWhenProperty>(
                                        "QDimensions", IS_EQUAL_TO, "Q3D"));
 
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("OtherDimensions",
-                                              Direction::Input),
+      std::make_unique<ArrayProperty<std::string>>("OtherDimensions",
+                                                   Direction::Input),
       "List(comma separated) of additional to **Q** and **DeltaE** variables "
       "which form additional "
       "(orthogonal) to **Q** dimensions in the target workspace (e.g. "
@@ -118,9 +118,9 @@ void ConvertToMDMinMaxGlobal::init() {
       "workspace.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("MinValues", Direction::Output));
+      std::make_unique<ArrayProperty<double>>("MinValues", Direction::Output));
   declareProperty(
-      make_unique<ArrayProperty<double>>("MaxValues", Direction::Output));
+      std::make_unique<ArrayProperty<double>>("MaxValues", Direction::Output));
 }
 
 //----------------------------------------------------------------------------------------------

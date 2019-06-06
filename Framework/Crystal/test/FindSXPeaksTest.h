@@ -15,7 +15,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -55,7 +55,7 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
  * @param endIndex :: the workspace index to stop searching from
  */
 std::unique_ptr<FindSXPeaks> createFindSXPeaks(Workspace2D_sptr workspace) {
-  auto alg = Mantid::Kernel::make_unique<FindSXPeaks>();
+  auto alg = std::make_unique<FindSXPeaks>();
   alg->setRethrows(true);
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);

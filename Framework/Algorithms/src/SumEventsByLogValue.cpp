@@ -30,15 +30,15 @@ using namespace API;
 
 void SumEventsByLogValue::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "The input EventWorkspace. Must contain 'raw' (unweighted) events");
   declareProperty(
-      make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
           "MonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace containing the monitor counts relating to the input "
       "workspace");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm. The output workspace will be a "
@@ -51,7 +51,7 @@ void SumEventsByLogValue::init() {
                   "The name of the number series log against which the data "
                   "should be summed");
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "OutputBinning", "", boost::make_shared<RebinParamsValidator>(true)),
       "Binning parameters for the output workspace (see [[Rebin]] for syntax) "
       "(Optional for logs holding integer values, mandatory otherwise)");

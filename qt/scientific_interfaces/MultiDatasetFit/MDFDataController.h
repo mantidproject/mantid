@@ -7,7 +7,7 @@
 #ifndef MDFDATACONTROLLER_H_
 #define MDFDATACONTROLLER_H_
 
-#include <MantidKernel/Statistics.h>
+#include "MantidKernel/Statistics.h"
 #include <QObject>
 
 // Forward declaration

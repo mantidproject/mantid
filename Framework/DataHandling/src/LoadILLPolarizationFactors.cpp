@@ -13,7 +13,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
-#include "MantidKernel/make_unique.h"
+
 #include <fstream>
 
 namespace {
@@ -257,16 +257,16 @@ const std::string LoadILLPolarizationFactors::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLPolarizationFactors::init() {
-  declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::FILENAME, "", API::FileProperty::Load),
+  declareProperty(std::make_unique<API::FileProperty>(Prop::FILENAME, "",
+                                                      API::FileProperty::Load),
                   "Path to the polarization efficiency file.");
   const auto refWSValidator =
       boost::make_shared<API::IncreasingAxisValidator>();
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       Prop::OUT_WS, "", Direction::Output, refWSValidator),
                   "An output workspace containing the efficiencies at the "
                   "reference workspace's wavelength points.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       Prop::REF_WS, "", Direction::Input),
                   "A reference workspace to get the wavelength axis from.");
 }
@@ -279,7 +279,7 @@ void LoadILLPolarizationFactors::exec() {
   HistogramData::Histogram tmplHist{refWS->histogram(0).points()};
   API::MatrixWorkspace_sptr outWS =
       DataObjects::create<DataObjects::Workspace2D>(5, tmplHist);
-  auto outVertAxis = Kernel::make_unique<API::TextAxis>(5);
+  auto outVertAxis = std::make_unique<API::TextAxis>(5);
   const auto maxWavelength = tmplHist.x().back();
 
   const std::string filename = getProperty(Prop::FILENAME);

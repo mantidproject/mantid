@@ -43,16 +43,16 @@ using namespace HistogramData;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The name of the input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the output workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(make_unique<WorkspaceProperty<>>("InputImagWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputImagWorkspace",
+                                                        "", Direction::Input,
+                                                        PropertyMode::Optional),
                   "The name of the input workspace for the imaginary part. "
                   "Leave blank if same as InputWorkspace");
 
@@ -81,7 +81,7 @@ void FFT::init() {
 
   // "Shift" should only be enabled if "AutoShift" is turned off
   setPropertySettings(
-      "Shift", make_unique<EnabledWhenProperty>("AutoShift", IS_DEFAULT));
+      "Shift", std::make_unique<EnabledWhenProperty>("AutoShift", IS_DEFAULT));
 }
 
 /** Executes the algorithm

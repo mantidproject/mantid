@@ -133,13 +133,7 @@ void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
  */
 void PreviewPlot::removeSpectrum(const QString &lineName) {
   auto axes = m_canvas->gca();
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
-  const auto lineNameAsUnicode =
-      Python::NewRef(PyUnicode_FromString(lineName.toLatin1().constData()));
-  axes.forEachArtist("lines", [&lineNameAsUnicode](Artist &&line) {
-    if (lineNameAsUnicode == line.pyobj().attr("get_label")())
-      line.remove();
-  });
+  axes.removeArtists("lines", lineName);
 }
 
 /**
@@ -366,7 +360,12 @@ void PreviewPlot::onWorkspaceRemoved(
     Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
   // Ignore non matrix workspaces
   if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
-    m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
+    // the artist may have already been removed. ignore the event is that is the
+    // case
+    try {
+      m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
+    } catch (Mantid::PythonInterface::PythonException &) {
+    }
     m_canvas->draw();
   }
 }

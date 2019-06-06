@@ -43,40 +43,40 @@ const std::string DgsAbsoluteUnitsReduction::category() const {
 /** Initialize the algorithm's properties.
  */
 void DgsAbsoluteUnitsReduction::init() {
-  this->declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The absolute units sample workspace.");
-  this->declareProperty(make_unique<WorkspaceProperty<>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "InputWorkspace", "", Direction::Input),
+                        "The absolute units sample workspace.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "InputMonitorWorkspace", "", Direction::Input,
                             PropertyMode::Optional),
                         "A monitor workspace associated with the absolute "
                         "units sample workspace");
-  this->declareProperty(make_unique<WorkspaceProperty<>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "DetectorVanadiumWorkspace", "", Direction::Input,
                             PropertyMode::Optional),
                         "An absolute units detector vanadium workspace.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("DetectorVanadiumMonitorWorkspace", "",
-                                       Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("DetectorVanadiumMonitorWorkspace",
+                                            "", Direction::Input,
+                                            PropertyMode::Optional),
       "A monitor workspace associated with the absolute units detector "
       "vanadium workspace.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A masking workspace to apply to the data.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A grouping workspace for the absolute units data.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Input);
-  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                         Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Direction::Output),
                         "The integrated absolute units workspace.");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputMaskWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputMaskWorkspace", "",
+                                            Direction::Output),
       "The diagnostic mask from the absolute units workspace");
 }
 

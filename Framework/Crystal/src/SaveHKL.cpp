@@ -39,7 +39,7 @@ DECLARE_ALGORITHM(SaveHKL)
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
@@ -66,14 +66,14 @@ void SaveHKL::init() {
   declareProperty("Radius", EMPTY_DBL(), mustBePositive,
                   "Radius of the sample in centimeters");
   declareProperty("PowerLambda", 4.0, "Power of lambda ");
-  declareProperty(make_unique<FileProperty>("SpectraFile", "",
-                                            API::FileProperty::OptionalLoad,
-                                            ".dat"),
-                  " Spectrum data read from a spectrum file.");
-
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".hkl"),
-      "Path to an hkl file to save.");
+      std::make_unique<FileProperty>("SpectraFile", "",
+                                     API::FileProperty::OptionalLoad, ".dat"),
+      " Spectrum data read from a spectrum file.");
+
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".hkl"),
+                  "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
   declareProperty("SortBy", histoTypes[2],
@@ -84,7 +84,7 @@ void SaveHKL::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "SaveHKLOutput", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty(
@@ -95,7 +95,7 @@ void SaveHKL::init() {
       "Extra columns (22 total) in file if true for direction cosines.\n"
       "If false, original 14 columns (default).");
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "UBFilename", "", FileProperty::OptionalLoad, exts),
                   "Path to an ISAW-style UB matrix text file only needed for "
                   "DirectionCosines if workspace does not have lattice.");

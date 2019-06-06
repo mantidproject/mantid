@@ -8,7 +8,7 @@
 #define VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"

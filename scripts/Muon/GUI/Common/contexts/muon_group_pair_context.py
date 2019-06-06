@@ -48,8 +48,8 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = os.path.join(instrument_directory, grouping_file)
-    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
-    return new_groups, new_pairs
+    new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
+    return new_groups, new_pairs, default
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -99,6 +99,7 @@ class MuonGroupPairContext(object):
     def __init__(self, check_group_contains_valid_detectors=lambda x : True):
         self._groups = []
         self._pairs = []
+        self._selected = ''
 
         self.message_notifier = MessageNotifier(self)
 
@@ -123,6 +124,15 @@ class MuonGroupPairContext(object):
 
     def clear_pairs(self):
         self._pairs = []
+
+    @property
+    def selected(self):
+        return self._selected
+
+    @selected.setter
+    def selected(self, value):
+        if value in self.group_names + self.pair_names and self._selected != value:
+            self._selected = value
 
     @property
     def group_names(self):
@@ -165,7 +175,7 @@ class MuonGroupPairContext(object):
         self[name].show(str(run))
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
-        self._groups, self._pairs = get_default_grouping(workspace, instrument, main_field_direction)
+        self._groups, self._pairs, self._selected = get_default_grouping(workspace, instrument, main_field_direction)
 
     def _check_name_unique(self, name):
         for item in self._groups + self.pairs:

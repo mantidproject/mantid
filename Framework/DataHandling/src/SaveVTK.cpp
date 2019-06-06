@@ -34,11 +34,12 @@ SaveVTK::SaveVTK() : m_Xmin(0), m_Xmax(0) {}
  */
 void SaveVTK::init() {
   // Declare mandatory properties
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The workspace name to use as input");
-  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
-                  "The name to use when writing the file");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+      "The name to use when writing the file");
   // Declare optional properties
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);

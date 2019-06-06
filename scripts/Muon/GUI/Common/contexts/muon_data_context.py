@@ -10,7 +10,6 @@ from __future__ import (absolute_import, division, print_function)
 import os
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
-import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
@@ -19,43 +18,8 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
 from mantid.api import WorkspaceGroup
-from mantid.kernel import ConfigServiceImpl, ConfigService
+from mantid.kernel import ConfigService
 from Muon.GUI.Common.observer_pattern import Observable
-
-
-def get_grouping_psi(workspace):
-    grouping_list = []
-
-    for ii in range(0, workspace.getNumberHistograms()):
-        sample_log_label_name = "Label Spectra " + str(ii)
-        sample_log_value = ""
-        workspace_run = workspace.getRun()
-        if workspace_run.hasProperty(sample_log_label_name):
-            sample_log_value = workspace_run.getProperty(sample_log_label_name).value
-        grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
-
-    return grouping_list, []
-
-
-def get_default_grouping(workspace, instrument, main_field_direction):
-    parameter_name = "Default grouping file"
-    if instrument == "MUSR" or instrument == 'CHRONUS':
-        parameter_name += " - " + main_field_direction
-
-    if instrument != "PSI":
-        try:
-            if isinstance(workspace, WorkspaceGroup):
-                grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
-            else:
-                grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
-        except IndexError:
-            return [], []
-    else:
-        return get_grouping_psi(workspace)
-    instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
-    filename = os.path.join(instrument_directory, grouping_file)
-    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
-    return new_groups, new_pairs
 
 
 def construct_empty_group(group_names, group_index=0):
