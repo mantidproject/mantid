@@ -1170,7 +1170,8 @@ void FilterEvents::createOutputWorkspacesSplitters() {
         auto infoiter = infomap.find(wsgroup);
         if (infoiter != infomap.end()) {
           std::string name = infoiter->second;
-          name.erase(std::remove_if(name.begin(), name.end(), isspace), name.end());
+          name.erase(std::remove_if(name.begin(), name.end(), isspace),
+                     name.end());
           wsname << name;
         } else {
           wsname << wsgroup + delta_wsindex;
