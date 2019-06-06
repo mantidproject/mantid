@@ -72,7 +72,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                 number_of_pixels_x = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
             else:
                 raise RuntimeError("Instrument does not have parameter number-of-x-pixels")
-            if workspace.getInstrument().hasParameter("number-of-x-pixels").size() != 0:
+            if workspace.getInstrument().hasParameter("number-of-y-pixels"):
                 number_of_pixels_y = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
             else:
                 raise RuntimeError("Instrument does not have parameter number-of-y-pixels")
