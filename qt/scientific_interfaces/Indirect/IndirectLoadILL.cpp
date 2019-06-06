@@ -8,11 +8,61 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
 #include <QFileInfo>
 #include <QStringList>
+
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
+
+namespace {
+
+std::string getInstrumentParameter(Instrument_const_sptr &instrument,
+                                   std::string const &parameter,
+                                   std::string const &defaultValue) {
+  if (instrument->hasParameter(parameter))
+    return instrument->getStringParameter(parameter)[0];
+  return defaultValue;
+}
+
+std::string constructRunName(bool isILL, std::string const &instrumentName,
+                             std::string const &runNumber) {
+  return isILL ? instrumentName + "_" + runNumber : instrumentName + runNumber;
+}
+
+std::string constructPrefix(std::string const &runName,
+                            Instrument_const_sptr instrument) {
+  auto const analyser = getInstrumentParameter(instrument, "analyser", "");
+  auto const reflection = getInstrumentParameter(instrument, "reflection", "");
+
+  auto prefix = runName + '_' + analyser + reflection;
+  if (!analyser.empty() && !reflection.empty())
+    prefix += '_';
+  return prefix;
+}
+
+std::string getWorkspacePrefix(std::string const &workspaceName) {
+  if (!workspaceName.empty()) {
+    auto const workspace =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            workspaceName);
+    auto const facility =
+        ConfigService::Instance().getString("default.facility");
+
+    auto const instrument = workspace->getInstrument();
+    auto const runName =
+        constructRunName(facility == "ILL", instrument->getName(),
+                         std::to_string(workspace->getRunNumber()));
+    return constructPrefix(runName, instrument);
+  }
+  return "";
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -90,16 +140,23 @@ void IndirectLoadILL::run() {
   }
   plot = m_uiForm.cbPlot->currentText();
 
-  QString pyInput("");
   if (instrument == "IN16B") {
-    pyInput += "from IndirectCommon import getWSprefix\n";
-    pyInput += "tmp_name = '__tmp_IndirectLoadASCII_IN16B'\n";
-    pyInput += "LoadILLIndirect(Filename='" + filename +
-               "', OutputWorkspace=tmp_name)\n";
-    pyInput += "output_name = getWSprefix(tmp_name) + 'red'\n";
-    pyInput += "RenameWorkspace('__tmp_IndirectLoadASCII_IN16B', "
-               "OutputWorkspace=output_name)\n";
+    auto const temporaryName = "__tmp_IndirectLoadASCII_IN16B";
+    auto loader = AlgorithmManager::Instance().create("LoadILLIndirect");
+    loader->initialize();
+    loader->setProperty("Filename", filename.toStdString());
+    loader->setProperty("OutputWorkspace", temporaryName);
+    loader->execute();
+
+    auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+    renamer->initialize();
+    renamer->setProperty("InputWorkspace", temporaryName);
+    renamer->setProperty("OutputWorkspace",
+                         getWorkspacePrefix(temporaryName) + "red");
+    renamer->execute();
   } else {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+    QString pyInput("");
     QString pyFunc("");
     // IN13 has a different loading routine
     if (instrument == "IN13") {
@@ -124,8 +181,12 @@ void IndirectLoadILL::run() {
                "'"
                ",'" +
                plot + "'," + save + ")";
+    runPythonScript(pyInput);
+#else
+    emit showMessageBox("IN16B is currently the only instrument supported on "
+                        "the workbench in LoadILL.");
+#endif
   }
-  runPythonScript(pyInput);
 
   setRunIsRunning(false);
 }
