@@ -31,12 +31,14 @@ std::string toStdString(const QString &qString) {
   return qString.toStdString();
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 QStringList toQStringList(std::vector<std::string> const &input) {
   QStringList output;
   for (auto const &element : input)
     output << QString::fromStdString(element);
   return output;
 }
+#endif
 
 } // namespace
 
