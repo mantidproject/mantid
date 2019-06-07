@@ -146,10 +146,13 @@ void BatchAlgorithmRunner::cancelBatch() {
   // If the queue is empty, notify straight away that the batch has been
   // cancelled. Otherwise, set a flag so that it will be cancelled after the
   // current algorithm finishes processing
-  if (queueLength() < 1)
+  if (queueLength() < 1) {
+    addAllObservers();
     m_notificationCenter.postNotification(new BatchCancelledNotification());
-  else
+    removeAllObservers();
+  } else {
     m_cancelRequested = true;
+  }
 }
 
 /**
