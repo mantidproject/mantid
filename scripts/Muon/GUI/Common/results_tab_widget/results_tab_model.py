@@ -132,11 +132,13 @@ class ResultsTabModel(object):
         [(workspace, fit_position),...]
         It is assumed this is not empty and ordered as it should be displayed.
         """
+        self._raise_error_on_incompatible_selection(results_selection)
+
         results_table = self._create_empty_results_table(
             log_selection, results_selection)
-        fit_list = self._fit_context.fit_list
+        all_fits = self._fit_context.fit_list
         for _, position in results_selection:
-            fit = fit_list[position]
+            fit = all_fits[position]
             fit_parameters = fit.parameters
             row_dict = {
                 'workspace_name': fit_parameters.parameter_workspace_name
@@ -160,17 +162,27 @@ class ResultsTabModel(object):
                         fit_parameters.error(param_name)
                     })
 
-            try:
-                results_table.addRow(row_dict)
-            except ValueError:
-                msg = "Incompatible fits for results table:\n"
-                msg += " fit 1 and {} have a different parameters".format(
-                    position + 1)
-                raise RuntimeError(msg)
+            results_table.addRow(row_dict)
 
         AnalysisDataService.Instance().addOrReplace(self.results_table_name(),
                                                     results_table)
         return results_table
+
+    def _raise_error_on_incompatible_selection(self, results_selection):
+        """If the selected results cannot be displayed together then raise an error
+
+        :param results_selection: See create_results_output
+        :raises RuntimeError
+        """
+        all_fits = self._fit_context.fit_list
+        nparams_selected = [len(all_fits[position].parameters) for _, position in results_selection]
+        if nparams_selected[1:] != nparams_selected[:-1]:
+            msg = "The number of parameters for each selected fit does not match:\n"
+            for (_, position), nparams in zip(results_selection, nparams_selected):
+                fit = all_fits[position]
+                msg += "  {}: {}\n".format(
+                    fit.parameters.parameter_workspace_name, nparams)
+            raise RuntimeError(msg)
 
     def _create_empty_results_table(self, log_selection, results_selection):
         """
