@@ -376,8 +376,12 @@ void AnalysisDataServiceImpl::setIllegalCharacterList(
 /**
  * Checks the name is valid
  * @param name A string containing the name to check. If the name is invalid a
- * std::invalid_argument is thrown
+ * std::invalid_argument or std::runtime_error is thrown
+ * @param group A WorkspaceGroup shared ptr which will be evaluated if it is
+ * valid then it will check it's container for the same name that is passed if
+ * true throws std::runtime_error else nothing.
  */
+
 void AnalysisDataServiceImpl::verifyName(
     const std::string &name,
     const boost::shared_ptr<API::WorkspaceGroup> &group) {
