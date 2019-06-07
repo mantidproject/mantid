@@ -61,7 +61,7 @@ public:
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     // Data points workspace
@@ -77,7 +77,7 @@ public:
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     // Histogram workspace
@@ -102,7 +102,7 @@ public:
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
 

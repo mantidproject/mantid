@@ -34,16 +34,16 @@ TOFSANSResolution::TOFSANSResolution()
 
 void TOFSANSResolution::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::InOut,
           boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "ReducedWorkspace", "", Direction::Input, wsValidator),
                   "I(Q) workspace");
-  declareProperty(make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
       "OutputBinning", boost::make_shared<RebinParamsValidator>()));
 
   declareProperty("MinWavelength", EMPTY_DBL(), "Minimum wavelength to use.");
@@ -112,8 +112,8 @@ void TOFSANSResolution::exec() {
   // Create workspaces with each component of the resolution for debugging
   // purposes
   MatrixWorkspace_sptr thetaWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaError", "",
+                                                        Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
   thetaWS->setSharedX(0, iqWS->sharedX(0));
@@ -121,7 +121,7 @@ void TOFSANSResolution::exec() {
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
   declareProperty(
-      make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
+      std::make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
   tofWS->setSharedX(0, iqWS->sharedX(0));

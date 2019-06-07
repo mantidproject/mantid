@@ -16,10 +16,10 @@ from sans.common.enums import (SANSFacility)
 class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
     def test_that_all_option_columns_are_there(self):
         options = create_option_column_properties()
-        self.assertTrue(len(options) == 3)
-        self.assertTrue(options[0].algorithm_property == "WavelengthMin")
-        self.assertTrue(options[1].algorithm_property == "WavelengthMax")
-        self.assertTrue(options[2].algorithm_property == "EventSlices")
+        self.assertEqual(len(options), 3)
+        self.assertEqual(options[0].algorithm_property, "WavelengthMin")
+        self.assertEqual(options[1].algorithm_property, "WavelengthMax")
+        self.assertEqual(options[2].algorithm_property, "EventSlices")
 
     def test_that_the_properties_with_periods_can_be_provided(self):
         props = create_properties()
@@ -75,7 +75,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
 
     def test_that_gets_gui_algorithm_name(self):
         alg_name = get_gui_algorithm_name(SANSFacility.ISIS)
-        self.assertTrue(alg_name == "SANSGuiDataProcessorAlgorithm")
+        self.assertEqual(alg_name, "SANSGuiDataProcessorAlgorithm")
 
     def test_that_getting_algorithm_name_raises_when_facility_is_not_known(self):
         args = ["teskdfsd"]

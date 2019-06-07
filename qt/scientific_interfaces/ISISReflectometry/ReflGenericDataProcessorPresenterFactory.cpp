@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflGenericDataProcessorPresenterFactory.h"
-#include "MantidKernel/make_unique.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -117,7 +116,7 @@ ReflGenericDataProcessorPresenterFactory::create(int group) {
   // Value is property name of the post-processing algorithm
   std::map<QString, QString> postprocessMap = {{"dQ/Q", "Params"}};
 
-  return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
+  return std::make_unique<ReflDataProcessorPresenter>(
       whitelist, preprocessMap, processor, postprocessor, group, postprocessMap,
       "LoadNexus");
 }

@@ -307,7 +307,7 @@ public:
   }
 
   ConvertToMDComponentsTest() {
-    pAlg = Mantid::Kernel::make_unique<Convert2MDComponentsTestHelper>();
+    pAlg = std::make_unique<Convert2MDComponentsTestHelper>();
     ws2D = WorkspaceCreationHelper::
         createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;

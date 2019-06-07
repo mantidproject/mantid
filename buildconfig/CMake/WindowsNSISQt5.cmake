@@ -15,6 +15,7 @@ set ( QT5_DIST_DLLS
     Qt5Quick.dll
     Qt5QuickWidgets.dll
     Qt5Sql.dll
+    Qt5Xml.dll
     Qt5WebChannel.dll
     Qt5WebEngine.dll
     Qt5WebEngineCore.dll

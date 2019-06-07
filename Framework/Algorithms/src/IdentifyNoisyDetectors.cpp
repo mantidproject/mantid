@@ -29,9 +29,9 @@ void IdentifyNoisyDetectors::init() {
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "InputWorkspace", "", Direction::Input /*,wsVal*/));
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
   declareProperty("RangeLower", 2000.0, "The lower integration range");
   declareProperty("RangeUpper", 19000.0, "The upper integration range");

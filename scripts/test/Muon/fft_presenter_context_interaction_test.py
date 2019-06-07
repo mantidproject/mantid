@@ -109,7 +109,7 @@ class FFTPresenterTest(GuiTest):
         self.context.phase_context.add_phase_quad(workspace_wrapper)
         self.presenter.getWorkspaceNames()
 
-        self.assertEquals(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
+        self.assertEqual(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
                                                             'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table',
                                                             'NegativePadding': True, 'Padding': 1})
 
@@ -123,7 +123,7 @@ class FFTPresenterTest(GuiTest):
 
     def test_get_imaginary_pre_inputs(self):
         self.presenter.getWorkspaceNames()
-        self.assertEquals(self.presenter.get_imaginary_inputs(),
+        self.assertEqual(self.presenter.get_imaginary_inputs(),
                           {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
                            'InputWorkspace': 'MUSR22725; Pair Asym; test_pair; MA',
                            'NegativePadding': True, 'Padding': 1})
@@ -135,7 +135,7 @@ class FFTPresenterTest(GuiTest):
         self.presenter.getWorkspaceNames()
         self.view.imaginary_data = False
 
-        self.assertEquals(
+        self.assertEqual(
             self.presenter.get_fft_inputs(workspace_wrapper.workspace_name, workspace_wrapper.workspace_name),
             {'AcceptXRoundingErrors': True, 'AutoShift': True,
              'InputWorkspace': workspace_wrapper.workspace_name,
@@ -147,7 +147,7 @@ class FFTPresenterTest(GuiTest):
         workspace_wrapper.workspace_name = phase_name
         self.context.phase_context.add_phase_quad(workspace_wrapper)
         self.presenter.getWorkspaceNames()
-        self.assertEquals(self.presenter.get_fft_inputs(phase_name, phase_name, 1),
+        self.assertEqual(self.presenter.get_fft_inputs(phase_name, phase_name, 1),
                           {'AcceptXRoundingErrors': True, 'AutoShift': True,
                            'InputWorkspace': phase_name, 'InputImagWorkspace': phase_name,
                            'Real': 0, 'Imaginary': 1, 'Transform': 'Forward'})
@@ -155,7 +155,7 @@ class FFTPresenterTest(GuiTest):
     def test_get_fft_inputs_without_phase_quad(self):
         self.presenter.getWorkspaceNames()
         self.view.ws.setCurrentIndex(1)
-        self.assertEquals(self.presenter.get_fft_inputs('input_workspace', 'imaginary_input_workspace'),
+        self.assertEqual(self.presenter.get_fft_inputs('input_workspace', 'imaginary_input_workspace'),
                           {'AcceptXRoundingErrors': True, 'AutoShift': True, 'Imaginary': 0,
                            'InputImagWorkspace': 'imaginary_input_workspace', 'InputWorkspace': 'input_workspace',
                            'Real': 0, 'Transform': 'Forward'})
@@ -164,7 +164,7 @@ class FFTPresenterTest(GuiTest):
         self.presenter.getWorkspaceNames()
         self.view.imaginary_data = False
 
-        self.assertEquals(self.presenter.get_fft_inputs('input_workspace', 'imaginary_input_workspace'),
+        self.assertEqual(self.presenter.get_fft_inputs('input_workspace', 'imaginary_input_workspace'),
                           {'AcceptXRoundingErrors': True, 'AutoShift': True,
                            'InputWorkspace': 'input_workspace',
                            'Real': 0, 'Transform': 'Forward'})

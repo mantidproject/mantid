@@ -22,10 +22,10 @@ class WorkspaceFactoryTest(unittest.TestCase):
 
     def _verify(self, wksp, nhist, xlength, ylength):
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
-        self.assertEquals(wksp.id(), "Workspace2D")
-        self.assertEquals(wksp.getNumberHistograms(), nhist)
-        self.assertEquals(len(wksp.readX(0)), xlength)
-        self.assertEquals(wksp.blocksize(), ylength)
+        self.assertEqual(wksp.id(), "Workspace2D")
+        self.assertEqual(wksp.getNumberHistograms(), nhist)
+        self.assertEqual(len(wksp.readX(0)), xlength)
+        self.assertEqual(wksp.blocksize(), ylength)
 
     def test_creating_a_clean_workspace_is_correct_size_and_type(self):
         nhist = 2

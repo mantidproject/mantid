@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -45,7 +45,7 @@ public:
     using Mantid::Geometry::SampleEnvironment_uptr;
 
     SampleEnvironmentFactory factory(
-        Mantid::Kernel::make_unique<TestSampleEnvSpecFinder>());
+        std::make_unique<TestSampleEnvSpecFinder>());
     SampleEnvironment_uptr env;
     TS_ASSERT_THROWS_NOTHING(
         env = factory.create("facility", "inst", "CRYO001", "10mm"));
@@ -60,14 +60,14 @@ public:
   //----------------------------------------------------------------------------
   void test_Unknown_Specification_Throws_Error() {
     SampleEnvironmentFactory factory(
-        Mantid::Kernel::make_unique<NullSampleEnvSpecFinder>());
+        std::make_unique<NullSampleEnvSpecFinder>());
     TS_ASSERT_THROWS(factory.create("unknown", "unknown", "unknown", "unknown"),
                      const std::runtime_error &);
   }
 
   void test_Known_Specification_Unknown_Container_Throws() {
     SampleEnvironmentFactory factory(
-        Mantid::Kernel::make_unique<TestSampleEnvSpecFinder>());
+        std::make_unique<TestSampleEnvSpecFinder>());
     TS_ASSERT_THROWS(factory.create("unknown", "unknown", "CRYO001", "unknown"),
                      const std::invalid_argument &);
   }
@@ -106,7 +106,7 @@ private:
       large->setID("10mm");
 
       // Prepare a sample environment spec
-      auto spec = Mantid::Kernel::make_unique<SampleEnvironmentSpec>("CRYO001");
+      auto spec = std::make_unique<SampleEnvironmentSpec>("CRYO001");
       spec->addContainer(small);
       spec->addContainer(large);
       return spec;

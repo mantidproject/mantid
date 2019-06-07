@@ -12,7 +12,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"

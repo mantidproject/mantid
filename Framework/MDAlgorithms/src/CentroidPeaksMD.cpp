@@ -33,7 +33,7 @@ CentroidPeaksMD::CentroidPeaksMD() { this->useAlgorithm("CentroidPeaksMD", 2); }
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaksMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
@@ -44,18 +44,18 @@ void CentroidPeaksMD::init() {
                   "Ignored:  algorithm uses the InputWorkspace's coordinates.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
+                                                  Direction::Input),
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }

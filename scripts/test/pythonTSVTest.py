@@ -40,7 +40,7 @@ class PythonTSVTest(unittest.TestCase):
         TSV.writeLine(Name)
         pythonTSV.saveToTSV(TSV,value)
         load =get_loaded_data(TSV,value)
-        self.assertEquals(value, load.readDouble())
+        self.assertEqual(value, load.readDouble())
 
     def test_saveInt(self):
         value = 1
@@ -48,7 +48,7 @@ class PythonTSVTest(unittest.TestCase):
         TSV.writeLine(Name)
         pythonTSV.saveToTSV(TSV,value)
         load =get_loaded_data(TSV,value)
-        self.assertEquals(value, load.readInt())
+        self.assertEqual(value, load.readInt())
 
     def test_saveString(self):
         value = "string"
@@ -56,7 +56,7 @@ class PythonTSVTest(unittest.TestCase):
         TSV.writeLine(Name)
         pythonTSV.saveToTSV(TSV,value)
         load =get_loaded_data(TSV,value)
-        self.assertEquals(value, load.readString())
+        self.assertEqual(value, load.readString())
  
     def test_saveBool(self):
         value = False
@@ -64,7 +64,7 @@ class PythonTSVTest(unittest.TestCase):
         TSV.writeLine(Name)
         pythonTSV.saveToTSV(TSV,value)
         load =get_loaded_data(TSV,value)
-        self.assertEquals(value, load.readBool())
+        self.assertEqual(value, load.readBool())
 
     def test_saveClassFails(self):
         value = Class()
@@ -79,7 +79,7 @@ class PythonTSVTest(unittest.TestCase):
         TSV.writeLine(Name)
         TSV.storeDouble(value)
         load =load_TSV(TSV)
-        self.assertEquals(value, pythonTSV.loadFromTSV(load,Name,3.3))
+        self.assertEqual(value, pythonTSV.loadFromTSV(load,Name,3.3))
 
 
     def test_readInt(self):
@@ -88,7 +88,7 @@ class PythonTSVTest(unittest.TestCase):
         TSV.writeLine(Name)
         TSV.storeInt(value)
         load =load_TSV(TSV)
-        self.assertEquals(value, pythonTSV.loadFromTSV(load,Name,3))
+        self.assertEqual(value, pythonTSV.loadFromTSV(load,Name,3))
 
     def test_saveString(self):
         value = "string"
@@ -96,7 +96,7 @@ class PythonTSVTest(unittest.TestCase):
         TSV.writeLine(Name)
         TSV.storeString(value)
         load =load_TSV(TSV)
-        self.assertEquals(value, pythonTSV.loadFromTSV(load,Name,"test"))
+        self.assertEqual(value, pythonTSV.loadFromTSV(load,Name,"test"))
 
     def test_saveBool(self):
         value = False
@@ -104,7 +104,7 @@ class PythonTSVTest(unittest.TestCase):
         TSV.writeLine(Name)
         TSV.storeBool(value)
         load =load_TSV(TSV)
-        self.assertEquals(value, pythonTSV.loadFromTSV(load,Name,True))
+        self.assertEqual(value, pythonTSV.loadFromTSV(load,Name,True))
 
  
     def test_saveClassFails(self):
@@ -119,17 +119,17 @@ class PythonTSVTest(unittest.TestCase):
     def test_makeLineNameSafeSpaces(self):
         badName = "spaces fail"
         newName = pythonTSV.makeLineNameSafe(badName)
-        self.assertEquals(newName,"SpacesFail")
+        self.assertEqual(newName,"SpacesFail")
 
     def test_makeLineNameSafeUnderscores(self):
         badName = "underscores_fail"
         newName = pythonTSV.makeLineNameSafe(badName)
-        self.assertEquals(newName,"UnderscoresFail")
+        self.assertEqual(newName,"UnderscoresFail")
 
     def test_makeLineNameSafeDashes(self):
         badName = "dashes-fail"
         newName = pythonTSV.makeLineNameSafe(badName)
-        self.assertEquals(newName,"DashesFail")
+        self.assertEqual(newName,"DashesFail")
 
     def test_writeLine(self):
         badName = "bad name_example-here"
@@ -140,7 +140,7 @@ class PythonTSVTest(unittest.TestCase):
         load = load_TSV(TSV)
         safeName = pythonTSV.makeLineNameSafe(badName)
         load.selectLine(safeName)
-        self.assertEquals(pi, load.readDouble())
+        self.assertEqual(pi, load.readDouble())
         
 
 if __name__ == '__main__':

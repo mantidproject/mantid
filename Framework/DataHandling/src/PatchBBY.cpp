@@ -99,7 +99,7 @@ void PatchBBY::init() {
   // file to load.
   exts.clear();
   exts.push_back(".tar");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       FilenameStr, "", API::FileProperty::Load, exts),
                   "The filename of the stored data to be patched");
 
@@ -108,13 +108,13 @@ void PatchBBY::init() {
        itr != std::end(PatchableProperties); ++itr) {
     switch (itr->Type) {
     case TYPE_INT:
-      declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<int>>(
+      declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(
                           itr->Name, EMPTY_INT(), Kernel::Direction::Input),
                       "Optional");
       break;
 
     case TYPE_DBL:
-      declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+      declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                           itr->Name, EMPTY_DBL(), Kernel::Direction::Input),
                       "Optional");
       break;
@@ -123,7 +123,7 @@ void PatchBBY::init() {
       if (std::strcmp(itr->Name, "FrameSource") == 0) {
         std::array<std::string, 3> keys = {{"", EXTERNAL, INTERNAL}};
         declareProperty(
-            Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
+            std::make_unique<Kernel::PropertyWithValue<std::string>>(
                 itr->Name, "",
                 boost::make_shared<Kernel::ListValidator<std::string>>(keys),
                 Kernel::Direction::Input),
@@ -135,7 +135,7 @@ void PatchBBY::init() {
     setPropertyGroup(itr->Name, itr->Group);
   }
 
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "Reset", false, Kernel::Direction::Input),
                   "Optional");
 }

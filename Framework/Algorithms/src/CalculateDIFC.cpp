@@ -91,19 +91,19 @@ const std::string CalculateDIFC::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CalculateDIFC::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the workspace to have DIFC calculated from");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Workspace containing DIFC for each pixel");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "CalibrationWorkspace", "", Direction::Input,
                       Mantid::API::PropertyMode::Optional),
                   "Optional: A OffsetsWorkspace containing the calibration "
                   "offsets.  This cannot be specified with an "
                   "OffsetsWorkspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OffsetsWorkspace", "", Direction::Input,
                       Mantid::API::PropertyMode::Optional),
                   "Optional: A OffsetsWorkspace containing the calibration "

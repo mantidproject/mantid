@@ -27,7 +27,7 @@ class MDGeometryTest(unittest.TestCase):
 
 #====================== Success cases ==================================================
     def test_numDims_returns_expected_number(self):
-        self.assertEquals(self._test_ndims, self._test_mdws.getNumDims())
+        self.assertEqual(self._test_ndims, self._test_mdws.getNumDims())
 
     def test_getDimension_by_index_returns_IMDDimension_object_for_valid_index(self):
         dimension =  self._test_mdws.getDimension(0) # positional
@@ -53,8 +53,8 @@ class MDGeometryTest(unittest.TestCase):
     def test_estimateResolution_returns_1d_numpy_array_same_length_as_number_dims(self):
         resolution = self._test_mdws.estimateResolution()
         self.assertTrue(isinstance(resolution, numpy.ndarray))
-        self.assertEquals(1, len(resolution.shape))
-        self.assertEquals(4, resolution.shape[0])
+        self.assertEqual(1, len(resolution.shape))
+        self.assertEqual(4, resolution.shape[0])
 
     def test_getXDimension_returns_correct_dimension_if_workspace_has_enough_dimensions(self):
         dimension = self._test_mdws.getXDimension()
@@ -74,7 +74,7 @@ class MDGeometryTest(unittest.TestCase):
 
     def test_getGeometryXML_returns_non_empty_string(self):
         xml = self._test_mdws.getGeometryXML()
-        self.assertTrue(len(xml) > 0)
+        self.assertGreater(len(xml), 0)
 
     def test_getBasisVector_returns_VMD(self):
         basis = self._test_mdws.getBasisVector(0)
@@ -110,7 +110,7 @@ class MDGeometryTest(unittest.TestCase):
 
     def _check_is_dimension_with_id(self, dimension, expected_id):
         self.assertTrue(isinstance(dimension, IMDDimension))
-        self.assertEquals(expected_id,dimension.getDimensionId())
+        self.assertEqual(expected_id,dimension.getDimensionId())
 
 if __name__ == '__main__':
     unittest.main()

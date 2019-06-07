@@ -46,12 +46,12 @@ const std::string PeakIntensityVsRadius::category() const {
 /** Initialize the algorithm's properties.
  */
 void PeakIntensityVsRadius::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace containing the SCD data.");
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "",
-                                                     Direction::Input),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "",
+                                                          Direction::Input),
       "The list of peaks to integrate, matching the InputWorkspace.");
 
   declareProperty("RadiusStart", 0.0, "Radius at which to start integrating.");
@@ -91,12 +91,12 @@ void PeakIntensityVsRadius::init() {
   setPropertyGroup("BackgroundInnerRadius", "Fixed Background Shell");
   setPropertyGroup("BackgroundOuterRadius", "Fixed Background Shell");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace2D containing intensity vs radius.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace2",
-                                                   "NumberPeaksIntegrated",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace2",
+                                                        "NumberPeaksIntegrated",
+                                                        Direction::Output),
                   "An output workspace2D containing number of peaks at levels "
                   "of I/sigI vs radius.");
 }

@@ -153,9 +153,9 @@ void run_parallel_AllowDifferentNumberSpectra_fail(
                      create<Workspace2D>(indexInfo, HistogramData::Points(1)));
   } else {
     alg->setProperty("LHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
+                     std::make_unique<Workspace2D>(StorageMode::MasterOnly));
     alg->setProperty("RHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
+                     std::make_unique<Workspace2D>(StorageMode::MasterOnly));
   }
   alg->setProperty("AllowDifferentNumberSpectra", true);
   if (comm.size() > 1) {

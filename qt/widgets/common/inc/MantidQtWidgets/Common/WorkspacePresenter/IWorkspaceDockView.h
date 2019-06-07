@@ -7,8 +7,8 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
 #define MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
 
-#include <MantidAPI/IAlgorithm_fwd.h>
-#include <MantidAPI/Workspace_fwd.h>
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <map>

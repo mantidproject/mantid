@@ -74,7 +74,7 @@ class MaxEntPresenterTest(GuiTest):
 
         parameters = self.presenter.get_parameters_for_maxent_calculation()
 
-        self.assertEquals(parameters, {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04, 'FirstGoodTime': 0.11,
+        self.assertEqual(parameters, {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04, 'FirstGoodTime': 0.11,
                                        'FitDeadTime': True, 'InnerIterations': 10,
                                        'InputDeadTimeTable': 'deadtime_table_name',
                                        'InputWorkspace': 'MUSR22725_raw_data MA',
@@ -86,7 +86,7 @@ class MaxEntPresenterTest(GuiTest):
 
         self.presenter.update_phase_table_options()
 
-        self.assertEquals(retrieve_combobox_info(self.view.phase_table_combo),
+        self.assertEqual(retrieve_combobox_info(self.view.phase_table_combo),
                           ['Construct', 'MUSR22222_phase_table', 'MUSR33333_phase_table'])
 
     @mock.patch('Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter_new.MuonWorkspaceWrapper')
@@ -112,7 +112,7 @@ class MaxEntPresenterTest(GuiTest):
 
         output_options = self.presenter.get_maxent_output_options()
 
-        self.assertEquals(output_options, {'OutputDeadTimeTable': False, 'PhaseConvergenceTable': False,
+        self.assertEqual(output_options, {'OutputDeadTimeTable': False, 'PhaseConvergenceTable': False,
                                            'OutputPhaseTable': False, 'ReconstructedSpectra': False})
 
     def test_get_output_options_returns_correctly(self):
@@ -124,7 +124,7 @@ class MaxEntPresenterTest(GuiTest):
 
         output_options = self.presenter.get_maxent_output_options()
 
-        self.assertEquals(output_options, {'OutputDeadTimeTable': True, 'PhaseConvergenceTable': True,
+        self.assertEqual(output_options, {'OutputDeadTimeTable': True, 'PhaseConvergenceTable': True,
                                            'OutputPhaseTable': True, 'ReconstructedSpectra': True})
 
 

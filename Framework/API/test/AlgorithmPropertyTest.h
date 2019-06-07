@@ -52,7 +52,7 @@ private:
     const std::string category() const override { return "Dummy"; }
     const std::string summary() const override { return "Test summary"; }
     void init() override {
-      declareProperty(make_unique<AlgorithmProperty>("CalculateStep"));
+      declareProperty(std::make_unique<AlgorithmProperty>("CalculateStep"));
     }
     void exec() override {}
   };
@@ -64,7 +64,7 @@ private:
     const std::string category() const override { return "Dummy"; }
     const std::string summary() const override { return "Test summary"; }
     void init() override {
-      declareProperty(make_unique<AlgorithmProperty>(
+      declareProperty(std::make_unique<AlgorithmProperty>(
           "CalculateStep",
           boost::make_shared<AlgorithmHasProperty>("Output1")));
     }

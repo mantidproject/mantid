@@ -16,7 +16,7 @@ DECLARE_ALGORITHM(CatalogListInvestigationTypes)
 void CatalogListInvestigationTypes::init() {
   declareProperty("Session", "",
                   "The session information of the catalog to use.");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
                       "InvestigationTypes", std::vector<std::string>(),
                       boost::make_shared<Kernel::NullValidator>(),
                       Kernel::Direction::Output),
