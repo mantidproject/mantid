@@ -1,5 +1,4 @@
 import unittest
-
 import six
 from mantid.py3compat import mock
 

@@ -151,7 +151,7 @@ class MaxEntPresenter(object):
     def add_maxent_workspace_to_ADS(self, input_workspace, maxent_workspace, alg):
         run = re.search('[0-9]+', input_workspace).group()
         base_name = get_maxent_workspace_name(input_workspace)
-        group = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument)
+        group = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument, self.load.workspace_suffix)
         directory = get_base_data_directory(self.load, run) + group
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(maxent_workspace, directory + base_name)
