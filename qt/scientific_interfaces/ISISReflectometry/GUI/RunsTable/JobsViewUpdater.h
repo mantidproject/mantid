@@ -24,6 +24,22 @@ cellsFromGroup(Group const &group,
   return cells;
 }
 
+using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
+
+MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput,
+                                               RangeInQ const &qRangeOutput,
+                                               ValueFunction valueFunction) {
+  auto maybeValue = (qRangeInput.*valueFunction)();
+  auto useOutputValue = false;
+  if (!maybeValue.is_initialized()) {
+    maybeValue = (qRangeOutput.*valueFunction)();
+    useOutputValue = true;
+  }
+  auto result = MantidWidgets::Batch::Cell(optionalToString(maybeValue));
+  result.setContainsOutputValue(useOutputValue);
+  return result;
+}
+
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
@@ -32,12 +48,9 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
            row.transmissionWorkspaceNames().firstRunList()),
        MantidQt::MantidWidgets::Batch::Cell(
            row.transmissionWorkspaceNames().secondRunList()),
-       MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.qRangeOrOutput().min())),
-       MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.qRangeOrOutput().max())),
-       MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.qRangeOrOutput().step())),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step),
        MantidQt::MantidWidgets::Batch::Cell(
            optionalToString(row.scaleFactor())),
        MantidQt::MantidWidgets::Batch::Cell(

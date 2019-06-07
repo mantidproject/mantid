@@ -53,6 +53,9 @@ public:
   void disableEditing();
   void enableEditing();
 
+  bool containsOutputValue() const;
+  void setContainsOutputValue(bool containsOutputValue);
+
 private:
   std::string m_contentText;
   std::string m_backgroundColor;
@@ -63,6 +66,7 @@ private:
   std::string m_iconFilePath;
   bool m_isEditable;
   std::string m_toolTip;
+  bool m_containsOutputValue;
 };
 
 EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os,

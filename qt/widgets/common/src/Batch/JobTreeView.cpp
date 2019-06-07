@@ -45,11 +45,20 @@ void JobTreeView::commitData(QWidget *editor) {
   if (cellText != cellTextBefore) {
     resizeColumnToContents(m_lastEdited.column());
     m_hasEditorOpen = false;
-    m_notifyee->notifyCellTextChanged(rowLocation().atIndex(m_lastEdited),
-                                      m_lastEdited.column(), cellTextBefore,
+    auto location = rowLocation().atIndex(m_lastEdited);
+    auto column = m_lastEdited.column();
+    setUserEditedCellStyle(location, column);
+    m_notifyee->notifyCellTextChanged(location, column, cellTextBefore,
                                       cellText);
     editAt(current_filtered_index);
   }
+}
+
+void JobTreeView::setUserEditedCellStyle(RowLocation const &location,
+                                         int column) {
+  auto cell = cellAt(location, column);
+  cell.setForegroundColor("black");
+  setCellAt(location, column, cell);
 }
 
 void JobTreeView::selectionChanged(const QItemSelection &selected,

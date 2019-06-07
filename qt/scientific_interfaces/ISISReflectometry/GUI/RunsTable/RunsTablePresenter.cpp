@@ -556,13 +556,24 @@ void RunsTablePresenter::notifyRowStateChanged() {
       if (!row)
         forAllCellsAt(rowPath, applyInvalidStateStyling);
       else {
-        m_jobViewUpdater.rowModified(groupOf(rowPath), rowOf(rowPath), *row);
         setRowStylingForItem(rowPath, *row);
       }
 
       ++rowIndex;
     }
     ++groupIndex;
+  }
+}
+
+void RunsTablePresenter::notifyRowOutputsChanged() {
+  int groupIndex = 0;
+  for (auto &group : m_model.reductionJobs().groups()) {
+    auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
+    int rowIndex = 0;
+    for (auto &row : group.rows()) {
+      auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+      m_jobViewUpdater.rowModified(groupOf(rowPath), rowOf(rowPath), *row);
+    }
   }
 }
 

@@ -31,6 +31,7 @@ public:
   virtual void notifyReductionResumed() = 0;
   virtual void notifyReductionPaused() = 0;
   virtual void notifyRowStateChanged() = 0;
+  virtual void notifyRowOutputsChanged() = 0;
 
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;

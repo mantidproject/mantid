@@ -15,9 +15,10 @@ void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
   item.setToolTip(QString::fromStdString(cell.toolTip()));
   setBorderThickness(item, cell.borderThickness());
   setBackgroundColor(item, cell.backgroundColor());
-  setForegroundColor(item, cell.foregroundColor());
   setBorderColor(item, cell.borderColor(), cell.borderOpacity());
   setIcon(item, cell.iconFilePath());
+  if (cell.containsOutputValue())
+    setForegroundColor(item, cell.foregroundColor());
 }
 
 Cell extractCellPropertiesFromItem(QStandardItem const &item) {
