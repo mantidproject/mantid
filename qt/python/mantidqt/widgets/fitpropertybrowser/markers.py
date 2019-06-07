@@ -100,6 +100,16 @@ class VerticalMarker(QObject):
             return False
         return abs(self.get_x_in_pixels() - x_pixels) < 3
 
+    def transform_pixels_to_coords(self, x_pixels, y_pixels):
+        """
+        Transforms pixel coords to axis coords
+        :param x_pixels: An x mouse pixel coordinate.
+        :param y_pixels: An y mouse pixel coordinate.
+        :return: The x and y position along the axis.
+        """
+        x_value, y_value = self.patch.get_transform().inverted().transform((x_pixels, y_pixels))
+        return [x_value, y_value]
+
     def mouse_move_start(self, x, y):
         """
         Start moving this marker if (x, y) is above it. Ignore otherwise.
@@ -126,6 +136,13 @@ class VerticalMarker(QObject):
             self.x_moved.emit(x)
             return True
         return False
+
+    def is_marker_moving(self):
+        """
+        Returns true if the marker is being moved
+        :return: True if the marker is being moved.
+        """
+        return self.is_moving
 
     def get_cursor_at_y(self, y):
         """

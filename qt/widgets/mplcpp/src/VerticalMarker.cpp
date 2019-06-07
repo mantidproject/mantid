@@ -17,7 +17,7 @@ using namespace MantidQt::Widgets::MplCpp;
 namespace {
 
 Python::Object
-newMarker(FigureCanvasQt *canvas, QString const &colour, double const &x,
+newMarker(FigureCanvasQt *canvas, QString const &colour, double x,
           boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
@@ -45,7 +45,7 @@ namespace MplCpp {
  * @param x The x coordinate of the marker
  */
 VerticalMarker::VerticalMarker(FigureCanvasQt *canvas, QString const &colour,
-                               double const &x,
+                               double x,
                                QHash<QString, QVariant> const &otherKwargs)
     : InstanceHolder(newMarker(canvas, colour, x, otherKwargs)) {}
 
@@ -61,12 +61,37 @@ void VerticalMarker::mouseMoveStart(double x, double y) {
   callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
 }
 
-void VerticalMarker::mouseMoveEnd() {
+void VerticalMarker::mouseMoveStop() {
   callMethodNoCheck<void>(pyobj(), "mouse_move_stop");
 }
 
-void VerticalMarker::mouseMove(double x) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move", x);
+bool VerticalMarker::mouseMove(double x) {
+  GlobalInterpreterLock lock;
+
+  auto const args = Python::NewRef(Py_BuildValue("(d)", x));
+  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(*args));
+  return PyLong_AsLong(movedPy.ptr()) > 0;
+}
+
+bool VerticalMarker::isMarkerMoving() {
+  GlobalInterpreterLock lock;
+
+  auto const isMovingPy = Python::Object(pyobj().attr("is_marker_moving")());
+  return PyLong_AsLong(isMovingPy.ptr()) > 0;
+}
+
+std::tuple<double, double>
+VerticalMarker::transformPixelsToCoords(int xPixels, int yPixels) {
+  GlobalInterpreterLock lock;
+
+  auto const toDouble = [](Python::Object const &value) {
+    return PyFloat_AsDouble(value.ptr());
+  };
+
+  auto const args = Python::NewRef(Py_BuildValue("(ii)", xPixels, yPixels));
+  auto const coords = pyobj().attr("transform_pixels_to_coords")(*args);
+  return std::make_tuple<double, double>(toDouble(coords[0]),
+                                         toDouble(coords[1]));
 }
 
 } // namespace MplCpp

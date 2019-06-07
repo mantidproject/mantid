@@ -7,6 +7,8 @@
 #include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
 
+using namespace MantidQt::Widgets::MplCpp;
+
 namespace {
 
 std::pair<double, double> toPair(const std::tuple<double, double> &range) {
@@ -36,12 +38,24 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
                              bool infoOnly, const QColor &colour)
     : QObject(), m_plot(plot), m_type(type),
       m_limits(toPair(m_plot->getAxisRange())),
-      m_minMarker(m_plot->canvas(), colour.name(QColor::HexRgb),
-                  getDefaultRange(m_limits).first, defaultLineKwargs()) {
-  m_plot->canvas()->draw();
-  m_minMarker.redraw();
+      m_minimum(getDefaultRange(m_limits).first),
+      m_maximum(getDefaultRange(m_limits).second),
+      m_minMarker(std::make_unique<VerticalMarker>(
+          m_plot->canvas(), colour.name(QColor::HexRgb), m_minimum,
+          defaultLineKwargs())),
+      m_maxMarker(std::make_unique<VerticalMarker>(
+          m_plot->canvas(), colour.name(QColor::HexRgb), m_maximum,
+          defaultLineKwargs())) {
   Q_UNUSED(visible);
   Q_UNUSED(infoOnly);
+
+  m_plot->canvas()->draw();
+
+  connect(m_plot, SIGNAL(mouseDown(QPoint)), this,
+          SLOT(handleMouseDown(QPoint)));
+  connect(m_plot, SIGNAL(mouseMove(QPoint)), this,
+          SLOT(handleMouseMove(QPoint)));
+  connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
 }
 
 void RangeSelector::setRange(const std::pair<double, double> &range) {
@@ -68,16 +82,48 @@ double RangeSelector::getMinimum() { return m_minimum; }
 double RangeSelector::getMaximum() { return m_maximum; }
 
 void RangeSelector::detach() {
-  m_minMarker.remove();
+  m_minMarker->remove();
+  m_maxMarker->remove();
   m_plot->canvas()->draw();
 }
 
 void RangeSelector::setColour(QColor colour) {
-  m_minMarker.setColor(colour.name(QColor::HexRgb));
-  m_minMarker.redraw();
+  m_minMarker->setColor(colour.name(QColor::HexRgb));
+  m_maxMarker->setColor(colour.name(QColor::HexRgb));
+  m_minMarker->redraw();
+  m_maxMarker->redraw();
 }
 
-void RangeSelector::mouseMoveEvent() {}
+void RangeSelector::handleMouseDown(const QPoint &point) {
+  const auto coords =
+      m_minMarker->transformPixelsToCoords(point.x(), point.y());
+  m_minMarker->mouseMoveStart(std::get<0>(coords), std::get<1>(coords));
+  m_maxMarker->mouseMoveStart(std::get<0>(coords), std::get<1>(coords));
+}
+
+void RangeSelector::handleMouseMove(const QPoint &point) {
+  const auto minMoved = moveMarker(m_minMarker.get(), point);
+  const auto maxMoved = moveMarker(m_maxMarker.get(), point);
+  if (minMoved || maxMoved) {
+    m_plot->canvas()->draw();
+    m_minMarker->redraw();
+    m_maxMarker->redraw();
+  }
+}
+
+void RangeSelector::handleMouseUp(const QPoint &point) {
+  m_minMarker->mouseMoveStop();
+  m_maxMarker->mouseMoveStop();
+}
+
+bool RangeSelector::moveMarker(VerticalMarker *marker, const QPoint &point) {
+  if (marker->isMarkerMoving()) {
+    const auto coords = marker->transformPixelsToCoords(point.x(), point.y());
+    const auto moved = marker->mouseMove(std::get<0>(coords));
+    return moved;
+  }
+  return false;
+}
 
 } // namespace MantidWidgets
 } // namespace MantidQt

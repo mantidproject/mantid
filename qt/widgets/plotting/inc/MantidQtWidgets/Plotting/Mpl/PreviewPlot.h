@@ -73,7 +73,9 @@ public slots:
   void showLegend(const bool visible);
 
 signals:
-  void mouseDragged(int x, int y);
+  void mouseDown(const QPoint &point);
+  void mouseUp(const QPoint &point);
+  void mouseMove(const QPoint &point);
 
 public:
   QColor canvasColour() const;
@@ -86,7 +88,7 @@ protected:
 private:
   bool handleMousePressEvent(QMouseEvent *evt);
   bool handleMouseReleaseEvent(QMouseEvent *evt);
-  void mouseMoveEvent(QMouseEvent *evt) override;
+  bool handleMouseMoveEvent(QMouseEvent *evt);
 
   void showContextMenu(QMouseEvent *evt);
 

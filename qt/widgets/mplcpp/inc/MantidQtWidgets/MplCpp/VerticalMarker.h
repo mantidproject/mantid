@@ -23,9 +23,8 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL VerticalMarker : public Common::Python::InstanceHolder {
 public:
-  // Holds a reference to the vertical marker python object
   explicit VerticalMarker(
-      FigureCanvasQt *canvas, QString const &colour, double const &x,
+      FigureCanvasQt *canvas, QString const &colour, double x,
       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
   void redraw();
   void remove();
@@ -33,8 +32,12 @@ public:
   void setColor(QString const &colour);
 
   void mouseMoveStart(double x, double y);
-  void mouseMoveEnd();
-  void mouseMove(double x);
+  void mouseMoveStop();
+  bool mouseMove(double x);
+
+  bool isMarkerMoving();
+
+  std::tuple<double, double> transformPixelsToCoords(int xPixels, int yPixels);
 };
 
 } // namespace MplCpp

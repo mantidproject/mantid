@@ -191,6 +191,8 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
   case AxisID::YLeft:
     return m_canvas->gca().getYLim();
   }
+  throw std::runtime_error(
+      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
 }
 
 /**
@@ -261,6 +263,9 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
   case QEvent::MouseButtonRelease:
     stopEvent = handleMouseReleaseEvent(static_cast<QMouseEvent *>(evt));
     break;
+  case QEvent::MouseMove:
+    stopEvent = handleMouseMoveEvent(static_cast<QMouseEvent *>(evt));
+    break;
   default:
     break;
   }
@@ -278,6 +283,11 @@ bool PreviewPlot::handleMousePressEvent(QMouseEvent *evt) {
   // show when the mouse click is released
   if (evt->buttons() & Qt::RightButton) {
     stopEvent = true;
+  } else if (evt->buttons() & Qt::LeftButton) {
+    stopEvent = true;
+    const auto position = evt->pos();
+    if (!position.isNull())
+      emit mouseDown(position);
   }
   return stopEvent;
 }
@@ -292,13 +302,24 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
   if (evt->button() == Qt::RightButton) {
     stopEvent = true;
     showContextMenu(evt);
+  } else if (evt->button() == Qt::LeftButton) {
+    stopEvent = true;
+    const auto position = evt->pos();
+    if (!position.isNull())
+      emit mouseUp(position);
   }
   return stopEvent;
 }
 
-void PreviewPlot::mouseMoveEvent(QMouseEvent *evt) {
-  const auto position = evt->pos();
-  emit mouseDragged(position.x(), position.y());
+bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
+  bool stopEvent(false);
+  if (evt->buttons() == Qt::LeftButton) {
+    stopEvent = true;
+    const auto position = evt->pos();
+    if (!position.isNull())
+      emit mouseMove(position);
+  }
+  return stopEvent;
 }
 
 /**

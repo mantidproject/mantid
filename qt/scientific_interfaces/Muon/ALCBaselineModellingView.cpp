@@ -28,6 +28,7 @@ void ALCBaselineModellingView::initialize() {
   connect(m_ui.fit, SIGNAL(clicked()), SIGNAL(fitRequested()));
 
   m_ui.dataPlot->setCanvasColour(Qt::white);
+  //m_ui.dataPlot->showLegend(false);
   m_ui.correctedPlot->setCanvasColour(Qt::white);
 
   // Context menu for sections table

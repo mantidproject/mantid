@@ -41,7 +41,15 @@ public slots:
   void detach();
   void setColour(QColor colour);
 
+private slots:
+  void handleMouseDown(const QPoint &point);
+  void handleMouseMove(const QPoint &point);
+  void handleMouseUp(const QPoint &point);
+
 private:
+  bool moveMarker(MantidQt::Widgets::MplCpp::VerticalMarker *marker,
+                  const QPoint &point);
+
   /// The preview plot containing the range selector
   PreviewPlot *m_plot;
   /// Type of selection
@@ -53,9 +61,9 @@ private:
   /// Current position of the line marking the maximum
   double m_maximum;
   /// The minimum marker
-  MantidQt::Widgets::MplCpp::VerticalMarker m_minMarker;
+  std::unique_ptr<MantidQt::Widgets::MplCpp::VerticalMarker> m_minMarker;
   /// The maximum marker
-  // MantidQt::Widgets::MplCpp::VerticalMarker m_maxMarker;
+  std::unique_ptr<MantidQt::Widgets::MplCpp::VerticalMarker> m_maxMarker;
 };
 
 } // namespace MantidWidgets
