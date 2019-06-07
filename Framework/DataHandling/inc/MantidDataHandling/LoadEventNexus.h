@@ -93,10 +93,10 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   template <typename T>
-  static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(
-      const std::string &nexusfilename, T localWorkspace, Algorithm &alg,
-      bool returnpulsetimes, int &nPeriods,
-      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
+  static boost::shared_ptr<BankPulseTimes>
+  runLoadNexusLogs(const std::string &nexusfilename, T localWorkspace,
+                   Algorithm &alg, bool returnpulsetimes, int &nPeriods,
+                   std::unique_ptr<Kernel::TimeSeriesProperty<int>> &periodLog);
 
   template <typename T>
   static void loadEntryMetadata(const std::string &nexusfilename, T WS,

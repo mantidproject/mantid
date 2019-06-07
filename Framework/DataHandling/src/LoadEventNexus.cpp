@@ -543,7 +543,7 @@ template <typename T>
 boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
     bool returnpulsetimes, int &nPeriods,
-    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
+    std::unique_ptr<TimeSeriesProperty<int>> &periodLog) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
@@ -575,13 +575,21 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
       auto *temp = run.getProperty("period_log");
       periodLog.reset(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
 
-      // Sanity check here that period_log only contains period numbers up to
-      // nperiods. These values can be different due to instrument noise, and
-      // cause undescriptive crashes if not caught.
-      // We throw here to make it clear
-      // that the file is corrupted and must be manually assessed.
       const auto nPeriodsInLog = periodLog->valuesAsVector().back();
-      if (nPeriodsInLog != nPeriods) {
+      if (nPeriodsInLog == 0 && nPeriods == 1) {
+        // Historic files can have 1 period but a period_log containing 0s
+        // if this is the case, "modernize" the local copy here
+        const int nValues = periodLog->realSize();
+        const std::vector<int> newValues(nValues, 1);
+        const auto times = periodLog->timesAsVector();
+        periodLog->clear();
+        periodLog->addValues(times, newValues);
+      } else if (nPeriodsInLog != nPeriods) {
+        // Sanity check here that period_log only contains period numbers up to
+        // nperiods. These values can be different due to instrument noise, and
+        // cause undescriptive crashes if not caught.
+        // We throw here to make it clear
+        // that the file is corrupted and must be manually assessed.
         const auto msg =
             "File " + nexusfilename +
             " has been corrupted. The log framelog/period_log/value "
@@ -662,7 +670,7 @@ LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename,
     EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
     bool returnpulsetimes, int &nPeriods,
-    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
+    std::unique_ptr<TimeSeriesProperty<int>> &periodLog) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
   auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(
       nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog);
@@ -695,13 +703,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
-  auto periodLog =
-      std::make_unique<const TimeSeriesProperty<int>>("period_log");
+  auto tmpPeriodLog = std::make_unique<TimeSeriesProperty<int>>("period_log");
   if (loadlogs) {
     prog->doReport("Loading DAS logs");
 
     m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
-        m_filename, m_ws, *this, true, nPeriods, periodLog);
+        m_filename, m_ws, *this, true, nPeriods, tmpPeriodLog);
 
     try {
       run_start = m_ws->getFirstPulseTime();
@@ -728,6 +735,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
                                    true);
   }
+  // Make a pointer to a const period log, as it should no longer be changed
+  auto periodLog =
+      std::make_unique<const TimeSeriesProperty<int>>(*tmpPeriodLog);
+  tmpPeriodLog.reset();
   // set more properties on the workspace
   try {
     // this is a static method that is why it is passing the

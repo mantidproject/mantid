@@ -508,7 +508,7 @@ void LoadTOFRawNexus::exec() {
 
   int nPeriods = 1; // Unused
   auto periodLog =
-      std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
+      std::make_unique<TimeSeriesProperty<int>>("period_log"); // Unused
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(
       filename, WS, *this, false, nPeriods, periodLog);
 
