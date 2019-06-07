@@ -110,19 +110,10 @@ public:
     EXPECT_CALL(*m_jobAlgorithm, item())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(&row));
-    EXPECT_CALL(*m_jobAlgorithm, outputWorkspaceNames())
-        .Times(1)
-        .WillOnce(Return(std::vector<std::string>{"", "IvsQ", "IvsQBin"}));
-    EXPECT_CALL(*m_jobAlgorithm, outputWorkspaceNameToWorkspace())
-        .Times(1)
-        .WillOnce(Return(std::map<std::string, Workspace_sptr>{
-            {"OutputWorkspace", iVsQ}, {"OutputWorkspaceBinned", iVsQBin}}));
+    EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
 
     jobRunner.algorithmComplete(m_jobAlgorithm);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_COMPLETE);
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "IvsQ");
-    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "IvsQBin");
     verifyAndClear();
   }
 
