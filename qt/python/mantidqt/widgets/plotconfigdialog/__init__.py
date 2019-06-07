@@ -47,7 +47,7 @@ def curve_in_ax(ax):
 
 
 def line_in_ax(ax):
-    return len(ax.get_lines()) > 1
+    return len(ax.get_lines()) > 0
 
 
 def errorbars_in_ax(ax):
