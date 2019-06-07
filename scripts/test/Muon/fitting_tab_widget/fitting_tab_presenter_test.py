@@ -105,6 +105,7 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual(self.view.function_browser.getDatasetNames(), ['Input Workspace Name'])
 
     def test_fit_clicked_with_simultaneous_selected_and_no_globals(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
         self.view.simul_fit_radio.toggle()
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -126,6 +127,7 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual(call_args_globals, [])
 
     def test_fit_clicked_with_simultaneous_selected_with_global_parameters(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
         self.view.simul_fit_radio.toggle()
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -138,7 +140,12 @@ class FittingTabPresenterTest(GuiTest):
 
         simultaneous_call_args = self.presenter.model.do_simultaneous_fit.call_args
 
-        # above tests output with no globals set
+        call_args_dict = simultaneous_call_args[0][0]
+        self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
+        self.assertEqual(call_args_dict['Minimizer'], 'Levenberg-Marquardt')
+        self.assertEqual(call_args_dict['StartX'], [0.0, 0.0])
+        self.assertEqual(call_args_dict['EndX'], [15.0, 15.0])
+
         call_args_globals = simultaneous_call_args[0][1]
         self.assertEqual(call_args_globals, ['A'])
 

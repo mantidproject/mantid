@@ -230,7 +230,7 @@ class FittingTabPresenter(object):
         :return: The set of attributes common to all fit types
         """
         return {
-            'Function': self.view.fit_string,
+            'Function': self.view.fit_object,
             'Minimizer': self.view.minimizer,
             'EvaluationType': self.view.evaluation_type,
             'FitGroupName': self.view.group_name

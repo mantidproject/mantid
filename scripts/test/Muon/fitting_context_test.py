@@ -82,7 +82,7 @@ class FitParametersTest(unittest.TestCase):
                                        ('Cost function', (0.1, 0.))])
         fit_params = create_test_fit_parameters(test_parameters)
 
-        self.assertEqual(test_parameters.keys(), fit_params.names())
+        self.assertEqual(list(test_parameters.keys()), fit_params.names())
         self.assertEqual(3, len(fit_params))
         for index, name in enumerate(fit_params.names()):
             self.assertEqual(test_parameters[name][0],
