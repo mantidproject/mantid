@@ -27,14 +27,14 @@ The Plots Toolbox has a number of functions to help manage your plots:
 Matplotlib
 ==========
 
-Workbench uses the Python Package `Matplotlib` to build it's graphs instad of `Qt4` which was used in MantidPlot. As such the plot window itself looks somewhat different.
+Workbench uses the Python Package `Matplotlib` to build it's graphs instad of `Qwt` which was used in MantidPlot. As such the plot window itself looks somewhat different.
 Along with your plot you now have a taskbar with a number of options:
 
 1. Reset view/Pan and zoom with mouse/Zoom to rectangle.
 2. Toggle grid lines on and off.
 3. Export to file or Print figure. (Print not yet implemented)
 4. Configure plot options.
-5. Open fit browser tool
+5. Open fit browser tool.
 
 .. figure:: /images/workbench_plot_window.png
    :width: 700px
@@ -48,7 +48,8 @@ widget by clicking on the square button next to the text box.
    :width: 700px
    :alt: The Workbench plot options window
 
-Currently the Workbench user interface is unable to do everything MantidPlot was able to, as it does not support 2D or 3D plots and slacks the spectrum viewer among others. 
+Currently the Workbench user interface is unable to do everything MantidPlot was able to, as it does not support 3D plots from the user interface (though you can generate them with python scripts) and currently lacks the spectrum viewer among others. 
+
 To get the full use out of Matplotlib you can work from the IPython prompt or by writing script in the Workbench main window. If you have not used Matplotlib before it might 
 help to consult the online `Matplotlib tutorial <https://matplotlib.org/tutorials/introductory/pyplot.html>`_.
    

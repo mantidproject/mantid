@@ -39,6 +39,8 @@ This imports all the algorithms from Mantid to be used within your Python script
 
 This imports Matplotlib for use as well as the excellent NumPy package.
 
+These imports used to happen automagically for you invisibly in Mantidplot. But in the workbench they are visibly added at the top of the script, so script that work in the workbench will work elsewhere as well.
+
 2. Tabs and multiple scripts
 ============================
 

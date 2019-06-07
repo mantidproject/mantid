@@ -12,7 +12,7 @@ Plotting tools
 
 In the loading_and_displaying_data chapter you learnet how to create 2D colour plots and 3D surface plots. Colour plots in Workbench cannot have 
 their colour bar scale changed between linear and logarithmic removing the usefulness of colourfill plots.
-Workbench also lacks an interface for producing 3D plots at all, lacking the advanced plot tool that was presant in MantidPlot.
+Workbench also lacks an interface for producing 3D plots at all, as well as the advanced plot tool that was presant in MantidPlot.
 Access to these plots must be done through Matplotlib directly, it may help to consult the `Matplotlib in Mantid tutorial <https://docs.mantidproject.org/nightly/plotting/index.html#simple-plots>`_.
 
 
@@ -20,7 +20,7 @@ Access to these plots must be done through Matplotlib directly, it may help to c
 Interfaces
 ==========
 
-MantidPlot provides a range of different interfaces that are not yet available in Workbench. Currently the interfaces available through Workbench are:
+MantidPlot provides a range of different interfaces that are not yet available in Workbench. As of Mantid 4.0, the interfaces available through Workbench are:
 
 * Defraction
 
