@@ -46,7 +46,8 @@ void CalculateMuonAsymmetry::init() {
   // norm table to update
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalizationTable", "", Direction::Input),
+          "NormalizationTable", "", Direction::Input,
+          API::PropertyMode::Optional),
       "Name of the table containing the normalizations for the asymmetries.");
   // list of uNonrm workspaces to fit to
   declareProperty(
@@ -127,6 +128,7 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
   // muon folder
   API::ITableWorkspace_const_sptr tabWS = getProperty("NormalizationTable");
 
+  if (tabWS) {
   if (tabWS->columnCount() == 0) {
     validationOutput["NormalizationTable"] =
         "Please provide a non-empty NormalizationTable.";
@@ -166,7 +168,7 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
                                              std::to_string(wsNamesCount) +
                                              " name columns";
   }
-
+  }
   return validationOutput;
 }
 /** Executes the algorithm
@@ -205,8 +207,12 @@ void CalculateMuonAsymmetry::exec() {
   // update table with new norm
   std::vector<std::string> methods(wsNames.size(), "Calculated");
   API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
+  if (table) {
+  
   updateNormalizationTable(table, wsNames, norms, methods);
-}
+  }
+
+ }
 
 /**
  * Calculate normalization constant after the exponential decay has been removed
