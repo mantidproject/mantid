@@ -8,7 +8,6 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget import MARKER_MAP
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget import MarkerProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MarkerTabWidgetView
 
@@ -25,7 +24,7 @@ class MarkerTabWidgetPresenter:
     def apply_properties(self):
         view_props = self.get_view_properties()
         if view_props:
-            self.line.set_marker(MARKER_MAP[view_props.style])
+            self.line.set_marker(view_props.style)
             self.line.set_markersize(view_props.size)
             self.line.set_markerfacecolor(view_props.face_color)
             self.line.set_markeredgecolor(view_props.edge_color)

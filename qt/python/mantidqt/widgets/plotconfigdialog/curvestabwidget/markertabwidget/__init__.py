@@ -43,7 +43,7 @@ class MarkerProperties:
         if not view.isEnabled():
             return None
         props = dict()
-        props['style'] = view.get_style()
+        props['style'] = MARKER_MAP[view.get_style()]
         props['size'] = view.get_size()
         props['face_color'] = view.get_face_color()
         props['edge_color'] = view.get_edge_color()

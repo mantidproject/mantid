@@ -13,20 +13,20 @@ mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
 
 from mantid.py3compat.mock import Mock, patch
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.linetabwidget.presenter import LineTabWidgetPresenter
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.presenter import MarkerTabWidgetPresenter
 
 
-class LineTabWidgetPresenterTest(unittest.TestCase):
+class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         fig = figure()
         ax = fig.add_subplot(111)
-        plot_args = {'linewidth': 1.1, 'drawstyle': 'steps', 'color': 'g',
-                     'linestyle': '--'}
+        plot_args = {'marker': 'v', 'markersize': 1.1, 'markerfacecolor': 'g',
+                     'markeredgecolor': 'r'}
         curve = ax.plot([0, 1, 2], [0, 10, 20], **plot_args)[0]
         cls.mock_view = Mock()
-        cls.presenter = LineTabWidgetPresenter(line=curve, view=cls.mock_view)
+        cls.presenter = MarkerTabWidgetPresenter(line=curve, view=cls.mock_view)
         cls.presenter.update_view()
 
     def test_apply_properties(self):
@@ -36,22 +36,22 @@ class LineTabWidgetPresenterTest(unittest.TestCase):
             with patch.object(self.presenter, 'get_view_properties',
                               lambda: view_props_mock):
                 self.presenter.apply_properties()
-        line_mock.set_linestyle.assert_called_once_with(view_props_mock.style)
-        line_mock.set_drawstyle.assert_called_once_with(view_props_mock.draw_style)
-        line_mock.set_linewidth.assert_called_once_with(view_props_mock.width)
-        line_mock.set_color.assert_called_once_with(view_props_mock.color)
+        line_mock.set_marker.assert_called_once_with(view_props_mock.style)
+        line_mock.set_markersize.assert_called_once_with(view_props_mock.size)
+        line_mock.set_markerfacecolor(view_props_mock.face_color)
+        line_mock.set_markeredgecolor(view_props_mock.edge_color)
 
     def test_set_style_called_on_view_update(self):
-        self.mock_view.set_style.assert_called_once_with('dashed')
+        self.mock_view.set_style.assert_called_once_with('triangle_down')
 
-    def test_set_draw_style_called_on_view_update(self):
-        self.mock_view.set_draw_style.assert_called_once_with('steps')
+    def test_set_size_called_on_view_update(self):
+        self.mock_view.set_size.assert_called_once_with(1.1)
 
-    def test_set_width_called_on_view_update(self):
-        self.mock_view.set_width.assert_called_once_with(1.1)
+    def test_set_face_color_called_on_view_update(self):
+        self.mock_view.set_face_color.assert_called_once_with('#008000')
 
-    def test_set_color_called_on_view_update(self):
-        self.mock_view.set_color.assert_called_once_with('#008000')
+    def test_set_edge_color_called_on_view_update(self):
+        self.mock_view.set_edge_color.assert_called_once_with('#ff0000')
 
 
 if __name__ == '__main__':
