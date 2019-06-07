@@ -11,13 +11,9 @@ from qtpy import QtWidgets, QtCore
 
 from copy import deepcopy
 
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
 from MultiPlotting.edit_windows.select_subplot import SelectSubplot
-from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 # use this to manage lines and workspaces directly
 
@@ -28,30 +24,33 @@ class subplot(QtWidgets.QWidget):
     quickEditSignal = QtCore.Signal(object)
     rmSubplotSignal = QtCore.Signal(object)
 
-    def __init__(self, context):
-        super(subplot, self).__init__()
+    def __init__(self, context, canvas, parent=None):
+        super(subplot, self).__init__(parent=parent)
         self._context = context
-        self.figure = Figure()
+        self.figure = canvas.figure
         self.figure.set_facecolor("none")
-        self.canvas = FigureCanvas(self.figure)
+        self.canvas = canvas
         self._rm_window = None
         self._selector_window = None
         # update quick edit from tool bar
         self.canvas.mpl_connect("draw_event", self.draw_event_callback)
-
-        self._ADSObserver = SubplotADSObserver(self)
 
         grid = QtWidgets.QGridLayout()
         # add toolbar
         self.toolbar = myToolbar(self.canvas, self)
         self.toolbar.update()
         grid.addWidget(self.toolbar, 0, 0)
-        self.toolbar.setRmConnection(self._rm)
-        self.toolbar.setRmSubplotConnection(self._rm_subplot)
+
         # add plot
         self.plotObjects = {}
         grid.addWidget(self.canvas, 1, 0)
         self.setLayout(grid)
+
+    def set_remove_line_connection(self, slot):
+        self.toolbar.setRmConnection(slot)
+
+    def set_remove_subplot_connection(self, slot):
+        self.toolbar.setRmSubplotConnection(slot)
 
     """ this is called when the zoom
     or pan are used. We want to send a
@@ -111,7 +110,7 @@ class subplot(QtWidgets.QWidget):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
         self.plotObjects[subplotName] = self.figure.add_subplot(
-            gridspec[number], label=subplotName)
+            gridspec[number], label=subplotName, projection='mantid')
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         self._update()
@@ -195,7 +194,7 @@ class subplot(QtWidgets.QWidget):
             self._selector_window.show()
 
     def _createSelectWindow(self, names):
-        return SelectSubplot(names)
+        return SelectSubplot(names, parent=self)
 
     def _raise_rm_window(self):
         self._rm_window.raise_()
@@ -245,7 +244,7 @@ class subplot(QtWidgets.QWidget):
             self._close_rm_window()
 
     def _close_rm_window(self):
-        self._rm_window.close
+        self._rm_window.close()
         self._rm_window = None
 
     def _remove_subplot(self, subplotName):
@@ -257,7 +256,7 @@ class subplot(QtWidgets.QWidget):
         self.rmSubplotSignal.emit(subplotName)
 
     def _rm_ws_from_plots(self, workspace_name):
-        keys = deepcopy(self._context.subplots.keys())
+        keys = deepcopy(list(self._context.subplots.keys()))
         for subplot in keys:
             labels = self._context.get_lines_from_WS(subplot, workspace_name)
             for label in labels:
@@ -271,3 +270,6 @@ class subplot(QtWidgets.QWidget):
             redraw = self._context.subplots[subplot].replace_ws(workspace)
             if redraw:
                 self.canvas.draw()
+
+    def emit_close(self):
+        self.rmSubplotSignal.emit('')
