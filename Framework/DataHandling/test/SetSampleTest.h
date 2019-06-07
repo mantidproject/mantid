@@ -682,7 +682,7 @@ private:
     // Use the same pointing up direction as in the without axis test
     std::vector<double> axis{0, 0, 1};
     props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleArrayProperty>("Axis", axis), "");
+        std::make_unique<DoubleArrayProperty>("Axis", axis), "");
     return props;
   }
 
@@ -694,7 +694,7 @@ private:
     // Use the same pointing up direction as in the without axis test
     int axis{2};
     props->declareProperty(
-        Mantid::Kernel::make_unique<IntProperty>("Axis", axis), "");
+        std::make_unique<IntProperty>("Axis", axis), "");
     return props;
   }
 
@@ -730,7 +730,7 @@ private:
     // Use the same pointing up direction as in the without axis test
     std::vector<double> axis{0, 0, 1};
     props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleArrayProperty>("Axis", axis), "");
+        std::make_unique<DoubleArrayProperty>("Axis", axis), "");
     return props;
   }
 
@@ -743,7 +743,7 @@ private:
     // Use the same pointing up direction as in the without axis test
     int axis{2};
     props->declareProperty(
-        Mantid::Kernel::make_unique<IntProperty>("Axis", axis), "");
+        std::make_unique<IntProperty>("Axis", axis), "");
     return props;
   }
 
