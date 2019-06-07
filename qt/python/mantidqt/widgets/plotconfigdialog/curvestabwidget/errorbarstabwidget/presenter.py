@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import hide_errorbars
-from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget import ErrorbarsProperties, errorbars_hidden
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget import ErrorbarsProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget.view import ErrorbarsTabWidgetView
 
 

@@ -8,8 +8,6 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from matplotlib.axes import ErrorbarContainer
-
 from mantidqt.widgets.plotconfigdialog import curves_in_figure
 from mantidqt.widgets.plotconfigdialog.view import PlotConfigDialogView
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
@@ -45,14 +43,6 @@ class PlotConfigDialogPresenter:
 
     def _add_tab_widget_views(self):
         self.view.add_tab_widgets(self.tab_widget_views)
-
-    @staticmethod
-    def _line_in_ax(ax):
-        return len(ax.get_lines()) > 1
-
-    @staticmethod
-    def _errorbars_in_ax(ax):
-        return any(isinstance(c, ErrorbarContainer) for c in ax.containers)
 
     def apply_properties(self):
         for tab in self.tab_widget_presenters:

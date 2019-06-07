@@ -178,8 +178,7 @@ class CurvesTabWidgetPresenter:
 
     def set_curve_label(self, curve, label):
         """Set label on curve and update its entry in the combo box"""
-        old_label = curve.get_label()
-        self.update_legend_entry(curve, old_label, label)
+        self.update_legend()
         curve.set_label(label)
         self.view.set_selected_curve_selector_text(label)
 
@@ -216,12 +215,11 @@ class CurvesTabWidgetPresenter:
         else:
             return curve.axes.get_legend()
 
-    @staticmethod
-    def update_legend_entry(curve, old_label, new_label):
-        """Update the entry in the legend for a specific curve"""
-        legend = CurvesTabWidgetPresenter.get_legend_from_curve(curve)
-        if legend:
-            text_labels = legend.get_texts()
-            for text in text_labels:
-                if text.get_text() == old_label:
-                    text.set_text(new_label)
+    def update_legend(self):
+        curve = self.get_selected_curve()
+        if isinstance(curve, ErrorbarContainer):
+            ax = curve.get_children()[0].axes
+        else:
+            ax = curve.axes
+        if ax.get_legend():
+            ax.legend()
