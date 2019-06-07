@@ -14,11 +14,6 @@ from functools import wraps
 import sys
 
 # 3rdparty imports
-from mantid.api import AnalysisDataServiceObserver
-from mantid.plots import MantidAxes
-from mantid.py3compat import text_type
-from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import FigureManagerBase
@@ -28,6 +23,11 @@ from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
 
 # local imports
+from mantid.api import AnalysisDataServiceObserver
+from mantid.plots import MantidAxes
+from mantid.py3compat import text_type
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from .figureinteraction import FigureInteraction
 from .figurewindow import FigureWindow
@@ -287,7 +287,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # line is run, leading to a useless AttributeError.
 
     def launch_plot_options(self):
-        self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure)
+        self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure,
+                                                             parent=self.window)
 
     def grid_toggle(self):
         """
