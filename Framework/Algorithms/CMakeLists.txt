@@ -271,6 +271,7 @@ set(SRC_FILES
     src/RunCombinationHelpers/RunCombinationHelper.cpp
     src/RunCombinationHelpers/SampleLogsBehaviour.cpp
     src/SANSCollimationLengthEstimator.cpp
+    src/SANSSolidAngle.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
     src/SampleCorrections/MCInteractionVolume.cpp
@@ -614,6 +615,7 @@ set(INC_FILES
     inc/MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h
     inc/MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h
     inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
+    inc/MantidAlgorithms/SANSSolidAngle.h
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
@@ -957,6 +959,7 @@ set(TEST_FILES
     RunCombinationHelperTest.h
     SampleLogsBehaviourTest.h
     SANSCollimationLengthEstimatorTest.h
+    SANSSolidAngleTest.h
     SassenaFFTTest.h
     ScaleTest.h
     ScaleXTest.h
