@@ -107,12 +107,7 @@ RunsTable &RunsPresenter::mutableRunsTable() {
    Used by the view to tell the presenter something has changed
 */
 
-void RunsPresenter::notifySearch() {
-  // Start the search algorithm. If it is not started, make sure
-  // autoreduction is not left running
-  if (!search())
-    stopAutoreduction();
-}
+void RunsPresenter::notifySearch() { search(); }
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
@@ -205,9 +200,9 @@ void RunsPresenter::autoreductionResumed() {
 void RunsPresenter::autoreductionPaused() {
   m_runNotifier->stopPolling();
   m_autoreduction.stop();
+  m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
   tablePresenter()->autoreductionPaused();
-  m_progressView->setAsPercentageIndicator();
 }
 
 void RunsPresenter::autoreductionCompleted() {
@@ -334,11 +329,6 @@ void RunsPresenter::autoreduceNewRuns() {
   } else {
     m_mainPresenter->notifyAutoreductionCompleted();
   }
-}
-
-void RunsPresenter::stopAutoreduction() {
-  m_runNotifier->stopPolling();
-  m_autoreduction.stop();
 }
 
 bool RunsPresenter::isProcessing() const {

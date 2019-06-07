@@ -395,7 +395,6 @@ private:
 
   void expectSearchFailed() {
     EXPECT_CALL(m_view, getAlgorithmRunner()).Times(0);
-    expectStopAutoreduction();
   }
 
   void expectAutoreductionSettingsChanged() {

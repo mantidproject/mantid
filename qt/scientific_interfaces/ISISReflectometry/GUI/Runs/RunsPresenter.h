@@ -142,7 +142,6 @@ private:
   bool requireNewAutoreduction() const;
   void checkForNewRuns();
   void autoreduceNewRuns();
-  void stopAutoreduction();
   bool shouldUpdateExistingSearchResults() const;
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
