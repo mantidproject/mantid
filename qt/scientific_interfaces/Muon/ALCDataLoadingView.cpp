@@ -151,8 +151,17 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr &workspace,
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
 
+  // Error bars on the plot
+  QStringList plotsWithErrors{"Data"};
+  m_ui.dataPlot->setLinesWithErrors(plotsWithErrors);
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_ui.dataPlot->setCurveStyle("Data", -1);
+  m_ui.dataPlot->setCurveSymbol("Data", 0);
+#endif
+
   m_ui.dataPlot->clear();
-  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, true,
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black,
                              kwargs);
 }
 

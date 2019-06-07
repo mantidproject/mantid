@@ -37,7 +37,8 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
       m_curves(), m_magnifyTool(nullptr), m_panTool(nullptr),
       m_zoomTool(nullptr), m_contextMenu(new QMenu(this)),
       m_showLegendAction(nullptr), m_showErrorsMenuAction(nullptr),
-      m_showErrorsMenu(nullptr), m_errorBarOptionCache() {
+      m_showErrorsMenu(nullptr), m_errorBarOptionCache(),
+      m_curveStyle(QwtPlotCurve::Lines), m_curveSymbol(QwtSymbol::NoSymbol) {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
   watchADS(init);
@@ -252,9 +253,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString &curveName) {
 void PreviewPlot::addSpectrum(const QString &curveName,
                               const MatrixWorkspace_sptr &ws,
                               const size_t wsIndex, const QColor &curveColour,
-                              const bool errorBars,
                               const QHash<QString, QVariant> &plotKwargs) {
-  UNUSED_ARG(errorBars);
   UNUSED_ARG(plotKwargs);
 
   if (curveName.isEmpty()) {
@@ -313,7 +312,6 @@ void PreviewPlot::addSpectrum(const QString &curveName,
  */
 void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
                               const size_t wsIndex, const QColor &curveColour,
-                              const bool errorBars,
                               const QHash<QString, QVariant> &plotKwargs) {
   if (wsName.isEmpty()) {
     g_log.error("Cannot plot with empty workspace name");
@@ -329,7 +327,7 @@ void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
     throw std::runtime_error(
         wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
 
-  addSpectrum(curveName, ws, wsIndex, curveColour, errorBars, plotKwargs);
+  addSpectrum(curveName, ws, wsIndex, curveColour, plotKwargs);
 }
 
 /**
@@ -471,7 +469,7 @@ void PreviewPlot::showLegend(bool show) {
  *
  * @param curveNames List of curve names to show error bars of
  */
-void PreviewPlot::setDefaultShownErrorBars(const QStringList &curveNames) {
+void PreviewPlot::setLinesWithErrors(const QStringList &curveNames) {
   for (const auto &curveName : curveNames) {
     m_errorBarOptionCache[curveName] = true;
 
@@ -689,6 +687,9 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
 
   // Create the new curve
   curveConfig.curve = new QwtPlotCurve();
+  curveConfig.curve->setStyle(m_curveStyle);
+  curveConfig.curve->setSymbol(
+      QwtSymbol(m_curveSymbol, QBrush(), QPen(), QSize(7, 7)));
   curveConfig.curve->setData(wsData);
   curveConfig.curve->setPen(curveColour);
   curveConfig.curve->attach(m_uiForm.plot);
@@ -701,6 +702,26 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   } else {
     curveConfig.errorCurve = nullptr;
   }
+}
+
+/**
+ * Sets the style of the curve.
+ *
+ * @param curveName The name of the Curve
+ * @param style The style of the curve
+ */
+void PreviewPlot::setCurveStyle(const QString &curveName, const int style) {
+  m_curveStyle = QwtPlotCurve::CurveStyle(style);
+}
+
+/**
+ * Sets the style of the curve.
+ *
+ * @param curveName The name of the Curve
+ * @param symbol The symbol for each data point
+ */
+void PreviewPlot::setCurveSymbol(const QString &curveName, const int symbol) {
+  m_curveSymbol = QwtSymbol::Style(symbol);
 }
 
 /**

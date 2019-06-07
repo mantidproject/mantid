@@ -75,6 +75,7 @@ void RangeSelector::setMinimum(double value) {
     m_minimum = (value > m_limits.first) ? value : m_limits.first;
     m_minMarker->setXPosition(m_minimum);
     updateCanvas();
+    emit selectionChanged(m_minimum, m_maximum);
   }
 }
 
@@ -83,6 +84,7 @@ void RangeSelector::setMaximum(double value) {
     m_maximum = (value < m_limits.second) ? value : m_limits.second;
     m_maxMarker->setXPosition(m_maximum);
     updateCanvas();
+    emit selectionChanged(m_minimum, m_maximum);
   }
 }
 
@@ -105,17 +107,20 @@ void RangeSelector::setColour(QColor colour) {
 
 void RangeSelector::handleMouseDown(const QPoint &point) {
   const auto coords =
-      m_minMarker->transformPixelsToCoords(point.x(), point.y());
-  m_minMarker->mouseMoveStart(std::get<0>(coords), std::get<1>(coords));
-  m_maxMarker->mouseMoveStart(std::get<0>(coords), std::get<1>(coords));
+      toPair(m_minMarker->transformPixelsToCoords(point.x(), point.y()));
+  m_minMarker->mouseMoveStart(coords.first, coords.second);
+  m_maxMarker->mouseMoveStart(coords.first, coords.second);
   updateCursor();
 }
 
 void RangeSelector::handleMouseMove(const QPoint &point) {
   const auto minMoved = moveMarker(m_minMarker.get(), point);
   const auto maxMoved = moveMarker(m_maxMarker.get(), point);
-  if (minMoved || maxMoved)
+
+  if (minMoved || maxMoved) {
     updateCanvas();
+    updateMinMax(point, minMoved, maxMoved);
+  }
 }
 
 bool RangeSelector::moveMarker(VerticalMarker *marker, const QPoint &point) {
@@ -124,6 +129,20 @@ bool RangeSelector::moveMarker(VerticalMarker *marker, const QPoint &point) {
     return marker->mouseMove(std::get<0>(coords));
   }
   return false;
+}
+
+void RangeSelector::updateMinMax(const QPoint &point, bool minMoved,
+                                 bool maxMoved) {
+  const auto coords =
+      m_minMarker->transformPixelsToCoords(point.x(), point.y());
+
+  if (minMoved) {
+    m_minimum = std::get<0>(coords);
+    emit selectionChanged(m_minimum, m_maximum);
+  } else if (maxMoved) {
+    m_maximum = std::get<0>(coords);
+    emit selectionChanged(m_minimum, m_maximum);
+  }
 }
 
 void RangeSelector::handleMouseUp(const QPoint &point) {

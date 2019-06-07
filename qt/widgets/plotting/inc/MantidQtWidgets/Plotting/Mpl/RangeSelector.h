@@ -34,6 +34,9 @@ public:
   double getMinimum();
   double getMaximum();
 
+signals:
+  void selectionChanged(double min, double max);
+
 public slots:
   void setRange(const double min, const double max);
   void setMinimum(double value);
@@ -49,6 +52,7 @@ private slots:
 private:
   bool moveMarker(MantidQt::Widgets::MplCpp::VerticalMarker *marker,
                   const QPoint &point);
+  void updateMinMax(const QPoint &point, bool minMoved, bool maxMoved);
   void updateCursor();
   void updateCanvas();
 
@@ -64,6 +68,7 @@ private:
   double m_maximum;
   /// The minimum marker
   std::unique_ptr<MantidQt::Widgets::MplCpp::VerticalMarker> m_minMarker;
+
   /// The maximum marker
   std::unique_ptr<MantidQt::Widgets::MplCpp::VerticalMarker> m_maxMarker;
 };

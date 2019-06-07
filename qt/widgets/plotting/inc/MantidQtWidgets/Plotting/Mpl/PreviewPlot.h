@@ -53,11 +53,10 @@ public:
   void addSpectrum(
       const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws,
       const size_t wsIndex = 0, const QColor &lineColour = QColor(),
-      const bool errorBars = false,
       const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
   void addSpectrum(
       const QString &lineName, const QString &wsName, const size_t wsIndex = 0,
-      const QColor &lineColour = QColor(), const bool errorBars = false,
+      const QColor &lineColour = QColor(),
       const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
   void removeSpectrum(const QString &lineName);
   void setAxisRange(const QPair<double, double> &range,

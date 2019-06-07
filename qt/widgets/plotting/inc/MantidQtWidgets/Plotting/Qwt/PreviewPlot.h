@@ -31,6 +31,7 @@
 #include <qwt_plot_magnifier.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_zoomer.h>
+#include <qwt_symbol.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -51,7 +52,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public API::MantidWidget {
   Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
   Q_PROPERTY(bool showLegend READ legendIsShown WRITE showLegend)
   Q_PROPERTY(QStringList curveErrorBars READ getShownErrorBars WRITE
-                 setDefaultShownErrorBars)
+                 setLinesWithErrors)
 
 public:
   PreviewPlot(QWidget *parent = nullptr, bool init = true);
@@ -74,17 +75,19 @@ public:
   void addSpectrum(
       const QString &curveName, const Mantid::API::MatrixWorkspace_sptr &ws,
       const size_t wsIndex = 0, const QColor &curveColour = QColor(),
-      const bool errorBars = false,
       const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
   void addSpectrum(
       const QString &curveName, const QString &wsName, const size_t wsIndex = 0,
-      const QColor &curveColour = QColor(), const bool errorBars = false,
+      const QColor &curveColour = QColor(),
       const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
 
   void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr ws);
   void removeSpectrum(const QString &curveName);
 
   bool hasCurve(const QString &curveName);
+
+  void setCurveStyle(const QString &curveName, const int style);
+  void setCurveSymbol(const QString &curveName, const int symbol);
 
   RangeSelector *
   addRangeSelector(const QString &rsName,
@@ -107,7 +110,7 @@ signals:
 
 public slots:
   void showLegend(bool show);
-  void setDefaultShownErrorBars(const QStringList &curveNames);
+  void setLinesWithErrors(const QStringList &curveNames);
   void togglePanTool(bool enabled);
   void toggleZoomTool(bool enabled);
   void resetView();
@@ -196,6 +199,9 @@ private:
   // Persists error bar options when curves of same name are removed and
   // readded
   QMap<QString, bool> m_errorBarOptionCache;
+
+  QwtPlotCurve::CurveStyle m_curveStyle;
+  QwtSymbol::Style m_curveSymbol;
 
   friend class DisplayCurveFit;
 };

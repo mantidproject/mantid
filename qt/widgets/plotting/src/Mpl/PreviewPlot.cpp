@@ -103,7 +103,6 @@ Widgets::MplCpp::FigureCanvasQt *PreviewPlot::canvas() const {
 void PreviewPlot::addSpectrum(const QString &lineName,
                               const Mantid::API::MatrixWorkspace_sptr &ws,
                               const size_t wsIndex, const QColor &lineColour,
-                              const bool errorBars,
                               const QHash<QString, QVariant> &plotKwargs) {
   if (lineName.isEmpty()) {
     g_log.warning("Cannot plot with empty line name");
@@ -116,12 +115,12 @@ void PreviewPlot::addSpectrum(const QString &lineName,
   removeSpectrum(lineName);
 
   auto axes = m_canvas->gca<MantidAxes>();
-  if (!errorBars) {
-    axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
-              plotKwargs);
-  } else {
+  if (linesWithErrors().contains(lineName)) {
     axes.errorbar(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
                   plotKwargs);
+  } else {
+    axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
+              plotKwargs);
   }
 
   regenerateLegend();
@@ -138,12 +137,11 @@ void PreviewPlot::addSpectrum(const QString &lineName,
  */
 void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
                               const size_t wsIndex, const QColor &lineColour,
-                              const bool errorBars,
                               const QHash<QString, QVariant> &plotKwargs) {
   addSpectrum(lineName,
               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
                   wsName.toStdString()),
-              wsIndex, lineColour, errorBars, plotKwargs);
+              wsIndex, lineColour, plotKwargs);
 }
 
 /**
