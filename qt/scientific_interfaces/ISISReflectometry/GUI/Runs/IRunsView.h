@@ -51,8 +51,8 @@ public:
 
 class RunsViewTimerSubscriber {
 public:
-  virtual void notifyTimerEvent(){};
   virtual ~RunsViewTimerSubscriber() = default;
+  virtual void notifyTimerEvent() = 0;
 };
 
 /** @class IRunsView

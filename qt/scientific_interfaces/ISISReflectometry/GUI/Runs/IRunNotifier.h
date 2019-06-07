@@ -24,7 +24,7 @@ implementations.
 */
 class IRunNotifier {
 public:
-  virtual ~IRunNotifier(){};
+  virtual ~IRunNotifier() = default;
   virtual void subscribe(RunNotifierSubscriber *notifyee) = 0;
   virtual void startPolling() = 0;
   virtual void stopPolling() = 0;
