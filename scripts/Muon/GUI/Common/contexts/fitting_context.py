@@ -6,7 +6,119 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division)
 
+from collections import OrderedDict
+
+from mantid.py3compat import iterkeys
+
 from Muon.GUI.Common.observer_pattern import Observable
+
+# Magic values for names of columns in the fit parameter table
+NAME_COL = 'Name'
+VALUE_COL = 'Value'
+ERRORS_COL = 'Error'
+
+
+def is_same_parameter(prefixed_name, unprefixed_name):
+    """
+    Check if two parameters are actually referring to the same parameter name.
+    :param prefixed_name: A name such as f0.Lambda from the result of a fit
+    :param unprefixed_name: A bare parameter name from a function, e.g. Lambda
+    :return: True if these refer to the same parameter, False otherwise
+    """
+    return prefixed_name.endswith(unprefixed_name)
+
+
+def _create_unique_param_lookup(parameter_workspace, global_parameters):
+    """
+    Create a dictionary with the parameter names as keys where each
+    value is a 2-tuple of (value, error). Only unique parameters are
+    included, i.e if parameters are marked global then only 1 parameter
+    is kept.
+
+    :param parameter_workspace: A raw parameter table from Fit
+    :param global_parameters: A list of global parameters(if any)
+    """
+
+    def is_in(unique_params, param_name):
+        if not global_parameters:
+            return False
+
+        # Find the global parameter than matches this one
+        global_name = None
+        for name in global_parameters:
+            if is_same_parameter(param_name, name):
+                global_name = name
+                break
+        if global_name is None:
+            # param_name is not in globals
+            return False
+
+        # Do we have this parameter already?
+        for unique_name in iterkeys(unique_params):
+            if is_same_parameter(unique_name, global_name):
+                return True
+
+        return False
+
+    unique_params = OrderedDict()
+    default_table = parameter_workspace.workspace
+    for row in default_table:
+        name = row[NAME_COL]
+        if not is_in(unique_params, name):
+            unique_params[name] = (row[VALUE_COL], row[ERRORS_COL])
+
+    return unique_params
+
+
+class FitParameters(object):
+    """Data-object encapsulating fit parameters for a single fit"""
+
+    def __init__(self, parameter_workspace, global_parameters=None):
+        """
+        Initialize the fit parameters from a workspace
+        :param parameter_workspace: Assumed to be a table workspace output from Fit
+        """
+        self._parameter_workspace = parameter_workspace
+        self._global_parameters = global_parameters if global_parameters is not None else []
+        self._unique_params = _create_unique_param_lookup(
+            parameter_workspace, global_parameters)
+
+    def __eq__(self, other):
+        return self._parameter_workspace == other._parameter_workspace and \
+            self._global_parameters == other._global_parameters
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __len__(self):
+        """Returns the number of unique parameters"""
+        return len(self._unique_params)
+
+    def names(self):
+        """Returns a list of names of parameters"""
+        return list(self._unique_params.keys())
+
+    def value(self, name):
+        """Return the value of a given parameter"""
+        return self._unique_params[name][0]
+
+    def error(self, name):
+        """Return the error associated with a given parameter"""
+        return self._unique_params[name][1]
+
+    @property
+    def parameter_workspace_name(self):
+        """
+        :return: The name of the raw parameter workspace
+        """
+        return self._parameter_workspace.workspace_name
+
+    @property
+    def global_parameters(self):
+        """
+        :return: The set of global parameters
+        """
+        return self._global_parameters
 
 
 class FitInformation(object):
@@ -26,27 +138,20 @@ class FitInformation(object):
         :param global_parameters: An optional list of parameters
         that were tied together during the fit
         """
-        self.parameter_workspace = parameter_workspace
+        self._fit_parameters = FitParameters(parameter_workspace,
+                                             global_parameters)
         self.fit_function_name = fit_function_name
         self.input_workspace = input_workspace
-        self.global_parameters = global_parameters if global_parameters is not None else []
-
-    @property
-    def parameter_name(self):
-        """Returns the name of the parameter workspace"""
-        return self.parameter_workspace.workspace_name
-
-    @property
-    def parameters(self):
-        """Returns the dictionary of the fit parameters"""
-        return self.parameter_workspace.workspace.toDict()
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self.parameter_workspace == other.parameter_workspace and \
+        return self.parameters == other.parameters and \
             self.fit_function_name == other.fit_function_name and \
-            self.input_workspace == other.input_workspace and \
-            self.global_parameters == other.global_parameters
+            self.input_workspace == other.input_workspace
+
+    @property
+    def parameters(self):
+        return self._fit_parameters
 
 
 class FittingContext(object):
@@ -58,8 +163,8 @@ class FittingContext(object):
        - function names
     """
 
-    def __init__(self):
-        self.fit_list = []
+    def __init__(self, fit_list = None):
+        self.fit_list = fit_list if fit_list is not None else []
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
