@@ -214,10 +214,9 @@ void IndirectDiffractionReduction::plotResults() {
   setPlotIsPlotting(true);
   const QString plotType = m_uiForm.cbPlotType->currentText();
 
-  QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
-
-  if (plotType == "Spectra" || plotType == "Both") {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
+  if (plotType == "Spectra" || plotType == "Both") {
     for (const auto &it : m_plotWorkspaces) {
       const auto workspaceExists =
           AnalysisDataService::Instance().doesExist(it);
@@ -227,14 +226,9 @@ void IndirectDiffractionReduction::plotResults() {
         showInformationBox(QString::fromStdString(
             "Workspace '" + it + "' not found\nUnable to plot workspace"));
     }
-#else
-    using MantidQt::Widgets::MplCpp::plot;
-    plot(m_plotWorkspaces, boost::none, std::vector<int>{0});
-#endif
   }
 
   if (plotType == "Contour" || plotType == "Both") {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     for (const auto &it : m_plotWorkspaces) {
       const auto workspaceExists =
           AnalysisDataService::Instance().doesExist(it);
@@ -244,13 +238,18 @@ void IndirectDiffractionReduction::plotResults() {
         showInformationBox(QString::fromStdString(
             "Workspace '" + it + "' not found\nUnable to plot workspace"));
     }
+  }
+  runPythonCode(pyInput);
 #else
+  if (plotType == "Spectra" || plotType == "Both") {
+    using MantidQt::Widgets::MplCpp::plot;
+    plot(m_plotWorkspaces, boost::none, std::vector<int>{0});
+  }
+  if (plotType == "Contour" || plotType == "Both") {
     using MantidQt::Widgets::MplCpp::pcolormesh;
     pcolormesh(toQStringList(m_plotWorkspaces));
-#endif
   }
-
-  runPythonCode(pyInput);
+#endif
 
   setPlotIsPlotting(false);
 }

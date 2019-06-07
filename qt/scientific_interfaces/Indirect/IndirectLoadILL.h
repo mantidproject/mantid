@@ -37,8 +37,6 @@ private slots:
   void runClicked();
 
 private:
-  void loadILLData(std::string const &filename, std::string const &outputName);
-
   void setRunIsRunning(bool running);
   void setRunEnabled(bool enabled);
   void setPlotOptionsEnabled(bool enabled);

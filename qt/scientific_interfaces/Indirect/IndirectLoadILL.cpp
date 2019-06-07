@@ -76,6 +76,14 @@ void renameWorkspace(std::string const &inputName,
   renamer->execute();
 }
 
+void loadILLData(std::string const &filename, std::string const &outputName) {
+  auto loader = AlgorithmManager::Instance().create("LoadILLIndirect");
+  loader->initialize();
+  loader->setProperty("Filename", filename);
+  loader->setProperty("OutputWorkspace", outputName);
+  loader->execute();
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -194,15 +202,6 @@ void IndirectLoadILL::run() {
   }
 
   setRunIsRunning(false);
-}
-
-void IndirectLoadILL::loadILLData(std::string const &filename,
-                                  std::string const &outputName) {
-  auto loader = AlgorithmManager::Instance().create("LoadILLIndirect");
-  loader->initialize();
-  loader->setProperty("Filename", filename);
-  loader->setProperty("OutputWorkspace", outputName);
-  loader->execute();
 }
 
 /**
