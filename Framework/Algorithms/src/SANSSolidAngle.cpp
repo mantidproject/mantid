@@ -58,10 +58,10 @@ void SANSSolidAngle::init() {
                   "Wing: cos^3(alpha);");
 }
 
-/*
+/**
  * Returns the angle between the sample-to-pixel vector and its
  * projection on the X-Z plane.
- * */
+ */
 double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t index) {
   const V3D samplePos = spectrumInfo.samplePosition();
 
@@ -77,6 +77,9 @@ double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t index) {
   return sampleDetVec.angle(inPlane);
 }
 
+/**
+ *Returns correct angular function for the specified type
+ */
 std::function<double(int64_t)>
 getAngularFunction(const SpectrumInfo &spectrumInfo, const std::string &type) {
   if (type == "Normal") {
@@ -101,9 +104,8 @@ getAngularFunction(const SpectrumInfo &spectrumInfo, const std::string &type) {
 }
 
 /**
- * Compute the solid angle
- * */
-
+ * Compute the solid angle using the correct angular function
+ */
 class CalculateSolidAngle {
 public:
   CalculateSolidAngle(const double pixelArea, const SpectrumInfo &spectrumInfo,
@@ -161,20 +163,17 @@ void SANSSolidAngle::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int64_t i = 0; i < numberOfSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
-
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // Copy over the spectrum number & detector IDs
       outputWS->getSpectrum(i).copyInfoFrom(inputWS->getSpectrum(i));
       outputWS->mutableX(i) = inputWS->x(i);
-      double solidAngle = calculateSolidAngle(i);
-      outputWS->mutableY(i) = solidAngle;
+      outputWS->mutableY(i) = calculateSolidAngle(i);
       outputWS->mutableE(i) = 0.;
     } else {
       outputWS->mutableX(i) = 0.;
       outputWS->mutableY(i) = 0.;
       outputWS->mutableE(i) = 0.;
     }
-
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
