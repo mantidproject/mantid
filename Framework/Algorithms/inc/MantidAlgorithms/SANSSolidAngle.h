@@ -68,12 +68,6 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  void execEvent();
-
-  double getYTubeAngle(const API::SpectrumInfo &spectrumInfo, size_t index);
-  double calculateSolidAngle(int, const API::SpectrumInfo &,
-                             const Geometry::ComponentInfo &,
-                             const double PixelSizeX, const double PixelSizeY);
 };
 
 } // namespace Algorithms

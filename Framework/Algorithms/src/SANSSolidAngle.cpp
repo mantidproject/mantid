@@ -58,11 +58,80 @@ void SANSSolidAngle::init() {
                   "Wing: cos^3(alpha);");
 }
 
+/*
+ * Returns the angle between the sample-to-pixel vector and its
+ * projection on the X-Z plane.
+ * */
+double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t index) {
+  const V3D samplePos = spectrumInfo.samplePosition();
+
+  // Get the vector from the sample position to the detector pixel
+  V3D sampleDetVec = spectrumInfo.position(index) - samplePos;
+
+  // Get the projection of that vector on the X-Z plane
+  V3D inPlane = V3D(sampleDetVec);
+  inPlane.setY(0.0);
+
+  // This is the angle between the sample-to-detector vector
+  // and its project on the X-Z plane.
+  return sampleDetVec.angle(inPlane);
+}
+
+std::function<double(int64_t)>
+getAngularFunction(const SpectrumInfo &spectrumInfo, const std::string &type) {
+  if (type == "Normal") {
+    return [&spectrumInfo](int64_t histogramIndex) {
+      double cosTheta = std::cos(spectrumInfo.twoTheta(histogramIndex));
+      return cosTheta * cosTheta * cosTheta;
+    };
+  } else if (type == "Tube") {
+    return [&spectrumInfo](int64_t histogramIndex) {
+      double cosTheta = std::cos(spectrumInfo.twoTheta(histogramIndex));
+      double cosAlpha = std::cos(getYTubeAngle(spectrumInfo, histogramIndex));
+      return cosTheta * cosTheta * cosAlpha;
+    };
+  } else if (type == "Wing") {
+    return [&spectrumInfo](int64_t histogramIndex) {
+      double cosAlpha = std::cos(getYTubeAngle(spectrumInfo, histogramIndex));
+      return cosAlpha * cosAlpha * cosAlpha;
+    };
+  } else {
+    throw std::runtime_error("Invalid type of correction");
+  }
+}
+
+/**
+ * Compute the solid angle
+ * */
+
+class CalculateSolidAngle {
+public:
+  CalculateSolidAngle(const double pixelArea, const SpectrumInfo &spectrumInfo,
+                      const ComponentInfo &componentInfo,
+                      std::function<double(int64_t)> f)
+      : m_pixelArea(pixelArea), m_spectrumInfo(spectrumInfo),
+        m_componentInfo(componentInfo), m_f(std::move(f)) {}
+  double operator()(int64_t histogramIndex) const {
+    Kernel::V3D scaleFactor = m_componentInfo.scaleFactor(histogramIndex);
+    double scaledPixelArea = m_pixelArea * scaleFactor[0] * scaleFactor[1];
+    double angularTerm = m_f(histogramIndex);
+    double distance = m_spectrumInfo.l2(histogramIndex) * 1.e3; // mm
+    return (scaledPixelArea * angularTerm) / (distance * distance);
+  }
+
+private:
+  const double m_pixelArea;
+  const SpectrumInfo &m_spectrumInfo;
+  const ComponentInfo &m_componentInfo;
+  const std::function<double(int64_t)> m_f;
+};
+
 void SANSSolidAngle::exec() {
 
   // Get the workspaces
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const int64_t numberOfSpectra =
+      static_cast<int64_t>(inputWS->getNumberHistograms());
   API::MatrixWorkspace_sptr outputWS =
       WorkspaceFactory::Instance().create(inputWS, numberOfSpectra, 2, 1);
   // The result of this will be a distribution
@@ -81,28 +150,29 @@ void SANSSolidAngle::exec() {
   g_log.debug() << "Pixel sizes (mm) X=" << pixelSizeX << " Y=" << pixelSizeY
                 << '\n';
 
+  const std::string type = getProperty("Type");
+  auto angularFunction = getAngularFunction(spectrumInfo, type);
+  const CalculateSolidAngle calculateSolidAngle(
+      pixelSizeX * pixelSizeY, spectrumInfo, componentInfo, angularFunction);
+
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
-  for (int i = 0; i < numberOfSpectra; ++i) {
+  for (int64_t i = 0; i < numberOfSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // Copy over the spectrum number & detector IDs
       outputWS->getSpectrum(i).copyInfoFrom(inputWS->getSpectrum(i));
-
-      double solidAngle = calculateSolidAngle(i, spectrumInfo, componentInfo,
-                                              pixelSizeX, pixelSizeY);
-
-      outputWS->mutableX(i)[0] = inputWS->x(i).front();
-      outputWS->mutableX(i)[1] = inputWS->x(i).back();
-      outputWS->mutableY(i)[0] = solidAngle;
-      outputWS->mutableE(i)[0] = 0;
+      outputWS->mutableX(i) = inputWS->x(i);
+      double solidAngle = calculateSolidAngle(i);
+      outputWS->mutableY(i) = solidAngle;
+      outputWS->mutableE(i) = 0.;
     } else {
-      outputWS->mutableX(i) = 0;
-      outputWS->mutableY(i) = 0;
-      outputWS->mutableE(i) = 0;
+      outputWS->mutableX(i) = 0.;
+      outputWS->mutableY(i) = 0.;
+      outputWS->mutableE(i) = 0.;
     }
 
     prog.report();
@@ -110,60 +180,5 @@ void SANSSolidAngle::exec() {
   } // loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
 }
-
-/*
- * Returns the angle between the sample-to-pixel vector and its
- * projection on the X-Z plane.
- * */
-double SANSSolidAngle::getYTubeAngle(const SpectrumInfo &spectrumInfo,
-                                     size_t index) {
-  const V3D samplePos = spectrumInfo.samplePosition();
-
-  // Get the vector from the sample position to the detector pixel
-  V3D sampleDetVec = spectrumInfo.position(index) - samplePos;
-
-  // Get the projection of that vector on the X-Z plane
-  V3D inPlane = V3D(sampleDetVec);
-  inPlane.setY(0.0);
-
-  // This is the angle between the sample-to-detector vector
-  // and its project on the X-Z plane.
-  return sampleDetVec.angle(inPlane);
-}
-
-/**
- * Compute the solid angle
- * */
-double SANSSolidAngle::calculateSolidAngle(int histogramIndex,
-                                           const SpectrumInfo &spectrumInfo,
-                                           const ComponentInfo &componentInfo,
-                                           const double pixelSizeX,
-                                           const double pixelSizeY) {
-
-  const std::string type = getProperty("Type");
-  double pixelSizeXScaled =
-      pixelSizeX * componentInfo.scaleFactor(histogramIndex)[0];
-  double pixelSizeYScaled =
-      pixelSizeY * componentInfo.scaleFactor(histogramIndex)[1];
-  double pixelArea = pixelSizeXScaled * pixelSizeYScaled;
-  double distance = spectrumInfo.l2(histogramIndex) * 1e3; // mm
-
-  double angularTerm = 0;
-  if (type == "Normal") {
-    double cosTheta = cos(spectrumInfo.twoTheta(histogramIndex));
-    angularTerm = cosTheta * cosTheta * cosTheta;
-  } else if (type == "Tube") {
-    double cosTheta = cos(spectrumInfo.twoTheta(histogramIndex));
-    double cosAlpha = cos(getYTubeAngle(spectrumInfo, histogramIndex));
-    angularTerm = cosTheta * cosTheta * cosAlpha;
-  } else if (type == "Wing") {
-    double cosAlpha = cos(getYTubeAngle(spectrumInfo, histogramIndex));
-    angularTerm = cosAlpha * cosAlpha * cosAlpha;
-  } else {
-    throw std::runtime_error("Invalid type of correction");
-  }
-  return (pixelArea * angularTerm) / (distance * distance);
-}
-
 } // namespace Algorithms
 } // namespace Mantid
