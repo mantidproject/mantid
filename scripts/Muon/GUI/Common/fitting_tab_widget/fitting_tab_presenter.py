@@ -10,7 +10,6 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 import functools
 import re
-from mantid.api import AnalysisDataService
 
 
 class FittingTabPresenter(object):
@@ -25,6 +24,7 @@ class FittingTabPresenter(object):
         self._fit_chi_squared = [0.0]
         self._fit_function = [None]
         self.manual_selection_made = False
+        self.automatically_update_fit_name = True
         self.thread_success = True
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
@@ -159,7 +159,6 @@ class FittingTabPresenter(object):
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
 
         self.update_fit_status_information_in_view()
-        self.increment_fit_group_name()
 
     def handle_error(self, error):
         self.thread_success = False
@@ -175,6 +174,16 @@ class FittingTabPresenter(object):
         value = self.view.end_time
         index = self.view.get_index_for_start_end_times()
         self.update_end_x(index, value)
+
+    def handle_fit_name_changed_by_user(self):
+        self.automatically_update_fit_name = False
+        self.model.function_name = self.view.function_name
+
+    def handle_function_structure_changed(self):
+        self.clear_fit_information()
+        if self.automatically_update_fit_name:
+            self.view.function_name = self.model.get_function_name(self.view.fit_object)
+            self.model.function_name = self.view.function_name
 
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()
@@ -196,10 +205,10 @@ class FittingTabPresenter(object):
 
     def _get_shared_parameters(self):
         params = {}
-        params['Function'] = self.view.fit_string
+        params['Function'] = self.view.fit_object
         params['Minimizer'] = self.view.minimizer
         params['EvaluationType'] = self.view.evaluation_type
-        params['GroupName'] = self.view.group_name
+        params['FitGroupName'] = self.view.group_name
         return params
 
     @property
@@ -272,12 +281,3 @@ class FittingTabPresenter(object):
         self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index],
                                           self._fit_chi_squared[current_index])
         self.view.update_global_fit_state(self._fit_status)
-
-    def increment_fit_group_name(self):
-        while AnalysisDataService.doesExist(self.view.group_name):
-            current_number = re.search(r'\d+$', self.view.group_name)
-            if current_number:
-                new_number = str(int(current_number.group()) + 1)
-                self.view.group_name = self.view.group_name[:-len(current_number.group())] + new_number
-            else:
-                self.view.group_name = self.view.group_name + ' 1'

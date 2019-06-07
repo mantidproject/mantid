@@ -32,13 +32,13 @@ DECLARE_ALGORITHM(GeneratePythonScript)
 /** Initialize the algorithm's properties.
  */
 void GeneratePythonScript::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   std::vector<std::string> exts{".py"};
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
                   "be generated.");

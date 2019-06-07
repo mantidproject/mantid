@@ -68,7 +68,7 @@ const std::string AddTimeSeriesLog::category() const {
  * Initialize the algorithm's properties.
  */
 void AddTimeSeriesLog::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::InOut),
                   "In/out workspace that will store the new log information");
 

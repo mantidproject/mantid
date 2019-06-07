@@ -12,7 +12,7 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/shared_ptr.hpp>
 #include <memory>
 #include <vector>
@@ -54,7 +54,7 @@ makeRenderingMesh(const Adaptee &adaptee) {
     }
     virtual ~Adapter() {}
   };
-  return Kernel::make_unique<Adapter>(adaptee);
+  return std::make_unique<Adapter>(adaptee);
 }
 } // namespace detail
 

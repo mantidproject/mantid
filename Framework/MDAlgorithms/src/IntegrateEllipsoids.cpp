@@ -227,12 +227,12 @@ void IntegrateEllipsoids::init() {
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input MatrixWorkspace with time-of-flight units along "
                   "X-axis and defined instrument with defined sample");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
                   "be indexed with integer HKL values.");
@@ -261,8 +261,8 @@ void IntegrateEllipsoids::init() {
                   "background region");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 

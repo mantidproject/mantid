@@ -39,28 +39,28 @@ IntegratePeaksCWSD::IntegratePeaksCWSD()
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksCWSD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "PeaksWorkspace", "", Direction::Input, API::PropertyMode::Optional),
       "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Output Masking Workspace");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("PeakCentre"),
+      std::make_unique<ArrayProperty<double>>("PeakCentre"),
       "A comma separated list for peak centre in Q-sample frame. "
       "Its length is either 3 (Qx, Qy, Qz) or 0. "
       "If peak center is defined, then all the data among all the runs will be "

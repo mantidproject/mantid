@@ -12,7 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidPlotUtilities.h"
-#include <MantidQtWidgets/Common/MantidDisplayBase.h>
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
 using namespace MantidQt::MantidWidgets;
 using Mantid::API::MatrixWorkspace;

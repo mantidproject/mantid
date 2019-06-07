@@ -15,7 +15,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMDAlgorithms/LoadSQW2.h"
 
 #include <Poco/TemporaryFile.h>
@@ -173,7 +173,7 @@ private:
   }
 
   IAlgorithm_uptr createAlgorithm() {
-    IAlgorithm_uptr alg(Mantid::Kernel::make_unique<LoadSQW2>());
+    IAlgorithm_uptr alg(std::make_unique<LoadSQW2>());
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("OutputWorkspace", "__unused_value_for_child_algorithm");

@@ -24,18 +24,18 @@ DECLARE_ALGORITHM(RRFMuon)
 void RRFMuon::init() {
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "Name of the input workspace containing the spectra in the lab frame");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "Name of the output workspace containing the spectra in the RRF");
 
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("Frequency", 0, Direction::Input),
-      "Frequency of the oscillations");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Frequency", 0,
+                                                              Direction::Input),
+                  "Frequency of the oscillations");
 
   std::vector<std::string> unitOptions{"MHz", "Gauss", "Mrad/s"};
   declareProperty("FrequencyUnits", "MHz",
@@ -43,7 +43,7 @@ void RRFMuon::init() {
                   "The frequency units");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("Phase", 0, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("Phase", 0, Direction::Input),
       "Phase accounting for any misalignment of the counters");
 }
 

@@ -53,13 +53,13 @@ const std::string IntegrateEPP::summary() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateEPP::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
                   "A workspace to be integrated.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
                   "An workspace containing the integrated histograms.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       PropertyNames::EPP_WORKSPACE, "", Direction::Input),
                   "Table containing information on the elastic peaks.");
   const auto mandatoryDouble =

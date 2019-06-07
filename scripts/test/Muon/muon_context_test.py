@@ -59,24 +59,24 @@ class MuonContextTest(unittest.TestCase):
         self.context.phase_context.add_phase_quad(MuonWorkspaceWrapper(workspace, 'EMU19489; PhaseQuad; PhaseTable EMU19489'))
 
     def test_reset_groups_and_pairs_to_default(self):
-        self.assertEquals(self.group_pair_context.group_names, ['fwd', 'bwd'])
-        self.assertEquals(self.group_pair_context.pair_names, ['long'])
+        self.assertEqual(self.group_pair_context.group_names, ['fwd', 'bwd'])
+        self.assertEqual(self.group_pair_context.pair_names, ['long'])
 
     def test_calculate_group_calculates_group_for_given_run(self):
         counts_workspace, asymmetry_workspace = self.context.calculate_group('fwd', run=[19489])
 
-        self.assertEquals(type(counts_workspace), Workspace2D)
-        self.assertEquals(type(counts_workspace), Workspace2D)
+        self.assertEqual(type(counts_workspace), Workspace2D)
+        self.assertEqual(type(counts_workspace), Workspace2D)
 
     def test_calculate_pair_calculates_pair_for_given_run(self):
         pair_asymmetry = self.context.calculate_pair('long', run=[19489])
 
-        self.assertEquals(type(pair_asymmetry), Workspace2D)
+        self.assertEqual(type(pair_asymmetry), Workspace2D)
 
     def test_show_all_groups_calculates_and_shows_all_groups(self):
         self.context.show_all_groups()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Groups', 'EMU19489; Group; bwd; Asymmetry; #1',
+        self.assertEqual(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Groups', 'EMU19489; Group; bwd; Asymmetry; #1',
                                                                  'EMU19489; Group; bwd; Counts; #1', 'EMU19489; Group; fwd; Asymmetry; #1',
                                                                  'EMU19489; Group; fwd; Counts; #1', 'Muon Data'])
 
@@ -86,7 +86,7 @@ class MuonContextTest(unittest.TestCase):
 
         self.context.show_all_groups()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(),
+        self.assertEqual(AnalysisDataService.getObjectNames(),
                           ['EMU19489', 'EMU19489 Groups', 'EMU19489; Group; bwd; Asymmetry; #1', 'EMU19489; Group; bwd; Asymmetry; Rebin; #1',
                            'EMU19489; Group; bwd; Counts; #1', 'EMU19489; Group; bwd; Counts; Rebin; #1',
                            'EMU19489; Group; fwd; Asymmetry; #1', 'EMU19489; Group; fwd; Asymmetry; Rebin; #1',
@@ -95,7 +95,7 @@ class MuonContextTest(unittest.TestCase):
     def test_show_all_pairs_calculates_and_shows_all_pairs(self):
         self.context.show_all_pairs()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Pairs', 'EMU19489; Pair Asym; long; #1', 'Muon Data'])
+        self.assertEqual(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Pairs', 'EMU19489; Pair Asym; long; #1', 'Muon Data'])
 
     def test_that_show_all_calculates_and_shows_all_pairs_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -103,59 +103,59 @@ class MuonContextTest(unittest.TestCase):
 
         self.context.show_all_pairs()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(),
+        self.assertEqual(AnalysisDataService.getObjectNames(),
                           ['EMU19489', 'EMU19489 Pairs', 'EMU19489; Pair Asym; long; #1', 'EMU19489; Pair Asym; long; Rebin; #1', 'Muon Data'])
 
     def test_update_current_data_sets_current_run_in_data_context(self):
         self.context.update_current_data()
 
-        self.assertEquals(self.data_context.current_data, self.load_result)
+        self.assertEqual(self.data_context.current_data, self.load_result)
 
     def test_update_current_data_sets_groups_and_pairs(self):
         self.context.update_current_data()
 
-        self.assertEquals(self.group_pair_context.pair_names, ['long'])
-        self.assertEquals(self.group_pair_context.group_names, ['fwd', 'bwd'])
+        self.assertEqual(self.group_pair_context.pair_names, ['long'])
+        self.assertEqual(self.group_pair_context.group_names, ['fwd', 'bwd'])
 
     def test_show_raw_data_puts_raw_data_into_the_ADS(self):
         self.context.show_raw_data()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Raw Data', 'EMU19489_raw_data', 'Muon Data'])
+        self.assertEqual(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Raw Data', 'EMU19489_raw_data', 'Muon Data'])
 
     def test_that_first_good_data_returns_correctly_when_from_file_chosen_option(self):
         self.gui_context.update({'FirstGoodDataFromFile': True})
 
         first_good_data = self.context.first_good_data([19489])
 
-        self.assertEquals(first_good_data, 0.11)
+        self.assertEqual(first_good_data, 0.11)
 
     def test_first_good_data_returns_correctly_when_manually_specified_used(self):
         self.gui_context.update({'FirstGoodDataFromFile': False, 'FirstGoodData': 5})
 
         first_good_data = self.context.first_good_data([19489])
 
-        self.assertEquals(first_good_data, 5)
+        self.assertEqual(first_good_data, 5)
 
     def test_that_last_good_data_returns_correctly_when_from_file_chosen_option(self):
         self.gui_context.update({'LastGoodDataFromFile': True})
 
         last_good_data = self.context.last_good_data([19489])
 
-        self.assertEquals(last_good_data, 31.76)
+        self.assertEqual(last_good_data, 31.76)
 
     def test_last_good_data_returns_correctly_when_manually_specified_used(self):
         self.gui_context.update({'LastGoodDataFromFile': False, 'LastGoodData': 5})
 
         last_good_data = self.context.last_good_data([19489])
 
-        self.assertEquals(last_good_data, 5)
+        self.assertEqual(last_good_data, 5)
 
     def test_that_dead_time_table_from_ADS_returns_table_name(self):
         self.gui_context.update({'DeadTimeSource': 'FromADS', 'DeadTimeTable': 'deadtime_table_name'})
 
         deadtime_table = self.context.dead_time_table([19489])
 
-        self.assertEquals(deadtime_table, 'deadtime_table_name')
+        self.assertEqual(deadtime_table, 'deadtime_table_name')
 
     def test_get_workspace_names_returns_all_stored_workspaces_if_all_selected(self):
         self.populate_ADS()

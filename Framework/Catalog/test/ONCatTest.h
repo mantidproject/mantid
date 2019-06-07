@@ -14,7 +14,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/ONCatHelper.h"
 
 #include <map>

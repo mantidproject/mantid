@@ -11,7 +11,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -38,11 +38,11 @@ const std::string SortXAxis::summary() const {
 }
 
 void SortXAxis::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input Workspace");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Sorted Output Workspace");
 
@@ -68,9 +68,10 @@ void SortXAxis::exec() {
 
   // Check if it is a valid histogram here
   const bool isAProperHistogram =
-      (!ignoreHistogramValidation)
-          ? determineIfHistogramIsValid(*inputWorkspace)
-          : false;
+      ignoreHistogramValidation ||
+      determineIfHistogramIsValid(
+          *inputWorkspace); // Assume a valid histogram if validation is to be
+                            // ignored
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size

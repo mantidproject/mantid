@@ -13,8 +13,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <MantidAlgorithms/GeneralisedSecondDifference.h>
-#include <MantidDataObjects/EventWorkspace.h>
+#include "MantidAlgorithms/GeneralisedSecondDifference.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;

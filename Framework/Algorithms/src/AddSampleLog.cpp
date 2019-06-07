@@ -41,7 +41,7 @@ using namespace API;
 using Types::Core::DateAndTime;
 
 void AddSampleLog::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "", Direction::InOut),
                   "Workspace to add the log entry to");
   declareProperty("LogName", "",
@@ -70,7 +70,7 @@ void AddSampleLog::init() {
 
   // add optional workspace which contains the data of the TimeSeriesProperty
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "TimeSeriesWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional workspace contain the data");
   declareProperty(

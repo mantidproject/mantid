@@ -138,7 +138,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         return str(self.parameter_display_combo.currentText())
 
     @property
-    def fit_string(self):
+    def fit_object(self):
         return self.function_browser.getGlobalFunction()
 
     @property
@@ -202,6 +202,16 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     @group_name.setter
     def group_name(self, value):
         self.ads_group_name_textbox.setText(value)
+
+    @property
+    def function_name(self):
+        return str(self.function_name_line_edit.text())
+
+    @function_name.setter
+    def function_name(self, function_name):
+        self.function_name_line_edit.blockSignals(True)
+        self.function_name_line_edit.setText(function_name)
+        self.function_name_line_edit.blockSignals(False)
 
     def warning_popup(self, message):
         warning(message, parent=self)

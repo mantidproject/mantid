@@ -36,6 +36,11 @@ public:
     const Python::Object siteModule{
         Python::NewRef(PyImport_ImportModule("site"))};
     siteModule.attr("addsitedir")(ConfigService::Instance().getPropertiesDir());
+
+    // Use Agg backend for matplotlib
+    auto mpl = Python::NewRef(PyImport_ImportModule("matplotlib"));
+    mpl.attr("use")("Agg");
+
     return Py_IsInitialized();
   }
 

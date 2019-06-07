@@ -27,7 +27,6 @@
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/error_of_mean.hpp>
@@ -434,7 +433,7 @@ CSGObject &CSGObject::operator=(const CSGObject &A) {
     vtkCacheWriter = A.vtkCacheWriter;
     m_shapeXML = A.m_shapeXML;
     m_id = A.m_id;
-    m_material = Kernel::make_unique<Material>(A.material());
+    m_material = std::make_unique<Material>(A.material());
 
     if (TopRule)
       createSurfaceList();
@@ -449,7 +448,7 @@ CSGObject::~CSGObject() = default;
  * @param material The new Material that the object is composed from
  */
 void CSGObject::setMaterial(const Kernel::Material &material) {
-  m_material = Mantid::Kernel::make_unique<Material>(material);
+  m_material = std::make_unique<Material>(material);
 }
 
 /**
@@ -457,7 +456,7 @@ void CSGObject::setMaterial(const Kernel::Material &material) {
  */
 const Kernel::Material &CSGObject::material() const {
   if (!m_material) {
-    m_material = Kernel::make_unique<Material>();
+    m_material = std::make_unique<Material>();
   }
   return *m_material;
 }
@@ -693,11 +692,10 @@ int CSGObject::procPair(std::string &Ln,
   // Get rules
   auto RRA = std::move(Rlist[Ra]);
   auto RRB = std::move(Rlist[Rb]);
-  auto Join =
-      (type) ? std::unique_ptr<Rule>(Mantid::Kernel::make_unique<Union>(
-                   std::move(RRA), std::move(RRB)))
-             : std::unique_ptr<Rule>(Mantid::Kernel::make_unique<Intersection>(
-                   std::move(RRA), std::move(RRB)));
+  auto Join = (type) ? std::unique_ptr<Rule>(std::make_unique<Union>(
+                           std::move(RRA), std::move(RRB)))
+                     : std::unique_ptr<Rule>(std::make_unique<Intersection>(
+                           std::move(RRA), std::move(RRB)));
   Rlist[Ra] = std::move(Join);
   Rlist.erase(Rlist.find(Rb));
 
@@ -725,16 +723,16 @@ int CSGObject::procPair(std::string &Ln,
 std::unique_ptr<CompGrp>
 CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
   if (!RItem)
-    return Mantid::Kernel::make_unique<CompGrp>();
+    return std::make_unique<CompGrp>();
 
   Rule *Pptr = RItem->getParent();
   Rule *RItemptr = RItem.get();
-  auto CG = Mantid::Kernel::make_unique<CompGrp>(Pptr, std::move(RItem));
+  auto CG = std::make_unique<CompGrp>(Pptr, std::move(RItem));
   if (Pptr) {
     const int Ln = Pptr->findLeaf(RItemptr);
     Pptr->setLeaf(std::move(CG), Ln);
     // CG already in tree. Return empty object.
-    return Mantid::Kernel::make_unique<CompGrp>();
+    return std::make_unique<CompGrp>();
   }
   return CG;
 }
@@ -1037,12 +1035,12 @@ int CSGObject::procString(const std::string &Line) {
             "Invalid surface string in Object::ProcString : " + Line);
       // Process #Number
       if (i != 0 && Ln[i - 1] == '#') {
-        TmpO = Mantid::Kernel::make_unique<CompObj>();
+        TmpO = std::make_unique<CompObj>();
         TmpO->setObjN(SN);
         RuleList[Ridx] = std::move(TmpO);
       } else // Normal rule
       {
-        TmpR = Mantid::Kernel::make_unique<SurfPoint>();
+        TmpR = std::make_unique<SurfPoint>();
         TmpR->setKeyN(SN);
         RuleList[Ridx] = std::move(TmpR);
       }

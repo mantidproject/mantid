@@ -293,24 +293,24 @@ SaveGSASInstrumentFile::SaveGSASInstrumentFile()
  */
 void SaveGSASInstrumentFile::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Name of the table workspace containing the parameters.");
 
   vector<string> infileexts{".irf"};
-  auto infileprop = Kernel::make_unique<FileProperty>(
+  auto infileprop = std::make_unique<FileProperty>(
       "InputFileName", "", FileProperty::OptionalLoad, infileexts);
   declareProperty(std::move(infileprop),
                   "Name of the input Fullprof resolution file (.irf).");
 
   vector<string> outfileexts{".iparam", ".prm"};
-  auto fileprop = Kernel::make_unique<FileProperty>(
+  auto fileprop = std::make_unique<FileProperty>(
       "OutputFileName", "", FileProperty::Save, outfileexts);
   declareProperty(std::move(fileprop),
                   "Name of the output GSAS instrument file.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<unsigned int>>("BankIDs"),
+      std::make_unique<ArrayProperty<unsigned int>>("BankIDs"),
       "Bank IDs of the banks to be written to GSAS instrument file.");
 
   vector<string> instruments{"powgen", "nomad"};

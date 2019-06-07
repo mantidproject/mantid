@@ -41,7 +41,7 @@ class TransformTest(GuiTest):
     def test_changeDisplay(self):
         self.widget.updateDisplay(1)
         assert (self.view.hideAll.call_count == 1)
-        self.assertEquals(self.view.showMethod.call_count, 1)
+        self.assertEqual(self.view.showMethod.call_count, 1)
 
 
 if __name__ == '__main__':

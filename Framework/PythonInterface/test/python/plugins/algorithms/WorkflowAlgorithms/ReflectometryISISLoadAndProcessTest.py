@@ -467,7 +467,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             algNames = [alg.name() for alg in algHistories]
         else:
             algNames = [alg.name() for alg in history]
-        self.assertEquals(algNames, expected)
+        self.assertEqual(algNames, expected)
 
     def _assert_run_algorithm_succeeds(self, args, expected):
         """Run the algorithm with the given args and check it succeeds, 
@@ -476,13 +476,13 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryISISLoadAndProcess', **args)
         assertRaisesNothing(self, alg.execute)
         actual = mtd.getObjectNames()
-        self.assertEquals(set(actual), set(expected))
+        self.assertEqual(set(actual), set(expected))
 
     def _assert_run_algorithm_fails(self, args):
         """Run the algorithm with the given args and check it fails to produce output"""
         alg = create_algorithm('ReflectometryISISLoadAndProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.doesExist('output'), False)
+        self.assertEqual(mtd.doesExist('output'), False)
 
     def _assert_run_algorithm_throws(self, args = {}):
         """Run the algorithm with the given args and check it throws"""
@@ -492,10 +492,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             alg.execute()
         except:
             throws = True
-        self.assertEquals(throws, True)
+        self.assertEqual(throws, True)
 
     def _assert_delta(self, value1, value2):
-        self.assertEquals(round(value1, 6), round(value2, 6))
+        self.assertEqual(round(value1, 6), round(value2, 6))
 
     def _clear(self, expected):
         for workspace in expected:

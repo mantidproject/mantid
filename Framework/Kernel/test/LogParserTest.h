@@ -15,7 +15,7 @@
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/File.h>
@@ -258,7 +258,7 @@ public:
   }
 
   void testConstructionFromPropertyUsingICPVariant_CHANGE_PERIOD() {
-    auto log = make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE_PERIOD"
     TS_ASSERT_THROWS_NOTHING(
         log->addValue("2007-11-30T16:15:00", "CHANGE_PERIOD 1"));
@@ -290,7 +290,7 @@ public:
   }
 
   void testConstructionFromPropertyUsingICPVariant_CHANGE_SPACE_PERIOD() {
-    auto log = make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE PERIOD"
     TS_ASSERT_THROWS_NOTHING(
         log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1"));
@@ -324,7 +324,7 @@ public:
   // Check that periods that don't have a full "CHANGE PERIOD" flag are not
   // added.
   void testWontAddPeriodWithoutPERIODpartOfCHANGE_SPACE_PERIOD() {
-    auto log = make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    auto log = std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     // Notice we are using "CHANGE PERIOD"
     TS_ASSERT_THROWS_NOTHING(
         log->addValue("2007-11-30T16:15:00", "CHANGE PERIOD 1"));
@@ -400,7 +400,7 @@ public:
   //----------------------------------------------------------------------------
   void test_timeMean() {
     constexpr size_t logSize(11);
-    auto log = make_unique<TimeSeriesProperty<double>>("MydoubleLog");
+    auto log = std::make_unique<TimeSeriesProperty<double>>("MydoubleLog");
     std::vector<double> values(logSize);
     std::iota(values.begin(), values.end(), 1);
     DateAndTime firstTime("2007-11-30T16:17:00");
@@ -413,7 +413,7 @@ public:
   }
 
   void test_timeMean_one_Value() {
-    auto log = make_unique<TimeSeriesProperty<double>>("MydoubleLog");
+    auto log = std::make_unique<TimeSeriesProperty<double>>("MydoubleLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 56));
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
@@ -423,7 +423,7 @@ public:
   /// Tests to see if we can cope with duplicate log values that have the same
   /// time.
   void test_timeMean_duplicate_values_with_same_timestamp() {
-    auto log = make_unique<TimeSeriesProperty<double>>("MydoubleLog");
+    auto log = std::make_unique<TimeSeriesProperty<double>>("MydoubleLog");
     // Add the same value twice
     TS_ASSERT_THROWS_NOTHING(log->addValue("2012-07-19T20:00:00", 666));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2012-07-19T20:00:00", 666));
@@ -432,7 +432,8 @@ public:
   }
 
   void test_isICPEventLogNewStyle_works() {
-    auto oldlog = make_unique<TimeSeriesProperty<std::string>>("MyOldICPevent");
+    auto oldlog =
+        std::make_unique<TimeSeriesProperty<std::string>>("MyOldICPevent");
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:00", "START"));
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:01", "BEGIN"));
     TS_ASSERT_THROWS_NOTHING(oldlog->addValue("2012-07-19T20:00:02", "PAUSE"));
@@ -440,7 +441,8 @@ public:
     const auto &oldLogm = oldlog->valueAsMultiMap();
     TS_ASSERT(!LogParser::isICPEventLogNewStyle(oldLogm));
 
-    auto newlog = make_unique<TimeSeriesProperty<std::string>>("MyNewICPevent");
+    auto newlog =
+        std::make_unique<TimeSeriesProperty<std::string>>("MyNewICPevent");
     TS_ASSERT_THROWS_NOTHING(newlog->addValue("2012-07-19T20:00:00", "START"));
     TS_ASSERT_THROWS_NOTHING(
         newlog->addValue("2012-07-19T20:00:01", "START_COLLECTION PERIOD 1"));
@@ -460,7 +462,7 @@ public:
   }
 
   void test_new_style_command_parsing() {
-    auto log = make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
+    auto log = std::make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
     log->addValue("2013-10-16T19:04:47", "CHANGE_PERIOD 1");
     log->addValue("2013-10-16T19:04:48", "RESUME");
     log->addValue("2013-10-16T19:04:48",
@@ -621,7 +623,7 @@ public:
   /// If a run is aborted and then restarted, the "running" log should be set to
   /// false at all times during the aborted run.
   void test_abort_runningLogAlwaysFalseBeforeRestart() {
-    auto log = make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
+    auto log = std::make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
 
     // (This is a cut-down version of EMU66122)
     const DateAndTime timeZero{"2016-10-01T10:01:44"};
@@ -665,7 +667,7 @@ public:
   /// If a run is aborted and then restarted, the "running" log should be set to
   /// false at all times during the aborted run.
   void test_abort_runningLogAlwaysFalseBeforeRestart_oldStyleCommands() {
-    auto log = make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
+    auto log = std::make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
 
     // (This is a cut-down version of EMU66122, changed to "old style" commands)
     const DateAndTime timeZero{"2016-10-01T10:01:44"};
@@ -697,7 +699,8 @@ public:
 private:
   /// Helper method to run common test code for checking period logs.
   void doTestCurrentPeriodLog(const int &expected_period) {
-    const auto &log = make_unique<TimeSeriesProperty<std::string>>("ICPLog");
+    const auto &log =
+        std::make_unique<TimeSeriesProperty<std::string>>("ICPLog");
     const LogParser logparser(log.get());
     const auto prop = std::unique_ptr<Property>(
         logparser.createCurrentPeriodLog(expected_period));

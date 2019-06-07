@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
    fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    fitting_tab_widget/fitting_tab_presenter_test.py
    fitting_tab_widget/fitting_tab_model_test.py
+   fitting_context_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
@@ -47,6 +48,8 @@ set ( TEST_PY_FILES
    muon_plot_model_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
+   results_tab_widget/results_tab_model_test.py
+   results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
    utilities/muon_group_test.py
    utilities/muon_pair_test.py
@@ -95,6 +98,8 @@ set ( TEST_PY_FILES_QT5
    muon_plot_model_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
+   results_tab_widget/results_tab_presenter_test.py
+   results_tab_widget/results_tab_model_test.py
    help_widget_presenter_test.py
 )
 

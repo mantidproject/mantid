@@ -153,7 +153,7 @@ class Plots__init__Test(unittest.TestCase):
         self.ax.replace_workspace_artists(plot_data)
         self.assertAlmostEqual(25, line_ws2d_histo.get_xdata()[0])
         self.assertAlmostEqual(35, line_ws2d_histo.get_xdata()[-1])
-        self.assertEquals('r', line_ws2d_histo.get_color())
+        self.assertEqual('r', line_ws2d_histo.get_color())
         # try deleting
         self.ax.remove_workspace_artists(plot_data)
 
@@ -173,7 +173,7 @@ class Plots__init__Test(unittest.TestCase):
         self.assertTrue(isinstance(eb_container, ErrorbarContainer))
         self.assertAlmostEqual(25, eb_container[0].get_xdata()[0])
         self.assertAlmostEqual(35, eb_container[0].get_xdata()[-1])
-        self.assertEquals('r', eb_container[0].get_color())
+        self.assertEqual('r', eb_container[0].get_color())
         # try deleting
         self.ax.remove_workspace_artists(eb_data)
 
@@ -189,7 +189,7 @@ class Plots__init__Test(unittest.TestCase):
                                   NSpec=3, VerticalAxisValues=[2, 3, 4],
                                   VerticalAxisUnit='DeltaE')
         self.ax.replace_workspace_artists(im_data)
-        self.assertEquals(1, len(artists))
+        self.assertEqual(1, len(artists))
         left, right, bottom, top = get_colorplot_extents(artists[0])
         self.assertAlmostEqual(20., left)
         self.assertAlmostEqual(40., right)

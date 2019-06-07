@@ -16,6 +16,7 @@
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+using Mantid::API::LogManager;
 using Mantid::API::Run;
 using Mantid::Geometry::Goniometer;
 using Mantid::Kernel::Property;
@@ -26,6 +27,19 @@ GET_POINTER_SPECIALIZATION(Run)
 
 namespace {
 namespace bpl = boost::python;
+
+/**
+ * Wrapper around getPropertyAsSingleValue to use the default value of the
+ * StatisticType. Casting to a function pointer in the definition below seems
+ * to give the incorrect value for the default argument
+ * @param self A reference to the Run object
+ * @param name A name of a log
+ * @return A double value
+ */
+double getPropertyAsSingleValueWithDefaultStatistic(Run &self,
+                                                    const std::string &name) {
+  return self.getPropertyAsSingleValue(name);
+}
 
 /**
  * Add a property with the given name and value
@@ -128,6 +142,8 @@ GNU_DIAG_OFF("conversion")
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload,
                                        integrateProtonCharge, 0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getPropertyAsSingleValue_Overload,
+                                       getPropertyAsSingleValue, 1, 1)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -155,6 +171,12 @@ void export_Run() {
            "(log value). Use '.value' "
            "to return the value.")
 
+      .def("getPropertyAsSingleValue",
+           getPropertyAsSingleValueWithDefaultStatistic,
+           (arg("self"), arg("name")),
+           "Return a log as a single float value. Time series values are "
+           "averaged.")
+
       .def("getProperties", &Run::getProperties, arg("self"),
            return_internal_reference<>(),
            "Return the list of run properties managed by this object.")
@@ -162,13 +184,15 @@ void export_Run() {
       .def("getLogData",
            (Property * (Run::*)(const std::string &)const) & Run::getLogData,
            (arg("self"), arg("name")), return_value_policy<return_by_value>(),
-           "Returns the named log. Use '.value' to return the value. The same "
+           "Returns the named log. Use '.value' to return the value. The "
+           "same "
            "as getProperty.")
 
       .def("getLogData",
            (const std::vector<Property *> &(Run::*)() const) & Run::getLogData,
            arg("self"), return_internal_reference<>(),
-           "Return the list of logs for this run. The same as getProperties.")
+           "Return the list of logs for this run. The same as "
+           "getProperties.")
 
       .def("getGoniometer",
            (const Mantid::Geometry::Goniometer &(Run::*)() const) &
@@ -198,8 +222,7 @@ void export_Run() {
       .def("endTime", &Run::endTime, arg("self"),
            "Return the total ending time of the run.")
 
-      //--------------------------- Dictionary
-      // access----------------------------
+      //-------------------- Dictionary access----------------------------
       .def("get", &getWithDefault, (arg("self"), arg("key"), arg("default")),
            "Returns the value pointed to by the key or the default value "
            "given.")

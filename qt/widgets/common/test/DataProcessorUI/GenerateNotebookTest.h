@@ -148,7 +148,7 @@ public:
 
   void testGenerateNotebookFirstLines() {
 
-    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
+    auto notebook = std::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
         std::map<QString, PreprocessingAlgorithm>(), reflProcessor(),
         PostprocessingStep("", reflPostprocessor(), OptionsMap()),
@@ -686,7 +686,7 @@ public:
     auto postprocessingStep =
         PostprocessingStep(postprocessingOptions, postProcessor, OptionsMap());
 
-    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
+    auto notebook = std::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
         postprocessingStep, preprocessingOptions);
 
@@ -820,7 +820,7 @@ public:
     auto postprocessingStep =
         PostprocessingStep(postprocessingOptions, postProcessor, OptionsMap());
 
-    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
+    auto notebook = std::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
         postprocessingStep, preprocessingOptions);
 

@@ -46,12 +46,12 @@ const std::string LorentzCorrection::name() const {
  */
 void LorentzCorrection::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       PropertyMode::Mandatory,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Input workspace to correct in Wavelength.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

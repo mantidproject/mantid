@@ -34,11 +34,11 @@ void CorrectKiKf::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("DeltaE");
 
   this->declareProperty(
-      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, wsValidator),
       "Name of the input workspace");
   this->declareProperty(
-      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "Name of the output workspace, can be the same as the input");
 

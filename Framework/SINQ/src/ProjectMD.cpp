@@ -23,7 +23,7 @@ using namespace Mantid::DataObjects;
 // It is used to print out information, warning and error messages
 
 void ProjectMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "InputWorkspace", "", Direction::Input));
   std::vector<std::string> projectOptions{"X", "Y", "Z", "K"};
   this->declareProperty("ProjectDirection", "Z",
@@ -33,7 +33,7 @@ void ProjectMD::init() {
   declareProperty("StartIndex", 0, Direction::Input);
   declareProperty("EndIndex", -1, Direction::Input);
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "OutputWorkspace", "", Direction::Output));
 }
 

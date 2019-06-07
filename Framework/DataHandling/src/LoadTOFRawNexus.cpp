@@ -40,10 +40,10 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "The name of the NeXus file to load");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "The name of the NeXus file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace2D to create.");
   declareProperty("Signal", 1,
@@ -55,12 +55,12 @@ void LoadTOFRawNexus::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
-      make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
-                                                mustBePositive),
+      std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
+                                                     mustBePositive),
       "The index number of the first spectrum to read.  Only used if\n"
       "spectrum_max is set.");
   declareProperty(
-      make_unique<PropertyWithValue<specnum_t>>(
+      std::make_unique<PropertyWithValue<specnum_t>>(
           "SpectrumMax", Mantid::EMPTY_INT(), mustBePositive),
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
@@ -488,7 +488,7 @@ void LoadTOFRawNexus::exec() {
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
 
   // Count pixels and other setup
-  auto prog = make_unique<Progress>(this, 0.0, 1.0, 10);
+  auto prog = std::make_unique<Progress>(this, 0.0, 1.0, 10);
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
@@ -508,7 +508,7 @@ void LoadTOFRawNexus::exec() {
 
   int nPeriods = 1; // Unused
   auto periodLog =
-      make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
+      std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(
       filename, WS, *this, false, nPeriods, periodLog);
 

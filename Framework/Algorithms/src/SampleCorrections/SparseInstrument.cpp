@@ -19,7 +19,6 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/HistogramIterator.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -205,8 +204,8 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
       boost::make_shared<Geometry::ReferenceFrame>(*refFrame));
   // The sparse instrument is build around origin.
   constexpr Kernel::V3D samplePos{0.0, 0.0, 0.0};
-  auto sample = Kernel::make_unique<Geometry::ObjComponent>("sample", nullptr,
-                                                            instrument.get());
+  auto sample = std::make_unique<Geometry::ObjComponent>("sample", nullptr,
+                                                         instrument.get());
   sample->setPos(samplePos);
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());
@@ -217,8 +216,8 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
     p[refFrame->pointingAlongBeam()] = -2.0 * R;
     return p;
   }();
-  auto source = Kernel::make_unique<Geometry::ObjComponent>("source", nullptr,
-                                                            instrument.get());
+  auto source = std::make_unique<Geometry::ObjComponent>("source", nullptr,
+                                                         instrument.get());
   source->setPos(sourcePos);
   instrument->add(source.get());
   instrument->markAsSource(source.release());
@@ -235,7 +234,7 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
       const int detID = static_cast<int>(index);
       std::ostringstream detName;
       detName << "det-" << detID;
-      auto det = Kernel::make_unique<Geometry::Detector>(
+      auto det = std::make_unique<Geometry::Detector>(
           detName.str(), detID, detShape, instrument.get());
       const Kernel::V3D pos = [&]() {
         Kernel::V3D p;
@@ -363,7 +362,7 @@ createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
                              const size_t rows, const size_t columns) {
   double minLat, maxLat, minLong, maxLong;
   std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
-  return Kernel::make_unique<Algorithms::DetectorGridDefinition>(
+  return std::make_unique<Algorithms::DetectorGridDefinition>(
       minLat, maxLat, rows, minLong, maxLong, columns);
 }
 } // namespace SparseInstrument

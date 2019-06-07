@@ -42,16 +42,16 @@ GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
  */
 void GetTimeSeriesLogInformation::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "Anonymous", Direction::InOut),
       "Input EventWorkspace.  Each spectrum corresponds to 1 pixel");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "Dummy", Direction::Output),
                   "Name of the workspace of log delta T distribution. ");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "InformationWorkspace", "", Direction::Output),
       "Name of optional log statistic information output Tableworkspace.");
 
