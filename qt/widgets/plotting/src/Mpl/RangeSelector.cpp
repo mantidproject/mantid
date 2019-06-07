@@ -7,6 +7,9 @@
 #include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
 
+#include <QApplication>
+#include <QCursor>
+
 using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
@@ -63,18 +66,24 @@ void RangeSelector::setRange(const std::pair<double, double> &range) {
 }
 
 void RangeSelector::setRange(const double min, const double max) {
-  m_minimum = min;
-  m_maximum = max;
+  setMinimum(min);
+  setMaximum(max);
 }
 
 void RangeSelector::setMinimum(double value) {
-  if (value != m_minimum)
+  if (value != m_minimum) {
     m_minimum = (value > m_limits.first) ? value : m_limits.first;
+    m_minMarker->setXPosition(m_minimum);
+    updateCanvas();
+  }
 }
 
 void RangeSelector::setMaximum(double value) {
-  if (value != m_maximum)
+  if (value != m_maximum) {
     m_maximum = (value < m_limits.second) ? value : m_limits.second;
+    m_maxMarker->setXPosition(m_maximum);
+    updateCanvas();
+  }
 }
 
 double RangeSelector::getMinimum() { return m_minimum; }
@@ -99,30 +108,43 @@ void RangeSelector::handleMouseDown(const QPoint &point) {
       m_minMarker->transformPixelsToCoords(point.x(), point.y());
   m_minMarker->mouseMoveStart(std::get<0>(coords), std::get<1>(coords));
   m_maxMarker->mouseMoveStart(std::get<0>(coords), std::get<1>(coords));
+  updateCursor();
 }
 
 void RangeSelector::handleMouseMove(const QPoint &point) {
   const auto minMoved = moveMarker(m_minMarker.get(), point);
   const auto maxMoved = moveMarker(m_maxMarker.get(), point);
-  if (minMoved || maxMoved) {
-    m_plot->canvas()->draw();
-    m_minMarker->redraw();
-    m_maxMarker->redraw();
+  if (minMoved || maxMoved)
+    updateCanvas();
+}
+
+bool RangeSelector::moveMarker(VerticalMarker *marker, const QPoint &point) {
+  if (marker->isMoving()) {
+    const auto coords = marker->transformPixelsToCoords(point.x(), point.y());
+    return marker->mouseMove(std::get<0>(coords));
   }
+  return false;
 }
 
 void RangeSelector::handleMouseUp(const QPoint &point) {
   m_minMarker->mouseMoveStop();
   m_maxMarker->mouseMoveStop();
+  updateCursor();
 }
 
-bool RangeSelector::moveMarker(VerticalMarker *marker, const QPoint &point) {
-  if (marker->isMarkerMoving()) {
-    const auto coords = marker->transformPixelsToCoords(point.x(), point.y());
-    const auto moved = marker->mouseMove(std::get<0>(coords));
-    return moved;
+void RangeSelector::updateCursor() {
+  if ((m_minMarker->isMoving() || m_maxMarker->isMoving()) &&
+      !QApplication::overrideCursor()) {
+    QApplication::setOverrideCursor(Qt::SizeHorCursor);
+  } else {
+    QApplication::restoreOverrideCursor();
   }
-  return false;
+}
+
+void RangeSelector::updateCanvas() {
+  m_plot->canvas()->draw();
+  m_minMarker->redraw();
+  m_maxMarker->redraw();
 }
 
 } // namespace MantidWidgets

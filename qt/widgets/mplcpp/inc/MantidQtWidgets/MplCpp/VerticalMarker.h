@@ -30,12 +30,13 @@ public:
   void remove();
 
   void setColor(QString const &colour);
+  void setXPosition(double x);
 
   void mouseMoveStart(double x, double y);
   void mouseMoveStop();
   bool mouseMove(double x);
 
-  bool isMarkerMoving();
+  bool isMoving();
 
   std::tuple<double, double> transformPixelsToCoords(int xPixels, int yPixels);
 };

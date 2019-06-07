@@ -49,6 +49,8 @@ private slots:
 private:
   bool moveMarker(MantidQt::Widgets::MplCpp::VerticalMarker *marker,
                   const QPoint &point);
+  void updateCursor();
+  void updateCanvas();
 
   /// The preview plot containing the range selector
   PreviewPlot *m_plot;

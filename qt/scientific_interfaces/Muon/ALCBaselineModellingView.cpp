@@ -28,7 +28,6 @@ void ALCBaselineModellingView::initialize() {
   connect(m_ui.fit, SIGNAL(clicked()), SIGNAL(fitRequested()));
 
   m_ui.dataPlot->setCanvasColour(Qt::white);
-  //m_ui.dataPlot->showLegend(false);
   m_ui.correctedPlot->setCanvasColour(Qt::white);
 
   // Context menu for sections table
@@ -151,8 +150,8 @@ void ALCBaselineModellingView::addSectionSelector(
   m_rangeSelectors[index] = newSelector;
 
   // Set initial values
-  // newSelector->setRange(values.first, values.second);
-  // setSelectorValues(newSelector, values);
+  newSelector->setRange(values.first, values.second);
+  setSelectorValues(newSelector, values);
 }
 
 void ALCBaselineModellingView::deleteSectionSelector(int index) {

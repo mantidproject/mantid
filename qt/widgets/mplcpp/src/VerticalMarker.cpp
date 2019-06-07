@@ -57,6 +57,10 @@ void VerticalMarker::setColor(QString const &color) {
   callMethodNoCheck<void>(pyobj(), "set_color", color.toLatin1().constData());
 }
 
+void VerticalMarker::setXPosition(double x) {
+  callMethodNoCheck<void>(pyobj(), "set_x_position", x);
+}
+
 void VerticalMarker::mouseMoveStart(double x, double y) {
   callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
 }
@@ -73,7 +77,7 @@ bool VerticalMarker::mouseMove(double x) {
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
-bool VerticalMarker::isMarkerMoving() {
+bool VerticalMarker::isMoving() {
   GlobalInterpreterLock lock;
 
   auto const isMovingPy = Python::Object(pyobj().attr("is_marker_moving")());

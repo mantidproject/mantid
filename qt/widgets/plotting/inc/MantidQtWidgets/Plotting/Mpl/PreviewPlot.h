@@ -70,7 +70,7 @@ public slots:
   void resetView();
   void setCanvasColour(QColor colour);
   void setLinesWithErrors(QStringList labels);
-  void showLegend(const bool visible);
+  void showLegend(bool visible);
 
 signals:
   void mouseDown(const QPoint &point);

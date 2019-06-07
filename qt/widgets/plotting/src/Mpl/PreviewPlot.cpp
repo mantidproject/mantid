@@ -232,7 +232,7 @@ void PreviewPlot::setLinesWithErrors(QStringList labels) {
  * Toggle for programatic legend visibility toggle
  * @param visible If True the legend is visible on the canvas
  */
-void PreviewPlot::showLegend(const bool visible) {
+void PreviewPlot::showLegend(bool visible) {
   m_contextLegend->setChecked(visible);
 }
 

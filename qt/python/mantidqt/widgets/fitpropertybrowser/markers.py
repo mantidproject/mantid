@@ -79,6 +79,14 @@ class VerticalMarker(QObject):
         """
         self.patch.set_edgecolor(color)
 
+    def set_x_position(self, x):
+        """
+        Set the x position of the marker.
+        :param x: An x axis coordinate.
+        """
+        self.x = x
+        self.x_moved.emit(x)
+
     def get_x_in_pixels(self):
         """
         Get the x coordinate in screen pixels.
