@@ -131,7 +131,6 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
 
     def _assert_run_algorithm_throws(self, args = {}):
         """Run the algorithm with the given args and check it throws"""
-        throws = False
         alg = create_algorithm('ReflectometryBackgroundSubtraction', **args)
         with self.assertRaises(RuntimeError):
             alg.execute()
