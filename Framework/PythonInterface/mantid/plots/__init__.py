@@ -21,7 +21,6 @@ from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
 from mantid.plots.scales import PowerScale, SquareScale
-from mantid.api import AnalysisDataService
 from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
@@ -90,12 +89,9 @@ class _WorkspaceArtists(object):
         """
         Remove the tracked artists from the given axes
         :param axes: A reference to the axes instance the artists are attached to
-        :returns: Returns a bool specifying whether the class is now empty
         """
         # delete the artists from the axes
         self._remove(axes, self._artists)
-
-        return True
 
     def remove_if(self, axes, predicate):
         """
@@ -130,8 +126,6 @@ class _WorkspaceArtists(object):
 
         if (not axes.is_empty(axes)) and axes.legend_ is not None:
             axes.legend()
-
-
 
     def replace_data(self, workspace):
         """Replace or replot artists based on a new workspace
@@ -311,6 +305,12 @@ class MantidAxes(Axes):
         return self.is_empty(self)
 
     def _remove_artist_info_if(self, artist_info, unary_predicate):
+        """
+        Remove any artists which satisfy the predicate from the artist_info_list
+        :param artist_info: A list of _WorkspaceArtists objects
+        :param unary_predicate: A predicate taking a single matplotlib artist object
+        :return: True if the artist_info is empty, false if artist_info remain
+        """
         is_empty_list = []
         for workspace_artist in artist_info:
             empty = workspace_artist.remove_if(self, unary_predicate)
