@@ -8,6 +8,9 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib.axes import ErrorbarContainer
+from matplotlib.lines import Line2D
+
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.linetabwidget import LineProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.linetabwidget.view import LineTabWidgetView
 
@@ -36,6 +39,9 @@ class LineTabWidgetPresenter:
         return LineProperties.from_view(self.view)
 
     def set_line(self, line):
+        if not isinstance(line, Line2D) and not isinstance(line, ErrorbarContainer):
+            raise ValueError("'line' must be a Line2D or ErrorbarContainer "
+                             "object. Found '{}'".format(type(line)))
         self.line = line
 
     def update_view(self):
