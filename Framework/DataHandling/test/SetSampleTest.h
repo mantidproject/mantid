@@ -704,7 +704,7 @@ private:
     using IntProperty = PropertyWithValue<int>;
     auto props = createCylinderGeometryProps();
     // Use the same pointing up direction as in the without axis test
-    int axis = 2;
+    int axis{2};
     props->declareProperty(
         Mantid::Kernel::make_unique<IntProperty>("Axis", axis), "");
     return props;
@@ -765,7 +765,7 @@ private:
     ;
     auto props = createHollowCylinderGeometryProps();
     // Use the same pointing up direction as in the without axis test
-    int axis = 2;
+    int axis{2};
     props->declareProperty(
         Mantid::Kernel::make_unique<IntProperty>("Axis", axis), "");
     return props;
