@@ -53,7 +53,13 @@ void Cell::setBackgroundColor(std::string const &backgroundColor) {
   m_backgroundColor = backgroundColor;
 }
 
+void Cell::setForegroundColor(std::string const &foregroundColor) {
+  m_foregroundColor = foregroundColor;
+}
+
 std::string const &Cell::backgroundColor() const { return m_backgroundColor; }
+
+std::string const &Cell::foregroundColor() const { return m_foregroundColor; }
 
 void Cell::setBorderOpacity(int borderOpacity) {
   m_borderOpacity = borderOpacity;

@@ -38,6 +38,9 @@ void setIconFilePath(QStandardItem &item, QString const &iconFilePath);
 std::string getBackgroundColor(QStandardItem const &item);
 void setBackgroundColor(QStandardItem &item,
                         std::string const &backgroundColor);
+std::string getForegroundColor(QStandardItem const &item);
+void setForegroundColor(QStandardItem &item,
+                        std::string const &foregroundColor);
 
 void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item);
 Cell extractCellPropertiesFromItem(QStandardItem const &item);
