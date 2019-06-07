@@ -257,6 +257,9 @@ void export_IFunction() {
       .def("nDomains", &IFunction::getNumberDomains, arg("self"),
            "Get the number of domains.")
 
+      .def("nFunctions", &IFunction::nFunctions, arg("self"),
+           "Get the number of functions.")
+
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")

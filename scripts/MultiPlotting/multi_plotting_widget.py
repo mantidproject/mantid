@@ -11,31 +11,35 @@ from copy import deepcopy
 from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 from MultiPlotting.multi_plotting_context import *
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 
-class MultiPlotWindow(QtWidgets.QMainWindow):
-    windowClosedSignal = QtCore.Signal()
-
+class MultiPlotWindow(object):
     def __init__(self, window_title="plotting"):
-        super(MultiPlotWindow, self).__init__()
+        self.figure = Figure()
+        self.figure.set_facecolor("none")
+        self.canvas = FigureCanvas(self.figure)
+
         self.plot_context = PlottingContext()
-        self.multi_plot = MultiPlotWidget(self.plot_context, self)
-        self.setCentralWidget(self.multi_plot)
-        self.setWindowTitle(window_title)
+        self.multi_plot = MultiPlotWidget(self.plot_context, self.canvas, self.figure)
+        self.window = self.multi_plot
 
-    def set_window_title(self, window_title):
-        self.setWindowTitle(window_title)
+        self._ADSObserver = SubplotADSObserver(self)
 
-    def closeEvent(self, event):
-        self.multi_plot.removeSubplotDisonnect()
-        self.windowClosedSignal.emit()
+    def show(self):
+        self.window.show()
+
+    def emit_close(self):
+        self.window.close()
 
 
 class MultiPlotWidget(QtWidgets.QWidget):
     closeSignal = QtCore.Signal()
 
-    def __init__(self, context, parent=None):
-        super(MultiPlotWidget, self).__init__()
+    def __init__(self, context, canvas, figure, parent=None):
+        super(MultiPlotWidget, self).__init__(parent=parent)
         self._context = context
         layout = QtWidgets.QVBoxLayout()
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
@@ -47,7 +51,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.connect_plot_selection(self._selection_changed)
 
         # add some dummy plot
-        self.plots = subplot(self._context)
+        self.plots = subplot(self._context, canvas, figure)
         self.plots.connect_quick_edit_signal(self._update_quick_edit)
         self.plots.connect_rm_subplot_signal(self._update_quick_edit)
         # create GUI layout
@@ -130,7 +134,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def removeSubplotConnection(self, slot):
         self.plots.connect_rm_subplot_signal(slot)
 
-    def disconnectCloseSignal(selft):
+    def disconnectCloseSignal(self):
         self.closeSignal.disconnect()
 
     def removeSubplotDisonnect(self):
@@ -144,7 +148,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def _if_empty_close(self):
         if not self._context.subplots:
             self.closeSignal.emit()
-            self.close
 
     def _update_quick_edit(self, subplotName):
         names = self.quickEdit.get_selection()
@@ -220,3 +223,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
             if self._context.subplots[name].errors is False:
                 return False
         return True
+
+    def emit_close(self):
+        self.close()

@@ -27,18 +27,16 @@ class subplot(QtWidgets.QWidget):
     quickEditSignal = QtCore.Signal(object)
     rmSubplotSignal = QtCore.Signal(object)
 
-    def __init__(self, context):
-        super(subplot, self).__init__()
+    def __init__(self, context, canvas, figure, parent=None):
+        super(subplot, self).__init__(parent=parent)
         self._context = context
-        self.figure = Figure()
+        self.figure = figure
         self.figure.set_facecolor("none")
-        self.canvas = FigureCanvas(self.figure)
+        self.canvas = canvas
         self._rm_window = None
         self._selector_window = None
         # update quick edit from tool bar
         self.canvas.mpl_connect("draw_event", self.draw_event_callback)
-
-        self._ADSObserver = SubplotADSObserver(self)
 
         grid = QtWidgets.QGridLayout()
         # add toolbar
@@ -110,7 +108,7 @@ class subplot(QtWidgets.QWidget):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
         self.plotObjects[subplotName] = self.figure.add_subplot(
-            gridspec[number], label=subplotName)
+            gridspec[number], label=subplotName, projection='mantid')
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         self._update()
@@ -194,7 +192,7 @@ class subplot(QtWidgets.QWidget):
             self._selector_window.show()
 
     def _createSelectWindow(self, names):
-        return SelectSubplot(names)
+        return SelectSubplot(names, parent=self)
 
     def _raise_rm_window(self):
         self._rm_window.raise_()
@@ -256,7 +254,7 @@ class subplot(QtWidgets.QWidget):
         self.rmSubplotSignal.emit(subplotName)
 
     def _rm_ws_from_plots(self, workspace_name):
-        keys = deepcopy(self._context.subplots.keys())
+        keys = deepcopy(list(self._context.subplots.keys()))
         for subplot in keys:
             labels = self._context.get_lines_from_WS(subplot, workspace_name)
             for label in labels:
@@ -270,3 +268,6 @@ class subplot(QtWidgets.QWidget):
             redraw = self._context.subplots[subplot].replace_ws(workspace)
             if redraw:
                 self.canvas.draw()
+
+    def emit_close(self):
+        self.rmSubplotSignal.emit('')

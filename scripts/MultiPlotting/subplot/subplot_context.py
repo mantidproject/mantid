@@ -50,11 +50,10 @@ class subplotContext(object):
 
     def addLine(self, ws, specNum=1):
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot, ws, specNum=specNum)
+        line, = self._subplot.plot(ws, specNum=specNum)
         label = line.get_label()
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
-                self._subplot, ws, specNum=specNum, label=label)
+            line, cap_lines, bar_lines = self._subplot.errorbar(ws, specNum=specNum, label=label)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)

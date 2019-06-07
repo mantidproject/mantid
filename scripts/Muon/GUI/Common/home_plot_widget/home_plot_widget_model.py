@@ -30,7 +30,9 @@ class HomePlotWidgetModel(object):
 
     def get_workspaces_to_plot(self):
         current_group_pair = self.context.group_pair_context.selected
-        return self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(self.context.data_context.current_runs)
+        return [self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(self.context.data_context.current_runs)[0],
+                self.context.group_pair_context['bkwd'].get_asymmetry_workspace_names(
+                    self.context.data_context.current_runs)[0]]
 
     def get_plot_title(self):
         flattened_run_list = [item for sublist in self.context.data_context.current_runs for item in sublist]
