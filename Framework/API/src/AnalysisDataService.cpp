@@ -73,28 +73,17 @@ AnalysisDataServiceImpl::isValid(const std::string &name) const {
 void AnalysisDataServiceImpl::add(
     const std::string &name,
     const boost::shared_ptr<API::Workspace> &workspace) {
-  verifyName(name);
+  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  verifyName(name, group);
+
   // Attach the name to the workspace
   if (workspace)
     workspace->setName(name);
   Kernel::DataService<API::Workspace>::add(name, workspace);
 
   // if a group is added add its members as well
-  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   if (!group)
     return;
-
-  // Perform a check to confirm that a group being added's children don't
-  // already exist in the ADS
-  for (size_t i = 0; i < group->size(); ++i) {
-    const auto &ws = group->getItem(i);
-    const std::string &wsName = ws->getName();
-
-    if (doesExist(wsName) && !(ws == workspace)) {
-      throw std::runtime_error("Attempted to add a group which contains a "
-                               "child that already exists in the ADS");
-    }
-  }
 
   group->observeADSNotifications(true);
   for (size_t i = 0; i < group->size(); ++i) {
@@ -124,15 +113,14 @@ void AnalysisDataServiceImpl::add(
 void AnalysisDataServiceImpl::addOrReplace(
     const std::string &name,
     const boost::shared_ptr<API::Workspace> &workspace) {
-  verifyName(name);
+  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  verifyName(name, group);
 
   // Attach the name to the workspace
   if (workspace)
     workspace->setName(name);
   Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);
 
-  // if a group is added add its members as well
-  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   if (!group)
     return;
   group->observeADSNotifications(true);
@@ -143,19 +131,11 @@ void AnalysisDataServiceImpl::addOrReplace(
     if (wsName.empty()) {
       wsName = name + "_" + std::to_string(i + 1);
     } else if (doesExist(wsName)) { // if ws is already there do nothing
-      // Also compare pointer of the group item and the ws item if they are the
-      // same then don't clear the wsName
-      if (!(ws == workspace)) {
-        wsName.clear();
-      }
+      wsName.clear();
     }
     // add member workspace if needed
     if (!wsName.empty()) {
-      // If the member of the workspace already exists then don't add it
-      // (Can cause infinete recursion and crash)
-      if (!this->doesExist(wsName)) {
-        addOrReplace(wsName, ws);
-      }
+      addOrReplace(wsName, ws);
     }
   }
 }
@@ -168,19 +148,17 @@ void AnalysisDataServiceImpl::addOrReplace(
  */
 void AnalysisDataServiceImpl::rename(const std::string &oldName,
                                      const std::string &newName) {
-  auto ws = retrieve(oldName);
 
-  if (ws->isGroup() && doesExist(newName)) {
-    auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-    if (wsGroup->isInGroup(*retrieve(newName))) {
-      throw std::runtime_error(
-          "Cannot rename a group to a name of it's member");
-    }
+  auto oldWorkspace = retrieve(oldName);
+  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(oldWorkspace);
+  if (group && group->contains(newName)) {
+    throw std::runtime_error(
+        "Unable to rename group as the new name matches its member's");
   }
 
   Kernel::DataService<API::Workspace>::rename(oldName, newName);
   // Attach the new name to the workspace
-  ws = retrieve(newName);
+  auto ws = retrieve(newName);
   ws->setName(newName);
 }
 
@@ -400,10 +378,17 @@ void AnalysisDataServiceImpl::setIllegalCharacterList(
  * @param name A string containing the name to check. If the name is invalid a
  * std::invalid_argument is thrown
  */
-void AnalysisDataServiceImpl::verifyName(const std::string &name) {
+void AnalysisDataServiceImpl::verifyName(
+    const std::string &name,
+    const boost::shared_ptr<API::WorkspaceGroup> &group) {
   const std::string error = isValid(name);
   if (!error.empty()) {
     throw std::invalid_argument(error);
+  }
+
+  if (group && group->contains(name)) {
+    throw std::runtime_error(
+        "Unable to add group as name matches its member's");
   }
 }
 

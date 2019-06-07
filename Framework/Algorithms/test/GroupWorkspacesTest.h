@@ -38,9 +38,9 @@ public:
   }
 
   void testInit() {
+    using Mantid::Algorithms::GroupWorkspaces;
     using Mantid::API::WorkspaceGroup;
     using Mantid::API::WorkspaceProperty;
-    using Mantid::Algorithms::GroupWorkspaces;
 
     GroupWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -388,6 +388,18 @@ public:
         Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
 
     removeFromADS("", inputs);
+  }
+
+  void test_OutputGroup_cannot_contain_workspaces_from_the_ADS() {
+    std::vector<std::string> inputs{"ws1", "ws2"};
+    addTestMatrixWorkspacesToADS(inputs);
+    Mantid::Algorithms::GroupWorkspaces alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputs));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws1"));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
   }
 
 private:

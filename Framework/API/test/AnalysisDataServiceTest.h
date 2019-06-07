@@ -503,6 +503,27 @@ public:
     TS_ASSERT(!ads.doesExist("null_workspace"));
   }
 
+  void
+  test_throws_when_adding_a_group_which_contains_a_ws_with_the_same_name() {
+    auto ws1 = addToADS("ws1");
+    auto ws2 = addToADS("ws2");
+    WorkspaceGroup_sptr group(new WorkspaceGroup);
+    group->addWorkspace(ws1);
+    group->addWorkspace(ws2);
+
+    TS_ASSERT_THROWS(ads.add("ws1", group), const std::runtime_error &);
+    TS_ASSERT_THROWS(ads.addOrReplace("ws1", group),
+                     const std::runtime_error &);
+  }
+
+  void test_throws_when_adding_to_a_group_a_workspace_with_the_same_name() {
+    auto ws1 = addToADS("ws1");
+    auto ws2 = addToADS("ws2");
+    auto group = addOrReplaceGroupToADS("ws1", 2);
+
+    TS_ASSERT_THROWS(ads.addToGroup("ws1", "ws1"), const std::runtime_error &);
+  }
+
 private:
   /// If replace=true then usea addOrReplace
   void doAddingOnInvalidNameTests(bool replace) {
@@ -552,6 +573,17 @@ private:
       group->addWorkspace(boost::make_shared<MockWorkspace>());
     }
     ads.add(name, group);
+    return group;
+  }
+
+  /// Add a group with N simple workspaces to the ADS
+  WorkspaceGroup_sptr addOrReplaceGroupToADS(const std::string &name,
+                                             const size_t nitems = 2) {
+    auto group(boost::make_shared<WorkspaceGroup>());
+    for (auto i = 0u; i < nitems; ++i) {
+      group->addWorkspace(boost::make_shared<MockWorkspace>());
+    }
+    ads.addOrReplace(name, group);
     return group;
   }
 
