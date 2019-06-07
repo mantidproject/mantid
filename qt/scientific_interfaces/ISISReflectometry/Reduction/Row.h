@@ -38,7 +38,7 @@ public:
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   double theta() const;
   RangeInQ const &qRange() const;
-  RangeInQ qRangeOrOutput() const;
+  RangeInQ const &qRangeOutput() const;
   boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;

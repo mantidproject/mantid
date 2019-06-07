@@ -72,6 +72,7 @@ public:
   void notifyPasteRowsRequested() override;
   void notifyFilterReset() override;
   void notifyRowStateChanged() override;
+  void notifyRowOutputsChanged() override;
 
 private:
   void

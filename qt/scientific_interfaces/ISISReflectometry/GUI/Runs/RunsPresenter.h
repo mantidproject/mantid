@@ -78,6 +78,7 @@ public:
   void notifyReductionResumed() override;
   void notifyReductionPaused() override;
   void notifyRowStateChanged() override;
+  void notifyRowOutputsChanged() override;
 
   void reductionPaused() override;
   void reductionResumed() override;

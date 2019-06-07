@@ -41,11 +41,7 @@ double Row::theta() const { return m_theta; }
 
 RangeInQ const &Row::qRange() const { return m_qRange; }
 
-RangeInQ Row::qRangeOrOutput() const {
-  return RangeInQ(qRange().min() ? qRange().min() : m_qRangeOutput.min(),
-                  qRange().step() ? qRange().step() : m_qRangeOutput.step(),
-                  qRange().max() ? qRange().max() : m_qRangeOutput.max());
-}
+RangeInQ const &Row::qRangeOutput() const { return m_qRangeOutput; }
 
 boost::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
 

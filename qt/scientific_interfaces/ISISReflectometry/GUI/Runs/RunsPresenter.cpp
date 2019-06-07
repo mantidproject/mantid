@@ -155,6 +155,10 @@ void RunsPresenter::notifyRowStateChanged() {
   tablePresenter()->notifyRowStateChanged();
 }
 
+void RunsPresenter::notifyRowOutputsChanged() {
+  tablePresenter()->notifyRowOutputsChanged();
+}
+
 void RunsPresenter::reductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->reductionResumed();

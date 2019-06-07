@@ -99,6 +99,7 @@ public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
+  MOCK_METHOD0(notifyRowOutputsChanged, void());
   MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(resumeAutoreduction, bool());

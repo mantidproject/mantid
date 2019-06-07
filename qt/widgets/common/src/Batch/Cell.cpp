@@ -77,6 +77,16 @@ void Cell::disableEditing() { m_isEditable = false; }
 
 void Cell::enableEditing() { m_isEditable = true; }
 
+bool Cell::containsOutputValue() const { return m_containsOutputValue; }
+
+void Cell::setContainsOutputValue(bool containsOutputValue) {
+  m_containsOutputValue = containsOutputValue;
+  if (m_containsOutputValue)
+    setForegroundColor("grey");
+  else
+    setForegroundColor("black");
+}
+
 std::ostream &operator<<(std::ostream &os, Cell const &cell) {
   os << '|' << cell.contentText() << '|';
   return os;

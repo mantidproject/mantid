@@ -119,6 +119,8 @@ private:
   // The view property values for an uneditable, unselectable cell.
   static Cell const g_deadCell;
 
+  void setUserEditedCellStyle(RowLocation const &location, int column);
+
   void appendAndEditAtChildRow();
   void appendAndEditAtRowBelow();
   void editAtRowAbove();
