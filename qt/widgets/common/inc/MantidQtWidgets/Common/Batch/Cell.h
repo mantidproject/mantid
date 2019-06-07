@@ -36,6 +36,8 @@ public:
 
   void setBackgroundColor(std::string const &backgroundColor);
   std::string const &backgroundColor() const;
+  void setForegroundColor(std::string const &foregroundColor);
+  std::string const &foregroundColor() const;
 
   void setBorderOpacity(int transparency);
   int borderOpacity() const;
@@ -54,6 +56,7 @@ public:
 private:
   std::string m_contentText;
   std::string m_backgroundColor;
+  std::string m_foregroundColor;
   int m_borderThickness;
   int m_borderOpacity;
   std::string m_borderColor;
