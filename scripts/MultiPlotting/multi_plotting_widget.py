@@ -23,7 +23,7 @@ class MultiPlotWindow(object):
         self.canvas = FigureCanvas(self.figure)
 
         self.plot_context = PlottingContext()
-        self.multi_plot = MultiPlotWidget(self.plot_context, self.canvas, self.figure)
+        self.multi_plot = MultiPlotWidget(self.plot_context, self.canvas)
         self.window = self.multi_plot
 
         self._ADSObserver = SubplotADSObserver(self)
@@ -38,7 +38,7 @@ class MultiPlotWindow(object):
 class MultiPlotWidget(QtWidgets.QWidget):
     closeSignal = QtCore.Signal()
 
-    def __init__(self, context, canvas, figure, parent=None):
+    def __init__(self, context, canvas, parent=None):
         super(MultiPlotWidget, self).__init__(parent=parent)
         self._context = context
         layout = QtWidgets.QVBoxLayout()
@@ -51,7 +51,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.connect_plot_selection(self._selection_changed)
 
         # add some dummy plot
-        self.plots = subplot(self._context, canvas, figure)
+        self.plots = subplot(self._context, canvas)
         self.plots.connect_quick_edit_signal(self._update_quick_edit)
         self.plots.connect_rm_subplot_signal(self._update_quick_edit)
         # create GUI layout
@@ -59,6 +59,10 @@ class MultiPlotWidget(QtWidgets.QWidget):
         splitter.addWidget(self.quickEdit.widget)
         layout.addWidget(splitter)
         self.setLayout(layout)
+
+        self.plots.set_remove_line_connection(self.handle_remove_workspace)
+
+        self.plots.set_remove_subplot_connection(self.handle_remove_subplot)
 
     """ plotting """
 
@@ -147,7 +151,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     def _if_empty_close(self):
         if not self._context.subplots:
-            self.closeSignal.emit()
+            self.close()
 
     def _update_quick_edit(self, subplotName):
         names = self.quickEdit.get_selection()
@@ -226,3 +230,12 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     def emit_close(self):
         self.close()
+
+    def handle_remove_workspace(self):
+        self.plots._rm()
+        self._if_empty_close()
+
+    def handle_remove_subplot(self):
+        self.plots._rm_subplot()
+        self._if_empty_close()
+

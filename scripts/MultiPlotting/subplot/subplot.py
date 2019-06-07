@@ -11,12 +11,9 @@ from qtpy import QtWidgets, QtCore
 
 from copy import deepcopy
 
-from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
 from MultiPlotting.edit_windows.select_subplot import SelectSubplot
-from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 # use this to manage lines and workspaces directly
 
@@ -27,10 +24,10 @@ class subplot(QtWidgets.QWidget):
     quickEditSignal = QtCore.Signal(object)
     rmSubplotSignal = QtCore.Signal(object)
 
-    def __init__(self, context, canvas, figure, parent=None):
+    def __init__(self, context, canvas, parent=None):
         super(subplot, self).__init__(parent=parent)
         self._context = context
-        self.figure = figure
+        self.figure = canvas.figure
         self.figure.set_facecolor("none")
         self.canvas = canvas
         self._rm_window = None
@@ -43,12 +40,17 @@ class subplot(QtWidgets.QWidget):
         self.toolbar = myToolbar(self.canvas, self)
         self.toolbar.update()
         grid.addWidget(self.toolbar, 0, 0)
-        self.toolbar.setRmConnection(self._rm)
-        self.toolbar.setRmSubplotConnection(self._rm_subplot)
+
         # add plot
         self.plotObjects = {}
         grid.addWidget(self.canvas, 1, 0)
         self.setLayout(grid)
+
+    def set_remove_line_connection(self, slot):
+        self.toolbar.setRmConnection(slot)
+
+    def set_remove_subplot_connection(self, slot):
+        self.toolbar.setRmSubplotConnection(slot)
 
     """ this is called when the zoom
     or pan are used. We want to send a
@@ -242,7 +244,7 @@ class subplot(QtWidgets.QWidget):
             self._close_rm_window()
 
     def _close_rm_window(self):
-        self._rm_window.close
+        self._rm_window.close()
         self._rm_window = None
 
     def _remove_subplot(self, subplotName):
