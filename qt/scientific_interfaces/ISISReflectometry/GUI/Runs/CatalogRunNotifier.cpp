@@ -9,8 +9,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-CatalogRunNotifier::CatalogRunNotifier(IMainWindowView *view) : m_view(view) {
-  m_view->subscribe(this);
+CatalogRunNotifier::CatalogRunNotifier(IRunsView *view) : m_view(view) {
+  m_view->subscribeTimer(this);
 }
 
 void CatalogRunNotifier::subscribe(RunNotifierSubscriber *notifyee) {

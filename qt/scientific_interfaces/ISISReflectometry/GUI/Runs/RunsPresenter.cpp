@@ -9,7 +9,7 @@
 #include "CatalogSearcher.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
-#include "GUI/Common/IRunNotifier.h"
+#include "GUI/Runs/IRunNotifier.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -56,19 +56,18 @@ namespace CustomInterfaces {
  * @param messageHandler :: A handler to pass messages to the user
  * @param autoreduction :: [input] The autoreduction implementation
  * @param searcher :: [input] The search implementation
- * @param runNotifier :: [input] The run notifier implementation
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
     int defaultInstrumentIndex, IMessageHandler *messageHandler,
-    IAutoreduction &autoreduction, ISearcher &searcher,
-    IRunNotifier &runNotifier)
-    : m_autoreduction(autoreduction), m_view(mainView),
-      m_progressView(progressableView), m_mainPresenter(nullptr),
-      m_messageHandler(messageHandler), m_searcher(searcher),
-      m_runNotifier(runNotifier), m_instruments(instruments),
+    IAutoreduction &autoreduction, ISearcher &searcher)
+    : m_autoreduction(autoreduction),
+      m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
+      m_view(mainView), m_progressView(progressableView),
+      m_mainPresenter(nullptr), m_messageHandler(messageHandler),
+      m_searcher(searcher), m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
 
@@ -76,7 +75,7 @@ RunsPresenter::RunsPresenter(
   m_view->subscribe(this);
   m_tablePresenter = makeRunsTablePresenter(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
-  m_runNotifier.subscribe(this);
+  m_runNotifier->subscribe(this);
 
   updateViewWhenMonitorStopped();
 }
@@ -204,7 +203,7 @@ void RunsPresenter::autoreductionResumed() {
 }
 
 void RunsPresenter::autoreductionPaused() {
-  m_runNotifier.stopPolling();
+  m_runNotifier->stopPolling();
   m_autoreduction.stop();
   updateWidgetEnabledState();
   tablePresenter()->autoreductionPaused();
@@ -213,7 +212,7 @@ void RunsPresenter::autoreductionPaused() {
 
 void RunsPresenter::autoreductionCompleted() {
   // Return to polling state
-  m_runNotifier.startPolling();
+  m_runNotifier->startPolling();
   updateWidgetEnabledState();
 }
 
@@ -315,7 +314,7 @@ bool RunsPresenter::requireNewAutoreduction() const {
  */
 void RunsPresenter::checkForNewRuns() {
   // Stop notifications during processing
-  m_runNotifier.stopPolling();
+  m_runNotifier->stopPolling();
 
   // Initially we just need to start an ICat search and the reduction will be
   // run when the search completes
@@ -338,7 +337,7 @@ void RunsPresenter::autoreduceNewRuns() {
 }
 
 void RunsPresenter::stopAutoreduction() {
-  m_runNotifier.stopPolling();
+  m_runNotifier->stopPolling();
   m_autoreduction.stop();
 }
 

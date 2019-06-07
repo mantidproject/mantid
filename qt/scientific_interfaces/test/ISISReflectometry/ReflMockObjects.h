@@ -11,7 +11,6 @@
 #include "GUI/Batch/IBatchJobRunner.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
-#include "GUI/Common/IRunNotifier.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
@@ -19,6 +18,7 @@
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
 #include "GUI/Runs/IAutoreduction.h"
+#include "GUI/Runs/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearcher.h"
 #include "GUI/Runs/SearchModel.h"
@@ -51,8 +51,6 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
-  MOCK_METHOD1(startTimer, void(const int));
-  MOCK_METHOD0(stopTimer, void());
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   MOCK_METHOD0(newBatch, IBatchView *());
   MOCK_METHOD1(subscribe, void(MainWindowSubscriber *));

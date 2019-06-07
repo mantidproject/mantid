@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include "ui_RunsWidget.h"
+#include <QBasicTimer>
 
 namespace MantidQt {
 
@@ -47,7 +48,12 @@ public:
   RunsView(QWidget *parent, RunsTableViewFactory makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
+  void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
   IRunsTableView *table() const override;
+
+  // Timer methods
+  void startTimer(const int millisecs) override;
+  void stopTimer() override;
 
   // Connect the model
   void showSearch(boost::shared_ptr<SearchModel> model) override;
@@ -95,6 +101,8 @@ public:
 private:
   /// initialise the interface
   void initLayout();
+  /// Implement our own timer event to trigger autoreduction
+  void timerEvent(QTimerEvent *event) override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
@@ -102,6 +110,7 @@ private:
   void setSelected(QComboBox &box, std::string const &str);
 
   RunsViewSubscriber *m_notifyee;
+  RunsViewTimerSubscriber *m_timerNotifyee;
 
   boost::shared_ptr<SearchModel> m_searchModel;
 
@@ -111,6 +120,9 @@ private:
   SlitCalculator *m_calculator;
 
   RunsTableView *m_tableView;
+
+  // Timer for triggering periodic autoreduction
+  QBasicTimer m_timer;
 
 private slots:
   void on_actionSearch_triggered();

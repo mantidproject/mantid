@@ -43,7 +43,7 @@ public:
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
                                               "POLREF", "OFFSPEC"},
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(), m_searcher(), m_runNotifier(),
+        m_autoreduction(), m_searcher(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
@@ -197,7 +197,7 @@ public:
 
   void testAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_runNotifier, stopPolling()).Times(1);
+    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_autoreduction, stop()).Times(1);
     EXPECT_CALL(*m_runsTablePresenter, autoreductionPaused()).Times(1);
     expectWidgetsEnabledForPaused();
@@ -207,7 +207,7 @@ public:
 
   void testAutoreductionCompleted() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_runNotifier, startPolling()).Times(1);
+    EXPECT_CALL(*m_runNotifier, startPolling()).Times(1);
     EXPECT_CALL(m_autoreduction, stop()).Times(0);
     expectWidgetsEnabledForAutoreducing();
     presenter.autoreductionCompleted();
@@ -307,11 +307,10 @@ private:
                         std::vector<std::string> const &instruments,
                         int defaultInstrumentIndex,
                         IMessageHandler *messageHandler,
-                        IAutoreduction &autoreduction, ISearcher &searcher,
-                        IRunNotifier &runNotifier)
+                        IAutoreduction &autoreduction, ISearcher &searcher)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
-                        messageHandler, autoreduction, searcher, runNotifier) {}
+                        messageHandler, autoreduction, searcher) {}
   };
 
   RunsPresenterFriend makePresenter() {
@@ -327,12 +326,15 @@ private:
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
         m_instruments, defaultInstrumentIndex, &m_messageHandler,
-        m_autoreduction, m_searcher, m_runNotifier);
+        m_autoreduction, m_searcher);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
     m_runsTablePresenter = dynamic_cast<NiceMock<MockRunsTablePresenter> *>(
         presenter.m_tablePresenter.get());
+    presenter.m_runNotifier.reset(new NiceMock<MockRunNotifier>());
+    m_runNotifier = dynamic_cast<NiceMock<MockRunNotifier> *>(
+        presenter.m_runNotifier.get());
     // Return an empty table by default
     ON_CALL(*m_runsTablePresenter, runsTable())
         .WillByDefault(ReturnRef(m_runsTable));
@@ -360,7 +362,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_autoreduction));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searcher));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runNotifier));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_runNotifier));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
@@ -387,7 +389,7 @@ private:
   }
 
   void expectStopAutoreduction() {
-    EXPECT_CALL(m_runNotifier, stopPolling()).Times(1);
+    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_autoreduction, stop()).Times(1);
   }
 
@@ -435,13 +437,13 @@ private:
   }
 
   void expectCheckForNewRuns() {
-    EXPECT_CALL(m_runNotifier, stopPolling()).Times(1);
+    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_view, startIcatSearch()).Times(1);
   }
 
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_)).Times(0);
-    EXPECT_CALL(m_runNotifier, stopPolling()).Times(0);
+    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
     EXPECT_CALL(m_view, startIcatSearch()).Times(0);
   }
 
@@ -544,7 +546,7 @@ private:
   NiceMock<MockMessageHandler> m_messageHandler;
   MockAutoreduction m_autoreduction;
   MockSearcher m_searcher;
-  MockRunNotifier m_runNotifier;
+  MockRunNotifier *m_runNotifier;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   RunsTable m_runsTable;
 };

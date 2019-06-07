@@ -26,7 +26,6 @@ public:
   virtual void notifyHelpPressed(){};
   virtual void notifyNewBatchRequested(){};
   virtual void notifyCloseBatchRequested(int){};
-  virtual void notifyTimerEvent(){};
   virtual ~MainWindowSubscriber() = default;
 };
 
@@ -37,10 +36,6 @@ public:
   virtual void removeBatch(int index) = 0;
   virtual std::vector<IBatchView *> batches() const = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
-
-  // Timer methods
-  virtual void startTimer(const int millisecs) = 0;
-  virtual void stopTimer() = 0;
 
   virtual ~IMainWindowView() = default;
 };

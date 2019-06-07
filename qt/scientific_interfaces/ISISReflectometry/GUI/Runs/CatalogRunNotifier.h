@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_CATALOGRUNNOTIFIER_H
 #define MANTID_ISISREFLECTOMETRY_CATALOGRUNNOTIFIER_H
 
-#include "GUI/MainWindow/IMainWindowView.h"
+#include "GUI/Runs/IRunsView.h"
 #include "IRunNotifier.h"
 
 namespace MantidQt {
@@ -19,11 +19,11 @@ poll for new runs.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL CatalogRunNotifier
     : public IRunNotifier,
-      public MainWindowSubscriber {
+      public RunsViewTimerSubscriber {
 public:
   static auto constexpr POLLING_INTERVAL_MILLISECONDS = 5000;
 
-  explicit CatalogRunNotifier(IMainWindowView *view);
+  explicit CatalogRunNotifier(IRunsView *view);
   ~CatalogRunNotifier() override{};
 
   void subscribe(RunNotifierSubscriber *notifyee) override;
@@ -32,11 +32,11 @@ public:
   void startPolling() override;
   void stopPolling() override;
 
-  // MainWindowSubscriber overrides
+  // RunsViewTimerSubscriber overrides
   void notifyTimerEvent() override;
 
 private:
-  IMainWindowView *m_view;
+  IRunsView *m_view;
   RunNotifierSubscriber *m_notifyee;
 };
 } // namespace CustomInterfaces

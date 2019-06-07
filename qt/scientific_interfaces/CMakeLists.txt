@@ -59,9 +59,9 @@ set(TEST_FILES
     test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
     test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
     test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
+    test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
-    test/ISISReflectometry/Common/CatalogRunNotifierTest.h
     test/ISISReflectometry/Common/PlotterTestQt4.h
 )
 

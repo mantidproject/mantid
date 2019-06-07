@@ -9,7 +9,6 @@
 #include "Autoreduction.h"
 #include "CatalogSearcher.h"
 #include "Common/DllConfig.h"
-#include "GUI/Common/CatalogRunNotifier.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
@@ -26,22 +25,20 @@ public:
       RunsTablePresenterFactory runsTablePresenterFactory,
       double thetaTolerance, std::vector<std::string> instruments,
       int defaultInstrumentIndex, IMessageHandler *messageHandler,
-      Autoreduction autoreduction, CatalogSearcher searcher,
-      CatalogRunNotifier runNotifier)
+      Autoreduction autoreduction, CatalogSearcher searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
         m_defaultInstrumentIndex(std::move(defaultInstrumentIndex)),
         m_messageHandler(messageHandler),
         m_autoreduction(std::move(autoreduction)),
-        m_searcher(std::move(searcher)), m_runNotifier(std::move(runNotifier)) {
-  }
+        m_searcher(std::move(searcher)) {}
 
   std::unique_ptr<IRunsPresenter> make(IRunsView *view) {
     return std::make_unique<RunsPresenter>(
         view, view, m_runsTablePresenterFactory, m_thetaTolerance,
         m_instruments, m_defaultInstrumentIndex, m_messageHandler,
-        m_autoreduction, m_searcher, m_runNotifier);
+        m_autoreduction, m_searcher);
   }
 
 private:
@@ -52,7 +49,6 @@ private:
   IMessageHandler *m_messageHandler;
   Autoreduction m_autoreduction;
   CatalogSearcher m_searcher;
-  CatalogRunNotifier m_runNotifier;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

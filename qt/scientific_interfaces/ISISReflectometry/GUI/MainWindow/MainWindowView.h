@@ -14,7 +14,6 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_MainWindowWidget.h"
 
-#include <QBasicTimer>
 #include <QCloseEvent>
 
 namespace MantidQt {
@@ -51,10 +50,6 @@ public:
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) override;
 
-  // Timer methods
-  void startTimer(const int millisecs) override;
-  void stopTimer() override;
-
 public slots:
   void helpPressed();
   void onTabCloseRequested(int tabIndex);
@@ -63,16 +58,12 @@ public slots:
 private:
   /// Initializes the interface
   void initLayout() override;
-  /// Implement our own timer event to trigger autoreduction
-  void timerEvent(QTimerEvent *event) override;
   /// Interface definition with widgets for the main interface window
   Ui::MainWindowWidget m_ui;
+  MainWindowSubscriber *m_notifyee;
   /// The presenter handling this view
-  std::vector<MainWindowSubscriber *> m_notifyees;
   boost::optional<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
-  // Timer for triggering periodic autoreduction
-  QBasicTimer m_timer;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

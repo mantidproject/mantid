@@ -7,7 +7,6 @@
 #include "MainWindowView.h"
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchView.h"
-#include "GUI/Common/CatalogRunNotifier.h"
 #include "GUI/Common/Plotter.h"
 #include "MantidKernel/make_unique.h"
 #include <QMessageBox>
@@ -32,7 +31,7 @@ int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
 DECLARE_SUBWINDOW(MainWindowView)
 
 MainWindowView::MainWindowView(QWidget *parent)
-    : UserSubWindow(parent), m_notifyees() {}
+    : UserSubWindow(parent), m_notifyee(nullptr) {}
 
 IBatchView *MainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
@@ -76,10 +75,10 @@ void MainWindowView::initLayout() {
 
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto messageHandler = this;
-  auto makeRunsPresenter = RunsPresenterFactory(
-      std::move(makeRunsTablePresenter), thetaTolerance, instruments,
-      defaultInstrumentIndex, messageHandler, Autoreduction(),
-      CatalogSearcher(), CatalogRunNotifier(this));
+  auto makeRunsPresenter =
+      RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance,
+                           instruments, defaultInstrumentIndex, messageHandler,
+                           Autoreduction(), CatalogSearcher());
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
@@ -93,7 +92,6 @@ void MainWindowView::initLayout() {
 
   // Create the presenter
   m_presenter = MainWindowPresenter(this, std::move(makeBatchPresenter));
-  subscribe(&m_presenter.get());
 
   m_presenter.get().notifyNewBatchRequested();
   m_presenter.get().notifyNewBatchRequested();
@@ -104,18 +102,14 @@ void MainWindowView::onTabCloseRequested(int tabIndex) {
 }
 
 void MainWindowView::onNewBatchRequested(bool) {
-  for (auto notifyee : m_notifyees)
-    notifyee->notifyNewBatchRequested();
+  m_notifyee->notifyNewBatchRequested();
 }
 
 void MainWindowView::subscribe(MainWindowSubscriber *notifyee) {
-  m_notifyees.push_back(notifyee);
+  m_notifyee = notifyee;
 }
 
-void MainWindowView::helpPressed() {
-  for (auto notifyee : m_notifyees)
-    notifyee->notifyHelpPressed();
-}
+void MainWindowView::helpPressed() { m_notifyee->notifyHelpPressed(); }
 
 /**
 Runs python code
@@ -165,27 +159,5 @@ bool MainWindowView::askUserYesNo(const std::string &prompt,
 
   return false;
 }
-
-/**
-   This slot is called each time the timer times out
-*/
-void MainWindowView::timerEvent(QTimerEvent *event) {
-  if (event->timerId() == m_timer.timerId()) {
-    for (auto notifyee : m_notifyees)
-      notifyee->notifyTimerEvent();
-  } else {
-    QWidget::timerEvent(event);
-  }
-}
-
-/** start the timer
- */
-void MainWindowView::startTimer(const int millisecs) {
-  m_timer.start(millisecs, this);
-}
-
-/** stop
- */
-void MainWindowView::stopTimer() { m_timer.stop(); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -49,6 +49,12 @@ public:
   virtual void notifyStartMonitorComplete() = 0;
 };
 
+class RunsViewTimerSubscriber {
+public:
+  virtual void notifyTimerEvent(){};
+  virtual ~RunsViewTimerSubscriber() = default;
+};
+
 /** @class IRunsView
 
 IRunsView is the base view class for the Reflectometry Interface. It
@@ -61,7 +67,12 @@ public:
   virtual ~IRunsView() = default;
 
   virtual void subscribe(RunsViewSubscriber *notifyee) = 0;
+  virtual void subscribeTimer(RunsViewTimerSubscriber *notifyee) = 0;
   virtual IRunsTableView *table() const = 0;
+
+  // Timer methods
+  virtual void startTimer(const int millisecs) = 0;
+  virtual void stopTimer() = 0;
 
   // Connect the model
   virtual void showSearch(boost::shared_ptr<SearchModel> model) = 0;
