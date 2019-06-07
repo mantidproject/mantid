@@ -8,6 +8,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/api/ComponentInfoPythonIterator.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
@@ -19,9 +20,16 @@
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
+using Mantid::PythonInterface::ComponentInfoPythonIterator;
 using namespace Mantid::PythonInterface::Converters;
 using namespace Mantid::PythonInterface::Policies;
 using namespace boost::python;
+
+namespace {
+ComponentInfoPythonIterator make_pyiterator(ComponentInfo &componentInfo) {
+  return ComponentInfoPythonIterator(componentInfo);
+}
+} // namespace
 
 // Function pointers to help resolve ambiguity
 Mantid::Kernel::V3D (ComponentInfo::*position)(const size_t) const =
@@ -39,6 +47,8 @@ void (ComponentInfo::*setRotation)(const size_t, const Mantid::Kernel::Quat &) =
 // Export ComponentInfo
 void export_ComponentInfo() {
   class_<ComponentInfo, boost::noncopyable>("ComponentInfo", no_init)
+
+      .def("__iter__", make_pyiterator)
 
       .def("__len__", &ComponentInfo::size, arg("self"),
            "Returns the number of components.")
@@ -93,10 +103,10 @@ void export_ComponentInfo() {
            "Returns True if a sample is present.")
 
       .def("source", &ComponentInfo::source, arg("self"),
-           "Returns the source component.")
+           "Returns the source component index.")
 
-      .def("sample", &ComponentInfo::source, arg("self"),
-           "Returns the sample component.")
+      .def("sample", &ComponentInfo::sample, arg("self"),
+           "Returns the sample component index.")
 
       .def("sourcePosition", &ComponentInfo::sourcePosition, arg("self"),
            "Returns the source position.")
@@ -138,5 +148,12 @@ void export_ComponentInfo() {
 
       .def("shape", &ComponentInfo::shape, (arg("self"), arg("index")),
            return_value_policy<reference_existing_object>(),
-           "Returns the shape of the component identified by 'index'.");
+           "Returns the shape of the component identified by 'index'.")
+
+      .def("indexOfAny", &ComponentInfo::indexOfAny, (arg("self"), arg("name")),
+           "Returns the index of any component matching name. Raises "
+           "ValueError if name not found")
+
+      .def("root", &ComponentInfo::root, arg("self"),
+           "Returns the index of the root component");
 }

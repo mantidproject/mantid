@@ -17,6 +17,10 @@ XML File Format
 
 Extension: .xml
 
+If the ``InputWorkspace`` is specified, it overrides what is given in
+the file. This is useful for loading a grouping for an instrument that
+is not the most recent one.
+
 Parameters
 ##########
 
@@ -163,7 +167,7 @@ Usage
 
     #check some values
     format_string = "Detector {}, with ID {}, in spectrum {} belongs to group {:.0f}"
-	      
+
     sid=0
     print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
 	  sid, ws.dataY(sid)[0]))
@@ -173,7 +177,7 @@ Usage
     sid=5000
     print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
 	  sid, ws.dataY(sid)[0]))
-    
+
 .. testcleanup:: LoadDetectorsGroupingFile
 
    DeleteWorkspace(ws)

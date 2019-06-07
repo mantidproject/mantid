@@ -26,20 +26,20 @@ DECLARE_ALGORITHM(ConjoinWorkspaces)
 //----------------------------------------------------------------------------------------------
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Direction::InOut),
-      "The name of the first input workspace");
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Direction::Input),
-      "The name of the second input workspace");
-  declareProperty(make_unique<PropertyWithValue<bool>>("CheckOverlapping", true,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
+                                                        Direction::InOut),
+                  "The name of the first input workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace2", "",
+                                                        Direction::Input),
+                  "The name of the second input workspace");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "CheckOverlapping", true, Direction::Input),
                   "Verify that the supplied data do not overlap");
-  declareProperty(make_unique<PropertyWithValue<std::string>>("YAxisLabel", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "YAxisLabel", "", Direction::Input),
                   "The label to set the Y axis to");
-  declareProperty(make_unique<PropertyWithValue<std::string>>("YAxisUnit", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "YAxisUnit", "", Direction::Input),
                   "The unit to set the Y axis to");
 }
 
@@ -69,7 +69,7 @@ void ConjoinWorkspaces::exec() {
   }
 
   if (eventWs1 && eventWs2) {
-    this->validateInputs(*eventWs1, *eventWs2, false);
+    this->checkCompatibility(*eventWs1, *eventWs2);
     auto output = conjoinEvents(*eventWs1, *eventWs2);
     setYUnitAndLabel(*output);
     // Set the result workspace to the first input
@@ -149,7 +149,7 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
 API::MatrixWorkspace_sptr
 ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
                                  const DataObjects::EventWorkspace &ws2) {
-  this->validateInputs(ws1, ws2, false);
+  this->checkCompatibility(ws1, ws2);
 
   // Check there is no overlap
   if (this->getProperty("CheckOverlapping")) {
@@ -176,7 +176,7 @@ API::MatrixWorkspace_sptr
 ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
                                      const API::MatrixWorkspace &ws2) {
   // Check that the input workspaces meet the requirements for this algorithm
-  this->validateInputs(ws1, ws2, false);
+  this->checkCompatibility(ws1, ws2);
 
   if (this->getProperty("CheckOverlapping")) {
     this->checkForOverlap(ws1, ws2, true);

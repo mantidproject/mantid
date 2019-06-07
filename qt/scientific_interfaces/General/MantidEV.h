@@ -12,7 +12,7 @@
 #include <QRunnable>
 #include <QWidget>
 
-#include <MantidKernel/System.h>
+#include "MantidKernel/System.h"
 
 #include "MantidEVWorker.h"
 #include "MantidQtWidgets/Common/SelectionNotificationService.h"
@@ -216,7 +216,8 @@ public:
 
 public slots:
   /// Slot for Q-Point selection notification
-  void QPointSelection_slot(bool, double, double, double);
+  void QPointSelection_slot(bool /*lab_coords*/, double /*qx*/, double /*qy*/,
+                            double /*qz*/);
 
 private slots:
 

@@ -18,28 +18,31 @@ ZERO_ERROR_DEFAULT = 1e6
 file_format_with_append = namedtuple('file_format_with_append', 'file_format, append_file_format_name')
 
 
-def save_to_file(workspace, file_format, file_name):
+def save_to_file(workspace, file_format, file_name, transmission_workspaces):
     """
     Save a workspace to a file.
 
     :param workspace: the workspace to save.
     :param file_format: the selected file format type.
     :param file_name: the file name.
+    :param transmission_workspaces: a dict of additional save algorithm inputs
+            e.g. Transmission and TransmissionCan for SaveCanSAS1D-v2
     :return:
     """
     save_options = {"InputWorkspace": workspace}
-    save_alg = get_save_strategy(file_format, file_name, save_options)
+    save_alg = get_save_strategy(file_format, file_name, save_options, transmission_workspaces)
     save_alg.setRethrows(True)
     save_alg.execute()
 
 
-def get_save_strategy(file_format_bundle, file_name, save_options):
+def get_save_strategy(file_format_bundle, file_name, save_options, transmission_workspaces):
     """
     Provide a save strategy based on the selected file format
 
     :param file_format_bundle: the selected file_format_bundle
     :param file_name: the name of the file
     :param save_options: the save options such as file name and input workspace
+    :param transmission_workspaces: a dict of additional inputs for SaveCanSAS algorithm
     :return: a handle to a save algorithm
     """
     file_format = file_format_bundle.file_format
@@ -49,15 +52,18 @@ def get_save_strategy(file_format_bundle, file_name, save_options):
     elif file_format is SaveType.CanSAS:
         file_name = get_file_name(file_format_bundle, file_name, "", ".xml")
         save_name = "SaveCanSAS1D"
+        save_options.update(transmission_workspaces)
     elif file_format is SaveType.NXcanSAS:
         file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
+        save_options.update(transmission_workspaces)
     elif file_format is SaveType.NistQxy:
         file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")
         save_name = "SaveNISTDAT"
     elif file_format is SaveType.RKH:
         file_name = get_file_name(file_format_bundle, file_name, "", ".txt")
         save_name = "SaveRKH"
+        save_options.update({"Append": False})
     elif file_format is SaveType.CSV:
         file_name = get_file_name(file_format_bundle, file_name, "", ".csv")
         save_name = "SaveCSV"

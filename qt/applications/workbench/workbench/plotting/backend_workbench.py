@@ -19,19 +19,15 @@ from __future__ import (absolute_import, division, print_function,
 # std imports
 import importlib
 
-
+# local imports
+from matplotlib.backends.backend_qt5agg import (draw_if_interactive as draw_if_interactive_impl,
+                                                show as show_impl)  # noqa
 # 3rd party imports
 # Put these first so that the correct Qt version is selected by qtpy
 from qtpy import QT_VERSION
 
-# local imports
-from workbench.plotting.figuremanager import (backend_version,  # noqa
-    draw_if_interactive as draw_if_interactive_impl,
-    new_figure_manager as new_figure_manager_impl,
-    new_figure_manager_given_figure as new_figure_manager_given_figure_impl,
-    show as show_impl,
-    QAppThreadCall
-)
+from workbench.plotting.figuremanager import (QAppThreadCall, new_figure_manager as new_figure_manager_impl,
+                                              new_figure_manager_given_figure as new_figure_manager_given_figure_impl)
 
 # Import the *real* matplotlib backend for the canvas
 mpl_qtagg_backend = importlib.import_module('matplotlib.backends.backend_qt{}agg'.format(QT_VERSION[0]))
@@ -39,7 +35,6 @@ try:
     FigureCanvas = getattr(mpl_qtagg_backend, 'FigureCanvasQTAgg')
 except KeyError:
     raise ImportError("Unknown form of matplotlib Qt backend.")
-
 
 # -----------------------------------------------------------------------------
 # Backend implementation

@@ -45,20 +45,22 @@ public:
 /** Initialize the algorithm's properties.
  */
 void RebinByTimeBase::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input workspace containing TOF events.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "An input workspace containing TOF events.");
 
-  declareProperty(make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "Params", boost::make_shared<RebinParamsValidator>()),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. Optionally\n"
                   "this can be followed by a comma and more widths and last "
                   "boundary pairs. Values are in seconds since run start.");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "An output workspace.");
 }
 
 /**
@@ -73,8 +75,6 @@ void RebinByTimeBase::exec() {
     throw std::invalid_argument(
         algName + " Algorithm requires an EventWorkspace as an input.");
   }
-
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // retrieve the properties
   const std::vector<double> inParams = getProperty("Params");
@@ -130,7 +130,7 @@ void RebinByTimeBase::exec() {
   std::transform(XValues_new->begin(), XValues_new->end(),
                  OutXValues_scaled.begin(), transformToRelativeT);
 
-  outputWS = DataObjects::create<DataObjects::Workspace2D>(
+  MatrixWorkspace_sptr outputWS = DataObjects::create<DataObjects::Workspace2D>(
       *inWS, histnumber, HistogramData::BinEdges(*XValues_new));
 
   // Copy all the axes

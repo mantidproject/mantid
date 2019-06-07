@@ -12,6 +12,9 @@
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
+
 using namespace Mantid::PhysicalConstants;
 
 class AtomTest : public CxxTest::TestSuite {
@@ -36,10 +39,72 @@ public:
     // Cm249.neutron.coh_scatt_length_real); // TODO
   }
 
-  void testError() {
-    TS_ASSERT_THROWS(getAtom(1, 15), std::runtime_error);
-    TS_ASSERT_THROWS(getAtom("garbage"), std::runtime_error);
+  void test_Z_Number() {
+    for (uint16_t z = 1; z <= 96; ++z) {
+      Atom a = getAtom(z);
+      TS_ASSERT_EQUALS(a.z_number, z);
+    }
   }
+
+  void testError() {
+    TS_ASSERT_THROWS(getAtom(1, 15), const std::runtime_error &);
+    TS_ASSERT_THROWS(getAtom("garbage"), const std::runtime_error &);
+  }
+};
+
+class AtomTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AtomTestPerformance *createSuite() {
+    return new AtomTestPerformance();
+  }
+  static void destroySuite(AtomTestPerformance *suite) { delete suite; }
+
+  /// Set up all the test workspaces
+  AtomTestPerformance() {
+    const size_t test_size = 1000000;
+    boost::random::mt19937 gen;
+    boost::random::uniform_int_distribution<uint16_t> dist(1, 96);
+    for (size_t i = 0; i < test_size; ++i) {
+      z_input.push_back(dist(gen));
+    }
+    for (auto z : z_input) {
+      symbol_input.push_back(getAtom(z).symbol);
+    }
+  }
+
+#ifdef _MSC_VER
+
+#pragma optimize("", off)
+
+  static void escape(void *p) { p = p; }
+
+#pragma optimize("", on)
+
+#else
+
+  static void escape(void *p) { asm volatile("" : : "g"(p) : "memory"); }
+
+#endif
+
+  void test_z_performance() {
+    for (uint16_t z : z_input) {
+      const Atom &a = getAtom(z);
+      escape(const_cast<Atom *>(&a));
+    }
+  }
+
+  void test_symbol_performance() {
+    for (const auto &symbol : symbol_input) {
+      const Atom &a = getAtom(symbol);
+      escape(const_cast<Atom *>(&a));
+    }
+  }
+
+private:
+  std::vector<uint16_t> z_input;
+  std::vector<std::string> symbol_input;
 };
 
 #endif // ATOMTEST_H_

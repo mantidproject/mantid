@@ -95,11 +95,11 @@ int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadNXSPE::init() {
   const std::vector<std::string> exts{".nxspe", ""};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "An NXSPE file");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "An NXSPE file");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace that will be created.");
 }
 

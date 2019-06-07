@@ -100,7 +100,7 @@ class DRangeToWorkspaceMap(object):
         # Get the time regime of the workspace, and use it to find the DRange.
         d_range = self._d_range_of(workspace)
 
-        logger.information('dRange for workspace %s is %s' % (workspace.getName(), str(d_range)))
+        logger.information('dRange for workspace %s is %s' % (workspace.name(), str(d_range)))
 
         # Add the workspace to the map, alongside its DRange.
         if d_range not in self._map:
@@ -455,7 +455,7 @@ def create_drange_map_generator(runs_loader, combinator, delete_runs=True):
 
     def generator(runs, transform):
         drange_map = DRangeToWorkspaceMap()
-        workspace_names, _ = runs_loader(runs)
+        workspace_names, _, _ = runs_loader(runs)
         drange_map.add_workspaces([transform(workspace_name) for workspace_name in workspace_names], combinator)
         if delete_runs:
             delete_workspaces(workspace_names)

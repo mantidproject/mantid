@@ -11,16 +11,15 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/make_unique.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
-#include <type_traits>
 #endif
 
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <unordered_set>
 #include <vector>
 
@@ -58,12 +57,15 @@ template <typename T> class Matrix;
  */
 class MANTID_KERNEL_DLL IPropertyManager {
 public:
-  // IPropertyManager(){}
   virtual ~IPropertyManager() = default;
 
   /// Function to declare properties (i.e. store them)
   virtual void declareProperty(std::unique_ptr<Property> p,
                                const std::string &doc = "") = 0;
+
+  /// Function to declare properties (i.e. store them)
+  virtual void declareOrReplaceProperty(std::unique_ptr<Property> p,
+                                        const std::string &doc = "") = 0;
 
   /// Removes the property from management
   virtual void removeProperty(const std::string &name,
@@ -80,26 +82,30 @@ public:
       const std::unordered_set<std::string> &ignoreProperties =
           std::unordered_set<std::string>()) = 0;
 
-  /** Sets all the declared properties from a string.
+  /** Sets all properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted
         as a json name value pair collection
       @param ignoreProperties :: A set of names of any properties NOT to set
       from the propertiesArray
+      @param createMissing :: If the property does not exist then create it
    */
   virtual void
   setProperties(const std::string &propertiesJson,
                 const std::unordered_set<std::string> &ignoreProperties =
-                    std::unordered_set<std::string>()) = 0;
+                    std::unordered_set<std::string>(),
+                bool createMissing = false) = 0;
 
-  /** Sets all the declared properties from a json object
+  /** Sets all the properties from a json object
      @param jsonValue :: A json name value pair collection
      @param ignoreProperties :: A set of names of any properties NOT to set
      from the propertiesArray
+     @param createMissing :: If the property does not exist then create it
   */
   virtual void
   setProperties(const ::Json::Value &jsonValue,
                 const std::unordered_set<std::string> &ignoreProperties =
-                    std::unordered_set<std::string>()) = 0;
+                    std::unordered_set<std::string>(),
+                bool createMissing = false) = 0;
 
   /** Sets property value from a string
       @param name :: Property name
@@ -107,6 +113,13 @@ public:
    */
   virtual void setPropertyValue(const std::string &name,
                                 const std::string &value) = 0;
+
+  /** Sets property value from a Json::Value
+      @param name :: Property name
+      @param value :: New property value
+   */
+  virtual void setPropertyValueFromJson(const std::string &name,
+                                        const Json::Value &value) = 0;
 
   /// Set the value of a property by an index
   virtual void setPropertyOrdinal(const int &index,
@@ -231,8 +244,8 @@ protected:
       const std::string &doc = "",
       const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
-        Kernel::make_unique<PropertyWithValue<T>>(name, value, validator,
-                                                  direction);
+        std::make_unique<PropertyWithValue<T>>(name, value, validator,
+                                               direction);
     declareProperty(std::move(p), doc);
   }
 
@@ -250,7 +263,7 @@ protected:
   void declareProperty(const std::string &name, T value, const std::string &doc,
                        const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
-        Kernel::make_unique<PropertyWithValue<T>>(
+        std::make_unique<PropertyWithValue<T>>(
             name, value, boost::make_shared<NullValidator>(), direction);
     declareProperty(std::move(p), doc);
   }
@@ -267,7 +280,7 @@ protected:
   void declareProperty(const std::string &name, T value,
                        const unsigned int direction) {
     std::unique_ptr<PropertyWithValue<T>> p =
-        Kernel::make_unique<PropertyWithValue<T>>(
+        std::make_unique<PropertyWithValue<T>>(
             name, value, boost::make_shared<NullValidator>(), direction);
     declareProperty(std::move(p));
   }

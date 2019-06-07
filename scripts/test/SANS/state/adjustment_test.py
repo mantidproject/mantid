@@ -90,12 +90,10 @@ class StateAdjustmentBuilderTest(unittest.TestCase):
         builder.set_normalize_to_monitor(MockStateNormalizeToMonitor())
         builder.set_wavelength_and_pixel_adjustment(MockStateWavelengthAndPixelAdjustment())
         builder.set_wide_angle_correction(False)
-        builder.set_show_transmission(False)
         state = builder.build()
 
         # # Assert
         self.assertTrue(not state.wide_angle_correction)
-        self.assertTrue(not state.show_transmission)
         try:
             state.validate()
             is_valid = True

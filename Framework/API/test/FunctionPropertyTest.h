@@ -13,6 +13,7 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/ParamFunction.h"
 #include <boost/shared_ptr.hpp>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -39,17 +40,16 @@ public:
   }
   static void destroySuite(FunctionPropertyTest *suite) { delete suite; }
 
-  void testConstructor() {
+  void test_Constructor() {
     TS_ASSERT_THROWS_NOTHING(FunctionProperty prop("fun"));
   }
 
-  void testValue() {
+  void test_Value() {
     FunctionProperty prop("fun");
     TS_ASSERT_EQUALS("", prop.value());
 
     std::string error;
-    TS_ASSERT_THROWS_NOTHING(
-        error = prop.setValue("name=FunctionPropertyTest_Function,A=3"));
+    TS_ASSERT_THROWS_NOTHING(error = prop.setValue(createTestFunctionString()));
     TS_ASSERT(error.empty());
     boost::shared_ptr<IFunction> fun_p = prop;
     TS_ASSERT_EQUALS(fun_p->asString(),
@@ -60,7 +60,23 @@ public:
                      "name=FunctionPropertyTest_Function,A=3,B=2");
   }
 
-  void testBadValue() {
+  void test_ValueAsJson() {
+    FunctionProperty prop("fun");
+    const std::string funcString("name=FunctionPropertyTest_Function,A=3,B=2");
+    prop.setValue(funcString);
+    TS_ASSERT_EQUALS(funcString, prop.valueAsJson().asString());
+  }
+
+  void test_SetValueFromJson() {
+    FunctionProperty prop("fun");
+    const std::string helpMessage{
+        prop.setValueFromJson(Json::Value(createTestFunctionString()))};
+    TS_ASSERT(helpMessage.empty());
+    TS_ASSERT_EQUALS("name=FunctionPropertyTest_Function,A=3,B=2",
+                     prop.value());
+  }
+
+  void test_Bad_Value() {
     FunctionProperty prop("fun");
     std::string error;
     TS_ASSERT_THROWS_NOTHING(
@@ -70,15 +86,14 @@ public:
     TS_ASSERT(!error.empty());
   }
 
-  void testSetValue() {
+  void test_Assignment_By_SharedPtr() {
     FunctionProperty prop("fun");
     std::string error;
-    boost::shared_ptr<IFunction> fun_p(
-        FunctionFactory::Instance().createInitialized(
-            "name=FunctionPropertyTest_Function,A=3"));
+    auto fun_p = FunctionFactory::Instance().createInitialized(
+        createTestFunctionString());
     TS_ASSERT(fun_p);
     prop = fun_p;
-    boost::shared_ptr<IFunction> fun1_p = prop;
+    auto fun1_p = prop();
     TS_ASSERT(fun1_p);
     TS_ASSERT_EQUALS(fun_p, fun1_p);
     TS_ASSERT_EQUALS(fun1_p->asString(),
@@ -87,7 +102,9 @@ public:
     TS_ASSERT_EQUALS(fun1_p->getParameter("B"), 2.0);
   }
 
-  void testSharedPointer() {
+  void test_SetValue_From_Json() {}
+
+  void test_Shared_Pointer() {
     FunctionProperty prop("fun");
     std::string error;
     boost::shared_ptr<FunctionPropertyTest_Function> fun_p(
@@ -105,6 +122,9 @@ public:
   }
 
 private:
+  std::string createTestFunctionString() {
+    return "name=FunctionPropertyTest_Function,A=3";
+  }
 };
 
 #endif /*FUNCTIONPROPERTYTEST_H_*/

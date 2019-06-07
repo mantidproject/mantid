@@ -29,18 +29,19 @@ const std::string StepScan::category() const { return "Workflow\\Alignment"; }
 
 void StepScan::init() {
   // TODO: Validator to ensure that this is 'fresh' data???
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
-                  "The input workspace. Must hold 'raw' (unweighted) events.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<WorkspaceUnitValidator>("TOF")),
+      "The input workspace. Must hold 'raw' (unweighted) events.");
   // Note that this algorithm may modify the input workspace (by masking and/or
   // cropping)
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output table workspace.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace holding pixels to be masked.");
 

@@ -86,15 +86,15 @@ Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
  *
  */
 void Rebin::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace containing the input data");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace containing the input data");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to give the output workspace");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally "
@@ -236,9 +236,6 @@ void Rebin::exec() {
       ChildAlg->execute();
       inputWS = ChildAlg->getProperty("OutputWorkspace");
     }
-
-    // This will be the output workspace (exact type may vary)
-    API::MatrixWorkspace_sptr outputWS;
 
     // make output Workspace the same type is the input, but with new length of
     // signal array

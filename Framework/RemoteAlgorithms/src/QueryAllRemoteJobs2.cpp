@@ -38,37 +38,37 @@ void QueryAllRemoteJobs2::init() {
   // Mantid can't store arbitrary structs in its properties, so we're going to
   // declare several array properties for different pieces of data.  Values from
   // the same array index are for the same job.
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "JobID", nullValidator, Direction::Output),
                   "ID string for the job(s)");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "JobStatusString", nullValidator, Direction::Output),
                   "Description of the job's current status (Queued, Running, "
                   "Complete, etc..)");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "JobName", nullValidator, Direction::Output),
                   "Name of the job (specified when the job was submitted)");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "ScriptName", nullValidator, Direction::Output),
                   "The name of the script (python, etc.) or other type of "
                   "executable that the job runs");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "TransID", nullValidator, Direction::Output),
                   "The ID of the transaction that owns the job");
 
   // Times for job submit, job start and job complete (may be empty depending
   // on the server-side implementation)
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "SubmitDate", nullValidator, Direction::Output),
                   "The date & time the job was submitted");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "StartDate", nullValidator, Direction::Output),
                   "The date & time the job actually started executing");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "CompletionDate", nullValidator, Direction::Output),
                   "The date & time the job finished");
 
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "CommandLine", nullValidator, Direction::Output),
                   "The command line run by this job on the remote compute "
                   "resource machine(s)");

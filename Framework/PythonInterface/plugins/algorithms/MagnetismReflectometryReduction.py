@@ -104,6 +104,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("TimeAxisStep", 40.0,
                              doc="Binning step size for the time axis. TOF for detector binning, wavelength for constant Q")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
+        self.declareProperty("CleanupBadData", True, doc="If true, we crop the points consistent with R=0")
         self.declareProperty("ConstQTrim", 0.5,
                              doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
         self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
@@ -485,8 +486,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             if low_q is not None and high_q is not None:
                 break
 
+        cleanup = self.getProperty("CleanupBadData").value
         crop = self.getProperty("CropFirstAndLastPoints").value
-        if low_q is not None and high_q is not None:
+        if cleanup and low_q is not None and high_q is not None:
             # Get rid of first and last Q points to avoid edge effects
             if crop:
                 low_q += 1
@@ -495,18 +497,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             q_rebin = CropWorkspace(InputWorkspace=q_rebin,
                                     OutputWorkspace=str(q_rebin),
                                     XMin=data_x[low_q], XMax=data_x[high_q])
-        else:
+        elif cleanup:
             logger.error("Data is all zeros. Check your TOF ranges.")
 
         # Clean up the workspace for backward compatibility
         data_y = q_rebin.dataY(0)
-        data_e = q_rebin.dataE(0)
-
-        # Values < 1e-12 and values where the error is greater than the value are replaced by 0+-1
-        for i in range(len(data_y)):
-            if data_y[i] < 1e-12 or data_e[i]>data_y[i]:
-                data_y[i]=0.0
-                data_e[i]=1.0
 
         # Sanity check
         if sum(data_y) == 0:

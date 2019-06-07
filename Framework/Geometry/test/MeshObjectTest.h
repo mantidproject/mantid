@@ -15,48 +15,19 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MockRNG.h"
 
-#include <algorithm>
-#include <cmath>
-#include <ctime>
 #include <cxxtest/TestSuite.h>
-#include <ostream>
-#include <vector>
-
-#include "boost/make_shared.hpp"
-#include "boost/shared_ptr.hpp"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
-#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
 
 namespace {
-// -----------------------------------------------------------------------------
-// Mock Random Number Generator
-// -----------------------------------------------------------------------------
-class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD0(nextValue, double());
-  MOCK_METHOD2(nextValue, double(double, double));
-  MOCK_METHOD2(nextInt, int(int, int));
-  MOCK_METHOD0(restart, void());
-  MOCK_METHOD0(save, void());
-  MOCK_METHOD0(restore, void());
-  MOCK_METHOD1(setSeed, void(size_t));
-  MOCK_METHOD2(setRange, void(const double, const double));
-  MOCK_CONST_METHOD0(min, double());
-  MOCK_CONST_METHOD0(max, double());
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
-
 std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   /**
    * Create cube of side length size with specified centre,
@@ -95,7 +66,7 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   triangles.insert(triangles.end(), {3, 6, 2});
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
       std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
@@ -143,7 +114,7 @@ std::unique_ptr<MeshObject> createOctahedron() {
   triangles.insert(triangles.end(), {3, 1, 5});
 
   // Use flexible constructor
-  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
       triangles, vertices, Mantid::Kernel::Material());
   return retVal;
 }
@@ -197,7 +168,7 @@ std::unique_ptr<MeshObject> createLShape() {
   triangles.insert(triangles.end(), {11, 0, 6});
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
       std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
@@ -253,13 +224,12 @@ public:
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
 
     // Test material through flexible constructor
-    auto obj1 = Mantid::Kernel::make_unique<MeshObject>(triangles, vertices,
-                                                        testMaterial);
+    auto obj1 = std::make_unique<MeshObject>(triangles, vertices, testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      obj1->material().numberDensity(), 1e-12);
     // Test material through efficient constructor
-    auto obj2 = Mantid::Kernel::make_unique<MeshObject>(
-        std::move(triangles), std::move(vertices), testMaterial);
+    auto obj2 = std::make_unique<MeshObject>(std::move(triangles),
+                                             std::move(vertices), testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      obj2->material().numberDensity(), 1e-12);
   }
@@ -349,7 +319,9 @@ public:
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
     auto geom_obj = createCube(4.0);
-    Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
+    V3D dir(1., 1., 0.);
+    dir.normalize();
+    Track track(V3D(-10, 0, 0), dir);
 
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -390,7 +362,9 @@ public:
   void testInterceptLShapeTwoPass() {
     std::vector<Link> expectedResults;
     auto geom_obj = createLShape();
-    Track track(V3D(0, 2.5, 0.5), V3D(0.707, -0.707, 0));
+    V3D dir(1., -1., 0.);
+    dir.normalize();
+    Track track(V3D(0, 2.5, 0.5), dir);
 
     // format = startPoint, endPoint, total distance so far
     expectedResults.emplace_back(
@@ -879,7 +853,7 @@ public:
     auto geom_obj = createOctahedron();
     size_t maxAttempts(1);
     TS_ASSERT_THROWS(geom_obj->generatePointInObject(rng, maxAttempts),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testVolumeOfCube() {

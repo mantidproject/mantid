@@ -7,7 +7,11 @@
 #ifndef MANTID_KERNEL_OPTIONALBOOLTEST_H_
 #define MANTID_KERNEL_OPTIONALBOOLTEST_H_
 
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
+
+#include <json/value.h>
+
 #include <cxxtest/TestSuite.h>
 #include <sstream>
 
@@ -124,6 +128,13 @@ public:
     TS_ASSERT_EQUALS(OptionalBool::StrUnset, map[OptionalBool::Unset]);
     TS_ASSERT_EQUALS(OptionalBool::StrFalse, map[OptionalBool::False]);
     TS_ASSERT_EQUALS(OptionalBool::StrTrue, map[OptionalBool::True]);
+  }
+
+  void testEncodeOptionalBoolPropertyThrows() {
+    using Mantid::Kernel::Exception::NotImplementedError;
+    using Mantid::Kernel::OptionalBool;
+    OptionalBool truth{OptionalBool::True};
+    TS_ASSERT_THROWS(encodeAsJson(truth), const NotImplementedError &);
   }
 };
 

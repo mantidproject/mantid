@@ -7,7 +7,6 @@
 #ifndef MANTID_PARALLEL_THREADINGBACKEND_H_
 #define MANTID_PARALLEL_THREADINGBACKEND_H_
 
-#include "MantidKernel/make_unique.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
 #include "MantidParallel/Status.h"
@@ -113,7 +112,7 @@ template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
   // Must wrap std::stringbuf in a unique_ptr since gcc on RHEL7 does not
   // support moving a stringbuf (incomplete C++11 support?).
-  auto buf = Kernel::make_unique<std::stringbuf>();
+  auto buf = std::make_unique<std::stringbuf>();
   std::ostream os(buf.get());
   {
     // The binary_oarchive must be scoped to prevent a segmentation fault. I

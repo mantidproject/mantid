@@ -11,7 +11,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -38,11 +38,11 @@ const std::string SortXAxis::summary() const {
 }
 
 void SortXAxis::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input Workspace");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Sorted Output Workspace");
 
@@ -51,15 +51,27 @@ void SortXAxis::init() {
       boost::make_shared<StringListValidator>(orderingValues);
   declareProperty("Ordering", orderingValues[0], orderingValidator,
                   "Ascending or descending sorting", Direction::Input);
+  declareProperty("IgnoreHistogramValidation", false,
+                  "This will stop SortXAxis from throwing if the workspace is "
+                  "not a valid histogram for this algorithm to work on. THIS "
+                  "IS TEMPORARY, this item will be removed for 4.1 and thus "
+                  "should only be used internally for the TOSCA legacy data "
+                  "in indirect .");
 }
 
 void SortXAxis::exec() {
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
+  const bool ignoreHistogramValidation =
+      getProperty("IgnoreHistogramValidation");
 
   // Check if it is a valid histogram here
-  bool isAProperHistogram = determineIfHistogramIsValid(*inputWorkspace);
+  const bool isAProperHistogram =
+      ignoreHistogramValidation ||
+      determineIfHistogramIsValid(
+          *inputWorkspace); // Assume a valid histogram if validation is to be
+                            // ignored
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
@@ -258,8 +270,9 @@ bool SortXAxis::determineIfHistogramIsValid(
     // check whether each data value is in the correct order.
     if (!isItSorted(std::greater<double>(), inputWorkspace)) {
       if (!isItSorted(std::less<double>(), inputWorkspace)) {
-        throw std::runtime_error("Data entered looks like a histogram, but is "
-                                 "not a valid histogram");
+        throw std::runtime_error(
+            "The data entered contains an invalid histogram: histogram has an "
+            "unordered x-axis.");
       }
     }
     return true;

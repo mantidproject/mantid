@@ -48,7 +48,7 @@ public:
     if (!nxLoad.isInitialized())
       nxLoad.initialize();
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(nxLoad.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(nxLoad.execute(), const std::runtime_error &);
 
     // Now set required filename and output workspace name
     inputFile = "emu00006473.nxs";
@@ -899,26 +899,27 @@ public:
 
     if (detectorGrouping) {
       TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
-      TS_ASSERT_EQUALS(detectorGrouping->rowCount(), 2);
+      TS_ASSERT_EQUALS(detectorGrouping->rowCount(), 4);
 
       TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->type(), "vector_int");
       TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->name(), "Detectors");
 
-      std::vector<int> fwd, bwd;
+      std::vector<int> left, right, up, down;
       TS_ASSERT_THROWS_NOTHING(
-          fwd = detectorGrouping->cell<std::vector<int>>(0, 0));
+          left = detectorGrouping->cell<std::vector<int>>(0, 0));
       TS_ASSERT_THROWS_NOTHING(
-          bwd = detectorGrouping->cell<std::vector<int>>(1, 0));
+          right = detectorGrouping->cell<std::vector<int>>(1, 0));
 
-      TS_ASSERT_EQUALS(fwd.size(), 304);
-      TS_ASSERT_EQUALS(bwd.size(), 302);
+      TS_ASSERT_THROWS_NOTHING(
+          up = detectorGrouping->cell<std::vector<int>>(2, 0));
+      TS_ASSERT_THROWS_NOTHING(
+          down = detectorGrouping->cell<std::vector<int>>(3, 0));
 
-      for (const int det : fwd) {
-        TS_ASSERT_EQUALS(det % 2, 1);
-      }
-      for (const int det : bwd) {
-        TS_ASSERT_EQUALS(det % 2, 0);
-      }
+      TS_ASSERT_EQUALS(left.size(), 150);
+      TS_ASSERT_EQUALS(right.size(), 150);
+      TS_ASSERT_EQUALS(up.size(), 154);
+      TS_ASSERT_EQUALS(down.size(), 152);
+
     } else {
       TS_FAIL("Loaded grouping was null");
     }

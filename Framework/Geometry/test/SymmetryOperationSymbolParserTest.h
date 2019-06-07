@@ -8,7 +8,6 @@
 #define MANTID_GEOMETRY_SYMMETRYOPERATIONSYMBOLPARSERTEST_H_
 
 #include "MantidKernel/Timer.h"
-#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
@@ -40,13 +39,13 @@ public:
 
     TS_ASSERT_THROWS(
         TestableSymmetryOperationSymbolParser::parseIdentifier("1/4, x, -z-x"),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         TestableSymmetryOperationSymbolParser::parseIdentifier("x, -z-x"),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         TestableSymmetryOperationSymbolParser::parseIdentifier("y, x, -z-x, z"),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testGetNormalizedIdentifier() {

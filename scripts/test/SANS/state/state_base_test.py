@@ -226,35 +226,35 @@ class ComplexState(StateBase):
 
 class TestStateBase(unittest.TestCase):
     def _assert_simple_state(self, state):
-        self.assertTrue(state.string_parameter == "String_in_SimpleState")
+        self.assertEqual(state.string_parameter,  "String_in_SimpleState")
         self.assertFalse(state.bool_parameter)
-        self.assertTrue(state.float_parameter is None)  # We did not set it on the instance
-        self.assertTrue(state.positive_float_parameter == 1.)
-        self.assertTrue(state.positive_integer_parameter == 6)
-        self.assertTrue(state.dict_parameter["1"] == 123)
-        self.assertTrue(state.dict_parameter["2"] == "test")
-        self.assertTrue(state.float_with_none_parameter == 325.)
-        self.assertTrue(state.positive_float_with_none_parameter is None)
+        self.assertEqual(state.float_parameter, None)  # We did not set it on the instance
+        self.assertEqual(state.positive_float_parameter,  1.)
+        self.assertEqual(state.positive_integer_parameter,  6)
+        self.assertEqual(state.dict_parameter["1"],  123)
+        self.assertEqual(state.dict_parameter["2"],  "test")
+        self.assertEqual(state.float_with_none_parameter,  325.)
+        self.assertEqual(state.positive_float_with_none_parameter, None)
 
-        self.assertTrue(len(state.float_list_parameter) == 2)
-        self.assertTrue(state.float_list_parameter[0] == 123.)
-        self.assertTrue(state.float_list_parameter[1] == 234.)
+        self.assertEqual(len(state.float_list_parameter),  2)
+        self.assertEqual(state.float_list_parameter[0],  123.)
+        self.assertEqual(state.float_list_parameter[1],  234.)
 
-        self.assertTrue(len(state.string_list_parameter) == 2)
-        self.assertTrue(state.string_list_parameter[0] == "test1")
-        self.assertTrue(state.string_list_parameter[1] == "test2")
+        self.assertEqual(len(state.string_list_parameter),  2)
+        self.assertEqual(state.string_list_parameter[0],  "test1")
+        self.assertEqual(state.string_list_parameter[1],  "test2")
 
-        self.assertTrue(len(state.positive_integer_list_parameter) == 3)
-        self.assertTrue(state.positive_integer_list_parameter[0] == 1)
-        self.assertTrue(state.positive_integer_list_parameter[1] == 2)
-        self.assertTrue(state.positive_integer_list_parameter[2] == 3)
+        self.assertEqual(len(state.positive_integer_list_parameter),  3)
+        self.assertEqual(state.positive_integer_list_parameter[0],  1)
+        self.assertEqual(state.positive_integer_list_parameter[1],  2)
+        self.assertEqual(state.positive_integer_list_parameter[2],  3)
 
-        self.assertTrue(state.class_type_parameter is TestType.TypeA)
-        self.assertTrue(len(state.class_type_list_parameter) == 2)
-        self.assertTrue(state.class_type_list_parameter[0] == TestType.TypeA)
-        self.assertTrue(state.class_type_list_parameter[1] == TestType.TypeB)
+        self.assertEqual(state.class_type_parameter, TestType.TypeA)
+        self.assertEqual(len(state.class_type_list_parameter),  2)
+        self.assertEqual(state.class_type_list_parameter[0],  TestType.TypeA)
+        self.assertEqual(state.class_type_list_parameter[1],  TestType.TypeB)
 
-        self.assertTrue(state.sub_state_very_simple.string_parameter == "test_in_very_simple")
+        self.assertEqual(state.sub_state_very_simple.string_parameter,  "test_in_very_simple")
         
     def test_that_sans_state_can_be_serialized_and_deserialized_when_going_through_an_algorithm(self):
         class FakeAlgorithm(Algorithm):
@@ -275,8 +275,8 @@ class TestStateBase(unittest.TestCase):
         property_manager = fake.getProperty("Args").value
 
         # Assert
-        self.assertTrue(type(serialized) == dict)
-        self.assertTrue(type(property_manager) == PropertyManager)
+        self.assertEqual(type(serialized),  dict)
+        self.assertEqual(type(property_manager),  PropertyManager)
         state_2 = create_deserialized_sans_state_from_property_manager(property_manager)
         state_2.property_manager = property_manager
 
@@ -288,8 +288,8 @@ class TestStateBase(unittest.TestCase):
         self._assert_simple_state(state_2.dict_parameter["B"])
 
         # The regular parameters
-        self.assertTrue(state_2.float_parameter == 23.)
-        self.assertTrue(state_2.positive_float_with_none_parameter == 234.)
+        self.assertEqual(state_2.float_parameter,  23.)
+        self.assertEqual(state_2.positive_float_with_none_parameter,  234.)
 
 
 if __name__ == '__main__':

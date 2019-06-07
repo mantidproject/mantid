@@ -14,33 +14,12 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MockRNG.h"
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 
 using Mantid::Geometry::SampleEnvironment;
-
-namespace {
-// -----------------------------------------------------------------------------
-// Mock Random Number Generator
-// -----------------------------------------------------------------------------
-class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD0(nextValue, double());
-  MOCK_METHOD2(nextValue, double(double, double));
-  MOCK_METHOD2(nextInt, int(int, int));
-  MOCK_METHOD0(restart, void());
-  MOCK_METHOD0(save, void());
-  MOCK_METHOD0(restore, void());
-  MOCK_METHOD1(setSeed, void(size_t));
-  MOCK_METHOD2(setRange, void(const double, const double));
-  MOCK_CONST_METHOD0(min, double());
-  MOCK_CONST_METHOD0(max, double());
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
-} // namespace
 
 class SampleEnvironmentTest : public CxxTest::TestSuite {
 public:
@@ -59,7 +38,6 @@ public:
     SampleEnvironment kit("TestKit", can);
     TS_ASSERT_EQUALS(kit.name(), "TestKit");
     TS_ASSERT_EQUALS(kit.containerID(), "8mm");
-    TS_ASSERT_EQUALS(kit.container(), can);
     TS_ASSERT_EQUALS(1, kit.nelements());
   }
 
@@ -179,9 +157,10 @@ public:
         .WillOnce(Return(0.5))
         .WillOnce(Return(0.5));
     // Restrict region to can
-    TS_ASSERT_THROWS(kit->generatePoint(rng, kit->container()->getBoundingBox(),
+    TS_ASSERT_THROWS(kit->generatePoint(rng,
+                                        kit->getContainer().getBoundingBox(),
                                         maxAttempts),
-                     std::runtime_error);
+                     const std::runtime_error &);
     Mock::VerifyAndClearExpectations(&rng);
   }
 

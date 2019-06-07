@@ -111,9 +111,9 @@ double GetNeXusValue<double>(NeXus::NXEntry &entry, const std::string &path,
   }
 }
 template <>
-std::string GetNeXusValue<std::string>(NeXus::NXEntry &entry,
-                                       const std::string &path,
-                                       const std::string &defval, int32_t) {
+std::string
+GetNeXusValue<std::string>(NeXus::NXEntry &entry, const std::string &path,
+                           const std::string &defval, int32_t /*unused*/) {
 
   try {
     NeXus::NXChar dataSet = entry.openNXChar(path);
@@ -137,12 +137,10 @@ void MapNeXusToProperty(NeXus::NXEntry &entry, const std::string &path,
 
 // sting is a special case
 template <>
-void MapNeXusToProperty<std::string>(NeXus::NXEntry &entry,
-                                     const std::string &path,
-                                     const std::string &defval,
-                                     API::LogManager &logManager,
-                                     const std::string &name,
-                                     const std::string &, int32_t index) {
+void MapNeXusToProperty<std::string>(
+    NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
+    API::LogManager &logManager, const std::string &name,
+    const std::string & /*unused*/, int32_t index) {
 
   std::string value = GetNeXusValue<std::string>(entry, path, defval, index);
   logManager.addProperty<std::string>(name, value);
@@ -444,7 +442,8 @@ protected:
   // fields
   std::vector<size_t> &m_eventCounts;
 
-  void addEventImpl(size_t id, size_t, size_t, double) override {
+  void addEventImpl(size_t id, size_t /*x*/, size_t /*y*/,
+                    double /*tof*/) override {
     m_eventCounts[id]++;
   }
 
@@ -473,7 +472,7 @@ protected:
   int64_t m_startTime;
   bool m_saveAsTOF;
 
-  void addEventImpl(size_t id, size_t x, size_t, double tobs) override {
+  void addEventImpl(size_t id, size_t x, size_t /*y*/, double tobs) override {
 
     // get the absolute time for the start of the frame
     auto offset = m_startTime + frameStart();
@@ -552,7 +551,7 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
     exts.emplace_back(".hdf");
   else
     exts.emplace_back(".tar");
-  Base::declareProperty(Kernel::make_unique<API::FileProperty>(
+  Base::declareProperty(std::make_unique<API::FileProperty>(
                             FilenameStr, "", API::FileProperty::Load, exts),
                         "The input filename of the stored data");
 
@@ -566,7 +565,7 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
   // mask
   exts.clear();
   exts.emplace_back(".xml");
-  Base::declareProperty(Kernel::make_unique<API::FileProperty>(
+  Base::declareProperty(std::make_unique<API::FileProperty>(
                             MaskStr, "", API::FileProperty::OptionalLoad, exts),
                         "The input filename of the mask data");
 
@@ -576,7 +575,7 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
       "  eg 16,19-45,47");
 
   Base::declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output));
 
   if (hdfLoader) {

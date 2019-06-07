@@ -30,14 +30,14 @@ DECLARE_ALGORITHM(RayTracerTester)
 /** Initialize the algorithm's properties.
  */
 void RayTracerTester::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
-      "The filename (including its full or relative path) of an "
-      "instrument definition file");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".xml"),
+                  "The filename (including its full or relative path) of an "
+                  "instrument definition file");
   declareProperty("NumAzimuth", 100, "Steps in azimuthal angles");
   declareProperty("NumZenith", 50, "Steps in zenith angles");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 }
 
@@ -66,11 +66,12 @@ void RayTracerTester::exec() {
     prog.report();
     double az = double(iaz) * M_PI * 2.0 / double(NumAzimuth);
     for (int iz = 0; iz < NumZenith; iz++) {
-      double zen = double(iz) * M_PI / double(NumZenith);
-      double x = cos(az);
-      double z = sin(az);
-      double y = cos(zen);
+      const double zen = double(iz) * M_PI / double(NumZenith);
+      const double x = cos(az);
+      const double z = sin(az);
+      const double y = cos(zen);
       V3D beam(x, y, z);
+      beam.normalize();
 
       // Create a ray tracer
       tracker.traceFromSample(beam);

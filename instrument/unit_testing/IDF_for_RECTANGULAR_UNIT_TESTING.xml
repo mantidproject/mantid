@@ -16,30 +16,6 @@
   </reference-frame>
 </defaults>
 
-  <!--SOURCE-->
-<!--
-  <component type="moderator">
-    <location z="-15.0"/>
-  </component>
-  <type name="moderator" is="Source"/>
--->
-
-
-  <!--SAMPLE-->
-<!--
-  <component type="sample-position">
-    <location y="0.0" x="0.0" z="0.0"/>
-  </component>
-  <type name="sample-position" is="SamplePos">
-  <cylinder id="cyl-approx">
-    <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
-    <axis y="0.0" x="0.0" z="1.0"/>
-    <radius radius="0.1"/>
-    <height height="0.3"/>
-  </cylinder>
-  <algebra val="cyl-approx"/>
-  </type>
--->
 
 
 
@@ -60,24 +36,12 @@
   <properties/>
 </type>
 
-<!-- Pixel for Detectors-->
-<!--
 <type is="detector" name="pixel">
   <cuboid id="pixel-shape">
-    <left-front-bottom-point y="-0.001" x="-0.001" z="0.0"/>
-    <left-front-top-point y="0.001" x="-0.001" z="0.0"/>
-    <left-back-bottom-point y="-0.001" x="-0.001" z="-0.0001"/>
-    <right-front-bottom-point y="-0.001" x="0.001" z="0.0"/>
-  </cuboid>
-  <algebra val="pixel-shape"/>
-</type>
--->
-<type is="detector" name="pixel">
-  <cuboid id="pixel-shape">
-    <left-front-bottom-point y="-1" x="-1" z="-1"/>
+    <left-front-bottom-point y="-1" x="-1" z="1"/>
     <left-front-top-point y="1" x="-1" z="1"/>
     <left-back-bottom-point y="-1" x="-1" z="-1"/>
-    <right-front-bottom-point y="-1" x="1" z="-1"/>
+    <right-front-bottom-point y="-1" x="1" z="1"/>
   </cuboid>
   <algebra val="pixel-shape"/>
 </type>

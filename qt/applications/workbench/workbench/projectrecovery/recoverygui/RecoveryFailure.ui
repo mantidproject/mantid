@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RecoveryFailure</class>
+ <widget class="QWidget" name="RecoveryFailure">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>633</width>
+    <height>339</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Recovery Failed</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Project recovery has failed unexpectedly, you can choose to recover from one of the checkpoints below, open the selected checkpoint in the script window, or you can start Mantid normally.</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTableWidget" name="tableWidget">
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <row>
+        <property name="text">
+         <string/>
+        </property>
+       </row>
+       <row>
+        <property name="text">
+         <string/>
+        </property>
+       </row>
+       <row>
+        <property name="text">
+         <string/>
+        </property>
+       </row>
+       <row>
+        <property name="text">
+         <string/>
+        </property>
+       </row>
+       <row>
+        <property name="text">
+         <string/>
+        </property>
+       </row>
+       <column>
+        <property name="text">
+         <string>Checkpoint Time and Date</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Workspaces to recover</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Checkpoint Tried</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="text">
+          <string>Try last 
+checkpoint again</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="text">
+          <string>Try selected 
+checkpoint</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="text">
+          <string>Open selected 
+in script editor</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="text">
+          <string>Start Mantid
+ normally</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton_4</sender>
+   <signal>clicked()</signal>
+   <receiver>RecoveryFailure</receiver>
+   <slot>onClickLastCheckpoint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>143</x>
+     <y>274</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>160</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>RecoveryFailure</receiver>
+   <slot>onClickSelectedCheckpoint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>245</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>346</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>RecoveryFailure</receiver>
+   <slot>onClickOpenSelectedInScriptWindow()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>382</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>568</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>RecoveryFailure</receiver>
+   <slot>onClickStartMantidNormally()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>494</x>
+     <y>272</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>631</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onClickLastCheckpoint()</slot>
+  <slot>onClickSelectedCheckpoint()</slot>
+  <slot>onClickOpenSelectedInScriptWindow()</slot>
+  <slot>onClickStartMantidNormally()</slot>
+ </slots>
+</ui>

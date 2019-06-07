@@ -12,7 +12,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/graph/adjacency_list.hpp>
@@ -102,11 +102,9 @@ SXPeak::SXPeak(double t, double phi, double intensity,
   const auto sourcePos = spectrumInfo.sourcePosition();
   const auto detPos = spectrumInfo.position(m_wsIndex);
   // Normalized beam direction
-  auto beamDir = samplePos - sourcePos;
-  beamDir.normalize();
+  const auto beamDir = normalize(samplePos - sourcePos);
   // Normalized detector direction
-  auto detDir = (detPos - samplePos);
-  detDir.normalize();
+  const auto detDir = normalize(detPos - samplePos);
   m_unitWaveVector = beamDir - detDir;
   m_qConvention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
@@ -252,7 +250,7 @@ AbsoluteBackgroundStrategy::AbsoluteBackgroundStrategy(const double background)
     : m_background(background) {}
 
 bool AbsoluteBackgroundStrategy::isBelowBackground(
-    const double intensity, const HistogramData::HistogramY &) const {
+    const double intensity, const HistogramData::HistogramY & /*y*/) const {
   return intensity < m_background;
 }
 
@@ -327,7 +325,7 @@ PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
  * @return :: The averaged or exact value of phi
  */
 double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
-  double phi = std::numeric_limits<double>::infinity();
+  double phi;
 
   // Get the detectors for the workspace index
   const auto &spectrumDefinition =
@@ -477,7 +475,7 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
     if (!isRecording && !isAboveThreshold) {
       continue;
     } else if (!isRecording && isAboveThreshold) {
-      currentPeak = Mantid::Kernel::make_unique<PeakContainer>(y);
+      currentPeak = std::make_unique<PeakContainer>(y);
       currentPeak->startRecord(it);
       isRecording = true;
     } else if (isRecording && !isAboveThreshold) {
@@ -545,9 +543,9 @@ SimpleReduceStrategy::SimpleReduceStrategy(
     const CompareStrategy *compareStrategy)
     : ReducePeakListStrategy(compareStrategy) {}
 
-std::vector<SXPeak>
-SimpleReduceStrategy::reduce(const std::vector<SXPeak> &peaks,
-                             Mantid::Kernel::ProgressBase &) const {
+std::vector<SXPeak> SimpleReduceStrategy::reduce(
+    const std::vector<SXPeak> &peaks,
+    Mantid::Kernel::ProgressBase & /*progress*/) const {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
@@ -602,12 +600,11 @@ std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
     Mantid::Kernel::ProgressBase &progress) const {
 
   // Create a vector of addresses. Note that the peaks live on the stack. This
-  // here only works,
-  // because the peaks are always in a stack frame below.
+  // here only works, because the peaks are always in a stack frame below.
   std::vector<SXPeak *> peaks;
-  for (const auto &peak : peakList) {
-    peaks.push_back(&const_cast<SXPeak &>(peak));
-  }
+  peaks.reserve(peakList.size());
+  std::transform(peakList.cbegin(), peakList.cend(), std::back_inserter(peaks),
+                 [](const auto &peak) { return &const_cast<SXPeak &>(peak); });
 
   // Add the peaks to a graph
   Edge edge;
@@ -633,7 +630,7 @@ std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
                         std::string(" peaks. Investigating peak number ");
   int peakCounter = 0;
 
-  for (const auto peak : peaks) {
+  for (auto peak : peaks) {
     ++peakCounter;
 
     // 1. Add the vertex

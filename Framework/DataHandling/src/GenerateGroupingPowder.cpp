@@ -7,8 +7,10 @@
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/System.h"
@@ -22,8 +24,9 @@
 
 #include <fstream>
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Poco::XML;
 
 namespace Mantid {
@@ -48,15 +51,15 @@ const std::string GenerateGroupingPowder::category() const {
 /** Initialize the algorithm's properties.
  */
 void GenerateGroupingPowder::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "A workspace from which to generate the grouping.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "A workspace from which to generate the grouping.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble,
                   "The angle step for grouping, in degrees.");
-  declareProperty(make_unique<FileProperty>("GroupingFilename", "",
-                                            FileProperty::Save, ".xml"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "",
+                                                 FileProperty::Save, ".xml"),
                   "A grouping file that will be created.");
   declareProperty("GenerateParFile", true,
                   "If true, a par file with a corresponding name to the "
@@ -67,6 +70,7 @@ void GenerateGroupingPowder::init() {
  */
 void GenerateGroupingPowder::exec() {
   MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
+  const auto &spectrumInfo = input_ws->spectrumInfo();
   const auto &detectorInfo = input_ws->detectorInfo();
   const auto &detectorIDs = detectorInfo.detectorIDs();
   if (detectorIDs.empty())
@@ -79,16 +83,24 @@ void GenerateGroupingPowder::exec() {
   std::vector<double> twoThetaAverage(numSteps, 0.);
   std::vector<double> rAverage(numSteps, 0.);
 
-  for (size_t i = 0; i < detectorIDs.size(); ++i) {
-    if (detectorInfo.isMonitor(i))
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) ||
+        spectrumInfo.isMonitor(i)) {
       continue;
-
-    const double tt = detectorInfo.twoTheta(i) * Geometry::rad2deg;
-    const double r = detectorInfo.l2(i);
+    }
+    const auto &det = spectrumInfo.detector(i);
+    const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
+    const double r = spectrumInfo.l2(i);
     const size_t where = static_cast<size_t>(tt / step);
-    groups[where].emplace_back(detectorIDs[i]);
     twoThetaAverage[where] += tt;
     rAverage[where] += r;
+    if (spectrumInfo.hasUniqueDetector(i)) {
+      groups[where].emplace_back(det.getID());
+    } else {
+      const auto &group = dynamic_cast<const DetectorGroup &>(det);
+      const auto ids = group.getDetectorIDs();
+      groups[where].insert(groups[where].end(), ids.begin(), ids.end());
+    }
   }
 
   const std::string XMLfilename = getProperty("GroupingFilename");
@@ -125,10 +137,8 @@ void GenerateGroupingPowder::exec() {
     }
   }
   if (goodGroups == 0) {
-    g_log.error("Something terrible has happened: I cannot find any detectors "
-                "with scattering angle between 0 and 180 degrees");
     throw Exception::InstrumentDefinitionError(
-        "Detector scattering angles not between 0 and 180 degrees");
+        "No detectors found in scattering angles between 0 and 180 degrees");
   }
 
   DOMWriter writer;

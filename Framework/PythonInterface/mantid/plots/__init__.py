@@ -20,11 +20,18 @@ from collections import Iterable
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
+from mantid.plots.scales import PowerScale, SquareScale
 from matplotlib import cbook
 from matplotlib.axes import Axes
-from matplotlib.container import Container
-from matplotlib.projections import register_projection
+from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
+from matplotlib.container import Container
+from matplotlib.image import AxesImage
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+from matplotlib.projections import register_projection
+from matplotlib.scale import register_scale
+from matplotlib.table import Table
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -67,14 +74,16 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-    def __init__(self, artists, data_replace_cb):
+    def __init__(self, artists, data_replace_cb, spec_num=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
+        :param spec_num: The spectrum number of the spectrum used to plot the artist
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
+        self.spec_num = spec_num
 
     def remove(self, axes):
         """
@@ -91,7 +100,7 @@ class _WorkspaceArtists(object):
                 except ValueError:
                     pass
 
-        if (not axes.is_empty()) and axes.legend_ is not None:
+        if (not axes.is_empty(axes)) and axes.legend_ is not None:
             axes.legend()
 
     def replace_data(self, workspace):
@@ -141,14 +150,87 @@ class MantidAxes(Axes):
         self.tracked_workspaces = dict()
         self.creation_args = []
 
-    def track_workspace_artist(self, workspace, artists, data_replace_cb=None):
+    def add_artist_correctly(self, artist):
+        """
+        Add an artist via the correct function.
+        MantidAxes will not correctly track artists added via :code:`add_artist`.
+        They must be added via the correct function for features like
+        autoscaling to work.
+
+        :param artist: A Matplotlib Artist object
+        """
+        artist.set_transform(self.transData)
+        if artist.axes:
+            artist.remove()
+        if isinstance(artist, Line2D):
+            self.add_line(artist)
+        elif isinstance(artist, Collection):
+            self.add_collection(artist)
+        elif isinstance(artist, Container):
+            self.add_container(artist)
+        elif isinstance(artist, AxesImage):
+            self.add_image(artist)
+        elif isinstance(artist, Patch):
+            self.add_patch(artist)
+        elif isinstance(artist, Table):
+            self.add_table(artist)
+        else:
+            self.add_artist(artist)
+
+    @staticmethod
+    def from_mpl_axes(ax, ignore_artists=None):
+        """
+        Returns a MantidAxes from an Axes object.
+        Transfers all transferable artists from a Matplotlib.Axes
+        instance to a MantidAxes instance on the same figure. Then
+        removes the Matplotlib.Axes.
+
+        :param ax: An Axes object
+        :param ignore_artists: List of Artist types to ignore
+        :returns: A MantidAxes object
+        """
+        if not ignore_artists:
+            ignore_artists = []
+        prop_cycler = ax._get_lines.prop_cycler  # tracks line color cycle
+        artists = ax.get_children()
+        mantid_axes = ax.figure.add_subplot(111, projection='mantid',
+                                            label='mantid')
+        for artist in artists:
+            if not any(isinstance(artist, artist_type) for artist_type in
+                       ignore_artists):
+                try:
+                    mantid_axes.add_artist_correctly(artist)
+                except NotImplementedError:
+                    pass
+        mantid_axes.set_title(ax.get_title())
+        mantid_axes._get_lines.prop_cycler = prop_cycler
+        ax.remove()
+        return mantid_axes
+
+    @staticmethod
+    def get_spec_num_from_wksp_index(workspace, wksp_index):
+        return workspace.getSpectrum(wksp_index).getSpectrumNo()
+
+    def _get_spec_number(self, workspace, kwargs):
+        if kwargs.get('specNum', None) is not None:
+            return kwargs['specNum']
+        elif kwargs.get('wkspIndex', None) is not None:
+            return self.get_spec_num_from_wksp_index(workspace,
+                                                     kwargs['wkspIndex'])
+        else:
+            return None
+
+    def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
+                               spec_num=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
-        :param workspace: The name of the workspace. If empty then no tracking takes place
+        :param workspace: A Workspace object. If empty then no tracking takes place
         :param artists: A single artist or iterable of artists containing the data for the workspace
         :param data_replace_cb: A function to call when the data is replaced to update
         the artist (optional)
+        :param spec_num: The spectrum number associated with the artist (optional)
+
         :returns: The artists variable as it was passed in.
         """
         name = workspace.name()
@@ -157,7 +239,8 @@ class MantidAxes(Axes):
                 def data_replace_cb(_, __):
                     logger.warning("Updating data on this plot type is not yet supported")
             artist_info = self.tracked_workspaces.setdefault(name, [])
-            artist_info.append(_WorkspaceArtists(artists, data_replace_cb))
+            artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
+                                                 spec_num))
 
         return artists
 
@@ -165,7 +248,7 @@ class MantidAxes(Axes):
         """
         Remove the artists reference by this workspace (if any) and return True
         if the axes is then empty
-        :param workspace: The name of the workspace
+        :param workspace: A Workspace object
         :return: True if the axes is empty, false if artists remain or this workspace is not associated here
         """
         try:
@@ -176,7 +259,7 @@ class MantidAxes(Axes):
 
         for workspace_artist in artist_info:
             workspace_artist.remove(self)
-        return self.is_empty()
+        return self.is_empty(self)
 
     def replace_workspace_artists(self, workspace):
         """
@@ -194,15 +277,75 @@ class MantidAxes(Axes):
             workspace_artist.replace_data(workspace)
         return True
 
-    def is_empty(self):
+    @staticmethod
+    def is_empty(axes):
         """
         Checks the known artist containers to see if anything exists within them
         :return: True if no artists exist, false otherwise
         """
         def _empty(container):
             return len(container) == 0
-        return _empty(self.lines) and _empty(self.images) and _empty(self.collections)\
-               and _empty(self.containers)
+        return (_empty(axes.lines) and _empty(axes.images) and
+                _empty(axes.collections) and _empty(axes.containers))
+
+    def twinx(self):
+        """
+        Create a twin Axes sharing the xaxis
+
+        Create a new Axes instance with an invisible x-axis and an independent
+        y-axis positioned opposite to the original one (i.e. at right). The
+        x-axis autoscale setting will be inherited from the original Axes.
+        To ensure that the tick marks of both y-axes align, see
+        `~matplotlib.ticker.LinearLocator`
+
+        Returns
+        -------
+        ax_twin : Axes
+            The newly created Axes instance
+
+        Notes
+        -----
+        For those who are 'picking' artists while using twinx, pick
+        events are only called for the artists in the top-most axes.
+        """
+        ax2 = self._make_twin_axes(sharex=self, projection='mantid')
+        ax2.yaxis.tick_right()
+        ax2.yaxis.set_label_position('right')
+        ax2.yaxis.set_offset_position('right')
+        ax2.set_autoscalex_on(self.get_autoscalex_on())
+        self.yaxis.tick_left()
+        ax2.xaxis.set_visible(False)
+        ax2.patch.set_visible(False)
+        return ax2
+
+    def twiny(self):
+        """
+        Create a twin Axes sharing the yaxis
+
+        Create a new Axes instance with an invisible y-axis and an independent
+        x-axis positioned opposite to the original one (i.e. at top). The
+        y-axis autoscale setting will be inherited from the original Axes.
+        To ensure that the tick marks of both x-axes align, see
+        `~matplotlib.ticker.LinearLocator`
+
+        Returns
+        -------
+        ax_twin : Axes
+            The newly created Axes instance
+
+        Notes
+        -----
+        For those who are 'picking' artists while using twiny, pick
+        events are only called for the artists in the top-most axes.
+        """
+        ax2 = self._make_twin_axes(sharey=self, projection='mantid')
+        ax2.xaxis.tick_top()
+        ax2.xaxis.set_label_position('top')
+        ax2.set_autoscaley_on(self.get_autoscaley_on())
+        self.xaxis.tick_bottom()
+        ax2.yaxis.set_visible(False)
+        ax2.patch.set_visible(False)
+        return ax2
 
     @plot_decorator
     def plot(self, *args, **kwargs):
@@ -235,7 +378,11 @@ class MantidAxes(Axes):
                 self.autoscale()
                 return artists
 
-            return self.track_workspace_artist(args[0], plotfunctions.plot(self, *args, **kwargs), _data_update)
+            workspace = args[0]
+            spec_num = self._get_spec_number(workspace, kwargs)
+            return self.track_workspace_artist(
+                workspace, plotfunctions.plot(self, *args, **kwargs),
+                _data_update, spec_num)
         else:
             return Axes.plot(self, *args, **kwargs)
 
@@ -307,14 +454,17 @@ class MantidAxes(Axes):
                 # update line properties to match original
                 orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
                 for artist_orig, artist_new in zip(orig_flat, new_flat):
-                     artist_new.update_from(artist_orig)
+                    artist_new.update_from(artist_orig)
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
                 self.autoscale()
                 return container_new
 
-            return self.track_workspace_artist(args[0], plotfunctions.errorbar(self, *args, **kwargs),
-                                               _data_update)
+            workspace = args[0]
+            spec_num = self._get_spec_number(workspace, kwargs)
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.errorbar(self, *args, **kwargs),
+                                               _data_update, spec_num=spec_num)
         else:
             return Axes.errorbar(self, *args, **kwargs)
 
@@ -410,8 +560,9 @@ class MantidAxes(Axes):
             def _update_data(artists, workspace):
                 return self._redraw_colorplot(plotfunctions.imshow,
                                               artists, workspace, **kwargs)
-
-            return self.track_workspace_artist(args[0], plotfunctions.imshow(self, *args, **kwargs),
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.imshow(self, *args, **kwargs),
                                                _update_data)
         else:
             return Axes.imshow(self, *args, **kwargs)
@@ -431,8 +582,10 @@ class MantidAxes(Axes):
             def _update_data(artists, workspace):
                 return self._redraw_colorplot(plotfunctions_func,
                                               artists, workspace, **kwargs)
+            workspace = args[0]
             # We return the last mesh so the return type is a single artist like the standard Axes
-            artists = self.track_workspace_artist(args[0], plotfunctions_func(self, *args, **kwargs),
+            artists = self.track_workspace_artist(workspace,
+                                                  plotfunctions_func(self, *args, **kwargs),
                                                   _update_data)
             try:
                 return artists[-1]
@@ -494,7 +647,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.contour(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.contour(self, *args, **kwargs))
         else:
             return Axes.contour(self, *args, **kwargs)
 
@@ -520,7 +675,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.contourf(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.contourf(self, *args, **kwargs))
         else:
             return Axes.contourf(self, *args, **kwargs)
 
@@ -546,7 +703,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.tripcolor(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.tripcolor(self, *args, **kwargs))
         else:
             return Axes.tripcolor(self, *args, **kwargs)
 
@@ -572,7 +731,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.tricontour(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.tricontour(self, *args, **kwargs))
         else:
             return Axes.tricontour(self, *args, **kwargs)
 
@@ -598,7 +759,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.tricontourf(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.tricontourf(self, *args, **kwargs))
         else:
             return Axes.tricontourf(self, *args, **kwargs)
 
@@ -792,3 +955,5 @@ class MantidAxes3D(Axes3D):
 
 register_projection(MantidAxes)
 register_projection(MantidAxes3D)
+register_scale(PowerScale)
+register_scale(SquareScale)

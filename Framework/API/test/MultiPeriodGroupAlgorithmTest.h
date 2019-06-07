@@ -29,9 +29,9 @@ public:
   const std::string summary() const override { return "Test summary"; }
   void init() override {
     declareProperty(
-        make_unique<ArrayProperty<std::string>>("MyInputWorkspaces"));
-    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                     Direction::Output),
+        std::make_unique<ArrayProperty<std::string>>("MyInputWorkspaces"));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                          Direction::Output),
                     "");
     declareProperty(
         "PropertyA", 1,
@@ -67,14 +67,14 @@ public:
   int version() const override { return 1; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {
-    declareProperty(
-        make_unique<WorkspaceProperty<>>("PropertyA", "ws1", Direction::Input));
-    declareProperty(
-        make_unique<WorkspaceProperty<>>("PropertyB", "ws2", Direction::Input));
-    declareProperty(
-        make_unique<WorkspaceProperty<>>("PropertyC", "ws3", Direction::Input));
-    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                     Direction::Output),
+    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyA", "ws1",
+                                                          Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyB", "ws2",
+                                                          Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("PropertyC", "ws3",
+                                                          Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                          Direction::Output),
                     "");
     declareProperty(
         "PropertyX", 1,
@@ -131,11 +131,11 @@ public:
       int version() const override { return 1; }
       const std::string summary() const override { return "Test summary"; }
       void init() override {
-        declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+        declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                             "InputWorkspaces", "", Direction::Input),
                         "");
-        declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                         Direction::Output),
+        declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Direction::Output),
                         "");
       }
       void exec() override {
@@ -160,7 +160,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TSM_ASSERT_THROWS("Should throw because fetchInputPropertyName is "
                       "returning the name of a property which doesn't exist.",
-                      alg.execute(), std::runtime_error);
+                      alg.execute(), const std::runtime_error &);
   }
 
   void test_input_property_doesnt_exist_throws() {
@@ -173,9 +173,9 @@ public:
       const std::string summary() const override { return "Test summary"; }
       void init() override {
         declareProperty(
-            make_unique<ArrayProperty<std::string>>("InputWorkspaces"));
-        declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                         Direction::Output),
+            std::make_unique<ArrayProperty<std::string>>("InputWorkspaces"));
+        declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Direction::Output),
                         "Name of the output workspace");
       }
       void exec() override {
@@ -200,7 +200,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TSM_ASSERT_THROWS("Should throw because fetchInputPropertyName is "
                       "returning the name of a property which doesn't exist.",
-                      alg.execute(), Kernel::Exception::NotFoundError);
+                      alg.execute(), const Kernel::Exception::NotFoundError &);
   }
 
   void test_process_groups_with_array_input() {

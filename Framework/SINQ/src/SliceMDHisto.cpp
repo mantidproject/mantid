@@ -30,13 +30,13 @@ using namespace Mantid;
 SliceMDHisto::SliceMDHisto() : Mantid::API::Algorithm(), m_rank(0), m_dim() {}
 
 void SliceMDHisto::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "InputWorkspace", "", Direction::Input));
-  declareProperty(make_unique<ArrayProperty<int>>("Start"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("Start"),
                   "A comma separated list of min,for each dimension");
-  declareProperty(make_unique<ArrayProperty<int>>("End"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("End"),
                   "A comma separated list of max for each dimension");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
 }
 

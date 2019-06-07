@@ -55,7 +55,7 @@ public:
 
   void test_That_Requests_For_An_Undefined_Environment_Throw() {
     Sample sample;
-    TS_ASSERT_THROWS(sample.getEnvironment(), std::runtime_error);
+    TS_ASSERT_THROWS(sample.getEnvironment(), const std::runtime_error &);
   }
 
   void
@@ -212,7 +212,7 @@ public:
   void test_setCrystalStructure() {
     Sample sample;
     TS_ASSERT(!sample.hasCrystalStructure());
-    TS_ASSERT_THROWS(sample.getCrystalStructure(), std::runtime_error);
+    TS_ASSERT_THROWS(sample.getCrystalStructure(), const std::runtime_error &);
 
     CrystalStructure structure("3 4 5 90 90 90", "C m m m",
                                "Fe 0.12 0.23 0.121");
@@ -228,7 +228,7 @@ public:
   void test_clearCrystalStructure() {
     Sample sample;
     TS_ASSERT(!sample.hasCrystalStructure());
-    TS_ASSERT_THROWS(sample.getCrystalStructure(), std::runtime_error);
+    TS_ASSERT_THROWS(sample.getCrystalStructure(), const std::runtime_error &);
 
     CrystalStructure structure("3 4 5 90 90 90", "C m m m",
                                "Fe 0.12 0.23 0.121");
@@ -351,6 +351,21 @@ public:
         dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML());
     // Geometry values
     TS_ASSERT_DELTA(loaded.getWidth(), sample.getWidth(), 1e-6);
+  }
+
+  void test_nexus_empty_name() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTest.nxs");
+
+    Sample sample;
+
+    sample.saveNexus(th.file, "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file, "sample");
+
+    TS_ASSERT(loaded.getName().empty());
   }
 };
 

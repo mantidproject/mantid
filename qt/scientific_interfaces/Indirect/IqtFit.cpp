@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
 
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -39,17 +39,17 @@ IqtFit::IqtFit(QWidget *parent)
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
 
-  setFitDataPresenter(Mantid::Kernel::make_unique<IndirectFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
       m_iqtFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
+  setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+
+  setEditResultVisible(true);
 }
 
 void IqtFit::setupFitTab() {
-  setSampleWSSuffices({"_iqt"});
-  setSampleFBSuffices({"_iqt.nxs"});
-
   // Create custom function groups
   auto &functionFactory = FunctionFactory::Instance();
   const auto exponential = functionFactory.createFunction("ExpDecay");
@@ -69,8 +69,6 @@ void IqtFit::setupFitTab() {
   setBackgroundOptions({"None", "FlatBackground"});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotResult()));
-  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
 
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
   connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
@@ -119,10 +117,6 @@ std::string IqtFit::fitTypeString() const {
   return "";
 }
 
-void IqtFit::updatePlotOptions() {
-  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-}
-
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   fitAlgorithm->setProperty("ExtractMembers",
                             boolSettingValue("ExtractMembers"));
@@ -131,51 +125,11 @@ void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 
 void IqtFit::runClicked() { runTab(); }
 
-void IqtFit::plotResult() {
-  setPlotResultIsPlotting(true);
-  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
-  setPlotResultIsPlotting(false);
-}
-
 void IqtFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
 }
 
-void IqtFit::setFitSingleSpectrumIsFitting(bool fitting) {
-  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
-      fitting ? "Fitting..." : "Fit Single Spectrum");
-  setButtonsEnabled(!fitting);
-}
-
-void IqtFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
-void IqtFit::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
-  setFitSingleSpectrumEnabled(enabled);
-}
-
-void IqtFit::setRunEnabled(bool enabled) {
-  m_uiForm->pbRun->setEnabled(enabled);
-}
-
-void IqtFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
-void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-}
-
-void IqtFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
-}
+void IqtFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

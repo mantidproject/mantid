@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -23,14 +25,14 @@ using namespace API;
 
 CylinderAbsorption::CylinderAbsorption()
     : AbsorptionCorrection(), m_cylHeight(0.0), m_cylRadius(0.0),
-      m_numSlices(0), m_sliceThickness(0), m_numAnnuli(0), m_deltaR(0) {}
+      m_numSlices(0), m_numAnnuli(0), m_useSampleShape(false) {}
 
 void CylinderAbsorption::defineProperties() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("CylinderSampleHeight", -1.0, mustBePositive,
+  declareProperty("CylinderSampleHeight", EMPTY_DBL(), mustBePositive,
                   "The height of the cylindrical sample in centimetres");
-  declareProperty("CylinderSampleRadius", -1.0, mustBePositive,
+  declareProperty("CylinderSampleRadius", EMPTY_DBL(), mustBePositive,
                   "The radius of the cylindrical sample in centimetres");
 
   auto positiveInt = boost::make_shared<BoundedValidator<int>>();
@@ -45,50 +47,98 @@ void CylinderAbsorption::defineProperties() {
       "calculation");
 }
 
+// returns an empty string if anything is wrong
+void CylinderAbsorption::getShapeFromSample(
+    const Geometry::IObject &sampleShape, bool updateHeight,
+    bool updateRadius) {
+  if (!(updateHeight || updateRadius))
+    return; // nothing to update
+  if (!sampleShape.hasValidShape())
+    return; // no valid shape
+  if (sampleShape.shape() !=
+      Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
+    return; // not a cylinder
+
+  // get to the underlying ShapeInfo object
+  const auto csgshape = dynamic_cast<const CSGObject *>(&sampleShape);
+  if (!csgshape)
+    return;
+  const auto &shapeObj = csgshape->shapeInfo();
+
+  if (updateRadius)
+    m_cylRadius = shapeObj.radius();
+  if (updateHeight)
+    m_cylHeight = shapeObj.height();
+}
+
 /// Fetch the properties and set the appropriate member variables
 void CylinderAbsorption::retrieveProperties() {
-  m_cylHeight = getProperty("CylinderSampleHeight"); // in cm
-  m_cylRadius = getProperty("CylinderSampleRadius"); // in cm
-  m_cylHeight *= 0.01;                               // now in m
-  m_cylRadius *= 0.01;                               // now in m
-
   m_numSlices = getProperty("NumberOfSlices");
-  m_sliceThickness = m_cylHeight / m_numSlices;
   m_numAnnuli = getProperty("NumberOfAnnuli");
-  m_deltaR = m_cylRadius / m_numAnnuli;
 
-  /* The number of volume elements is
-   * numslices*(1+2+3+.....+numAnnuli)*6
-   * Since the first annulus is separated in 6 segments, the next one in 12 and
-   * so on.....
-   */
-  m_numVolumeElements = m_numSlices * m_numAnnuli * (m_numAnnuli + 1) * 3;
+  bool userSuppliedHeight = false;
+  bool userSuppliedRadius = false;
 
-  if (m_numVolumeElements == 0) {
-    g_log.error() << "Input properties lead to no defined volume elements.\n";
-    throw std::runtime_error("No volume elements defined.");
+  m_cylHeight = getProperty("CylinderSampleHeight"); // in cm
+  if (!isEmpty(m_cylHeight)) {
+    m_cylHeight *= 0.01; // now in m
+    userSuppliedHeight = true;
+  }
+  m_cylRadius = getProperty("CylinderSampleRadius"); // in cm
+  if (!isEmpty(m_cylRadius)) {
+    m_cylRadius *= 0.01; // now in m
+    userSuppliedRadius = true;
   }
 
-  m_sampleVolume = m_cylHeight * M_PI * m_cylRadius * m_cylRadius;
+  // this declares that at least part of the built-in sample geometry should be
+  // ignored and use the supplied parameters instead
+  m_useSampleShape = !(userSuppliedHeight || userSuppliedRadius);
 
-  if (m_sampleVolume == 0.0) {
-    g_log.error() << "Defined sample has zero volume.\n";
-    throw std::runtime_error("Sample with zero volume defined.");
+  // if the user supplied both, then just ignore the built-in shape
+  if (userSuppliedHeight && userSuppliedRadius) {
+    g_log.information(
+        "Chosing user supplied sample geometry in CylinderAbsorption");
+    return;
+  }
+
+  // get the missing parameters from the sample shape
+  const auto &sampleShape = m_inputWS->sample().getShape();
+  getShapeFromSample(sampleShape, !userSuppliedHeight, !userSuppliedRadius);
+
+  bool heightOk = m_cylRadius >= 0. && (!isEmpty(m_cylHeight));
+  bool radiusOk = (m_cylRadius >= 0.) && (!isEmpty(m_cylRadius));
+  if (heightOk && radiusOk) {
+    g_log.information() << "Creating cylinder with radius=" << m_cylRadius
+                        << "m, height=" << m_cylHeight << "m\n";
+  } else if (!heightOk) {
+    if (radiusOk) {
+      throw std::invalid_argument("Failed to specify height of cylinder");
+    } else { // radiusOk == false
+      throw std::invalid_argument(
+          "Failed to specify height and radius of cylinder");
+    }
+  } else { // radiusOk == false
+    throw std::invalid_argument("Failed to specify radius of cylinder");
   }
 }
 
 std::string CylinderAbsorption::sampleXML() {
+  if (m_useSampleShape)
+    return std::string();
+
   // Get the sample position, which is typically the origin but we should be
   // generic
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   // Shift so that cylinder is centered at sample position
   const double cylinderBase = (-0.5 * m_cylHeight) + samplePos.Y();
 
+  // The default behavior is to have the sample along the y-axis. If something
+  // else is desired, it will have to be done through SetSample.
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<cylinder id=\"detector-shape\"> "
                  << "<centre-of-bottom-base x=\"" << samplePos.X() << "\" y=\""
                  << cylinderBase << "\" z=\"" << samplePos.Z() << "\" /> "
-                 << R"(<axis x="0" y="1" z="0" /> )"
+                 << "<axis x=\"0\" y=\"1\" z=\"0\" /> "
                  << "<radius val=\"" << m_cylRadius << "\" /> "
                  << "<height val=\"" << m_cylHeight << "\" /> "
                  << "</cylinder>";
@@ -99,46 +149,27 @@ std::string CylinderAbsorption::sampleXML() {
 /// Calculate the distances for L1 and element size for each element in the
 /// sample
 void CylinderAbsorption::initialiseCachedDistances() {
-  m_L1s.resize(m_numVolumeElements);
-  m_elementVolumes.resize(m_numVolumeElements);
-  m_elementPositions.resize(m_numVolumeElements);
+  if (!m_sampleObject) // should never happen
+    throw std::runtime_error("Do not have a sample object defined");
 
-  int counter = 0;
-  // loop over slices
-  for (int i = 0; i < m_numSlices; ++i) {
-    const double z = (i + 0.5) * m_sliceThickness - 0.5 * m_cylHeight;
-
-    // Number of elements in 1st annulus
-    int Ni = 0;
-    // loop over annuli
-    for (int j = 0; j < m_numAnnuli; ++j) {
-      Ni += 6;
-      const double R = (j * m_cylRadius / m_numAnnuli) + (m_deltaR / 2.0);
-      // loop over elements in current annulus
-      for (int k = 0; k < Ni; ++k) {
-        const double phi = 2 * M_PI * k / Ni;
-        // Calculate the current position in the sample in Cartesian
-        // coordinates.
-        // Remember that our cylinder has its axis along the y axis
-        m_elementPositions[counter](R * sin(phi), z, R * cos(phi));
-        assert(m_sampleObject->isValid(m_elementPositions[counter]));
-        // Create track for distance in cylinder before scattering point
-        Track incoming(m_elementPositions[counter], m_beamDirection * -1.0);
-
-        m_sampleObject->interceptSurface(incoming);
-        m_L1s[counter] = incoming.cbegin()->distFromStart;
-
-        // Also calculate element volumes here
-        const double outerR = R + (m_deltaR / 2.0);
-        const double innerR = outerR - m_deltaR;
-        const double elementVolume =
-            M_PI * (outerR * outerR - innerR * innerR) * m_sliceThickness / Ni;
-        m_elementVolumes[counter] = elementVolume;
-
-        counter++;
-      }
-    }
-  }
+  if (m_sampleObject->shape() !=
+      Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
+    throw std::runtime_error("Sample shape is not a cylinder");
+  const Geometry::CSGObject *shape =
+      dynamic_cast<const Geometry::CSGObject *>(m_sampleObject);
+  if (!shape)
+    throw std::runtime_error(
+        "Failed to convert shape from IObject to CSGObject");
+  auto raster = Geometry::Rasterize::calculateCylinder(
+      m_beamDirection, *shape, m_numSlices, m_numAnnuli);
+  m_sampleVolume = raster.totalvolume;
+  if (raster.l1.size() == 0)
+    throw std::runtime_error("Failed to rasterize shape");
+  // move over the information
+  m_numVolumeElements = raster.l1.size();
+  m_L1s = std::move(raster.l1);
+  m_elementPositions = std::move(raster.position);
+  m_elementVolumes = std::move(raster.volume);
 }
 
 } // namespace Algorithms

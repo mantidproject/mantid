@@ -71,8 +71,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
     //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument );
-    TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), const std::invalid_argument &);
+    TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace","test_out2") );
     delete alg;
   }
@@ -436,10 +436,6 @@ public:
     else
       performTest(work_in1,work_in2, true, 4.0, sqrt(12.0), false, false, true);
   }
-
-
-
-
 
   void test_Event_2DSingleSpectrum()
   {
@@ -881,15 +877,11 @@ public:
         const auto &yOut = work_out1->y(wi);
         const auto &eOut = work_out1->e(wi);
         for (size_t i=0; i < yOut.size(); i++) {
-          //std::ostringstream mess;
-          //mess << message << ", evaluated at wi " << wi << ", i " << i;
           TS_ASSERT_DELTA(xIn[i], xOut[i], 0.0001);
           const double sig3 = yOut[i];
           const double err3 = eOut[i];
           TS_ASSERT_DELTA(sig3, expectedValue, 0.0001);
           TS_ASSERT_DELTA(err3, expectedError, 0.0001);
-          //TSM_ASSERT_DELTA(mess.str(), sig3, expectedValue, 0.0001);
-          //TSM_ASSERT_DELTA(mess.str(), err3, expectedError, 0.0001);
           if (fabs(err3 - expectedError) > 0.001)
           {
             breakOut=true;
@@ -906,11 +898,6 @@ public:
   bool checkDataItem (const MatrixWorkspace_sptr work_in1,  const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1,
       size_t i, size_t ws2Index)
   {
-    // Avoid going out of bounds! For some of the grouped ones
-//    if (i/work_in1->blocksize() >= work_in1->getNumberHistograms())
-//      return true;
-//    if (ws2Index/work_in2->blocksize() >= work_in2->getNumberHistograms())
-//      return true;
     double sig1 = work_in1->y(i/work_in1->blocksize())[i%work_in1->blocksize()];
     double sig2 = work_in2->y(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
     double sig3 = work_out1->y(i/work_in1->blocksize())[i%work_in1->blocksize()];
@@ -940,9 +927,6 @@ public:
     // Return false if the error is wrong
     return (diff < 0.0001);
   }
-
-
-
 
   void doDivideWithMaskedTest(bool replaceInput)
   {
@@ -1014,5 +998,33 @@ public:
 
 };
 
+//============================================================================
+/** Performance test with large workspaces. */
 
+class @MULTIPLYDIVIDETEST_CLASS@Performance : public CxxTest::TestSuite
+{
+  Workspace2D_sptr m_ws2D_1, m_ws2D_2;
+
+public:
+  static @MULTIPLYDIVIDETEST_CLASS@Performance *createSuite() { return new @MULTIPLYDIVIDETEST_CLASS@Performance(); }
+  static void destroySuite( @MULTIPLYDIVIDETEST_CLASS@Performance *suite ) { delete suite; }
+
+  void setUp() override
+  {
+    constexpr int histograms{100000};
+    constexpr int bins{1000};
+    m_ws2D_1 = WorkspaceCreationHelper::create2DWorkspace(histograms, bins);
+    m_ws2D_2 = WorkspaceCreationHelper::create2DWorkspace(histograms, bins);
+  }
+
+  void test_large_2D()
+  {
+    constexpr bool doDivide{@MULTIPLYDIVIDETEST_DO_DIVIDE@};
+    if (doDivide) {
+      MatrixWorkspace_sptr out = m_ws2D_1 / m_ws2D_2;
+    } else {
+      MatrixWorkspace_sptr out = m_ws2D_1 * m_ws2D_2;
+    }
+  }
+};
 #endif /*MULTIPLYTEST_H_ or DIVIDETEST_H_*/

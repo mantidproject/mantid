@@ -9,8 +9,7 @@
 """ SANSLoad algorithm which handles loading SANS files"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty,
-                           EnabledWhenProperty, PropertyCriterion)
+from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
 from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         WorkspaceProperty)
 
@@ -41,12 +40,7 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         self.declareProperty("UseCached", True, direction=Direction.Input,
                              doc="Checks if there are loaded files available. If they are, those files are used.")
 
-        self.declareProperty("MoveWorkspace", defaultValue=False, direction=Direction.Input,
-                             doc="Move the workspace according to the SANSState setting. This might be useful"
-                             "for manual inspection.")
-
         # Beam coordinates if an initial move of the workspace is requested
-        enabled_condition = EnabledWhenProperty("MoveWorkspace", PropertyCriterion.IsNotDefault)
         self.declareProperty(FloatArrayProperty(name='BeamCoordinates', values=[]),
                              doc='The coordinates which is used to position the instrument component(s). '
                                  'If the workspaces should be loaded with an initial move, then this '
@@ -56,8 +50,6 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                              doc='Component that should be moved. '
                                  'If the workspaces should be loaded with an initial move, then this '
                                  'needs to be specified.')
-        self.setPropertySettings("BeamCoordinates", enabled_condition)
-        self.setPropertySettings("Component", enabled_condition)
 
         # ------------
         #  OUTPUT
@@ -144,21 +136,17 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                                                         parent_alg=self)
         progress.report("Loaded the data.")
 
-        # Check if a move has been requested and perform it. This can be useful if scientists want to load the data and
-        # have it moved in order to inspect it with other tools
-        move_workspaces = self.getProperty("MoveWorkspace").value
-        if move_workspaces:
-            progress_move = Progress(self, start=0.8, end=1.0, nreports=2)
-            progress_move.report("Starting to move the workspaces.")
-            self._perform_initial_move(workspaces, state)
-            progress_move.report("Finished moving the workspaces.")
+        progress_move = Progress(self, start=0.8, end=1.0, nreports=2)
+        progress_move.report("Starting to move the workspaces.")
+        self._perform_initial_move(workspaces, state)
+        progress_move.report("Finished moving the workspaces.")
 
         # Set output workspaces
-        for workspace_type, workspace in list(workspaces.items()):
+        for workspace_type, workspace in workspaces.items():
             self.set_output_for_workspaces(workspace_type, workspace)
 
         # Set the output monitor workspaces
-        for workspace_type, workspace in list(workspace_monitors.items()):
+        for workspace_type, workspace in workspace_monitors.items():
             self.set_output_for_monitor_workspaces(workspace_type, workspace)
 
     def validateInputs(self):
@@ -336,25 +324,36 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
     def _perform_initial_move(self, workspaces, state):
         move_name = "SANSMove"
         state_dict = state.property_manager
+
+        zero_options = {"SANSState": state_dict,
+                        "MoveType": "SetToZero",
+                        "Component": ""}
+        zero_alg = create_child_algorithm(self, move_name, **zero_options)
+
         move_options = {"SANSState": state_dict,
                         "MoveType": "InitialMove"}
-
-        # If beam centre was specified then use it
-        beam_coordinates = self.getProperty("BeamCoordinates").value
-        if beam_coordinates:
-            move_options.update({"BeamCoordinates": beam_coordinates})
-
-        # If component was specified then use it
-        component = self.getProperty("Component").value
-        if beam_coordinates:
-            move_options.update({"Component": component})
-
         move_alg = create_child_algorithm(self, move_name, **move_options)
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
-        for key, workspace_list in list(workspaces.items()):
+        for key, workspace_list in workspaces.items():
+            if SANSDataType.to_string(key) in ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect"):
+                is_trans = True
+            else:
+                is_trans = False
+            move_alg.setProperty("IsTransmissionWorkspace", is_trans)
             for workspace in workspace_list:
-                move_alg.setProperty("Workspace", workspace)
+                zero_alg.setProperty("Workspace", workspace)
+                zero_alg.execute()
+                zeroed_workspace = zero_alg.getProperty("Workspace").value
+
+                # If beam centre was specified then use it
+                beam_coordinates = self.getProperty("BeamCoordinates").value
+                if beam_coordinates:
+                    move_alg.setProperty("BeamCoordinates", beam_coordinates)
+
+                # ZOOM and LARMOR only have LAB, SANS2D and LOQ move both at once.
+                move_alg.setProperty("Component", "LAB")
+                move_alg.setProperty("Workspace", zeroed_workspace)
                 move_alg.execute()
 
     def _get_progress_for_file_loading(self, data):
@@ -365,10 +364,9 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                                                               data.calibration])
         progress_steps = number_of_files_to_load + 1
         # Check if there is a move operation to be performed
-        uses_move = self.getProperty("MoveWorkspace").value
 
         # The partitioning of the progress bar is 80% for loading if there is a move else 100%
-        end = 0.8 if uses_move else 1.0
+        end = 1.0
         progress = Progress(self, start=0.0, end=end, nreports=progress_steps)
         return progress
 

@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/HistogramBuilder.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -28,15 +27,14 @@ Histogram HistogramBuilder::build() const {
   if (getHistogramXMode(m_x->size(), m_y->size()) ==
       Histogram::XMode::BinEdges) {
     if (m_isDistribution)
-      histogram =
-          Kernel::make_unique<Histogram>(BinEdges(m_x), Frequencies(m_y));
+      histogram = std::make_unique<Histogram>(BinEdges(m_x), Frequencies(m_y));
     else
-      histogram = Kernel::make_unique<Histogram>(BinEdges(m_x), Counts(m_y));
+      histogram = std::make_unique<Histogram>(BinEdges(m_x), Counts(m_y));
   } else {
     if (m_isDistribution)
-      histogram = Kernel::make_unique<Histogram>(Points(m_x), Frequencies(m_y));
+      histogram = std::make_unique<Histogram>(Points(m_x), Frequencies(m_y));
     else
-      histogram = Kernel::make_unique<Histogram>(Points(m_x), Counts(m_y));
+      histogram = std::make_unique<Histogram>(Points(m_x), Counts(m_y));
   }
   if (m_e)
     histogram->setSharedE(m_e);

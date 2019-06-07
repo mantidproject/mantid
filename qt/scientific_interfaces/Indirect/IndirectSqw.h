@@ -31,7 +31,7 @@ public:
   bool validate() override;
 
 private slots:
-  void plotContour();
+  void plotRqwContour();
   void sqwAlgDone(bool error);
 
   void runClicked();
@@ -45,6 +45,8 @@ private slots:
                        QString const tooltip = "");
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   Mantid::API::MatrixWorkspace_const_sptr
   getADSWorkspace(std::string const &name) const;
   std::size_t getOutWsNumberOfSpectra() const;

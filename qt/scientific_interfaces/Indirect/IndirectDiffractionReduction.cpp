@@ -12,18 +12,14 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-// Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
 
 namespace {
-/// static logger
 Mantid::Kernel::Logger g_log("IndirectDiffractionReduction");
 
 // Helper function for use with std::transform.
@@ -34,21 +30,13 @@ std::string toStdString(const QString &qString) {
 
 DECLARE_SUBWINDOW(IndirectDiffractionReduction)
 
-using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
-
 using MantidQt::API::BatchAlgorithmRunner;
 
-//----------------------
-// Public member functions
-//----------------------
-/// Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
-    : UserSubWindow(parent), m_valDbl(nullptr),
+    : IndirectInterface(parent), m_valDbl(nullptr),
       m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
-/// Destructor
 IndirectDiffractionReduction::~IndirectDiffractionReduction() {
   saveSettings();
 }
@@ -59,9 +47,11 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction() {
 void IndirectDiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
 
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
-          SLOT(openDirectoryDialog()));
+          SLOT(manageUserDirectories()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
 
   connect(m_uiForm.iicInstrumentConfiguration,
@@ -208,11 +198,7 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
  */
 void IndirectDiffractionReduction::plotResults() {
   setPlotIsPlotting(true);
-
-  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-
-  QString plotType = m_uiForm.cbPlotType->currentText();
+  const QString plotType = m_uiForm.cbPlotType->currentText();
 
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
 
@@ -560,17 +546,18 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
 void IndirectDiffractionReduction::createGroupingWorkspace(
     const std::string &outputWsName) {
-  IAlgorithm_sptr groupingAlg =
+  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
+  auto const numberOfGroups = m_uiForm.spNumberGroups->value();
+  auto const instrument = instrumentConfig->getInstrumentName().toStdString();
+  auto const analyser = instrumentConfig->getAnalyserName().toStdString();
+  auto const componentName = analyser == "diffraction" ? "bank" : analyser;
+
+  auto groupingAlg =
       AlgorithmManager::Instance().create("CreateGroupingWorkspace");
   groupingAlg->initialize();
-
-  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
-
-  groupingAlg->setProperty("FixedGroupCount", m_uiForm.spNumberGroups->value());
-  groupingAlg->setProperty("InstrumentName",
-                           instrumentConfig->getInstrumentName().toStdString());
-  groupingAlg->setProperty("ComponentName",
-                           instrumentConfig->getAnalyserName().toStdString());
+  groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
+  groupingAlg->setProperty("InstrumentName", instrument);
+  groupingAlg->setProperty("ComponentName", componentName);
   groupingAlg->setProperty("OutputWorkspace", outputWsName);
 
   m_batchAlgoRunner->addAlgorithm(groupingAlg);
@@ -645,6 +632,8 @@ void IndirectDiffractionReduction::instrumentSelected(
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfVanadiumFile->setInstrumentOverride(instrumentName);
+  m_uiForm.rfCalFile_only->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(
       instrumentName.toStdString(), reflectionName.toStdString());
@@ -717,21 +706,8 @@ void IndirectDiffractionReduction::instrumentSelected(
   }
 }
 
-/**
- * Handles opening the directory manager window.
- */
-void IndirectDiffractionReduction::openDirectoryDialog() {
-  auto ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Handles the user clicking the help button.
- */
-void IndirectDiffractionReduction::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect Diffraction"));
+std::string IndirectDiffractionReduction::documentationPage() const {
+  return "Indirect Diffraction";
 }
 
 void IndirectDiffractionReduction::initLocalPython() {}

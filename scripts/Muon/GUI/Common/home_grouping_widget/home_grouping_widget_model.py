@@ -6,19 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.contexts.muon_context import MuonContext
 
 
 class HomeGroupingWidgetModel(object):
 
-    def __init__(self, muon_data=MuonContext()):
-        self._data = muon_data
+    def __init__(self, context=MuonContext()):
+        self._data = context.data_context
+        self._context = context
 
     def get_group_names(self):
-        return self._data.groups.keys()
+        return self._context.group_pair_context.group_names
 
     def get_pair_names(self):
-        return self._data.pairs.keys()
+        return self._context.group_pair_context.pair_names
+
+    def get_default_group_pair(self):
+        return self._context.group_pair_context.selected
 
     def is_group(self, name):
         return name in self.get_group_names()
@@ -28,16 +32,19 @@ class HomeGroupingWidgetModel(object):
 
     def update_pair_alpha(self, pair_name, alpha):
         try:
-            self._data.pairs[pair_name].alpha = alpha
+            self._context.group_pair_context[pair_name].alpha = alpha
         except Exception:
             print("Exception in update_pair_alpha")
 
     def get_alpha(self, pair_name):
-        pair = self._data.pairs[pair_name]
+        pair = self._context.group_pair_context[pair_name]
         if pair:
             return pair.alpha
         else:
             return None
+
+    def update_selected_group_pair_in_context(self, name):
+        self._context.group_pair_context.selected = name
 
     # ------------------------------------------------------------------------------------------------------------------
     # Periods
@@ -52,14 +59,11 @@ class HomeGroupingWidgetModel(object):
         else:
             return 1
 
-    def update_summed_periods(self, summed_periods):
-        self._data.current_data["SummedPeriods"] = summed_periods
-
-    def update_subtracted_periods(self, subtracted_periods):
-        self._data.current_data["SubtractedPeriods"] = subtracted_periods
+    def update_periods(self, summed_periods, subtracted_periods):
+        self._context.gui_context.update_and_send_signal(SubtractedPeriods=subtracted_periods, SummedPeriods=summed_periods)
 
     def get_summed_periods(self):
-        return self._data.current_data["SummedPeriods"]
+        return self._context.gui_context["SummedPeriods"]
 
     def get_subtracted_periods(self):
-        return self._data.current_data["SubtractedPeriods"]
+        return self._context.gui_context["SubtractedPeriods"]

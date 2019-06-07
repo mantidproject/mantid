@@ -5,15 +5,17 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Elwin.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QFileInfo>
 
 #include <qwt_plot.h>
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -48,6 +50,65 @@ std::vector<std::string> getOutputWorkspaceSuffices() {
 
 int getNumberOfSpectra(std::string const &name) {
   return static_cast<int>(getADSMatrixWorkspace(name)->getNumberHistograms());
+}
+
+std::string extractLastOf(const std::string &str,
+                          const std::string &delimiter) {
+  auto const cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(cutIndex + 1, str.size() - cutIndex);
+  return str;
+}
+
+template <typename Iterator, typename Functor>
+std::vector<std::string> transformElements(Iterator const fromIter,
+                                           Iterator const toIter,
+                                           Functor const &functor) {
+  std::vector<std::string> newVector;
+  newVector.reserve(toIter - fromIter);
+  std::transform(fromIter, toIter, std::back_inserter(newVector), functor);
+  return newVector;
+}
+
+template <typename T, typename Predicate>
+void removeElementsIf(std::vector<T> &vector, Predicate const &filter) {
+  auto const iter = std::remove_if(vector.begin(), vector.end(), filter);
+  if (iter != vector.end())
+    vector.erase(iter, vector.end());
+}
+
+std::vector<std::string> extractSuffixes(QStringList const &files,
+                                         std::string const &delimiter) {
+  return transformElements(
+      files.begin(), files.end(), [&](QString const &file) {
+        QFileInfo const fileInfo(file);
+        return extractLastOf(fileInfo.baseName().toStdString(), delimiter);
+      });
+}
+
+std::vector<std::string> attachPrefix(std::vector<std::string> const &strings,
+                                      std::string const &prefix) {
+  return transformElements(
+      strings.begin(), strings.end(),
+      [&prefix](std::string const &str) { return prefix + str; });
+}
+
+std::vector<std::string> getFilteredSuffixes(QStringList const &files) {
+  auto suffixes = extractSuffixes(files, "_");
+
+  removeElementsIf(suffixes, [&](std::string const &suffix) {
+    return suffix != "red" && suffix != "sqw";
+  });
+  return suffixes;
+}
+
+IAlgorithm_sptr loadAlgorithm(std::string const &filepath,
+                              std::string const &outputName) {
+  auto loadAlg = AlgorithmManager::Instance().create("LoadNexus");
+  loadAlg->initialize();
+  loadAlg->setProperty("Filename", filepath);
+  loadAlg->setProperty("OutputWorkspace", outputName);
+  return loadAlg;
 }
 
 } // namespace
@@ -132,12 +193,15 @@ void Elwin::setup() {
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this,
           SLOT(newInputFiles()));
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(plotInput()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this,
+          SLOT(updateIntegrationRange()));
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this,
           SLOT(newPreviewFileSelected(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
+
   // Handle plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -186,10 +250,8 @@ void Elwin::run() {
     runNumber = runNumber.substr(runNumberStart, strLength);
     auto baseName = firstFileInfo.baseName();
     const auto prefix = baseName.left(baseName.indexOf("_"));
-    auto testPre = prefix.toStdString();
     const auto suffix =
         baseName.right(baseName.length() - baseName.indexOf("_"));
-    auto testsuf = suffix.toStdString();
     workspaceBaseName =
         prefix + QString::fromStdString("-" + runNumber) + suffix;
   }
@@ -204,16 +266,11 @@ void Elwin::run() {
   // Load input files
   std::string inputWorkspacesString;
 
-  for (auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it) {
-    QFileInfo inputFileInfo(*it);
-    std::string workspaceName = inputFileInfo.baseName().toStdString();
-
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadNexus");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", (*it).toStdString());
-    loadAlg->setProperty("OutputWorkspace", workspaceName);
-
-    m_batchAlgoRunner->addAlgorithm(loadAlg);
+  for (auto &inputFilename : inputFilenames) {
+    QFileInfo inputFileInfo(inputFilename);
+    auto const workspaceName = inputFileInfo.baseName().toStdString();
+    m_batchAlgoRunner->addAlgorithm(
+        loadAlgorithm(inputFilename.toStdString(), workspaceName));
     inputWorkspacesString += workspaceName + ",";
   }
 
@@ -291,10 +348,20 @@ void Elwin::unGroupInput(bool error) {
 
     updatePlotSpectrumOptions();
 
+    if (m_blnManager->value(m_properties["Normalise"]))
+      checkForELTWorkspace();
+
   } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
   }
+}
+
+void Elwin::checkForELTWorkspace() {
+  auto const workspaceName = getOutputBasename().toStdString() + "_elt";
+  if (!doesExistInADS(workspaceName))
+    showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
+                   "was not produced - temperatures were not found.");
 }
 
 void Elwin::updatePlotSpectrumOptions() {
@@ -306,7 +373,7 @@ void Elwin::updatePlotSpectrumOptions() {
 }
 
 void Elwin::updateAvailablePlotWorkspaces() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.cbPlotWorkspace);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.cbPlotWorkspace);
   m_uiForm.cbPlotWorkspace->clear();
   for (auto const &suffix : getOutputWorkspaceSuffices()) {
     auto const workspaceName = getOutputBasename().toStdString() + suffix;
@@ -320,12 +387,12 @@ QString Elwin::getPlotWorkspaceName() const {
 }
 
 void Elwin::setPlotSpectrumValue(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spPlotSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spPlotSpectrum);
   m_uiForm.spPlotSpectrum->setValue(value);
 }
 
 void Elwin::updateAvailablePlotSpectra() {
-  auto const name = m_uiForm.cbPlotWorkspace->currentText().toStdString();
+  auto const name = getPlotWorkspaceName().toStdString();
   auto const maximumValue = getNumberOfSpectra(name) - 1;
   setPlotSpectrumMinMax(0, maximumValue);
   setPlotSpectrumValue(0);
@@ -360,6 +427,12 @@ bool Elwin::validate() {
     uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
   }
 
+  auto const suffixes =
+      getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
+  if (std::adjacent_find(suffixes.begin(), suffixes.end(),
+                         std::not_equal_to<>()) != suffixes.end())
+    uiv.addErrorMessage("The input files must be all _red or all _sqw.");
+
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
 
@@ -368,6 +441,12 @@ bool Elwin::validate() {
 
 void Elwin::loadSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
+}
+
+void Elwin::setFileExtensionsByName(bool filter) {
+  auto const tabName("Elwin");
+  m_uiForm.dsInputFiles->setFileExtensions(filter ? getSampleFBSuffixes(tabName)
+                                                  : getExtensions(tabName));
 }
 
 void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
@@ -431,8 +510,7 @@ void Elwin::newInputFiles() {
 
   // Populate the combo box with the filenames
   QStringList filenames = m_uiForm.dsInputFiles->getFilenames();
-  for (auto it = filenames.begin(); it != filenames.end(); ++it) {
-    QString rawFilename = *it;
+  for (auto rawFilename : filenames) {
     QFileInfo inputFileInfo(rawFilename);
     QString sampleName = inputFileInfo.baseName();
 
@@ -467,8 +545,10 @@ void Elwin::newPreviewFileSelected(int index) {
       int const numHist =
           static_cast<int>(workspace->getNumberHistograms()) - 1;
 
+      setInputWorkspace(workspace);
       m_uiForm.spPreviewSpec->setMaximum(numHist);
       m_uiForm.spPreviewSpec->setValue(0);
+      plotInput();
     } else
       g_log.error("Failed to load input workspace.");
   }
@@ -482,9 +562,13 @@ void Elwin::plotInput() {
   IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
                                            m_uiForm.ppPlot, "IntegrationStart",
                                            "IntegrationEnd");
+
+  setDefaultSampleLog(inputWorkspace());
+}
+
+void Elwin::updateIntegrationRange() {
   setDefaultResolution(inputWorkspace(),
                        m_uiForm.ppPlot->getCurveRange("Sample"));
-  setDefaultSampleLog(inputWorkspace());
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
@@ -555,13 +639,18 @@ void Elwin::plotClicked() {
  * Handles saving of workspaces
  */
 void Elwin::saveClicked() {
-  auto const workspaceBaseName = getOutputBasename().toStdString();
-
-  for (auto const &suffix : getOutputWorkspaceSuffices())
-    if (checkADSForPlotSaveWorkspace(workspaceBaseName + suffix, false))
-      addSaveWorkspaceToQueue(workspaceBaseName + suffix);
-
+  for (auto const &name : getOutputWorkspaceNames())
+    addSaveWorkspaceToQueue(name);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+std::vector<std::string> Elwin::getOutputWorkspaceNames() {
+  auto outputNames = attachPrefix(getOutputWorkspaceSuffices(),
+                                  getOutputBasename().toStdString());
+  removeElementsIf(outputNames, [](std::string const &workspaceName) {
+    return !doesExistInADS(workspaceName);
+  });
+  return outputNames;
 }
 
 QString Elwin::getOutputBasename() {

@@ -97,10 +97,10 @@ void CalculateCarpenterSampleCorrection::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
                       "OutputWorkspaceBaseName", "", Direction::Output),
                   "Basename of the output workspace group for corrections."
                   "Absorption suffix = '_abs'. "

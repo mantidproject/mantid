@@ -24,13 +24,6 @@ IndirectLoadILL::IndirectLoadILL(QWidget *parent) : IndirectToolsTab(parent) {
   connect(m_uiForm.mwRun, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
   connect(m_uiForm.chkUseMap, SIGNAL(toggled(bool)), m_uiForm.mwMapFile,
           SLOT(setEnabled(bool)));
-
-  connect(this,
-          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
-                                 QString const &)),
-          this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &,
-                               QString const &)));
 }
 
 /**
@@ -110,7 +103,6 @@ void IndirectLoadILL::run() {
     QString pyFunc("");
     // IN13 has a different loading routine
     if (instrument == "IN13") {
-      ext = "asc";
       pyFunc = "IN13Start";
     } else if (ext == "asc") // using ascii files
     {

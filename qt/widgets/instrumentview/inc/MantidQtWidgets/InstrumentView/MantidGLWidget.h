@@ -31,13 +31,13 @@ public:
   void setSurface(boost::shared_ptr<ProjectionSurface> surface);
   boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 
-  void setBackgroundColor(QColor);
+  void setBackgroundColor(QColor /*input*/);
   QColor currentBackgroundColor() const;
   void saveToFile(const QString &filename);
   // int getLightingState() const {return m_lightingState;}
 
 public slots:
-  void enableLighting(bool);
+  void enableLighting(bool /*on*/);
   void updateView(bool picking = true);
   void updateDetectors();
   void componentSelected(size_t componentIndex);
@@ -47,16 +47,16 @@ protected:
   void resetWidget();
   void MakeObject();
   void paintEvent(QPaintEvent *event) override;
-  void resizeGL(int, int) override;
-  void contextMenuEvent(QContextMenuEvent *) override;
-  void mousePressEvent(QMouseEvent *) override;
-  void mouseMoveEvent(QMouseEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *) override;
-  void wheelEvent(QWheelEvent *) override;
-  void keyPressEvent(QKeyEvent *) override;
-  void keyReleaseEvent(QKeyEvent *) override;
-  void enterEvent(QEvent *) override;
-  void leaveEvent(QEvent *) override;
+  void resizeGL(int /*w*/, int /*h*/) override;
+  void contextMenuEvent(QContextMenuEvent * /*unused*/) override;
+  void mousePressEvent(QMouseEvent * /*unused*/) override;
+  void mouseMoveEvent(QMouseEvent * /*unused*/) override;
+  void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
+  void wheelEvent(QWheelEvent * /*unused*/) override;
+  void keyPressEvent(QKeyEvent * /*unused*/) override;
+  void keyReleaseEvent(QKeyEvent * /*unused*/) override;
+  void enterEvent(QEvent * /*unused*/) override;
+  void leaveEvent(QEvent * /*unused*/) override;
   void draw();
   void checkGLError(const QString &funName);
 

@@ -44,7 +44,7 @@ SortHKL::SortHKL() {
 SortHKL::~SortHKL() = default;
 
 void SortHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
 
@@ -52,10 +52,12 @@ void SortHKL::init() {
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
   pgOptions.reserve(2 * m_pointGroups.size() + 5);
-  for (auto &pointGroup : m_pointGroups)
-    pgOptions.push_back(pointGroup->getSymbol());
-  for (auto &pointGroup : m_pointGroups)
-    pgOptions.push_back(pointGroup->getName());
+  std::transform(m_pointGroups.cbegin(), m_pointGroups.cend(),
+                 std::back_inserter(pgOptions),
+                 [](const auto &group) { return group->getSymbol(); });
+  std::transform(m_pointGroups.cbegin(), m_pointGroups.cend(),
+                 std::back_inserter(pgOptions),
+                 [](const auto &group) { return group->getName(); });
   // Scripts may have Orthorhombic misspelled from past bug in PointGroupFactory
   pgOptions.push_back("222 (Orthorombic)");
   pgOptions.push_back("mm2 (Orthorombic)");
@@ -68,39 +70,41 @@ void SortHKL::init() {
 
   std::vector<std::string> centeringOptions;
   centeringOptions.reserve(2 * m_refConds.size());
-  for (auto &refCond : m_refConds)
-    centeringOptions.push_back(refCond->getSymbol());
-  for (auto &refCond : m_refConds)
-    centeringOptions.push_back(refCond->getName());
+  std::transform(m_refConds.cbegin(), m_refConds.cend(),
+                 std::back_inserter(centeringOptions),
+                 [](const auto &condition) { return condition->getSymbol(); });
+  std::transform(m_refConds.cbegin(), m_refConds.cend(),
+                 std::back_inserter(centeringOptions),
+                 [](const auto &condition) { return condition->getName(); });
   declareProperty("LatticeCentering", centeringOptions[0],
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty("OutputChi2", 0.0, "Chi-square is available as output",
                   Direction::Output);
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "RowName", "Overall", Direction::Input),
                   "name of row");
   declareProperty("Append", false,
                   "Append to output table workspace if true.\n"
                   "If false, new output table workspace (default).");
-  std::vector<std::string> equivTypes{"Mean", "Median"};
-  declareProperty("EquivalentIntensities", equivTypes[0],
+  const std::vector<std::string> equivTypes{"Mean", "Median"};
+  declareProperty("EquivalentIntensities", equivTypes.front(),
                   boost::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "SigmaCritical", 3.0, Direction::Input),
                   "Removes peaks whose intensity deviates more than "
                   "SigmaCritical from the mean (or median).");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
       "Output Equivalent Intensities");
   declareProperty("WeightedZScore", false,
@@ -298,10 +302,14 @@ ReflectionCondition_sptr SortHKL::getCentering() const {
   ReflectionCondition_sptr centering =
       boost::make_shared<ReflectionConditionPrimitive>();
 
-  std::string refCondName = getPropertyValue("LatticeCentering");
-  for (const auto &refCond : m_refConds)
-    if (refCond->getName() == refCondName)
-      centering = refCond;
+  const std::string refCondName = getPropertyValue("LatticeCentering");
+  const auto found = std::find_if(m_refConds.crbegin(), m_refConds.crend(),
+                                  [refCondName](const auto &condition) {
+                                    return condition->getName() == refCondName;
+                                  });
+  if (found != m_refConds.crend()) {
+    centering = *found;
+  }
 
   return centering;
 }
@@ -319,9 +327,14 @@ PointGroup_sptr SortHKL::getPointgroup() const {
     pointGroupName.replace(pos, 11, "Orthorhombic");
     g_log.warning() << "Please correct to " << pointGroupName << ".\n";
   }
-  for (const auto &m_pointGroup : m_pointGroups)
-    if (m_pointGroup->getName() == pointGroupName)
-      pointGroup = m_pointGroup;
+  const auto found =
+      std::find_if(m_pointGroups.crbegin(), m_pointGroups.crend(),
+                   [&pointGroupName](const auto &group) {
+                     return group->getName() == pointGroupName;
+                   });
+  if (found != m_pointGroups.crend()) {
+    pointGroup = *found;
+  }
 
   return pointGroup;
 }

@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 
@@ -150,8 +150,7 @@ ISISDiagnostics::~ISISDiagnostics() {}
 void ISISDiagnostics::setup() {}
 
 void ISISDiagnostics::run() {
-  QString suffix = "_" + getInstrumentConfiguration()->getAnalyserName() +
-                   getInstrumentConfiguration()->getReflectionName() + "_slice";
+  QString suffix = "_" + getAnalyserName() + getReflectionName() + "_slice";
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
   std::vector<long> spectraRange;
@@ -269,35 +268,47 @@ void ISISDiagnostics::algorithmComplete(bool error) {
  * Sets default spectra, peak and background ranges.
  */
 void ISISDiagnostics::setDefaultInstDetails() {
-  // Get spectra, peak and background details
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+  try {
+    setDefaultInstDetails(getInstrumentDetails());
+  } catch (std::exception const &ex) {
+    showMessageBox(ex.what());
+  }
+}
+
+void ISISDiagnostics::setDefaultInstDetails(
+    QMap<QString, QString> const &instrumentDetails) {
+  auto const instrument = getInstrumentDetail(instrumentDetails, "instrument");
+  auto const spectraMin =
+      getInstrumentDetail(instrumentDetails, "spectra-min").toDouble();
+  auto const spectraMax =
+      getInstrumentDetail(instrumentDetails, "spectra-max").toDouble();
 
   // Set the search instrument for runs
-  m_uiForm.dsInputFiles->setInstrumentOverride(instDetails["instrument"]);
-
-  double specMin = instDetails["spectra-min"].toDouble();
-  double specMax = instDetails["spectra-max"].toDouble();
+  m_uiForm.dsInputFiles->setInstrumentOverride(instrument);
 
   // Set spectra range
-  m_dblManager->setMaximum(m_properties["SpecMin"], specMax);
-  m_dblManager->setMinimum(m_properties["SpecMax"], specMin);
+  m_dblManager->setMaximum(m_properties["SpecMin"], spectraMax);
+  m_dblManager->setMinimum(m_properties["SpecMax"], spectraMin);
 
-  m_dblManager->setValue(m_properties["SpecMin"], specMin);
-  m_dblManager->setValue(m_properties["SpecMax"], specMax);
-  m_dblManager->setValue(m_properties["PreviewSpec"], specMin);
+  m_dblManager->setValue(m_properties["SpecMin"], spectraMin);
+  m_dblManager->setValue(m_properties["SpecMax"], spectraMax);
+  m_dblManager->setValue(m_properties["PreviewSpec"], spectraMin);
 
   // Set peak and background ranges
-  if (instDetails.size() >= 8) {
+  if (instrumentDetails.size() >= 8) {
+    auto const peakStart = getInstrumentDetail(instrumentDetails, "peak-start");
+    auto const peakEnd = getInstrumentDetail(instrumentDetails, "peak-end");
+    auto const backStart = getInstrumentDetail(instrumentDetails, "back-start");
+    auto const backEnd = getInstrumentDetail(instrumentDetails, "back-end");
+
     setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SlicePeak"),
                      m_properties["PeakStart"], m_properties["PeakEnd"],
-                     qMakePair(instDetails["peak-start"].toDouble(),
-                               instDetails["peak-end"].toDouble()));
+                     qMakePair(peakStart.toDouble(), peakEnd.toDouble()));
 
     setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SliceBackground"),
                      m_properties["BackgroundStart"],
                      m_properties["BackgroundEnd"],
-                     qMakePair(instDetails["back-start"].toDouble(),
-                               instDetails["back-end"].toDouble()));
+                     qMakePair(backStart.toDouble(), backEnd.toDouble()));
   }
 }
 
@@ -349,7 +360,7 @@ void ISISDiagnostics::handleNewFile() {
  *
  * @param state :: True to show the second range selectors, false to hide
  */
-void ISISDiagnostics::sliceTwoRanges(QtProperty *, bool state) {
+void ISISDiagnostics::sliceTwoRanges(QtProperty * /*unused*/, bool state) {
   m_uiForm.ppRawPlot->getRangeSelector("SliceBackground")->setVisible(state);
 }
 
@@ -447,6 +458,16 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
   // Ungroup the output workspace
   sliceOutputGroup->removeAll();
   AnalysisDataService::Instance().remove("IndirectDiagnostics_Workspaces");
+}
+
+void ISISDiagnostics::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffices{""};
+  auto const tabName("ISISDiagnostics");
+  m_uiForm.dsCalibration->setFBSuffixes(
+      filter ? getCalibrationFBSuffixes(tabName)
+             : getCalibrationExtensions(tabName));
+  m_uiForm.dsCalibration->setWSSuffixes(
+      filter ? getCalibrationWSSuffixes(tabName) : noSuffices);
 }
 
 /**

@@ -139,7 +139,7 @@ public:
 
     // quick checks to make sure things are returning the expected values
     TS_ASSERT(!(ws->isCommonBins()));
-    TS_ASSERT_THROWS(ws->blocksize(), std::logic_error);
+    TS_ASSERT_THROWS(ws->blocksize(), const std::logic_error &);
     TS_ASSERT_EQUALS(ws->size(), 17);
     // Split in 4 iterators
     auto iterators = ws->createIterators(4, nullptr);

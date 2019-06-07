@@ -34,6 +34,8 @@ double QMOD(const Mantid::Geometry::IPeak &p) {
 double SN(const Mantid::Geometry::IPeak &p) {
   return p.getIntensity() / p.getSigmaIntensity();
 }
+
+double RUN(const Mantid::Geometry::IPeak &p) { return p.getRunNumber(); }
 } // namespace
 
 namespace Mantid {
@@ -57,16 +59,16 @@ const std::string FilterPeaks::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void FilterPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
   std::vector<std::string> filters{"h+k+l",        "h^2+k^2+l^2", "Intensity",
                                    "Signal/Noise", "QMod",        "Wavelength",
-                                   "DSpacing",     "TOF"};
+                                   "DSpacing",     "TOF",         "RunNumber"};
   declareProperty("FilterVariable", "",
                   boost::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
@@ -150,6 +152,8 @@ FilterPeaks::FilterFunction FilterPeaks::getFilterVariableFunction(
     filterFunction = &SN;
   else if (filterVariable == "QMod")
     filterFunction = &QMOD;
+  else if (filterVariable == "RunNumber")
+    filterFunction = &RUN;
   else
     throw std::invalid_argument("Unknown FilterVariable: " + filterVariable);
   return filterFunction;

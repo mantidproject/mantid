@@ -49,7 +49,7 @@
 #endif
 #include "AxesDialog.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
 #include "MultiLayer.h"
 #include "Plot.h"
 #include "PlotToolInterface.h"

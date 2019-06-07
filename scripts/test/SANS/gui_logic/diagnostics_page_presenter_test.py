@@ -5,17 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from sans.test_helper.mock_objects import create_mock_diagnostics_tab
 from sans.common.enums import SANSInstrument, DetectorType, IntegralEnum, SANSFacility
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
-
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
 
 
 class DiagnosticsPagePresenterTest(unittest.TestCase):

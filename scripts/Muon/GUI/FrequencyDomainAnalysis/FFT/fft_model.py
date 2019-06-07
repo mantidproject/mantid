@@ -59,7 +59,7 @@ class FFTWrapper(object):
         if self.phaseTable is not None:
             if self.phaseTable["newTable"]:
                 self.model.makePhaseQuadTable(self.phaseTable)
-            self.model.PhaseQuad()
+            self.model.PhaseQuad(self.phaseTable)
 
         if self.preRe is not None:
             self.model.preAlg(self.preRe)
@@ -126,15 +126,17 @@ class FFTModel(object):
             FFTInputs["OutputWorkspace"],
             self.alg.getProperty("OutputWorkspace").value)
 
-        ws = self.alg.getPropertyValue("OutputWorkspace")
         group = mantid.AnalysisDataService.retrieve(self.runName)
-        group.add(ws)
+        group.add(FFTInputs["OutputWorkspace"])
         self.alg = None
 
     def makePhaseQuadTable(self, inputs):
         """
         generates a phase table from CalMuonDetectorPhases
         """
+        cloned_workspace_CalMuon = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], StoreInADS=False)
+        mantid.MaskDetectors(Workspace=cloned_workspace_CalMuon, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
+
         self.alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
@@ -143,7 +145,7 @@ class FFTModel(object):
         self.alg.setProperty("FirstGoodData", inputs["FirstGoodData"])
         self.alg.setProperty("LastGoodData", inputs["LastGoodData"])
 
-        self.alg.setProperty("InputWorkspace", "MuonAnalysis")
+        self.alg.setProperty("InputWorkspace", cloned_workspace_CalMuon)
         self.alg.setProperty("DetectorTable", "PhaseTable")
         self.alg.setProperty("DataFitted", "fits")
 
@@ -153,17 +155,24 @@ class FFTModel(object):
             self.alg.getProperty("DetectorTable").value)
         self.alg = None
 
-    def PhaseQuad(self):
+    def PhaseQuad(self, inputs):
         """
         do the phaseQuad algorithm
         groups data into a single set
         """
+        cloned_workspace = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], StoreInADS=False)
+        mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
+        cropped_workspace_pre_phasequad = mantid.CropWorkspace(InputWorkspace=cloned_workspace,
+                                                               XMin=inputs['FirstGoodData'],
+                                                               XMax=inputs['LastGoodData'],
+                                                               StoreInADS=False)
+
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()
         self.alg.setChild(False)
         self.alg.setRethrows(True)
 
-        self.alg.setProperty("InputWorkspace", "MuonAnalysis")
+        self.alg.setProperty("InputWorkspace", cropped_workspace_pre_phasequad)
         self.alg.setProperty("PhaseTable", "PhaseTable")
         self.alg.setProperty("OutputWorkspace", "__phaseQuad__")
         self.alg.execute()

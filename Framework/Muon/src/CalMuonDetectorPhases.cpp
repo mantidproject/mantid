@@ -39,8 +39,8 @@ DECLARE_ALGORITHM(CalMuonDetectorPhases)
  */
 void CalMuonDetectorPhases::init() {
 
-  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the reference input workspace");
 
   declareProperty("FirstGoodData", EMPTY_DBL(),
@@ -54,22 +54,23 @@ void CalMuonDetectorPhases::init() {
   declareProperty("Frequency", EMPTY_DBL(),
                   "Starting hint for the frequency in MHz", Direction::Input);
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "DetectorTable", "", Direction::Output),
-                  "Name of the TableWorkspace in which to store the list "
-                  "of phases and asymmetries");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "DetectorTable", "", Direction::Output),
+      "Name of the TableWorkspace in which to store the list "
+      "of phases and asymmetries");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
                       "DataFitted", "", Direction::Output),
                   "Name of the output workspace holding fitting results");
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("ForwardSpectra", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("ForwardSpectra", Direction::Input),
       "The spectra numbers of the forward group. If not specified "
       "will read from file.");
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("BackwardSpectra", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("BackwardSpectra", Direction::Input),
       "The spectra numbers of the backward group. If not specified "
       "will read from file.");
 }
@@ -204,11 +205,14 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
       fit->execute();
 
       std::string status = fit->getProperty("OutputStatus");
-      if (!fit->isExecuted() || status != success) {
+      if (!fit->isExecuted()) {
         std::ostringstream error;
         error << "Fit failed for spectrum at workspace index " << wsIndex;
         error << ": " << status;
         throw std::runtime_error(error.str());
+      } else if (status != success) {
+        g_log.warning("Fit failed for spectrum at workspace index " +
+                      std::to_string(wsIndex) + ": " + status);
       }
 
       API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
@@ -396,14 +400,14 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   backward.clear();
 
   const auto instrument = ws->getInstrument();
-  auto loader = Kernel::make_unique<API::GroupingLoader>(instrument);
+  auto loader = std::make_unique<API::GroupingLoader>(instrument);
 
-  if (instrument->getName() == "MUSR") {
+  if (instrument->getName() == "MUSR" || instrument->getName() == "CHRONUS") {
     // Two possibilities for grouping - use workspace log
     auto fieldDir = ws->run().getLogData("main_field_direction");
     if (fieldDir) {
-      loader = Kernel::make_unique<API::GroupingLoader>(instrument,
-                                                        fieldDir->value());
+      loader =
+          std::make_unique<API::GroupingLoader>(instrument, fieldDir->value());
     }
     if (!fieldDir) {
       throw std::invalid_argument(
@@ -418,9 +422,9 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   size_t nGroups = grouping->groups.size();
   for (size_t iGroup = 0; iGroup < nGroups; iGroup++) {
     const std::string name = grouping->groupNames[iGroup];
-    if (name == "fwd") {
+    if (name == "fwd" || name == "left") {
       fwdRange = grouping->groups[iGroup];
-    } else if (name == "bwd" || name == "bkwd") {
+    } else if (name == "bwd" || name == "bkwd" || name == "right") {
       bwdRange = grouping->groups[iGroup];
     }
   }

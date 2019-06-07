@@ -134,11 +134,6 @@ IntegratePeakTimeSlices::IntegratePeakTimeSlices()
   m_ParameterNames[5] = "SSrow";
   m_ParameterNames[6] = "SSrc";
 
-  // for (int i = 0; i < NAttributes; i++)
-  //   m_AttributeValues[i] = 0;
-
-  for (double &m_ParameterValue : m_ParameterValues)
-    m_ParameterValue = 0;
   std::fill(m_ParameterValues.begin(), m_ParameterValues.end(), 0.0);
 }
 
@@ -151,15 +146,15 @@ double SQRT(double v) {
 IntegratePeakTimeSlices::~IntegratePeakTimeSlices() { delete[] m_NeighborIDs; }
 
 void IntegratePeakTimeSlices::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "A 2D workspace with X values of time of flight");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output table workspace with Log info");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "Peaks", "", Direction::Input),
                   "Workspace of Peaks");
 
@@ -427,11 +422,9 @@ void IntegratePeakTimeSlices::exec() {
           if (m_R0 > 0)
             Radius = m_R0;
 
-          int NN = m_NeighborIDs[1];
-
           MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
-              std::string("Workspace2D"), 3, NN,
-              NN); // neighbors.size(), neighbors.size());
+              std::string("Workspace2D"), 3, m_NeighborIDs[1],
+              m_NeighborIDs[1]);
 
           g_log.debug() << " A:chan=" << xchan << "  time=" << time
                         << "   Radius=" << Radius << "row= " << lastRow
@@ -528,9 +521,9 @@ void IntegratePeakTimeSlices::exec() {
                                 neighborRadius))
               Cent = m_AttributeValues->getCurrentCenter();
 
-            int NN = m_NeighborIDs[1];
-            MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
-                std::string("Workspace2D"), 3, NN, NN);
+            Data = WorkspaceFactory::Instance().create(
+                std::string("Workspace2D"), 3, m_NeighborIDs[1],
+                m_NeighborIDs[1]);
 
             SetUpData1(Data, inpWkSpace, chanMin, chanMax,
                        m_AttributeValues->getCurrentRadius(),
@@ -1087,24 +1080,24 @@ std::vector<double> DataModeHandler::GetParams(double b) {
  *  Sets the Accumulated data values into this class, then updates other
  *information like initial values
  *
- *  @param StatBase  The accumulated data that is to be considered.
+ *  @param statBase  The accumulated data that is to be considered.
  */
-bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
+bool DataModeHandler::setStatBase(std::vector<double> const &statBase)
 
 {
-  double TotBoundaryIntensities = StatBase[ITotBoundary];
-  int nBoundaryCells = static_cast<int>(StatBase[INBoundary]);
-  this->StatBase = StatBase;
+  double TotBoundaryIntensities = statBase[ITotBoundary];
+  int nBoundaryCells = static_cast<int>(statBase[INBoundary]);
+  this->StatBase = statBase;
   double b = 0;
   if (nBoundaryCells > 0)
     b = TotBoundaryIntensities / nBoundaryCells;
 
-  int nCells = static_cast<int>(StatBase[ISS1]);
-  double Den = StatBase[IIntensities] - b * nCells;
+  int nCells = static_cast<int>(statBase[ISS1]);
+  double Den = statBase[IIntensities] - b * nCells;
   int k = 0;
   while (Den <= 0 && b != 0) {
     b = b * .7;
-    Den = StatBase[IIntensities] - b * nCells;
+    Den = statBase[IIntensities] - b * nCells;
 
     if (k < 8)
       k++;
@@ -1113,8 +1106,8 @@ bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
   }
 
   double Varx, Vary;
-  Varx = StatBase[INCol] / 7; // Range = 3.5 standard deviations
-  Vary = StatBase[INRows] / 7;
+  Varx = statBase[INCol] / 7; // Range = 3.5 standard deviations
+  Vary = statBase[INRows] / 7;
   Varx *= Varx;
   Vary *= Vary;
 
@@ -1131,7 +1124,7 @@ bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
       col_calc = lastCol;
       row_calc = lastRow;
       back_calc = b;
-      Intensity_calc = StatBase[IIntensities] - b * nCells;
+      Intensity_calc = statBase[IIntensities] - b * nCells;
       if (Vx_calc <= 0 || Vy_calc <= 0) // EdgePeak but not big enuf
         return true;
 
@@ -1148,15 +1141,15 @@ bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
   int ntimes = 0;
   double Mx, My, Sxx, Syy, Sxy;
 
-  double RangeX = StatBase[INCol] / 2;
-  double RangeY = StatBase[INRows] / 2;
+  double RangeX = statBase[INCol] / 2;
+  double RangeY = statBase[INRows] / 2;
 
   while (!done && ntimes < 29) {
-    Mx = StatBase[ISSIx] - b * StatBase[ISSx];
-    My = StatBase[ISSIy] - b * StatBase[ISSy];
-    Sxx = (StatBase[ISSIxx] - b * StatBase[ISSxx] - Mx * Mx / Den) / Den;
-    Syy = (StatBase[ISSIyy] - b * StatBase[ISSyy] - My * My / Den) / Den;
-    Sxy = (StatBase[ISSIxy] - b * StatBase[ISSxy] - Mx * My / Den) / Den;
+    Mx = statBase[ISSIx] - b * statBase[ISSx];
+    My = statBase[ISSIy] - b * statBase[ISSy];
+    Sxx = (statBase[ISSIxx] - b * statBase[ISSxx] - Mx * Mx / Den) / Den;
+    Syy = (statBase[ISSIyy] - b * statBase[ISSyy] - My * My / Den) / Den;
+    Sxy = (statBase[ISSIxy] - b * statBase[ISSxy] - Mx * My / Den) / Den;
     ntimes++;
     done = false;
 
@@ -1167,7 +1160,7 @@ bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
       if (ntimes + 1 == 29)
         b = 0;
 
-      Den = StatBase[IIntensities] - b * nCells;
+      Den = statBase[IIntensities] - b * nCells;
       if (Den <= 1)
         Den = 1;
 
@@ -1176,7 +1169,7 @@ bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
   }
 
   back_calc = b;
-  Intensity_calc = StatBase[IIntensities] - b * nCells;
+  Intensity_calc = statBase[IIntensities] - b * nCells;
   col_calc = Mx / Den;
   row_calc = My / Den;
   Vx_calc = Sxx;
@@ -1510,11 +1503,10 @@ void IntegratePeakTimeSlices::SetUpData1(
     const int chanMax, double Radius, Kernel::V3D CentPos,
     string &spec_idList) {
   UNUSED_ARG(g_log);
-  std::vector<double> StatBase(NAttributes);
   if (m_NeighborIDs[1] < 10) {
-    StatBase[ISSIxx] = -1;
     return;
   }
+  std::vector<double> StatBase(NAttributes);
   boost::shared_ptr<Workspace2D> ws =
       boost::dynamic_pointer_cast<Workspace2D>(Data);
 
@@ -2253,10 +2245,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
       obj = " error ";
     g_log.debug() << "   Bad Slice." << obj << BadParamNum
                   << " is not a number\n";
-  }
-
-  if (!GoodNums)
     return false;
+  }
 
   GoodNums = true;
 
@@ -2335,7 +2325,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
  * @return  true if there is enough data, otherwise false
  */
 bool DataModeHandler::IsEnoughData(const double *ParameterValues,
-                                   Kernel::Logger &) {
+                                   Kernel::Logger & /*unused*/) {
   // Check if flat
   double Varx, Vary, Cov;
 
@@ -2350,8 +2340,6 @@ bool DataModeHandler::IsEnoughData(const double *ParameterValues,
   double meany = StatBase[ISSIy] / ncells;
 
   if (!CalcVariances()) {
-    meanx = ParameterValues[IXMEAN];
-    meany = ParameterValues[IYMEAN];
     Varx = ParameterValues[IVXX];
     Vary = ParameterValues[IVYY];
     Cov = ParameterValues[IVXY];

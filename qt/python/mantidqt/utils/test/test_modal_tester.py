@@ -10,12 +10,11 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from mock import patch
 import unittest
-
 from qtpy.QtWidgets import QInputDialog
 
-from mantidqt.utils.qt.test import GuiTest, ModalTester
+from mantid.py3compat.mock import patch
+from mantidqt.utils.qt.testing import GuiTest, ModalTester
 
 
 class TestModalTester(GuiTest):
@@ -86,7 +85,7 @@ class TestModalTester(GuiTest):
             tester = ModalTester(create, testing_function)
             tester.start()
             print_exc.assert_called_once_with()
-        self.assertTrue(tester.widget is None)
+        self.assertEqual(tester.widget, None)
         self.assertFalse(tester.passed)
 
 

@@ -76,7 +76,7 @@ public:
     if (!crop.isInitialized())
       crop.initialize();
 
-    TS_ASSERT_THROWS(crop.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(crop.execute(), const std::runtime_error &);
     TS_ASSERT(!crop.isExecuted());
     TS_ASSERT_THROWS_NOTHING(
         crop.setPropertyValue("InputWorkspace", inputName));

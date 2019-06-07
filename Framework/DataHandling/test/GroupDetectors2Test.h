@@ -938,7 +938,7 @@ public:
     // Check that the GroupingPattern was recognised as invalid
     TS_ASSERT(!groupAlg.validateInputs()["GroupingPattern"].empty());
     // And that we're not allowed to run
-    TS_ASSERT_THROWS(groupAlg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(groupAlg.execute(), const std::runtime_error &);
   }
 
   void test_grouping_with_time_indexes() {
@@ -1125,6 +1125,7 @@ private:
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < NHIST; i++) {
       Detector *d = new Detector("det", i, nullptr);
+      d->setPos(1. + static_cast<double>(i) * 0.1, 0., 1.);
       instr->add(d);
       instr->markAsDetector(d);
     }

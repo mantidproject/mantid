@@ -9,13 +9,14 @@
 """ SANSMove algorithm to move a workspace according to the instrument settings."""
 
 from __future__ import (absolute_import, division, print_function)
+
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
-from sans.algorithm_detail.move_workspaces import SANSMoveFactory
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.algorithm_detail.move_workspaces import create_mover
 from sans.common.enums import DetectorType
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
 class MoveType(object):
@@ -99,10 +100,9 @@ class SANSMove(DistributedDataProcessorAlgorithm):
         state_property_manager = self.getProperty("SANSState").value
         state = create_deserialized_sans_state_from_property_manager(state_property_manager)
 
-        # Get the correct SANS move strategy from the SANSMoveFactory
+        # Get the correct SANS move strategy from create_mover
         workspace = self.getProperty("Workspace").value
-        move_factory = SANSMoveFactory()
-        mover = move_factory.create_mover(workspace)
+        mover = create_mover(workspace)
 
         # Get the selected component and the beam coordinates
         move_info = state.move

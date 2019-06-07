@@ -296,10 +296,10 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
                               "ensure each comma separated value is within "
                               "double precision range.");
     }
-    for (auto value : tolerancesVector) {
-      if (value < 0)
-        throw std::out_of_range("Error when creating tolerances vector. Please "
-                                "ensure all tolerance values are positive.");
+    if (std::any_of(tolerancesVector.cbegin(), tolerancesVector.cend(),
+                    [](const auto value) { return value < 0.; })) {
+      throw std::out_of_range("Error when creating tolerances vector. Please "
+                              "ensure all tolerance values are positive.");
     }
   } else if (tolerances.empty()) {
     std::fill(tolerancesVector.begin(), tolerancesVector.end(), -1.0);
@@ -342,7 +342,7 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
 std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
     const std::string &item, const double value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
-  const std::string unit = ws.getLog(item)->units();
+  const std::string originalUnit = ws.getLog(item)->units();
   try {
     // See if property exists as a TimeSeriesLog already - merging an output of
     // MergeRuns
@@ -359,7 +359,7 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
 
     returnProp.reset(ws.getLog(item)->clone());
   }
-  ws.getLog(item)->setUnits(unit); // we lost the unit of the workspace
+  ws.getLog(item)->setUnits(originalUnit); // we lost the unit of the workspace
   return returnProp;
 }
 
@@ -375,14 +375,14 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
     const std::string &item, const std::string &value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
 
-  const std::string unit = ws.getLog(item)->units();
+  const std::string originalUnit = ws.getLog(item)->units();
   // See if property exists already - merging an output of the calling algorithm
   returnProp.reset(ws.getLog(item)->clone());
   if (returnProp->type() != "string") {
     ws.mutableRun().addProperty(item, value, true);
     returnProp.reset(ws.getLog(item)->clone());
   }
-  ws.getLog(item)->setUnits(unit); // we lost the unit of the workspace
+  ws.getLog(item)->setUnits(originalUnit); // we lost the unit of the workspace
   return returnProp;
 }
 
@@ -419,10 +419,10 @@ bool SampleLogsBehaviour::setNumericValue(const std::string &item,
 void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace_sptr addeeWS,
                                           MatrixWorkspace_sptr outWS) {
   for (const auto &item : m_logMap) {
-    std::string logName = item.first.first;
+    const std::string &logName = item.first.first;
 
     Property *addeeWSProperty = addeeWS->getLog(logName);
-    const std::string logUnit = addeeWS->getLog(logName)->units();
+    const std::string originalUnit = addeeWS->getLog(logName)->units();
 
     double addeeWSNumericValue = 0.;
     double outWSNumericValue = 0.;
@@ -460,7 +460,7 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace_sptr addeeWS,
                                addeeWSNumericValue, outWSNumericValue, logName);
       break;
     }
-    outWS->getLog(logName)->setUnits(logUnit);
+    outWS->getLog(logName)->setUnits(originalUnit);
   }
 }
 

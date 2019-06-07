@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>661</width>
-    <height>662</height>
+    <width>752</width>
+    <height>670</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="lbInputType">
         <property name="text">
-         <string>Sample:</string>
+         <string>Sample Input:</string>
         </property>
        </widget>
       </item>
@@ -64,7 +64,7 @@
       <item row="1" column="0">
        <widget class="QCheckBox" name="ckUseCan">
         <property name="text">
-         <string>Use Can:</string>
+         <string>Use Container:</string>
         </property>
        </widget>
       </item>
@@ -356,8 +356,17 @@
           </item>
           <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spFlatSampleAngle">
+            <property name="suffix">
+             <string>°</string>
+            </property>
             <property name="decimals">
-             <number>3</number>
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>-180.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>180.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -433,6 +442,9 @@
           </item>
           <item row="7" column="1">
            <widget class="QDoubleSpinBox" name="spCylStepSize">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>4</number>
             </property>
@@ -561,6 +573,9 @@
           </item>
           <item row="7" column="1">
            <widget class="QDoubleSpinBox" name="spAnnStepSize">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>4</number>
             </property>
@@ -656,74 +671,281 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbSampleDetails">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>93</height>
+       <height>97</height>
       </size>
      </property>
      <property name="title">
       <string>Sample Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spSampleDensity">
-        <property name="suffix">
-         <string> g/cm3</string>
-        </property>
-        <property name="maximum">
-         <double>9999.989999999999782</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QComboBox" name="cbSampleDensity">
-        <item>
-         <property name="text">
-          <string>Mass Density</string>
+      <item row="4" column="0" colspan="3">
+       <widget class="QFrame" name="frame">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="leftMargin">
+          <number>0</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Number Density</string>
+         <property name="topMargin">
+          <number>0</number>
          </property>
-        </item>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="cbSampleDensity">
+           <item>
+            <property name="text">
+             <string>Mass Density</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Atom Number Density</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Formula Number Density</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="spSampleDensity">
+           <property name="suffix">
+            <string> g/cm3</string>
+           </property>
+           <property name="decimals">
+            <number>4</number>
+           </property>
+           <property name="maximum">
+            <double>9999.989999999999782</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="swSampleMaterialDetails">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="lbSampleChemicalFormula">
+               <property name="text">
+                <string>Chemical Formula:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="leSampleChemicalFormula">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="valSampleChemicalFormula">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_2">
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="lbCoherentXSection">
+               <property name="text">
+                <string>Coherent:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="spSampleCoherentXSection">
+               <property name="suffix">
+                <string> b</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lbIncoherentXSection">
+               <property name="text">
+                <string>Incoherent:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="spSampleIncoherentXSection">
+               <property name="suffix">
+                <string> b</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lbAttenuationXSection">
+               <property name="text">
+                <string>Attenuation:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="spSampleAttenuationXSection">
+               <property name="suffix">
+                <string> b</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="lbSampleChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="leSampleChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="valSampleChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
+      <item row="2" column="0" colspan="3">
+       <widget class="QFrame" name="frame_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lbSampleMaterialsMethod">
+           <property name="text">
+            <string>Method:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbSampleMaterialMethod">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <item>
+            <property name="text">
+             <string>Chemical Formula</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Cross-sections</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -737,68 +959,248 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>93</height>
+       <height>97</height>
       </size>
      </property>
      <property name="title">
-      <string>Can Details</string>
+      <string>Container Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QComboBox" name="cbCanDensity">
-        <item>
-         <property name="text">
-          <string>Mass Density</string>
+      <item row="0" column="0" colspan="6">
+       <widget class="QFrame" name="frame_3">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <property name="leftMargin">
+          <number>0</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Number Density</string>
+         <property name="topMargin">
+          <number>0</number>
          </property>
-        </item>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lbCanMaterialMethod">
+           <property name="text">
+            <string>Method:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbCanMaterialMethod">
+           <item>
+            <property name="text">
+             <string>Chemical Formula</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Cross-sections</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="leCanChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spCanDensity">
-        <property name="suffix">
-         <string> g/cm3</string>
-        </property>
-        <property name="maximum">
-         <double>9999.989999999999782</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="lbCanChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="valCanChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
+      <item row="2" column="0" colspan="6">
+       <widget class="QFrame" name="frame_4">
+        <layout class="QHBoxLayout" name="horizontalLayout_11">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="cbCanDensity">
+           <item>
+            <property name="text">
+             <string>Mass Density</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Atom Number Density</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Formula Number Density</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="spCanDensity">
+           <property name="suffix">
+            <string> g/cm3</string>
+           </property>
+           <property name="decimals">
+            <number>4</number>
+           </property>
+           <property name="maximum">
+            <double>9999.989999999999782</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="swCanMaterialDetails">
+           <widget class="QWidget" name="page_3">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <spacer name="horizontalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="lbCanChemicalFormula">
+               <property name="text">
+                <string>Chemical Formula:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="leCanChemicalFormula">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="valCanChemicalFormula">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_4">
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="lbCoherentXSection_2">
+               <property name="text">
+                <string>Coherent:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="spCanCoherentXSection">
+               <property name="suffix">
+                <string> b</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lbIncoherentXSection_2">
+               <property name="text">
+                <string>Incoherent:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="spCanIncoherentXSection">
+               <property name="suffix">
+                <string> b</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lbAttenuationXSection_2">
+               <property name="text">
+                <string>Attenuation:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="spCanAttenuationXSection">
+               <property name="suffix">
+                <string> b</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -884,17 +1286,17 @@
         </property>
         <item>
          <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>Wavelength</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>Angle</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Both</string>
          </property>
         </item>
        </widget>
@@ -962,8 +1364,6 @@
   <tabstop>spAnnBeamHeight</tabstop>
   <tabstop>spAnnBeamWidth</tabstop>
   <tabstop>spAnnStepSize</tabstop>
-  <tabstop>leSampleChemicalFormula</tabstop>
-  <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>cbPlotOutput</tabstop>
   <tabstop>pbSave</tabstop>
  </tabstops>

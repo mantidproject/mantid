@@ -34,7 +34,6 @@ Helper function. Creates a peaksworkspace with a single peak
     auto detectorIds = ws->getInstrument()->getDetectorIDs();
     Peak &peak = ws->getPeak(0);
     peak.setDetectorID(detectorIds.front());
-    Mantid::Kernel::V3D position;
     if (coordFrame == "Q (lab frame)") {
       peak.setQLabFrame(peakPosition,
                         1 /*set the detector distance explicitly*/);

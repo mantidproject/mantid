@@ -14,14 +14,14 @@ class VMDTest(unittest.TestCase):
 
     def test_default_construction_gives_object_with_single_dimension(self):
         one = VMD()
-        self.assertEquals(1, one.getNumDims())
+        self.assertEqual(1, one.getNumDims())
 
     def test_constructors_with_dimension_pts(self):
         pts = [1]
         for i in range(2,7):
             pts.append(i)
             vector = VMD(*pts) #unpack list
-            self.assertEquals(i, vector.getNumDims())
+            self.assertEqual(i, vector.getNumDims())
 
     def test_scalar_prod_returns_expected_value(self):
         a = VMD(1.0,2.0,1.0)
@@ -48,7 +48,7 @@ class VMDTest(unittest.TestCase):
     def test_normalize(self):
         a = VMD(3,4, math.sqrt(39.0))
         pre_norm = a.norm()
-        self.assertEquals(pre_norm, a.normalize())
+        self.assertEqual(pre_norm, a.normalize())
 
         b = VMD(3./8,4./8, math.sqrt(39.0)/8.) # normalized version
         self.assertAlmostEquals(b[0], a[0], places=6)
@@ -111,12 +111,12 @@ class VMDTest(unittest.TestCase):
 
     def test_equality_operators(self):
         v1 = VMD(1.0,2.0)
-        self.assertTrue(v1 == v1)
+        self.assertEqual(v1,  v1)
         v2 = VMD(1.0,2.0) # different object, same value
-        self.assertTrue(v1 == v2)
+        self.assertEqual(v1,  v2)
         self.assertFalse(v1 != v2)
         v3 = VMD(1.0,-5.0)
-        self.assertTrue(v1 != v3)
+        self.assertNotEqual(v1,  v3)
 
 
     #==================== Failure cases =======================================

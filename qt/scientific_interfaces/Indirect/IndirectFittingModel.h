@@ -47,6 +47,7 @@ public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
+  virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(std::size_t index) const;
   Spectra getSpectra(std::size_t index) const;
@@ -115,8 +116,8 @@ public:
   virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
   Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
                                             std::size_t spectrum) const;
+  std::string getOutputBasename() const;
 
-  void saveResult() const;
   void cleanFailedRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm);
   void cleanFailedSingleRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm,
                             std::size_t index);
@@ -140,6 +141,8 @@ protected:
   void removeFittingData(std::size_t index);
 
 private:
+  std::vector<std::string> getWorkspaceNames() const;
+
   void removeWorkspaceFromFittingData(std::size_t const &index);
 
   Mantid::API::IAlgorithm_sptr

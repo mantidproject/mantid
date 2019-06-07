@@ -7,15 +7,6 @@
 #ifndef MDVIEWERWIDGET_H_
 #define MDVIEWERWIDGET_H_
 
-#ifdef ERROR
-#undef ERROR
-#endif
-// Moving this to the bottom of the include stack causes a compilation error
-// under Visual Studio.
-// clang-format off
-#include "ui_MdViewerWidget.h"
-// clang-format on
-
 #include "MantidQtWidgets/Common/MdConstants.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
@@ -24,6 +15,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_MdViewerWidget.h"
 
 #include "vtkSmartPointer.h"
 

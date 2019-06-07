@@ -117,17 +117,17 @@ void SofTwoThetaTOF::init() {
   histogrammedTOF->add(boost::make_shared<API::HistogramValidator>());
   histogrammedTOF->add(boost::make_shared<API::InstrumentValidator>());
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, histogrammedTOF),
       "A workspace to be converted.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::OUTPUT_WS, "", Kernel::Direction::Output),
                   "A workspace with (2theta, TOF) units.");
   auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLowerExclusive(0.);
   declareProperty(Prop::ANGLE_STEP, EMPTY_DBL(), positiveDouble,
                   "The angle step for detector grouping, in degrees.");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       Prop::FILENAME, "", API::FileProperty::OptionalSave,
                       std::vector<std::string>{".xml"}),
                   "A grouping file that will be created; a corresponding .par "
@@ -207,6 +207,7 @@ SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_sptr &ws,
 #endif
     generateGrouping->setProperty("GenerateParFile", false);
     // Make sure the file gets deleted at scope exit.
+    // enable cppcheck-suppress unreadVariable if needed
     deleteThisLater.name = filename;
   } else {
     filename = static_cast<std::string>(getProperty(Prop::FILENAME));

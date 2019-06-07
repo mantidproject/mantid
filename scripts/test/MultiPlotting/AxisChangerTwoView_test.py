@@ -6,14 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid.py3compat import mock
+
 from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
-
-from Muon.GUI.Common import mock_widget
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class AxisChangerTwoViewTest(unittest.TestCase):
@@ -54,8 +50,8 @@ class AxisChangerTwoViewTest(unittest.TestCase):
 
     def test_clear_bounds(self):
         self.view.clear_bounds()
-        self.assertEquals(self.view.lower_bound.clear.call_count, 1)
-        self.assertEquals(self.view.upper_bound.clear.call_count, 1)
+        self.assertEqual(self.view.lower_bound.clear.call_count, 1)
+        self.assertEqual(self.view.upper_bound.clear.call_count, 1)
 
     def test_bound_changed(self):
         self.view._bound_changed()

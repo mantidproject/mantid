@@ -61,8 +61,8 @@ private:
   /// flag for reciprocal lattice units
   bool m_isRLU;
   /// The projection vectors
-  std::vector<double> m_Q1Basis{1., 0., 0.}, m_Q2Basis{0., 1., 0.},
-      m_Q3Basis{0., 0., 1.};
+  std::vector<double> m_Q0Basis{1., 0., 0.}, m_Q1Basis{0., 1., 0.},
+      m_Q2Basis{0., 0., 1.};
   /// UB matrix
   Mantid::Kernel::DblMatrix m_UB;
   /// W matrix

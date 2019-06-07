@@ -11,10 +11,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 
-#include "BoundingBox.h"
+#include <boost/optional.hpp>
 #include <map>
 #include <memory>
 
@@ -47,7 +49,7 @@ class vtkGeometryCacheWriter;
 A Constructive Solid Geometry (CSG) object, implemented
 as a collection of Rules and surface objects
 */
-class MANTID_GEOMETRY_DLL CSGObject : public IObject {
+class MANTID_GEOMETRY_DLL CSGObject final : public IObject {
 public:
   /// Default constructor
   CSGObject();
@@ -58,7 +60,7 @@ public:
   /// Assignment operator
   CSGObject &operator=(const CSGObject &);
   /// Destructor
-  virtual ~CSGObject();
+  ~CSGObject() override;
   /// Clone
   IObject *clone() const override { return new CSGObject(*this); }
 
@@ -82,7 +84,7 @@ public:
   int getName() const override { return ObjNum; } ///< Get Name
 
   void setMaterial(const Kernel::Material &material);
-  const Kernel::Material material() const override;
+  const Kernel::Material &material() const override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
@@ -109,7 +111,8 @@ public:
   bool isValid(const std::map<int, int> &)
       const; ///< Check if a set of surfaces are valid.
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
+  Mantid::Geometry::TrackDirection calcValidType(const Kernel::V3D &Pt,
+                                                 const Kernel::V3D &uVec) const;
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
@@ -134,10 +137,10 @@ public:
   double solidAngle(const Kernel::V3D &observer,
                     const Kernel::V3D &scaleFactor) const override;
   // solid angle via triangulation
-  double triangleSolidAngle(const Kernel::V3D &observer) const;
+  double triangulatedSolidAngle(const Kernel::V3D &observer) const;
   // Solid angle via triangulation with scaling factor for object size
-  double triangleSolidAngle(const Kernel::V3D &observer,
-                            const Kernel::V3D &scaleFactor) const;
+  double triangulatedSolidAngle(const Kernel::V3D &observer,
+                                const Kernel::V3D &scaleFactor) const;
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 
@@ -180,9 +183,11 @@ public:
   void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
   void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+  detail::ShapeInfo::GeometryShape shape() const override;
+  const detail::ShapeInfo &shapeInfo() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &myradius,
-                     double &myheight) const override;
+                     std::vector<Kernel::V3D> &vectors, double &innerRadius,
+                     double &radius, double &height) const override;
   /// Getter for the shape xml
   std::string getShapeXML() const;
 
@@ -202,29 +207,12 @@ private:
   void calcBoundingBoxByGeometry();
 
   int searchForObject(Kernel::V3D &) const;
-  double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
-                               const Kernel::V3D &c,
-                               const Kernel::V3D &observer) const;
-  double CuboidSolidAngle(const Kernel::V3D observer,
-                          const std::vector<Kernel::V3D> vectors) const;
-  double SphereSolidAngle(const Kernel::V3D observer,
-                          const std::vector<Kernel::V3D> vectors,
-                          const double radius) const;
-  double CylinderSolidAngle(const Kernel::V3D &observer,
-                            const Mantid::Kernel::V3D &centre,
-                            const Mantid::Kernel::V3D &axis,
-                            const double radius, const double height) const;
-  double ConeSolidAngle(const Kernel::V3D &observer,
-                        const Mantid::Kernel::V3D &centre,
-                        const Mantid::Kernel::V3D &axis, const double radius,
-                        const double height) const;
 
   /// Returns the volume.
   double monteCarloVolume() const;
   /// Returns the volume.
   double singleShotMonteCarloVolume(const int shotSize,
                                     const size_t seed) const;
-
   /// Top rule [ Geometric scope of object]
   std::unique_ptr<Rule> TopRule;
   /// Object's bounding box
@@ -261,7 +249,7 @@ private:
   /// Optional string identifier
   std::string m_id;
   /// material composition
-  std::unique_ptr<Kernel::Material> m_material;
+  mutable std::unique_ptr<Kernel::Material> m_material;
   /// Whether or not the object geometry is finite
   bool m_isFiniteGeometry = true;
 

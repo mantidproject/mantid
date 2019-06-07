@@ -9,17 +9,13 @@
 #
 from __future__ import absolute_import, division, print_function
 
+import os
+import unittest
+
+from mantid.py3compat import mock
 from workbench.widgets.plotselector.model import PlotSelectorModel
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import PlotSelectorView, Column
-
-import os
-
-import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 class PlotSelectorPresenterTest(unittest.TestCase):
@@ -130,8 +126,8 @@ class PlotSelectorPresenterTest(unittest.TestCase):
     def test_hide_multiple_plots_calls_hide_in_model(self):
         self.view.get_all_selected_plot_numbers = mock.Mock(return_value=[1, 2])
         self.presenter.hide_selected_plots()
-        self.assertEquals(self.model.hide_plot.mock_calls[0], mock.call(1))
-        self.assertEquals(self.model.hide_plot.mock_calls[1], mock.call(2))
+        self.assertEqual(self.model.hide_plot.mock_calls[0], mock.call(1))
+        self.assertEqual(self.model.hide_plot.mock_calls[1], mock.call(2))
 
     def test_toggle_plot_visibility_for_visible_plot(self):
         self.model.is_visible = mock.Mock(return_value=True)

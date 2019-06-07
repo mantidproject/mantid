@@ -10,8 +10,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Material.h"
 #include <boost/optional/optional.hpp>
-#include <string>
-#include <tuple>
 
 namespace Mantid {
 // Forward declare
@@ -26,6 +24,7 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL MaterialBuilder {
 public:
+  enum class NumberDensityUnit { Atoms, FormulaUnits };
   MaterialBuilder();
 
   MaterialBuilder &setName(const std::string &name);
@@ -35,6 +34,7 @@ public:
   MaterialBuilder &setMassNumber(int massNumber);
 
   MaterialBuilder &setNumberDensity(double rho);
+  MaterialBuilder &setNumberDensityUnit(NumberDensityUnit unit);
   MaterialBuilder &setZParameter(double zparam);
   MaterialBuilder &setUnitCellVolume(double cellVolume);
   MaterialBuilder &setMassDensity(double massDensity);
@@ -58,12 +58,13 @@ private:
   double getOrCalculateRho(const Material::ChemicalFormula &formula) const;
 
   std::string m_name;
-  std::unique_ptr<Material::ChemicalFormula> m_formula;
+  Material::ChemicalFormula m_formula;
   boost::optional<int> m_atomicNo;
   int m_massNo;
   boost::optional<double> m_numberDensity, m_zParam, m_cellVol, m_massDensity;
   boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection,
       m_absSection;
+  NumberDensityUnit m_numberDensityUnit;
 };
 
 } // namespace Kernel

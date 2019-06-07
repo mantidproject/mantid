@@ -52,7 +52,7 @@ public:
         "Should throw as the box data were written for lean event and now we "
         "try to retrieve full events",
         BoxStoredTree.loadBoxStructure("someFile.nxs", nDims, "MDEvent"),
-        std::runtime_error);
+        const std::runtime_error &);
 
     nDims = 0;
     TSM_ASSERT_THROWS_NOTHING(

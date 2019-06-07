@@ -81,7 +81,7 @@ template <typename ElementType> struct std_vector_exporter {
 
   /// a python wrapper
   static void wrap(std::string const &python_name) {
-    boost::python::class_<w_t, std::auto_ptr<w_t>>(python_name.c_str())
+    boost::python::class_<w_t, boost::shared_ptr<w_t>>(python_name.c_str())
         .def(boost::python::init<w_t const &>())
         .def(boost::python::vector_indexing_suite<w_t>())
         .def("__str__", &std_vector_exporter::to_string);
@@ -131,7 +131,7 @@ template <typename ElementType> struct std_set_exporter {
   }
 
   static void wrap(std::string const &python_name) {
-    boost::python::class_<w_t, std::auto_ptr<w_t>>(python_name.c_str())
+    boost::python::class_<w_t, boost::shared_ptr<w_t>>(python_name.c_str())
         .def(boost::python::init<w_t const &>())
         // special methods
         .def("__str__", &std_set_exporter::to_string, arg("self"))

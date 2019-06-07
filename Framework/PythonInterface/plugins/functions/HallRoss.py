@@ -4,18 +4,24 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 '''
 @author Spencer Howells, ISIS
 @date December 05, 2013
 '''
 from __future__ import (absolute_import, division, print_function)
+
 import math
 import numpy as np
+
 from mantid.api import IFunction1D, FunctionFactory
+from scipy import constants
 
 
 class HallRoss(IFunction1D):
+
+    planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
+    hbar = planck_constant / (2 * np.pi)  # meV * ps  = ueV * ns
 
     def category(self):
         return "QuasiElastic"
@@ -29,10 +35,10 @@ class HallRoss(IFunction1D):
         tau = self.getParameterValue("Tau")
         l = self.getParameterValue("L")
         l = l**2 / 2
-
         xvals = np.array(xvals)
-        hwhm = (1.0 - np.exp( -l * xvals * xvals )) / tau
 
+        with np.errstate(divide='ignore'):
+            hwhm = self.hbar*(1.0 - np.exp( -l * np.square(xvals))) / tau
         return hwhm
 
     def functionDeriv1D(self, xvals, jacobian):
@@ -40,13 +46,11 @@ class HallRoss(IFunction1D):
         l = self.getParameterValue("L")
         l = l**2 / 2
 
-        i = 0
-        for x in xvals:
+        for i, x in enumerate(xvals, start=0):
             ex = math.exp(-l*x*x)
-            h = (1.0-ex)/tau
-            jacobian.set(i,0,-h/tau)
+            hwhm = self.hbar*(1.0-ex)/tau
+            jacobian.set(i,0,-hwhm/tau)
             jacobian.set(i,1,x*x*ex/tau)
-            i += 1
 
 
 # Required to have Mantid recognise the new function

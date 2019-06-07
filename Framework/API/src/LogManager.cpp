@@ -101,16 +101,16 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 //----------------------------------------------------------------------
 
 LogManager::LogManager()
-    : m_manager(Kernel::make_unique<Kernel::PropertyManager>()),
+    : m_manager(std::make_unique<Kernel::PropertyManager>()),
       m_singleValueCache(
-          Kernel::make_unique<Kernel::Cache<
+          std::make_unique<Kernel::Cache<
               std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {
 }
 
 LogManager::LogManager(const LogManager &other)
-    : m_manager(Kernel::make_unique<Kernel::PropertyManager>(*other.m_manager)),
+    : m_manager(std::make_unique<Kernel::PropertyManager>(*other.m_manager)),
       m_singleValueCache(
-          Kernel::make_unique<Kernel::Cache<
+          std::make_unique<Kernel::Cache<
               std::pair<std::string, Kernel::Math::StatisticType>, double>>(
               *other.m_singleValueCache)) {}
 
@@ -119,7 +119,7 @@ LogManager::~LogManager() = default;
 
 LogManager &LogManager::operator=(const LogManager &other) {
   *m_manager = *other.m_manager;
-  m_singleValueCache = Kernel::make_unique<Kernel::Cache<
+  m_singleValueCache = std::make_unique<Kernel::Cache<
       std::pair<std::string, Kernel::Math::StatisticType>, double>>(
       *other.m_singleValueCache);
   return *this;
@@ -321,8 +321,7 @@ size_t LogManager::getMemorySize() const {
 
 /**
  * Returns a property as a time series property. It will throw if it is not
- * valid or the
- * property does not exist
+ * valid or the property does not exist
  * @param name The name of a time-series property
  * @return A pointer to the time-series property
  */

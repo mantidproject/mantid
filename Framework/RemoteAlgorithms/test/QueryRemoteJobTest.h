@@ -57,15 +57,15 @@ public:
 
   // TODO: when we have a RemoteJobManager capable of creating
   // algorithms for different types of compute resources (example:
-  // Fermi@SNS and SCARF@STFC), create different algorithms for them
+  // Fermi@SNS), create different algorithms for them
   void test_propertiesMissing() {
     QueryRemoteJob alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // id missing
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     QueryRemoteJob alg2;
@@ -73,7 +73,7 @@ public:
     // compute resource missing
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("JobID", "missing001"));
 
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
   }
 
@@ -81,16 +81,15 @@ public:
     QueryRemoteJob qr;
     TS_ASSERT_THROWS_NOTHING(qr.initialize();)
     TS_ASSERT_THROWS(qr.setPropertyValue("job", "whatever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(qr.setPropertyValue("id", "whichever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(qr.setPropertyValue("ComputeRes", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_propertiesOK() {
     testFacilities.emplace_back("SNS", "Fermi");
-    testFacilities.emplace_back("ISIS", "SCARF@STFC");
 
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();

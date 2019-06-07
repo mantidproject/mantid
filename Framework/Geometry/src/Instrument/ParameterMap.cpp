@@ -63,17 +63,17 @@ void checkIsNotMaskingParameter(const std::string &name) {
  */
 ParameterMap::ParameterMap()
     : m_cacheLocMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
-      m_cacheRotMap(Kernel::make_unique<
-                    Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
+      m_cacheRotMap(
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
     : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
       m_cacheLocMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(
               *other.m_cacheLocMap)),
       m_cacheRotMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(
               *other.m_cacheRotMap)),
       m_instrument(other.m_instrument) {
   if (m_instrument)
@@ -973,7 +973,7 @@ Parameter_sptr ParameterMap::getRecursive(const IComponent *comp,
 std::string ParameterMap::getString(const IComponent *comp,
                                     const std::string &name,
                                     bool recursive) const {
-  Parameter_sptr param = get(comp, name);
+  Parameter_sptr param;
   if (recursive) {
     param = getRecursive(comp, name);
   } else {

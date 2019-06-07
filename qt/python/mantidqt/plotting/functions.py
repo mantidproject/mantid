@@ -21,13 +21,15 @@ try:
     from matplotlib.cm import viridis as DEFAULT_CMAP
 except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
-from mantid.py3compat import is_text_string
 from matplotlib.gridspec import GridSpec
+from matplotlib.legend import Legend
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
+from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
+from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 
 # -----------------------------------------------------------------------------
@@ -38,6 +40,24 @@ PROJECTION = 'mantid'
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
 LOGGER = Logger("workspace.plotting.functions")
+
+
+# -----------------------------------------------------------------------------
+# Decorators
+# -----------------------------------------------------------------------------
+
+def manage_workspace_names(func):
+    """
+    A decorator to go around plotting functions.
+    This will retrieve workspaces from workspace names before
+    calling the plotting function
+    :param func: A plotting function
+    :return:
+    """
+    def inner_func(workspaces, *args, **kwargs):
+        workspaces = _validate_workspace_names(workspaces)
+        return func(workspaces, *args, **kwargs)
+    return inner_func
 
 
 # -----------------------------------------------------------------------------
@@ -112,6 +132,10 @@ def plot_from_names(names, errors, overplot, fig=None):
     :param fig: If not None then use this figure object to plot
     :return: The figure containing the plot or None if selection was cancelled
     """
+    if fig and len(fig.axes) > 1:
+        LOGGER.warning("Cannot plot workspace on top of Matplotlib subplots.")
+        return None
+
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
     try:
         selection = get_spectra_selection(workspaces)
@@ -127,8 +151,33 @@ def plot_from_names(names, errors, overplot, fig=None):
                 errors=errors, overplot=overplot, fig=fig)
 
 
+def get_plot_fig(overplot=None, ax_properties=None, window_title=None):
+    """
+    Create a blank figure and axes, with configurable properties.
+    :param overplot: If true then plotting on figure will plot over previous plotting
+    :param ax_properties: A doict of axes properties. E.g. {'yscale': 'log'} for log y-axis
+    :param window_title: A string denoting the name of the GUI window which holds the graph
+    :return: Matplotlib fig and axes objects
+    """
+    import matplotlib.pyplot as plt
+    if overplot:
+        ax = plt.gca(projection=PROJECTION)
+        fig = ax.figure
+    else:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection=PROJECTION)
+    if ax_properties:
+        ax.set(**ax_properties)
+    if window_title:
+        fig.canvas.set_window_title(window_title)
+
+    return fig, ax
+
+
+@manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
-         overplot=False, fig=None, plot_kwargs=None):
+         overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
+         window_title=None):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -141,9 +190,10 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param overplot: If true then overplot over the current figure if one exists
     :param fig: If not None then use this Figure object to plot
     :param plot_kwargs: Arguments that will be passed onto the plot function
+    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'}
+    :param window_title: A string denoting name of the GUI window which holds the graph
     :return: The figure containing the plots
     """
-    import matplotlib.pyplot as plt
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices)
@@ -154,14 +204,14 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     if fig is None:
         # get/create the axes to hold the plot
-        if overplot:
-            ax = plt.gca(projection=PROJECTION)
-            fig = ax.figure
-        else:
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection=PROJECTION)
+        fig, ax = get_plot_fig(overplot, ax_properties, window_title)
     else:
         ax = fig.gca()
+
+    if not isinstance(ax, MantidAxes):
+        # Convert to a MantidAxes if it isn't already. Ignore legend since
+        # a new one will be drawn later
+        ax = MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
 
     # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot
@@ -170,7 +220,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             plot_kwargs[kw] = num
             plot_fn(ws, **plot_kwargs)
 
-    ax.legend()
+    ax.legend().draggable()
     if not overplot:
         title = workspaces[0].name()
         ax.set_title(title)
@@ -197,22 +247,16 @@ def pcolormesh_from_names(names, fig=None):
 
 
 def use_imshow(ws):
-    if not ws.isCommonBins():
-        return False
-
-    x = ws.dataX(0)
-    difference = np.diff(x)
-    if not np.all(np.isclose(difference[:-1], difference[0])):
-        return False
-
     y = ws.getAxis(1).extractValues()
     difference = np.diff(y)
-    if not np.all(np.isclose(difference[:-1], difference[0])):
+    try:
+        commonLogBins = hasattr(ws, 'isCommonLogBins') and ws.isCommonLogBins()
+        return np.all(np.isclose(difference[:-1], difference[0])) and not commonLogBins
+    except IndexError:
         return False
 
-    return True
 
-
+@manage_workspace_names
 def pcolormesh(workspaces, fig=None):
     """
     Create a figure containing pcolor subplots
@@ -305,13 +349,17 @@ def _raise_if_not_sequence(value, seq_name, element_type=None):
     """
     accepted_types = (list, tuple, range)
     if type(value) not in accepted_types:
-        raise ValueError("{} should be a list or tuple".format(seq_name))
+        raise ValueError("{} should be a list or tuple, "
+                         "instead found '{}'".format(seq_name,
+                                                     value.__class__.__name__))
     if element_type is not None:
         def raise_if_not_type(x):
             if not isinstance(x, element_type):
                 raise ValueError("Unexpected type: '{}'".format(x.__class__.__name__))
 
-        map(raise_if_not_type, value)
+        # Map in Python3 is an iterator, so ValueError will not be raised unless the values are yielded.
+        # converting to a list forces yielding
+        list(map(raise_if_not_type, value))
 
 
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
@@ -327,6 +375,22 @@ def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
 
     if wksp_indices is not None:
         _raise_if_not_sequence(wksp_indices, 'wksp_indices')
+
+
+def _validate_workspace_names(workspaces):
+    """
+    Checks if the workspaces passed into a plotting function are workspace names, and
+    retrieves the workspaces if they are.
+    This function assumes that we do not have a mix of workspaces and workspace names.
+    :param workspaces: A list of workspaces or workspace names
+    :return: A list of workspaces
+    """
+    try:
+        _raise_if_not_sequence(workspaces, 'workspaces', string_types)
+    except ValueError:
+        return workspaces
+    else:
+        return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
 
 
 def _validate_pcolormesh_inputs(workspaces):

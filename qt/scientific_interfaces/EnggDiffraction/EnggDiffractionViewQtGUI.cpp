@@ -93,7 +93,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // This is created from a QWidget* -> use null-deleter to prevent double-free
   // with Qt
   boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
-      this, [](EnggDiffractionViewQtGUI *) {});
+      this, [](EnggDiffractionViewQtGUI * /*unused*/) {});
   m_fittingWidget =
       new EnggDiffFittingViewQtWidget(m_ui.tabMain, sharedView, sharedView,
                                       fullPres, fullPres, sharedView, fullPres);
@@ -281,7 +281,6 @@ void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(g_settingsGroup));
-  auto fname = qs.fileName();
 
   m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
@@ -419,10 +418,8 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("current-calib-filename",
               m_uiTabCalib.lineEdit_current_calib_filename->text());
 
-  qs.setValue("user-params-new-vanadium-num",
-              m_uiTabCalib.MWRunFiles_new_vanadium_num->getText());
-  qs.setValue("user-params-new-ceria-num",
-              m_uiTabCalib.MWRunFiles_new_ceria_num->getText());
+  qs.setValue("user-params-new-vanadium-num", "");
+  qs.setValue("user-params-new-ceria-num", "");
 
   qs.setValue("user-params-calib-cropped-group-checkbox",
               m_uiTabCalib.groupBox_calib_cropped->isChecked());
@@ -759,7 +756,7 @@ EnggDiffractionViewQtGUI::enggRunPythonCode(const std::string &pyCode) {
 std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
-    QString prevPath =
+    prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   }
 
@@ -858,7 +855,7 @@ void EnggDiffractionViewQtGUI::browseInputDirRaw() {
 void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
-    QString prevPath =
+    prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   }
 
@@ -1054,7 +1051,7 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
 }
 
-void EnggDiffractionViewQtGUI::showEvent(QShowEvent *) {
+void EnggDiffractionViewQtGUI::showEvent(QShowEvent * /*unused*/) {
   // make sure that the RB number is checked on interface startup/show
   m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }

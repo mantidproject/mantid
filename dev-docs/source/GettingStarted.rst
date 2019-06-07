@@ -32,8 +32,9 @@ Install the following:
   * install the latest version and ensure that Git LFS is checked to be included
   * when the install has completed create a directory for storage of the LFS objects, e.g. ``C:\GitLFSStorage``
   * open up Git Bash and run ``git config --global lfs.storage C:/GitLFSStorage``
+  * run ``git lfs install`` to initialize Git LFS. (Note that if you miss this step you may get errors due to the third party libraries not checking out properly. This can be fixed later by running ``git lfs fetch`` and ``git lfs checkout`` in the ``external\src\ThirdParty`` directory.)
 
-* `CMake <https://cmake.org/download/>`_ >= 3.7
+* `CMake <https://cmake.org/download/>`_ >= 3.14
 * `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
 
   * open the MikTeX console from the start menu
@@ -90,8 +91,19 @@ OSX
 ---
 The build environment on OS X is described here :ref:`BuildingOnOSX`.
 
+Docker
+------
+
+On Docker supported systems you may use the `mantid-development
+<https://github.com/mantidproject/dockerfiles/tree/master/mantid-development>`_
+images to develop Mantid without having to configure your system as a suitable
+build environment. This will give you an out of the box working build
+environment, including ParaView/VATES, Python 3 (where available) and ccache.
+
+More details and instructions can be found at the GitHub link above.
+
 Getting the Mantid code
-############################
+#######################
 We use `Git`_ as our version control system (VCS). The master copies of our repositories are located at `GitHub <http://github.com/mantidproject>`_. We have a number of repositories, of which the main one (the one containing all the source code for Mantid itself) is called simply `mantid <http://github.com/mantidproject/mantid>`_.
 
 If you are not already set up with Git, you can follow these `instructions <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_.

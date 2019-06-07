@@ -87,11 +87,11 @@ int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLSANS::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "Name of the nexus file to load");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "Name of the nexus file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -234,11 +234,11 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
   NXInt dataRear = dataGroup1.openIntData();
   dataRear.load();
   NXData dataGroup2 = firstEntry.openNXData("data2");
-  NXInt dataRight = dataGroup2.openIntData();
-  dataRight.load();
-  NXData dataGroup3 = firstEntry.openNXData("data3");
-  NXInt dataLeft = dataGroup3.openIntData();
+  NXInt dataLeft = dataGroup2.openIntData();
   dataLeft.load();
+  NXData dataGroup3 = firstEntry.openNXData("data3");
+  NXInt dataRight = dataGroup3.openIntData();
+  dataRight.load();
   NXData dataGroup4 = firstEntry.openNXData("data4");
   NXInt dataDown = dataGroup4.openIntData();
   dataDown.load();
@@ -308,15 +308,15 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
       std::string distancePrefix(instrumentPath + "/tof/tof_distance_detector");
       binningRear = getVariableTimeBinning(firstEntry, distancePrefix + "1",
                                            channelWidthSum, channelWidthTimes);
-      binningRight = getVariableTimeBinning(firstEntry, distancePrefix + "2",
-                                            channelWidthSum, channelWidthTimes);
-      binningLeft = getVariableTimeBinning(firstEntry, distancePrefix + "3",
+      binningLeft = getVariableTimeBinning(firstEntry, distancePrefix + "2",
                                            channelWidthSum, channelWidthTimes);
+      binningRight = getVariableTimeBinning(firstEntry, distancePrefix + "3",
+                                            channelWidthSum, channelWidthTimes);
       binningDown = getVariableTimeBinning(firstEntry, distancePrefix + "4",
                                            channelWidthSum, channelWidthTimes);
       binningUp = getVariableTimeBinning(firstEntry, distancePrefix + "5",
                                          channelWidthSum, channelWidthTimes);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       vtof = false;
     }
     if (!vtof) {
@@ -326,10 +326,11 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
                                   "/tof/tof_wavelength_detector");
         binningRear = m_loader.getTimeBinningFromNexusPath(firstEntry,
                                                            binPathPrefix + "1");
-        binningRight = m_loader.getTimeBinningFromNexusPath(
-            firstEntry, binPathPrefix + "2");
+
         binningLeft = m_loader.getTimeBinningFromNexusPath(firstEntry,
-                                                           binPathPrefix + "3");
+                                                           binPathPrefix + "2");
+        binningRight = m_loader.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "3");
         binningDown = m_loader.getTimeBinningFromNexusPath(firstEntry,
                                                            binPathPrefix + "4");
         binningUp = m_loader.getTimeBinningFromNexusPath(firstEntry,
@@ -399,36 +400,22 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     NeXus::NXInt &data, const std::vector<double> &timeBinning,
     size_t firstIndex = 0) {
 
-  g_log.debug("Loading the data into the workspace:");
-  g_log.debug() << "\t"
-                << "firstIndex = " << firstIndex << '\n';
-  g_log.debug() << "\t"
-                << "Number of Tubes : data.dim0() = " << data.dim0() << '\n';
-  g_log.debug() << "\t"
-                << "Number of Pixels : data.dim1() = " << data.dim1() << '\n';
-  g_log.debug() << "\t"
-                << "data.dim2() = " << data.dim2() << '\n';
-  g_log.debug() << "\t"
-                << "First bin = " << timeBinning[0] << '\n';
-
   // Workaround to get the number of tubes / pixels
   const size_t numberOfTubes = data.dim0();
   const size_t numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
-  size_t spec = firstIndex;
 
-  for (size_t i = 0; i < numberOfTubes; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
       const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
-      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
-      ++spec;
+      m_localWorkspace->setHistogram(index, binEdges, std::move(histoCounts));
     }
   }
 
-  g_log.debug() << "Data loading inti WS done....\n";
-
-  return spec;
+  return firstIndex + numberOfTubes * numberOfPixelsPerTube;
 }
 
 /**
@@ -631,10 +618,10 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     const std::string entryResolution = instrumentNamePath + "/selector/";
     try {
       wavelengthRes = entry.getFloat(entryResolution + "wavelength_res");
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       try {
         wavelengthRes = entry.getFloat(entryResolution + "wave_length_res");
-      } catch (std::runtime_error) {
+      } catch (const std::runtime_error &) {
         g_log.warning("Could not find wavelength resolution, assuming 10%");
       }
     }
@@ -661,7 +648,7 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
   if (nxStat != NX_ERROR) {
     m_loader.addNexusFieldsToWsRun(nxHandle, runDetails);
-    nxStat = NXclose(&nxHandle);
+    NXclose(&nxHandle);
   }
 }
 

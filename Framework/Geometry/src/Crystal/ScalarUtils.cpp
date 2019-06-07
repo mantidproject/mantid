@@ -10,6 +10,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
+#include <algorithm>
 #include <stdexcept>
 
 using namespace Mantid::Geometry;
@@ -271,16 +272,11 @@ void ScalarUtils::RemoveHighErrorForms(std::vector<ConventionalCell> &list,
                                        double level) {
   if (list.empty()) // nothing to do
     return;
-
-  std::vector<ConventionalCell> new_list;
-
-  for (auto &cell : list)
-    if (cell.GetError() <= level)
-      new_list.push_back(cell);
-
-  list.clear();
-  for (const auto &cell : new_list)
-    list.push_back(cell);
+  const auto removeRangeBegin =
+      std::remove_if(list.begin(), list.end(), [level](const auto &cell) {
+        return cell.GetError() > level;
+      });
+  list.erase(removeRangeBegin, list.end());
 }
 
 /**

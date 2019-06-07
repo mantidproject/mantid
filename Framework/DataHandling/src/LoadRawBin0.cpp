@@ -45,7 +45,7 @@ void LoadRawBin0::init() {
   declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
                   "The number of the last spectrum to read.");
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if "
       "explicitly set.");
 }

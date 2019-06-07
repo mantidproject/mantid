@@ -38,8 +38,8 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
       m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent),
       m_init(init), m_workspaceTypes(), m_showHidden(false), m_showGroups(true),
-      m_optional(false), m_suffix(), m_algName(), m_algPropName(),
-      m_algorithm() {
+      m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
+      m_algName(), m_algPropName(), m_algorithm() {
   setEditable(false);
   if (init) {
     Mantid::API::AnalysisDataServiceImpl &ads =
@@ -132,6 +132,14 @@ void WorkspaceSelector::setSuffixes(const QStringList &suffix) {
   }
 }
 
+void WorkspaceSelector::setLowerBinLimit(int numberOfBins) {
+  m_binLimits.first = numberOfBins;
+}
+
+void WorkspaceSelector::setUpperBinLimit(int numberOfBins) {
+  m_binLimits.second = numberOfBins;
+}
+
 QString WorkspaceSelector::getValidatingAlgorithm() const { return m_algName; }
 
 void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
@@ -145,14 +153,13 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
     m_algorithm->initialize();
     std::vector<Mantid::Kernel::Property *> props =
         m_algorithm->getProperties();
-    for (std::vector<Mantid::Kernel::Property *>::iterator it = props.begin();
-         it != props.end(); ++it) {
-      if ((*it)->direction() == Mantid::Kernel::Direction::Input) {
+    for (auto &prop : props) {
+      if (prop->direction() == Mantid::Kernel::Direction::Input) {
         // try to cast property to WorkspaceProperty
         Mantid::API::WorkspaceProperty<> *wsProp =
-            dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
+            dynamic_cast<Mantid::API::WorkspaceProperty<> *>(prop);
         if (wsProp != nullptr) {
-          m_algPropName = QString::fromStdString((*it)->name());
+          m_algPropName = QString::fromStdString(prop->name());
           break;
         }
       }
@@ -188,7 +195,7 @@ void WorkspaceSelector::handleRemEvent(
 }
 
 void WorkspaceSelector::handleClearEvent(
-    Mantid::API::ClearADSNotification_ptr) {
+    Mantid::API::ClearADSNotification_ptr /*unused*/) {
   this->clear();
   emit emptied();
 }
@@ -253,6 +260,8 @@ bool WorkspaceSelector::checkEligibility(
     return false;
   } else if (!hasValidSuffix(name)) {
     return false;
+  } else if (!hasValidNumberOfBins(object)) {
+    return false;
   } else if (!m_showGroups) {
     auto group =
         boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
@@ -277,6 +286,21 @@ bool WorkspaceSelector::hasValidSuffix(const QString &name) const {
   return false;
 }
 
+bool WorkspaceSelector::hasValidNumberOfBins(
+    Mantid::API::Workspace_sptr object) const {
+  if (m_binLimits.first != 0 || m_binLimits.second != -1) {
+    if (auto const workspace =
+            boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
+      auto const numberOfBins = static_cast<int>(workspace->y(0).size());
+      if (m_binLimits.second != -1)
+        return numberOfBins >= m_binLimits.first &&
+               numberOfBins <= m_binLimits.second;
+      return numberOfBins >= m_binLimits.first;
+    }
+  }
+  return true;
+}
+
 void WorkspaceSelector::refresh() {
   clear();
   if (m_optional)
@@ -291,9 +315,9 @@ void WorkspaceSelector::refresh() {
   }
 
   QStringList namesToAdd;
-  for (auto it = items.begin(); it != items.end(); ++it) {
-    QString name = QString::fromStdString(*it);
-    if (checkEligibility(name, ads.retrieve(*it))) {
+  for (auto &item : items) {
+    QString name = QString::fromStdString(item);
+    if (checkEligibility(name, ads.retrieve(item))) {
       namesToAdd << name;
     }
   }

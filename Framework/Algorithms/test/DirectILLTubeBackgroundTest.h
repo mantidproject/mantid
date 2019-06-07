@@ -198,7 +198,7 @@ public:
       }
     }
     auto maskWS =
-        Kernel::make_unique<DataObjects::MaskWorkspace>(inWS->getInstrument());
+        std::make_unique<DataObjects::MaskWorkspace>(inWS->getInstrument());
     maskWS->setMaskedIndex(1);
     inWS->mutableY(1) = -600;
     maskWS->setMaskedIndex(6);

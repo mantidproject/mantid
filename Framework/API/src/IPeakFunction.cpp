@@ -15,7 +15,6 @@
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <cmath>
 #include <limits>

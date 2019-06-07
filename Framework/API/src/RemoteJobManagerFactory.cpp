@@ -43,8 +43,7 @@ IRemoteJobManager_sptr RemoteJobManagerFactoryImpl::create(
       Mantid::Kernel::ConfigService::Instance().getFacility().computeResource(
           computeResourceName);
 
-  // this is the default. It could be "MantidWebServiceAPI", "LSF",
-  // "SCARFLSF", "MOAB", etc.
+  // this is the default. It could be "MantidWebServiceAPI", "MOAB", etc.
   std::string type = "MantidWebServiceAPIJobManager";
   std::string fdfType = cr.remoteJobManagerType();
   if (!fdfType.empty())

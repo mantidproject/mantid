@@ -32,27 +32,28 @@ using namespace Mantid::Crystal;
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InPeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input 2D Workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "An input 2D Workspace.");
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("PeakRadius", 10, Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("PeakRadius", 10,
+                                               Direction::Input),
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
-  declareProperty(
-      make_unique<PropertyWithValue<int>>("EdgePixels", 0, Direction::Input),
-      "The number of pixels where peaks are removed at edges. Only "
-      "for instruments with RectangularDetectors. ");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("EdgePixels", 0,
+                                                           Direction::Input),
+                  "The number of pixels where peaks are removed at edges. Only "
+                  "for instruments with RectangularDetectors. ");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+          "OutPeaksWorkspace", "", Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }
@@ -95,6 +96,7 @@ void CentroidPeaks::integrate() {
     }
   }
 
+  const int inBlocksize = static_cast<int>(inWS->blocksize());
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
@@ -105,11 +107,11 @@ void CentroidPeaks::integrate() {
     int col = peak.getCol();
     int row = peak.getRow();
     int pixelID = peak.getDetectorID();
-    auto it = wi_to_detid_map.find(pixelID);
-    if (it == wi_to_detid_map.end()) {
+    auto detidIterator = wi_to_detid_map.find(pixelID);
+    if (detidIterator == wi_to_detid_map.end()) {
       continue;
     }
-    size_t workspaceIndex = it->second;
+    size_t workspaceIndex = detidIterator->second;
     double TOFPeakd = peak.getTOF();
     const auto &X = inWS->x(workspaceIndex);
     int chan = Kernel::VectorHelper::getBinIndex(X.rawData(), TOFPeakd);
@@ -137,9 +139,8 @@ void CentroidPeaks::integrate() {
               wi_to_detid_map.find(findPixelID(bankName, icol, irow));
           if (it == wi_to_detid_map.end())
             continue;
-          size_t workspaceIndex = (it->second);
 
-          const auto &histogram = inWS->y(workspaceIndex);
+          const auto &histogram = inWS->y(it->second);
 
           intensity += histogram[ichan];
           rowcentroid += irow * histogram[ichan];
@@ -154,13 +155,13 @@ void CentroidPeaks::integrate() {
     col = int(colcentroid / intensity);
     boost::algorithm::clamp(col, 0, nCols - 1);
     chan = int(chancentroid / intensity);
-    boost::algorithm::clamp(chan, 0, static_cast<int>(inWS->blocksize()));
+    boost::algorithm::clamp(chan, 0, inBlocksize);
 
     // Set wavelength to change tof for peak object
     if (!edgePixel(inst, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
-      it = wi_to_detid_map.find(findPixelID(bankName, col, row));
-      workspaceIndex = (it->second);
+      detidIterator = wi_to_detid_map.find(findPixelID(bankName, col, row));
+      workspaceIndex = (detidIterator->second);
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
       timeflight.push_back(inWS->x(workspaceIndex)[chan]);

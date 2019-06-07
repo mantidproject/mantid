@@ -58,9 +58,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(lo.initialize());
     // username missing
     TS_ASSERT_THROWS(lo.setPropertyValue("ComputeResource", "anything"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(lo.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(lo.execute(), const std::runtime_error &);
     TS_ASSERT(!lo.isExecuted());
   }
 
@@ -68,12 +68,11 @@ public:
     Logout2 lo;
     TS_ASSERT_THROWS_NOTHING(lo.initialize());
     TS_ASSERT_THROWS(lo.setPropertyValue("usernam", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_runOK() {
     testFacilities.emplace_back("SNS", "Fermi");
-    testFacilities.emplace_back("ISIS", "SCARF@STFC");
 
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();

@@ -9,7 +9,6 @@
 #include <complex>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <iterator>
 #include <list>
 #include <map>
@@ -23,13 +22,17 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 
 namespace Geometry {
+
+namespace {
+Kernel::Logger logger("Rules");
+}
 
 int Rule::addToKey(std::vector<int> &AV, const int passN)
 /**
@@ -243,14 +246,11 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
           // hence we have to play games with a second
           // gamma->clone()
           std::unique_ptr<Rule> tmp1 =
-              Mantid::Kernel::make_unique<Intersection>(std::move(alpha),
-                                                        gamma->clone());
+              std::make_unique<Intersection>(std::move(alpha), gamma->clone());
           std::unique_ptr<Rule> tmp2 =
-              Mantid::Kernel::make_unique<Intersection>(std::move(beta),
-                                                        std::move(gamma));
+              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
           std::unique_ptr<Rule> partReplace =
-              Mantid::Kernel::make_unique<Union>(std::move(tmp1),
-                                                 std::move(tmp2));
+              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
@@ -311,7 +311,7 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
     // Exit condition is that nothing changed last time
     // or the tree is Empty.
     if (!TopRule->checkParents())
-      std::cerr << "Parents False\n";
+      logger.debug() << "Parents False\n";
     while (!active && !TreeLine.empty()) {
       // Ok get and remvoe the top item from the stack.
       tmpA = TreeLine.top();
@@ -363,14 +363,11 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
           // hence we have to play games with a second
           // gamma->clone()
           std::unique_ptr<Rule> tmp1 =
-              Mantid::Kernel::make_unique<Intersection>(std::move(alpha),
-                                                        gamma->clone());
+              std::make_unique<Intersection>(std::move(alpha), gamma->clone());
           std::unique_ptr<Rule> tmp2 =
-              Mantid::Kernel::make_unique<Intersection>(std::move(beta),
-                                                        std::move(gamma));
+              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
           std::unique_ptr<Rule> partReplace =
-              Mantid::Kernel::make_unique<Union>(std::move(tmp1),
-                                                 std::move(tmp2));
+              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
@@ -445,7 +442,7 @@ Rule::Rule()
 */
 {}
 
-Rule::Rule(const Rule &)
+Rule::Rule(const Rule & /*unused*/)
     : Parent(nullptr)
 /**
   Constructor copies.
@@ -462,7 +459,7 @@ Rule::Rule(Rule *A)
 */
 {}
 
-Rule &Rule::operator=(const Rule &)
+Rule &Rule::operator=(const Rule & /*unused*/)
 /**
   Assignment operator=
   does not set parent as Rules
@@ -625,7 +622,7 @@ int Rule::getKeyList(std::vector<int> &IList) const
       if (SurX)
         IList.push_back(SurX->getKeyN());
       else {
-        std::cerr << "Error with surface List\n";
+        logger.error() << "Error with surface List\n";
         return static_cast<int>(IList.size());
       }
     }

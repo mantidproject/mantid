@@ -50,7 +50,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("Instrument", "__NOT_AN_INSTRUMENT__"));
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void
@@ -142,7 +142,7 @@ public:
     alg->initialize();
 
     TS_ASSERT_THROWS(alg->setPropertyValue("UnitX", "NOT_A_UNIT"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_UnitX_Parameter_Is_DeltaE_By_Default() {

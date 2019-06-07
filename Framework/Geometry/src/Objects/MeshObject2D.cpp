@@ -244,7 +244,7 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
   // fails
   if (t >= 0) {
     Kernel::V3D intersection;
-    int entryExit;
+    TrackDirection entryExit;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
       if (MeshObjectCommon::rayIntersectsTriangle(
               ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
@@ -356,18 +356,18 @@ int MeshObject2D::getPointInObject(Kernel::V3D &point) const {
   return this->isValid(point) ? 1 : 0;
 }
 
-Kernel::V3D
-MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
-                                    const size_t) const {
+Kernel::V3D MeshObject2D::generatePointInObject(
+    Kernel::PseudoRandomNumberGenerator & /*rng*/,
+    const size_t /*unused*/) const {
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
   // use the bounding box
   throw std::runtime_error("Not implemented.");
 }
 
-Kernel::V3D
-MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
-                                    const BoundingBox &, const size_t) const {
+Kernel::V3D MeshObject2D::generatePointInObject(
+    Kernel::PseudoRandomNumberGenerator & /*rng*/,
+    const BoundingBox & /*activeRegion*/, const size_t /*unused*/) const {
 
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
@@ -375,7 +375,7 @@ MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
   throw std::runtime_error("Not implemented");
 }
 
-const Kernel::Material MeshObject2D::material() const { return m_material; }
+const Kernel::Material &MeshObject2D::material() const { return m_material; }
 
 const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 
@@ -395,11 +395,19 @@ std::vector<double> MeshObject2D::getVertices() const {
 
 std::vector<uint32_t> MeshObject2D::getTriangles() const { return m_triangles; }
 
-void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
-                                 std::vector<Kernel::V3D> &, double &,
-                                 double &) const {
+detail::ShapeInfo::GeometryShape MeshObject2D::shape() const {
+  // should be consistent with MeshObject2D::GetObjectGeom
+  return detail::ShapeInfo::GeometryShape::NOSHAPE;
+}
 
-  throw std::runtime_error("Not implemented");
+const detail::ShapeInfo &MeshObject2D::shapeInfo() const {
+  throw std::runtime_error("MeshObject2D::shapeInfo() is not implemented");
+}
+
+void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
+                                 std::vector<Kernel::V3D> &, double &, double &,
+                                 double &) const {
+  throw std::runtime_error("MeshObject2D::GetObjectGeom is not implemented");
 }
 
 void MeshObject2D::draw() const {

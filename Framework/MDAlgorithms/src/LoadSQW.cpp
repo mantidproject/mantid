@@ -85,20 +85,21 @@ LoadSQW::~LoadSQW() { delete m_prog; }
 /// Initialize the algorithm
 void LoadSQW::init() {
   std::vector<std::string> fileExtensions{".sqw"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type SQW format");
-  declareProperty(make_unique<API::WorkspaceProperty<API::IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
-                  "Output IMDEventWorkspace reflecting SQW data read-in.");
   declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
+      std::make_unique<API::WorkspaceProperty<API::IMDEventWorkspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
+      "Output IMDEventWorkspace reflecting SQW data read-in.");
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
       "Load Metadata without events.");
   std::vector<std::string> fileExtensions2{".nxs"};
   declareProperty(
-      Kernel::make_unique<API::FileProperty>("OutputFilename", "",
-                                             API::FileProperty::OptionalSave,
-                                             fileExtensions2),
+      std::make_unique<API::FileProperty>("OutputFilename", "",
+                                          API::FileProperty::OptionalSave,
+                                          fileExtensions2),
       "If the input SQW file is too large to fit in memory, specify an output "
       "NXS file.\n"
       "The MDEventWorkspace will be create with this file as its back-end.");
@@ -520,7 +521,6 @@ void LoadSQW::readDNDDimensions(
   */
   // axis counter
   ic = 0;
-  ;
   std::vector<unsigned int> iax;
   if (niax > 0) {
     buf.resize(4 * (niax + 2 * niax));
@@ -603,16 +603,16 @@ void LoadSQW::readDNDDimensions(
   if (arrangeByMDImage) {
 
     // Place dimensions to output vector in the correct dimensions order;
-    size_t ic = 0;
+    size_t dimIndex = 0;
     DimVectorOut.resize(4);
     for (size_t i = 0; i < npax; i++) {
-      DimVectorOut[ic] = DimVectorIn[pax[dax[i]]];
-      ic++;
+      DimVectorOut[dimIndex] = DimVectorIn[pax[dax[i]]];
+      dimIndex++;
     }
 
     for (size_t i = 0; i < niax; i++) {
-      DimVectorOut[ic] = DimVectorIn[iax[i]];
-      ic++;
+      DimVectorOut[dimIndex] = DimVectorIn[iax[i]];
+      dimIndex++;
     }
   } else // arrange according to sqw
   {

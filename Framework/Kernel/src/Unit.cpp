@@ -349,17 +349,11 @@ void Wavelength::init() {
   factorTo *= TOFisinMicroseconds / toAngstroms;
 
   // ------------ Factors to convert FROM TOF ---------------------
-  ltot = l1 + l2;
-  // Protect against divide by zero
-  if (ltot == 0.0)
-    ltot = DBL_MIN;
-
   // Now apply the factor to the input data vector
   do_sfpFrom = false;
   if (efixed != DBL_MIN) {
     if (emode == 1) // Direct
     {
-      ltot = l2;
       sfpFrom = (sqrt(PhysicalConstants::NeutronMass /
                       (2.0 * PhysicalConstants::meV)) *
                  TOFisinMicroseconds * l1) /
@@ -367,18 +361,17 @@ void Wavelength::init() {
       do_sfpFrom = true;
     } else if (emode == 2) // Indirect
     {
-      ltot = l1;
       sfpFrom = (sqrt(PhysicalConstants::NeutronMass /
                       (2.0 * PhysicalConstants::meV)) *
                  TOFisinMicroseconds * l2) /
                 sqrt(efixed);
       do_sfpFrom = true;
-    } else {
-      ltot = l1 + l2;
     }
-  } else {
-    ltot = l1 + l2;
   }
+
+  // Protect against divide by zero
+  if (ltot == 0.0)
+    ltot = DBL_MIN;
 
   // First the crux of the conversion
   factorFrom = PhysicalConstants::h / (PhysicalConstants::NeutronMass * (ltot));
@@ -1005,30 +998,24 @@ void Momentum::init() {
   factorTo *= TOFisinMicroseconds / toAngstroms;
 
   // ------------ Factors to convert FROM TOF ---------------------
-  ltot = l1 + l2;
-  // Protect against divide by zero
-  if (ltot == 0.0)
-    ltot = DBL_MIN;
 
   // Now apply the factor to the input data vector
   do_sfpFrom = false;
   if (efixed != DBL_MIN) {
     if (emode == 1) // Direct
     {
-      ltot = l2;
       sfpFrom = sfpTo;
       do_sfpFrom = true;
     } else if (emode == 2) // Indirect
     {
-      ltot = l1;
       sfpFrom = sfpTo;
       do_sfpFrom = true;
-    } else {
-      ltot = l1 + l2;
     }
-  } else {
-    ltot = l1 + l2;
   }
+
+  // Protect against divide by zero
+  if (ltot == 0.0)
+    ltot = DBL_MIN;
 
   // First the crux of the conversion
   factorFrom = PhysicalConstants::h / (PhysicalConstants::NeutronMass * (ltot));
@@ -1271,6 +1258,39 @@ double Temperature::conversionTOFMax() const {
 }
 
 Unit *Temperature::clone() const { return new Temperature(*this); }
+
+// ================================================================================
+
+double timeConversionValue(std::string input_unit, std::string output_unit) {
+  std::map<std::string, double> timesList;
+  double seconds = 1.0e9;
+  double milliseconds = 1.0e-3 * seconds;
+  double microseconds = 1.0e-3 * milliseconds;
+  double nanoseconds = 1.0e-3 * microseconds;
+
+  timesList["seconds"] = seconds;
+  timesList["second"] = seconds;
+  timesList["s"] = seconds;
+  timesList["milliseconds"] = milliseconds;
+  timesList["millisecond"] = milliseconds;
+  timesList["ms"] = milliseconds;
+  timesList["microseconds"] = microseconds;
+  timesList["microsecond"] = microseconds;
+  timesList["us"] = microseconds;
+  timesList["nanoseconds"] = nanoseconds;
+  timesList["nanosecond"] = nanoseconds;
+  timesList["ns"] = nanoseconds;
+
+  double input_float = timesList[input_unit];
+  double output_float = timesList[output_unit];
+  if (input_float == 0)
+    throw std::runtime_error("timeConversionValue: input unit " + input_unit +
+                             " not known.");
+  if (output_float == 0)
+    throw std::runtime_error("timeConversionValue: output unit " + input_unit +
+                             " not known.");
+  return input_float / output_float;
+}
 
 } // namespace Units
 

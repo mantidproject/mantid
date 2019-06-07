@@ -39,7 +39,7 @@ def _create_XML_subElement_for_pairs(root_node, pairs):
     return pair_nodes
 
 
-def save_grouping_to_XML(groups, pairs, filename, save=True):
+def save_grouping_to_XML(groups, pairs, filename, save=True, description=''):
     """
     Save a set of muon group and pair parameters to XML format file. Fewer checks are performed
     than with the XML loading.
@@ -61,16 +61,14 @@ def save_grouping_to_XML(groups, pairs, filename, save=True):
         raise AttributeError("pairs must be MuonPair type")
 
     root = ET.Element("detector-grouping")
+    if description:
+        root.set('description', description)
 
     # handle groups
-    group_nodes = _create_XML_subElement_for_groups(root, groups)
-    for child in group_nodes:
-        root.extend(child)
+    _create_XML_subElement_for_groups(root, groups)
 
     # handle pairs
-    pair_nodes = _create_XML_subElement_for_pairs(root, pairs)
-    for child in pair_nodes:
-        root.extend(child)
+    _create_XML_subElement_for_pairs(root, pairs)
 
     tree = ET.ElementTree(root)
     if save:
@@ -88,6 +86,14 @@ def load_grouping_from_XML(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
 
+    description = root.get('description')
+    if not description:
+        description = filename
+    try:
+        default = root.find('default').get('name')
+    except (AttributeError, KeyError):
+        default = ''
+
     group_names, group_ids = _get_groups_from_XML(root)
     pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
     groups, pairs = [], []
@@ -100,7 +106,7 @@ def load_grouping_from_XML(filename):
                            forward_group_name=pair_groups[i][0],
                            backward_group_name=pair_groups[i][1],
                            alpha=pair_alphas[i])]
-    return groups, pairs
+    return groups, pairs, description, default
 
 
 def _get_groups_from_XML(root):

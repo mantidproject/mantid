@@ -390,7 +390,7 @@ class JumpHallRossTest(JumpFitFunctionTestBase):
         JumpFitFunctionTestBase.__init__(self)
 
         self._function = 'name=HallRoss,Tau=2.7,L=1.75'
-        self.tolerance = 1e-5
+        self.tolerance = 5e-3
 
     def get_reference_files(self):
         return 'ISISIndirectBayes_JumpHallRossTest.nxs'

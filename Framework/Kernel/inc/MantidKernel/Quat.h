@@ -113,7 +113,7 @@ public:
   Quat &operator*=(const Quat &);
   bool operator==(const Quat &) const;
   bool operator!=(const Quat &) const;
-  const double &operator[](int) const;
+  double operator[](int) const;
   double &operator[](int);
 
   /** @name Element access. */

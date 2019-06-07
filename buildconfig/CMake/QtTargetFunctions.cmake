@@ -159,9 +159,11 @@ function (mtd_add_qt_target)
   endif()
 
   if (PARSED_LIBRARY)
-    add_library (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    add_library (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS}
+      ${PARSED_MOC} ${PARSED_NOMOC} ${RES_FILES})
   elseif (PARSED_EXECUTABLE)
-    add_executable (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    add_executable (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS}
+      ${PARSED_NOMOC} ${PARSED_NOMOC} ${RES_FILES})
   else ()
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
@@ -255,7 +257,7 @@ endfunction()
 #  - install_target_type The type of target that should be installed. See https://cmake.org/cmake/help/latest/command/install.html?highlight=install
 #  - install_dir A relative directory to install_prefix
 function (mtd_install_qt_library qt_version target install_target_type install_dir )
-    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${PACKAGE_WORKBENCH}) )
+    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${ENABLE_WORKBENCH}) )
       install ( TARGETS ${target} ${install_target_type} DESTINATION ${install_dir} )
     endif ()
 endfunction ()

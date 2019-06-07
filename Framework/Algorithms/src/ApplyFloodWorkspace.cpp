@@ -43,6 +43,7 @@ MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input,
   auto newFlood =
       WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
   auto const table = BinaryOperation::buildBinaryOperationTable(input, flood);
+  auto const floodBlocksize = flood->blocksize();
   const ISpectrum *missingSpectrum = nullptr;
   for (size_t i = 0; i < table->size(); ++i) {
     auto const j = (*table)[i];
@@ -50,8 +51,8 @@ MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input,
       if (missingSpectrum) {
         newFlood->getSpectrum(i).copyDataFrom(*missingSpectrum);
       } else {
-        newFlood->dataY(i).assign(flood->blocksize(), 1.0);
-        newFlood->dataE(i).assign(flood->blocksize(), 0.0);
+        newFlood->dataY(i).assign(floodBlocksize, 1.0);
+        newFlood->dataE(i).assign(floodBlocksize, 0.0);
         missingSpectrum = &newFlood->getSpectrum(i);
       }
     } else {
@@ -88,15 +89,15 @@ const std::string ApplyFloodWorkspace::category() const {
 
 void ApplyFloodWorkspace::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::INPUT_WORKSPACE, "", Direction::Input),
                   "The workspace to correct.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::FLOOD_WORKSPACE, "", Direction::Input),
                   "The flood workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::OUTPUT_WORKSPACE, "", Direction::Output),
                   "The corrected workspace.");
 }

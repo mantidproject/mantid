@@ -52,12 +52,12 @@ public:
   Shape2D *clone() const override { return nullptr; }
   void setWindow(const RectF &surface, const QRect &viewport) const;
   void draw(QPainter &painter) const override;
-  virtual void addShape(Shape2D *, bool slct = false);
-  virtual void removeShape(Shape2D *, bool sendSignal = true);
-  virtual void removeShapes(const QList<Shape2D *> &);
+  virtual void addShape(Shape2D * /*shape*/, bool slct = false);
+  virtual void removeShape(Shape2D * /*shape*/, bool sendSignal = true);
+  virtual void removeShapes(const QList<Shape2D *> & /*shapeList*/);
   virtual void clear();
 
-  void keyPressEvent(QKeyEvent *);
+  void keyPressEvent(QKeyEvent * /*e*/);
 
   bool selectAtXY(int x, int y, bool edit = true);
   bool selectAtXY(const QPointF &point, bool edit = true);
@@ -116,10 +116,10 @@ signals:
 public slots:
   void addShape(const QString &type, int x, int y, const QColor &borderColor,
                 const QColor &fillColor);
-  void addFreeShape(const QPolygonF &, const QColor &borderColor,
+  void addFreeShape(const QPolygonF & /*poly*/, const QColor &borderColor,
                     const QColor &fillColor);
   void deselectAll();
-  void moveRightBottomTo(int, int);
+  void moveRightBottomTo(int /*x*/, int /*y*/);
   void selectShapeOrControlPointAt(int x, int y);
   void addToSelectionShapeAt(int x, int y);
   void moveShapeOrControlPointBy(int dx, int dy);
@@ -130,8 +130,8 @@ public slots:
   void eraseFree(const QPolygonF &polygon);
 
 protected:
-  void drawShape(QPainter &) const override {} // never called
-  void addToPath(QPainterPath &) const override {}
+  void drawShape(QPainter & /*painter*/) const override {} // never called
+  void addToPath(QPainterPath & /*path*/) const override {}
   void refit() override;
   void resetBoundingRect() override;
 
@@ -159,6 +159,8 @@ protected:
   QList<Shape2D *>
       m_selectedShapes; ///< A list of selected shapes (can be moved or deleted)
   bool m_overridingCursor;
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

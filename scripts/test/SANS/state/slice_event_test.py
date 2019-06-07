@@ -67,13 +67,13 @@ class StateSliceEventBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertTrue(len(state.start_time) == 2)
-        self.assertTrue(state.start_time[0] == start_time[0])
-        self.assertTrue(state.start_time[1] == start_time[1])
+        self.assertEqual(len(state.start_time),  2)
+        self.assertEqual(state.start_time[0],  start_time[0])
+        self.assertEqual(state.start_time[1],  start_time[1])
 
-        self.assertTrue(len(state.end_time) == 2)
-        self.assertTrue(state.end_time[0] == end_time[0])
-        self.assertTrue(state.end_time[1] == end_time[1])
+        self.assertEqual(len(state.end_time),  2)
+        self.assertEqual(state.end_time[0],  end_time[0])
+        self.assertEqual(state.end_time[1],  end_time[1])
 
 
 if __name__ == '__main__':

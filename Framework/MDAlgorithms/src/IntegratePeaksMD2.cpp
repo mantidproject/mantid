@@ -51,39 +51,39 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD2::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
+                                                  Direction::Input),
       "Fixed radius around each peak position in which to integrate (in the "
       "same units as the workspace).");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0,
+                                                  Direction::Input),
       "Inner radius to use to evaluate the background of the peak.\n"
       "If smaller than PeakRadius, then we assume BackgroundInnerRadius = "
       "PeakRadius.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0,
+                                                  Direction::Input),
       "Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
       "BackgroundOuterRadius) is used to estimate the background under the "
       "peak.\n"
       "If smaller than PeakRadius, no background measurement is done.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 
@@ -106,13 +106,13 @@ void IntegratePeaksMD2::init() {
                   "Default is sphere.  Use next five parameters for cylinder.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("CylinderLength", 0.0,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("CylinderLength", 0.0,
+                                                  Direction::Input),
       "Length of cylinder in which to integrate (in the same units as the "
       "workspace).");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("PercentBackground",
-                                                         0.0, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "PercentBackground", 0.0, Direction::Input),
                   "Percent of CylinderLength that is background (20 is 20%)");
 
   std::vector<std::string> peakNames =
@@ -134,9 +134,9 @@ void IntegratePeaksMD2::init() {
                   "used only with Cylinder integration.");
 
   declareProperty(
-      Kernel::make_unique<FileProperty>(
-          "ProfilesFile", "", FileProperty::OptionalSave,
-          std::vector<std::string>(1, "profiles")),
+      std::make_unique<FileProperty>("ProfilesFile", "",
+                                     FileProperty::OptionalSave,
+                                     std::vector<std::string>(1, "profiles")),
       "Save (Optionally) as Isaw peaks file with profiles included");
 
   declareProperty("AdaptiveQMultiplier", 0.0,
@@ -373,11 +373,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       if (Peak *shapeablePeak = dynamic_cast<Peak *>(&p)) {
 
-        PeakShape *sphere = new PeakShapeSpherical(
+        PeakShape *sphereShape = new PeakShapeSpherical(
             PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
             BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(),
             this->version());
-        shapeablePeak->setPeakShape(sphere);
+        shapeablePeak->setPeakShape(sphereShape);
       }
 
       // Perform the integration into whatever box is contained within.
@@ -404,18 +404,20 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             useOnePercentBackgroundCorrection);
 
         // Relative volume of peak vs the BackgroundOuterRadius sphere
-        double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = ratio * ratio * ratio;
+        const double radiusRatio = (PeakRadius / BackgroundOuterRadius);
+        const double peakVolume = radiusRatio * radiusRatio * radiusRatio;
 
         // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+        const double interiorRatio =
+            (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the
         // BackgroundOuterRadius sphere
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+        const double bgVolume =
+            1.0 - interiorRatio * interiorRatio * interiorRatio;
 
         // Finally, you will multiply the bg intensity by this to get the
         // estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
+        const double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       }
@@ -466,18 +468,20 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // are 100% dependent; this is the same as integrating a shell.
         bgErrorSquared -= interiorErrorSquared;
         // Relative volume of peak vs the BackgroundOuterRadius cylinder
-        double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = ratio * ratio * cylinderLength;
+        const double radiusRatio = (PeakRadius / BackgroundOuterRadius);
+        const double peakVolume = radiusRatio * radiusRatio * cylinderLength;
 
         // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+        const double interiorRatio =
+            (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the
         // BackgroundOuterRadius cylinder
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * cylinderLength;
+        const double bgVolume =
+            1.0 - interiorRatio * interiorRatio * cylinderLength;
 
         // Finally, you will multiply the bg intensity by this to get the
         // estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
+        const double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       } else {

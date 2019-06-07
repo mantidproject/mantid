@@ -110,8 +110,8 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../TestHelpers/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../WorkflowAlgorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../WorkflowAlgorithms/src \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot/src/analysis \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot/src/Mantid \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot/src/analysis \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot/src/Mantid \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/factory/inc \
@@ -133,11 +133,11 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/spectrumviewer/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/refdetectorview/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/refdetectorview/src \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesAPI/inc \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesAPI/src \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesSimpleGui/QtWidgets \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesSimpleGui/ViewWidgets
+        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesAPI/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesAPI/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesSimpleGui/QtWidgets \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesSimpleGui/ViewWidgets
 
 
 INPUT_ENCODING         = UTF-8
@@ -146,18 +146,20 @@ RECURSIVE              = YES
 
 #Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
 # Third party library ANN in Kernel is not doxygenised.
+# Third party library span.hpp has doxygen warnings
 EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoapGenerated \
-		         @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoap \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoap.cpp \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../ICat/inc/MantidICat/GSoapGenerated \
-		         @CMAKE_CURRENT_SOURCE_DIR@/../ICat/inc/MantidICat/GSoap \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../MDEvents/src/generate_mdevent_declarations.py \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/ANN \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN_complete.cpp \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/src/QtPropertyBrowser \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins
+                         @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoap \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoap.cpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../ICat/inc/MantidICat/GSoapGenerated \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../ICat/inc/MantidICat/GSoap \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../MDEvents/src/generate_mdevent_declarations.py \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/ANN \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN_complete.cpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/src/QtPropertyBrowser \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/span.hpp
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
@@ -195,7 +197,7 @@ HTML_FILE_EXTENSION    = .html
 HTML_HEADER            = @CMAKE_CURRENT_BINARY_DIR@/doxy_header.html
 HTML_FOOTER            =
 HTML_STYLESHEET        =
-HTML_TIMESTAMP	       = YES
+HTML_TIMESTAMP         = YES
 GENERATE_HTMLHELP      = NO
 HTML_DYNAMIC_SECTIONS  = NO
 CHM_FILE               =

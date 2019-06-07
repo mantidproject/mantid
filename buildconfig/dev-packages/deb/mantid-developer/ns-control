@@ -3,7 +3,7 @@ Priority: optional
 Standards-Version: 3.9.2
 
 Package: mantid-developer
-Version: 1.3.9
+Version: 1.4.1
 Maintainer: Mantid Project <mantid-tech@mantidproject.org>
 Priority: optional
 Architecture: all
@@ -36,6 +36,7 @@ Depends: git,
   qttools5-dev-tools,
   libqt5webkit5-dev,
   libqt5x11extras5-dev,
+  libqt5opengl5-dev,
   libqt5scintilla2-dev,
   libpython-dev,
   python-setuptools,
@@ -47,7 +48,6 @@ Depends: git,
   pyqt5-dev,
   pyqt5-dev-tools,
   python-qtpy,
-  python-qtawesome,
   python-sphinx,
   python-dateutil,
   python-sphinx-bootstrap-theme,
@@ -68,7 +68,6 @@ Depends: git,
   python3-pyqt4,
   python3-pyqt5,
   python3-qtpy,
-  python3-qtawesome,
   python3-numpy,
   python3-scipy,
   python3-skimage,

@@ -8,7 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.simpleapi import LoadNexusProcessed, IndirectFlatPlateAbsorption
-from mantid.api import *
 
 
 class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
@@ -38,7 +37,7 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
         # Test units of factor workspaces
         for ws in factor_group:
             x_unit = ws.getAxis(0).getUnit().unitID()
-            self.assertEquals(x_unit, 'Wavelength')
+            self.assertEqual(x_unit, 'Wavelength')
 
             y_unit = ws.YUnitLabel()
             self.assertEqual(y_unit, 'Attenuation factor')

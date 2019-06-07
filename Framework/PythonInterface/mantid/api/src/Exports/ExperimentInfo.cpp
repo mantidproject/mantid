@@ -12,18 +12,31 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/Converters/ToPyList.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::ExperimentInfo;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
+using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(ExperimentInfo)
+
+/// Converter from C++ signature to python signature
+list getResourceFilenames(const std::string &prefix, const list &fileFormats,
+                          const list &directoryNames, const std::string &date) {
+  return Converters::ToPyList<std::string>()(
+      ExperimentInfo::getResourceFilenames(
+          prefix, Converters::PySequenceToVector<std::string>(fileFormats)(),
+          Converters::PySequenceToVector<std::string>(directoryNames)(), date));
+}
 
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
@@ -42,7 +55,22 @@ void export_ExperimentInfo() {
       .def("getInstrument", &ExperimentInfo::getInstrument,
            return_value_policy<RemoveConstSharedPtr>(), args("self"),
            "Returns the :class:`~mantid.geometry.Instrument` for this run.")
-
+      .def("getResourceFilenames", &getResourceFilenames,
+           (arg("prefix"), arg("fileFormats"), arg("directoryNames"),
+            arg("date")),
+           "Compile a list of files in compliance with name pattern-matching,\n"
+           "file format, and date-stamp constraints\n\n"
+           "Ideally, the valid-from and valid-to of any valid file should\n"
+           "encapsulate the argument date. If this is not possible, then\n"
+           "the file with the most recent valid-from stamp is selected\n\n"
+           "prefix:         the name of a valid file must begin with this "
+           "pattern\n"
+           "fileFormats:    list of valid file extensions\n"
+           "directoryNames: list of directories to be searched\n"
+           "date :          the 'valid-from' and 'valid-to 'dates of a valid\n"
+           "file will encapsulate this date (e.g '1900-01-31 23:59:00')\n"
+           "\nreturns : list of absolute paths for each valid file\n")
+      .staticmethod("getResourceFilenames")
       .def("getInstrumentFilename", &ExperimentInfo::getInstrumentFilename,
            getInstrumentFilename_Overload(
                "Returns IDF filename", (arg("instrument"), arg("date") = "")))

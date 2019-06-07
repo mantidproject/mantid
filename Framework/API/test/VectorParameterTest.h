@@ -89,7 +89,7 @@ public:
   void testToXMLStringThrows() {
     ConcreteVectorDblParam param;
     TSM_ASSERT_THROWS("Should throw if trying to serialize and invalid object",
-                      param.toXMLString(), std::runtime_error);
+                      param.toXMLString(), const std::runtime_error &);
   }
 
   void testToXMLString() {

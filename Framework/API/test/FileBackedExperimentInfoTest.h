@@ -167,7 +167,7 @@ public:
   void test_getEFixed() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_THROWS(fileBacked->getEFixed(10100), std::runtime_error);
+    TS_ASSERT_THROWS(fileBacked->getEFixed(10100), const std::runtime_error &);
   }
 
   void test_setEFixed() {
@@ -183,7 +183,7 @@ public:
     // Create the file backed experiment info, shouldn't be loaded yet
     FileBackedExperimentInfo fileBacked(m_filename, "/not/right/path");
 
-    TS_ASSERT_THROWS(fileBacked.toString(), std::runtime_error);
+    TS_ASSERT_THROWS(fileBacked.toString(), const std::runtime_error &);
   }
 
 private:

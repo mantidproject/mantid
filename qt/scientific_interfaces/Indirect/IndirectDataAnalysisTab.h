@@ -61,6 +61,12 @@ public:
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
 
+  /// Prevent loading of data with incorrect naming
+  void filterInputData(bool filter);
+
+  /// Allows the user to turn the plotting of error bars off and on
+  void setPlotErrorBars(bool errorBars);
+
   /// Sets the active workspace in the selected tab
   void setActiveWorkspace();
 
@@ -150,11 +156,12 @@ private:
   bool validate() override = 0;
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
+  virtual void setFileExtensionsByName(bool filter) = 0;
   virtual void setBrowserWorkspace() = 0;
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
+  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
   int m_selectedSpectrum;
   int m_minSpectrum;

@@ -13,7 +13,6 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -51,7 +50,7 @@ DetectorInfo::DetectorInfo(
  * ComponentInfo must be set up. */
 DetectorInfo::DetectorInfo(const DetectorInfo &other)
     : m_detectorInfo(
-          Kernel::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
+          std::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
       m_instrument(other.m_instrument), m_detectorIDs(other.m_detectorIDs),
       m_detIDToIndex(other.m_detIDToIndex),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
@@ -332,11 +331,11 @@ DetectorInfo::scanIntervals() const {
 }
 
 const DetectorInfoConstIt DetectorInfo::cbegin() const {
-  return DetectorInfoConstIt(*this, 0);
+  return DetectorInfoConstIt(*this, 0, size());
 }
 
 const DetectorInfoConstIt DetectorInfo::cend() const {
-  return DetectorInfoConstIt(*this, size());
+  return DetectorInfoConstIt(*this, size(), size());
 }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
@@ -358,10 +357,14 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
 }
 
 // Begin method for iterator
-DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0); }
+DetectorInfoIt DetectorInfo::begin() {
+  return DetectorInfoIt(*this, 0, size());
+}
 
 // End method for iterator
-DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size()); }
+DetectorInfoIt DetectorInfo::end() {
+  return DetectorInfoIt(*this, size(), size());
+}
 
 } // namespace Geometry
 } // namespace Mantid

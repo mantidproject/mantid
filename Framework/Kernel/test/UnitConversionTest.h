@@ -26,7 +26,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TS_ASSERT_THROWS(UnitConversion::run("zxzxz", "Wavelength", 0.0, 0.0, 0.0,
                                          0.0, DeltaEMode::Elastic, 0.0),
-                     NotFoundError);
+                     const NotFoundError &);
   }
 
   void test_Run_Throws_When_Dest_Unit_Is_Unknown() {
@@ -34,7 +34,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TS_ASSERT_THROWS(UnitConversion::run("Wavelength", "xszfsdf", 0.0, 0.0, 0.0,
                                          0.0, DeltaEMode::Elastic, 0.0),
-                     NotFoundError);
+                     const NotFoundError &);
   }
 
   void

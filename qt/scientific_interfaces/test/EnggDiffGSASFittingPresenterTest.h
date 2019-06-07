@@ -14,7 +14,7 @@
 #include "EnggDiffractionParamMock.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -73,7 +73,7 @@ public:
 
     const GSASIIRefineFitPeaksParameters params(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100),
-        RunLabel(123, 1), GSASRefinementMethod::RIETVELD, "Instrument file",
+        RunLabel("123", 1), GSASRefinementMethod::RIETVELD, "Instrument file",
         {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", boost::none, boost::none,
         10000, 40000, true, false);
     setRefinementParamsExpectations(params);
@@ -93,7 +93,7 @@ public:
 
     const GSASIIRefineFitPeaksParameters params(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100),
-        RunLabel(123, 1), GSASRefinementMethod::PAWLEY, "Instrument file",
+        RunLabel("123", 1), GSASRefinementMethod::PAWLEY, "Instrument file",
         {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", 1, 2, 10000, 40000, true,
         false);
     setRefinementParamsExpectations(params);
@@ -110,7 +110,7 @@ public:
 
   void test_selectValidRunFitResultsAvailable() {
     auto presenter = setUpPresenter();
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
@@ -152,7 +152,7 @@ public:
 
   void test_selectRunNoFitResults() {
     auto presenter = setUpPresenter();
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getSelectedRunLabel())
         .Times(1)
@@ -199,10 +199,10 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
     const auto latticeParams =
         Mantid::API::WorkspaceFactory::Instance().createTable();
-    const RunLabel runLabel1(123, 1);
+    const RunLabel runLabel1("123", 1);
     const GSASIIRefineFitPeaksOutputProperties refinementResults1(
         1, 2, 3, fittedPeaks, latticeParams, runLabel1);
-    const RunLabel runLabel2(125, 1);
+    const RunLabel runLabel2("125", 1);
     const std::vector<RunLabel> runLabels({runLabel1, runLabel2});
     const GSASIIRefineFitPeaksOutputProperties refinementResults2(
         1, 2, 3, fittedPeaks, latticeParams, runLabel2);
@@ -228,7 +228,7 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
     const auto latticeParams =
         Mantid::API::WorkspaceFactory::Instance().createTable();
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     const GSASIIRefineFitPeaksOutputProperties refinementResults(
         1, 2, 3, fittedPeaks, latticeParams, runLabel);
     const Mantid::API::IAlgorithm_sptr alg(nullptr);
@@ -277,12 +277,12 @@ public:
 
     const GSASIIRefineFitPeaksParameters params1(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100),
-        RunLabel(123, 1), GSASRefinementMethod::RIETVELD, "Instrument file",
+        RunLabel("123", 1), GSASRefinementMethod::RIETVELD, "Instrument file",
         {"Phase1", "Phase2"}, "GSASHOME", "GPX_123_1.gpx", boost::none,
         boost::none, 10000, 40000, true, false);
     const GSASIIRefineFitPeaksParameters params2(
         WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200),
-        RunLabel(456, 2), GSASRefinementMethod::RIETVELD, "Instrument file",
+        RunLabel("456", 2), GSASRefinementMethod::RIETVELD, "Instrument file",
         {"Phase1", "Phase2"}, "GSASHOME", "GPX_456_2.gpx", boost::none,
         boost::none, 10000, 40000, true, false);
 
@@ -356,8 +356,8 @@ private:
   MockEnggDiffractionParam *m_mockParamPtr;
 
   std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffGSASFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffGSASFittingModel>>();
     m_mockModelPtr = mockModel.get();
 
     m_mockViewPtr = new testing::NiceMock<MockEnggDiffGSASFittingView>();
@@ -370,7 +370,7 @@ private:
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     m_mockParamPtr = mockParam_sptr.get();
 
-    auto pres_uptr = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
+    auto pres_uptr = std::make_unique<EnggDiffGSASFittingPresenter>(
         std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr,
         mockParam_sptr);
     return pres_uptr;

@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <array>
 #include <boost/numeric/conversion/cast.hpp>
-#include <iostream>
 
 using namespace H5;
 
@@ -284,11 +283,10 @@ std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
     result = readArray1DCoerce<NumT>(dataset);
   } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
-    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
+    g_log.information("Failed to open dataset \"" + name + "\"\n");
   } catch (H5::DataTypeIException &e) {
     UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be double"
-                        << "\n";
+    g_log.information("DataSet \"" + name + "\" should be double" + "\n");
   }
 
   return result;

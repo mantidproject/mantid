@@ -244,7 +244,7 @@ public:
     // No instrument, so spectrum definitions created by make_indices are bad.
     TS_ASSERT_THROWS(
         create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4})),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_create_Instrument_size_Histogram() {
@@ -397,7 +397,7 @@ public:
     // make_indices are bad.
     TS_ASSERT_THROWS(
         create<Workspace2D>(*parent, make_indices(), (BinEdges{1, 2, 4})),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_create_parent_IndexInfo() {

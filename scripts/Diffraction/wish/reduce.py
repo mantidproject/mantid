@@ -197,8 +197,9 @@ class Wish:
         cal = "WISH_diff{}"
         if cal.format("_cal") not in simple.mtd:
             simple.LoadDiffCal(filename=self.get_cal(), InstrumentName="WISH", WorkspaceName=cal.format(""))
-        simple.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationWorkspace=cal.format("_cal"))
-        simple.DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus, GroupingWorkspace=cal.format("_group"))
+        simple.AlignAndFocusPowder(InputWorkspace=work, OutputWorkspace=focus, GroupingWorkspace=cal.format("_group"),
+                                   CalibrationWorkspace=cal.format("_cal"), Dspacing=True, params="-0.00063")
+        simple.ConvertUnits(InputWorkspace=focus, OutputWorkspace=focus, Target="dSpacing")
         if self.deleteWorkspace:
             simple.DeleteWorkspace(work)
         if panel == 5 or panel == 6:

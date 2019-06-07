@@ -68,17 +68,17 @@ int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadSwans::init() {
-  declareProperty(
-      make_unique<FileProperty>("FilenameData", "", FileProperty::Load, ".dat"),
-      "The name of the text file to read, including its full or "
-      "relative path. The file extension must be .dat.");
+  declareProperty(std::make_unique<FileProperty>("FilenameData", "",
+                                                 FileProperty::Load, ".dat"),
+                  "The name of the text file to read, including its full or "
+                  "relative path. The file extension must be .dat.");
 
-  declareProperty(make_unique<FileProperty>("FilenameMetaData", "",
-                                            FileProperty::Load, "meta.dat"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "FilenameMetaData", "", FileProperty::Load, "meta.dat"),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be meta.dat.");
 
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
@@ -147,7 +147,7 @@ void LoadSwans::placeDetectorInSpace() {
   helper.moveComponent(m_ws, componentName, newpos);
 
   // Apply a local rotation to stay perpendicular to the beam
-  const V3D axis(0.0, 1.0, 0.0);
+  constexpr V3D axis(0.0, 1.0, 0.0);
   Quat rotation(angle, axis);
   helper.rotateComponent(m_ws, componentName, rotation);
 }
@@ -210,8 +210,9 @@ std::vector<double> LoadSwans::loadMetaData() {
           line, "\t ",
           Mantid::Kernel::StringTokenizer::TOK_TRIM |
               Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      metadata.reserve(tokenizer.size());
       for (const auto &token : tokenizer) {
-        metadata.push_back(boost::lexical_cast<double>(token));
+        metadata.emplace_back(boost::lexical_cast<double>(token));
       }
     }
   }

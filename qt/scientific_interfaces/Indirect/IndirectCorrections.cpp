@@ -4,33 +4,18 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------
-// Includes
-//----------------------
-
 #include "IndirectCorrections.h"
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
 #include "ContainerSubtraction.h"
 
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
-
-#include "MantidAPI/AnalysisDataService.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
-// Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(IndirectCorrections)
 
-/**
- * Constructor.
- *
- * @param parent :: the parent QWidget.
- */
 IndirectCorrections::IndirectCorrections(QWidget *parent)
-    : UserSubWindow(parent),
+    : IndirectInterface(parent),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -54,7 +39,7 @@ IndirectCorrections::IndirectCorrections(QWidget *parent)
 /**
  * @param :: the detected close event
  */
-void IndirectCorrections::closeEvent(QCloseEvent *) {
+void IndirectCorrections::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -79,20 +64,24 @@ void IndirectCorrections::initLayout() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Set up all tabs
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->setupTab();
-    connect(tab->second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
+  for (auto &tab : m_tabs) {
+    tab.second->setupTab();
+    connect(tab.second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
             SIGNAL(runAsPythonScript(const QString &, bool)));
-    connect(tab->second, SIGNAL(showMessageBox(const QString &)), this,
+    connect(tab.second, SIGNAL(showMessageBox(const QString &)), this,
             SLOT(showMessageBox(const QString &)));
   }
 
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  // connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
-          SLOT(openDirectoryDialog()));
+          SLOT(manageUserDirectories()));
+
+  // Needed to initially apply the settings loaded on the settings GUI
+  applySettings(getInterfaceSettings());
 }
 
 /**
@@ -125,21 +114,12 @@ void IndirectCorrections::loadSettings() {
   settings.endGroup();
 }
 
-/**
- * Opens a directory dialog.
- */
-void IndirectCorrections::openDirectoryDialog() {
-  auto ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Opens the Mantid Wiki web page of the current tab.
- */
-void IndirectCorrections::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect Corrections"));
+void IndirectCorrections::applySettings(
+    std::map<std::string, QVariant> const &settings) {
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
+    tab->second->filterInputData(settings.at("RestrictInput").toBool());
+    tab->second->setPlotErrorBars(settings.at("ErrorBars").toBool());
+  }
 }
 
 /**
@@ -150,14 +130,8 @@ void IndirectCorrections::exportTabPython() {
   m_tabs[currentTab]->exportPythonScript();
 }
 
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message The message to display in the message box
- */
-void IndirectCorrections::showMessageBox(const QString &message) {
-  showInformationBox(message);
+std::string IndirectCorrections::documentationPage() const {
+  return "Indirect Corrections";
 }
 
 } // namespace CustomInterfaces

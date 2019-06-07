@@ -35,17 +35,17 @@ DECLARE_ALGORITHM(SaveIsawDetCal)
 /** Initialize the algorithm's properties.
  */
 void SaveIsawDetCal::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".DetCal"),
-      "Path to an ISAW-style .detcal file to save.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".DetCal"),
+                  "Path to an ISAW-style .detcal file to save.");
 
   declareProperty("TimeOffset", 0.0, "Offsets to be applied to times");
   declareProperty(
-      make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
+      std::make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
       "Optional: Only select the specified banks");
   declareProperty("AppendFile", false,
                   "Append to file if true.\n"
@@ -65,8 +65,7 @@ void SaveIsawDetCal::exec() {
   const API::Run &run = ws->run();
   // Use T0 from workspace if T0 not specified in input
   if (T0 == 0.0 && run.hasProperty("T0")) {
-    Kernel::Property *prop = run.getProperty("T0");
-    T0 = boost::lexical_cast<double, std::string>(prop->value());
+    T0 = run.getPropertyValueAsType<double>("T0");
     if (T0 != 0) {
       g_log.notice() << "T0 = " << T0 << '\n';
     }

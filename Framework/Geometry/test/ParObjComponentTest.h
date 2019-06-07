@@ -176,8 +176,10 @@ public:
     ocyl.setParent(&parent);
     // Check original track misses
     TS_ASSERT_EQUALS(pocyl.interceptSurface(track), 0);
-    // Create a new test track going from the origin down the line y = -x
-    Track track2(V3D(0, 0, 0), V3D(0, 1, -1));
+    // Create a new test track going from the origin down the line z = -y
+    V3D dir(0, 1., -1.);
+    dir.normalize();
+    Track track2(V3D(0, 0, 0), dir);
     TS_ASSERT_EQUALS(pocyl.interceptSurface(track2), 1);
     Track::LType::const_iterator it2 = track2.cbegin();
     if (it2 == track2.cend())
@@ -194,7 +196,7 @@ public:
     ObjComponent pcomp(&comp, pmap.get());
 
     TS_ASSERT_THROWS(pcomp.interceptSurface(track),
-                     Exception::NullPointerException);
+                     const Exception::NullPointerException &);
   }
 
   void testSolidAngleCappedCylinder() {
@@ -230,7 +232,7 @@ public:
     ObjComponent pB(&B, pmap.get());
 
     TS_ASSERT_THROWS(pB.solidAngle(V3D(1, 2, 3)),
-                     Exception::NullPointerException);
+                     const Exception::NullPointerException &);
   }
 
   void testBoundingBoxCappedCylinder() {

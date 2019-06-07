@@ -72,12 +72,6 @@ void SCDCalibratePanels::exec() {
   }
   findU(peaksWs);
 
-  std::vector<Peak> &peaks = peaksWs->getPeaks();
-  auto it = std::remove_if(peaks.begin(), peaks.end(), [](const Peak &pk) {
-    return pk.getHKL() == V3D(0, 0, 0);
-  });
-  peaks.erase(it, peaks.end());
-
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
   bool changeT0 = getProperty("ChangeT0");
@@ -196,14 +190,8 @@ void SCDCalibratePanels::exec() {
   for (int i = 0; i < nPeaks; i++) {
     PARALLEL_START_INTERUPT_REGION
     DataObjects::Peak &peak = peaksWs->getPeak(i);
-    V3D hkl =
-        V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
-            boost::math::iround(peak.getL()));
-    V3D Q2 = lattice0.qFromHKL(hkl);
     try {
       peak.setInstrument(inst2);
-      peak.setQSampleFrame(Q2);
-      peak.setHKL(hkl);
     } catch (const std::exception &exc) {
       g_log.notice() << "Problem in applying calibration to peak " << i << " : "
                      << exc.what() << "\n";
@@ -432,14 +420,12 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   ub_alg->executeAsChildAlg();
 
   // Reindex peaks with new UB
-  Mantid::API::IAlgorithm_sptr alg =
-      createChildAlgorithm("OptimizeCrystalPlacement");
+  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
   alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
-  alg->setPropertyValue("ModifiedPeaksWorkspace", peaksWs->getName());
-  alg->setProperty("AdjustSampleOffsets", true);
-  alg->setProperty("MaxAngularChange", 0.0);
-  alg->setProperty("MaxIndexingError", 0.15);
+  alg->setProperty("Tolerance", 0.15);
   alg->executeAsChildAlg();
+  int numIndexed = alg->getProperty("NumIndexed");
+  g_log.notice() << "Number Indexed = " << numIndexed << "\n";
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
 
@@ -485,7 +471,7 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 void SCDCalibratePanels::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeakWorkspace", "", Kernel::Direction::InOut),
                   "Workspace of Indexed Peaks");
 
@@ -527,31 +513,31 @@ void SCDCalibratePanels::init() {
   // ---------- outputs
   const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
-                                        FileProperty::Save, detcalExts),
+      std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
+                                     FileProperty::Save, detcalExts),
       "Path to an ISAW-style .detcal file to save.");
 
   declareProperty(
-      Kernel::make_unique<FileProperty>("XmlFilename", "",
-                                        FileProperty::OptionalSave, ".xml"),
+      std::make_unique<FileProperty>("XmlFilename", "",
+                                     FileProperty::OptionalSave, ".xml"),
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("ColFilename",
-                                                    "ColCalcvsTheor.nxs",
-                                                    FileProperty::Save, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("ColFilename",
+                                                 "ColCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "column of each peak.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("RowFilename",
-                                                    "RowCalcvsTheor.nxs",
-                                                    FileProperty::Save, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("RowFilename",
+                                                 "RowCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "row of each peak.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("TofFilename",
-                                                    "TofCalcvsTheor.nxs",
-                                                    FileProperty::Save, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("TofFilename",
+                                                 "TofCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "TOF of each peak.");
 

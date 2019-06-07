@@ -20,11 +20,13 @@ class BrowseFileWidgetPresenter(object):
         self._model = model
 
         # Whether to allow single or multiple files to be loaded
-        self._multiple_files = False
-        self._multiple_file_mode = "Single"
+        self._multiple_files = True
+        self._multiple_file_mode = "Simultaneous"
 
         self._use_threading = True
         self._load_thread = None
+
+        self.filenames = []
 
         self._view.on_browse_clicked(self.on_browse_button_clicked)
         self._view.on_file_edit_changed(self.handle_file_changed_by_user)
@@ -55,6 +57,8 @@ class BrowseFileWidgetPresenter(object):
     def on_browse_button_clicked(self):
         filenames = self.get_filenames_from_user()
         filenames = file_utils.remove_duplicated_files_from_list(filenames)
+        self.filenames = filenames
+
         if not self._multiple_files and len(filenames) > 1:
             self._view.warning_popup("Multiple files selected in single file mode")
             self._view.reset_edit_to_cached_value()
@@ -66,6 +70,8 @@ class BrowseFileWidgetPresenter(object):
         user_input = self._view.get_file_edit_text()
         filenames = file_utils.parse_user_input_to_files(user_input)
         filenames = file_utils.remove_duplicated_files_from_list(filenames)
+        self.filenames = filenames
+
         if not filenames:
             self._view.reset_edit_to_cached_value()
             return
@@ -79,6 +85,11 @@ class BrowseFileWidgetPresenter(object):
         self.handle_loading(filenames)
 
     def handle_loading(self, filenames):
+        unloaded_file_names = []
+        for filename in filenames:
+            if not self._model.get_data(filename=filename):
+                unloaded_file_names.append(filename)
+
         if self._use_threading:
             self.handle_load_thread_start(filenames)
         else:
@@ -109,18 +120,28 @@ class BrowseFileWidgetPresenter(object):
         self._load_thread.deleteLater()
         self._load_thread = None
 
-        # If in single file mode, remove the previous run
-        if not self._multiple_files and len(self._model.get_run_list()) > 1:
-            self._model.remove_previous_data()
-
         self.on_loading_finished()
 
     def on_loading_finished(self):
-        file_list = self._model.loaded_filenames
-        self.set_file_edit(file_list)
+        instrument_from_workspace = self._model.get_instrument_from_latest_run()
+        if instrument_from_workspace != self._model._data_context.instrument:
+            self._model.instrument = instrument_from_workspace
 
         if self._multiple_files and self._multiple_file_mode == "Co-Add":
-            load_utils.combine_loaded_runs(self._model, self._model.loaded_runs)
+            file_list = [filename for filename in self.filenames if
+                         self._model.get_data(filename=filename, instrument=self._model._data_context.instrument)]
+            run_list_to_add = [self._model.get_data(filename=filename)['run'][0] for filename in file_list]
+            run_list = [
+                [self._model.get_data(filename=filename)['run'][0] for filename in file_list]]
+            load_utils.combine_loaded_runs(self._model, run_list_to_add)
+
+        else:
+            file_list = [filename for filename in self.filenames if
+                         self._model._loaded_data_store.get_data(filename=filename, instrument=self._model.instrument)]
+            run_list = [self._model.get_data(filename=filename)['run'] for filename in file_list]
+
+        self.set_file_edit(file_list)
+        self._model.current_runs = run_list
 
         self._view.notify_loading_finished()
         self.enable_loading()
@@ -135,9 +156,6 @@ class BrowseFileWidgetPresenter(object):
 
     def enable_loading(self):
         self._view.enable_load_buttons()
-
-    def enable_multiple_files(self, enabled):
-        self._multiple_files = enabled
 
     @property
     def workspaces(self):

@@ -66,7 +66,7 @@ public:
   static bool handle(QObject *receiver, const std::exception &e);
 
 signals:
-  void runAsPythonScript(const QString &code, bool);
+  void runAsPythonScript(const QString &code, bool /*_t2*/);
 
 protected:
   /// Run python code that is passed to it and, optionally, return anything it

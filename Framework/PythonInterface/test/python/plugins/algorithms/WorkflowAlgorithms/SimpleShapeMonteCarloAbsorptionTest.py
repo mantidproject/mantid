@@ -50,16 +50,16 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
     def _test_corrections_workspace(self, corr_ws):
         x_unit = corr_ws.getAxis(0).getUnit().unitID()
-        self.assertEquals(x_unit, 'Wavelength')
+        self.assertEqual(x_unit, 'Wavelength')
 
         y_unit = corr_ws.YUnitLabel()
-        self.assertEquals(y_unit, 'Attenuation factor')
+        self.assertEqual(y_unit, 'Attenuation factor')
 
         num_hists = corr_ws.getNumberHistograms()
-        self.assertEquals(num_hists, 10)
+        self.assertEqual(num_hists, 10)
 
         blocksize = corr_ws.blocksize()
-        self.assertEquals(blocksize, 1905)
+        self.assertEqual(blocksize, 1905)
 
     def tearDown(self):
         DeleteWorkspace(self._red_ws)
@@ -159,18 +159,41 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     **kwargs)
 
         x_unit = corrected.getAxis(0).getUnit().unitID()
-        self.assertEquals(x_unit, 'Wavelength')
+        self.assertEqual(x_unit, 'Wavelength')
 
         y_unit = corrected.YUnitLabel()
-        self.assertEquals(y_unit, 'Attenuation factor')
+        self.assertEqual(y_unit, 'Attenuation factor')
 
         num_hists = corrected.getNumberHistograms()
-        self.assertEquals(num_hists, 18)
+        self.assertEqual(num_hists, 18)
 
         blocksize = corrected.blocksize()
-        self.assertEquals(blocksize, 1024)
+        self.assertEqual(blocksize, 1024)
 
         DeleteWorkspace(ill_red_ws)
+
+    def test_that_the_output_workspace_is_valid_when_using_cross_sections_for_sample(self):
+        """
+        Test simple run with sample workspace using cross sections.
+        """
+
+        output_workspace = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                           Shape='FlatPlate',
+                                                           Width=2.0,
+                                                           Thickness=2.0,
+                                                           MaxScatterPtAttempts=3000,
+                                                           DensityType='Number Density',
+                                                           Density=0.1,
+                                                           EventsPerPoint=50,
+                                                           BeamHeight=3.5,
+                                                           BeamWidth=4.0,
+                                                           Height=2.0,
+                                                           CoherentXSection=0.039,
+                                                           IncoherentXSection=56.052,
+                                                           AttenuationXSection=0.222)
+
+        self.assertTrue(CompareWorkspaces(
+            self._corrected_flat_plate, output_workspace, Tolerance=1e-2)[0])
 
     def test_max_scatter_point_attempts_similar(self):
         """
@@ -187,13 +210,13 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         matching, _ = CompareWorkspaces(
             self._corrected_flat_plate, output_workspace, Tolerance=1e-6)
-        self.assertEquals(matching, True)
+        self.assertEqual(matching, True)
 
     # TODO: add test for powder diffraction data
 
     # ------------------------------------- Failure Cases --------------------
 
-    def test_no_chemical_formula(self):
+    def test_no_chemical_formula_or_cross_sections_causes_an_error(self):
         kwargs = {'InputWorkspace': self._red_ws,
                   'MaterialAlreadyDefined': False,
                   'DensityType': 'Mass Density',

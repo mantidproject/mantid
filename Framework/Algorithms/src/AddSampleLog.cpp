@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"
@@ -40,7 +41,7 @@ using namespace API;
 using Types::Core::DateAndTime;
 
 void AddSampleLog::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "", Direction::InOut),
                   "Workspace to add the log entry to");
   declareProperty("LogName", "",
@@ -69,7 +70,7 @@ void AddSampleLog::init() {
 
   // add optional workspace which contains the data of the TimeSeriesProperty
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "TimeSeriesWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional workspace contain the data");
   declareProperty(
@@ -96,8 +97,22 @@ void AddSampleLog::init() {
 void AddSampleLog::exec() {
   // A pointer to the workspace to add a log to
   Workspace_sptr target_workspace = getProperty("Workspace");
-  ExperimentInfo_sptr expinfo_ws =
+  auto expinfo_ws =
       boost::dynamic_pointer_cast<ExperimentInfo>(target_workspace);
+  if (!expinfo_ws) {
+    // We're dealing with an MD workspace which has multiple experiment infos
+    auto infos =
+        boost::dynamic_pointer_cast<MultipleExperimentInfos>(target_workspace);
+    if (!infos) {
+      throw std::invalid_argument(
+          "Input workspace does not support sample logs");
+    }
+    if (infos->getNumExperimentInfo() < 1) {
+      ExperimentInfo_sptr info(new ExperimentInfo());
+      infos->addExperimentInfo(info);
+    }
+    expinfo_ws = infos->getExperimentInfo(0);
+  }
   // we're going to edit the workspaces run details so get a non-const reference
   // to it
   Run &theRun = expinfo_ws->mutableRun();
@@ -177,7 +192,6 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
       g_log.error() << "Error interpreting string '" << propValue
                     << "' as NumberType Int.";
       throw std::runtime_error("Invalie integer input");
-      // intVal = 0;
     }
     theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
   } else {
@@ -188,7 +202,6 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
       g_log.error() << "Error interpreting string '" << propValue
                     << "' as NumberType Double.";
       throw std::runtime_error("Invalid double input.");
-      // dblVal = 0.;
     }
     theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
     g_log.information() << "added property " << propName << " with value "
@@ -394,7 +407,7 @@ Types::Core::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
   Types::Core::DateAndTime runstart(0);
   try {
     runstart = run_obj.startTime();
-  } catch (std::runtime_error &) {
+  } catch (const std::runtime_error &) {
     // Swallow the error - startTime will just be 0
   }
 

@@ -12,7 +12,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
+
 #include <Eigen/Geometry>
 #include <exception>
 #include <iterator>
@@ -438,6 +438,22 @@ size_t ComponentInfo::scanCount() const { return m_componentInfo->scanCount(); }
 
 void ComponentInfo::merge(const ComponentInfo &other) {
   m_componentInfo->merge(*other.m_componentInfo);
+}
+
+ComponentInfoIt ComponentInfo::begin() {
+  return ComponentInfoIt(*this, 0, size());
+}
+
+ComponentInfoIt ComponentInfo::end() {
+  return ComponentInfoIt(*this, size(), size());
+}
+
+const ComponentInfoConstIt ComponentInfo::cbegin() {
+  return ComponentInfoConstIt(*this, 0, size());
+}
+
+const ComponentInfoConstIt ComponentInfo::cend() {
+  return ComponentInfoConstIt(*this, size(), size());
 }
 
 } // namespace Geometry

@@ -109,7 +109,7 @@ public:
                           "_2"); // Not really required for child algorithm
 
     if (nonIntegr.size() > 2 || nonIntegr.empty()) {
-      TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+      TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     } else {
       try {
         alg->execute();

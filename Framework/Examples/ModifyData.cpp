@@ -24,12 +24,12 @@ using namespace API;
 void ModifyData::init() {
 
   // Declare a 2D input workspace property.
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input));
 
   // Declare a 2D output workspace property.
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output));
 
   // Switches between two ways of accessing the data in the input workspace
   declareProperty("UseVectors", false);
@@ -76,9 +76,6 @@ void ModifyData::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
-
-  // Get the newly set workspace
-  MatrixWorkspace_const_sptr newW = getProperty("OutputWorkspace");
 
   // Check the new workspace
   g_log.information() << "New values:" << std::endl;

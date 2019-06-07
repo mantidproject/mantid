@@ -50,21 +50,21 @@ const std::string DgsReduction::category() const {
 void DgsReduction::init() {
   // Sample setup options
   std::string sampleSetup = "Sample Setup";
-  this->declareProperty(make_unique<FileProperty>("SampleInputFile", "",
-                                                  FileProperty::OptionalLoad,
-                                                  "_event.nxs"),
-                        "File containing the sample data to reduce");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<FileProperty>("SampleInputFile", "",
+                                     FileProperty::OptionalLoad, "_event.nxs"),
+      "File containing the sample data to reduce");
+  this->declareProperty(
+      std::make_unique<WorkspaceProperty<>>(
           "SampleInputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Workspace to be reduced");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("SampleInputMonitorWorkspace", "",
-                                       Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("SampleInputMonitorWorkspace", "",
+                                            Direction::Input,
+                                            PropertyMode::Optional),
       "A monitor workspace associated with the input sample workspace.");
-  this->declareProperty(make_unique<FileProperty>("DetCalFilename", "",
-                                                  FileProperty::OptionalLoad),
+  this->declareProperty(std::make_unique<FileProperty>(
+                            "DetCalFilename", "", FileProperty::OptionalLoad),
                         "A detector calibration file.");
   this->declareProperty("RelocateDetectors", false,
                         "Move detectors to position specified in cal file.");
@@ -80,7 +80,7 @@ void DgsReduction::init() {
   this->declareProperty("TimeZeroGuess", EMPTY_DBL(),
                         "Set the value of time zero offset in microseconds.");
   this->setPropertySettings("TimeZeroGuess",
-                            make_unique<VisibleWhenProperty>(
+                            std::make_unique<VisibleWhenProperty>(
                                 "UseIncidentEnergyGuess", IS_EQUAL_TO, "1"));
   auto mustBePositiveInt = boost::make_shared<BoundedValidator<int>>();
   mustBePositiveInt->setLower(0);
@@ -91,7 +91,7 @@ void DgsReduction::init() {
       "Monitor2SpecId", EMPTY_INT(), mustBePositiveInt,
       "Spectrum No for the second monitor to use in Ei calculation.");
   this->declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "EnergyTransferRange",
           boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin "
@@ -100,14 +100,14 @@ void DgsReduction::init() {
   this->declareProperty(
       "SofPhiEIsDistribution", true,
       "The final S(Phi, E) data is made to be a distribution.");
-  this->declareProperty(make_unique<FileProperty>("HardMaskFile", "",
-                                                  FileProperty::OptionalLoad,
-                                                  ".xml"),
-                        "A file or workspace containing a hard mask.");
-  this->declareProperty(make_unique<FileProperty>("GroupingFile", "",
-                                                  FileProperty::OptionalLoad,
-                                                  ".xml"),
-                        "A file containing grouping (mapping) information.");
+  this->declareProperty(
+      std::make_unique<FileProperty>("HardMaskFile", "",
+                                     FileProperty::OptionalLoad, ".xml"),
+      "A file or workspace containing a hard mask.");
+  this->declareProperty(
+      std::make_unique<FileProperty>("GroupingFile", "",
+                                     FileProperty::OptionalLoad, ".xml"),
+      "A file containing grouping (mapping) information.");
   this->declareProperty("ShowIntermediateWorkspaces", false,
                         "Flag to show the intermediate workspaces (diagnostic "
                         "mask, integrated detector vanadium, "
@@ -145,14 +145,14 @@ void DgsReduction::init() {
                         "Set the lower bound for monitor integration.");
   this->setPropertySettings(
       "MonitorIntRangeLow",
-      make_unique<VisibleWhenProperty>("IncidentBeamNormalisation", IS_EQUAL_TO,
-                                       "ToMonitor"));
+      std::make_unique<VisibleWhenProperty>("IncidentBeamNormalisation",
+                                            IS_EQUAL_TO, "ToMonitor"));
   this->declareProperty("MonitorIntRangeHigh", EMPTY_DBL(),
                         "Set the upper bound for monitor integration.");
   this->setPropertySettings(
       "MonitorIntRangeHigh",
-      make_unique<VisibleWhenProperty>("IncidentBeamNormalisation", IS_EQUAL_TO,
-                                       "ToMonitor"));
+      std::make_unique<VisibleWhenProperty>("IncidentBeamNormalisation",
+                                            IS_EQUAL_TO, "ToMonitor"));
   this->declareProperty(
       "TimeIndepBackgroundSub", false,
       "If true, time-independent background will be calculated and removed.");
@@ -160,38 +160,38 @@ void DgsReduction::init() {
       "TibTofRangeStart", EMPTY_DBL(),
       "Set the lower TOF bound for time-independent background subtraction.");
   this->setPropertySettings("TibTofRangeStart",
-                            make_unique<VisibleWhenProperty>(
+                            std::make_unique<VisibleWhenProperty>(
                                 "TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
   this->declareProperty(
       "TibTofRangeEnd", EMPTY_DBL(),
       "Set the upper TOF bound for time-independent background subtraction.");
   this->setPropertySettings("TibTofRangeEnd",
-                            make_unique<VisibleWhenProperty>(
+                            std::make_unique<VisibleWhenProperty>(
                                 "TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
   this->declareProperty("CorrectKiKf", true, "Apply the ki/kf correction.");
   this->declareProperty(
-      make_unique<FileProperty>("DetectorVanadiumInputFile", "",
-                                FileProperty::OptionalLoad, "_event.nxs"),
+      std::make_unique<FileProperty>("DetectorVanadiumInputFile", "",
+                                     FileProperty::OptionalLoad, "_event.nxs"),
       "File containing the sample detector vanadium data to reduce");
-  this->declareProperty(make_unique<WorkspaceProperty<>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "DetectorVanadiumInputWorkspace", "",
                             Direction::Input, PropertyMode::Optional),
                         "Sample detector vanadium workspace to be reduced");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("DetectorVanadiumInputMonitorWorkspace",
-                                       "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "DetectorVanadiumInputMonitorWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "A monitor workspace associated with the input sample detector vanadium "
       "workspace.");
   this->declareProperty("SaveProcessedDetVan", false,
                         "Save the processed detector vanadium workspace");
   this->setPropertySettings(
       "SaveProcessedDetVan",
-      make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
-                                       IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
+                                            IS_NOT_EQUAL_TO, ""));
   this->declareProperty(
-      make_unique<FileProperty>("SaveProcDetVanFilename", "",
-                                FileProperty::OptionalSave, ".nxs"),
+      std::make_unique<FileProperty>("SaveProcDetVanFilename", "",
+                                     FileProperty::OptionalSave, ".nxs"),
       "Provide a filename for saving the processed detector vanadium.");
   this->declareProperty(
       "UseProcessedDetVan", false,
@@ -203,15 +203,15 @@ void DgsReduction::init() {
   this->declareProperty(
       "DetVanIntRangeLow", EMPTY_DBL(),
       "Set the lower bound for integrating the detector vanadium.");
-  this->setPropertySettings(
-      "DetVanIntRangeLow",
-      make_unique<VisibleWhenProperty>("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("DetVanIntRangeLow",
+                            std::make_unique<VisibleWhenProperty>(
+                                "UseBoundsForDetVan", IS_EQUAL_TO, "1"));
   this->declareProperty(
       "DetVanIntRangeHigh", EMPTY_DBL(),
       "Set the upper bound for integrating the detector vanadium.");
-  this->setPropertySettings(
-      "DetVanIntRangeHigh",
-      make_unique<VisibleWhenProperty>("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("DetVanIntRangeHigh",
+                            std::make_unique<VisibleWhenProperty>(
+                                "UseBoundsForDetVan", IS_EQUAL_TO, "1"));
   std::vector<std::string> detvanIntRangeUnits;
   detvanIntRangeUnits.emplace_back("Energy");
   detvanIntRangeUnits.emplace_back("Wavelength");
@@ -220,9 +220,9 @@ void DgsReduction::init() {
       "DetVanIntRangeUnits", "Energy",
       boost::make_shared<StringListValidator>(detvanIntRangeUnits),
       "Options for the units on the detector vanadium integration.");
-  this->setPropertySettings(
-      "DetVanIntRangeUnits",
-      make_unique<VisibleWhenProperty>("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("DetVanIntRangeUnits",
+                            std::make_unique<VisibleWhenProperty>(
+                                "UseBoundsForDetVan", IS_EQUAL_TO, "1"));
 
   // this->setPropertyGroup("FilterBadPulses", dataCorr);
   this->setPropertyGroup("IncidentBeamNormalisation", dataCorr);
@@ -248,65 +248,65 @@ void DgsReduction::init() {
   this->declareProperty("HighCounts", EMPTY_DBL(), mustBePositive,
                         "Mask detectors above this threshold.");
   this->setPropertySettings(
-      "HighCounts", make_unique<VisibleWhenProperty>(
+      "HighCounts", std::make_unique<VisibleWhenProperty>(
                         "DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
   this->declareProperty("LowCounts", EMPTY_DBL(), mustBePositive,
                         "Mask detectors below this threshold.");
   this->setPropertySettings(
-      "LowCounts", make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
-                                                    IS_NOT_EQUAL_TO, ""));
+      "LowCounts", std::make_unique<VisibleWhenProperty>(
+                       "DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
   this->declareProperty(
       "LowOutlier", EMPTY_DBL(),
       "Lower bound defining outliers as fraction of median value");
   this->setPropertySettings(
-      "LowOutlier", make_unique<VisibleWhenProperty>(
+      "LowOutlier", std::make_unique<VisibleWhenProperty>(
                         "DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
   this->declareProperty(
       "HighOutlier", EMPTY_DBL(),
       "Upper bound defining outliers as fraction of median value");
   this->setPropertySettings(
-      "HighOutlier", make_unique<VisibleWhenProperty>(
+      "HighOutlier", std::make_unique<VisibleWhenProperty>(
                          "DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
   this->declareProperty("MedianTestHigh", EMPTY_DBL(), mustBePositive,
                         "Mask detectors above this threshold.");
   this->setPropertySettings(
-      "MedianTestHigh", make_unique<VisibleWhenProperty>(
+      "MedianTestHigh", std::make_unique<VisibleWhenProperty>(
                             "DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
   this->declareProperty("MedianTestLow", EMPTY_DBL(), mustBePositive,
                         "Mask detectors below this threshold.");
   this->setPropertySettings(
-      "MedianTestLow", make_unique<VisibleWhenProperty>(
+      "MedianTestLow", std::make_unique<VisibleWhenProperty>(
                            "DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
   this->declareProperty("MedianTestLevelsUp", 0., mustBePositive,
                         "Mask detectors below this threshold.");
   this->setPropertySettings(
       "MedianTestLevelsUp",
-      make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
-                                       IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
+                                            IS_NOT_EQUAL_TO, ""));
   this->declareProperty("MedianTestCorrectForSolidAngle", false,
                         "Flag to correct for solid angle efficiency.");
   this->setPropertySettings(
       "MedianTestCorrectForSolidAngle",
-      make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
-                                       IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
+                                            IS_NOT_EQUAL_TO, ""));
   this->declareProperty("ErrorBarCriterion", EMPTY_DBL(), mustBePositive,
                         "Some selection criteria for the detector tests.");
   this->setPropertySettings(
       "ErrorBarCriterion",
-      make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
-                                       IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("DetectorVanadiumInputFile",
+                                            IS_NOT_EQUAL_TO, ""));
   this->declareProperty(
-      make_unique<FileProperty>("DetectorVanadium2InputFile", "",
-                                FileProperty::OptionalLoad, "_event.nxs"),
+      std::make_unique<FileProperty>("DetectorVanadium2InputFile", "",
+                                     FileProperty::OptionalLoad, "_event.nxs"),
       "File containing detector vanadium data to compare against");
-  this->declareProperty(make_unique<WorkspaceProperty<>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "DetectorVanadium2InputWorkspace", "",
                             Direction::Input, PropertyMode::Optional),
                         "Detector vanadium workspace to compare against");
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("DetectorVanadium2InputMonitorWorkspace",
-                                       "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "DetectorVanadium2InputMonitorWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "A monitor workspace associated with the input comparison detector "
       "vanadium workspace.");
 
@@ -315,49 +315,51 @@ void DgsReduction::init() {
       "Mask detectors if the time variation is above this threshold.");
   this->setPropertySettings(
       "DetVanRatioVariation",
-      make_unique<VisibleWhenProperty>("DetectorVanadium2InputFile",
-                                       IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("DetectorVanadium2InputFile",
+                                            IS_NOT_EQUAL_TO, ""));
 
   this->declareProperty(
       "BackgroundCheck", false,
       "If true, run a background check on detector vanadium.");
   this->declareProperty("SamBkgMedianTestHigh", EMPTY_DBL(), mustBePositive,
                         "Mask detectors above this threshold.");
-  this->setPropertySettings(
-      "SamBkgMedianTestHigh",
-      make_unique<VisibleWhenProperty>("BackgroundCheck", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("SamBkgMedianTestHigh",
+                            std::make_unique<VisibleWhenProperty>(
+                                "BackgroundCheck", IS_EQUAL_TO, "1"));
   this->declareProperty("SamBkgMedianTestLow", EMPTY_DBL(), mustBePositive,
                         "Mask detectors below this threshold.");
-  this->setPropertySettings(
-      "SamBkgMedianTestLow",
-      make_unique<VisibleWhenProperty>("BackgroundCheck", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("SamBkgMedianTestLow",
+                            std::make_unique<VisibleWhenProperty>(
+                                "BackgroundCheck", IS_EQUAL_TO, "1"));
   this->declareProperty("SamBkgErrorBarCriterion", EMPTY_DBL(), mustBePositive,
                         "Some selection criteria for the detector tests.");
-  this->setPropertySettings(
-      "SamBkgErrorBarCriterion",
-      make_unique<VisibleWhenProperty>("BackgroundCheck", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("SamBkgErrorBarCriterion",
+                            std::make_unique<VisibleWhenProperty>(
+                                "BackgroundCheck", IS_EQUAL_TO, "1"));
   this->declareProperty("BackgroundTofStart", EMPTY_DBL(), mustBePositive,
                         "Start TOF for the background check.");
-  this->setPropertySettings(
-      "BackgroundTofStart",
-      make_unique<VisibleWhenProperty>("BackgroundCheck", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("BackgroundTofStart",
+                            std::make_unique<VisibleWhenProperty>(
+                                "BackgroundCheck", IS_EQUAL_TO, "1"));
   this->declareProperty("BackgroundTofEnd", EMPTY_DBL(), mustBePositive,
                         "End TOF for the background check.");
-  this->setPropertySettings(
-      "BackgroundTofEnd",
-      make_unique<VisibleWhenProperty>("BackgroundCheck", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("BackgroundTofEnd",
+                            std::make_unique<VisibleWhenProperty>(
+                                "BackgroundCheck", IS_EQUAL_TO, "1"));
   this->declareProperty("RejectZeroBackground", false,
                         "If true, check the background region for anomolies.");
   this->declareProperty("PsdBleed", false,
                         "If true, perform a PSD bleed test.");
   this->declareProperty("MaxFramerate", EMPTY_DBL(),
                         "The maximum framerate to check.");
-  this->setPropertySettings("MaxFramerate", make_unique<VisibleWhenProperty>(
-                                                "PsdBleed", IS_EQUAL_TO, "1"));
+  this->setPropertySettings(
+      "MaxFramerate",
+      std::make_unique<VisibleWhenProperty>("PsdBleed", IS_EQUAL_TO, "1"));
   this->declareProperty("IgnoredPixels", EMPTY_DBL(),
                         "A list of pixels to ignore in the calculations.");
-  this->setPropertySettings("IgnoredPixels", make_unique<VisibleWhenProperty>(
-                                                 "PsdBleed", IS_EQUAL_TO, "1"));
+  this->setPropertySettings(
+      "IgnoredPixels",
+      std::make_unique<VisibleWhenProperty>("PsdBleed", IS_EQUAL_TO, "1"));
 
   this->setPropertyGroup("HighCounts", findBadDets);
   this->setPropertyGroup("LowCounts", findBadDets);
@@ -388,113 +390,113 @@ void DgsReduction::init() {
   this->declareProperty("DoAbsoluteUnits", false,
                         "If true, perform an absolute units normalisation.");
   this->declareProperty(
-      make_unique<FileProperty>("AbsUnitsSampleInputFile", "",
-                                FileProperty::OptionalLoad),
+      std::make_unique<FileProperty>("AbsUnitsSampleInputFile", "",
+                                     FileProperty::OptionalLoad),
       "The sample (vanadium) file used in the absolute units normalisation.");
-  this->setPropertySettings(
-      "AbsUnitsSampleInputFile",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsSampleInputFile",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("AbsUnitsSampleInputWorkspace", "",
-                                       Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("AbsUnitsSampleInputWorkspace", "",
+                                            Direction::Input,
+                                            PropertyMode::Optional),
       "The sample (vanadium) workspace for absolute units normalisation.");
-  this->setPropertySettings(
-      "AbsUnitsSampleInputWorkspace",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsSampleInputWorkspace",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("AbsUnitsSampleInputMonitorWorkspace",
-                                       "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "AbsUnitsSampleInputMonitorWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "A monitor workspace associated with the input absolute units sample "
       "workspace.");
-  this->setPropertySettings(
-      "AbsUnitsSampleInputMonitorWorkspace",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsSampleInputMonitorWorkspace",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty("AbsUnitsGroupingFile", "",
                         "Grouping file for absolute units normalisation.");
-  this->setPropertySettings(
-      "AbsUnitsGroupingFile",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsGroupingFile",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      make_unique<FileProperty>("AbsUnitsDetectorVanadiumInputFile", "",
-                                FileProperty::OptionalLoad),
+      std::make_unique<FileProperty>("AbsUnitsDetectorVanadiumInputFile", "",
+                                     FileProperty::OptionalLoad),
       "The detector vanadium file used in the absolute units normalisation.");
-  this->setPropertySettings(
-      "AbsUnitsDetectorVanadiumInputFile",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsDetectorVanadiumInputFile",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("AbsUnitsDetectorVanadiumInputWorkspace",
-                                       "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "AbsUnitsDetectorVanadiumInputWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "The detector vanadium workspace for absolute units normalisation.");
-  this->setPropertySettings(
-      "AbsUnitsDetectorVanadiumInputWorkspace",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsDetectorVanadiumInputWorkspace",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "AbsUnitsDetectorVanadiumInputMonitorWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "A monitor workspace associated with the input absolute units sample "
       "detector vanadium workspace.");
-  this->setPropertySettings(
-      "AbsUnitsDetectorVanadiumInputMonitorWorkspace",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsDetectorVanadiumInputMonitorWorkspace",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty("AbsUnitsIncidentEnergy", EMPTY_DBL(), mustBePositive,
                         "The incident energy for the vanadium sample.");
-  this->setPropertySettings(
-      "AbsUnitsIncidentEnergy",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsIncidentEnergy",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty("AbsUnitsMinimumEnergy", EMPTY_DBL(),
                         "The minimum energy for the integration range.");
-  this->setPropertySettings(
-      "AbsUnitsMinimumEnergy",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsMinimumEnergy",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty("AbsUnitsMaximumEnergy", EMPTY_DBL(),
                         "The maximum energy for the integration range.");
-  this->setPropertySettings(
-      "AbsUnitsMaximumEnergy",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsMaximumEnergy",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty("VanadiumMass", EMPTY_DBL(), "The mass of vanadium.");
   this->setPropertySettings(
-      "VanadiumMass",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      "VanadiumMass", std::make_unique<VisibleWhenProperty>("DoAbsoluteUnits",
+                                                            IS_EQUAL_TO, "1"));
   this->declareProperty("SampleMass", 1.0, "The mass of sample.");
   this->setPropertySettings(
-      "SampleMass",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      "SampleMass", std::make_unique<VisibleWhenProperty>("DoAbsoluteUnits",
+                                                          IS_EQUAL_TO, "1"));
   this->declareProperty("SampleRmm", 1.0, "The rmm of sample.");
   this->setPropertySettings(
-      "SampleRmm",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      "SampleRmm", std::make_unique<VisibleWhenProperty>("DoAbsoluteUnits",
+                                                         IS_EQUAL_TO, "1"));
   this->declareProperty(
       "AbsUnitsLowOutlier", EMPTY_DBL(),
       "Lower bound defining outliers as fraction of median value");
-  this->setPropertySettings(
-      "AbsUnitsLowOutlier",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsLowOutlier",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty(
       "AbsUnitsHighOutlier", EMPTY_DBL(),
       "Upper bound defining outliers as fraction of median value");
-  this->setPropertySettings(
-      "AbsUnitsHighOutlier",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsHighOutlier",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty("AbsUnitsMedianTestHigh", EMPTY_DBL(), mustBePositive,
                         "Mask detectors above this threshold.");
-  this->setPropertySettings(
-      "AbsUnitsMedianTestHigh",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsMedianTestHigh",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty("AbsUnitsMedianTestLow", EMPTY_DBL(), mustBePositive,
                         "Mask detectors below this threshold.");
-  this->setPropertySettings(
-      "AbsUnitsMedianTestLow",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsMedianTestLow",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   this->declareProperty("AbsUnitsErrorBarCriterion", EMPTY_DBL(),
                         mustBePositive,
                         "Some selection criteria for the detector tests.");
-  this->setPropertySettings(
-      "AbsUnitsErrorBarCriterion",
-      make_unique<VisibleWhenProperty>("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+  this->setPropertySettings("AbsUnitsErrorBarCriterion",
+                            std::make_unique<VisibleWhenProperty>(
+                                "DoAbsoluteUnits", IS_EQUAL_TO, "1"));
 
   this->setPropertyGroup("DoAbsoluteUnits", absUnitsCorr);
   this->setPropertyGroup("AbsUnitsSampleInputFile", absUnitsCorr);
@@ -523,27 +525,27 @@ void DgsReduction::init() {
   this->declareProperty("DoPowderDataConversion", false,
                         "Flag to switch on converting DeltaE to SQW.");
   this->declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "PowderMomTransferRange",
           boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin "
       "boundary.\n"
       "Negative width value indicates logarithmic binning.");
   this->setPropertySettings("PowderMomTransferRange",
-                            make_unique<VisibleWhenProperty>(
+                            std::make_unique<VisibleWhenProperty>(
                                 "DoPowderDataConversion", IS_EQUAL_TO, "1"));
   this->declareProperty(
       "SavePowderNexusFile", true,
       "Flag to use to save a processed NeXus file for powder data.");
   this->setPropertySettings("SavePowderNexusFile",
-                            make_unique<VisibleWhenProperty>(
+                            std::make_unique<VisibleWhenProperty>(
                                 "DoPowderDataConversion", IS_EQUAL_TO, "1"));
   this->declareProperty(
-      make_unique<FileProperty>("SavePowderNexusFilename", "",
-                                FileProperty::OptionalSave, ".nxs"),
+      std::make_unique<FileProperty>("SavePowderNexusFilename", "",
+                                     FileProperty::OptionalSave, ".nxs"),
       "Provide a filename for saving the processed powder data.");
   this->setPropertySettings("SavePowderNexusFilename",
-                            make_unique<VisibleWhenProperty>(
+                            std::make_unique<VisibleWhenProperty>(
                                 "DoPowderDataConversion", IS_EQUAL_TO, "1"));
 
   this->setPropertyGroup("DoPowderDataConversion", powder);
@@ -553,8 +555,8 @@ void DgsReduction::init() {
 
   // Common to PD and SC
 
-  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                         Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Direction::Output),
                         "Provide a name for the output workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Output);
@@ -593,7 +595,7 @@ Workspace_sptr DgsReduction::loadInputData(const std::string prop,
       std::string detCalFileProperty = prop + "DetCalFilename";
       if (!detCalFileFromAlg.empty()) {
         this->reductionManager->declareProperty(
-            Kernel::make_unique<PropertyWithValue<std::string>>(
+            std::make_unique<PropertyWithValue<std::string>>(
                 detCalFileProperty, detCalFileFromAlg));
       }
     }
@@ -663,7 +665,7 @@ MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string prop) {
       // Set a property to use later.
       g_log.warning() << "Old format grouping file in use.\n";
       this->reductionManager->declareProperty(
-          Kernel::make_unique<PropertyWithValue<std::string>>(
+          std::make_unique<PropertyWithValue<std::string>>(
               prop + "OldGroupingFilename", groupFile));
       return boost::shared_ptr<MatrixWorkspace>();
     }
@@ -716,7 +718,7 @@ void DgsReduction::exec() {
   MatrixWorkspace_sptr WS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
   this->reductionManager->declareProperty(
-      Kernel::make_unique<PropertyWithValue<std::string>>(
+      std::make_unique<PropertyWithValue<std::string>>(
           "InstrumentName", WS->getInstrument()->getName()));
 
   // Check the facility for the loaded file and make sure it's the
@@ -735,8 +737,6 @@ void DgsReduction::exec() {
 
   const bool showIntermedWS = this->getProperty("ShowIntermediateWorkspaces");
 
-  // Get output workspace pointer and name
-  MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
   std::string outputWsName = this->getPropertyValue("OutputWorkspace");
   if (boost::ends_with(outputWsName, "_spe")) {
     boost::erase_all(outputWsName, "_spe");
@@ -748,7 +748,7 @@ void DgsReduction::exec() {
   MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
   if (hardMaskWS && showIntermedWS) {
     std::string hardMaskName = outputWsName + "_hardmask";
-    this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    this->declareProperty(std::make_unique<WorkspaceProperty<>>(
         "ReductionHardMask", hardMaskName, Direction::Output));
     this->setProperty("ReductionHardMask", hardMaskWS);
   }
@@ -758,7 +758,7 @@ void DgsReduction::exec() {
   MatrixWorkspace_sptr groupingWS = this->loadGroupingFile("");
   if (groupingWS && showIntermedWS) {
     std::string groupName = outputWsName + "_grouping";
-    this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    this->declareProperty(std::make_unique<WorkspaceProperty<>>(
         "ReductionGrouping", groupName, Direction::Output));
     this->setProperty("ReductionGrouping", groupingWS);
   }
@@ -794,7 +794,7 @@ void DgsReduction::exec() {
     maskWS = diag->getProperty("OutputWorkspace");
 
     if (showIntermedWS) {
-      this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      this->declareProperty(std::make_unique<WorkspaceProperty<>>(
           "SampleDetVanDiagMask", detVanMaskName, Direction::Output));
       this->setProperty("SampleDetVanDiagMask", maskWS);
     }
@@ -811,7 +811,7 @@ void DgsReduction::exec() {
     idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
 
     if (showIntermedWS) {
-      this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      this->declareProperty(std::make_unique<WorkspaceProperty<>>(
           "IntegratedNormWorkspace", idetVanName, Direction::Output));
       this->setProperty("IntegratedNormWorkspace", idetVanWS);
     }
@@ -840,11 +840,11 @@ void DgsReduction::exec() {
                       getPropertyValue("ReductionProperties"));
   std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
   etConv->executeAsChildAlg();
-  outputWS = etConv->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = etConv->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr tibWS = etConv->getProperty("OutputTibWorkspace");
 
   if (tibWS && showIntermedWS) {
-    this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    this->declareProperty(std::make_unique<WorkspaceProperty<>>(
         "SampleTibWorkspace", tibWsName, Direction::Output));
     this->setProperty("SampleTibWorkspace", tibWS);
   }
@@ -896,10 +896,10 @@ void DgsReduction::exec() {
     outputWS = divide(outputWS, absUnitsWS);
 
     if (showIntermedWS) {
-      this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      this->declareProperty(std::make_unique<WorkspaceProperty<>>(
           "AbsUnitsWorkspace", absWsName, Direction::Output));
       this->setProperty("AbsUnitsWorkspace", absUnitsWS);
-      this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      this->declareProperty(std::make_unique<WorkspaceProperty<>>(
           "AbsUnitsDiagMask", outputWsName + "_absunits_diagmask",
           Direction::Output));
       this->setProperty("AbsUnitsDiagMask", absMaskWS);
@@ -916,7 +916,7 @@ void DgsReduction::exec() {
     std::string sqwWsName = outputWsName + "_pd_sqw";
     std::vector<double> qBinning = this->getProperty("PowderMomTransferRange");
     const double initialEnergy =
-        boost::lexical_cast<double>(outputWS->run().getProperty("Ei")->value());
+        outputWS->run().getPropertyValueAsType<double>("Ei");
 
     IAlgorithm_sptr sofqw = this->createChildAlgorithm("SofQW3");
     sofqw->setProperty("InputWorkspace", outputWS);
@@ -925,7 +925,7 @@ void DgsReduction::exec() {
     sofqw->setProperty("EFixed", initialEnergy);
     sofqw->executeAsChildAlg();
     MatrixWorkspace_sptr sqwWS = sofqw->getProperty("OutputWorkspace");
-    this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    this->declareProperty(std::make_unique<WorkspaceProperty<>>(
         "PowderSqwWorkspace", sqwWsName, Direction::Output));
     this->setProperty("PowderSqwWorkspace", sqwWS);
 

@@ -18,7 +18,6 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 

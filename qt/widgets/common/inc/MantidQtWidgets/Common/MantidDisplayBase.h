@@ -7,11 +7,11 @@
 #ifndef MANTID_MANTIDWIDGETS_MANTIDDISPLAYBASE_H_
 #define MANTID_MANTIDWIDGETS_MANTIDDISPLAYBASE_H_
 
+#include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/System.h"
-#include <MantidAPI/AlgorithmObserver.h>
-#include <MantidAPI/IAlgorithm_fwd.h>
-#include <MantidQtWidgets/Common/DistributionOptions.h>
-#include <MantidQtWidgets/Common/GraphOptions.h>
+#include "MantidQtWidgets/Common/DistributionOptions.h"
+#include "MantidQtWidgets/Common/GraphOptions.h"
 #include <QStringList>
 #include <map>
 #include <set>
@@ -123,7 +123,7 @@ public:
                              bool showTiledOpt, bool isAdvanced = false) = 0;
 
   virtual void updateProject() = 0;
-  virtual void showCritical(const QString &) {}
+  virtual void showCritical(const QString & /*unused*/) {}
 #ifdef MAKE_VATES
   virtual bool doesVatesSupportOpenGL() = 0;
 #endif

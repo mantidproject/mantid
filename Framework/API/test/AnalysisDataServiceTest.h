@@ -79,7 +79,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("Z"));
 
     ads.remove("Z");
-    TS_ASSERT_THROWS(ads.retrieve("z"), Exception::NotFoundError);
+    TS_ASSERT_THROWS(ads.retrieve("z"), const Exception::NotFoundError &);
   }
 
   void test_retrieveWorkspaces_with_empty_list_returns_empty_list() {
@@ -88,16 +88,17 @@ public:
   }
 
   void test_retrieveWorkspaces_with_all_missing_items_throws_exception() {
-    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a"}), Exception::NotFoundError);
+    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a"}),
+                     const Exception::NotFoundError &);
     TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a", "b"}),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void test_retrieveWorkspaces_with_some_missing_items_throws_exception() {
     const std::string name("test_some_missing_items");
     addToADS(name);
     TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a", "b"}),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
     ads.remove(name);
   }
 
@@ -148,7 +149,7 @@ public:
     const std::string name = "SameName";
     TS_ASSERT_THROWS_NOTHING(addToADS(name));
     // Adding again will throw
-    TS_ASSERT_THROWS(addToADS(name), std::runtime_error);
+    TS_ASSERT_THROWS(addToADS(name), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(ads.remove(name));
   }
 
@@ -173,7 +174,7 @@ public:
     TS_ASSERT_EQUALS(ads.doesExist(name), true);
     std::string banned = "Also.Contains.Illegal";
     // This should not be allowed now.
-    TS_ASSERT_THROWS(addToADS(banned), std::invalid_argument);
+    TS_ASSERT_THROWS(addToADS(banned), const std::invalid_argument &);
     // Clear up
     ads.setIllegalCharacterList("");
   }
@@ -182,7 +183,7 @@ public:
   test_AddOrReplace_Does_Not_Throw_When_Adding_Object_That_Has_A_Name_That_Already_Exists() {
     const std::string name("MySpaceAddOrReplace");
     TS_ASSERT_THROWS_NOTHING(addOrReplaceToADS(name));
-    TS_ASSERT_THROWS(addToADS(name), std::runtime_error);
+    TS_ASSERT_THROWS(addToADS(name), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(addOrReplaceToADS(name));
     TS_ASSERT_THROWS_NOTHING(ads.remove(name));
   }
@@ -191,7 +192,7 @@ public:
     const std::string name("MySpace");
     addToADS(name);
     TS_ASSERT_THROWS_NOTHING(ads.remove(name));
-    TS_ASSERT_THROWS(ads.retrieve(name), std::runtime_error);
+    TS_ASSERT_THROWS(ads.retrieve(name), const std::runtime_error &);
     // Remove should not throw but give a warning in the log file, changed by
     // LCC 05/2008
     TS_ASSERT_THROWS_NOTHING(ads.remove("ttttt"));
@@ -328,7 +329,7 @@ public:
     group->addWorkspace(ws2);
     // ADS must have 2 workspaces
     TS_ASSERT_EQUALS(ads.size(), 2);
-    TS_ASSERT_THROWS(ads.add("Group", group), std::runtime_error);
+    TS_ASSERT_THROWS(ads.add("Group", group), const std::runtime_error &);
     // there must be 4 workspaces in the ADS
     TS_ASSERT_EQUALS(ads.size(), 4);
     TS_ASSERT(ads.doesExist("Group"));
@@ -400,9 +401,10 @@ public:
     TS_ASSERT_EQUALS(ads.size(), 4);
 
     // name doesn't exist
-    TS_ASSERT_THROWS(ads.deepRemoveGroup("abc"), std::runtime_error);
+    TS_ASSERT_THROWS(ads.deepRemoveGroup("abc"), const std::runtime_error &);
     // workspace isn't a group
-    TS_ASSERT_THROWS(ads.deepRemoveGroup("group_1"), std::runtime_error);
+    TS_ASSERT_THROWS(ads.deepRemoveGroup("group_1"),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(ads.deepRemoveGroup("group"));
     TS_ASSERT_EQUALS(ads.size(), 1);
 
@@ -423,11 +425,11 @@ public:
     TS_ASSERT_EQUALS(group->size(), 1);
 
     TS_ASSERT_THROWS(ads.removeFromGroup("group", "noworkspace"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ads.removeFromGroup("nogroup", "noworkspace"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ads.removeFromGroup("nogroup", "group_1"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     ads.clear();
   }
 
@@ -493,9 +495,10 @@ public:
     auto nullWS = MockWorkspace_sptr();
 
     // Shouldn't be able to add null pointers
-    TS_ASSERT_THROWS(ads.add("null_workspace", nullWS), std::runtime_error);
+    TS_ASSERT_THROWS(ads.add("null_workspace", nullWS),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ads.addOrReplace("null_workspace", nullWS),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     TS_ASSERT(!ads.doesExist("null_workspace"));
   }
@@ -519,10 +522,10 @@ private:
                << " is not allowed but ADS did not throw.";
       if (replace) {
         TSM_ASSERT_THROWS(errorMsg.str(), addToADS(name.str()),
-                          std::invalid_argument);
+                          const std::invalid_argument &);
       } else {
         TSM_ASSERT_THROWS(errorMsg.str(), addOrReplaceToADS(name.str()),
-                          std::invalid_argument);
+                          const std::invalid_argument &);
       }
       bool stored = ads.doesExist(name.str());
       TS_ASSERT_EQUALS(stored, false);

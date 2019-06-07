@@ -218,6 +218,10 @@ protected:
   bool m_AllowDifferentNumberSpectra{false};
   /// Flag to clear RHS workspace in binary operation
   bool m_ClearRHSWorkspace{false};
+  /// Cache for LHS workspace's blocksize
+  size_t m_lhsBlocksize;
+  /// Cache for RHS workspace's blocksize
+  size_t m_rhsBlocksize;
 
   //------ Requirements -----------
 

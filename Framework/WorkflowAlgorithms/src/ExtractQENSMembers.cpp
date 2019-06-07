@@ -52,25 +52,26 @@ const std::string ExtractQENSMembers::summary() const {
  */
 void ExtractQENSMembers::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "The input workspace used in the fit. Ignored if 'InputWorkspaces' "
       "property is provided.");
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("InputWorkspaces", ""),
+      std::make_unique<ArrayProperty<std::string>>("InputWorkspaces", ""),
       "List of the workspaces used in the fit.");
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "ResultWorkspace", "", Direction::Input),
                   "The result group workspace produced in a QENS fit.");
   declareProperty("RenameConvolvedMembers", false,
                   "If true, renames the n-th 'Convolution' member, to the n-th "
                   "supplied name in the ConvolvedMembers property.");
-  declareProperty(make_unique<ArrayProperty<std::string>>("ConvolvedMembers"),
-                  "A list of the names of the members which were convolved "
-                  "before being output by the fit routine. These must be "
-                  "provided in the same order as originally provided to the "
-                  "fit.");
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>("ConvolvedMembers"),
+      "A list of the names of the members which were convolved "
+      "before being output by the fit routine. These must be "
+      "provided in the same order as originally provided to the "
+      "fit.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace group, containing the fit members.");
 }
@@ -114,20 +115,17 @@ void ExtractQENSMembers::exec() {
 
 std::vector<MatrixWorkspace_sptr>
 ExtractQENSMembers::getInputWorkspaces() const {
+  const std::vector<std::string> workspaceNames =
+      getProperty("InputWorkspaces");
   std::vector<MatrixWorkspace_sptr> workspaces;
-  std::vector<std::string> workspaceNames = getProperty("InputWorkspaces");
 
-  for (const auto &name : workspaceNames)
-    workspaces.emplace_back(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
-
-  if (!workspaces.empty()) {
+  if (!workspaceNames.empty()) {
     workspaces.reserve(workspaceNames.size());
+    auto &ADS = AnalysisDataService::Instance();
     for (const auto &name : workspaceNames)
-      workspaces.emplace_back(
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
+      workspaces.emplace_back(ADS.retrieveWS<MatrixWorkspace>(name));
   } else
-    workspaces.push_back(getProperty("InputWorkspace"));
+    workspaces.emplace_back(getProperty("InputWorkspace"));
   return workspaces;
 }
 

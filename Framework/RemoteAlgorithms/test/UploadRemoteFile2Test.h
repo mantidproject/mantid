@@ -59,7 +59,7 @@ public:
 
   // TODO: when we have a RemoteJobManager capable of creating
   // algorithms for different types of compute resources (example:
-  // Fermi@SNS and SCARF@STFC), create different algorithms for them
+  // Fermi@SNS), create different algorithms for them
   void test_propertiesMissing() {
     UploadRemoteFile2 alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
@@ -69,9 +69,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg1.setPropertyValue("LocalFileName", "local file name"));
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     UploadRemoteFile2 alg2;
@@ -81,9 +81,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg2.setPropertyValue("LocalFileName", "local file name"));
     TS_ASSERT_THROWS(alg2.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
 
     UploadRemoteFile2 alg3;
@@ -93,9 +93,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("RemoteFileName", "remote file name"));
     TS_ASSERT_THROWS(alg3.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg3.execute(), const std::runtime_error &);
     TS_ASSERT(!alg3.isExecuted());
 
     UploadRemoteFile2 alg4;
@@ -105,7 +105,7 @@ public:
         alg4.setPropertyValue("RemoteFileName", "file name"));
     TS_ASSERT_THROWS_NOTHING(alg4.setPropertyValue("TransactionID", "id001"));
 
-    TS_ASSERT_THROWS(alg4.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg4.execute(), const std::runtime_error &);
     TS_ASSERT(!alg4.isExecuted());
   }
 
@@ -113,20 +113,19 @@ public:
     UploadRemoteFile2 ul;
     TS_ASSERT_THROWS_NOTHING(ul.initialize();)
     TS_ASSERT_THROWS(ul.setPropertyValue("Compute", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ul.setPropertyValue("TransID", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ul.setPropertyValue("RemoteFile", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ul.setPropertyValue("FileName", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ul.setPropertyValue("LocalFile", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_propertiesOK() {
     testFacilities.emplace_back("SNS", "Fermi");
-    testFacilities.emplace_back("ISIS", "SCARF@STFC");
 
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();

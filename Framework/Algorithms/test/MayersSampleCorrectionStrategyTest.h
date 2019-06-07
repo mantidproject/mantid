@@ -81,11 +81,11 @@ public:
     TS_ASSERT_DELTA(100.0, tof.front(), delta);
     TS_ASSERT_DELTA(199.0, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.375086, signal.front(), delta);
-    TS_ASSERT_DELTA(0.377762, signal.back(), delta);
+    TS_ASSERT_DELTA(2.308089, signal.front(), delta);
+    TS_ASSERT_DELTA(2.314809, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.265226, error.front(), delta);
-    TS_ASSERT_DELTA(0.267118, error.back(), delta);
+    TS_ASSERT_DELTA(1.632065, error.front(), delta);
+    TS_ASSERT_DELTA(1.636817, error.back(), delta);
   }
 
   void
@@ -105,11 +105,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.375086, signal.front(), delta);
-    TS_ASSERT_DELTA(0.377762, signal.back(), delta);
+    TS_ASSERT_DELTA(2.308089, signal.front(), delta);
+    TS_ASSERT_DELTA(2.314809, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.265226, error.front(), delta);
-    TS_ASSERT_DELTA(0.267118, error.back(), delta);
+    TS_ASSERT_DELTA(1.632065, error.front(), delta);
+    TS_ASSERT_DELTA(1.636817, error.back(), delta);
   }
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {
@@ -157,11 +157,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.374857, signal.front(), delta);
-    TS_ASSERT_DELTA(0.377747, signal.back(), delta);
+    TS_ASSERT_DELTA(2.307860, signal.front(), delta);
+    TS_ASSERT_DELTA(2.314794, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.265064, error.front(), delta);
-    TS_ASSERT_DELTA(0.267107, error.back(), delta);
+    TS_ASSERT_DELTA(1.631904, error.front(), delta);
+    TS_ASSERT_DELTA(1.636807, error.back(), delta);
   }
 
   void test_MutlipleScattering_NRuns_Parameter() {
@@ -184,11 +184,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.375848, signal.front(), delta);
-    TS_ASSERT_DELTA(0.386508, signal.back(), delta);
+    TS_ASSERT_DELTA(2.308851, signal.front(), delta);
+    TS_ASSERT_DELTA(2.323555, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.265765, error.front(), delta);
-    TS_ASSERT_DELTA(0.273302, error.back(), delta);
+    TS_ASSERT_DELTA(1.632604, error.front(), delta);
+    TS_ASSERT_DELTA(1.643002, error.back(), delta);
   }
 
   // ---------------------- Failure tests -----------------------------
@@ -199,7 +199,7 @@ public:
 
     TS_ASSERT_THROWS(
         MayersSampleCorrectionStrategy(createTestParameters(), histo),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
 private:

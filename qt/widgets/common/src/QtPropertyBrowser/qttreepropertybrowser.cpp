@@ -257,7 +257,7 @@ void QtPropertyEditorDelegate::closeEditor(QtProperty *property) {
 
 QWidget *
 QtPropertyEditorDelegate::createEditor(QWidget *parent,
-                                       const QStyleOptionViewItem &,
+                                       const QStyleOptionViewItem & /*option*/,
                                        const QModelIndex &index) const {
   if (index.column() == 1 && m_editorPrivate) {
     QtProperty *property = m_editorPrivate->indexToProperty(index);
@@ -677,7 +677,7 @@ void QtTreePropertyBrowserPrivate::slotCurrentBrowserItemChanged(
 }
 
 void QtTreePropertyBrowserPrivate::slotCurrentTreeItemChanged(
-    QTreeWidgetItem *newItem, QTreeWidgetItem *) {
+    QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/) {
   QtBrowserItem *browserItem = newItem ? m_itemToIndex.value(newItem) : 0;
   m_browserChangedBlocked = true;
   q_ptr->setCurrentItem(browserItem);
@@ -699,6 +699,11 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem) {
     m_treeWidget->setCurrentItem(treeItem, 1);
     m_treeWidget->editItem(treeItem, 1);
   }
+}
+
+QTreeWidgetItem *
+QtTreePropertyBrowserPrivate::getItemWidget(QtBrowserItem *browserItem) {
+  return m_indexToItem.value(browserItem, 0);
 }
 
 void QtTreePropertyBrowserPrivate::disableItem(QtBrowserItem *browserItem) {
@@ -1085,6 +1090,12 @@ void QtTreePropertyBrowser::editItem(QtBrowserItem *item) {
 void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2) {
   d_ptr->setColumnSizes(s0, s1, s2);
 }
+
+QTreeWidgetItem *QtTreePropertyBrowser::getItemWidget(QtBrowserItem *item) {
+  return d_ptr->getItemWidget(item);
+}
+
+QTreeWidget *QtTreePropertyBrowser::treeWidget() { return d_ptr->treeWidget(); }
 
 void QtTreePropertyBrowser::closeEditor() { d_ptr->closeEditor(); }
 

@@ -43,8 +43,12 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
   namespace PhysicalConstants = Mantid::PhysicalConstants;
 
   // Define a sample shape
-  auto sampleShape =
-      ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
+  constexpr double sampleRadius{0.006};
+  constexpr double sampleHeight{0.04};
+  const V3D sampleBaseCentre{0., -sampleHeight / 2., 0.};
+  const V3D yAxis{0., 1., 0.};
+  auto sampleShape = ComponentCreationHelper::createCappedCylinder(
+      sampleRadius, sampleHeight, sampleBaseCentre, yAxis, "sample-cylinder");
   // And a material assuming it's a CSG Object
   sampleShape->setMaterial(
       Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
@@ -52,15 +56,13 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
 
   if (environment == Environment::SamplePlusContainer) {
     const std::string id("container");
-    const double radius(0.11);
-    const double height(0.03);
-    const V3D baseCentre(0.0, -height / 2.0, 0.0);
-    const V3D axis(0.0, 1.0, 0.0);
+    constexpr double containerWallThickness{0.002};
+    constexpr double containerInnerRadius{1.2 * sampleHeight};
+    constexpr double containerOuterRadius{containerInnerRadius +
+                                          containerWallThickness};
 
-    ShapeFactory shapeMaker;
-    auto canShape =
-        shapeMaker.createShape(ComponentCreationHelper::cappedCylinderXML(
-            radius, height, baseCentre, axis, id));
+    auto canShape = ComponentCreationHelper::createHollowShell(
+        containerInnerRadius, containerOuterRadius);
     // Set material assuming it's a CSG Object
     canShape->setMaterial(Material(
         "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
@@ -118,15 +120,15 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.006335, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.000092, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.000029, outputWS->y(0).back(), delta);
-    TS_ASSERT_DELTA(0.006265, outputWS->y(2).front(), delta);
-    TS_ASSERT_DELTA(0.000137, outputWS->y(2)[middle_index], delta);
-    TS_ASSERT_DELTA(0.000031, outputWS->y(2).back(), delta);
-    TS_ASSERT_DELTA(0.006294, outputWS->y(4).front(), delta);
-    TS_ASSERT_DELTA(0.000230, outputWS->y(4)[middle_index], delta);
-    TS_ASSERT_DELTA(0.000035, outputWS->y(4).back(), delta);
+    TS_ASSERT_DELTA(0.6245262704, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2770105008, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1041517761, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.6282072570, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(0.2790911215, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1078704876, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.6267458002, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(0.2790655428, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1068945921, outputWS->y(4).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {
@@ -139,9 +141,9 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.002188, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.000131, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.000276, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.5060586383, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.3389572854, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.2186106403, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Indirect() {
@@ -154,9 +156,9 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.001107, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.000023, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.000051, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.3658064669, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2277021116, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1383621690, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Sample_And_Container() {
@@ -169,24 +171,23 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.003521, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.000225, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.000018, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.6028577409, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2758029301, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1035877536, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_Beam_Size_Set() {
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {
-        1, 10, Environment::UserBeamSize, DeltaEMode::Elastic, 0.18, 0.15};
+        1, 10, Environment::UserBeamSize, DeltaEMode::Elastic, 0.018, 0.015};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(0.002546, outputWS->y(0).front(), delta);
-    const double delta2(1e-08);
-    TS_ASSERT_DELTA(0.0000005359, outputWS->y(0)[middle_index], delta2);
-    TS_ASSERT_DELTA(0.0000046103, outputWS->y(0).back(), delta2);
+    TS_ASSERT_DELTA(0.6279328067, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2770103841, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1041522173, outputWS->y(0).back(), delta);
   }
 
   void test_Linear_Interpolation() {
@@ -199,10 +200,10 @@ public:
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
-    TS_ASSERT_DELTA(0.006335, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.000432, outputWS->y(0)[3], delta);
-    TS_ASSERT_DELTA(0.000321, outputWS->y(0)[4], delta);
-    TS_ASSERT_DELTA(0.000438, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.6245262704, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.3455351271, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.2783583898, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.1168965453, outputWS->y(0).back(), delta);
   }
 
   void test_CSpline_Interpolation() {
@@ -215,11 +216,11 @@ public:
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
-    TS_ASSERT_DELTA(0.006335, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.6245262704, outputWS->y(0).front(), delta);
     // Interpolation gives some negative value due to test setup
-    TS_ASSERT_DELTA(0.000016, outputWS->y(0)[3], delta);
-    TS_ASSERT_DELTA(0.000321, outputWS->y(0)[4], delta);
-    TS_ASSERT_DELTA(0.000438, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.3368552576, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.2783583898, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.1168965453, outputWS->y(0).back(), delta);
   }
 
   //---------------------------------------------------------------------------
@@ -233,7 +234,7 @@ public:
     auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
 
     TS_ASSERT_THROWS(mcAbsorb->setProperty("InputWorkspace", testWS),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Workspace_With_An_Invalid_Sample_Shape_Is_Not_Accepted() {
@@ -246,7 +247,7 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", testWS));
-    TS_ASSERT_THROWS(mcabs->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(mcabs->execute(), const std::invalid_argument &);
   }
 
   void test_Lower_Limit_for_Number_of_Wavelengths() {
@@ -255,10 +256,10 @@ public:
         1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
     int nlambda{1};
     TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "Linear"),
-                     std::runtime_error)
+                     const std::runtime_error &)
     nlambda = 2;
     TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "CSpline"),
-                     std::runtime_error)
+                     const std::runtime_error &)
   }
 
   void test_event_workspace() {
@@ -282,17 +283,17 @@ public:
     auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta{1e-04};
+    const double delta{1e-05};
     const size_t middle_index{4};
-    TS_ASSERT_DELTA(0.003861, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.000062, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(3.8547e-07, outputWS->y(0).back(), delta);
-    TS_ASSERT_DELTA(0.003804, outputWS->y(2).front(), delta);
-    TS_ASSERT_DELTA(3.30326e-05, outputWS->y(2)[middle_index], delta);
-    TS_ASSERT_DELTA(3.84174e-07, outputWS->y(2).back(), delta);
-    TS_ASSERT_DELTA(0.003797, outputWS->y(4).front(), delta);
-    TS_ASSERT_DELTA(0.000174, outputWS->y(4)[middle_index], delta);
-    TS_ASSERT_DELTA(4.21291e-07, outputWS->y(4).back(), delta);
+    TS_ASSERT_DELTA(0.6241295766, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2830812429, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1055135467, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.6265926135, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(0.2829539939, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1078604888, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.6260645680, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(0.2829361634, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1073283604, outputWS->y(4).back(), delta);
   }
 
   void test_Sparse_Instrument_For_Direct() {
@@ -305,10 +306,10 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.001065, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.000137, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.5055988099, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.3419146885, outputWS->y(0)[middle_index], delta);
     const double delta2(1e-08);
-    TS_ASSERT_DELTA(0.00000167, outputWS->y(0).back(), delta2);
+    TS_ASSERT_DELTA(0.2270203007, outputWS->y(0).back(), delta2);
   }
 
   void test_Sparse_Instrument_For_Indirect() {
@@ -321,9 +322,9 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.000606, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.000022, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(9.16794e-07, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.3651989107, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.2308318553, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.1385715148, outputWS->y(0).back(), delta);
   }
 
 private:

@@ -356,7 +356,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         repl   = files_to_copy[0][2]
         self.assertEqual(os.path.basename(source),'MERLINReduction_Sample.py')
         self.assertEqual(os.path.basename(dest) ,'MERLINReduction_2015_1.py')
-        self.assertTrue(repl is None)
+        self.assertEqual(repl, None)
 
         
         # test files defined by test xml file

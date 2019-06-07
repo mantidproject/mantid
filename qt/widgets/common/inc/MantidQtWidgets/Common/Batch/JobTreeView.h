@@ -111,7 +111,7 @@ protected:
   void enableFiltering();
 
 protected slots:
-  void commitData(QWidget *) override;
+  void commitData(QWidget * /*editor*/) override;
 
 private:
   // The view property values for an uneditable, unselectable cell.

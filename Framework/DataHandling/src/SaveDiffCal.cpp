@@ -56,23 +56,23 @@ const std::string SaveDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SaveDiffCal::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "CalibrationWorkspace", "", Direction::Input),
                   "An output workspace.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<GroupingWorkspace>>(
+      std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An GroupingWorkspace workspace giving the grouping info.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MaskWorkspace>>(
+      std::make_unique<WorkspaceProperty<MaskWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An Workspace workspace giving which detectors are masked.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, ".h5"),
-                  "Path to the .h5 file that will be created.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".h5"),
+      "Path to the .h5 file that will be created.");
 }
 
 std::map<std::string, std::string> SaveDiffCal::validateInputs() {
@@ -122,7 +122,6 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
 void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
     DataObjects::SpecialWorkspace2D_const_sptr ws) {
-  auto detidCol = m_calibrationWS->getColumn("detid");
   const bool isMask = (name == "use");
 
   // output array defaults to all one (one group, use the pixel)
@@ -161,14 +160,11 @@ void SaveDiffCal::generateDetidToIndex() {
   }
 }
 
-bool SaveDiffCal::tableHasColumn(const std::string ColumnName) const {
+bool SaveDiffCal::tableHasColumn(const std::string &ColumnName) const {
   const std::vector<std::string> names = m_calibrationWS->getColumnNames();
-  for (const auto &name : names) {
-    if (name == ColumnName)
-      return true;
-  }
-
-  return false;
+  return std::any_of(
+      names.cbegin(), names.cend(),
+      [&ColumnName](const auto &name) { return name == ColumnName; });
 }
 
 //----------------------------------------------------------------------------------------------

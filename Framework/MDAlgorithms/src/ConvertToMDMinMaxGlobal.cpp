@@ -56,7 +56,7 @@ void ConvertToMDMinMaxGlobal::init() {
   // histogram needed by ConvertUnits
   ws_valid->add<HistogramValidator>();
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, ws_valid),
       "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
@@ -89,7 +89,7 @@ void ConvertToMDMinMaxGlobal::init() {
                   Direction::InOut);
 
   setPropertySettings("dEAnalysisMode",
-                      make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
   std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
@@ -102,12 +102,12 @@ void ConvertToMDMinMaxGlobal::init() {
       "laboratory or sample frame."
       "  **HKL** - reciprocal lattice units");
 
-  setPropertySettings("Q3DFrames", make_unique<VisibleWhenProperty>(
+  setPropertySettings("Q3DFrames", std::make_unique<VisibleWhenProperty>(
                                        "QDimensions", IS_EQUAL_TO, "Q3D"));
 
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("OtherDimensions",
-                                              Direction::Input),
+      std::make_unique<ArrayProperty<std::string>>("OtherDimensions",
+                                                   Direction::Input),
       "List(comma separated) of additional to **Q** and **DeltaE** variables "
       "which form additional "
       "(orthogonal) to **Q** dimensions in the target workspace (e.g. "
@@ -118,9 +118,9 @@ void ConvertToMDMinMaxGlobal::init() {
       "workspace.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("MinValues", Direction::Output));
+      std::make_unique<ArrayProperty<double>>("MinValues", Direction::Output));
   declareProperty(
-      make_unique<ArrayProperty<double>>("MaxValues", Direction::Output));
+      std::make_unique<ArrayProperty<double>>("MaxValues", Direction::Output));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -189,8 +189,7 @@ void ConvertToMDMinMaxGlobal::exec() {
                                PhysicalConstants::meV * 1e-20 /
                                (PhysicalConstants::h * PhysicalConstants::h);
       if (GeometryMode == "Direct") {
-        double Ei = boost::lexical_cast<double, std::string>(
-            ws->run().getProperty("Ei")->value());
+        const double Ei = ws->run().getPropertyValueAsType<double>("Ei");
         qmax =
             std::sqrt(energyToK * Ei) + std::sqrt(energyToK * (Ei - deltaEmin));
       } else // indirect
@@ -267,9 +266,9 @@ void ConvertToMDMinMaxGlobal::exec() {
       MaxValues.push_back(p->getStatistics().maximum);
     } else // it may be not a time series property but just number property
     {
-      Kernel::PropertyWithValue<double> *p =
+      auto *property =
           dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);
-      if (!p) {
+      if (!property) {
         std::string ERR =
             " Can not interpret property, used as dimension.\n Property: " +
             OtherDimension +
@@ -277,7 +276,7 @@ void ConvertToMDMinMaxGlobal::exec() {
             "a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
-      double val = *p;
+      double val = *property;
       MinValues.push_back(val);
       MaxValues.push_back(val);
     }

@@ -44,29 +44,29 @@ void PeaksOnSurface::init() {
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
-          "Vertex1", std::vector<double>(), manditoryExtents->clone()),
+      std::make_unique<ArrayProperty<double>>("Vertex1", std::vector<double>(),
+                                              manditoryExtents->clone()),
       "A comma separated list of cartesian coordinates for the "
       "lower left vertex of the surface. Values to be specified in "
       "the CoordinateFrame choosen.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
-          "Vertex2", std::vector<double>(), manditoryExtents->clone()),
+      std::make_unique<ArrayProperty<double>>("Vertex2", std::vector<double>(),
+                                              manditoryExtents->clone()),
       "A comma separated list of cartesian coordinates for the "
       "upper left vertex of the surface. Values to be specified in "
       "the CoordinateFrame choosen.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
-          "Vertex3", std::vector<double>(), manditoryExtents->clone()),
+      std::make_unique<ArrayProperty<double>>("Vertex3", std::vector<double>(),
+                                              manditoryExtents->clone()),
       "A comma separated list of cartesian coordinates for the "
       "upper right vertex of the surface. Values to be specified "
       "in the CoordinateFrame choosen.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
-          "Vertex4", std::vector<double>(), std::move(manditoryExtents)),
+      std::make_unique<ArrayProperty<double>>("Vertex4", std::vector<double>(),
+                                              std::move(manditoryExtents)),
       "A comma separated list of cartesian coordinates for the "
       "lower right vertex of the surface. Values to be specified "
       "in the CoordinateFrame choosen.");
@@ -92,13 +92,14 @@ void PeaksOnSurface::validateExtentsInput() const {
   }
 }
 
-bool PeaksOnSurface::pointOutsideAnyExtents(const V3D &) const { return true; }
+bool PeaksOnSurface::pointOutsideAnyExtents(const V3D & /*testPoint*/) const {
+  return true;
+}
 
 bool lineIntersectsSphere(const V3D &line, const V3D &lineStart,
                           const V3D &peakCenter, const double peakRadius) {
   V3D peakToStart = peakCenter - lineStart;
-  V3D unitLine = line;
-  unitLine.normalize();
+  const V3D unitLine = normalize(line);
   double proj = peakToStart.scalar_prod(unitLine); // All we are doing here is
                                                    // projecting the peak to
                                                    // segment start vector onto

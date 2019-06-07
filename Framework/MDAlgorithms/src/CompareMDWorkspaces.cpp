@@ -55,10 +55,10 @@ const std::string CompareMDWorkspaces::category() const {
 /** Initialize the algorithm's properties.
  */
 void CompareMDWorkspaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "Workspace1", "", Direction::Input),
                   "First MDWorkspace to compare.");
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "Workspace2", "", Direction::Input),
                   "Second MDWorkspace to compare.");
 
@@ -70,12 +70,12 @@ void CompareMDWorkspaces::init() {
                   "False, will only look at the box "
                   "structure.");
 
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Equals", false,
+                                                            Direction::Output),
+                  "Boolean set to true if the workspaces match.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("Equals", false, Direction::Output),
-      "Boolean set to true if the workspaces match.");
-  declareProperty(
-      make_unique<PropertyWithValue<std::string>>("Result", "",
-                                                  Direction::Output),
+      std::make_unique<PropertyWithValue<std::string>>("Result", "",
+                                                       Direction::Output),
       "String describing the difference found between the workspaces");
   declareProperty("IgnoreBoxID", false,
                   "To ignore box ID-s when comparing MD "

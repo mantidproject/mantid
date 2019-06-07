@@ -5,14 +5,19 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "isisraw.h"
+#include "MantidKernel/Logger.h"
 #include "byte_rel_comp.h"
 #include "vms_convert.h"
+
 #include <cstdio>
-#include <iostream>
+#include <ostream>
 
 #define SUCCESS 0
 #define FAILURE 1
 
+namespace {
+Mantid::Kernel::Logger logger("isisraw");
+}
 /// stuff
 ISISRAW::ISISRAW() : m_crpt(nullptr), dat1(nullptr) {
   int i, j;
@@ -473,10 +478,11 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
 
     if (u_len < 0 || (add.ad_data < add.ad_user + 2)) {
       // this will/would be used for memory allocation
-      std::cerr << "Error in u_len value read from file, it would be " << u_len
-                << "; where it is calculated as "
-                   "u_len = ad_data - ad_user - 2, where ad_data: "
-                << add.ad_data << ", ad_user: " << add.ad_user << '\n';
+      logger.error() << "Error in u_len value read from file, it would be "
+                     << u_len
+                     << "; where it is calculated as "
+                        "u_len = ad_data - ad_user - 2, where ad_data: "
+                     << add.ad_data << ", ad_user: " << add.ad_user << '\n';
       return 0;
     }
   }
@@ -497,8 +503,8 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
       for (i = 0; i < ndes; i++) {
         int zero = fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
         if (0 != zero)
-          std::cerr << "Failed to seek position in file for index: " << i
-                    << "\n";
+          logger.error() << "Failed to seek position in file for index: " << i
+                         << "\n";
       }
     }
   } else if (dhdr.d_comp == 0) {
@@ -556,16 +562,16 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
         128; // in 512 byte blocks (vms default allocation unit)
     int zero = fgetpos(file, &keep_pos);
     if (!zero) {
-      std::cerr << "Error when getting file position: " << strerror(errno)
-                << '\n';
+      logger.error() << "Error when getting file position: " << strerror(errno)
+                     << '\n';
       return -1;
     }
 
     // update section addresses
     zero = fsetpos(file, &add_pos);
     if (!zero) {
-      std::cerr << "Error when setting file position: " << strerror(errno)
-                << '\n';
+      logger.error() << "Error when setting file position: " << strerror(errno)
+                     << '\n';
       return -1;
     }
 
@@ -573,8 +579,8 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     // update data header and descriptors etc.
     zero = fsetpos(file, &dhdr_pos);
     if (!zero) {
-      std::cerr << "Error when setting file position to header: "
-                << strerror(errno) << '\n';
+      logger.error() << "Error when setting file position to header: "
+                     << strerror(errno) << '\n';
       return -1;
     }
 
@@ -582,8 +588,8 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     ioRAW(file, &ddes, ndes, from_file);
     zero = fsetpos(file, &keep_pos);
     if (!zero) {
-      std::cerr << "Error when restoring file position: " << strerror(errno)
-                << '\n';
+      logger.error() << "Error when restoring file position: "
+                     << strerror(errno) << '\n';
       return -1;
     }
   }
@@ -919,7 +925,7 @@ int ISISRAW::size_check() {
       sizeof(DHDR_STRUCT), 32 * 4, sizeof(DDES_STRUCT), 2 * 4};
   for (unsigned i = 0; i < sizeof(size_check_array) / sizeof(int); i += 2) {
     if (size_check_array[i] != size_check_array[i + 1]) {
-      std::cerr << "size check failed\n";
+      logger.error() << "size check failed\n";
     }
   }
   return 0;

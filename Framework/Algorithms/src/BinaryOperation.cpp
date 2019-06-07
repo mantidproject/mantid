@@ -37,19 +37,19 @@ namespace Algorithms {
  */
 void BinaryOperation::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          inputPropName1(), "", Direction::Input),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(inputPropName1(), "",
+                                                           Direction::Input),
       "The name of the input workspace on the left hand side of the operation");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       inputPropName2(), "", Direction::Input),
                   "The name of the input workspace on the right hand side of "
                   "the operation");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       outputPropName(), "", Direction::Output),
                   "The name to call the output workspace");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("AllowDifferentNumberSpectra", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("AllowDifferentNumberSpectra",
+                                                false, Direction::Input),
       "Are workspaces with different number of spectra allowed? "
       "For example, the LHSWorkspace might have one spectrum per detector, "
       "but the RHSWorkspace could have its spectra averaged per bank. If true, "
@@ -59,8 +59,8 @@ void BinaryOperation::init() {
       "apply the RHS spectrum to the LHS.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("ClearRHSWorkspace", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("ClearRHSWorkspace", false,
+                                                Direction::Input),
       "For EventWorkspaces only. This will clear out event lists "
       "from the RHS workspace as the binary operation is applied. "
       "This can prevent excessive memory use, e.g. when subtracting "
@@ -151,6 +151,9 @@ void BinaryOperation::exec() {
   m_rhs = getProperty(inputPropName2());
   m_AllowDifferentNumberSpectra = getProperty("AllowDifferentNumberSpectra");
 
+  m_lhsBlocksize = m_lhs->blocksize();
+  m_rhsBlocksize = m_rhs->blocksize();
+
   // Special handling for 1-WS and 1/WS.
   if (this->handleSpecialDivideMinus())
     return;
@@ -185,6 +188,7 @@ void BinaryOperation::exec() {
     // Flip the workspaces left and right
     std::swap(m_lhs, m_rhs);
     std::swap(m_elhs, m_erhs);
+    std::swap(m_lhsBlocksize, m_rhsBlocksize);
   }
 
   // Check that the input workspaces are compatible
@@ -246,7 +250,7 @@ void BinaryOperation::exec() {
 
   // Initialise the progress reporting object
   m_progress =
-      make_unique<Progress>(this, 0.0, 1.0, m_lhs->getNumberHistograms());
+      std::make_unique<Progress>(this, 0.0, 1.0, m_lhs->getNumberHistograms());
 
   // There are now 4 possible scenarios, shown schematically here:
   // xxx x   xxx xxx   xxx xxx   xxx x
@@ -264,7 +268,7 @@ void BinaryOperation::exec() {
   }
   // Single column on rhs; if the RHS is an event workspace with one bin, it is
   // treated as a scalar.
-  else if ((m_rhs->blocksize() == 1) && !m_do2D_even_for_SingleColumn_on_rhs) {
+  else if ((m_rhsBlocksize == 1) && !m_do2D_even_for_SingleColumn_on_rhs) {
     doSingleColumn();
   } else // The two are both 2D and should be the same size (except if LHS is an
          // event workspace)
@@ -318,15 +322,15 @@ bool BinaryOperation::checkCompatibility(
   const std::string rhs_unitID = (rhs_unit ? rhs_unit->unitID() : "");
 
   // Check the workspaces have the same units and distribution flag
-  if (lhs_unitID != rhs_unitID && lhs->blocksize() > 1 &&
-      rhs->blocksize() > 1) {
+  if (lhs_unitID != rhs_unitID && m_lhsBlocksize > 1 && m_rhsBlocksize > 1) {
     g_log.error("The two workspace are not compatible because they have "
                 "different units on the X axis.");
     return false;
   }
 
   // Check the size compatibility
-  std::string checkSizeCompatibilityResult = checkSizeCompatibility(lhs, rhs);
+  const std::string checkSizeCompatibilityResult =
+      checkSizeCompatibility(lhs, rhs);
   if (!checkSizeCompatibilityResult.empty()) {
     throw std::invalid_argument(checkSizeCompatibilityResult);
   }
@@ -383,7 +387,7 @@ std::string BinaryOperation::checkSizeCompatibility(
   }
   // Otherwise they must match both ways, or horizontally or vertically with the
   // other rhs dimension=1
-  if (rhs->blocksize() == 1 &&
+  if (m_rhsBlocksize == 1 &&
       lhs->getNumberHistograms() == rhs->getNumberHistograms())
     return "";
   // Past this point, we require the X arrays to match. Note this only checks
@@ -395,7 +399,7 @@ std::string BinaryOperation::checkSizeCompatibility(
 
   const size_t rhsSpec = rhs->getNumberHistograms();
 
-  if (lhs->blocksize() == rhs->blocksize()) {
+  if (m_lhsBlocksize == m_rhsBlocksize) {
     if (rhsSpec == 1 || lhs->getNumberHistograms() == rhsSpec) {
       return "";
     } else {

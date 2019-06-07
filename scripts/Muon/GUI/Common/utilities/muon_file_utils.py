@@ -7,8 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-
-allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
+from qtpy import PYQT4, QtWidgets
+allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS"]
 allowed_extensions = ["nxs"]
 FILE_SEP = os.sep
 
@@ -26,8 +26,6 @@ def get_instrument_directory(instrument):
     """
     if instrument in allowed_instruments:
         instrument_directory = instrument
-        if instrument == "CHRONUS":
-            instrument_directory = "NDW1030"
         return instrument_directory
     else:
         raise RuntimeError('Instrument {} not in list of allowed instruments'.format(instrument))
@@ -117,3 +115,24 @@ def parse_user_input_to_files(input_text, extensions=allowed_extensions):
         if os.path.splitext(text)[-1].lower() in ["." + ext for ext in extensions]:
             filenames += [text]
     return filenames
+
+
+def show_file_browser_and_return_selection(
+        parent, file_filter, search_directories, multiple_files=False):
+    default_directory = search_directories[0]
+    if multiple_files:
+        if PYQT4:
+            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(
+                parent, "Select files", default_directory, file_filter)
+        else:
+            chosen_files, _filter = QtWidgets.QFileDialog.getOpenFileNames(
+                parent, "Select files", default_directory, file_filter)
+        return [str(chosen_file) for chosen_file in chosen_files]
+    else:
+        if PYQT4:
+            chosen_file = QtWidgets.QFileDialog.getOpenFileName(
+                parent, "Select file", default_directory, file_filter)
+        else:
+            chosen_file, _filter = QtWidgets.QFileDialog.getOpenFileName(
+                parent, "Select file", default_directory, file_filter)
+        return [str(chosen_file)]

@@ -258,8 +258,8 @@ public:
     TS_ASSERT(!ptrDet4->isValid(V3D(-0.02, 0.0, 0.0) + ptrDet4->getPos()));
     TS_ASSERT(!ptrDet4->isValid(V3D(0.0, 0.02, 0.0) + ptrDet4->getPos()));
     TS_ASSERT(!ptrDet4->isValid(V3D(0.0, -0.02, 0.0) + ptrDet4->getPos()));
-    TS_ASSERT(!ptrDet4->isValid(V3D(0.0, 0.0, 0.02) + ptrDet4->getPos()));
-    TS_ASSERT(ptrDet4->isValid(V3D(0.0, 0.0, -0.02) + ptrDet4->getPos()));
+    TS_ASSERT(ptrDet4->isValid(V3D(0.0, 0.0, 0.02) + ptrDet4->getPos()));
+    TS_ASSERT(!ptrDet4->isValid(V3D(0.0, 0.0, -0.02) + ptrDet4->getPos()));
 
     // test of facing as a sub-element of location
     boost::shared_ptr<const IDetector> ptrDet5 = i->getDetector(5);
@@ -995,12 +995,12 @@ public:
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
 
     locations = R"(<locations n-elements="-1" t="0.0" t-end="180.0" />)";
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
   }
 
   void testLocationsNotANumber() {
@@ -1030,7 +1030,7 @@ public:
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
   }
 };
 

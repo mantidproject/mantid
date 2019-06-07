@@ -74,11 +74,11 @@ FilterEvents::FilterEvents()
 /** Declare Inputs
  */
 void FilterEvents::init() {
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "SplitterWorkspace", "", Direction::Input),
                   "An input SpilltersWorskpace for filtering");
 
@@ -88,13 +88,13 @@ void FilterEvents::init() {
                   "splitter.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional output for the information of each splitter "
       "workspace index.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputTOFCorrectionWorkspace", "TOFCorrectWS", Direction::Output),
       "Name of output workspace for TOF correction factor. ");
 
@@ -120,13 +120,13 @@ void FilterEvents::init() {
                   "Type of correction on neutron events to sample time from "
                   "detector time. ");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "DetectorTOFCorrectionWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of table workspace containing the log "
                   "time correction factor for each detector. ");
   setPropertySettings("DetectorTOFCorrectionWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -134,7 +134,7 @@ void FilterEvents::init() {
   declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
                   "Value of incident energy (Ei) in meV in direct mode.");
   setPropertySettings("IncidentEnergy",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
   // Algorithm to spectra without detectors
@@ -155,7 +155,7 @@ void FilterEvents::init() {
   declareProperty("DBSpectrum", EMPTY_INT(),
                   "Spectrum (workspace index) for debug purpose. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<string>>(
+  declareProperty(std::make_unique<ArrayProperty<string>>(
                       "OutputWorkspaceNames", Direction::Output),
                   "List of output workspaces names");
 
@@ -170,7 +170,7 @@ void FilterEvents::init() {
       "Start time for splitters that can be parsed to DateAndTime.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>("TimeSeriesPropertyLogs"),
+      std::make_unique<ArrayProperty<std::string>>("TimeSeriesPropertyLogs"),
       "List of name of sample logs of TimeSeriesProperty format. "
       "They will be either excluded from splitting if ExcludedSpecifiedLogs is "
       "specified as True. Or "
@@ -277,7 +277,9 @@ void FilterEvents::exec() {
   std::vector<Kernel::TimeSeriesProperty<int> *> int_tsp_vector;
   std::vector<Kernel::TimeSeriesProperty<double> *> dbl_tsp_vector;
   std::vector<Kernel::TimeSeriesProperty<bool> *> bool_tsp_vector;
-  copyNoneSplitLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector);
+  std::vector<Kernel::TimeSeriesProperty<string> *> string_tsp_vector;
+  copyNoneSplitLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector,
+                    string_tsp_vector);
 
   // Optionall import corrections
   m_progress = 0.20;
@@ -293,6 +295,7 @@ void FilterEvents::exec() {
   else
     progressamount = 0.7;
 
+  // add a new 'split' tsp to output workspace
   std::vector<Kernel::TimeSeriesProperty<int> *> split_tsp_vector;
   if (m_useSplittersWorkspace) {
     filterEventsBySplitters(progressamount);
@@ -301,12 +304,12 @@ void FilterEvents::exec() {
     filterEventsByVectorSplitters(progressamount);
     generateSplitterTSP(split_tsp_vector);
   }
-
   // assign split_tsp_vector to all the output workspaces!
   mapSplitterTSPtoWorkspaces(split_tsp_vector);
 
   // split times series property: new way to split events
-  splitTimeSeriesLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector);
+  splitTimeSeriesLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector,
+                      string_tsp_vector);
 
   // Optional to group detector
   groupOutputWorkspace();
@@ -385,11 +388,8 @@ void FilterEvents::examineAndSortEventWS() {
   } // END-IF-ELSE
 
   // sort events
-  DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
-  if (m_filterByPulseTime)
-    sortType = DataObjects::PULSETIME_SORT;
-  else
-    sortType = DataObjects::PULSETIMETOF_SORT;
+  const auto sortType = m_filterByPulseTime ? DataObjects::PULSETIME_SORT
+                                            : DataObjects::PULSETIMETOF_SORT;
 
   // This runs the SortEvents algorithm in parallel
   m_eventWS->sortAll(sortType, nullptr);
@@ -545,10 +545,12 @@ void FilterEvents::groupOutputWorkspace() {
   }
 
   // set the group workspace as output workspace
-  declareProperty(
-      make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "OutputWorkspace", groupname, Direction::Output),
-      "Name of the workspace to be created as the output of grouping ");
+  if (!this->existsProperty("OutputWorkspace")) {
+    declareProperty(
+        std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+            "OutputWorkspace", groupname, Direction::Output),
+        "Name of the workspace to be created as the output of grouping ");
+  }
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   API::WorkspaceGroup_sptr workspace_group =
@@ -572,11 +574,13 @@ void FilterEvents::groupOutputWorkspace() {
  * @param int_tsp_name_vector :: output
  * @param dbl_tsp_name_vector :: output
  * @param bool_tsp_name_vector :: output
+ * @param string_tsp_vector :: output
  */
 void FilterEvents::copyNoneSplitLogs(
     std::vector<TimeSeriesProperty<int> *> &int_tsp_name_vector,
     std::vector<TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
-    std::vector<TimeSeriesProperty<bool> *> &bool_tsp_name_vector) {
+    std::vector<TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
+    std::vector<Kernel::TimeSeriesProperty<string> *> &string_tsp_vector) {
   // get the user input information
   bool exclude_listed_logs = getProperty("ExcludeSpecifiedLogs");
   std::vector<std::string> tsp_logs = getProperty("TimeSeriesPropertyLogs");
@@ -601,9 +605,11 @@ void FilterEvents::copyNoneSplitLogs(
         dynamic_cast<TimeSeriesProperty<int> *>(prop_i);
     TimeSeriesProperty<bool> *bool_prop =
         dynamic_cast<TimeSeriesProperty<bool> *>(prop_i);
+    TimeSeriesProperty<string> *string_prop =
+        dynamic_cast<TimeSeriesProperty<string> *>(prop_i);
 
     // check for time series properties
-    if (dbl_prop || int_prop || bool_prop) {
+    if (dbl_prop || int_prop || bool_prop || string_prop) {
       // check whether the log is there
       set_iter = tsp_logs_set.find(name_i);
       if (exclude_listed_logs && set_iter != tsp_logs_set.end()) {
@@ -630,6 +636,9 @@ void FilterEvents::copyNoneSplitLogs(
         // is integer time series property
         bool_tsp_name_vector.push_back(bool_prop);
         continue;
+      } else if (string_prop) {
+        // is string time series property
+        string_tsp_vector.push_back(string_prop);
       }
 
     } else {
@@ -658,14 +667,16 @@ void FilterEvents::copyNoneSplitLogs(
 //----------------------------------------------------------------------------------------------
 /** Split ALL the TimeSeriesProperty sample logs to all the output workspace
  * @brief FilterEvents::splitTimeSeriesLogs
- * @param int_tsp_vector
- * @param dbl_tsp_vector
- * @param bool_tsp_vector
+ * @param int_tsp_vector :: vector of itneger tps
+ * @param dbl_tsp_vector :: vector of double tsp
+ * @param bool_tsp_vector :: vector of boolean tsp
+ * @param string_tsp_vector :: vector of string tsp
  */
 void FilterEvents::splitTimeSeriesLogs(
     const std::vector<TimeSeriesProperty<int> *> &int_tsp_vector,
     const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
-    const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector) {
+    const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector,
+    const std::vector<TimeSeriesProperty<string> *> &string_tsp_vector) {
   // get split times by converting vector of int64 to Time
   std::vector<Types::Core::DateAndTime> split_datetime_vec;
 
@@ -709,6 +720,11 @@ void FilterEvents::splitTimeSeriesLogs(
   // deal with bool time series property
   for (const auto &bool_tsp : bool_tsp_vector) {
     splitTimeSeriesProperty(bool_tsp, split_datetime_vec, max_target_index);
+  }
+
+  // deal with string time series property
+  for (const auto &string_tsp : string_tsp_vector) {
+    splitTimeSeriesProperty(string_tsp, split_datetime_vec, max_target_index);
   }
 
   // integrate proton charge
@@ -1099,13 +1115,13 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Determine the minimum group index number
   int minwsgroup = INT_MAX;
-  for (auto wsgroup : m_targetWorkspaceIndexSet) {
+  for (const auto wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < minwsgroup && wsgroup >= 0)
       minwsgroup = wsgroup;
   }
   g_log.debug() << "Min WS Group = " << minwsgroup << "\n";
 
-  bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
+  const bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
   int delta_wsindex = 0;
   if (from1) {
     delta_wsindex = 1 - minwsgroup;
@@ -1171,11 +1187,13 @@ void FilterEvents::createOutputWorkspaces() {
 
       // create these output properties
       if (!this->m_toGroupWS) {
-        declareProperty(
-            Kernel::make_unique<
-                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                propertynamess.str(), wsname.str(), Direction::Output),
-            "Output");
+        if (!this->existsProperty(propertynamess.str())) {
+          declareProperty(
+              std::make_unique<
+                  API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                  propertynamess.str(), wsname.str(), Direction::Output),
+              "Output");
+        }
         setProperty(propertynamess.str(), optws);
       }
 
@@ -1264,11 +1282,13 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // Set (property) to output workspace and set to ADS
     if (m_toGroupWS) {
-      declareProperty(
-          Kernel::make_unique<
-              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-              propertynamess.str(), wsname.str(), Direction::Output),
-          "Output");
+      if (!this->existsProperty(propertynamess.str())) {
+        declareProperty(
+            std::make_unique<
+                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                propertynamess.str(), wsname.str(), Direction::Output),
+            "Output");
+      }
       setProperty(propertynamess.str(), optws);
 
       g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
@@ -1355,11 +1375,13 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
       } else {
         propertynamess << "OutputWorkspace_" << wsgroup;
       }
-      declareProperty(
-          Kernel::make_unique<
-              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-              propertynamess.str(), wsname.str(), Direction::Output),
-          "Output");
+      if (!this->existsProperty(propertynamess.str())) {
+        declareProperty(
+            std::make_unique<
+                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                propertynamess.str(), wsname.str(), Direction::Output),
+            "Output");
+      }
       setProperty(propertynamess.str(), optws);
 
       g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
@@ -1478,7 +1500,6 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   else if (colnames[0] == "Spectrum")
     usedetid = false;
   else {
-    usedetid = false;
     stringstream errss;
     errss << "First column must be either DetectorID or Spectrum. "
           << colnames[0] << " is not supported. ";

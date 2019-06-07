@@ -234,7 +234,7 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         # Set the output workspaces
         # --------------------------------------------------------------------------------------------------------------
         # Set sample logs
-        # Todo: Set sample log -> Userfile and unfitted transmission workspace. Should probably set on
+        # Todo: Set sample log -> unfitted transmission workspace. Should probably set on
         # higher level (SANSBatch)
         # Set the output workspaces
         self.set_output_workspaces(reduction_mode_vs_output_workspaces)
@@ -249,9 +249,8 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         if save_can:
             self.set_can_and_sam_on_output(output_bundles)
 
-        if state.adjustment.show_transmission:
-            self.set_transmission_workspaces_on_output(output_transmission_bundles,
-                                                       state.adjustment.calculate_transmission.fit)
+        self.set_transmission_workspaces_on_output(output_transmission_bundles,
+                                                   state.adjustment.calculate_transmission.fit)
 
     def validateInputs(self):
         errors = dict()

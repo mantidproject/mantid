@@ -4,20 +4,26 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtGui, QtCore, QtWidgets
-from qtpy.QtCore import Signal
+from __future__ import (absolute_import, print_function)
 
-try:
-    from ErrorReporter import resources_qt5 # noqa
-except ImportError:
-    from ErrorReporter import resources_qt4 # noqa
+import qtpy  # noqa
 
-from mantidqt.utils.qt import load_ui
+if qtpy.PYQT5:
+    from ErrorReporter import resources_qt5  # noqa
+elif qtpy.PYQT4:
+    from ErrorReporter import resources_qt4  # noqa
+else:
+    raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))
 
-ErrorReportUI, ErrorReportUIBase = load_ui(__file__, 'errorreport.ui')
+from qtpy import QtCore, QtGui, QtWidgets # noqa: E402
+from qtpy.QtCore import Signal # noqa: E402
+from qtpy.QtWidgets import QMessageBox # noqa: E402
+from mantidqt.utils.qt import load_ui # noqa: E402
+
+ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
 
-class CrashReportPage(QtWidgets.QWidget, ErrorReportUI):
+class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     action = Signal(bool, int, str, str, str)
     quit_signal = Signal()
 
@@ -41,10 +47,10 @@ class CrashReportPage(QtWidgets.QWidget, ErrorReportUI):
         self.input_free_text.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
 
-#  The options on what to do after closing the window (exit/continue)
-        self.radioButtonContinue.setChecked(True)     # Set continue to be checked by default
+        #  The options on what to do after closing the window (exit/continue)
+        self.radioButtonContinue.setChecked(True)  # Set continue to be checked by default
 
-#  These are the options along the bottom
+        #  These are the options along the bottom
         self.fullShareButton.clicked.connect(self.fullShare)
         self.nonIDShareButton.clicked.connect(self.nonIDShare)
         self.noShareButton.clicked.connect(self.noShare)
@@ -52,7 +58,7 @@ class CrashReportPage(QtWidgets.QWidget, ErrorReportUI):
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
-    def quit (self):
+    def quit(self):
         self.quit_signal.emit()
 
     def fullShare(self):
@@ -88,18 +94,14 @@ class CrashReportPage(QtWidgets.QWidget, ErrorReportUI):
             self.nonIDShareButton.setEnabled(False)
 
     def display_message_box(self, title, message, details):
-        msg = QtGui.QMessageBox(self)
-        msg.setIcon(QtGui.QMessageBox.Warning)
-
-        message_length = len(message)
-
-        # This is to ensure that the QMessage box is wide enough to display nicely.
-        msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText(message)
         msg.setWindowTitle(title)
         msg.setDetailedText(details)
-        msg.setStandardButtons(QtGui.QMessageBox.Ok)
-        msg.setDefaultButton(QtGui.QMessageBox.Ok)
-        msg.setEscapeButton(QtGui.QMessageBox.Ok)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setDefaultButton(QMessageBox.Ok)
+        msg.setEscapeButton(QMessageBox.Ok)
         msg.exec_()
 
     def set_report_callback(self, callback):

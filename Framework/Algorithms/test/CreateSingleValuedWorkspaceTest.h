@@ -26,7 +26,7 @@ public:
 
     // First with no Error
     // Running algorithm here should throw
-    TS_ASSERT_THROWS(algNoErr.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algNoErr.execute(), const std::runtime_error &);
 
     // Set some properties
     std::string outputSpace("NoError");
@@ -66,7 +66,7 @@ public:
 
     // First with no Error
     // Running algorithm here should throw
-    TS_ASSERT_THROWS(algWithErr.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algWithErr.execute(), const std::runtime_error &);
 
     // Set some properties
     std::string outputSpace("WithError");

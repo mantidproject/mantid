@@ -85,7 +85,7 @@ import platform
 from six import with_metaclass
 
 
-def currentOSHasGSLv2():
+def current_OS_has_GSLv2():
     """ Check whether the current OS should be running GSLv2 """
     return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''
 
@@ -227,6 +227,19 @@ class TOSCAReduction(ISISIndirectInelasticReduction):
         return ["II.TOSCAReductionFromFile.nxs"]
 
 
+class TOSCASimpleReductionUsingOldRunNumber(ISISIndirectInelasticReduction):
+
+    def __init__(self):
+        ISISIndirectInelasticReduction.__init__(self)
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC04970.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+
+    def get_reference_files(self):
+        return ["II.TOSCAReductionOfOldRunNumber.nxs"]
+
+
 class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
 
     def __init__(self):
@@ -248,12 +261,44 @@ class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
         self.detector_range = [1, 140]
-        self.data_files = ['TSC15352.raw', 'TSC15353.raw','TSC15354.raw']
+        self.data_files = ['TSC15352.raw', 'TSC15353.raw', 'TSC15354.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
         self.sum_files = True
 
     def get_reference_files(self):
         return ['II.TOSCAMultiFileSummedReduction.nxs']
+
+
+class TOSCAMultiFileSummedReductionWithDifferentMaskedDetectors(ISISIndirectInelasticReduction):
+    """
+    This test was created in response to the bug in issue #25072.
+    """
+    def __init__(self):
+        ISISIndirectInelasticReduction.__init__(self)
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC22841.raw', 'TSC22842.raw', 'TSC22843.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+        self.sum_files = True
+
+    def get_reference_files(self):
+        return ['II.TOSCAMultiFileSummedReduction2.nxs']
+
+
+class TOSCAMultiFileReductionWithDifferentMaskedDetectors(ISISIndirectInelasticReduction):
+    """
+    This test was created in response to the bug in issue #25061.
+    """
+    def __init__(self):
+        ISISIndirectInelasticReduction.__init__(self)
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC22797.raw', 'TSC22798.raw', 'TSC22799.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+        self.sum_files = False
+
+    def get_reference_files(self):
+        return ['II.TOSCAMultiFileReduction22797.nxs', 'II.TOSCAMultiFileReduction22798.nxs', 'II.TOSCAMultiFileReduction22799.nxs']
 
 #------------------------- OSIRIS tests ---------------------------------------
 
@@ -830,9 +875,14 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.118877
 
     def get_reference_files(self):
+        # gsl v2 gives a slightly different result than v1 for II.OSIRISFuryFitSeq
         self.tolerance = 1e-3
-        return ['II.OSIRISFury.nxs',
-                'II.OSIRISFuryFitSeq.nxs']
+        reference_files = ['II.OSIRISFury.nxs']
+        if current_OS_has_GSLv2():
+            reference_files += ['II.OSIRISFuryFitSeq_gslv2.nxs']
+        else:
+            reference_files += ['II.OSIRISFuryFitSeq.nxs']
+        return reference_files
 
 #------------------------- IRIS tests -----------------------------------------
 
@@ -858,15 +908,14 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.169171
 
     def get_reference_files(self):
-        self.tolerance = 1e-3
-        ref_files = ['II.IRISFury.nxs']
-        # gsl v2 gives a slightly different result than v1
-        # we could do with a better check than this
-        if currentOSHasGSLv2():
-            ref_files += ['II.IRISFuryFitSeq_gslv2.nxs']
+        # gsl v2 gives a slightly different result than v1 for II.IRISFuryFitSeq
+        self.tolerance = 1e-1
+        reference_files = ['II.IRISFury.nxs']
+        if current_OS_has_GSLv2():
+            reference_files += ['II.IRISFuryFitSeq_gslv2.nxs']
         else:
-            ref_files += ['II.IRISFuryFitSeq_gslv1.nxs']
-        return ref_files
+            reference_files += ['II.IRISFuryFitSeq.nxs']
+        return reference_files
 
 #==============================================================================
 
@@ -1068,7 +1117,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
 
     def get_reference_files(self):
         self.tolerance = 0.3
-        return ['II.OSIRISConvFitSeq.nxs']
+        # gsl v2 gives a slightly different result than v1
+        return ['II.OSIRISConvFitSeq_gslv2.nxs'] if current_OS_has_GSLv2() else ['II.OSIRISConvFitSeq.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
 
@@ -1095,7 +1145,8 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
 
     def get_reference_files(self):
         self.tolerance = 0.2
-        return ['II.IRISConvFitSeq.nxs']
+        # gsl v2 gives a slightly different result than v1
+        return ['II.IRISConvFitSeq_gslv2.nxs'] if current_OS_has_GSLv2() else ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================
 # Transmission Monitor Test

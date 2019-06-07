@@ -10,7 +10,6 @@
 #include "MantidAPI/SingleCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -160,11 +159,9 @@ bool MonIDPropChanger::monitorIdReader(
 
 bool spectrumDefinitionsMatchTimeIndex(const SpectrumDefinition &specDef,
                                        const size_t timeIndex) {
-
-  for (const auto &spec : specDef)
-    if (spec.second != timeIndex)
-      return false;
-  return true;
+  return std::none_of(
+      specDef.cbegin(), specDef.cend(),
+      [timeIndex](const auto &spec) { return spec.second != timeIndex; });
 }
 
 // Register with the algorithm factory
@@ -186,12 +183,12 @@ void NormaliseToMonitor::init() {
   validator->add<RawCountValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       validator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, validator),
       "Name of the input workspace. Must be a non-distribution histogram.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name to use for the output workspace");
   // should be any spectrum number, but named this property MonitorSpectrum to
   // keep compatibility with previous scripts
@@ -214,18 +211,18 @@ void NormaliseToMonitor::init() {
       "to empty data and the field then can accepts any MonitorID "
       "within the InputWorkspace.");
   // set up the validator, which would verify if spectrum is correct
-  setPropertySettings("MonitorID", Kernel::make_unique<MonIDPropChanger>(
+  setPropertySettings("MonitorID", std::make_unique<MonIDPropChanger>(
                                        "InputWorkspace", "MonitorSpectrum",
                                        "MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("MonitorWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional, validator),
-      "A workspace containing one or more spectra to normalize the "
-      "InputWorkspace by.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "MonitorWorkspace", "", Direction::Input,
+                      PropertyMode::Optional, validator),
+                  "A workspace containing one or more spectra to normalize the "
+                  "InputWorkspace by.");
   setPropertySettings("MonitorWorkspace",
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "MonitorSpectrum", IS_DEFAULT));
 
   declareProperty("MonitorWorkspaceIndex", 0,
@@ -238,7 +235,7 @@ void NormaliseToMonitor::init() {
                   "will be normalized by first spectra (with index 0)",
                   Direction::InOut);
   setPropertySettings("MonitorWorkspaceIndex",
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "MonitorSpectrum", IS_DEFAULT));
 
   // If users set either of these optional properties two things happen
@@ -257,8 +254,8 @@ void NormaliseToMonitor::init() {
       "end of the integration range are also included");
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("NormFactorWS", "", Direction::Output,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "NormFactorWS", "", Direction::Output, PropertyMode::Optional),
       "Name of the workspace, containing the normalization factor.\n"
       "If this name is empty, normalization workspace is not returned. If the "
       "name coincides with the output workspace name, _normFactor suffix is "
@@ -417,7 +414,7 @@ void NormaliseToMonitor::checkProperties(
   }
 
   // Do a check for common binning and store
-  m_commonBins = WorkspaceHelpers::commonBoundaries(*inputWorkspace);
+  m_commonBins = inputWorkspace->isCommonBins();
 
   // Check the monitor spectrum or workspace and extract into new workspace
   m_monitor = sepWS ? getMonitorWorkspace(inputWorkspace)
@@ -697,6 +694,7 @@ void NormaliseToMonitor::normaliseBinByBin(
   const auto &inputSpecInfo = inputWorkspace->spectrumInfo();
   const auto &monitorSpecInfo = m_monitor->spectrumInfo();
 
+  const auto specLength = inputWorkspace->blocksize();
   for (auto &workspaceIndex : m_workspaceIndexes) {
     // Get hold of the monitor spectrum
     const auto &monX = m_monitor->binEdges(workspaceIndex);
@@ -711,7 +709,6 @@ void NormaliseToMonitor::normaliseBinByBin(
       this->normalisationFactor(monX, monY, monE);
 
     const size_t numHists = inputWorkspace->getNumberHistograms();
-    auto specLength = inputWorkspace->blocksize();
     // Flag set when a division by 0 is found
     bool hasZeroDivision = false;
     Progress prog(this, 0.0, 1.0, numHists);

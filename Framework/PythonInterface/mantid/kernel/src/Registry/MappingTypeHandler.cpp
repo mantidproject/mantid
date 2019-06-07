@@ -49,11 +49,11 @@ void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
  */
 std::unique_ptr<Kernel::Property>
 MappingTypeHandler::create(const std::string &name, const object &defaultValue,
-                           const boost::python::api::object &,
+                           const boost::python::api::object & /*validator*/,
                            const unsigned int direction) const {
   // Wrap the property manager in a PropertyManagerProperty instance.
   std::unique_ptr<Kernel::Property> valueProp =
-      Kernel::make_unique<Kernel::PropertyManagerProperty>(
+      std::make_unique<Kernel::PropertyManagerProperty>(
           name, createPropertyManager(dict(defaultValue)), direction);
   return valueProp;
 }

@@ -15,7 +15,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+
 #include <cxxtest/TestSuite.h>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -34,7 +36,9 @@ public:
     return "getDefault() is not implemented in this class";
   }
   std::string value() const override { return "Nothing"; }
+  Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &) override { return ""; }
+  std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
   std::string setDataItem(const boost::shared_ptr<DataItem>) override {
     return "";
@@ -85,7 +89,7 @@ public:
     TS_ASSERT(!pp->name().compare("Test"));
     TS_ASSERT(dynamic_cast<ConcreteProperty *>(pp));
     TS_ASSERT_THROWS(pp = runInfo.getProperty("NotThere"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
 
     std::vector<Property *> props = runInfo.getProperties();
     TS_ASSERT(!props.empty());
@@ -156,7 +160,7 @@ public:
   void test_GetTimeSeriesProperty_Throws_When_Log_Does_Not_Exist() {
     Run runInfo;
     TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>("not_a_log"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void
@@ -166,13 +170,13 @@ public:
     runInfo.addProperty(name, 5.6); // Standard double property
 
     TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_GetPropertyAsType_Throws_When_Property_Does_Not_Exist() {
     Run runInfo;
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<double>("not_a_log"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void test_GetPropertyAsType_Returns_Expected_Value_When_Type_Is_Correct() {
@@ -192,7 +196,7 @@ public:
     runInfo.addProperty("double_prop", 6.7); // Standard double property
 
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -202,7 +206,7 @@ public:
     runInfo.addProperty<std::string>(name, "string"); // Adds a string property
 
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_GetPropertyAsSingleValue_Does_Not_Throw_If_Type_Is_Int() {
@@ -278,10 +282,10 @@ public:
 
     std::vector<double> bins;
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     bins.push_back(0.5);
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     bins.push_back(1.5);
     TS_ASSERT_THROWS_NOTHING(runInfo.storeHistogramBinBoundaries(bins));
   }
@@ -292,27 +296,27 @@ public:
     std::vector<double> bins(2, 0.0);
 
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
-                     std::out_of_range);
+                     const std::out_of_range &);
 
     bins[0] = -1.5;
     bins[1] = -1.5;
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
-                     std::out_of_range);
+                     const std::out_of_range &);
 
     bins[0] = 2.1;
     bins[1] = 2.1;
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
-                     std::out_of_range);
+                     const std::out_of_range &);
 
     bins[0] = -1.5;
     bins[1] = -1.6;
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
-                     std::out_of_range);
+                     const std::out_of_range &);
 
     bins[0] = 2.1;
     bins[1] = 1.9;
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
-                     std::out_of_range);
+                     const std::out_of_range &);
   }
 
   void test_storeHistogramBinBoundaries_Succeeds_With_Valid_Bins() {
@@ -327,7 +331,8 @@ public:
   void test_histogramBinBoundaries_Throws_RuntimeError_For_New_Run() {
     Run runInfo;
 
-    TS_ASSERT_THROWS(runInfo.histogramBinBoundaries(1.5), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.histogramBinBoundaries(1.5),
+                     const std::runtime_error &);
   }
 
   void
@@ -338,10 +343,10 @@ public:
 
     TS_ASSERT_THROWS(
         runInfo.histogramBinBoundaries(m_test_energy_bins.front() - 1.3),
-        std::out_of_range);
+        const std::out_of_range &);
     TS_ASSERT_THROWS(
         runInfo.histogramBinBoundaries(m_test_energy_bins.back() + 1.3),
-        std::out_of_range);
+        const std::out_of_range &);
   }
 
   void
@@ -466,7 +471,8 @@ public:
     Goniometer gm;
     gm.makeUniversalGoniometer();
 
-    TS_ASSERT_THROWS(runInfo.setGoniometer(gm, true), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.setGoniometer(gm, true),
+                     const std::runtime_error &);
   }
 
   /** Setting up a goniometer and the angles to feed it

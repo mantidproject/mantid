@@ -123,7 +123,7 @@ void Multiply::checkRequirements() {
   m_flipSides = (m_rhs->size() > m_lhs->size());
 
   // Both are vertical columns with one bin?
-  if ((m_rhs->blocksize() == 1) && (m_lhs->blocksize() == 1)) {
+  if ((m_rhsBlocksize == 1) && (m_lhsBlocksize == 1)) {
     // Flip it if the RHS is event and you could keep events
     if (m_erhs && !m_elhs)
       m_flipSides = true;
@@ -177,7 +177,7 @@ std::string Multiply::checkSizeCompatibility(
     // RHS only has one value (1D vertical), so the number of histograms needs
     // to match.
     // Each lhs spectrum will be divided by that scalar
-    if (rhs->blocksize() == 1 &&
+    if (m_rhsBlocksize == 1 &&
         lhs->getNumberHistograms() == rhs->getNumberHistograms())
       return "";
 

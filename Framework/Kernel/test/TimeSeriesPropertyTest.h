@@ -11,13 +11,14 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <json/value.h>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -81,10 +82,22 @@ public:
     TS_ASSERT_EQUALS(sProp->isValid(), "");
   }
 
-  void test_SetValue() {
-    TS_ASSERT_THROWS(iProp->setValue("1"), Exception::NotImplementedError);
-    TS_ASSERT_THROWS(dProp->setValue("5.5"), Exception::NotImplementedError);
-    TS_ASSERT_THROWS(sProp->setValue("aValue"), Exception::NotImplementedError);
+  void test_SetValueFromString() {
+    TS_ASSERT_THROWS(iProp->setValue("1"),
+                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(dProp->setValue("5.5"),
+                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->setValue("aValue"),
+                     const Exception::NotImplementedError &);
+  }
+
+  void test_SetValueFromJson() {
+    TS_ASSERT_THROWS(iProp->setValueFromJson(Json::Value(1)),
+                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(dProp->setValueFromJson(Json::Value(5.5)),
+                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->setValueFromJson(Json::Value("aValue")),
+                     const Exception::NotImplementedError &);
   }
 
   void test_AddValue() {
@@ -147,12 +160,12 @@ public:
     TS_ASSERT_EQUALS(derValues[2], 1);
 
     TSM_ASSERT_THROWS("derivative undefined for string property",
-                      sProp->getDerivative(), std::runtime_error);
+                      sProp->getDerivative(), const std::runtime_error &);
 
     iProp->addValue("2007-11-30T16:17:10", 10);
     TSM_ASSERT_THROWS(
         "derivative undefined for property with less then 2 values",
-        iProp->getDerivative(), std::runtime_error);
+        iProp->getDerivative(), const std::runtime_error &);
     iProp->addValue("2007-11-30T16:17:12", 12);
 
     derProp = iProp->getDerivative();
@@ -461,7 +474,7 @@ public:
 
     // Check throws if min > max
     TS_ASSERT_THROWS(log->makeFilterByValue(splitter, 2.0, 1.0, 0.0, true),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     delete log;
   }
@@ -470,7 +483,7 @@ public:
     TimeSeriesProperty<std::string> log("StringTSP");
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(log.makeFilterByValue(splitter, 0.0, 0.0, 0.0, true),
-                     Exception::NotImplementedError);
+                     const Exception::NotImplementedError &);
   }
 
   void test_expandFilterToRange() {
@@ -533,7 +546,7 @@ public:
 
     // Check throws if min > max
     TS_ASSERT_THROWS(log.expandFilterToRange(splitter, 2.0, 1.0, interval),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // Test good at both ends, but interval narrower than log range
     TimeInterval narrowinterval(DateAndTime("2007-11-30T16:17:15"),
@@ -552,7 +565,7 @@ public:
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(
         log.expandFilterToRange(splitter, 0.0, 0.0, TimeInterval()),
-        Exception::NotImplementedError);
+        const Exception::NotImplementedError &);
   }
 
   void test_averageValueInFilter() {
@@ -633,9 +646,9 @@ public:
   void test_averageValueInFilter_throws_for_string_property() {
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter),
-                     Exception::NotImplementedError);
+                     const Exception::NotImplementedError &);
     TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter),
-                     Exception::NotImplementedError);
+                     const Exception::NotImplementedError &);
   }
 
   //----------------------------------------------------------------------------
@@ -1144,9 +1157,9 @@ public:
     const TimeSeriesProperty<int> empty("Empty");
 
     DateAndTime time("2013-01-30T16:17:23");
-    TS_ASSERT_THROWS(empty.getSingleValue(time), std::runtime_error);
+    TS_ASSERT_THROWS(empty.getSingleValue(time), const std::runtime_error &);
     int i;
-    TS_ASSERT_THROWS(empty.getSingleValue(time, i), std::runtime_error);
+    TS_ASSERT_THROWS(empty.getSingleValue(time, i), const std::runtime_error &);
   }
 
   void test_firstLastTimeValue() {
@@ -1175,10 +1188,10 @@ public:
   void test_firstLastTimeValue_emptyPropertyThrows() {
     const TimeSeriesProperty<int> empty("Empty");
 
-    TS_ASSERT_THROWS(empty.firstTime(), std::runtime_error);
-    TS_ASSERT_THROWS(empty.lastTime(), std::runtime_error);
-    TS_ASSERT_THROWS(empty.firstValue(), std::runtime_error);
-    TS_ASSERT_THROWS(empty.lastValue(), std::runtime_error);
+    TS_ASSERT_THROWS(empty.firstTime(), const std::runtime_error &);
+    TS_ASSERT_THROWS(empty.lastTime(), const std::runtime_error &);
+    TS_ASSERT_THROWS(empty.firstValue(), const std::runtime_error &);
+    TS_ASSERT_THROWS(empty.lastValue(), const std::runtime_error &);
   }
 
   void test_min_max_value() {
@@ -1333,6 +1346,40 @@ public:
     delete newp;
 
     return;
+  }
+
+  /*
+   * Test cloneWithTimeShift
+   */
+  void test_cloneWithTimeShift() {
+    auto time_series = std::make_unique<TimeSeriesProperty<int>>("IntUnixTest");
+    time_series->addValue("2019-02-10T16:17:00", 1);
+
+    auto time_series_small_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(100.));
+    const auto &small_shift_times = time_series_small_shift->timesAsVector();
+    TS_ASSERT_EQUALS(small_shift_times[0], DateAndTime("2019-02-10T16:18:40"));
+
+    auto time_series_large_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(1234.));
+    const auto &large_shift_times = time_series_large_shift->timesAsVector();
+    TS_ASSERT_EQUALS(large_shift_times[0], DateAndTime("2019-02-10T16:37:34"));
+
+    auto time_series_negative_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(-1234.));
+    const auto &negative_shift_times =
+        time_series_negative_shift->timesAsVector();
+    TS_ASSERT_EQUALS(negative_shift_times[0],
+                     DateAndTime("2019-02-10T15:56:26"));
+
+    // There is a known issue which can cause cloneWithTimeShift to be called
+    // with a large (~9e+9 s) shift. Actual shifting is capped to be ~4.6e+19
+    // seconds in DateAndTime::operator+= Typical usage of this method is with
+    // shifts in the range tested here.
+
+    delete time_series_small_shift;
+    delete time_series_large_shift;
+    delete time_series_negative_shift;
   }
 
   /*
@@ -1712,7 +1759,7 @@ public:
         new TimeSeriesProperty<double>("doubleProp");
 
     // 1. Test Throws
-    TS_ASSERT_THROWS(p->nthTime(1), std::runtime_error);
+    TS_ASSERT_THROWS(p->nthTime(1), const std::runtime_error &);
 
     // 2. Add entries
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
@@ -1756,7 +1803,7 @@ public:
         new TimeSeriesProperty<double>("doubleProp");
 
     // 1. Test Throws
-    TS_ASSERT_THROWS(p->nthInterval(0), std::runtime_error);
+    TS_ASSERT_THROWS(p->nthInterval(0), const std::runtime_error &);
 
     // 2. Add entries
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
@@ -2314,8 +2361,7 @@ public:
   void test_getSplittingIntervals_repeatedEntries() {
     const auto &log = getTestLog();
     // Add the filter
-    auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
     Mantid::Types::Core::DateAndTime firstStart("2007-11-30T16:17:00"),
         firstEnd("2007-11-30T16:17:15"), secondStart("2007-11-30T16:18:35"),
         secondEnd("2007-11-30T16:18:40");
@@ -2341,8 +2387,7 @@ public:
   void test_getSplittingIntervals_startEndTimes() {
     const auto &log = getTestLog();
     // Add the filter
-    auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
     Mantid::Types::Core::DateAndTime firstEnd("2007-11-30T16:17:05"),
         secondStart("2007-11-30T16:17:10"), secondEnd("2007-11-30T16:17:15"),
         thirdStart("2007-11-30T16:18:35");
@@ -2368,8 +2413,7 @@ private:
   /// Generate a test log
   std::unique_ptr<TimeSeriesProperty<double>> getTestLog() {
     // Build the log
-    auto log =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("DoubleLog");
+    auto log = std::make_unique<TimeSeriesProperty<double>>("DoubleLog");
     Mantid::Types::Core::DateAndTime logTime("2007-11-30T16:17:00");
     const double incrementSecs(10.0);
     for (int i = 1; i < 12; ++i) {
@@ -2385,8 +2429,7 @@ private:
     // Build the log
     auto log = getTestLog();
     // Add the filter
-    auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
     filter->addValue("2007-11-30T16:17:00", true);
     filter->addValue("2007-11-30T16:17:15", false);
     filter->addValue("2007-11-30T16:17:25", true);

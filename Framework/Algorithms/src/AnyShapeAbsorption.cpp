@@ -10,6 +10,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -55,78 +56,16 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   }
 
-  auto bbox = integrationVolume->getBoundingBox();
-  double minX = bbox.xMin();
-  double maxX = bbox.xMax();
-  double minY = bbox.yMin();
-  double maxY = bbox.yMax();
-  double minZ = bbox.zMin();
-  double maxZ = bbox.zMax();
-  assert(maxX > minX);
-  assert(maxY > minY);
-  assert(maxZ > minZ);
-
-  const double xLength = maxX - minX;
-  const double yLength = maxY - minY;
-  const double zLength = maxZ - minZ;
-  const int numXSlices = static_cast<int>(xLength / m_cubeSide);
-  const int numYSlices = static_cast<int>(yLength / m_cubeSide);
-  const int numZSlices = static_cast<int>(zLength / m_cubeSide);
-  const double XSliceThickness = xLength / numXSlices;
-  const double YSliceThickness = yLength / numYSlices;
-  const double ZSliceThickness = zLength / numZSlices;
-
-  m_numVolumeElements = numXSlices * numYSlices * numZSlices;
-
-  try {
-    m_L1s.reserve(m_numVolumeElements);
-    m_elementVolumes.reserve(m_numVolumeElements);
-    m_elementPositions.reserve(m_numVolumeElements);
-  } catch (...) {
-    // Typically get here if the number of volume elements is too large
-    // Provide a bit more information
-    g_log.error("Too many volume elements requested - try increasing the value "
-                "of the ElementSize property.");
-    throw;
-  }
-
-  for (int i = 0; i < numZSlices; ++i) {
-    const double z = (i + 0.5) * ZSliceThickness - 0.5 * zLength;
-
-    for (int j = 0; j < numYSlices; ++j) {
-      const double y = (j + 0.5) * YSliceThickness - 0.5 * yLength;
-
-      for (int k = 0; k < numXSlices; ++k) {
-        const double x = (k + 0.5) * XSliceThickness - 0.5 * xLength;
-        // Set the current position in the sample in Cartesian coordinates.
-        const V3D currentPosition(x, y, z);
-        // Check if the current point is within the object. If not, skip.
-        if (integrationVolume->isValid(currentPosition)) {
-          // Create track for distance in sample before scattering point
-          Track incoming(currentPosition, m_beamDirection * -1.0);
-          // We have an issue where occasionally, even though a point is within
-          // the object a track segment to the surface isn't correctly created.
-          // In the context of this algorithm I think it's safe to just chuck
-          // away
-          // the element in this case.
-          // This will also throw away points that are inside a gauge volume but
-          // outside the sample
-          if (m_sampleObject->interceptSurface(incoming) > 0) {
-            m_L1s.push_back(incoming.cbegin()->distFromStart);
-            m_elementPositions.push_back(currentPosition);
-            // Also calculate element volume here
-            m_elementVolumes.push_back(XSliceThickness * YSliceThickness *
-                                       ZSliceThickness);
-          }
-        }
-      }
-    }
-  }
-
-  // Record the number of elements we ended up with
-  m_numVolumeElements = static_cast<int>(m_L1s.size());
-  m_sampleVolume = static_cast<double>(m_numVolumeElements) * XSliceThickness *
-                   YSliceThickness * ZSliceThickness;
+  auto raster = Geometry::Rasterize::calculate(m_beamDirection,
+                                               *integrationVolume, m_cubeSide);
+  m_sampleVolume = raster.totalvolume;
+  if (raster.l1.size() == 0)
+    throw std::runtime_error("Failed to rasterize shape");
+  // move over the information
+  m_numVolumeElements = raster.l1.size();
+  m_L1s = std::move(raster.l1);
+  m_elementPositions = std::move(raster.position);
+  m_elementVolumes = std::move(raster.volume);
 }
 
 boost::shared_ptr<const Geometry::IObject>

@@ -54,6 +54,7 @@ public:
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
   ISpectrum &getSpectrum(const size_t index) override {
+    invalidateCommonBinsFlag();
     return m_spectra[index];
   }
 
@@ -84,6 +85,9 @@ private:
     throw std::runtime_error("Cloning of "
                              "CompositeFunctionTest_MocMatrixWorkspace is not "
                              "implemented.");
+  }
+  ISpectrum &getSpectrumWithoutInvalidation(const size_t index) override {
+    return m_spectra[index];
   }
   std::vector<CompositeFunctionTest_MocSpectrum> m_spectra;
   size_t m_blocksize;
@@ -524,12 +528,18 @@ public:
     mfun->fix(10);
     // g2->fix(1);  // This doesn't work
 
-    TS_ASSERT_THROWS(mfun->setActiveParameter(0, 0), std::runtime_error);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(1, 0), std::runtime_error);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(4, 0), std::runtime_error);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(6, 0), std::runtime_error);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(7, 0), std::runtime_error);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(10, 0), std::runtime_error);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(0, 0),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(1, 0),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(4, 0),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(6, 0),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(7, 0),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(10, 0),
+                     const std::runtime_error &);
 
     mfun->setActiveParameter(2, 100);
     mfun->setActiveParameter(3, 101);

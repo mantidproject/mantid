@@ -37,17 +37,18 @@ struct IntegrationParameters {
 };
 
 /**
-    @class Integrate3DEvents
+ @class Integrate3DEvents
 
-    This is a low-level class to construct a map with lists of events near
-    each peak Q-vector, shifted to be centered at (0,0,0).  A method is also
-    provided to find the principal axes of such a list of events, and to
-    find the net integrated counts, using ellipsoids with axis lengths
-    determined from the standard deviations in the directions of the
-    principal axes.
+ This is a low-level class to construct a map with lists of events near
+ each peak Q-vector, shifted to be centered at (0,0,0).  A method is also
+ provided to find the principal axes of such a list of events, and to
+ find the net integrated counts, using ellipsoids with axis lengths
+ determined from the standard deviations in the directions of the
+ principal axes.
 
-    @author Dennis Mikkelson
-    @date   2012-12-19
+ @author Dennis Mikkelson
+ @date   2012-12-19
+
  */
 
 using EventListMap =
@@ -59,8 +60,16 @@ class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
   Integrate3DEvents(
-      std::vector<std::pair<double, Mantid::Kernel::V3D>> const &peak_q_list,
+      const std::vector<std::pair<double, Mantid::Kernel::V3D>> &peak_q_list,
       Kernel::DblMatrix const &UBinv, double radius,
+      const bool useOnePercentBackgroundCorrection = true);
+
+  Integrate3DEvents(
+      const std::vector<std::pair<double, Mantid::Kernel::V3D>> &peak_q_list,
+      std::vector<Mantid::Kernel::V3D> const &hkl_list,
+      std::vector<Mantid::Kernel::V3D> const &mnp_list,
+      Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
+      double radius_m, double radius_s, int MaxO, const bool CrossT,
       const bool useOnePercentBackgroundCorrection = true);
 
   /// Add event Q's to lists of events near peaks
@@ -74,6 +83,18 @@ public:
       bool specify_size, double peak_radius, double back_inner_radius,
       double back_outer_radius, std::vector<double> &axes_radii, double &inti,
       double &sigi);
+
+  /// Find the net integrated intensity of a modulated peak, using ellipsoidal
+  /// volumes
+  boost::shared_ptr<const Mantid::Geometry::PeakShape>
+  ellipseIntegrateModEvents(std::vector<Kernel::V3D> E1Vec,
+                            Mantid::Kernel::V3D const &peak_q,
+                            Mantid::Kernel::V3D const &hkl,
+                            Mantid::Kernel::V3D const &mnp, bool specify_size,
+                            double peak_radius, double back_inner_radius,
+                            double back_outer_radius,
+                            std::vector<double> &axes_radii, double &inti,
+                            double &sigi);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
   std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>,
@@ -133,12 +154,18 @@ private:
   /// Form a map key as 10^12*h + 10^6*k + l from the integers h, k, l
   static int64_t getHklKey(int h, int k, int l);
 
+  static int64_t getHklMnpKey(int h, int k, int l, int m, int n, int p);
+
   /// Form a map key for the specified q_vector.
   int64_t getHklKey(Mantid::Kernel::V3D const &q_vector);
+  int64_t getHklMnpKey(Mantid::Kernel::V3D const &q_vector);
   int64_t getHklKey2(Mantid::Kernel::V3D const &hkl);
+  int64_t getHklMnpKey2(Mantid::Kernel::V3D const &hkl);
 
   /// Add an event to the vector of events for the closest h,k,l
   void addEvent(std::pair<double, Mantid::Kernel::V3D> event_Q, bool hkl_integ);
+  void addModEvent(std::pair<double, Mantid::Kernel::V3D> event_Q,
+                   bool hkl_integ);
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
   boost::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
@@ -164,7 +191,11 @@ private:
   PeakQMap m_peak_qs;         // hashtable with peak Q-vectors
   EventListMap m_event_lists; // hashtable with lists of events for each peak
   Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
+  Kernel::DblMatrix m_ModHKL; // matrix mapping from Q to m,n,p
   double m_radius;            // size of sphere to use for events around a peak
+  double s_radius;            // size of sphere to use for events around a peak
+  int maxOrder;
+  const bool crossterm;
   const bool m_useOnePercentBackgroundCorrection =
       true; // if one perecent culling of the background should be performed.
 };

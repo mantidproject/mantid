@@ -15,7 +15,6 @@
 #include "MantidKernel/Unit.h"
 
 #include <boost/optional.hpp>
-#include <iostream>
 #include <iterator>
 #include <vector>
 

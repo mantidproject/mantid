@@ -32,20 +32,20 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
 void MagFormFactorCorrection::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace must have one axis with units of Q");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace must have one axis with units of Q");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Output workspace name.");
   std::vector<std::string> keys = getMagneticIonList();
   declareProperty("IonName", "Cu2",
                   boost::make_shared<StringListValidator>(keys),
                   "The name of the ion: an element symbol with a number "
                   "indicating the valence, e.g. Fe2 for Fe2+ / Fe(II)");
-  declareProperty(make_unique<WorkspaceProperty<>>("FormFactorWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("FormFactorWorkspace",
+                                                        "", Direction::Output,
+                                                        PropertyMode::Optional),
                   "If specified the algorithm will create a 1D workspace with "
                   "the form factor vs Q with a name given by this field.");
 }
@@ -96,7 +96,7 @@ void MagFormFactorCorrection::exec() {
   std::vector<double> FF;
   FF.reserve(Qvals.size());
   for (double Qval : Qvals) {
-    FF.push_back(ion.analyticalFormFactor(Qval * Qval));
+    FF.emplace_back(ion.analyticalFormFactor(Qval * Qval));
   }
   if (!ffwsStr.empty()) {
     HistogramBuilder builder;

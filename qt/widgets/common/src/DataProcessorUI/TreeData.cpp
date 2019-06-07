@@ -303,12 +303,9 @@ bool RowData::reductionFailed() const {
   if (!m_error.empty())
     return true;
 
-  for (const auto slice : m_slices) {
-    if (slice->reductionFailed())
-      return true;
-  }
-
-  return false;
+  return std::any_of(m_slices.cbegin(), m_slices.cend(), [](const auto &slice) {
+    return slice->reductionFailed();
+  });
 }
 
 /** Return the canonical reduced workspace name i.e. before any

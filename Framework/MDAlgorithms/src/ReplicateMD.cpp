@@ -242,13 +242,13 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void ReplicateMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "ShapeWorkspace", "", Direction::Input),
                   "An input workspace defining the shape of the output.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "DataWorkspace", "", Direction::Input),
                   "An input workspace containing the data to replicate.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace with replicated data.");
 }
@@ -304,18 +304,21 @@ void ReplicateMD::exec() {
     // Check that the indices stored in axes are compatible with the
     // dimensionality of the data workspace
     const auto numberOfDimensionsOfDataWorkspace = static_cast<int>(nDimsData);
-    for (const auto &axis : axes) {
-      if (axis >= numberOfDimensionsOfDataWorkspace) {
-        std::string message =
-            "ReplicateMD: Cannot transpose the data workspace. Attempting to "
-            "swap dimension index " +
-            std::to_string(
-                std::distance(static_cast<const int *>(&axes[0]), &axis)) +
-            " with index " + std::to_string(axis) +
-            ", but the dimensionality of the data workspace is " +
-            std::to_string(nDimsData);
-        throw std::runtime_error(message);
-      }
+    const auto found =
+        std::find_if(axes.cbegin(), axes.cend(),
+                     [numberOfDimensionsOfDataWorkspace](const auto &axis) {
+                       return axis >= numberOfDimensionsOfDataWorkspace;
+                     });
+    if (found != axes.cend()) {
+      std::string message =
+          "ReplicateMD: Cannot transpose the data workspace. Attempting to "
+          "swap dimension index " +
+          std::to_string(
+              std::distance(static_cast<const int *>(&axes[0]), &(*found))) +
+          " with index " + std::to_string(*found) +
+          ", but the dimensionality of the data workspace is " +
+          std::to_string(nDimsData);
+      throw std::runtime_error(message);
     }
     transposedDataWS = transposeMD(dataWS, axes);
     nDimsData = transposedDataWS->getNumDims();

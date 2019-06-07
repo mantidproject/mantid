@@ -46,18 +46,18 @@ const std::string ResampleX::alias() const { return ""; }
 /** Initialize the algorithm's properties.
  */
 void ResampleX::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("XMin"),
+      std::make_unique<ArrayProperty<double>>("XMin"),
       "A comma separated list of the XMin for every spectrum. (Optional)");
   declareProperty(
-      make_unique<ArrayProperty<double>>("XMax"),
+      std::make_unique<ArrayProperty<double>>("XMax"),
       "A comma separated list of the XMax for every spectrum. (Optional)");
 
   auto min = boost::make_shared<BoundedValidator<int>>();
@@ -445,9 +445,6 @@ void ResampleX::exec() {
       ChildAlg->execute();
       inputWS = ChildAlg->getProperty("OutputWorkspace");
     }
-
-    // This will be the output workspace (exact type may vary)
-    API::MatrixWorkspace_sptr outputWS;
 
     // make output Workspace the same type is the input, but with new length of
     // signal array

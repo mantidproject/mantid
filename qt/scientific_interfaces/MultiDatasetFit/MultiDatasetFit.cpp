@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MultiDatasetFit.h"
 #include "MDFDataController.h"
-#include "MDFEditLocalParameterDialog.h"
 #include "MDFPlotController.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -66,10 +65,10 @@ void formatParametersForPlotting(const Mantid::API::IFunction &function,
   col->setPlotType(1); // X-values inplots
 
   // Add columns for parameters and their errors
-  const auto &fun = *mdFunction.getFunction(0);
-  for (size_t iPar = 0; iPar < fun.nParams(); ++iPar) {
-    table->addColumn("double", fun.parameterName(iPar));
-    table->addColumn("double", fun.parameterName(iPar) + "_Err");
+  const auto &firstFun = *mdFunction.getFunction(0);
+  for (size_t iPar = 0; iPar < firstFun.nParams(); ++iPar) {
+    table->addColumn("double", firstFun.parameterName(iPar));
+    table->addColumn("double", firstFun.parameterName(iPar) + "_Err");
   }
 
   // Fill in the columns
@@ -87,6 +86,16 @@ void formatParametersForPlotting(const Mantid::API::IFunction &function,
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       parametersPropertyName + "_vs_dataset", table);
 }
+
+// Class to implement a scoped "enabler"
+class FinallyEnable {
+  QPushButton *m_button;
+
+public:
+  explicit FinallyEnable(QPushButton *control) : m_button(control) {}
+  ~FinallyEnable() { m_button->setEnabled(true); }
+};
+
 } // namespace
 
 namespace MantidQt {
@@ -162,9 +171,6 @@ void MultiDatasetFit::initLayout() {
       new MantidQt::MantidWidgets::FunctionBrowser(nullptr, true);
   m_functionBrowser->setColumnSizes(100, 100, 45);
   splitter->addWidget(m_functionBrowser);
-  connect(m_functionBrowser,
-          SIGNAL(localParameterButtonClicked(const QString &)), this,
-          SLOT(editLocalParameterValues(const QString &)));
   connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this,
           SLOT(reset()));
   connect(m_functionBrowser, SIGNAL(globalsChanged()), this,
@@ -178,8 +184,8 @@ void MultiDatasetFit::initLayout() {
           SLOT(setCurrentDataset(int)));
   connect(m_dataController, SIGNAL(spectraRemoved(QList<int>)),
           m_functionBrowser, SLOT(removeDatasets(QList<int>)));
-  connect(m_dataController, SIGNAL(spectraAdded(int)), m_functionBrowser,
-          SLOT(addDatasets(int)));
+  connect(m_dataController, SIGNAL(spectraAdded(const QStringList &)),
+          m_functionBrowser, SLOT(addDatasets(const QStringList &)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(
       nullptr,
@@ -303,7 +309,7 @@ void MultiDatasetFit::fitSequential() {
       mess += "...";
     }
     QMessageBox::critical(
-        this, "MantidPlot - Error",
+        this, "Mantid - Error",
         QString("PlotPeakByLogValue failed:\n\n  %1").arg(mess));
     m_uiForm.btnFit->setEnabled(true);
   }
@@ -312,7 +318,6 @@ void MultiDatasetFit::fitSequential() {
 /// Fit the data simultaneously.
 void MultiDatasetFit::fitSimultaneous() {
   try {
-
     m_uiForm.btnFit->setEnabled(false);
     auto fun = createFunction();
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -330,7 +335,7 @@ void MultiDatasetFit::fitSimultaneous() {
       fit->setPropertyValue("InputWorkspace_" + suffix,
                             getWorkspaceName(ispec).toStdString());
       fit->setProperty("WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec));
-      auto range = getFittingRange(ispec);
+      range = getFittingRange(ispec);
       fit->setProperty("StartX_" + suffix, range.first);
       fit->setProperty("EndX_" + suffix, range.second);
     }
@@ -364,7 +369,7 @@ void MultiDatasetFit::fitSimultaneous() {
       mess = mess.mid(0, maxSize);
       mess += "...";
     }
-    QMessageBox::critical(this, "MantidPlot - Error",
+    QMessageBox::critical(this, "Mantid - Error",
                           QString("Fit failed:\n\n  %1").arg(mess));
     m_uiForm.btnFit->setEnabled(true);
   }
@@ -373,15 +378,19 @@ void MultiDatasetFit::fitSimultaneous() {
 /// Run the fitting algorithm.
 void MultiDatasetFit::fit() {
   if (!m_functionBrowser->hasFunction()) {
-    QMessageBox::warning(this, "MantidPlot - Warning", "Function wasn't set.");
+    QMessageBox::warning(this, "Mantid - Warning", "Function wasn't set.");
     return;
   }
 
   auto fittingType = m_fitOptionsBrowser->getCurrentFittingType();
   auto n = getNumberOfSpectra();
+  if (n == 0) {
+    QMessageBox::warning(this, "Mantid - Warning", "Data wasn't set.");
+    return;
+  }
   int fitAll = QMessageBox::Yes;
 
-  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous) {
+  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous || n == 1) {
     if (n > 20 && m_fitAllSettings == QMessageBox::No) {
       fitAll = QMessageBox::question(this, "Fit All?",
                                      "Are you sure you would like to fit " +
@@ -454,24 +463,6 @@ int MultiDatasetFit::getNumberOfSpectra() const {
   return m_dataController->getNumberOfSpectra();
 }
 
-/// Start an editor to display and edit individual local parameter values.
-/// @param parName :: Fully qualified name for a local parameter (Global
-/// unchecked).
-void MultiDatasetFit::editLocalParameterValues(const QString &parName) {
-  MDF::EditLocalParameterDialog dialog(this, parName);
-  if (dialog.exec() == QDialog::Accepted) {
-    auto values = dialog.getValues();
-    auto fixes = dialog.getFixes();
-    auto ties = dialog.getTies();
-    assert(values.size() == getNumberOfSpectra());
-    for (int i = 0; i < values.size(); ++i) {
-      setLocalParameterValue(parName, i, values[i]);
-      setLocalParameterFixed(parName, i, fixes[i]);
-      setLocalParameterTie(parName, i, ties[i]);
-    }
-  }
-}
-
 /// Set the fit status info string after a fit is finished.
 /// @param status :: The Fit's status property.
 /// @param chiSquared :: The chi squared value returned by Fit.
@@ -498,6 +489,7 @@ void MultiDatasetFit::clearFitStatusInfo() {
 /// Slot called on completion of the Fit algorithm.
 /// @param error :: Set to true if Fit finishes with an error.
 void MultiDatasetFit::finishFit(bool error) {
+  FinallyEnable ensureEnabled(m_uiForm.btnFit);
   if (!error) {
     m_plotController->clear();
     m_plotController->update();
@@ -546,7 +538,6 @@ void MultiDatasetFit::finishFit(bool error) {
       clearFitStatusInfo();
     }
   }
-  m_uiForm.btnFit->setEnabled(true);
 }
 
 /// Update the interface to have the same parameter values as in a function.
@@ -758,10 +749,9 @@ void MultiDatasetFit::setLogNames() {
       const std::vector<Mantid::Kernel::Property *> logs =
           ws->run().getLogData();
       QStringList logNames;
-      for (int i = 0; i < static_cast<int>(logs.size()); ++i) {
-        if (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(
-                logs[i])) {
-          logNames << QString::fromStdString(logs[i]->name());
+      for (auto log : logs) {
+        if (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log)) {
+          logNames << QString::fromStdString(log->name());
         }
       }
       if (!logNames.isEmpty()) {
@@ -809,7 +799,6 @@ void MultiDatasetFit::invalidateOutput() {
 /// and the log name must be selected in m_fitOptionsBrowser.
 void MultiDatasetFit::showParameterPlot() {
   auto table = m_fitOptionsBrowser->getProperty("OutputWorkspace");
-  auto logValue = m_fitOptionsBrowser->getProperty("LogValue");
   auto parName = m_fitOptionsBrowser->getParameterToPlot();
   if (table.isEmpty() || parName.isEmpty())
     return;
@@ -820,7 +809,8 @@ void MultiDatasetFit::showParameterPlot() {
   runPythonCode(pyInput);
 }
 
-void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
+void MultiDatasetFit::updateGuessFunction(const QString & /*unused*/,
+                                          const QString & /*unused*/) {
   auto fun = m_functionBrowser->getFunction();
   auto composite =
       boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);

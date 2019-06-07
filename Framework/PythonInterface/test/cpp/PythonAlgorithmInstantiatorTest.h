@@ -8,7 +8,7 @@
 #define PYTHONOBJECTINSTANTIATORTEST_H_
 
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 #include <cxxtest/TestSuite.h>
 
@@ -34,7 +34,7 @@ public:
 public:
   void test_Bare_Pointer_Throws_On_Creation() {
     TS_ASSERT_THROWS(instantiator().createUnwrappedInstance(),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Shared_Pointer() {
@@ -53,7 +53,9 @@ private:
 
   PythonAlgorithmInstantiator const &instantiator() {
     if (!m_creator) {
-      // Assume this is where the mantid package is too
+      // The mantid package is not copied over for developer builds,
+      // but the PYTHONPATH is set in CMake for each of the test classes in
+      // PythonInterfaceCppTest so they can import mantid.api
       auto code = "from mantid.api import PythonAlgorithm\n"
                   "class PyAlg(PythonAlgorithm):\n"
                   "    def category(self):\n"
@@ -64,7 +66,7 @@ private:
       boost::python::object cls(
           boost::python::handle<>(PyObject_GetAttrString(main, "PyAlg")));
       TS_ASSERT(cls);
-      m_creator = Mantid::Kernel::make_unique<PythonAlgorithmInstantiator>(cls);
+      m_creator = std::make_unique<PythonAlgorithmInstantiator>(cls);
     }
     return *m_creator;
   }

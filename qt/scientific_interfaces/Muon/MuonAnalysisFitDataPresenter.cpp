@@ -377,10 +377,11 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   std::vector<std::vector<int>> runNumberVectors;
   if (m_dataSelector->getFitType() == IMuonFitDataSelector::FitType::CoAdd) {
     // Analyse all the runs in one go
-    runNumberVectors.push_back(selectedRuns);
+    runNumberVectors.emplace_back(selectedRuns);
   } else { // Analyse the runs one by one
+    runNumberVectors.reserve(selectedRuns.size());
     for (const int run : selectedRuns) {
-      runNumberVectors.push_back({run});
+      runNumberVectors.emplace_back(std::vector<int>(1, run));
     }
   }
 

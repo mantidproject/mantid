@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="MARI" valid-from   ="1900-01-31 23:59:59"
-                        valid-to     ="2100-01-31 23:59:59"
-                        last-modified="2015-03-01 00:00:00">
+ name="MARI" valid-from   ="2017-07-01 00:00:00"
+                        valid-to     ="2100-01-01 23:59:59"
+                        last-modified="2019-02-06 10:00:00">
 
   <defaults>
     <length unit="meter"/>
@@ -154,8 +154,8 @@
   <!-- MONITORS -->
 
   <component type="monitor" idlist="monitor">
-    <location z="-4.739" />
-    <location z="-1.442" />
+    <location z="-3.250" />
+    <location z="-1.511" />
     <location z="5.82" />
   </component>
   

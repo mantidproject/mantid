@@ -38,8 +38,8 @@ CatalogHelper::getInstrumentList(const std::vector<std::string> &sessionIDs) {
     return catalogAlgorithm->getProperty("InstrumentList");
   } else {
     // Use catalogs for the specified sessions.
-    for (unsigned i = 0; i < sessionIDs.size(); ++i) {
-      catalogAlgorithm->setProperty("Session", sessionIDs.at(i));
+    for (const auto &sessionID : sessionIDs) {
+      catalogAlgorithm->setProperty("Session", sessionID);
       executeAsynchronously(catalogAlgorithm);
     }
     // Return the vector containing the list of instruments available.
@@ -63,8 +63,8 @@ const std::vector<std::string> CatalogHelper::getInvestigationTypeList(
     executeAsynchronously(catalogAlgorithm);
     return catalogAlgorithm->getProperty("InvestigationTypes");
   } else {
-    for (unsigned i = 0; i < sessionIDs.size(); ++i) {
-      catalogAlgorithm->setProperty("Session", sessionIDs.at(i));
+    for (const auto &sessionID : sessionIDs) {
+      catalogAlgorithm->setProperty("Session", sessionID);
       executeAsynchronously(catalogAlgorithm);
     }
     return catalogAlgorithm->getProperty("InvestigationTypes");
@@ -97,8 +97,8 @@ void CatalogHelper::executeSearch(
   if (session.size() == sessionIDs.size()) {
     executeAsynchronously(catalogAlgorithm);
   } else {
-    for (unsigned i = 0; i < sessionIDs.size(); ++i) {
-      catalogAlgorithm->setProperty("Session", sessionIDs.at(i));
+    for (const auto &sessionID : sessionIDs) {
+      catalogAlgorithm->setProperty("Session", sessionID);
       executeAsynchronously(catalogAlgorithm);
     }
   }
@@ -126,8 +126,8 @@ int64_t CatalogHelper::getNumberOfSearchResults(
     executeAsynchronously(catalogAlgorithm);
     return catalogAlgorithm->getProperty("NumberOfSearchResults");
   } else {
-    for (unsigned i = 0; i < sessionIDs.size(); ++i) {
-      catalogAlgorithm->setProperty("Session", sessionIDs.at(i));
+    for (const auto &sessionID : sessionIDs) {
+      catalogAlgorithm->setProperty("Session", sessionID);
       executeAsynchronously(catalogAlgorithm);
     }
     return catalogAlgorithm->getProperty("NumberOfSearchResults");
@@ -175,10 +175,9 @@ const std::vector<std::string> CatalogHelper::downloadDataFiles(
 
   // For each pair in userSelectedFiles we want to add them to their related
   // vector to pass to the algorithm.
-  for (auto it = userSelectedFiles.begin(); it != userSelectedFiles.end();
-       ++it) {
-    fileIDs.push_back(it->first);
-    fileNames.push_back(it->second);
+  for (const auto &userSelectedFile : userSelectedFiles) {
+    fileIDs.push_back(userSelectedFile.first);
+    fileNames.push_back(userSelectedFile.second);
   }
 
   // End of the ugly!
@@ -211,17 +210,17 @@ const std::map<std::string, std::string> CatalogHelper::validateProperties(
   std::map<std::string, std::string> errors;
 
   // Validate all input elements in the map.
-  for (auto iter = inputFields.begin(); iter != inputFields.end(); ++iter) {
+  for (const auto &inputField : inputFields) {
     try {
-      catalogAlgorithm->setProperty(iter->first, iter->second);
+      catalogAlgorithm->setProperty(inputField.first, inputField.second);
     } catch (std::invalid_argument &) {
-      std::string documentation =
-          propertyDocumentation(catalogAlgorithm->getProperties(), iter->first);
+      std::string documentation = propertyDocumentation(
+          catalogAlgorithm->getProperties(), inputField.first);
 
       // Add the input name + "_err" (to indicate the error marker in the GUI,
       // rather than the input field) as the key, and the related error as the
       // value.
-      errors.emplace(iter->first + "_err", documentation);
+      errors.emplace(inputField.first + "_err", documentation);
     }
   }
   // catch invalid date formats
@@ -296,9 +295,9 @@ void CatalogHelper::showPublishDialog() {
 const std::string CatalogHelper::propertyDocumentation(
     const std::vector<Mantid::Kernel::Property *> &properties,
     const std::string &name) {
-  for (unsigned i = 0; i < properties.size(); i++) {
-    if (properties.at(i)->name() == name) {
-      return properties.at(i)->documentation();
+  for (auto property : properties) {
+    if (property->name() == name) {
+      return property->documentation();
     }
   }
   return "";
@@ -344,13 +343,13 @@ void CatalogHelper::setSearchProperties(
   // isn't empty (e.g. a value was input by the user)
   // then we will set the algorithm property with the key and value of that
   // specific value.
-  for (auto it = userInputFields.begin(); it != userInputFields.end(); it++) {
-    std::string value = it->second;
+  for (const auto &userInputField : userInputFields) {
+    std::string value = userInputField.second;
     // If the user has input any search terms.
     if (!value.empty()) {
       // Set the property that the search algorithm uses to: (key => FieldName,
       // value => FieldValue) (e.g., (Keywords, bob))
-      catalogAlgorithm->setProperty(it->first, value);
+      catalogAlgorithm->setProperty(userInputField.first, value);
     }
   }
 }

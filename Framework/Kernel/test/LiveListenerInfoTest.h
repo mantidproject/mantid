@@ -12,7 +12,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/LiveListenerInfo.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -86,7 +85,7 @@ public:
     TS_ASSERT_EQUALS(info.address(), "A");
     TS_ASSERT_EQUALS(info.listener(), "L");
 
-    TS_ASSERT_THROWS(inst.liveListenerInfo("n3"), std::runtime_error);
+    TS_ASSERT_THROWS(inst.liveListenerInfo("n3"), const std::runtime_error &);
   }
 
   void test_xml_two_connections_default() {
@@ -116,7 +115,7 @@ public:
     TS_ASSERT_EQUALS(info.address(), "A");
     TS_ASSERT_EQUALS(info.listener(), "L");
 
-    TS_ASSERT_THROWS(inst.liveListenerInfo("n3"), std::runtime_error);
+    TS_ASSERT_THROWS(inst.liveListenerInfo("n3"), const std::runtime_error &);
   }
 
   void test_manual_construction() {
@@ -179,7 +178,7 @@ private:
     Poco::XML::Element *pRootElem = pDoc->documentElement();
     Poco::XML::Element *elem = pRootElem->getChildElement("facility");
 
-    return Mantid::Kernel::make_unique<FacilityInfo>(elem);
+    return std::make_unique<FacilityInfo>(elem);
   }
 };
 

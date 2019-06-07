@@ -1,4 +1,4 @@
-﻿set(SRC_FILES
+set(SRC_FILES
     src/AppendGeometryToSNSNexus.cpp
     src/AsciiPointBase.cpp
     src/BankPulseTimes.cpp
@@ -52,6 +52,8 @@
     src/LoadDspacemap.cpp
     src/LoadEmptyInstrument.cpp
     src/LoadEMU.cpp
+    src/LoadOff.cpp
+    src/LoadPLN.cpp
     src/LoadEventNexus.cpp
     src/LoadEventNexusIndexSetup.cpp
     src/LoadEventPreNexus2.cpp
@@ -128,7 +130,6 @@
     src/MaskDetectors.cpp
     src/MaskDetectorsInShape.cpp
     src/MaskSpectra.cpp
-    src/MergeLogs.cpp
     src/ModifyDetectorDotDatFile.cpp
     src/MoveInstrumentComponent.cpp
     src/NexusTester.cpp
@@ -251,6 +252,8 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
     inc/MantidDataHandling/LoadEMU.h
+    inc/MantidDataHandling/LoadOff.h
+    inc/MantidDataHandling/LoadPLN.h
     inc/MantidDataHandling/LoadEventNexus.h
     inc/MantidDataHandling/LoadEventNexusIndexSetup.h
     inc/MantidDataHandling/LoadEventPreNexus2.h
@@ -310,6 +313,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSPE.h
     inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
     inc/MantidDataHandling/LoadSassena.h
+    inc/MantidDataHandling/LoadShape.h
     inc/MantidDataHandling/LoadSpec.h
     inc/MantidDataHandling/LoadSpice2D.h
     inc/MantidDataHandling/LoadSpiceAscii.h
@@ -322,7 +326,6 @@ set(INC_FILES
     inc/MantidDataHandling/MaskDetectors.h
     inc/MantidDataHandling/MaskDetectorsInShape.h
     inc/MantidDataHandling/MaskSpectra.h
-    inc/MantidDataHandling/MergeLogs.h
     inc/MantidDataHandling/ModifyDetectorDotDatFile.h
     inc/MantidDataHandling/MoveInstrumentComponent.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
@@ -510,7 +513,6 @@ set(TEST_FILES
     MaskDetectorsInShapeTest.h
     MaskDetectorsTest.h
     MaskSpectraTest.h
-    MergeLogsTest.h
     ModifyDetectorDotDatFileTest.h
     MoveInstrumentComponentTest.h
     NexusTesterTest.h
@@ -571,10 +573,12 @@ set(TEST_FILES
     UpdateInstrumentFromFileTest.h
     XMLInstrumentParameterTest.h)
 
-if (COVERALLS)
-    foreach( loop_var ${SRC_FILES} ${INC_FILES})
-      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
-    endforeach(loop_var)
+if(COVERALLS)
+  foreach(loop_var ${SRC_FILES} ${INC_FILES})
+    set_property(GLOBAL APPEND
+                 PROPERTY COVERAGE_SRCS
+                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+  endforeach(loop_var)
 endif()
 
 if(UNITY_BUILD)
@@ -583,33 +587,51 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
-enable_precompiled_headers( inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES )
+enable_precompiled_headers(inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
-add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
+add_library(DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling
-  COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING"
-)
+set_target_properties(DataHandling
+                      PROPERTIES OUTPUT_NAME
+                                 MantidDataHandling
+                                 COMPILE_DEFINITIONS
+                                 "IN_MANTID_DATAHANDLING")
 
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
-elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-  set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${PLUGINS_DIR}")
-endif ()
+if(OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties(DataHandling
+                        PROPERTIES INSTALL_RPATH
+                                   "@loader_path/../Contents/MacOS")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set_target_properties(
+    DataHandling
+    PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${PLUGINS_DIR}"
+    )
+endif()
 
 # Add to the 'Framework' group in VS
-set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
+set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 
-target_include_directories ( DataHandling PUBLIC inc ../Nexus/inc)
-target_include_directories ( DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
+target_include_directories(DataHandling PUBLIC inc ../Nexus/inc)
+target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${JSONCPP_LIBRARIES} Catalog )
+target_link_libraries(DataHandling
+                      LINK_PRIVATE
+                      ${TCMALLOC_LIBRARIES_LINKTIME}
+                      ${MANTIDLIBS}
+                      Nexus
+                      ${NEXUS_LIBRARIES}
+                      ${HDF5_LIBRARIES}
+                      ${HDF5_HL_LIBRARIES}
+                      ${JSONCPP_LIBRARIES}
+                      Catalog)
 
 # Add the unit tests directory
-add_subdirectory ( test )
+add_subdirectory(test)
 
-###########################################################################
 # Installation settings
-###########################################################################
 
-mtd_install_targets( TARGETS DataHandling INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
+mtd_install_targets(TARGETS
+                    DataHandling
+                    INSTALL_DIRS
+                    ${PLUGINS_DIR}
+                    ${WORKBENCH_PLUGINS_DIR})

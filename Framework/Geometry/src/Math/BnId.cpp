@@ -56,7 +56,7 @@ BnId::BnId(const size_t A, const unsigned int X)
   Tnum = (sum + static_cast<int>(size)) / 2;
 }
 
-int BnId::operator==(const BnId &A) const
+bool BnId::operator==(const BnId &A) const
 /**
   Tri-state return of the equality
   @param A :: BnId object to compare
@@ -65,15 +65,15 @@ int BnId::operator==(const BnId &A) const
 */
 {
   if (A.size != size || A.Tnum != Tnum || A.Znum != Znum)
-    return 0;
+    return false;
   auto ac = A.Tval.cbegin();
   for (auto vc = Tval.cbegin(); vc != Tval.cend(); ++vc, ++ac) {
     if (ac == A.Tval.cend()) // This should never happen
-      return 0;
+      return false;
     if (*vc != *ac)
-      return 0;
+      return false;
   }
-  return 1;
+  return true;
 }
 
 int BnId::equivalent(const BnId &A) const
@@ -96,17 +96,17 @@ int BnId::equivalent(const BnId &A) const
   return retval;
 }
 
-int BnId::operator>(const BnId &A) const
+bool BnId::operator>(const BnId &A) const
 /**
   Tri-state return of the ordering of number of true
   @param A :: BnId object to compare
   @return !(this<A)
 */
 {
-  return (&A != this) ? !(*this < A) : 0;
+  return (&A != this) ? !(*this < A) : false;
 }
 
-int BnId::operator<(const BnId &A) const
+bool BnId::operator<(const BnId &A) const
 /**
   Tri-state return of the ordering of number of true states
   @param A :: BnId object to compare
@@ -117,10 +117,10 @@ int BnId::operator<(const BnId &A) const
   if (A.size != size)
     return size < A.size;
   if (Znum != A.Znum)
-    return (Znum < A.Znum) ? 1 : 0;
+    return (Znum < A.Znum);
 
   if (Tnum != A.Tnum)
-    return (Tnum < A.Tnum) ? 1 : 0;
+    return (Tnum < A.Tnum);
 
   auto tvc = Tval.crbegin();
   auto avc = A.Tval.crbegin();
@@ -130,7 +130,7 @@ int BnId::operator<(const BnId &A) const
     ++tvc;
     ++avc;
   }
-  return 0;
+  return false;
 }
 
 int BnId::operator[](const int A) const

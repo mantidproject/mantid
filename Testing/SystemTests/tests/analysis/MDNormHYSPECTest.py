@@ -76,13 +76,13 @@ class MDNormHYSPECTest(systemtesting.MantidSystemTest):
         MergeMD(InputWorkspaces='md', OutputWorkspace='merged')
         DeleteWorkspace("md")
         MDNorm(InputWorkspace='merged',
-               Dimension0Name='QDimension2',
+               Dimension0Name='QDimension1',
                Dimension0Binning='-5,0.05,5',
-               Dimension1Name='QDimension3',
+               Dimension1Name='QDimension2',
                Dimension1Binning='-5,0.05,5',
                Dimension2Name='DeltaE',
                Dimension2Binning='-2,2',
-               Dimension3Name='QDimension1',
+               Dimension3Name='QDimension0',
                Dimension3Binning='-0.5,0.5',
                SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
                OutputWorkspace='result',

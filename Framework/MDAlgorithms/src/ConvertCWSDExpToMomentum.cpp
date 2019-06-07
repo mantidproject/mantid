@@ -41,11 +41,11 @@ ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
  */
 void ConvertCWSDExpToMomentum::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "",
-                                                      Direction::Input),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "",
+                                                           Direction::Input),
       "Name of table workspace for data file names in the experiment.");
 
-  declareProperty(make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
       "InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"));
 
   declareProperty(
@@ -66,22 +66,22 @@ void ConvertCWSDExpToMomentum::init() {
   declareProperty("CreateVirtualInstrument", false,
                   "Flag to create virtual instrument.");
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "DetectorTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of table workspace containing all the detectors.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of MDEventWorkspace containing all experimental data.");
 
-  declareProperty(make_unique<ArrayProperty<double>>("SourcePosition"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("SourcePosition"),
                   "A vector of 3 doubles for position of source.");
 
-  declareProperty(make_unique<ArrayProperty<double>>("SamplePosition"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("SamplePosition"),
                   "A vector of 3 doubles for position of sample.");
 
-  declareProperty(make_unique<ArrayProperty<double>>("PixelDimension"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("PixelDimension"),
                   "A vector of 8 doubles to determine a cubic pixel's size.");
 
   declareProperty("IsBaseName", true,
@@ -90,13 +90,13 @@ void ConvertCWSDExpToMomentum::init() {
                   "base name without directory.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Name of optional background workspace.");
 
   declareProperty(
-      make_unique<FileProperty>("Directory", "",
-                                FileProperty::OptionalDirectory),
+      std::make_unique<FileProperty>("Directory", "",
+                                     FileProperty::OptionalDirectory),
       "Directory where data files are if InputWorkspace gives data file name "
       "as the base file name as indicated by 'IsBaseName'.");
 }
@@ -245,20 +245,15 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   // Check whether to add / or \ to m_dataDir
   std::string sep;
   if (!m_dataDir.empty()) {
-// Determine system
-#if _WIN64
-    const bool isWindows = true;
-#elif _WIN32
-    const bool isWindows = true;
-#else
-    const bool isWindows = false;
-#endif
-
-    if (isWindows && *m_dataDir.rbegin() != '\\') {
+#if defined _WIN32 || defined _WIN64
+    if (*m_dataDir.rbegin() != '\\') {
       sep = "\\";
-      // cppcheck-suppress knownConditionTrueFalse
-    } else if (!isWindows && *m_dataDir.rbegin() != '/')
+    }
+#else
+    if (*m_dataDir.rbegin() != '/') {
       sep = "/";
+    }
+#endif
   }
 
   // Init some variables

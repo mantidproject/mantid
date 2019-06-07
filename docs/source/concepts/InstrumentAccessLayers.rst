@@ -37,11 +37,19 @@ There is also a near-complete implementation of the "real" ``DetectorInfo`` clas
 
 ``ExperimentInfo`` now also provides a method ``mutableDetectorInfo()`` so that non-const access to the DetectorInfo is possible for purposes of writing detector related information such as positions or rotations. 
 
+The python interface to ``DetectorInfo`` has matured, and includes widespread immutable access via iterators. The iterators can also be used to set masking flags.
+
+See :ref:`DetectorInfo <DetectorInfo>` for more information.
+
 ComponentInfo
 ______________
 ``ComponentInfo`` can be obtatined from a call to ``ExperimentInfo::componentInfo()`` (usually this method would be called on ``MatrixWorkspace``). Much like ``DetectorInfo``, the ``ComponentInfo`` yielded from this method call is a wrapper, which contains shape and index information, that cannot yet be moved in to the real ``Beamline::ComponentInfo``. However, replacing existing usage of ``IComponent`` and ``IObjComponent`` wherever possible with ``ComponentInfo`` across the framework will represent a major step forwards.
 
 For writing to the component tree. You can extract a non-const ``ComponentInfo`` via ``ExperimentInfo::mutableComponentInfo``.
+
+The python interface to ``ComponentInfo`` has matured, and now provides equal, if not better support than the ``Instrument`` API for navigating the high-level instrument. Iterator support has also been provided for ``ComponentInfo``.
+
+See :ref:`ComponentInfo <ComponentInfo>` for more information.
 
 Changes for Rollout
 -------------------

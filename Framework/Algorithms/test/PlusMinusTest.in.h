@@ -71,19 +71,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
     //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument );
-    TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), const std::invalid_argument &);
+    TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace","test_out2") );
     delete alg;
   }
 
-
-
-
   //====================================================================================
   //====================================================================================
   //====================================================================================
-
 
   void test_CompoundAssignment()
   {
@@ -153,13 +149,9 @@ public:
     }
   }
 
-
-
-
   //====================================================================================
   //====================================================================================
   //====================================================================================
-
 
   void test_1D_1D()
   {
@@ -472,9 +464,6 @@ public:
     }
   }
 
-
-
-
   void test_Event_Event()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
@@ -505,7 +494,6 @@ public:
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     performTest_fails(work_in1,work_in2, false);
   }
-
 
   void test_EventWithASingleBin_EventWithASingleBin()
   {
@@ -600,14 +588,7 @@ public:
     }
   }
 
-
-
-
-
-
-
   //============================================================================
-
 
   std::string describe_workspace(const MatrixWorkspace_sptr ws)
   {
@@ -724,7 +705,6 @@ public:
         TSM_ASSERT( message, ews_out);
         // The # of events is equal to the sum of the original amount
         TSM_ASSERT_EQUALS( message, ews_out->getNumberEvents(), numEvents1 + numEvents2 );
-        std::cout << ews_out->y(0)[0] << " after adding (Y\n";
       }
       else
       {
@@ -880,11 +860,6 @@ public:
   bool checkDataItem (const MatrixWorkspace_sptr work_in1,  const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1,
       size_t i, size_t ws2Index)
   {
-    // Avoid going out of bounds! For some of the grouped ones
-//    if (i/work_in1->blocksize() >= work_in1->getNumberHistograms())
-//      return true;
-//    if (ws2Index/work_in2->blocksize() >= work_in2->getNumberHistograms())
-//      return true;
     const size_t work_in1_blksize = work_in1->blocksize();
     const size_t work_in2_blksize = work_in2->blocksize();
 
@@ -916,35 +891,6 @@ public:
     return (diff < 0.0001);
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   int numBins;
   int numPixels;
   std::string wsName_EW, wsName_2D, wsNameOut;
@@ -960,8 +906,6 @@ public:
       int outputWorkspaceWillBe = 0
       )
   {
-    //lhs->setName("MinusTest_lhs");
-    //rhs->setName("MinusTest_rhs");
     switch (outputWorkspaceWillBe)
     {
     case 0:
@@ -1147,27 +1091,28 @@ public:
 
 class @PLUSMINUSTEST_CLASS@Performance : public CxxTest::TestSuite
 {
-  bool DO_PLUS;
-  Workspace2D_sptr ws2D_1, ws2D_2;
+  Workspace2D_sptr m_ws2D_1, m_ws2D_2;
 
 public:
   static @PLUSMINUSTEST_CLASS@Performance *createSuite() { return new @PLUSMINUSTEST_CLASS@Performance(); }
   static void destroySuite( @PLUSMINUSTEST_CLASS@Performance *suite ) { delete suite; }
 
-  @PLUSMINUSTEST_CLASS@Performance()
-  {
-    DO_PLUS = @PLUSMINUSTEST_DO_PLUS@;
-  }
-  
   void setUp() override
   {
-  	ws2D_1 = WorkspaceCreationHelper::create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
-   	ws2D_2 = WorkspaceCreationHelper::create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
+    constexpr int histograms{100000};
+    constexpr int bins{1000};
+    m_ws2D_1 = WorkspaceCreationHelper::create2DWorkspace(histograms, bins);
+    m_ws2D_2 = WorkspaceCreationHelper::create2DWorkspace(histograms, bins);
   }
   
   void test_large_2D()
   {
-  	MatrixWorkspace_sptr out = ws2D_1 * ws2D_2;
+    constexpr bool doPlus{@PLUSMINUSTEST_DO_PLUS@};
+    if (doPlus) {
+      MatrixWorkspace_sptr out = m_ws2D_1 + m_ws2D_2;
+    } else {
+      MatrixWorkspace_sptr out = m_ws2D_1 - m_ws2D_2;
+    }
   }
 
 }; // end of class @PLUSMINUSTEST_CLASS@Performance

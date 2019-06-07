@@ -217,7 +217,7 @@ public:
 
   /** @name IAlgorithm methods */
   void initialize() override;
-  bool execute() override;
+  bool execute() override final;
   void executeAsChildAlg() override;
   std::map<std::string, std::string> validateInputs() override;
   bool isInitialized() const override;
@@ -271,9 +271,11 @@ public:
   /// Serialize an object to a string
   std::string toString() const override;
   /// Serialize an object to a json object
-  ::Json::Value toJson() const;
+  ::Json::Value toJson() const override;
   /// De-serialize an object from a string
   static IAlgorithm_sptr fromString(const std::string &input);
+  /// De-serialize an object from a Json
+  static IAlgorithm_sptr fromJson(const Json::Value &input);
   /// Construct an object from a history entry
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory &history);
   //@}
@@ -417,6 +419,8 @@ private:
   void linkHistoryWithLastChild();
 
   void logAlgorithmInfo() const;
+
+  bool executeInternal();
 
   bool executeAsyncImpl(const Poco::Void &i);
 

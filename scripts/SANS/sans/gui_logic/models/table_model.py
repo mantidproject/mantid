@@ -128,8 +128,14 @@ class TableModel(object):
         row = [''] * 16
         return TableIndexModel(*row)
 
+    def get_non_empty_rows(self, rows):
+        return list(filter(lambda x: not self.get_table_entry(x).is_empty(), rows))
+
     def get_options_hint_strategy(self):
         return OptionsColumnModel.get_hint_strategy()
+
+    def get_sample_shape_hint_strategy(self):
+        return SampleShapeColumnModel.get_hint_strategy()
 
     def set_row_to_processed(self, row, tool_tip):
         self._table_entries[row].update_attribute('row_state', RowState.Processed)
@@ -185,7 +191,8 @@ class TableModel(object):
             self._table_entries[row].update_attribute('sample_thickness', rounded_file_thickness)
             self._table_entries[row].update_attribute('sample_height', rounded_file_height)
             self._table_entries[row].update_attribute('sample_width', rounded_file_width)
-            self._table_entries[row].update_attribute('sample_shape', file_information.get_shape())
+            if self._table_entries[row].sample_shape_string == "":
+                self._table_entries[row].update_attribute('sample_shape', file_information.get_shape())
             self._table_entries[row].file_finding = False
             self.reset_row_state(row)
 
@@ -269,10 +276,11 @@ class TableIndexModel(object):
         self.sample_thickness = sample_thickness
         self.sample_height = sample_height
         self.sample_width = sample_width
-        self.sample_shape = sample_shape
         self.output_name = output_name
 
         self.options_column_model = options_column_string
+        self.sample_shape_model = SampleShapeColumnModel()
+        self.sample_shape = sample_shape
 
         self.row_state = RowState.Unprocessed
 
@@ -289,6 +297,19 @@ class TableIndexModel(object):
     def options_column_model(self, value):
         self._options_column_model = OptionsColumnModel(value)
 
+    # Sample shape
+    @property
+    def sample_shape_string(self):
+        return self.sample_shape_model.sample_shape_string
+
+    @property
+    def sample_shape(self):
+        return self.sample_shape_model.sample_shape
+
+    @sample_shape.setter
+    def sample_shape(self, value):
+        self.sample_shape_model(value)
+
     def update_attribute(self, attribute_name, value):
         setattr(self, attribute_name, value)
 
@@ -300,12 +321,13 @@ class TableIndexModel(object):
 
     def to_list(self):
         return [self.sample_scatter, self._string_period(self.sample_scatter_period), self.sample_transmission,
-                self._string_period(self.sample_transmission_period),self.sample_direct,
+                self._string_period(self.sample_transmission_period), self.sample_direct,
                 self._string_period(self.sample_direct_period), self.can_scatter,
                 self._string_period(self.can_scatter_period), self.can_transmission,
                 self._string_period(self.can_transmission_period), self.can_direct,
                 self._string_period(self.can_direct_period), self.output_name, self.user_file, self.sample_thickness,
-                self.sample_height, self.sample_width, self._convert_sample_shape_to_string(self.sample_shape),
+                self.sample_height, self.sample_width,
+                self.sample_shape_string,
                 self.options_column_model.get_options_string()]
 
     def to_batch_list(self):
@@ -313,26 +335,14 @@ class TableIndexModel(object):
         :return: a list of data in the order as would typically appear
         in a batch file
         """
-        return_list = [self.sample_scatter, self.output_name, self.sample_transmission,
+        return_list = [self.sample_scatter, self.sample_transmission,
                        self.sample_direct, self.can_scatter, self.can_transmission,
-                       self.can_direct, self.user_file]
-        return_list = list(map(str, return_list))
-        return_list = list(map(str.strip, return_list))
-        return return_list
-
-    def _convert_sample_shape_to_string(self, shape):
-        if isinstance(shape, str):
-            # TODO temporary fix to shape already being a str
-            # find out where this is being converted as we are trying to convert twice
-            return shape
-        if shape:
-            return SampleShape.to_string(shape)
-        else:
-            return ''
+                       self.can_direct, self.output_name, self.user_file]
+        return list(map(lambda item: str(item).strip(), return_list))
 
     def isMultiPeriod(self):
-        return any ((self.sample_scatter_period, self.sample_transmission_period ,self.sample_direct_period,
-                     self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
+        return any((self.sample_scatter_period, self.sample_transmission_period, self.sample_direct_period,
+                    self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
 
     def is_empty(self):
         return not any((self.sample_scatter, self.sample_transmission, self.sample_direct, self.can_scatter,
@@ -359,15 +369,20 @@ class OptionsColumnModel(object):
 
     @staticmethod
     def _get_permissible_properties():
-        return {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
-                "MergeShift": float}
+        return {"WavelengthMin": float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
+                "MergeShift": float, "PhiMin": float, "PhiMax": float, "UseMirror": options_column_bool}
 
     @staticmethod
     def get_hint_strategy():
         return BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
-                                  "MergeScale": 'The scale applied to the HAB when mergeing',
-                                  "MergeShift": 'The shift applied to the HAB when mergeing',
+                                  "PhiMin": 'The min angle of the detector to accept.'
+                                            ' Anti-clockwise from horizontal.',
+                                  "PhiMax": 'The max angle of the detector to accept.'
+                                            ' Anti-clockwise from horizontal.',
+                                  "UseMirror": 'True or False. Whether or not to accept phi angle in opposing quadrant',
+                                  "MergeScale": 'The scale applied to the HAB when merging',
+                                  "MergeShift": 'The shift applied to the HAB when merging',
                                   "EventSlices": 'The event slices to reduce.'
                                   ' The format is the same as for the event slices'
                                   ' box in settings, however if a comma separated list is given '
@@ -430,3 +445,65 @@ class OptionsColumnModel(object):
 
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
+
+
+class SampleShapeColumnModel(object):
+    SAMPLE_SHAPES = ["cylinder", "disc", "flatplate"]
+    SAMPLE_SHAPES_DICT = {"cylinder": "Cylinder",
+                          "disc": "Disc",
+                          "flatplate": "FlatPlate"}
+
+    def __init__(self):
+        self.sample_shape = ""
+        self.sample_shape_string = ""
+
+    def __call__(self, original_value):
+        self._get_sample_shape(original_value)
+
+    def _get_sample_shape(self, original_value):
+        try:
+            original_value = SampleShape.to_string(original_value)
+        except RuntimeError as e:
+            if not isinstance(original_value, str):
+                raise ValueError(str(e))
+
+        value = original_value.strip().lower()
+        if value == "":
+            self.sample_shape = ""
+            self.sample_shape_string = ""
+        else:
+            for shape in SampleShapeColumnModel.SAMPLE_SHAPES:
+                if shape.startswith(value):
+                    shape_enum_string = SampleShapeColumnModel.SAMPLE_SHAPES_DICT[shape]
+                    self.sample_shape = SampleShape.from_string(shape_enum_string)
+                    self.sample_shape_string = shape_enum_string
+                    break
+
+    @staticmethod
+    def get_hint_strategy():
+        return BasicHintStrategy({"Cylinder": "",
+                                  "Disc": "",
+                                  "FlatPlate": ""})
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return self.__dict__ != other.__dict__
+
+
+def options_column_bool(string):
+    """
+    Evaluate input string as a bool. Used for UseMirror in Options column,
+    as evaluating bool("False") returns True (any string is Truthy).
+    :param string: User input string to be evaluated as False or True
+    :return: True or False
+    """
+    truthy_strings = ("true", "1", "yes", "t", "y")  # t short for true, y short for yes
+    falsy_strings = ("false", "0", "no", "f", "n")
+    if string.lower() in truthy_strings:
+        return True
+    elif string.lower() in falsy_strings:
+        return False
+    else:
+        raise ValueError("Could not evaluate {} as a boolean value. It should be True or False.".format(string))

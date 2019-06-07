@@ -9,6 +9,9 @@ import unittest
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantid.simpleapi import CreateWorkspace
+from Muon.GUI.Common.test_helpers.general_test_helpers import (create_group_populated_by_two_workspace,
+                                                               create_group_populated_by_two_rebinned_workspaces,
+                                                               create_group_populated_by_two_binned_and_two_unbinned_workspaces)
 
 
 class MuonGroupTest(unittest.TestCase):
@@ -23,7 +26,6 @@ class MuonGroupTest(unittest.TestCase):
     to prevent obvious misuse. The class is used by the MuonAnalysis interface and so these
     tests should be amended with care.
     """
-
     def test_that_cannot_initialize_MuonGroup_without_name(self):
         with self.assertRaises(TypeError):
             MuonGroup()
@@ -46,17 +48,17 @@ class MuonGroupTest(unittest.TestCase):
         dataY = [10, 20, 30, 20, 10]
         input_workspace = CreateWorkspace(dataX, dataY)
 
-        self.assertIsNone(group.workspace)
+        self.assertEqual(group.workspace, {})
         group.workspace = MuonWorkspaceWrapper(input_workspace)
         self.assertIsNotNone(group.workspace)
 
     def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):
         group = MuonGroup(group_name="group1")
-        self.assertIsNone(group.workspace)
-
+        self.assertEqual(group.workspace, {})
+        
         with self.assertRaises(AttributeError):
             group.workspace = [1, 2, 3]
-        self.assertIsNone(group.workspace)
+        self.assertEqual(group.workspace, {})
 
     def test_that_detector_ids_cannot_be_set_as_string(self):
         group = MuonGroup(group_name="group1")
@@ -101,6 +103,78 @@ class MuonGroupTest(unittest.TestCase):
 
         self.assertEqual(group.detectors, [])
         self.assertEqual(group.n_detectors, 0)
+
+    def test_get_asymmetry_workspace_names_returns_relevant_workspace_names_if_workspace_is_not_hidden(self):
+        group = create_group_populated_by_two_workspace()
+
+        workspace_list = group.get_asymmetry_workspace_names([[22222]])
+
+        self.assertEqual(workspace_list, ['asymmetry_name_22222'])
+
+    def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden(self):
+        group = create_group_populated_by_two_workspace()
+        group._asymmetry_estimate[str([22222])].hide()
+
+        workspace_list = group.get_asymmetry_workspace_names([[22222]])
+
+        self.assertEqual(workspace_list, [])
+
+    def test_get_asymmetry_workspace_names_returns_relevant_workspace_names_if_workspace_is_not_hidden_for_rebinned(self):
+        group = create_group_populated_by_two_rebinned_workspaces()
+
+        workspace_list = group.get_asymmetry_workspace_names_rebinned([[22222]])
+
+        self.assertEqual(workspace_list, ['asymmetry_name_22222_rebin'])
+
+    def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden_for_rebinned(self):
+        group = create_group_populated_by_two_rebinned_workspaces()
+        group._asymmetry_estimate_rebin[str([22222])].hide()
+
+        workspace_list = group.get_asymmetry_workspace_names_rebinned([[22222]])
+
+        self.assertEqual(workspace_list, [])
+
+    def test_unbinned_asymmetry_name_returns_binned_name(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_33333')
+
+        self.assertEqual(rebinned_workspace_name, 'asymmetry_name_33333_rebin')
+
+    def test_unbinned_counts_workspace_returns_binned_name(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('counts_name_33333')
+
+        self.assertEqual(rebinned_workspace_name, 'counts_name_33333_rebin')
+
+    def test_binned_counts_workspace_returns_unbinned_name(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('counts_name_33333_rebin')
+
+        self.assertEqual(rebinned_workspace_name, 'counts_name_33333')
+
+    def test_binned_asymmetry_name_returns_unbinned_name(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_33333_rebin')
+
+        self.assertEqual(rebinned_workspace_name, 'asymmetry_name_33333')
+
+    def test_nothing_returned_if_workspace_does_not_exist(self):
+        group = create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_43333_rebin')
+
+        self.assertEqual(rebinned_workspace_name, None)
+
+    def test_nothing_returned_equivalent_workspace_does_not_exist(self):
+        group = create_group_populated_by_two_workspace()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_33333')
+
+        self.assertEqual(rebinned_workspace_name, None)
 
 
 if __name__ == '__main__':

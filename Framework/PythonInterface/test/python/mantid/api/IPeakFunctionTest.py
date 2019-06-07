@@ -75,10 +75,10 @@ class IPeakFunctionTest(unittest.TestCase):
         func.initialize()
         xvals=np.array([1.,2.,3.])
         out = func.functionLocal(xvals)
-        self.assertEquals(3, out.shape[0])
-        self.assertEquals(5., out[0])
-        self.assertEquals(10., out[1])
-        self.assertEquals(15., out[2])
+        self.assertEqual(3, out.shape[0])
+        self.assertEqual(5., out[0])
+        self.assertEqual(10., out[1])
+        self.assertEqual(15., out[2])
 
     def test_get_set_intensity(self):
         func = RectangularFunction()
@@ -94,7 +94,7 @@ class IPeakFunctionTest(unittest.TestCase):
         # Setting the intensity only changes height, not width
         func.setIntensity(12.0)
 
-        self.assertEquals(func.fwhm(), 3.0)
+        self.assertEqual(func.fwhm(), 3.0)
         self.assertAlmostEquals(func.height(), 4.0, places=10)
         self.assertAlmostEquals(func.intensity(), 12.0, places=10)
 

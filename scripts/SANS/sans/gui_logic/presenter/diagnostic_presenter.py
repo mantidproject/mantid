@@ -42,7 +42,6 @@ class DiagnosticsPagePresenter(object):
             self._presenter.on_processing_error_integral(error)
 
     def __init__(self, parent_presenter, WorkHandler, run_integral, create_state, facility):
-        super(DiagnosticsPagePresenter, self).__init__()
         self._view = None
         self._facility = facility
         self._parent_presenter = parent_presenter

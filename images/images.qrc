@@ -2,7 +2,7 @@
     <qresource prefix="/">
         <file>pvIcon.png</file>
         <file>MantidSplashScreen.png</file>
-        <file>MantidPlot_Icon_32offset.png</file>
+        <file>mantidplot.png</file>
         <file>First_use_Background.png</file>
         <file>SNS_logo_trans_back.gif</file>
         <file>Tessella_Logo_Transparent.gif</file>

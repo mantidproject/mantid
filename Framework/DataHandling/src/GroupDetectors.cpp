@@ -9,7 +9,6 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <numeric>
@@ -25,22 +24,22 @@ using namespace API;
 
 void GroupDetectors::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "Workspace", "", Direction::InOut,
           boost::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectraList"),
       "An array containing a list of the indexes of the spectra to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
   declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList"),
+      std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
       "set)");
 
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
 
   declareProperty("ResultIndex", -1,
@@ -64,17 +63,9 @@ void GroupDetectors::exec() {
     return;
   }
 
-  // Bin boundaries need to be the same, so check if they actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(*WS)) {
-    g_log.error("Can only group if the histograms have common bin boundaries");
-    throw std::runtime_error(
-        "Can only group if the histograms have common bin boundaries");
-  }
-
   // If the spectraList property has been set, need to loop over the workspace
-  // looking for the
-  // appropriate spectra number and adding the indices they are linked to the
-  // list to be processed
+  // looking for the appropriate spectra number and adding the indices they
+  // are linked to the list to be processed
   if (!spectraList.empty()) {
     indexList = WS->getIndicesFromSpectra(spectraList);
   } // End dealing with spectraList

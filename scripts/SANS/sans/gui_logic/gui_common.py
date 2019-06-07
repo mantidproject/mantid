@@ -4,10 +4,14 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
-from qtpy.QtWidgets import (QFileDialog)  # noqa
-from qtpy.QtCore import (QSettings)  # noqa
 import os
+
+from qtpy.QtCore import QSettings
+from qtpy.QtWidgets import QFileDialog
+
+from sans.common.constant_containers import (SANSInstrument_enum_as_key, SANSInstrument_string_as_key_NoInstrument,
+                                             SANSInstrument_string_list)
+from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -101,7 +105,7 @@ def get_reduction_mode_strings_for_gui(instrument=None):
 
 
 def get_instrument_strings_for_gui():
-        return ['SANS2D', 'LOQ', 'LARMOR', 'ZOOM']
+        return SANSInstrument_string_list
 
 
 def get_reduction_selection(instrument):
@@ -125,18 +129,16 @@ def get_reduction_selection(instrument):
 
 def get_string_for_gui_from_reduction_mode(reduction_mode, instrument):
     reduction_selection = get_reduction_selection(instrument)
-    if reduction_selection and reduction_mode in list(reduction_selection.keys()):
+    if reduction_selection and reduction_mode in reduction_selection:
         return reduction_selection[reduction_mode]
     else:
         return None
 
 
 def get_string_for_gui_from_instrument(instrument):
-    instrument_selection = {SANSInstrument.SANS2D: 'SANS2D', SANSInstrument.LOQ: 'LOQ', SANSInstrument.LARMOR: 'LARMOR'
-                            , SANSInstrument.ZOOM: 'ZOOM'}
-    if instrument in list(instrument_selection.keys()):
-        return instrument_selection[instrument]
-    else:
+    try:
+        return SANSInstrument_enum_as_key[instrument]
+    except KeyError:
         return None
 
 
@@ -161,17 +163,9 @@ def get_detector_from_gui_selection(gui_selection):
 
 
 def get_instrument_from_gui_selection(gui_selection):
-    if gui_selection == 'LOQ':
-        return SANSInstrument.LOQ
-    elif gui_selection == 'LARMOR':
-        return SANSInstrument.LARMOR
-    elif gui_selection == 'SANS2D':
-        return SANSInstrument.SANS2D
-    elif gui_selection == 'ZOOM':
-        return SANSInstrument.ZOOM
-    elif gui_selection == 'NoInstrument':
-        return SANSInstrument.NoInstrument
-    else:
+    try:
+        return SANSInstrument_string_as_key_NoInstrument[gui_selection]
+    except KeyError:
         raise RuntimeError("Instrument selection is not valid.")
 
 
@@ -198,6 +192,16 @@ def load_default_file(line_edit_field, q_settings_group_key, q_settings_key):
     settings.endGroup()
 
     line_edit_field.setText(default_file)
+
+
+def load_property(q_settings_group_key, q_settings_key, type=str):
+    settings = QSettings()
+    settings.beginGroup(q_settings_group_key)
+    default = False if type == bool else ""
+    default_property = settings.value(q_settings_key, default, type=type)
+    settings.endGroup()
+
+    return default_property
 
 
 def set_setting(q_settings_group_key, q_settings_key, value):
@@ -234,3 +238,64 @@ def add_dir_to_datasearch(batch_file_path, current_directories):
 def remove_dir_from_datasearch(batch_file_path, directories):
     new_dirs = ";".join([path for path in directories.split(";") if path != batch_file_path])
     return new_dirs
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# GUI Property Defaults
+# ----------------------------------------------------------------------------------------------------------------------
+class SANSGuiPropertiesHandler(object):
+    """
+    This class handles the setting and getting
+    of SANSDataProcessorGUI default properties.
+    """
+    def __init__(self, keys, line_edits={}):
+        """
+        Initialise a properties handler for a particular pyqt view.
+        :param keys: A dict where keys are q_settings_key and values are a tuple of (update_function, type)
+                    where update function is method in the view to be called when loading a property and type
+                    is the data type of the property
+        :param line_edits: A dict where keys are the q_settings_key and values are a view's line edits to be updated
+        """
+        self.__generic_settings = GENERIC_SETTINGS
+
+        self.keys = keys
+        self.line_edits = line_edits
+
+        self._set_out_defaults()
+
+    def _set_out_defaults(self):
+        for property_key, (load_func, property_type) in self.keys.items():
+            args = []
+            if property_key in self.line_edits:
+                self._load_default_file(self.line_edits[property_key], self.__generic_settings, property_key)
+            else:
+                try:
+                    property_value = self._load_property(self.__generic_settings, property_key)
+                    args.append(property_value)
+                except RuntimeError:
+                    pass
+            load_func(*args)
+
+    @staticmethod
+    def _load_default_file(line_edit_field, q_settings_group_key, q_settings_key):
+        settings = QSettings()
+        settings.beginGroup(q_settings_group_key)
+        default_file = settings.value(q_settings_key, "", type=str)
+        settings.endGroup()
+
+        line_edit_field.setText(default_file)
+
+    @staticmethod
+    def _load_property(q_settings_group_key, q_settings_key):
+        settings = QSettings()
+        settings.beginGroup(q_settings_group_key)
+        default_property = settings.value(q_settings_key, "", type=str)
+        settings.endGroup()
+
+        return default_property
+
+    def set_setting(self, q_settings_key, value):
+        settings = QSettings()
+        settings.beginGroup(self.__generic_settings)
+        settings.setValue(q_settings_key, value)
+        settings.endGroup()

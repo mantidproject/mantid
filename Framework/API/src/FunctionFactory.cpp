@@ -11,10 +11,12 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 
@@ -212,23 +214,23 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     inputError(expr.str());
 
   for (; it != terms.end(); ++it) {
-    const Expression &term = it->bracketsRemoved();
+    const Expression &currentTerm = it->bracketsRemoved();
     IFunction_sptr fun;
     std::map<std::string, std::string> pAttributes;
-    if (term.name() == ";") {
-      fun = createComposite(term, pAttributes);
+    if (currentTerm.name() == ";") {
+      fun = createComposite(currentTerm, pAttributes);
       if (!fun)
         continue;
     } else {
-      std::string parName = term[0].name();
+      std::string parName = currentTerm[0].name();
       if (parName.size() >= 10 && parName.substr(0, 10) == "constraint") {
-        addConstraints(cfun, term[1].bracketsRemoved());
+        addConstraints(cfun, currentTerm[1].bracketsRemoved());
         continue;
       } else if (parName == "ties") {
-        addTies(cfun, term[1].bracketsRemoved());
+        addTies(cfun, currentTerm[1].bracketsRemoved());
         continue;
       } else {
-        fun = createSimple(term, pAttributes);
+        fun = createSimple(currentTerm, pAttributes);
       }
     }
     cfun->addFunction(fun);
@@ -359,6 +361,22 @@ void FunctionFactoryImpl::addTie(IFunction_sptr fun,
       fun->tie(expr[i].name(), value);
     }
   }
+}
+
+std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
+  auto &allNames = getFunctionNames<IFunction1D>();
+  std::vector<std::string> names;
+  names.reserve(allNames.size());
+  auto excludes =
+      Kernel::ConfigService::Instance().getString("curvefitting.guiExclude");
+  Kernel::StringTokenizer tokenizer(excludes, ";",
+                                    Kernel::StringTokenizer::TOK_TRIM);
+  std::set<std::string> excludeList(tokenizer.begin(), tokenizer.end());
+  std::copy_if(allNames.cbegin(), allNames.cend(), std::back_inserter(names),
+               [&excludeList](const auto &name) {
+                 return excludeList.count(name) == 0;
+               });
+  return names;
 }
 
 void FunctionFactoryImpl::subscribe(

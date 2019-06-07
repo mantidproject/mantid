@@ -13,6 +13,7 @@
 #include "BoundingBox.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Material.h"
 #include <map>
@@ -74,7 +75,7 @@ public:
 
   int getName() const override { return 0; }
 
-  const Kernel::Material material() const override;
+  const Kernel::Material &material() const override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
@@ -123,9 +124,12 @@ public:
   /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
+  detail::ShapeInfo::GeometryShape shape() const override;
+  const detail::ShapeInfo &shapeInfo() const override;
+
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &myradius,
-                     double &myheight) const override;
+                     std::vector<Kernel::V3D> &vectors, double &innerRadius,
+                     double &radius, double &height) const override;
 
   /// Read access to mesh object for rendering
   size_t numberOfVertices() const;
@@ -134,15 +138,16 @@ public:
   std::vector<uint32_t> getTriangles() const;
 
   void rotate(const Kernel::Matrix<double> &);
-  void translate(Kernel::V3D);
+  void translate(const Kernel::V3D &);
   void updateGeometryHandler();
 
 private:
   void initialize();
   /// Get intersections
-  void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
-                        std::vector<Kernel::V3D> &intersectionPoints,
-                        std::vector<int> &entryExitFlags) const;
+  void getIntersections(
+      const Kernel::V3D &start, const Kernel::V3D &direction,
+      std::vector<Kernel::V3D> &intersectionPoints,
+      std::vector<Mantid::Geometry::TrackDirection> &entryExitFlags) const;
 
   /// Get triangle
   bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2,

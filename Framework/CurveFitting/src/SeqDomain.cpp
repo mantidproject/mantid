@@ -9,17 +9,18 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/ParDomain.h"
+#include <numeric>
 
 namespace Mantid {
 namespace CurveFitting {
 
 /// Return the number of points in the domain
 size_t SeqDomain::size() const {
-  size_t n = 0;
-  for (const auto &creator : m_creators) {
-    n += creator->getDomainSize();
-  }
-  return n;
+  return std::accumulate(m_creators.cbegin(), m_creators.cend(),
+                         static_cast<size_t>(0),
+                         [](size_t sum, const auto &creator) {
+                           return sum + creator->getDomainSize();
+                         });
 }
 
 /// Return the number of parts in the domain

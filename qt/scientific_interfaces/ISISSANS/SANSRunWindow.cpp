@@ -136,7 +136,7 @@ void setStringSetting(const QString &settingName, const QString &settingValue) {
 
   if (!settings->existsProperty(name))
     settings->declareProperty(
-        Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
+        std::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
         value);
   else
     settings->setProperty(name, value);
@@ -886,9 +886,10 @@ bool SANSRunWindow::loadUserFile() {
     return false;
   }
 
-  const auto settings = getReductionSettings();
-
-  const double unit_conv(1000.);
+  // Make sure the reduction settings property object exists in the
+  // PropertyManagerDataService.
+  getReductionSettings();
+  constexpr double unit_conv(1000.);
   // Radius
   double dbl_param =
       runReduceScriptFunction("print(i.ReductionSingleton().mask.min_radius)")
@@ -1913,16 +1914,16 @@ void SANSRunWindow::setSANS2DGeometry(
              << "Rear_Det_X";
   int index = 0;
   foreach (QString detname, dets_names) {
-    QString distance = logvalues[index];
+    QString logDistance = logvalues[index];
     try {
-      double d = distance.toDouble();
-      distance = QString::number(d, 'f', 1);
+      double d = logDistance.toDouble();
+      logDistance = QString::number(d, 'f', 1);
     } catch (...) {
       // if distance is not a double, for now just proceed
     }
     QLabel *lbl = m_s2d_detlabels[wscode].value(detname);
     if (lbl)
-      lbl->setText(distance);
+      lbl->setText(logDistance);
     index += 1;
   }
 }
@@ -2034,8 +2035,6 @@ void SANSRunWindow::saveFileBrowse() {
                  QString::fromStdString(ConfigService::Instance().getString(
                      "defaultsave.directory")))
           .toString();
-
-  const QString filter = ";;AllFiles (*)";
 
   QString oFile = QFileDialog::getSaveFileName(
       this, title, prevPath + "/" + m_uiForm.outfile_edit->text());
@@ -2165,8 +2164,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
 
   // Set the geometry if the sample has been changed
   if (m_sample_file != sample) {
-    const auto sample = sample_workspace->sample();
-    const int geomId = sample.getGeometryFlag();
+    const auto sampleWs = sample_workspace->sample();
+    const int geomId = sampleWs.getGeometryFlag();
 
     if (geomId > 0 && geomId < 4) {
       m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
@@ -2184,10 +2183,9 @@ bool SANSRunWindow::handleLoadButtonClick() {
           make_tuple(m_uiForm.sample_height, &Sample::getHeight, "height"));
 
       // Populate the sample geometry fields, but replace any zero values with
-      // 1.0, and
-      // warn the user where this has occured.
+      // 1.0, and warn the user where this has occured.
       for (auto info : sampleInfoList) {
-        const auto value = info.get<1>()(&sample);
+        const auto value = info.get<1>()(&sampleWs);
         if (value == 0.0)
           g_log.warning("The sample geometry " + info.get<2>() +
                         " was found to be zero, so using a default value of "
@@ -3015,16 +3013,15 @@ void SANSRunWindow::handleDefSaveClick() {
 
   const QStringList algs(getSaveAlgs());
   QString saveCommand;
-  for (QStringList::const_iterator alg = algs.begin(); alg != algs.end();
-       ++alg) {
-    QString ext = SaveWorkspaces::getSaveAlgExt(*alg);
+  for (const auto &alg : algs) {
+    QString ext = SaveWorkspaces::getSaveAlgExt(alg);
     QString fname = fileBase.endsWith(ext) ? fileBase : fileBase + ext;
-    if ((*alg) == "SaveRKH")
+    if (alg == "SaveRKH")
       saveCommand +=
-          (*alg) + "('" + m_outputWS + "','" + fname + "', Append=False)\n";
-    else if ((*alg) == "SaveCanSAS1D") {
+          alg + "('" + m_outputWS + "','" + fname + "', Append=False)\n";
+    else if (alg == "SaveCanSAS1D") {
       saveCommand +=
-          (*alg) + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
+          alg + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
       Workspace_sptr workspace_ptr =
           AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
@@ -3047,9 +3044,9 @@ void SANSRunWindow::handleDefSaveClick() {
                      ", SampleWidth=" + sampleWidth +
                      ", SampleThickness=" + sampleThickness;
       saveCommand += ")\n";
-    } else if ((*alg) == "SaveNXcanSAS") {
+    } else if (alg == "SaveNXcanSAS") {
       saveCommand +=
-          (*alg) + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
+          alg + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
       Workspace_sptr workspace_ptr =
           AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
@@ -3062,7 +3059,7 @@ void SANSRunWindow::handleDefSaveClick() {
       }
       saveCommand += ")\n";
     } else
-      saveCommand += (*alg) + "('" + m_outputWS + "','" + fname + "')\n";
+      saveCommand += alg + "('" + m_outputWS + "','" + fname + "')\n";
   }
 
   saveCommand += "print('success')\n";
@@ -3256,8 +3253,8 @@ void SANSRunWindow::handleInstrumentChange() {
   QWidget *front_center_widgets[] = {
       m_uiForm.front_beam_x, m_uiForm.front_beam_y, m_uiForm.front_radio};
   bool loq_selected = (instClass == "LOQ()");
-  for (int i = 0; i < 3; i++)
-    front_center_widgets[i]->setEnabled(true);
+  for (auto &front_center_widget : front_center_widgets)
+    front_center_widget->setEnabled(true);
   // Set the label of the radio buttons according to the
   // beamline usage:
   // REAR/FRONT -> SANS2D
@@ -3483,10 +3480,10 @@ void SANSRunWindow::checkList() {
   // split up the comma separated list ignoring spaces
   Poco::StringTokenizer in(input, ",", Poco::StringTokenizer::TOK_TRIM);
   try {
-    for (Poco::StringTokenizer::Iterator i = in.begin(), end = in.end();
-         i != end; ++i) { // try a lexical cast, we don't need its result only
-                          // if there was an error
-      boost::lexical_cast<double>(*i);
+    for (const auto &i :
+         in) { // try a lexical cast, we don't need its result only
+               // if there was an error
+      boost::lexical_cast<double>(i);
     }
     // there were no errors
     if (!input.empty()) {
@@ -3967,8 +3964,8 @@ void SANSRunWindow::transSelectorChanged(int currindex) {
   QWidget *wid[] = {m_uiForm.trans_can_label, m_uiForm.transFitOnOff_can,
                     m_uiForm.transFit_ck_can, m_uiForm.trans_min_can,
                     m_uiForm.trans_max_can,   m_uiForm.trans_opt_can};
-  for (size_t i = 0; i < 6; i++)
-    wid[i]->setVisible(visible);
+  for (auto &i : wid)
+    i->setVisible(visible);
 }
 
 void SANSRunWindow::loadTransmissionSettings() {
@@ -4752,9 +4749,6 @@ void SANSRunWindow::updateBeamCenterCoordinates() {
  * Set the beam finder details
  */
 void SANSRunWindow::setBeamFinderDetails() {
-  // The instrument name
-  auto instrumentName = m_uiForm.inst_opt->currentText();
-
   // Set the labels according to the instrument
   auto requiresAngle = runReduceScriptFunction(
                            "print(i.is_current_workspace_an_angle_workspace())")

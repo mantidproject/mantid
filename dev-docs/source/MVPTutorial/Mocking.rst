@@ -22,10 +22,7 @@ First are the import statements
     import view
 
     import unittest
-    if sys.version_info.major == 3:
-        from unittest import mock
-    else:
-        import mock
+    from mantid.py3compat import mock
 
 A different import is used for ``mock``, depending on whether we're
 using Python 2 or 3.

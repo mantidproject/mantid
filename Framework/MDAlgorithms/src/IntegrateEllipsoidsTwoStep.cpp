@@ -19,7 +19,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/NearestNeighbours.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
@@ -61,12 +61,12 @@ void IntegrateEllipsoidsTwoStep::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input MatrixWorkspace with time-of-flight units along "
                   "X-axis and defined instrument with defined sample");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Workspace with peaks to be integrated");
 
@@ -115,8 +115,8 @@ void IntegrateEllipsoidsTwoStep::init() {
                   "before the background subtraction.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 }
@@ -220,8 +220,8 @@ void IntegrateEllipsoidsTwoStep::exec() {
   std::vector<std::pair<int, V3D>> weakPeaks, strongPeaks;
 
   // Compute signal to noise ratio for all peaks
-  int index = 0;
-  for (const auto &item : qList) {
+  for (int index = 0; static_cast<size_t>(index) < qList.size(); ++index) {
+    const auto &item = qList[index];
     const auto center = item.second;
     IntegrationParameters params = makeIntegrationParameters(center);
     auto sig2noise = integrator.estimateSignalToNoiseRatio(params, center);
@@ -242,7 +242,6 @@ void IntegrateEllipsoidsTwoStep::exec() {
                      << "\n";
       strongPeaks.push_back(result);
     }
-    ++index;
   }
 
   std::vector<std::pair<boost::shared_ptr<const Geometry::PeakShape>,
@@ -252,7 +251,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
   // Integrate strong peaks
   for (const auto &item : strongPeaks) {
     const auto index = item.first;
-    const auto q = item.second;
+    const auto &q = item.second;
     double inti, sigi;
 
     IntegrationParameters params = makeIntegrationParameters(q);
@@ -283,7 +282,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
   for (const auto &item : weakPeaks) {
     double inti, sigi;
     const auto index = item.first;
-    const auto q = item.second;
+    const auto &q = item.second;
 
     const auto result = kdTree.findNearest(Eigen::Vector3d(q[0], q[1], q[2]));
     const auto strongIndex = static_cast<int>(std::get<1>(result[0]));

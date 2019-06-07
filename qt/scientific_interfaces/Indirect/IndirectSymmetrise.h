@@ -22,7 +22,7 @@
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include <MantidQtWidgets/Common/QtPropertyBrowser/QtCheckBoxFactory>
+#include "MantidQtWidgets/Common/QtPropertyBrowser/QtCheckBoxFactory"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -76,7 +76,11 @@ private slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   Ui::IndirectSymmetrise m_uiForm;
+  double m_originalMax;
+  double m_originalMin;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

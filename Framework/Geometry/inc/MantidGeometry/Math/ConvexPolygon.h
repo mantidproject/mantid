@@ -73,6 +73,11 @@ public:
   ConvexPolygon(const Vertices &vertices);
   /// Destructor
   virtual ~ConvexPolygon() = default;
+  ConvexPolygon(ConvexPolygon &&) = default;
+  ConvexPolygon &operator=(ConvexPolygon &&) = default;
+  ConvexPolygon(const ConvexPolygon &) = default;
+  ConvexPolygon &operator=(const ConvexPolygon &) = default;
+
   /// Check if polygon is valid
   bool isValid() const;
   /// Clears all points

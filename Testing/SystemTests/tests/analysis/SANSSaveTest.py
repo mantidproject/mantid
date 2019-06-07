@@ -177,9 +177,9 @@ class SANSSaveTest(unittest.TestCase):
         reloaded_workspace = load_alg.getProperty("OutputWorkspace").value
         errors = reloaded_workspace.dataE(0)
         # Make sure that the errors are not zero
-        self.assertTrue(errors[0] > 1.0)
-        self.assertTrue(errors[14] > 1.0)
-        self.assertTrue(errors[45] > 1.0)
+        self.assertGreater(errors[0], 1.0)
+        self.assertGreater(errors[14], 1.0)
+        self.assertGreater(errors[45], 1.0)
 
         # Clean up
         self._remove_file(file_name)
