@@ -33,6 +33,9 @@ class PlotConfigDialogPresenter:
             curves_tab = CurvesTabWidgetPresenter(self.fig, parent=self.view)
             self.tab_widget_presenters.append(curves_tab)
             self.tab_widget_views.append((curves_tab.view, "Curves"))
+        else:
+            self.tab_widget_presenters.append(None)
+            self.tab_widget_views.append(None)
 
         self._add_tab_widget_views()
 
@@ -46,7 +49,8 @@ class PlotConfigDialogPresenter:
 
     def apply_properties(self):
         for tab in self.tab_widget_presenters:
-            tab.apply_properties()
+            if tab.view:
+                tab.apply_properties()
         self.fig.canvas.draw()
 
     def apply_properties_and_exit(self):

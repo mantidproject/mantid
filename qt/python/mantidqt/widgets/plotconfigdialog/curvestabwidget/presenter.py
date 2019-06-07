@@ -38,6 +38,7 @@ class CurvesTabWidgetPresenter:
 
         # Fill the fields in the view
         self.axes_names_dict = get_axes_names_dict(self.fig)
+        self.curve_names_dict = {}
         self.populate_select_axes_combo_box()
         self.populate_select_curve_combo_box()
         self.update_view()
@@ -60,10 +61,14 @@ class CurvesTabWidgetPresenter:
         curve = self.get_selected_curve()
         for tab in ['line_tab', 'marker_tab', 'errorbars_tab']:
             getattr(self, tab).apply_properties()
-        if 'nolegend' not in curve.get_label():
-            self.set_curve_label(curve, view_props.label)
+        self.set_curve_label(curve, view_props.label)
         hide_curve(curve, view_props.hide,
                    hide_bars=not self.errorbars_tab.view.get_hide())
+
+    def close_tab(self):
+        """Close the tab and set the view to None"""
+        self.view.close()
+        self.view = None
 
     def enable_tabs(self):
         """
@@ -100,12 +105,7 @@ class CurvesTabWidgetPresenter:
 
     def get_selected_curve(self):
         """Get selected Line2D or ErrorbarContainer object"""
-        for curve in self.get_selected_ax().get_lines():
-            if curve.get_label() == self.view.get_selected_curve_name():
-                return curve
-        for errorbar_container in self.get_selected_ax_errorbars():
-            if errorbar_container.get_label() == self.view.get_selected_curve_name():
-                return errorbar_container
+        return self.curve_names_dict[self.view.get_selected_curve_name()]
 
     def get_selected_curves_curve_properties(self):
         """Get top level properties from curve"""
@@ -144,20 +144,33 @@ class CurvesTabWidgetPresenter:
         """
         with BlockQSignals(self.view.select_curve_combo_box):
             self.view.select_curve_combo_box.clear()
-        curve_names = []
         selected_ax = self.get_selected_ax()
         if not selected_ax:
             self.view.close()
             return False
+
+        curve_names = []
         for errorbar_container in self.get_selected_ax_errorbars():
-            if 'nolegend' not in errorbar_container.get_label():
-                curve_names.append(errorbar_container.get_label())
+            self._set_curve_name(errorbar_container, curve_names)
         for line in self.get_selected_ax().get_lines():
-            if 'nolegend' not in line.get_label():
-                curve_names.append(line.get_label())
+            self._set_curve_name(line, curve_names)
 
         self.view.populate_select_curve_combo_box(curve_names)
         return True
+
+    def _set_curve_name(self, curve, curve_names):
+        label = self._get_curve_name(curve, len(curve_names))
+        if label:
+            curve_names.append(label)
+            self.curve_names_dict[label] = curve
+
+    @staticmethod
+    def _get_curve_name(curve, idx=0):
+        if curve.get_label():
+            if 'nolegend' not in curve.get_label():
+                return curve.get_label()
+        else:
+            return '_nolabel_{}'.format(idx)
 
     def remove_selected_curve(self):
         """
@@ -172,7 +185,7 @@ class CurvesTabWidgetPresenter:
             if self.view.select_curve_combo_box.count() == 0:
                 self.view.remove_select_axes_combo_box_selected_item()
                 if self.view.select_axes_combo_box.count() == 0:
-                    self.view.close()
+                    self.close_tab()
                     return
         self.update_view()
 
@@ -180,14 +193,17 @@ class CurvesTabWidgetPresenter:
         """Set label on curve and update its entry in the combo box"""
         self.update_legend()
         curve.set_label(label)
-        self.view.set_selected_curve_selector_text(label)
+        if label:
+            self.view.set_selected_curve_selector_text(label)
+            self.curve_names_dict[label] = curve
 
     def update_presenter_lines(self):
         """Update the line in the sub-tabs' presenters to selected curve"""
         curve = self.get_selected_curve()
         if isinstance(curve, ErrorbarContainer):
-            self.line_tab.set_line(curve[0])
-            self.marker_tab.set_line(curve[0])
+            if curve[0]:
+                self.line_tab.set_line(curve[0])
+                self.marker_tab.set_line(curve[0])
             self.errorbars_tab.set_line(curve)
         else:
             self.line_tab.set_line(curve)
@@ -206,14 +222,6 @@ class CurvesTabWidgetPresenter:
         self.errorbars_tab.update_view()
         # Enable/disable tabs
         self.enable_tabs()
-
-    @staticmethod
-    def get_legend_from_curve(curve):
-        """Get the legend from Line2D or errorbarContainer object"""
-        if isinstance(curve, ErrorbarContainer):
-            return curve.get_children()[0].axes.get_legend()
-        else:
-            return curve.axes.get_legend()
 
     def update_legend(self):
         curve = self.get_selected_curve()

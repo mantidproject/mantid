@@ -25,24 +25,24 @@ class ErrorbarsTabWidgetPresenter:
     def apply_properties(self):
         view_props = self.get_view_properties()
         if view_props:
-            self.apply_caps_properties(view_props)
-            self.apply_bars_properties(view_props)
+            if self.line[1]:
+                self.apply_caps_properties(view_props)
+            if self.line[2]:
+                self.apply_bars_properties(view_props)
             hide_errorbars(self.line, view_props.hide)
 
     def apply_caps_properties(self, props):
         caps_set = self.line[1]
-        if caps_set:
-            for caps in caps_set:
-                caps.set_markersize(2*props.capsize)
-                caps.set_markeredgewidth(props.cap_thickness)
-                caps.set_color(props.color)
+        for caps in caps_set:
+            caps.set_markersize(2*props.capsize)
+            caps.set_markeredgewidth(props.cap_thickness)
+            caps.set_color(props.color)
 
     def apply_bars_properties(self, props):
         bars_set = self.line[2]
-        if bars_set:
-            for bars in bars_set:
-                bars.set_linewidth(props.width)
-                bars.set_color(props.color)
+        for bars in bars_set:
+            bars.set_linewidth(props.width)
+            bars.set_color(props.color)
 
     def get_line_properties(self):
         return ErrorbarsProperties.from_container(self.line)

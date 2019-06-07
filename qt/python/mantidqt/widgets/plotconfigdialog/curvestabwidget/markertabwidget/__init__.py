@@ -15,7 +15,7 @@ from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
               'triangle_right': '>', 'tickup': 2, 'hline': '_', 'vline': '|',
               'pentagon': 'p', 'tri_left': '3', 'caretdown': 7,
-              'caretright (centered at base)': 9, 'tickright': '1',
+              'caretright (centered at base)': 9, 'tickright': 1,
               'caretright': 5, 'caretleft': 4, 'tickleft': 0, 'tri_up': '2',
               'circle': 'o', 'pixel': ',', 'caretleft (centered at base)': 8,
               'diamond': 'D', 'star': '*', 'hexagon1': 'h', 'octagon': '8',
