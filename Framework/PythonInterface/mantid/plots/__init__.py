@@ -21,7 +21,6 @@ from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
 from mantid.plots.scales import PowerScale, SquareScale
-from mantid.api import AnalysisDataService
 from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection

@@ -11,28 +11,34 @@ from mantid.py3compat import mock
 
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
-from Muon.GUI.Common.test_helpers import mock_widget
+
 
 
 class HomeTabPlotPresenterTest(unittest.TestCase):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        self.obj = QtGui.QWidget()
-        self.view = HomePlotWidgetView(self.obj)
-        self.model = HomePlotWidgetModel()
+        self.context = mock.MagicMock()
+        self.plotting_window_model = mock.MagicMock()
+        self.view = mock.MagicMock()
+        self.model = mock.MagicMock()
         self.presenter = HomePlotWidgetPresenter(self.view, self.model)
 
-        self.view.warning_popup = mock.MagicMock()
+    def test_use_rebin_changed_resets_use_raw_to_true_if_no_rebin_specified(self):
+        self.view.if_raw.return_value = False
+        self.model.context._do_rebin.return_value = False
 
-    def tearDown(self):
-        self.obj = None
+        self.presenter.handle_use_raw_workspaces_changed()
 
-    def test_plot_button_produces_not_implemented_method(self):
-        self.view.plot_button.clicked.emit(True)
+        self.model.plot.assert_not_called()
+        self.view.warning_popup.assert_called_once_with('No rebin options specified')
 
-        self.view.warning_popup.assert_called_once_with('Plotting not currently implemented!')
+    def test_use_rebin_changed_replots_figure_with_appropriate_data(self):
+        self.view.if_raw.return_value = False
+        self.view.get_selected.return_value = 'Asymmetry'
+        self.model.context._do_rebin.return_value = False
 
+        self.presenter.handle_use_raw_workspaces_changed()
+
+        self.model.plot.assert_called_once_with('Asymmetry', False)
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

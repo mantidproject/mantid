@@ -44,68 +44,26 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.plot_standard_workspaces()
 
     def plot_standard_workspaces(self):
-        self.plotted_workspaces = self._model.get_workspaces_to_plot(self._view.if_raw())
         if self._plot_window:
             self._plot_window.window.close()
-        self._plot_window = self._model.create_new_plot(self._model.get_workspaces_to_plot(self.plotted_workspaces),
+        self.plotted_workspaces = self._model.get_workspaces_to_plot(self._view.if_raw())
+        self._plot_window = self._model.create_new_plot(self.plotted_workspaces,
                                                         self._model.get_plot_title(), self._close_plot)
         self._plot_window.show()
+
+    def add_plot(self, workspace_name):
+        if not self._plot_window:
+            return
+
+        self._plot_window.multi_plot.plot(self._model.get_plot_title(), workspace_name, specNum=3)
 
     def handle_fit_completed(self):
         for plotted_workspace in self.plotted_workspaces:
             list_of_fits = self._model.context.fitting_context.find_fit_for_input_workspace_name(plotted_workspace)
-            print(list_of_fits)
+            list_of_workspaces_to_plot = [fit.parameter_name.replace(' Parameters', '') for fit in list_of_fits]
+            for workspace_name in list_of_workspaces_to_plot:
+                self.add_plot(workspace_name)
 
-
-    # def handle_plot_button_clicked(self):
-    #     is_raw = self._view.if_raw()
-    #     ws_list = self._model.context.get_names_of_workspaces_to_fit(runs='All',
-    #                                                            group_and_pair=self._model.context.gui_context[
-    #                                                            'selected_group_pair'], phasequad=False, rebin=not is_raw)
-    #     if self._view.get_selected() == "Counts":
-    #        for j in range(len(ws_list)):
-    #            ws_list[j] = ws_list[j].replace("Asymmetry","Counts")
-    #
-    #
-    #     new_plot = False
-    #     if self._plot_window is None:
-    #        new_plot = True
-    #
-    #     if new_plot or not self._view.if_keep():
-    #         self._plot_window = MultiPlotWindow("Muon plots")
-    #         self._plot_window.windowClosedSignal.connect(self._close_plot)
-    #
-    #     self.plotting = self._plot_window.multi_plot
-    #     if self._view.if_overlay():
-    #         # need to check if subplot exists first
-    #         # probably want a subplot for each x label
-    #         single_plot_name = "Time domain (Asymmetry)"
-    #         if self._view.get_selected() == "Counts":
-    #            single_plot_name = "Time domain (Counts)"
-    #         if not self.keep:
-    #             if not self.plotting.has_subplot(single_plot_name):
-    #                 self.plotting.add_subplot(single_plot_name)
-    #             self.keep = True
-    #         for ws_name in ws_list:
-    #             self.plotting.plot(single_plot_name, ws_name)
-    #     else:
-    #         for ws_name in ws_list:
-    #             self.plotting.add_subplot(ws_name)
-    #             self.plotting.plot(ws_name, ws_name)
-    #     # only do below line if its a new multi plot
-    #     if new_plot and self._view.get_selected() != "Counts":
-    #         self.plotting.set_all_values_to([0.0,15.0],[-30.,30])
-    #     elif new_plot:
-    #         self.plotting.set_all_values()
-    #     self._plot_window.show()
-    #
     def _close_plot(self):
         self._plot_window = None
-
-
-
-    # example code for forcing plots to close when GUI is closed
-    #def closeEvent(self, event):
-    #    if self._plot_window is not None:
-    #        self._plot_window.closeEvent(event)
-    #    super(HomePlotWidgetPresenter, self).closeEvent(event)
+        self.plotted_workspaces = []

@@ -9,7 +9,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
-#include <iostream>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -381,8 +380,7 @@ void MultiDomainFunctionModel::updateMultiDatasetParameters(
     const IFunction &fun) {
   if (!hasFunction())
     return;
-  std::cout << m_function->nParams() << '\n' << fun.nParams() << '\n' << fun.asString() << '\n' << m_function->asString() << std::endl;
-  std::cout << m_function->parameterName(0) << '\n' << m_function->parameterName(1) << '\n' << m_function->parameterName(2) << '\n' << m_function->parameterName(3) << '\n' << m_function->parameterName(4) << '\n' << m_function->parameterName(5) << '\n' << std::endl;
+
   assert(m_function->nParams() == fun.nParams());
   for (size_t i = 0; i < fun.nParams(); ++i) {
     m_function->setParameter(i, fun.getParameter(i));
