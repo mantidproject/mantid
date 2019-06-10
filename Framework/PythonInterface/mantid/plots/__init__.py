@@ -415,9 +415,8 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
-                workspace, self, pop=False, **kwargs)
-            is_normalized = workspace.isDistribution() or normalize_by_bin_width
+            is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
+                                                               **kwargs)
             return self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized)
@@ -504,9 +503,8 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
-                workspace, self, pop=False, **kwargs)
-            is_normalized = workspace.isDistribution() or normalize_by_bin_width
+            is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
+                                                               **kwargs)
             return self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized)

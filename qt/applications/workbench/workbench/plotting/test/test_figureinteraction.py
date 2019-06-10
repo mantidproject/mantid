@@ -146,7 +146,7 @@ class FigureInteractionTest(unittest.TestCase):
 
     def test_correct_yunit_label_when_overplotting_after_normaliztion_toggle(self):
         fig = plot([self.ws], spectrum_nums=[1], errors=True,
-                   plot_kwargs={'normalize_by_bin_width': False})
+                   plot_kwargs={'distribution': True})
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
@@ -183,19 +183,19 @@ class FigureInteractionTest(unittest.TestCase):
 
     def _test_toggle_normalization(self, errobars_on):
         fig = plot([self.ws], spectrum_nums=[1], errors=errobars_on,
-                   plot_kwargs={'normalize_by_bin_width': False})
+                   plot_kwargs={'distribution': True})
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
 
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
-        assert_almost_equal(ax.lines[0].get_data()[0], [15, 25])
-        assert_almost_equal(ax.lines[0].get_data()[1], [0.2, 0.3])
+        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
+        assert_almost_equal(ax.lines[0].get_ydata(), [0.2, 0.3])
         self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
         fig_interactor._toggle_normalization(ax)
-        assert_almost_equal(ax.lines[0]._x, [15, 25])
-        assert_almost_equal(ax.lines[0]._y, [2, 3])
+        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
+        assert_almost_equal(ax.lines[0].get_ydata(), [2, 3])
         self.assertEqual("Counts", ax.get_ylabel())
 
 

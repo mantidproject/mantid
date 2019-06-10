@@ -190,7 +190,7 @@ class FigureInteraction(object):
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
             workspace = ads.retrieve(arg_set['workspaces'])
-            arg_set['normalize_by_bin_width'] = not is_normalized
+            arg_set['distribution'] = is_normalized
             arg_set_copy = copy(arg_set)
             [arg_set_copy.pop(key) for key in ['function', 'workspaces']]
             if 'specNum' not in arg_set:

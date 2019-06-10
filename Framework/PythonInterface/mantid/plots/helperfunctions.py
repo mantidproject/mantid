@@ -50,7 +50,7 @@ def get_distribution(workspace, **kwargs):
     return bool(distribution), kwargs
 
 
-def get_normalize_by_bin_width(workspace, axes, pop=True, **kwargs):
+def get_normalize_by_bin_width(workspace, axes, **kwargs):
     """
     Determine whether or not the workspace should be plotted as a
     distribution. If the workspace is a distribution return False, else,
@@ -61,21 +61,24 @@ def get_normalize_by_bin_width(workspace, axes, pop=True, **kwargs):
     :param axes: The axes being plotted on
     :param pop: Bool. Set to True to remove 'normalize_by_bin_width' from 'kwargs'
     """
-    if hasattr(workspace, 'isDistribution') and workspace.isDistribution():
+    distribution = kwargs.get('distribution', None)
+    if distribution or (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
         return False, kwargs
-    try:
-        current_artists = axes.tracked_workspaces.values()
-    except AttributeError:
-        current_artists = None
-
-    if current_artists:
-        current_normalization = any(
-            [artist[0].is_normalized for artist in current_artists])
+    elif distribution is False:
+        return True, kwargs
     else:
-        current_normalization = mantid.kernel.config[
-                                    'graph1d.autodistribution'].lower() == 'on'
-    normalize_by_bin_width = getattr(kwargs, 'pop' if pop else 'get')(
-        'normalize_by_bin_width', current_normalization)
+        try:
+            current_artists = axes.tracked_workspaces.values()
+        except AttributeError:
+            current_artists = None
+
+        if current_artists:
+            current_normalization = any(
+                [artist[0].is_normalized for artist in current_artists])
+            normalize_by_bin_width = current_normalization
+        else:
+            normalize_by_bin_width = mantid.kernel.config[
+                                        'graph1d.autodistribution'].lower() == 'on'
     return normalize_by_bin_width, kwargs
 
 

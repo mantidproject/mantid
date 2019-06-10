@@ -132,8 +132,6 @@ def plot(axes, workspace, *args, **kwargs):
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a MatrixWorkspace histogram.
-    :param normalize_by_bin_width: Plot the workspace as a distribution. If None default to global
-                                   setting: config['graph1d.autodistribution']
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization

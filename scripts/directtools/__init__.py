@@ -234,8 +234,7 @@ def _plotsinglehistogram(workspaces, labels, style, xscale, yscale):
     for ws, label in zip(workspaces, labels):
         if 'm' in style:
             markerStyle, markerIndex = _choosemarker(markers, markerIndex)
-        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle,
-                      label=label, normalize_by_bin_width=False)
+        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
