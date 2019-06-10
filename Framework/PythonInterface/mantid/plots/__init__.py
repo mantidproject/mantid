@@ -95,8 +95,6 @@ class _WorkspaceArtists(object):
         # delete the artists from the axes
         self._remove(axes, self._artists)
 
-        return True
-
     def remove_if(self, axes, predicate):
         """
         Remove the tracked artists from the given axes if they return true from predicate
@@ -311,6 +309,12 @@ class MantidAxes(Axes):
         return self.is_empty(self)
 
     def _remove_artist_info_if(self, artist_info, unary_predicate):
+        """
+        Remove any artists which satisfy the predicate from the artist_info_list
+        :param artist_info: A list of _WorkspaceArtists objects
+        :param unary_predicate: A predicate taking a single matplotlib artist object
+        :return: True if the artist_info is empty, false if artist_info remain
+        """
         is_empty_list = []
         for workspace_artist in artist_info:
             empty = workspace_artist.remove_if(self, unary_predicate)
