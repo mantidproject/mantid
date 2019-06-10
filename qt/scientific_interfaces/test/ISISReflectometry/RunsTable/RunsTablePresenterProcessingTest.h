@@ -15,7 +15,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using namespace MantidQt::CustomInterfaces;
+using MantidQt::MantidWidgets::Batch::Cell;
+using MantidQt::MantidWidgets::Batch::RowLocation;
+using MantidQt::MantidWidgets::Batch::RowPath;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -56,6 +60,78 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testRowStateChangedForDefaultRowAndGroup() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    expectGroupStateCleared();
+    expectRowStateCleared();
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
+  void testRowStateChangedForInvalidRow() {
+    auto presenter = makePresenter(m_view, oneGroupWithAnInvalidRowModel());
+    expectGroupStateCleared();
+    expectRowStateInvalid();
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
+  void testRowStateChangedForStartingRow() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    getRow(presenter, 0, 0)->setStarting();
+    expectGroupStateCleared();
+    expectRowStateCleared();
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
+  void testRowStateChangedForRunningRow() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    getRow(presenter, 0, 0)->setRunning();
+    expectGroupStateCleared();
+    expectRowState(RUNNING);
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
+  void testRowStateChangedForCompleteRow() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    getRow(presenter, 0, 0)->setSuccess();
+    expectGroupStateCleared();
+    expectRowState(SUCCESS);
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
+  void testRowStateChangedForErrorRow() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    getRow(presenter, 0, 0)->setError("error message");
+    expectGroupStateCleared();
+    expectRowState(FAILURE);
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
+  void testRowStateChangedForCompleteGroup() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    getGroup(presenter, 0).setSuccess();
+    getRow(presenter, 0, 0)->setSuccess();
+    expectGroupState(SUCCESS);
+    expectRowState(SUCCESS);
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
+  void testRowStateChangedForErrorGroup() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    getGroup(presenter, 0).setError("error message");
+    getRow(presenter, 0, 0)->setSuccess();
+    expectGroupState(FAILURE);
+    expectRowState(SUCCESS);
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
   void testMergeJobsUpdatesProgressBar() {
     auto presenter = makePresenter(m_view, ReductionJobs());
     expectUpdateProgressBar();
@@ -71,6 +147,65 @@ public:
   }
 
 private:
+  static constexpr const char *DEFAULT = "#ffffff"; // white
+  static constexpr const char *INVALID = "#dddddd"; // very pale grey
+  static constexpr const char *RUNNING = "#f0e442"; // pale yellow
+  static constexpr const char *SUCCESS = "#d0f4d0"; // pale green
+  static constexpr const char *WARNING = "#e69f00"; // pale orange
+  static constexpr const char *FAILURE = "#accbff"; // pale blue
+
+  std::vector<Cell> rowCells(const char *colour) {
+    auto cells = std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""),
+                                   Cell(""), Cell(""), Cell(""), Cell("")};
+    for (auto &cell : cells)
+      cell.setBackgroundColor(colour);
+    return cells;
+  }
+
+  Group &getGroup(RunsTablePresenter &presenter, int groupIndex) {
+    auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
+    auto &group = reductionJobs.mutableGroups()[groupIndex];
+    return group;
+  }
+
+  Row *getRow(RunsTablePresenter &presenter, int groupIndex, int rowIndex) {
+    auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
+    auto *row = &reductionJobs.mutableGroups()[groupIndex]
+                     .mutableRows()[rowIndex]
+                     .get();
+    return row;
+  }
+
+  void expectGroupStateCleared() {
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(DEFAULT)))
+        .Times(1);
+  }
+
+  void expectRowStateCleared() {
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(DEFAULT)))
+        .Times(1);
+  }
+
+  void expectRowStateInvalid() {
+    auto cells = rowCells(INVALID);
+    for (auto &cell : cells)
+      cell.setToolTip(
+          "Row will not be processed: it either contains invalid cell values, "
+          "or duplicates a reduction in another row");
+
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), cells)).Times(1);
+  }
+
+  void expectGroupState(const char *colour) {
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(colour)))
+        .Times(1);
+  }
+
+  void expectRowState(const char *colour) {
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(colour)))
+        .Times(1);
+  }
+
   void expectUpdateProgressBar() {
     auto progress = 33;
     EXPECT_CALL(m_mainPresenter, percentComplete())
