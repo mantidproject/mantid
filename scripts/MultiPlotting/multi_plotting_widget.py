@@ -13,32 +13,38 @@ from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 from MultiPlotting.multi_plotting_context import *
 from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
+
+from mantidqt.plotting.ads_observer import FigureManagerADSObserver
 
 
 class MultiPlotWindow(object):
-    def __init__(self, window_title="plotting"):
+    def __init__(self, window_title="plotting", close_callback=None):
         self.figure = Figure()
         self.figure.set_facecolor("none")
         self.canvas = FigureCanvas(self.figure)
+        self.close_callback = close_callback
 
         self.plot_context = PlottingContext()
-        self.multi_plot = MultiPlotWidget(self.plot_context, self.canvas)
+        self.multi_plot = MultiPlotWidget(window_title, self.plot_context, self.canvas)
         self.window = self.multi_plot
+        self.window.closeSignal.connect(self.close_callback)
 
-        self._ADSObserver = SubplotADSObserver(self)
+        self._ADSObserver = FigureManagerADSObserver(self)
 
     def show(self):
         self.window.show()
+
+    def raise_(self):
+        self.window.raise_()
 
     def emit_close(self):
         self.window.close()
 
 
-class MultiPlotWidget(QtWidgets.QWidget):
+class MultiPlotWidget(QtWidgets.QMainWindow):
     closeSignal = QtCore.Signal()
 
-    def __init__(self, context, canvas, parent=None):
+    def __init__(self, window_title, context, canvas, parent=None):
         super(MultiPlotWidget, self).__init__(parent=parent)
         self._context = context
         layout = QtWidgets.QVBoxLayout()
@@ -58,7 +64,15 @@ class MultiPlotWidget(QtWidgets.QWidget):
         splitter.addWidget(self.plots)
         splitter.addWidget(self.quickEdit.widget)
         layout.addWidget(splitter)
-        self.setLayout(layout)
+        central_widget = QtWidgets.QWidget()
+        central_widget.setLayout(layout)
+
+        self.setCentralWidget(central_widget)
+        self.setWindowTitle(window_title)
+
+        self.plots.set_remove_line_connection(self.handle_remove_workspace)
+
+        self.plots.set_remove_subplot_connection(self.handle_remove_subplot)
 
         self.plots.set_remove_line_connection(self.handle_remove_workspace)
 
@@ -239,3 +253,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.plots._rm_subplot()
         self._if_empty_close()
 
+    def closeEvent(self, event):
+        self.closeSignal.emit()
+        super(MultiPlotWidget, self).closeEvent(event)

@@ -192,14 +192,12 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
         if self.plot_window is None:
-            self.plot_window = MultiPlotWindow(str(run))
+            self.plot_window = MultiPlotWindow(str(run), self._unset_detectors)
             self.plotting = self.plot_window.multi_plot
             self.add_detector_to_plot(detector, name)
             self.plotting.set_all_values()
             self.plotting.removeSubplotConnection(self.subplotRemoved)
             self.plot_window.show()
-            # untick detectors if plot window is closed
-            self.plot_window.windowClosedSignal.connect(self._unset_detectors)
         else:
             self.add_detector_to_plot(detector, name)
             self.plot_window.show()
@@ -234,7 +232,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.add_peak_data(element.symbol, detector)
 
     def _unset_detectors(self):
-        self.plot_window.windowClosedSignal.disconnect()
         self.plot_window = None
         for name in self.detectors.getNames():
             self.detectors.setStateQuietly(name, False)
