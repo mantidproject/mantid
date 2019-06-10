@@ -33,7 +33,6 @@ using namespace DataObjects;
 
 void FindCenterOfMassPosition2::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
