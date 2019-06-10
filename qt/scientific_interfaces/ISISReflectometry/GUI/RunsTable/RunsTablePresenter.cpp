@@ -516,11 +516,11 @@ void RunsTablePresenter::forAllCellsAt(
 
 void RunsTablePresenter::setRowStylingForItem(
     MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
-  forAllCellsAt(rowPath, clearStateStyling);
 
   switch (item.state()) {
   case State::ITEM_NOT_STARTED: // fall through
   case State::ITEM_STARTING:
+    forAllCellsAt(rowPath, clearStateStyling);
     break;
   case State::ITEM_RUNNING:
     forAllCellsAt(rowPath, applyRunningStateStyling);
