@@ -154,8 +154,9 @@ void SANSSolidAngle::exec() {
 
   const std::string type = getProperty("Type");
   auto angularFunction = getAngularFunction(spectrumInfo, type);
-  const CalculateSolidAngle calculateSolidAngle(
-      pixelSizeX * pixelSizeY, spectrumInfo, componentInfo, std::move(angularFunction));
+  const CalculateSolidAngle calculateSolidAngle(pixelSizeX * pixelSizeY,
+                                                spectrumInfo, componentInfo,
+                                                std::move(angularFunction));
 
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
