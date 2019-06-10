@@ -8,7 +8,7 @@ from mantid.simpleapi import LoadEmptyInstrument, SANSMaskDTP, mtd
 class SANSMaskDTPTest(unittest.TestCase):
 
     def test_cg2(self):
-        ws_name = 'ws'
+        ws_name = 'cg2'
         LoadEmptyInstrument(InstrumentName='CG2', OutputWorkspace=ws_name)
 
         # Let's mask just the first tube
@@ -21,7 +21,7 @@ class SANSMaskDTPTest(unittest.TestCase):
                             "DetID={} is not masked".format(i))
 
     def test_cg2_top_bottom(self):
-        ws_name = 'ws'
+        ws_name = 'cg2_top_bottom'
         LoadEmptyInstrument(InstrumentName='CG2', OutputWorkspace=ws_name)
 
         # Let's mask the bottom and top of the detector
@@ -44,11 +44,11 @@ class SANSMaskDTPTest(unittest.TestCase):
                                 "DetID={} is not masked".format(i))
 
     def test_cg2_interleaved(self):
-        ws_name = 'ws'
+        ws_name = 'cg2_interleaved'
         LoadEmptyInstrument(InstrumentName='CG2', OutputWorkspace=ws_name)
 
         # Let's mask the bottom and top of the detector
-        SANSMaskDTP(InputWorkspace=ws_name, Tube="1::2")
+        SANSMaskDTP(InputWorkspace=ws_name, Tube="1:300:2")
         w = mtd[ws_name]
         detInfo = w.detectorInfo()
         start_id = 2
