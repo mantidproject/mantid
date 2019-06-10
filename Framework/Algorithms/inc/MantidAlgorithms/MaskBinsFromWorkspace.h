@@ -39,7 +39,7 @@ private:
   /// Execution code
   void exec() override;
   Indexing::SpectrumIndexSet
-      indexSet; ///< the list of Spectra (workspace index) to load
+      m_indexSet; ///< the list of Spectra (workspace index) to load
 };
 
 } // namespace Algorithms
