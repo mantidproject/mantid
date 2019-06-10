@@ -259,14 +259,6 @@ class MantidAxes(Axes):
             self.check_axes_distribution_consistency()
         return artists
 
-    @staticmethod
-    def _on_off_to_bool(on_or_off):
-        if on_or_off.lower() == 'on':
-            return True
-        elif on_or_off.lower() == 'off':
-            return False
-        raise ValueError("Argument must be 'On' or 'Off'!")
-
     def check_axes_distribution_consistency(self):
         """
         Checks if new workspace to be plotted is consistent with current

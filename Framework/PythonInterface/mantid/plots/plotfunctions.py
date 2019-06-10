@@ -89,14 +89,6 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
     return x, y, dy, dx, indices, kwargs
 
 
-def on_off_to_bool(on_or_off):
-    if on_or_off.lower() == 'on':
-        return True
-    if on_or_off.lower() == 'off':
-        return False
-    raise ValueError("Argument 'on_or_off' must be either 'On' or 'Off")
-
-
 # ========================================================
 # Plot functions
 # ========================================================
