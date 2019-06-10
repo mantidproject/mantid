@@ -110,7 +110,7 @@ class CalculateSolidAngle {
 public:
   CalculateSolidAngle(const double pixelArea, const SpectrumInfo &spectrumInfo,
                       const ComponentInfo &componentInfo,
-                      std::function<double(int64_t)> f)
+                      std::function<double(int64_t)> &&f)
       : m_pixelArea(pixelArea), m_spectrumInfo(spectrumInfo),
         m_componentInfo(componentInfo), m_f(std::move(f)) {}
   double operator()(int64_t histogramIndex) const {
@@ -155,7 +155,7 @@ void SANSSolidAngle::exec() {
   const std::string type = getProperty("Type");
   auto angularFunction = getAngularFunction(spectrumInfo, type);
   const CalculateSolidAngle calculateSolidAngle(
-      pixelSizeX * pixelSizeY, spectrumInfo, componentInfo, angularFunction);
+      pixelSizeX * pixelSizeY, spectrumInfo, componentInfo, std::move(angularFunction));
 
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
