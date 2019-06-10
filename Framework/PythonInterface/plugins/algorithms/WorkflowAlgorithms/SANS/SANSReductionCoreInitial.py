@@ -287,7 +287,7 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
         return clone_alg.getProperty("OutputWorkspace").value
 
     def _get_progress(self):
-        return Progress(self, start=0.0, end=1.0, nreports=7)
+        return Progress(self, start=0.0, end=1.0, nreports=6)
 
 
 # Register algorithm with Mantid

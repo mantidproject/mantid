@@ -101,11 +101,10 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         # ----------
         # OUTPUT
         # ----------
-        self.declareProperty('OutScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
-                             doc='Applied scale factor.')
-
-        self.declareProperty('OutShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
-                             doc='Applied shift factor.')
+        self.declareProperty(MatrixWorkspaceProperty('OutShiftAndScaleFactor', '', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc='A workspace containing the applied shift factor as X data and applied scale factor '
+                                 'as Y data.')
 
         # This breaks our flexibility with the reduction mode. We need to check if we can populate this based on
         # the available reduction modes for the state input. TODO: check if this is possible
@@ -118,8 +117,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceMerged', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the merged reduction.')
-        self.setPropertyGroup("OutScaleFactor", 'Output')
-        self.setPropertyGroup("OutShiftFactor", 'Output')
+        self.setPropertyGroup("OutShiftAndScaleFactor", 'Output')
         self.setPropertyGroup("OutputWorkspaceLAB", 'Output')
         self.setPropertyGroup("OutputWorkspaceHAB", 'Output')
         self.setPropertyGroup("OutputWorkspaceMerged", 'Output')
@@ -142,16 +140,16 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                              doc='The sample output workspace group for the high-angle bank, provided there is one. '
                                  'Each workspace in the group is one event slice.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmission', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The calculated transmission workspace.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmission', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmissionCan', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The calculated transmission workspace for the can.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmissionCan', '',
-                                                    optional=PropertyMode.Optional, direction=Direction.Output),
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace for the can.')
         self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceHABCan", 'Can Output')
@@ -272,13 +270,14 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         # Deal with merging
         # --------------------------------------------------------------------------------------------------------------
         # Merge if required with stitching etc.
+        scale_factors = []
+        shift_factors = []
         if overall_reduction_mode is ReductionMode.Merged:
             progress.report("Merging reductions ...")
             for i, event_slice_part_bundle in enumerate(output_parts_bundles):
                 merge_bundle = get_merge_bundle_for_merge_request(event_slice_part_bundle, self)
-                if i == 0:
-                    # We only need to set this once.
-                    self.set_shift_and_scale_output(merge_bundle)
+                scale_factors.append(merge_bundle.scale)
+                shift_factors.append(merge_bundle.shift)
                 reduction_mode_vs_output_workspaces[ReductionMode.Merged].append(merge_bundle.merged_workspace)
                 merged_name = self._get_merged_workspace_name(event_slice_part_bundle)
                 reduction_mode_vs_workspace_names[ReductionMode.Merged].append(merged_name)
@@ -289,15 +288,12 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 state = event_slice_part_bundle[0].state
                 hab_name = self._get_output_workspace_name(state, reduction_mode=ISISReductionMode.HAB)
                 reduction_mode_vs_workspace_names[ISISReductionMode.HAB].append(hab_name)
-                # TODO we need to overwrite the previous HAB and Merged before adding them?
+
+            self.set_shift_and_scale_output(scale_factors, shift_factors)
 
         # --------------------------------------------------------------------------------------------------------------
         # Set the output workspaces
         # --------------------------------------------------------------------------------------------------------------
-        # Set sample logs
-        # Todo: Set sample log -> Userfile and unfitted transmission workspace. Should probably set on
-        # higher level (SANSBatch)
-        # Set the output workspaces
         self.set_output_workspaces(reduction_mode_vs_output_workspaces, reduction_mode_vs_workspace_names)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -458,9 +454,11 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         # split into event slices. We want the inner list to be component-wise splits so we must transpose this.
         return list(map(list, zip(*sliced_bundles)))
 
-    def set_shift_and_scale_output(self, merge_bundle):
-        self.setProperty("OutScaleFactor", merge_bundle.scale)
-        self.setProperty("OutShiftFactor", merge_bundle.shift)
+    def set_shift_and_scale_output(self, scale_factors, shift_factors):
+        create_workspace_alg = create_child_algorithm(self, "CreateWorkspace", **{"DataX": scale_factors,
+                                                                                  "DataY": shift_factors})
+        create_workspace_alg.execute()
+        self.setProperty("OutShiftAndScaleFactor", create_workspace_alg.getProperty("OutputWorkspace").value)
 
     def set_output_workspaces(self, reduction_mode_vs_output_workspaces, reduction_mode_vs_workspace_names):
         """

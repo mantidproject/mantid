@@ -531,7 +531,7 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
     def test_than_event_slice_algorithm_is_quicker(self):
         """
         In this test we run SANSSingleReductionEventSlice 5 times on HAB data, with event slice 0:300:600.
-        We run SANSSingleReduction 2 times for the 0:300 slice and 2 times for the 300:600 slice.
+        We run SANSSingleReduction repeat_n times for the 0:300 slice and 2 times for the 300:600 slice.
 
         We compare the data to check that similar workspaces are produced, and we also check that it takes less
         time to run SANSSingleReductionEventSlice than to run SANSSingleReduction twice
@@ -572,9 +572,10 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceHAB": EMPTY_NAME}
+        repeat_n = 2
 
         event_slice_alg_times = []
-        for _ in range(2):
+        for _ in range(repeat_n):
             start = time.time()
             single_reduction_event_slice_alg = self._run_single_reduction(state, sample_scatter=sample,
                                                                           sample_transmission=transmission_workspace,
@@ -602,7 +603,7 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
         state = user_file_director.construct()
 
         alg_first_slice_times = []
-        for _ in range(2):
+        for _ in range(repeat_n):
             start = time.time()
             single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                           sample_transmission=transmission_workspace,
@@ -624,7 +625,7 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
         state = user_file_director.construct()
 
         alg_second_slice_times = []
-        for _ in range(2):
+        for _ in range(repeat_n):
             start = time.time()
             single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                            sample_transmission=transmission_workspace,
@@ -659,9 +660,10 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
         self._compare_workspace(event_slice_output_workspace[1], second_slice_output_workspace, tolerance=1e-1)
 
         # OutScale and OutShift
-        self.assertEqual(single_reduction_event_slice_alg.getProperty("OutScaleFactor").value,
+        event_slice_shift_and_scale = single_reduction_event_slice_alg.getProperty("OutShiftAndScaleFactor").value
+        self.assertEqual(event_slice_shift_and_scale.readX(0)[0],
                          single_reduction_alg_first_slice.getProperty("OutScaleFactor").value)
-        self.assertEqual(single_reduction_event_slice_alg.getProperty("OutShiftFactor").value,
+        self.assertEqual(event_slice_shift_and_scale.readY(0)[0],
                          single_reduction_alg_first_slice.getProperty("OutShiftFactor").value)
 
         # HAB sample

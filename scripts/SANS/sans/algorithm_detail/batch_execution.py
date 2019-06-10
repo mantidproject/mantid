@@ -160,8 +160,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_package.reduced_lab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABSample")
         reduction_package.reduced_hab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABSample")
 
-        reduction_package.out_scale_factor = reduction_alg.getProperty("OutScaleFactor").value
-        reduction_package.out_shift_factor = reduction_alg.getProperty("OutShiftFactor").value
+        out_scale_factor, out_shift_factor = get_shift_and_scale_factors_from_algorithm(reduction_alg, event_slice)
+        reduction_package.out_scale_factor = out_scale_factor
+        reduction_package.out_shift_factor = out_shift_factor
 
         if not event_slice and plot_results:
             # Plot results is intended to show the result of each workspace/slice as it is reduced
@@ -199,8 +200,11 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     if not use_optimizations:
         delete_optimization_workspaces(reduction_packages, workspaces, monitors, save_can)
 
-    out_scale_factors = [reduction_package.out_scale_factor for reduction_package in reduction_packages]
-    out_shift_factors = [reduction_package.out_shift_factor for reduction_package in reduction_packages]
+    out_scale_factors = []
+    out_shift_factors = []
+    for reduction_package in reduction_packages:
+        out_scale_factors.extend(reduction_package.out_scale_factor)
+        out_shift_factors.extend(reduction_package.out_shift_factors)
 
     return out_scale_factors, out_shift_factors
 
@@ -818,6 +822,11 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
                          "OutputWorkspaceHABSample", "reduced_hab_sample_name", "reduced_hab_sample_base_name",
                          multi_reduction_type, HAB_SAMPLE_SUFFIX)
 
+    if event_slice:
+        # In event slice mode, we can have multiple shift and scale factors for one reduction package
+        # there we output these as a workspace containing shifts as X data and scales as Y data.
+        reduction_alg.setProperty("OutShiftAndScaleFactor", "ShiftAndScaleFactors")
+
     # Go through the elements of the reduction package and set them on the reduction algorithm
     # Set the SANSState
     state = reduction_package.state
@@ -946,6 +955,28 @@ def get_workspace_from_algorithm(alg, output_property_name, add_logs=False, user
         return ws
     else:
         return None
+
+
+def get_shift_and_scale_factors_from_algorithm(alg, event_slice):
+    """
+    Retrieve the shift and scale factors from the algorithm. In event slice mode there can be multiple shift
+    and scale factors. These are output as a workspace containing scale and shift as X, Y data, respectively.
+    :param alg: The SingleReduction algorithm
+    :param event_slice: bool. If true, then SANSSingleReductionEventSlice has been run, otherwise SANSSingleReduction.
+    :return: a list of shift factors, a list of scale factors
+    """
+    if event_slice:
+        factors_workspace = get_workspace_from_algorithm(alg, "OutShiftAndScaleFactors")
+        if factors_workspace is None:
+            return [], []  # ?
+        else:
+            scales = factors_workspace.readX(0)
+            shifts = factors_workspace.readY(0)
+            delete_alg = create_unmanaged_algorithm("DeleteWorkspace", **{"Workspace": "ShiftAndScaleFactors"})
+            delete_alg.execute()
+            return scales, shifts
+    else:
+        return [alg.getProperty("OutScaleFactor").value], [alg.getProperty("OutShiftFactor").value]
 
 
 # ----------------------------------------------------------------------------------------------------------------------
