@@ -49,12 +49,11 @@ private slots:
   void handleMouseMove(const QPoint &point);
   void handleMouseUp(const QPoint &point);
 
+  void redrawMarkers();
+
 private:
-  bool moveMarker(MantidQt::Widgets::MplCpp::VerticalMarker *marker,
-                  const QPoint &point);
-  void updateMinMax(const QPoint &point, bool minMoved, bool maxMoved);
+  void updateMinMax(const double x, bool minMoved, bool maxMoved);
   void updateCursor();
-  void updateCanvas();
 
   /// The preview plot containing the range selector
   PreviewPlot *m_plot;

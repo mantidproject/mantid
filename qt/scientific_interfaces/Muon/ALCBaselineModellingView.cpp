@@ -96,12 +96,28 @@ void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr &workspace,
 
 void ALCBaselineModellingView::setCorrectedCurve(
     MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
-  m_ui.dataPlot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::blue);
+  // These kwargs ensure only the data points are plotted with no line
+  QHash<QString, QVariant> kwargs;
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_ui.correctedPlot->setCurveStyle("Corrected", -1);
+  m_ui.correctedPlot->setCurveSymbol("Corrected", 0);
+#endif
+
+  // Error bars on the plot
+  QStringList plotsWithErrors{"Corrected"};
+  m_ui.correctedPlot->setLinesWithErrors(plotsWithErrors);
+
+  m_ui.correctedPlot->addSpectrum("Corrected", workspace, workspaceIndex,
+                                  Qt::blue, kwargs);
 }
 
 void ALCBaselineModellingView::setBaselineCurve(
     MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
   m_ui.dataPlot->addSpectrum("Baseline", workspace, workspaceIndex, Qt::red);
+  m_ui.dataPlot->replot();
 }
 
 void ALCBaselineModellingView::removePlot(QString const &plotName) {
@@ -161,6 +177,8 @@ void ALCBaselineModellingView::addSectionSelector(
   // Set initial values
   newSelector->setRange(values.first, values.second);
   setSelectorValues(newSelector, values);
+
+  m_ui.dataPlot->replot();
 }
 
 void ALCBaselineModellingView::deleteSectionSelector(int index) {

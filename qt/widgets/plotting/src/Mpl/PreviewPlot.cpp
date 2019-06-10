@@ -193,6 +193,11 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
       "Incorrect AxisID provided. Axis types are XBottom and YLeft");
 }
 
+void PreviewPlot::replot() {
+  m_canvas->draw();
+  emit redraw();
+}
+
 /**
  * Clear all lines from the plot
  */

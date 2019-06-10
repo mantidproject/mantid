@@ -38,6 +38,15 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr correctedData() const = 0;
 
   /**
+   * @param function The fitting function
+   * @param xValues The x values to evaluate over
+   * @return The baseline model data
+   */
+  virtual Mantid::API::MatrixWorkspace_sptr
+  baselineData(Mantid::API::IFunction_const_sptr function,
+               const std::vector<double> &xValues) = 0;
+
+  /**
    * @return Current data used for fitting
    */
   virtual Mantid::API::MatrixWorkspace_sptr data() const = 0;

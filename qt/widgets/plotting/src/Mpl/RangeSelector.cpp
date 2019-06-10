@@ -59,6 +59,8 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
   connect(m_plot, SIGNAL(mouseMove(QPoint)), this,
           SLOT(handleMouseMove(QPoint)));
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
+
+  connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarkers()));
 }
 
 void RangeSelector::setRange(const std::pair<double, double> &range) {
@@ -74,7 +76,7 @@ void RangeSelector::setMinimum(double value) {
   if (value != m_minimum) {
     m_minimum = (value > m_limits.first) ? value : m_limits.first;
     m_minMarker->setXPosition(m_minimum);
-    updateCanvas();
+    m_plot->replot();
     emit selectionChanged(m_minimum, m_maximum);
   }
 }
@@ -83,7 +85,7 @@ void RangeSelector::setMaximum(double value) {
   if (value != m_maximum) {
     m_maximum = (value < m_limits.second) ? value : m_limits.second;
     m_maxMarker->setXPosition(m_maximum);
-    updateCanvas();
+    m_plot->replot();
     emit selectionChanged(m_minimum, m_maximum);
   }
 }
@@ -101,51 +103,46 @@ void RangeSelector::detach() {
 void RangeSelector::setColour(QColor colour) {
   m_minMarker->setColor(colour.name(QColor::HexRgb));
   m_maxMarker->setColor(colour.name(QColor::HexRgb));
-  m_minMarker->redraw();
-  m_maxMarker->redraw();
+  redrawMarkers();
 }
 
 void RangeSelector::handleMouseDown(const QPoint &point) {
   const auto coords =
-      toPair(m_minMarker->transformPixelsToCoords(point.x(), point.y()));
-  m_minMarker->mouseMoveStart(coords.first, coords.second);
-  m_maxMarker->mouseMoveStart(coords.first, coords.second);
+      m_minMarker->transformPixelsToCoords(point.x(), point.y());
+  const auto xCoord = std::get<0>(coords);
+  const auto yCoord = std::get<1>(coords);
+
+  m_minMarker->mouseMoveStart(xCoord, yCoord);
+  m_maxMarker->mouseMoveStart(xCoord, yCoord);
   updateCursor();
 }
 
 void RangeSelector::handleMouseMove(const QPoint &point) {
-  const auto minMoved = moveMarker(m_minMarker.get(), point);
-  const auto maxMoved = moveMarker(m_maxMarker.get(), point);
-
-  if (minMoved || maxMoved) {
-    updateCanvas();
-    updateMinMax(point, minMoved, maxMoved);
-  }
-}
-
-bool RangeSelector::moveMarker(VerticalMarker *marker, const QPoint &point) {
-  if (marker->isMoving()) {
-    const auto coords = marker->transformPixelsToCoords(point.x(), point.y());
-    return marker->mouseMove(std::get<0>(coords));
-  }
-  return false;
-}
-
-void RangeSelector::updateMinMax(const QPoint &point, bool minMoved,
-                                 bool maxMoved) {
   const auto coords =
       m_minMarker->transformPixelsToCoords(point.x(), point.y());
+  const auto xCoord = std::get<0>(coords);
 
-  if (minMoved) {
-    m_minimum = std::get<0>(coords);
+  const auto minMoved = m_minMarker->mouseMove(xCoord);
+  const auto maxMoved = m_maxMarker->mouseMove(xCoord);
+
+  if (minMoved || maxMoved) {
+    m_plot->replot();
+    updateMinMax(xCoord, minMoved, maxMoved);
+  }
+}
+
+void RangeSelector::updateMinMax(const double x, bool minMoved, bool maxMoved) {
+  if (minMoved && x != m_minimum) {
+    m_minimum = x;
     emit selectionChanged(m_minimum, m_maximum);
-  } else if (maxMoved) {
-    m_maximum = std::get<0>(coords);
+  } else if (maxMoved && x != m_maximum) {
+    m_maximum = x;
     emit selectionChanged(m_minimum, m_maximum);
   }
 }
 
 void RangeSelector::handleMouseUp(const QPoint &point) {
+  UNUSED_ARG(point);
   m_minMarker->mouseMoveStop();
   m_maxMarker->mouseMoveStop();
   updateCursor();
@@ -160,8 +157,7 @@ void RangeSelector::updateCursor() {
   }
 }
 
-void RangeSelector::updateCanvas() {
-  m_plot->canvas()->draw();
+void RangeSelector::redrawMarkers() {
   m_minMarker->redraw();
   m_maxMarker->redraw();
 }

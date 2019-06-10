@@ -179,10 +179,13 @@ void ALCBaselineModellingPresenter::updateCorrectedCurve() {
 }
 
 void ALCBaselineModellingPresenter::updateBaselineCurve() {
-  if (auto baselineData = m_model->data())
-    m_view->setBaselineCurve(baselineData);
-  else
+  if (const auto fitFunction = m_model->fittedFunction()) {
+    const auto &xValues = m_model->data()->x(0);
+    m_view->setBaselineCurve(
+        m_model->baselineData(fitFunction, xValues.rawData()));
+  } else {
     m_view->removePlot("Baseline");
+  }
 }
 
 void ALCBaselineModellingPresenter::updateFunction() {

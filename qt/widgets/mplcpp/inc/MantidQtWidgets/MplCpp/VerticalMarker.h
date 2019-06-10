@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
+#include <QCursor>
 #include <QHash>
 #include <QVariant>
 
@@ -39,6 +40,8 @@ public:
   bool isMoving();
 
   std::tuple<double, double> transformPixelsToCoords(int xPixels, int yPixels);
+
+  //QCursor *overrideCursor(double x, double y);
 };
 
 } // namespace MplCpp

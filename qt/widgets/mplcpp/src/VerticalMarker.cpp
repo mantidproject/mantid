@@ -98,6 +98,17 @@ VerticalMarker::transformPixelsToCoords(int xPixels, int yPixels) {
                                          toDouble(coords[1]));
 }
 
+//QCursor *VerticalMarker::overrideCursor(double x, double y) {
+//  GlobalInterpreterLock lock;
+//
+//  auto const args = Python::NewRef(Py_BuildValue("(dd)", x, y));
+//  auto const cursor = pyobj().attr("override_cursor")(*args);
+//
+//	return cursor;
+//  //return std::make_tuple<double, double>(toDouble(coords[0]),
+//  //                                       toDouble(coords[1]));
+//}
+
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt

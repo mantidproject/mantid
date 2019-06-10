@@ -63,6 +63,8 @@ public:
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
 
+  void replot();
+
 public slots:
   void clear();
   void resizeX();
@@ -75,6 +77,8 @@ signals:
   void mouseDown(const QPoint &point);
   void mouseUp(const QPoint &point);
   void mouseMove(const QPoint &point);
+
+  void redraw();
 
 public:
   QColor canvasColour() const;
