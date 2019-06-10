@@ -33,6 +33,20 @@ TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name)
     : Property(name, typeid(std::vector<TimeValueUnit<TYPE>>)), m_values(),
       m_size(), m_propSortedFlag(), m_filterApplied() {}
 
+/**
+ * Constructor
+ * @param name :: The name to assign to the property
+ * @param times :: A vector of DateAndTime objects
+ * @param values :: A vector of TYPE
+ */
+template <typename TYPE>
+TimeSeriesProperty<TYPE>::TimeSeriesProperty(
+    const std::string &name, const std::vector<Types::Core::DateAndTime> &times,
+    const std::vector<TYPE> &values)
+    : TimeSeriesProperty(name) {
+  addValues(times, values);
+}
+
 /// Virtual destructor
 template <typename TYPE> TimeSeriesProperty<TYPE>::~TimeSeriesProperty() {}
 

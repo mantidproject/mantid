@@ -573,7 +573,11 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     // Get the period log. Map of DateAndTime to Period int values.
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
-      periodLog.reset(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
+      // Check for corrupted period logs
+      std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(
+          dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
+      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods,
+                               nexusfilename);
     }
 
     // If successful, we can try to load the pulse times
@@ -611,6 +615,10 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
       localWorkspace->mutableRun().setGoniometer(gm, true);
     } catch (std::runtime_error &) {
     }
+  } catch (const InvalidLogPeriods &) {
+    // Rethrow so LoadEventNexus fails.
+    // If we don't, Mantid will crash.
+    throw;
   } catch (...) {
     alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some "
                                "sample logs may be missing."
@@ -618,6 +626,55 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     return out;
   }
   return out;
+}
+
+/** Check for corrupted period logs
+ * If data is historical (1 periods, period is labelled 0) then change period
+ * labels to 1 If number of periods does not match expected number of periods
+ * then throw an error
+ * @param tempPeriodLog :: a temporary local copy of period logs, which will
+ * change
+ * @param periodLog :: unique pointer which will point to period logs once they
+ * have been changed
+ * @param nPeriods :: the value in the nperiods log of the run. Number of
+ * expected periods
+ * @param nexusfilename :: the filename of the run to load
+ */
+void LoadEventNexus::checkForCorruptedPeriods(
+    std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
+    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
+    const int &nPeriods, const std::string &nexusfilename) {
+  const auto valuesAsVector = tempPeriodLog->valuesAsVector();
+  const auto nPeriodsInLog =
+      *std::max_element(valuesAsVector.begin(), valuesAsVector.end());
+
+  // Check for historic files
+  if (nPeriodsInLog == 0 && nPeriods == 1) {
+    // "modernize" the local copy here by making period_log
+    // a vector of 1s
+    const std::vector<int> newValues(tempPeriodLog->realSize(), 1);
+    const auto times = tempPeriodLog->timesAsVector();
+    periodLog.reset(
+        new const TimeSeriesProperty<int>("period_log", times, newValues));
+  } else if (nPeriodsInLog != nPeriods) {
+    // Sanity check here that period_log only contains period numbers up to
+    // nperiods. These values can be different due to instrument noise, and
+    // cause undescriptive crashes if not caught.
+    // We throw here to make it clear
+    // that the file is corrupted and must be manually assessed.
+    const auto msg = "File " + nexusfilename +
+                     " has been corrupted. The log framelog/period_log/value "
+                     "contains " +
+                     std::to_string(nPeriodsInLog) +
+                     " periods, but periods/number contains " +
+                     std::to_string(nPeriods) +
+                     ". This file should be manually inspected and corrected.";
+    throw InvalidLogPeriods(msg);
+  } else {
+    // periodLog should point to a copy of the period logs
+    periodLog = std::make_unique<const TimeSeriesProperty<int>>(*tempPeriodLog);
+    tempPeriodLog.reset();
+  }
 }
 
 /** Load the instrument from the nexus file

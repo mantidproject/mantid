@@ -82,6 +82,65 @@ public:
     TS_ASSERT_EQUALS(sProp->isValid(), "");
   }
 
+  void test_Constructor_with_values() {
+    std::vector<DateAndTime> times = {DateAndTime("2019-01-01T00:00:00"),
+                                      DateAndTime("2019-01-01T00:01:00")};
+
+    // Test int TimeSeriesProperty
+    std::vector<int> iValues = {0, 1};
+    auto iPropWithValues =
+        std::make_unique<TimeSeriesProperty<int>>("intProp", times, iValues);
+    TS_ASSERT(!iPropWithValues->name().compare("intProp"));
+    TS_ASSERT(!iPropWithValues->documentation().compare(""));
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<int>>) ==
+              *iPropWithValues->type_info());
+    TS_ASSERT(!iPropWithValues->isDefault());
+
+    auto iPropTimes = iPropWithValues->timesAsVector();
+    TS_ASSERT_EQUALS(iPropTimes[0], DateAndTime("2019-01-01T00:00:00"));
+    TS_ASSERT_EQUALS(iPropTimes[1], DateAndTime("2019-01-01T00:01:00"));
+
+    auto iPropValues = iPropWithValues->valuesAsVector();
+    TS_ASSERT_EQUALS(iPropValues[0], 0);
+    TS_ASSERT_EQUALS(iPropValues[1], 1);
+
+    // Test double TimeSeriesProperty
+    std::vector<double> dValues = {0.1, 1.2};
+    auto dPropWithValues = std::make_unique<TimeSeriesProperty<double>>(
+        "doubleProp", times, dValues);
+    TS_ASSERT(!dPropWithValues->name().compare("doubleProp"));
+    TS_ASSERT(!dPropWithValues->documentation().compare(""));
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<double>>) ==
+              *dPropWithValues->type_info());
+    TS_ASSERT(!dPropWithValues->isDefault());
+
+    auto dPropTimes = dPropWithValues->timesAsVector();
+    TS_ASSERT_EQUALS(dPropTimes[0], DateAndTime("2019-01-01T00:00:00"));
+    TS_ASSERT_EQUALS(dPropTimes[1], DateAndTime("2019-01-01T00:01:00"));
+
+    auto dPropValues = dPropWithValues->valuesAsVector();
+    TS_ASSERT_EQUALS(dPropValues[0], 0.1);
+    TS_ASSERT_EQUALS(dPropValues[1], 1.2);
+
+    // Test string TimeSeriesProperty
+    std::vector<std::string> sValues = {"test", "test2"};
+    auto sPropWithValues = std::make_unique<TimeSeriesProperty<std::string>>(
+        "stringProp", times, sValues);
+    TS_ASSERT(!sPropWithValues->name().compare("stringProp"));
+    TS_ASSERT(!sPropWithValues->documentation().compare(""));
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<std::string>>) ==
+              *sPropWithValues->type_info());
+    TS_ASSERT(!sPropWithValues->isDefault());
+
+    auto sPropTimes = sPropWithValues->timesAsVector();
+    TS_ASSERT_EQUALS(sPropTimes[0], DateAndTime("2019-01-01T00:00:00"));
+    TS_ASSERT_EQUALS(sPropTimes[1], DateAndTime("2019-01-01T00:01:00"));
+
+    auto sPropValues = sPropWithValues->valuesAsVector();
+    TS_ASSERT_EQUALS(sPropValues[0], "test");
+    TS_ASSERT_EQUALS(sPropValues[1], "test2");
+  }
+
   void test_SetValueFromString() {
     TS_ASSERT_THROWS(iProp->setValue("1"),
                      const Exception::NotImplementedError &);

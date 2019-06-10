@@ -1012,6 +1012,19 @@ public:
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
+  void test_load_fails_on_corrupted_run() {
+    // Some ISIS runs can be corrupted by instrument noise,
+    // resulting in incorrect period numbers.
+    // LoadEventNexus should fail in this case.
+    LoadEventNexus loader;
+
+    loader.setChild(true);
+    loader.initialize();
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setPropertyValue("Filename", "SANS2D00059115_corrupted.nxs");
+    TS_ASSERT_THROWS(loader.execute(), const InvalidLogPeriods &);
+  }
+
 private:
   std::string wsSpecFilterAndEventMonitors;
 };
