@@ -236,6 +236,66 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyAlgorithmStarted() {
+    auto presenter = makePresenter();
+    IConfiguredAlgorithm_sptr algorithm =
+        boost::make_shared<MockBatchJobAlgorithm>();
+    EXPECT_CALL(*m_jobRunner, algorithmStarted(algorithm)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged()).Times(1);
+    presenter.notifyAlgorithmStarted(algorithm);
+    verifyAndClear();
+  }
+
+  void testNotifyAlgorithmComplete() {
+    auto presenter = makePresenter();
+    IConfiguredAlgorithm_sptr algorithm =
+        boost::make_shared<MockBatchJobAlgorithm>();
+    EXPECT_CALL(*m_jobRunner, algorithmComplete(algorithm)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged()).Times(1);
+    presenter.notifyAlgorithmComplete(algorithm);
+    verifyAndClear();
+  }
+
+  void testOutputWorkspacesSavedOnAlgorithmComplete() {
+    auto presenter = makePresenter();
+    IConfiguredAlgorithm_sptr algorithm =
+        boost::make_shared<MockBatchJobAlgorithm>();
+    EXPECT_CALL(*m_savePresenter, shouldAutosave())
+        .Times(1)
+        .WillOnce(Return(true));
+    auto const workspaces = std::vector<std::string>{"test1", "test2"};
+    EXPECT_CALL(*m_jobRunner, algorithmOutputWorkspacesToSave(algorithm))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces)).Times(1);
+    presenter.notifyAlgorithmComplete(algorithm);
+    verifyAndClear();
+  }
+
+  void testOutputWorkspacesNotSavedIfAutosaveDisabled() {
+    auto presenter = makePresenter();
+    IConfiguredAlgorithm_sptr algorithm =
+        boost::make_shared<MockBatchJobAlgorithm>();
+    EXPECT_CALL(*m_savePresenter, shouldAutosave())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_jobRunner, algorithmOutputWorkspacesToSave(_)).Times(0);
+    EXPECT_CALL(*m_savePresenter, saveWorkspaces(_)).Times(0);
+    presenter.notifyAlgorithmComplete(algorithm);
+    verifyAndClear();
+  }
+
+  void testNotifyAlgorithmError() {
+    auto presenter = makePresenter();
+    IConfiguredAlgorithm_sptr algorithm =
+        boost::make_shared<MockBatchJobAlgorithm>();
+    auto const errorMessage = std::string("test error");
+    EXPECT_CALL(*m_jobRunner, algorithmError(algorithm, errorMessage)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAlgorithmError(algorithm, errorMessage);
+    verifyAndClear();
+  }
+
   void testModelUpdatedWhenWorkspaceDeleted() {
     auto presenter = makePresenter();
     auto name = std::string("test_workspace");
