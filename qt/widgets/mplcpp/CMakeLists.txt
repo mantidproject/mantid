@@ -17,8 +17,8 @@ set(
   src/MantidColorMap.cpp
   src/PanZoomTool.cpp
   src/Plot.cpp
+  src/RangeMarker.cpp
   src/ScalarMappable.cpp
-  src/VerticalMarker.cpp
 )
 
 set(
@@ -42,8 +42,8 @@ set(
   inc/MantidQtWidgets/MplCpp/MantidColorMap.h
   inc/MantidQtWidgets/MplCpp/PanZoomTool.h
   inc/MantidQtWidgets/MplCpp/Plot.h
+  inc/MantidQtWidgets/MplCpp/RangeMarker.h
   inc/MantidQtWidgets/MplCpp/ScalarMappable.h
-  inc/MantidQtWidgets/MplCpp/VerticalMarker.h
 )
 
 set(UI_FILES inc/MantidQtWidgets/MplCpp/Colorbar.ui)

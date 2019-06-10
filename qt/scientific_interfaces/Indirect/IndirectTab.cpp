@@ -692,8 +692,7 @@ void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower,
                                    const QPair<double, double> &bounds) {
   m_dblManager->setValue(lower, bounds.first);
   m_dblManager->setValue(upper, bounds.second);
-  rs->setMinimum(bounds.first);
-  rs->setMaximum(bounds.second);
+  rs->setRange(bounds.first, bounds.second);
 }
 
 /**

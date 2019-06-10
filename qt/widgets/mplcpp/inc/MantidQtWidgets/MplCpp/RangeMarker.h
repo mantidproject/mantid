@@ -4,18 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_VERTICALMARKER_H
-#define MPLCPP_VERTICALMARKER_H
+#ifndef MPLCPP_RANGEMARKER_H
+#define MPLCPP_RANGEMARKER_H
 
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
-#include <boost/optional.hpp>
-
-#include <QCursor>
 #include <QHash>
-#include <QScopedPointer>
 #include <QVariant>
 
 namespace MantidQt {
@@ -23,35 +19,29 @@ namespace Widgets {
 namespace MplCpp {
 
 /**
- * Wraps a python defined vertical marker object
+ * Wraps a python defined range marker object
  */
-class MANTID_MPLCPP_DLL VerticalMarker : public Common::Python::InstanceHolder {
+class MANTID_MPLCPP_DLL RangeMarker : public Common::Python::InstanceHolder {
 public:
-  explicit VerticalMarker(
-      FigureCanvasQt *canvas, QString const &colour, double x,
+  explicit RangeMarker(
+      FigureCanvasQt *canvas, QString const &colour, double x_minimum,
+      double x_maximum,
       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
+
   void redraw();
   void remove();
 
   void setColor(QString const &colour);
-  bool setXPosition(double x);
-  void setXMinimum(double x);
-  void setXMaximum(double x);
+  void setXRange(double minimum, double maximum);
+  std::tuple<double, double> getXRange();
 
-  void mouseMoveStart(double x, double y);
+  void mouseMoveStart(double x, double y, bool usingPixels = false);
   void mouseMoveStop();
-  bool mouseMove(double x);
-
-  bool isMoving();
-
-  std::tuple<double, double> transformPixelsToCoords(int xPixels, int yPixels);
-
-  // boost::optional<QScopedPointer<QCursor>> overrideCursor(double x, double
-  // y);
+  bool mouseMove(double x, double y, bool usingPixels = false);
 };
 
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
 
-#endif // MPLCPP_VERTICALMARKER_H
+#endif // MPLCPP_RANGEMARKER_H

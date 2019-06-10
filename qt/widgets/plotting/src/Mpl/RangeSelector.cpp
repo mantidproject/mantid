@@ -14,18 +14,6 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
 
-std::pair<double, double> toPair(const std::tuple<double, double> &range) {
-  return std::make_pair(std::get<0>(range), std::get<1>(range));
-}
-
-std::pair<double, double>
-getDefaultRange(const std::pair<double, double> &limits) {
-  const auto minimum = limits.first;
-  const auto maximum = limits.second;
-  const auto offset = (maximum - minimum) * 0.2;
-  return std::make_pair(minimum + offset, maximum - offset);
-}
-
 QHash<QString, QVariant> defaultLineKwargs() {
   QHash<QString, QVariant> kwargs;
   kwargs.insert("line_style", QString("--"));
@@ -39,16 +27,12 @@ namespace MantidWidgets {
 
 RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
                              bool infoOnly, const QColor &colour)
-    : QObject(), m_plot(plot), m_type(type),
-      m_limits(toPair(m_plot->getAxisRange())),
-      m_minimum(getDefaultRange(m_limits).first),
-      m_maximum(getDefaultRange(m_limits).second),
-      m_minMarker(std::make_unique<VerticalMarker>(
-          m_plot->canvas(), colour.name(QColor::HexRgb), m_minimum,
-          defaultLineKwargs())),
-      m_maxMarker(std::make_unique<VerticalMarker>(
-          m_plot->canvas(), colour.name(QColor::HexRgb), m_maximum,
-          defaultLineKwargs())) {
+    : QObject(), m_plot(plot),
+      m_rangeMarker(std::make_unique<RangeMarker>(
+          m_plot->canvas(), colour.name(QColor::HexRgb),
+          std::get<0>(m_plot->getAxisRange()),
+          std::get<1>(m_plot->getAxisRange()), defaultLineKwargs())) {
+  Q_UNUSED(type);
   Q_UNUSED(visible);
   Q_UNUSED(infoOnly);
 
@@ -60,7 +44,7 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
           SLOT(handleMouseMove(QPoint)));
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
 
-  connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarkers()));
+  connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
 }
 
 void RangeSelector::setRange(const std::pair<double, double> &range) {
@@ -68,108 +52,43 @@ void RangeSelector::setRange(const std::pair<double, double> &range) {
 }
 
 void RangeSelector::setRange(const double min, const double max) {
-  setMinimum(min);
-  setMaximum(max);
+  m_rangeMarker->setXRange(min, max);
 }
 
-void RangeSelector::setMinimum(double value) {
-  if (value != m_minimum) {
-    m_minimum = (value > m_limits.first) ? value : m_limits.first;
-    const auto moved = m_minMarker->setXPosition(m_minimum);
-
-    if (moved) {
-      m_maxMarker->setXMinimum(m_minimum);
-      m_plot->replot();
-      emit selectionChanged(m_minimum, m_maximum);
-    }
-  }
+std::pair<double, double> RangeSelector::getRange() const {
+  const auto range = m_rangeMarker->getXRange();
+  return std::make_pair(std::get<0>(range), std::get<1>(range));
 }
-
-void RangeSelector::setMaximum(double value) {
-  if (value != m_maximum) {
-    m_maximum = (value < m_limits.second) ? value : m_limits.second;
-    const auto moved = m_maxMarker->setXPosition(m_maximum);
-
-    if (moved) {
-      m_minMarker->setXMaximum(m_maximum);
-      m_plot->replot();
-      emit selectionChanged(m_minimum, m_maximum);
-    }
-  }
-}
-
-double RangeSelector::getMinimum() { return m_minimum; }
-
-double RangeSelector::getMaximum() { return m_maximum; }
 
 void RangeSelector::detach() {
-  m_minMarker->remove();
-  m_maxMarker->remove();
+  m_rangeMarker->remove();
   m_plot->canvas()->draw();
 }
 
 void RangeSelector::setColour(QColor colour) {
-  m_minMarker->setColor(colour.name(QColor::HexRgb));
-  m_maxMarker->setColor(colour.name(QColor::HexRgb));
-  redrawMarkers();
+  m_rangeMarker->setColor(colour.name(QColor::HexRgb));
 }
 
 void RangeSelector::handleMouseDown(const QPoint &point) {
-  const auto coords =
-      m_minMarker->transformPixelsToCoords(point.x(), point.y());
-  const auto xCoord = std::get<0>(coords);
-  const auto yCoord = std::get<1>(coords);
-
-  m_minMarker->mouseMoveStart(xCoord, yCoord);
-  m_maxMarker->mouseMoveStart(xCoord, yCoord);
-  updateCursor();
+  m_rangeMarker->mouseMoveStart(point.x(), point.y(), true);
 }
 
 void RangeSelector::handleMouseMove(const QPoint &point) {
-  const auto xCoord =
-      std::get<0>(m_minMarker->transformPixelsToCoords(point.x(), point.y()));
+  const auto markerMoved = m_rangeMarker->mouseMove(point.x(), point.y(), true);
 
-  const auto minMoved = m_minMarker->mouseMove(xCoord);
-  const auto maxMoved = m_maxMarker->mouseMove(xCoord);
-
-  if (minMoved || maxMoved) {
+  if (markerMoved) {
     m_plot->replot();
-    updateMinMax(xCoord, minMoved, maxMoved);
-  }
-}
-
-void RangeSelector::updateMinMax(const double x, bool minMoved, bool maxMoved) {
-  if (minMoved) {
-    m_minimum = x;
-    m_maxMarker->setXMinimum(m_minimum);
-    emit selectionChanged(m_minimum, m_maximum);
-  } else if (maxMoved) {
-    m_maximum = x;
-    m_minMarker->setXMaximum(m_maximum);
-    emit selectionChanged(m_minimum, m_maximum);
+    const auto range = m_rangeMarker->getXRange();
+    emit selectionChanged(std::get<0>(range), std::get<1>(range));
   }
 }
 
 void RangeSelector::handleMouseUp(const QPoint &point) {
   UNUSED_ARG(point);
-  m_minMarker->mouseMoveStop();
-  m_maxMarker->mouseMoveStop();
-  updateCursor();
+  m_rangeMarker->mouseMoveStop();
 }
 
-void RangeSelector::updateCursor() {
-  if ((m_minMarker->isMoving() || m_maxMarker->isMoving()) &&
-      !QApplication::overrideCursor()) {
-    QApplication::setOverrideCursor(Qt::SizeHorCursor);
-  } else {
-    QApplication::restoreOverrideCursor();
-  }
-}
-
-void RangeSelector::redrawMarkers() {
-  m_minMarker->redraw();
-  m_maxMarker->redraw();
-}
+void RangeSelector::redrawMarker() { m_rangeMarker->redraw(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt
