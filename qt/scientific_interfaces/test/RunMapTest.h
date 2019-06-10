@@ -26,7 +26,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(runMap.add(morphism, "Morphism"));
 
     const RunLabel al("789", 4);
-    TS_ASSERT_THROWS(runMap.add(al, "Al"), std::invalid_argument);
+    TS_ASSERT_THROWS(runMap.add(al, "Al"), const std::invalid_argument &);
 
     TS_ASSERT(runMap.contains(polly));
     TS_ASSERT(runMap.contains(morphism));
@@ -57,7 +57,7 @@ public:
     TS_ASSERT(!runMap.contains(polly));
 
     const RunLabel invalid("123", 4);
-    TS_ASSERT_THROWS(runMap.remove(invalid), std::invalid_argument);
+    TS_ASSERT_THROWS(runMap.remove(invalid), const std::invalid_argument &);
   }
 
   void test_getRunLabels() {

@@ -38,13 +38,14 @@ _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 # Private 2D Helper functions
 # ================================================
 
-
-def _setLabels1D(axes, workspace, indices=None, normalize_by_bin_width=True):
+def _setLabels1D(axes, workspace, indices=None, normalize_by_bin_width=True,
+                 axis=MantidAxType.SPECTRUM):
     '''
     helper function to automatically set axes labels for 1D plots
     '''
     labels = get_axes_labels(workspace, indices, normalize_by_bin_width)
-    axes.set_xlabel(labels[1])
+    # We assume that previous checking has ensured axis can only be 1 of 2 types
+    axes.set_xlabel(labels[1 if axis == MantidAxType.SPECTRUM else 2])
     axes.set_ylabel(labels[0])
 
 
@@ -70,12 +71,12 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         indices, kwargs = get_indices(workspace, **kwargs)
         (x, y, dy) = get_md_data1d(workspace, normalization, indices)
         dx = None
+        axis = None
     else:
-        axis = kwargs.pop("axis", MantidAxType.SPECTRUM)
+        axis = MantidAxType(kwargs.pop("axis", MantidAxType.SPECTRUM))
         normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
             workspace, axes, **kwargs)
-        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(
-            workspace, axis, **kwargs)
+        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
             # Overwrite any user specified xlabel
             axes.set_xlabel("Spectrum")
@@ -86,7 +87,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         else:
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
-    return x, y, dy, dx, indices, kwargs
+    return x, y, dy, dx, indices, axis, kwargs
 
 
 # ========================================================
@@ -109,11 +110,11 @@ def _plot_impl(axes, workspace, args, kwargs):
             axes.set_xlabel('Time')
         kwargs['linestyle'] = 'steps-post'
     else:
-        x, y, _, _, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs)
-
+        x, y, _, _, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs)
         normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
             workspace, axes, **kwargs)
-        _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
+        _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width,
+                     axis=axis)
     return x, y, args, kwargs
 
 
@@ -146,8 +147,8 @@ def plot(axes, workspace, *args, **kwargs):
     :param ExperimentInfo: for MD Workspaces with multiple :class:`mantid.api.ExperimentInfo` is the
                            ExperimentInfo object from which to extract the log. It's 0 by default
     :param axis: Specify which axis will be plotted. Use axis=MantidAxType.BIN to plot a bin,
-                  and axis=MantidAxType.SPECTRUM to plot a spectrum.
-                  The default value is axis=1, plotting spectra by default.
+                 and axis=MantidAxType.SPECTRUM to plot a spectrum.
+                 The default value is axis=1, plotting spectra by default.
     :param indices: Specify which slice of an MDHistoWorkspace to use when plotting. Needs to be a tuple
                     and will be interpreted as a list of indices. You need to use ``slice(None)`` to
                     select which dimension to plot. *e.g.* to select the second axis to plot from a
@@ -207,9 +208,10 @@ def errorbar(axes, workspace, *args, **kwargs):
     """
     normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
         workspace, axes, **kwargs)
-    x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
+    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                                        with_dy=True, with_dx=False)
     _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
+
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
 

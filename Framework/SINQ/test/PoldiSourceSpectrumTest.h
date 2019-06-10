@@ -59,7 +59,7 @@ public:
     boost::shared_ptr<const PoldiAbstractFakeInstrument> badInstrument(
         new PoldiInvalidSourceFakeInstrument);
     TS_ASSERT_THROWS(spectrum.getSourceComponent(badInstrument),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testGetSpectrumParameter() {
@@ -75,7 +75,7 @@ public:
 
     ParameterMap_sptr badParameterMap(new PoldiInvalidFakeParameterMap);
     TS_ASSERT_THROWS(spectrum.getSpectrumParameter(source, badParameterMap),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testSetSpectrum() {
@@ -90,7 +90,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(spectrum.setSpectrum(goodParameter));
 
     TS_ASSERT_THROWS(spectrum.setSpectrum(Parameter_sptr()),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
 private:

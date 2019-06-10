@@ -26,10 +26,10 @@ const std::string FilterByXValue::category() const {
 }
 
 void FilterByXValue::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   declareProperty("XMin", EMPTY_DBL(),

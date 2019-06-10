@@ -16,7 +16,6 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -47,7 +46,7 @@ FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi,
                                  const std::vector<std::string> &categories)
     : QWidget(parent) {
   auto view = new FunctionTreeView(this, multi, categories);
-  m_presenter = make_unique<FunctionMultiDomainPresenter>(view);
+  m_presenter = std::make_unique<FunctionMultiDomainPresenter>(view);
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->addWidget(view);
@@ -196,6 +195,11 @@ void FunctionBrowser::setCurrentDataset(int i) {
 /// @param indices :: A list of indices of datasets to remove.
 void FunctionBrowser::removeDatasets(QList<int> indices) {
   m_presenter->removeDatasets(indices);
+}
+
+/// Get a list of dataset names.
+QStringList FunctionBrowser::getDatasetNames() const {
+  return m_presenter->getDatasetNames();
 }
 
 /// Add some datasets to those already set.

@@ -12,10 +12,11 @@ class HelpWidgetView(QtWidgets.QWidget):
     def warning_popup(message):
         message_box.warning(str(message))
 
-    def __init__(self, parent=None):
+    def __init__(self, doc, parent=None):
         super(HelpWidgetView, self).__init__(parent)
 
         self.setup_interface_layout()
+        self.doc = doc
 
     def setup_interface_layout(self):
         self.setObjectName("HelpWidget")
@@ -56,4 +57,4 @@ class HelpWidgetView(QtWidgets.QWidget):
         ManageUserDirectories.openUserDirsDialog(self)
 
     def _on_help_button_clicked(self):
-        InterfaceManager().showCustomInterfaceHelp('Frequency Domain Analysis')
+        InterfaceManager().showCustomInterfaceHelp(self.doc)

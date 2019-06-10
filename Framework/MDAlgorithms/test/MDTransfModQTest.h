@@ -177,7 +177,7 @@ public:
 
     TSM_ASSERT_THROWS(
         "No detectors yet defined, so should thow run time error: ",
-        ModQTransf.initialize(WSDescr), std::runtime_error);
+        ModQTransf.initialize(WSDescr), const std::runtime_error &);
 
     // let's preprocess detectors positions to go any further
     WSDescr.m_PreprDetTable =

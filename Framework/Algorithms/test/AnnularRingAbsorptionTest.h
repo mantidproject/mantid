@@ -67,7 +67,7 @@ public:
 
     TS_ASSERT_THROWS(
         alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_Workspace_With_Units_Not_In_Wavelength_Is_Not_Accepted() {
@@ -80,7 +80,7 @@ public:
 
     TS_ASSERT_THROWS(
         alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_Invalid_Sample_Material_Throws_Error() {
@@ -91,7 +91,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("SampleChemicalFormula", "A-lO"));
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     TS_ASSERT(!alg->isExecuted());
   }
 

@@ -40,12 +40,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
       m_showErrorsMenu(nullptr), m_errorBarOptionCache() {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
-
-  if (init) {
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-    ads.notificationCenter.addObserver(m_removeObserver);
-    ads.notificationCenter.addObserver(m_replaceObserver);
-  }
+  watchADS(init);
 
   // Setup plot manipulation tools
   m_zoomTool =
@@ -141,12 +136,20 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
  *
  * Removes observers on the ADS.
  */
-PreviewPlot::~PreviewPlot() {
-  if (m_init) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_removeObserver);
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_replaceObserver);
+PreviewPlot::~PreviewPlot() { watchADS(!m_init); }
+
+/**
+ * Enable/disable the ADS observers
+ * @param on If true ADS observers are enabled else they are disabled
+ */
+void PreviewPlot::watchADS(bool on) {
+  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  if (on) {
+    notificationCenter.addObserver(m_removeObserver);
+    notificationCenter.addObserver(m_replaceObserver);
+  } else {
+    notificationCenter.removeObserver(m_replaceObserver);
+    notificationCenter.removeObserver(m_removeObserver);
   }
 }
 
@@ -195,11 +198,11 @@ QStringList PreviewPlot::getShownErrorBars() {
  * @param range Pair of values for range
  * @param axisID ID of axis
  */
-void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID) {
+void PreviewPlot::setAxisRange(QPair<double, double> range, AxisID axisID) {
   if (range.first > range.second)
     throw std::runtime_error("Supplied range is invalid.");
 
-  m_uiForm.plot->setAxisScale(axisID, range.first, range.second);
+  m_uiForm.plot->setAxisScale(toQwtAxis(axisID), range.first, range.second);
   emit needToReplot();
 }
 
@@ -530,7 +533,7 @@ void PreviewPlot::resizeX() {
       high = range.second;
   }
 
-  setAxisRange(qMakePair(low, high), QwtPlot::xBottom);
+  setAxisRange(qMakePair(low, high), AxisID::XBottom);
 }
 
 /**

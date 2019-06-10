@@ -71,12 +71,12 @@ public:
 
     ws->addColumn("str", "Group");
     TS_ASSERT_THROWS(QOneLevelTreeModel(ws, m_whitelist),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     ws->addColumn("str", "Group1");
     ws->addColumn("str", "Group2");
     TS_ASSERT_THROWS(QOneLevelTreeModel(ws, m_whitelist),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testConstructorOneRowTable() {
@@ -272,8 +272,8 @@ public:
     model.setProcessed(true, 2);
 
     // Non-existent row
-    TS_ASSERT_THROWS(model.isProcessed(10), std::invalid_argument);
-    TS_ASSERT_THROWS(model.isProcessed(-1), std::invalid_argument);
+    TS_ASSERT_THROWS(model.isProcessed(10), const std::invalid_argument &);
+    TS_ASSERT_THROWS(model.isProcessed(-1), const std::invalid_argument &);
 
     // Only 1st and 3rd rows are processed
     TS_ASSERT_EQUALS(model.isProcessed(0), true);

@@ -14,7 +14,7 @@
 #include "../ISISReflectometry/ReflAutoreduction.h"
 #include "../ISISReflectometry/ReflRunsTabPresenter.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "ReflMockObjects.h"
@@ -496,16 +496,14 @@ private:
   // Create the mock objects. The number of groups defines the number of table
   // presenters
   void createMocks(int numGroups) {
-    m_mockRunsTabView =
-        Mantid::Kernel::make_unique<NiceMock<MockRunsTabView>>();
-    m_mockMainPresenter =
-        Mantid::Kernel::make_unique<MockMainWindowPresenter>();
-    m_mockProgress = Mantid::Kernel::make_unique<MockProgressableView>();
+    m_mockRunsTabView = std::make_unique<NiceMock<MockRunsTabView>>();
+    m_mockMainPresenter = std::make_unique<MockMainWindowPresenter>();
+    m_mockProgress = std::make_unique<MockProgressableView>();
 
     for (int i = 0; i < numGroups; ++i) {
       // The runs tab presenter requires a vector of raw pointers
       m_tablePresenters.emplace_back(
-          Mantid::Kernel::make_unique<NiceMock<MockDataProcessorPresenter>>());
+          std::make_unique<NiceMock<MockDataProcessorPresenter>>());
     }
   }
 

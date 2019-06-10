@@ -48,10 +48,10 @@ void SANSSolidAngleCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output));
   declareProperty("DetectorTubes", false,
                   "If true, the algorithm will assume "
                   "that the detectors are tubes in the "
@@ -80,7 +80,8 @@ void SANSSolidAngleCorrection::exec() {
 
   // If the solid angle algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("SANSSolidAngleCorrection")) {
-    auto algProp = make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
+    auto algProp =
+        std::make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }

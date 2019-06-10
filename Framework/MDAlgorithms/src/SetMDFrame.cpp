@@ -61,7 +61,7 @@ const std::string SetMDFrame::summary() const {
  */
 void SetMDFrame::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Mantid::API::IMDWorkspace>>(
+      std::make_unique<WorkspaceProperty<Mantid::API::IMDWorkspace>>(
           "InputWorkspace", "", Direction::InOut),
       "The workspace for which the MDFrames are to be changed. "
       "Note that only MDHisto and MDEvent workspaces can be "
@@ -87,7 +87,7 @@ void SetMDFrame::init() {
       boost::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>();
   axisValidator->setLower(0);
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>(
+      std::make_unique<Kernel::ArrayProperty<int>>(
           "Axes", std::vector<int>(0), axisValidator, Direction::Input),
       "Selects the axes which are going to be set to the new MDFrame type.");
 }

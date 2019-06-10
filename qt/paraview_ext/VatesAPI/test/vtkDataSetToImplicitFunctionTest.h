@@ -26,7 +26,7 @@ public:
   void testThrowIfvtkDataSetNull() {
     vtkDataSet *nullArg = nullptr;
     TS_ASSERT_THROWS(vtkDataSetToImplicitFunction temp(nullArg),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testNoImplcitFunction() {

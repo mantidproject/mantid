@@ -183,13 +183,13 @@ public:
 
     TSM_ASSERT_THROWS("building matrix by this construcor and data with wrong "
                       "number of elements should throw",
-                      (Matrix<double>(data)), std::invalid_argument);
+                      (Matrix<double>(data)), const std::invalid_argument &);
   }
 
   void testFromVectorAndDimensions() {
     std::vector<int> data{1, 2, 3, 4, 5, 6};
     TSM_ASSERT_THROWS("building matrix with worng dimension should fail",
-                      (Matrix<int>(data, 4, 5)), std::invalid_argument);
+                      (Matrix<int>(data, 4, 5)), const std::invalid_argument &);
     Matrix<int> myMat;
     TSM_ASSERT_THROWS_NOTHING("building matrix by this construcor and data "
                               "with correct number of elements should not "
@@ -307,11 +307,11 @@ public:
     DblMatrix rot;
     std::istringstream is;
     is.str("Matr(3,3)1,2,3,4,5,6,7,8,9");
-    TS_ASSERT_THROWS(is >> rot, std::invalid_argument);
+    TS_ASSERT_THROWS(is >> rot, const std::invalid_argument &);
     is.str("Matrix3,3)1,2,3,4,5,6,7,8,9");
-    TS_ASSERT_THROWS(is >> rot, std::invalid_argument);
+    TS_ASSERT_THROWS(is >> rot, const std::invalid_argument &);
     is.str("Matrix(3,31,2,3,4,5,6,7,8,9");
-    TS_ASSERT_THROWS(is >> rot, std::invalid_argument);
+    TS_ASSERT_THROWS(is >> rot, const std::invalid_argument &);
   }
 
   void test_Input_Stream_On_Square_Matrix() {
@@ -370,7 +370,7 @@ public:
     std::istringstream is;
     is.str("Matrix(3|3)1|2,3|4|5|6|7|8|9");
     TS_ASSERT_THROWS(Mantid::Kernel::fillFromStream(is, rot, '|'),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Construction_Non_Square_Matrix_From_Output_Stream() {
@@ -451,11 +451,11 @@ public:
 
     DblMatrix M4(4, 4, true);
     TS_ASSERT_THROWS(M4.operator*(v),
-                     Mantid::Kernel::Exception::MisMatch<size_t>);
+                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
     TS_ASSERT_THROWS(M4.operator*(stdvec),
-                     Mantid::Kernel::Exception::MisMatch<size_t>);
+                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
     TS_ASSERT_THROWS(M4.multiplyPoint(stdvec, otherStdNewVec),
-                     Mantid::Kernel::Exception::MisMatch<size_t>);
+                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
 
     DblMatrix M23 = boost::lexical_cast<DblMatrix>(
         "Matrix(2,3)-0.23,0.55,5.22,2.96,4.2,0.1");
@@ -479,8 +479,9 @@ public:
 
     DblMatrix M43 = boost::lexical_cast<DblMatrix>(
         "Matrix(4,3)-0.23,0.55,5.22,2.96,4.2,0.1,-0.23,0.55,5.22,2.96,4.2,0.1");
-    TS_ASSERT_THROWS(M43.operator*(v),
-                     Mantid::Kernel::Exception::MisMatch<size_t>); // V3D only
+    TS_ASSERT_THROWS(
+        M43.operator*(v),
+        const Mantid::Kernel::Exception::MisMatch<size_t> &); // V3D only
   }
 
   /// Test that the constructor taking preset sizes returns a zero matrix
@@ -527,9 +528,9 @@ public:
                                    7, -25, 8, 9, 42, -33, 15, 0};
     DblMatrix original(data);
     TS_ASSERT_THROWS(DblMatrix badMat(original, nRows + 1, missingCol),
-                     Mantid::Kernel::Exception::IndexError);
+                     const Mantid::Kernel::Exception::IndexError &);
     TS_ASSERT_THROWS(DblMatrix badMat(original, missingRow, nCols + 1),
-                     Mantid::Kernel::Exception::IndexError);
+                     const Mantid::Kernel::Exception::IndexError &);
     DblMatrix mat(original, missingRow, missingCol);
     checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
   }
@@ -687,7 +688,8 @@ public:
     const std::vector<double> newCol{2, 5, 8};
     DblMatrix mat(data);
     size_t badCol(3), goodCol(1);
-    TS_ASSERT_THROWS(mat.setColumn(badCol, newCol), std::invalid_argument);
+    TS_ASSERT_THROWS(mat.setColumn(badCol, newCol),
+                     const std::invalid_argument &);
     mat.setColumn(goodCol, newCol);
     checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
   }
@@ -697,7 +699,7 @@ public:
     const std::vector<double> newRow{7, 8, 9};
     DblMatrix mat(data);
     size_t badRow(3), goodRow(2);
-    TS_ASSERT_THROWS(mat.setRow(badRow, newRow), std::invalid_argument);
+    TS_ASSERT_THROWS(mat.setRow(badRow, newRow), const std::invalid_argument &);
     mat.setRow(goodRow, newRow);
     checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
   }
@@ -761,7 +763,8 @@ public:
     const std::vector<double> dataA{1, 2, 3, 4}, dataDiag{5, 6},
         dataBad{5, 6, 7};
     DblMatrix mat(dataA);
-    TS_ASSERT_THROWS(mat.preMultiplyByDiagonal(dataBad), std::runtime_error);
+    TS_ASSERT_THROWS(mat.preMultiplyByDiagonal(dataBad),
+                     const std::runtime_error &);
     DblMatrix result = mat.preMultiplyByDiagonal(dataDiag);
     TS_ASSERT_EQUALS(result[0][0], 5);
     TS_ASSERT_EQUALS(result[0][1], 10);
@@ -773,7 +776,8 @@ public:
     const std::vector<double> dataA{1, 2, 3, 4}, dataDiag{5, 6},
         dataBad{5, 6, 7};
     DblMatrix mat(dataA);
-    TS_ASSERT_THROWS(mat.postMultiplyByDiagonal(dataBad), std::runtime_error);
+    TS_ASSERT_THROWS(mat.postMultiplyByDiagonal(dataBad),
+                     const std::runtime_error &);
     DblMatrix result = mat.postMultiplyByDiagonal(dataDiag);
     TS_ASSERT_EQUALS(result[0][0], 5);
     TS_ASSERT_EQUALS(result[0][1], 12);

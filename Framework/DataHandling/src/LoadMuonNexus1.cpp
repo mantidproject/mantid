@@ -671,7 +671,7 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
 
   // Create and fill another vector for the X axis
   auto timeChannels = new float[lengthIn + 1]();
-  nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn + 1));
+  nxload.getTimeChannels(timeChannels, static_cast<int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
 
   localWorkspace->setHistogram(
@@ -768,7 +768,7 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
 
     if (orientation[0] == 't') {
       auto p =
-          Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("fromNexus");
+          std::make_unique<Kernel::TimeSeriesProperty<double>>("fromNexus");
       std::string start_time = root.getString("run/start_time");
       p->addValue(start_time, -90.0);
       localWorkspace->mutableRun().addLogData(std::move(p));

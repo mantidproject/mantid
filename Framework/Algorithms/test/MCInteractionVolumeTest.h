@@ -141,7 +141,7 @@ public:
     // nothing
     TS_ASSERT_THROWS(
         MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()),
-        std::invalid_argument);
+        const std::invalid_argument &);
     // valid shape
     sample.setShape(ComponentCreationHelper::createSphere(1));
     TS_ASSERT_THROWS_NOTHING(
@@ -165,7 +165,7 @@ public:
                                    maxTries);
     TS_ASSERT_THROWS(interactor.calculateAbsorption(rng, startPos, endPos,
                                                     lambdaBefore, lambdaAfter),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 };
 

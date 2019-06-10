@@ -24,7 +24,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
-#include <MantidHistogramData/LinearGenerator.h>
+#include "MantidHistogramData/LinearGenerator.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

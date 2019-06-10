@@ -67,7 +67,7 @@ public:
     TS_ASSERT_THROWS(
         MantidQt::Icons::getIcon(
             {QString("mdi.run-fast"), QString("mdi.run-fast")}, options),
-        std::invalid_argument)
+        const std::invalid_argument &)
   }
 
   void testGetFont() {
@@ -79,7 +79,7 @@ public:
 
   void testGetIconThrowsIfIconLibraryIsNotPresent() {
     TS_ASSERT_THROWS(MantidQt::Icons::getIcon(QString("fda.run-fast")),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 };
 

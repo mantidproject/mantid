@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import SofQWMomentsScan, DeleteWorkspace
 from mantid import mtd
 
 

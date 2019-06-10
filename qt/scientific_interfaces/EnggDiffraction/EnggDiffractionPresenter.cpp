@@ -1550,7 +1550,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                        "were not valid. "
                        "See log messages for details. Error: "
                     << ia.what() << '\n';
-    } catch (Mantid::API::Algorithm::CancelException) {
+    } catch (const Mantid::API::Algorithm::CancelException &) {
       m_focusFinishedOK = false;
       g_log.error() << "Focus terminated by user.\n";
     }

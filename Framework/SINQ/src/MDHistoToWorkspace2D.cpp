@@ -46,9 +46,9 @@ MDHistoToWorkspace2D::MDHistoToWorkspace2D()
     : Mantid::API::Algorithm(), m_rank(0), m_currentSpectra(0) {}
 
 void MDHistoToWorkspace2D::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "InputWorkspace", "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "OutputWorkspace", "", Direction::Output));
 }
 

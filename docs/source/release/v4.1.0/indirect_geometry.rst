@@ -84,8 +84,28 @@ Data Reduction Interface
 Improvements
 ############
 - Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
+- Improved ISISEnergyTransfer by automatically loading the Detailed Balance from the sample logs if available.
 
 Bug Fixes
 #########
 - Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm causing the Moments tab to crash.
 - Fixed an unexpected error when opening the Data Reduction interface with an unrelated facility selected.
+
+
+Indirect Settings Interface
+---------------------------
+
+New Features
+############
+- A :ref:`Settings <interface-indirect-settings>` GUI is now available and can be opened using the button
+  next to the help *?* button on the bottom left of the interfaces. It can also be opened from the Indirect
+  interfaces menu.
+
+.. figure:: ../../images/Indirect_Settings.png
+  :class: screenshot
+  :align: center
+  :figwidth: 90%
+  :alt: The Indirect settings GUI.
+
+- The *Settings* GUI allows you to turn off the restriction of input data based on their name.
+- The *Settings* GUI allows you to turn on error bars for the output plots.

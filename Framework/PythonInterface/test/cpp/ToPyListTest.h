@@ -30,7 +30,7 @@ public:
   void test_unregistered_element_type_throws_runtime_error() {
     std::vector<UnregisteredType> unknownElements{UnregisteredType()};
     TS_ASSERT_THROWS(ToPyList<UnregisteredType>()(unknownElements),
-                     boost::python::error_already_set);
+                     const boost::python::error_already_set &);
   }
 
 private:

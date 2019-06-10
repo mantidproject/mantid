@@ -41,12 +41,12 @@ public:
 
   // ----------------------- Failure tests ------------------------
   void testgetCMapWithUnknownCMapThrowsException() {
-    TS_ASSERT_THROWS(getCMap("AnUnknownName"), PythonException);
+    TS_ASSERT_THROWS(getCMap("AnUnknownName"), const PythonException &);
   }
 
   void testConstructionWithNonColorMapObjectThrows() {
     TS_ASSERT_THROWS(Colormap cmap(MantidQt::Widgets::Common::Python::Object{}),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 };
 

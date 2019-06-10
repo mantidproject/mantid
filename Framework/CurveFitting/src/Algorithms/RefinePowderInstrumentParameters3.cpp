@@ -42,7 +42,7 @@ RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3()
 void RefinePowderInstrumentParameters3::init() {
   // Peak position workspace
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+      std::make_unique<WorkspaceProperty<Workspace2D>>(
           "InputPeakPositionWorkspace", "Anonymous", Direction::Input),
       "Data workspace containing workspace positions in TOF agains dSpacing.");
 
@@ -53,20 +53,20 @@ void RefinePowderInstrumentParameters3::init() {
 
   // Output workspace
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+      std::make_unique<WorkspaceProperty<Workspace2D>>(
           "OutputPeakPositionWorkspace", "Anonymous2", Direction::Output),
       "Output data workspace containing refined workspace positions in TOF "
       "agains dSpacing.");
 
   // Input Table workspace containing instrument profile parameters
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "InputInstrumentParameterWorkspace", "Anonymous3", Direction::Input),
       "INput tableWorkspace containg instrument's parameters.");
 
   // Output table workspace containing the refined parameters
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputInstrumentParameterWorkspace", "Anonymous4",
           Direction::Output),
       "Output tableworkspace containing instrument's fitted parameters. ");
@@ -1231,7 +1231,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
         double upperbound = param.maxvalue;
         if (lowerbound >= -DBL_MAX * 0.1 || upperbound <= DBL_MAX * 0.1) {
           // If there is a boundary
-          auto bc = Kernel::make_unique<Constraints::BoundaryConstraint>(
+          auto bc = std::make_unique<Constraints::BoundaryConstraint>(
               function.get(), parname, lowerbound, upperbound, false);
           function->addConstraint(std::move(bc));
         }

@@ -96,7 +96,31 @@ class _WorkspaceArtists(object):
         :param axes: A reference to the axes instance the artists are attached to
         """
         # delete the artists from the axes
+        self._remove(axes, self._artists)
+
+    def remove_if(self, axes, predicate):
+        """
+        Remove the tracked artists from the given axes if they return true from predicate
+        :param axes: A reference to the axes instance the artists are attached to
+        :param predicate: A function which takes a matplotlib artist object and returns a boolean
+        :returns: Returns a bool specifying whether the class is now empty
+        """
+        artists_to_remove = []
+        artists_to_keep = []
         for artist in self._artists:
+            if predicate(artist):
+                artists_to_remove.append(artist)
+            else:
+                artists_to_keep.append(artist)
+
+        self._remove(axes, artists_to_remove)
+        self._artists = artists_to_keep
+
+        return len(self._artists) == 0
+
+    def _remove(self, axes, artists):
+        # delete the artists from the axes
+        for artist in artists:
             artist.remove()
             # Remove doesn't catch removing the container for errorbars etc
             if isinstance(artist, Container):
@@ -291,7 +315,44 @@ class MantidAxes(Axes):
 
         for workspace_artist in artist_info:
             workspace_artist.remove(self)
+
         return self.is_empty(self)
+
+    def remove_artists_if(self, unary_predicate):
+        """
+        Remove any artists which satisfy the predicate and return True
+        if the axes is then empty
+        :param unary_predicate: A predicate taking a single matplotlib artist object
+        :return: True if the axes is empty, false if artists remain
+        """
+        is_empty_list = []
+        for workspace_name, artist_info in self.tracked_workspaces.items():
+            is_empty = self._remove_artist_info_if(artist_info, unary_predicate)
+            if is_empty:
+                is_empty_list.append(workspace_name)
+
+        for workspace_name in is_empty_list:
+            self.tracked_workspaces.pop(workspace_name)
+
+        return self.is_empty(self)
+
+    def _remove_artist_info_if(self, artist_info, unary_predicate):
+        """
+        Remove any artists which satisfy the predicate from the artist_info_list
+        :param artist_info: A list of _WorkspaceArtists objects
+        :param unary_predicate: A predicate taking a single matplotlib artist object
+        :return: True if the artist_info is empty, false if artist_info remain
+        """
+        is_empty_list = []
+        for workspace_artist in artist_info:
+            empty = workspace_artist.remove_if(self, unary_predicate)
+            is_empty_list.append(empty)
+
+        for index, empty in reversed(list(enumerate(is_empty_list))):
+            if empty:
+                artist_info.pop(index)
+
+        return len(artist_info) == 0
 
     def replace_workspace_artists(self, workspace):
         """

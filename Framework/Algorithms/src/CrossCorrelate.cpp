@@ -68,10 +68,10 @@ void CrossCorrelate::init() {
   wsValidator->add<API::RawCountValidator>();
 
   // Input and output workspaces
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
@@ -189,7 +189,7 @@ void CrossCorrelate::exec() {
     outX[i] = static_cast<double>(i - nY + 2);
   }
   // Initialise the progress reporting object
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, nspecs);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {

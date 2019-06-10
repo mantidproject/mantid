@@ -39,10 +39,10 @@ class MaskWorkspaceToCalFileTest(unittest.TestCase):
         try:
             mask_boundary_inside = self.get_masking_for_index(file, masking_edge)
             mask_boundary_outside = self.get_masking_for_index(file, masking_edge+1)
-            self.assertTrue(mask_boundary_inside == expected_masking_identifier)
-            self.assertTrue(mask_boundary_outside == expected_not_masking_identifier)
+            self.assertEqual(mask_boundary_inside,  expected_masking_identifier)
+            self.assertEqual(mask_boundary_outside,  expected_not_masking_identifier)
         except LookupError:
-            self.assertTrue(False, msg="Could not find the requested index")
+            self.fail("Could not find the requested index")
         finally:
             file.close()
             os.remove(cal_file_full_path)

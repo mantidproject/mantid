@@ -32,7 +32,7 @@ class ResNorm2Test(unittest.TestCase):
         """
 
         self.assertTrue(isinstance(result, WorkspaceGroup))
-        self.assertEquals(result.getNumberOfEntries(), 2)
+        self.assertEqual(result.getNumberOfEntries(), 2)
 
         expected_names = [result.name() + '_' + n for n in ['Intensity', 'Stretch']]
         for name in expected_names:
@@ -42,7 +42,7 @@ class ResNorm2Test(unittest.TestCase):
             sub_ws = result.getItem(idx)
             self.assertTrue(isinstance(sub_ws, MatrixWorkspace))
             self.assertEqual(sub_ws.blocksize(), self._van_ws.getNumberHistograms())
-            self.assertEquals(sub_ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+            self.assertEqual(sub_ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
 
 
     def test_basic(self):

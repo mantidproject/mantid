@@ -49,6 +49,8 @@ private slots:
   void plotCurrentPreview();
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   void processLogs();
   void addAdditionalLogs(Mantid::API::WorkspaceGroup_sptr resultGroup) const;
   void addAdditionalLogs(Mantid::API::Workspace_sptr resultWorkspace) const;

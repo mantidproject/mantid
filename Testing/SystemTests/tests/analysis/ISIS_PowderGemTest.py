@@ -57,7 +57,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return self.calibration_results.getName(),\
+        return self.calibration_results.name(),\
                "ISIS_Powder-GEM-VanSplined_83608_offsets_2011_cycle111b.cal.nxs"
 
     def cleanup(self):

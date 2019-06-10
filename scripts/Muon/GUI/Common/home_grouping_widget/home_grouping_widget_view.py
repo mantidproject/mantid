@@ -138,7 +138,7 @@ class HomeGroupingWidgetView(QtWidgets.QWidget):
     # Groups and Pairs
     # ------------------------------------------------------------------------------------------------------------------
 
-    def populate_group_pair_selector(self, group_names, pair_names):
+    def populate_group_pair_selector(self, group_names, pair_names, default_name):
         self.grouppair_selector.clear()
 
         model = self.grouppair_selector.model()
@@ -149,11 +149,14 @@ class HomeGroupingWidgetView(QtWidgets.QWidget):
             model.appendRow(item)
         for name in pair_names:
             item = QtGui.QStandardItem(str(name))
-            #item.setForeground(QtGui.QColor('red'))
             font = item.font()
             font.setBold(True)
             item.setFont(font)
             model.appendRow(item)
+
+        index = self.grouppair_selector.findText(default_name)
+        index = 0 if index == -1 else index
+        self.grouppair_selector.setCurrentIndex(index)
 
     def get_selected_group_or_pair_name(self):
         return self.grouppair_selector.currentText()

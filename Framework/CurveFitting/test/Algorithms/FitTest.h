@@ -45,7 +45,7 @@ public:
   /// (default=0.01)
   TestMinimizer() {
     declareProperty(
-        Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+        std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
             "SomeOutput", "abc", Kernel::Direction::Output),
         "Name of the output Workspace holding some output.");
   }
@@ -102,14 +102,14 @@ public:
     TS_ASSERT_THROWS(
         alg->setProperty("Function",
                          boost::dynamic_pointer_cast<IFunction>(multi)),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_empty_function_str() {
     auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     TS_ASSERT_THROWS(alg->setPropertyValue("Function", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   // Test that Fit copies minimizer's output properties to Fit

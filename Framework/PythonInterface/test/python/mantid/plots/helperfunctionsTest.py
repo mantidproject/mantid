@@ -233,13 +233,13 @@ class HelperFunctionsTest(unittest.TestCase):
     def test_get_data_uneven_flag(self):
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, axisaligned=True, other_kwarg=1)
         self.assertTrue(flag)
-        self.assertEquals(kwargs, {'other_kwarg': 1})
+        self.assertEqual(kwargs, {'other_kwarg': 1})
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, other_kwarg=2)
         self.assertFalse(flag)
-        self.assertEquals(kwargs, {'other_kwarg': 2})
+        self.assertEqual(kwargs, {'other_kwarg': 2})
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_uneven, axisaligned=False, other_kwarg=3)
         self.assertTrue(flag)
-        self.assertEquals(kwargs, {'other_kwarg': 3})
+        self.assertEqual(kwargs, {'other_kwarg': 3})
 
     def test_boundaries_from_points(self):
         centers = np.array([1., 2., 4., 8.])
@@ -439,14 +439,14 @@ class HelperFunctionsTest(unittest.TestCase):
 
     def test_get_sample_logs(self):
         x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log', FullTime=True)
-        self.assertEquals(x[0], datetime.datetime(2010, 1, 1, 0, 0, 0))
-        self.assertEquals(x[1], datetime.datetime(2010, 1, 1, 0, 30, 0))
-        self.assertEquals(x[2], datetime.datetime(2010, 1, 1, 0, 50, 0))
+        self.assertEqual(x[0], datetime.datetime(2010, 1, 1, 0, 0, 0))
+        self.assertEqual(x[1], datetime.datetime(2010, 1, 1, 0, 30, 0))
+        self.assertEqual(x[2], datetime.datetime(2010, 1, 1, 0, 50, 0))
         np.testing.assert_allclose(y, np.array([100, 15, 100.2]))
         self.assertTrue(FullTime)
-        self.assertEquals(LogName, 'my_log')
-        self.assertEquals(units, '')
-        self.assertEquals(kwargs, {})
+        self.assertEqual(LogName, 'my_log')
+        self.assertEqual(units, '')
+        self.assertEqual(kwargs, {})
 
     def test_validate_args_success(self):
         ws = CreateSampleWorkspace()

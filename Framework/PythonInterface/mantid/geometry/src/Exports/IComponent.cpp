@@ -37,6 +37,7 @@ double getDistance(IComponent &self, IComponent &other) {
 
 void export_IComponent() {
   register_ptr_to_python<boost::shared_ptr<IComponent>>();
+  register_ptr_to_python<boost::shared_ptr<const IComponent>>();
 
   class_<IComponent, boost::noncopyable>("IComponent", no_init)
       .def("getPos", &IComponent::getPos, arg("self"),

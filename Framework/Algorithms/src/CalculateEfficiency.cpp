@@ -34,12 +34,12 @@ using namespace DataObjects;
  *
  */
 void CalculateEfficiency::init() {
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The workspace containing the flood data");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The workspace containing the flood data");
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
@@ -53,7 +53,7 @@ void CalculateEfficiency::init() {
   declareProperty("MaskedFullComponent", "",
                   "Component Name to fully mask according to the IDF file.");
   declareProperty(
-      make_unique<ArrayProperty<int>>("MaskedEdges"),
+      std::make_unique<ArrayProperty<int>>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
   declareProperty(
       "MaskedComponent", "",

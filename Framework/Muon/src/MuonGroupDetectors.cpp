@@ -39,16 +39,16 @@ const std::string MuonGroupDetectors::category() const { return "Muon"; }
 /** Initialize the algorithm's properties.
  */
 void MuonGroupDetectors::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to apply grouping to.");
 
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "DetectorGroupingTable", "", Direction::Input),
                   "Table with detector grouping information. Check wiki page "
                   "for table format expected.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Workspace with detectors grouped.");
 }

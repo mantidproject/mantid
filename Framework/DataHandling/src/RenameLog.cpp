@@ -20,9 +20,10 @@ DECLARE_ALGORITHM(RenameLog)
 
 void RenameLog::init() {
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "Workspace", "Anonymous", Direction::InOut),
-                  "Workspace to have logs merged");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "Workspace", "Anonymous", Direction::InOut),
+      "Workspace to have logs merged");
   declareProperty("OriginalLogName", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "Log's original name.");
