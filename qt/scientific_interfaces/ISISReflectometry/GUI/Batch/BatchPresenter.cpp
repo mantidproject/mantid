@@ -133,7 +133,6 @@ void BatchPresenter::notifyAlgorithmComplete(
     IConfiguredAlgorithm_sptr algorithm) {
   m_jobRunner->algorithmComplete(algorithm);
   m_runsPresenter->notifyRowOutputsChanged();
-  m_runsPresenter->notifyRowStateChanged();
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
