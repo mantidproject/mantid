@@ -72,6 +72,8 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         dx = None
     else:
         axis = kwargs.pop("axis", MantidAxType.SPECTRUM)
+        normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
+            workspace, axes, **kwargs)
         workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(
             workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
@@ -79,8 +81,6 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
             axes.set_xlabel("Spectrum")
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
         elif axis == MantidAxType.SPECTRUM:
-            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
-                workspace, axes, **kwargs)
             x, y, dy, dx = get_spectrum(workspace, workspace_index,
                                         normalize_by_bin_width, with_dy, with_dx)
         else:
@@ -179,7 +179,7 @@ def errorbar(axes, workspace, *args, **kwargs):
                       to extract the data from
     :param specNum:   spectrum number to plot if MatrixWorkspace
     :param wkspIndex: workspace index to plot if MatrixWorkspace
-    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+    :param distribution: ``None`` (default) asks the global setting. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a MatrixWorkspace histogram.
     :param normalize_by_bin_width: Plot the workspace as a distribution. If None default to global
@@ -205,10 +205,10 @@ def errorbar(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
-                                                       with_dy=True, with_dx=False)
     normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
         workspace, axes, **kwargs)
+    x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
+                                                       with_dy=True, with_dx=False)
     _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
