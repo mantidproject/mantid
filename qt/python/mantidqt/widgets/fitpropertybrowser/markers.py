@@ -43,6 +43,7 @@ class VerticalMarker(QObject):
                                linewidth=line_width, linestyle=line_style, animated=True)
         self.ax.add_patch(self.patch)
         self.is_moving = False
+        self.x_minimum, self.x_maximum = self.ax.get_xlim()
 
     def _get_y0_y1(self):
         """
@@ -84,8 +85,25 @@ class VerticalMarker(QObject):
         Set the x position of the marker.
         :param x: An x axis coordinate.
         """
-        self.x = x
-        self.x_moved.emit(x)
+        if self.x_minimum <= x <= self.x_maximum:
+            self.x = x
+            self.x_moved.emit(x)
+            return True
+        return False
+
+    def set_x_minimum(self, x_minimum):
+        """
+        Sets the minimum allowed x position for the marker.
+        :param x_minimum: An x axis coordinate.
+        """
+        self.x_minimum = x_minimum
+
+    def set_x_maximum(self, x_maximum):
+        """
+        Sets the maximum allowed x position for the marker.
+        :param x_maximum: An x axis coordinate.
+        """
+        self.x_maximum = x_maximum
 
     def get_x_in_pixels(self):
         """
@@ -116,7 +134,7 @@ class VerticalMarker(QObject):
         :return: The x and y position along the axis.
         """
         x_value, y_value = self.patch.get_transform().inverted().transform((x_pixels, y_pixels))
-        return [x_value, y_value]
+        return x_value, y_value
 
     def mouse_move_start(self, x, y):
         """
@@ -140,9 +158,7 @@ class VerticalMarker(QObject):
         :return: True if moved or False if stayed at the old position.
         """
         if self.is_moving and x is not None:
-            self.x = x
-            self.x_moved.emit(x)
-            return True
+            return self.set_x_position(x)
         return False
 
     def is_marker_moving(self):
@@ -174,6 +190,76 @@ class VerticalMarker(QObject):
         if self.is_moving or self.is_above(x, y):
             return self.get_cursor_at_y(y)
         return None
+
+
+class RangeMarker(QObject):
+    def __init__(self, canvas, color, x_min, x_max, line_style='-'):
+        """
+        Init the marker.
+        :param canvas: The MPL canvas.
+        :param color: An MPL colour value
+        :param x_min: The x coordinate (data) of the minimum marker.
+        :param x_max: The x coordinate (data) of the maximum marker.
+        :param line_style: An MPL line style value.
+        """
+        super(RangeMarker, self).__init__()
+        self.min_marker = VerticalMarker(canvas, color, x_min, line_style=line_style)
+        self.max_marker = VerticalMarker(canvas, color, x_max, line_style=line_style)
+
+    def redraw(self):
+        """
+        Redraw the range marker.
+        """
+        self.min_marker.redraw()
+        self.max_marker.redraw()
+
+    def remove(self):
+        """
+        Remove this range marker from the canvas.
+        """
+        self.min_marker.remove()
+        self.max_marker.remove()
+
+    def set_color(self, color):
+        """
+        Set the colour of the range marker
+        """
+        self.min_marker.set_color(color)
+        self.max_marker.set_color(color)
+        self.redraw()
+
+    def mouse_move_start(self, x, y, pixels=False):
+        """
+        Start moving this marker if (x, y) is above it. Ignore otherwise.
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        """
+        if pixels:
+            x, y = self.patch.get_transform().inverted().transform((x, y))
+        self.min_marker.mouse_move_start(x, y)
+        self.max_marker.mouse_move_start(x, y)
+
+    def mouse_move(self, x, y=None, pixels=False):
+        """
+        Move this marker to a new position if movement had been started earlier by a call to mouse_move_start(x, y)
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :return: True if moved or False if stayed at the old position.
+        """
+        if pixels:
+            x, _ = self.patch.get_transform().inverted().transform((x, y))
+        min_moved = self.min_marker.mouse_move(x)
+        max_moved = self.min_marker.mouse_move(x)
+        if min_moved or max_moved:
+            return True
+        return False
+
+    def mouse_move_stop(self):
+        """
+        Stop moving.
+        """
+        self.min_marker.mouse_move_stop()
+        self.max_marker.mouse_move_stop()
 
 
 class CentreMarker(VerticalMarker):

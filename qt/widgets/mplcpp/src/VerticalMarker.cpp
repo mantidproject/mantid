@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/MplCpp/VerticalMarker.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
+#include "MantidQtWidgets/Common/Python/Sip.h"
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
 // using Mantid::PythonInterface::PythonException;
@@ -57,8 +58,19 @@ void VerticalMarker::setColor(QString const &color) {
   callMethodNoCheck<void>(pyobj(), "set_color", color.toLatin1().constData());
 }
 
-void VerticalMarker::setXPosition(double x) {
-  callMethodNoCheck<void>(pyobj(), "set_x_position", x);
+bool VerticalMarker::setXPosition(double x) {
+  GlobalInterpreterLock lock;
+
+  auto const movedPy = Python::Object(pyobj().attr("set_x_position")(x));
+  return PyLong_AsLong(movedPy.ptr()) > 0;
+}
+
+void VerticalMarker::setXMinimum(double x) {
+  callMethodNoCheck<void>(pyobj(), "set_x_minimum", x);
+}
+
+void VerticalMarker::setXMaximum(double x) {
+  callMethodNoCheck<void>(pyobj(), "set_x_maximum", x);
 }
 
 void VerticalMarker::mouseMoveStart(double x, double y) {
@@ -72,8 +84,7 @@ void VerticalMarker::mouseMoveStop() {
 bool VerticalMarker::mouseMove(double x) {
   GlobalInterpreterLock lock;
 
-  auto const args = Python::NewRef(Py_BuildValue("(d)", x));
-  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(*args));
+  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x));
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
@@ -92,21 +103,21 @@ VerticalMarker::transformPixelsToCoords(int xPixels, int yPixels) {
     return PyFloat_AsDouble(value.ptr());
   };
 
-  auto const args = Python::NewRef(Py_BuildValue("(ii)", xPixels, yPixels));
-  auto const coords = pyobj().attr("transform_pixels_to_coords")(*args);
+  auto const coords =
+      pyobj().attr("transform_pixels_to_coords")(xPixels, yPixels);
   return std::make_tuple<double, double>(toDouble(coords[0]),
                                          toDouble(coords[1]));
 }
 
-//QCursor *VerticalMarker::overrideCursor(double x, double y) {
+// boost::optional<QScopedPointer<QCursor>>
+// VerticalMarker::overrideCursor(double x, double y) {
 //  GlobalInterpreterLock lock;
 //
-//  auto const args = Python::NewRef(Py_BuildValue("(dd)", x, y));
-//  auto const cursor = pyobj().attr("override_cursor")(*args);
+//  auto cursor = Python::Object(pyobj().attr("override_cursor")(x, y));
 //
-//	return cursor;
-//  //return std::make_tuple<double, double>(toDouble(coords[0]),
-//  //                                       toDouble(coords[1]));
+//  if (cursor.is_none())
+//    return boost::optional<QScopedPointer<QCursor>>();
+//  return QScopedPointer<QCursor>(Python::extract<QCursor>(cursor));
 //}
 
 } // namespace MplCpp

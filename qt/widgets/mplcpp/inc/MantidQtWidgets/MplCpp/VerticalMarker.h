@@ -11,8 +11,11 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
+#include <boost/optional.hpp>
+
 #include <QCursor>
 #include <QHash>
+#include <QScopedPointer>
 #include <QVariant>
 
 namespace MantidQt {
@@ -31,7 +34,9 @@ public:
   void remove();
 
   void setColor(QString const &colour);
-  void setXPosition(double x);
+  bool setXPosition(double x);
+  void setXMinimum(double x);
+  void setXMaximum(double x);
 
   void mouseMoveStart(double x, double y);
   void mouseMoveStop();
@@ -41,7 +46,8 @@ public:
 
   std::tuple<double, double> transformPixelsToCoords(int xPixels, int yPixels);
 
-  //QCursor *overrideCursor(double x, double y);
+  // boost::optional<QScopedPointer<QCursor>> overrideCursor(double x, double
+  // y);
 };
 
 } // namespace MplCpp

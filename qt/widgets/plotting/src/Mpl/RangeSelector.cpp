@@ -75,18 +75,26 @@ void RangeSelector::setRange(const double min, const double max) {
 void RangeSelector::setMinimum(double value) {
   if (value != m_minimum) {
     m_minimum = (value > m_limits.first) ? value : m_limits.first;
-    m_minMarker->setXPosition(m_minimum);
-    m_plot->replot();
-    emit selectionChanged(m_minimum, m_maximum);
+    const auto moved = m_minMarker->setXPosition(m_minimum);
+
+    if (moved) {
+      m_maxMarker->setXMinimum(m_minimum);
+      m_plot->replot();
+      emit selectionChanged(m_minimum, m_maximum);
+    }
   }
 }
 
 void RangeSelector::setMaximum(double value) {
   if (value != m_maximum) {
     m_maximum = (value < m_limits.second) ? value : m_limits.second;
-    m_maxMarker->setXPosition(m_maximum);
-    m_plot->replot();
-    emit selectionChanged(m_minimum, m_maximum);
+    const auto moved = m_maxMarker->setXPosition(m_maximum);
+
+    if (moved) {
+      m_minMarker->setXMaximum(m_maximum);
+      m_plot->replot();
+      emit selectionChanged(m_minimum, m_maximum);
+    }
   }
 }
 
@@ -118,9 +126,8 @@ void RangeSelector::handleMouseDown(const QPoint &point) {
 }
 
 void RangeSelector::handleMouseMove(const QPoint &point) {
-  const auto coords =
-      m_minMarker->transformPixelsToCoords(point.x(), point.y());
-  const auto xCoord = std::get<0>(coords);
+  const auto xCoord =
+      std::get<0>(m_minMarker->transformPixelsToCoords(point.x(), point.y()));
 
   const auto minMoved = m_minMarker->mouseMove(xCoord);
   const auto maxMoved = m_maxMarker->mouseMove(xCoord);
@@ -132,11 +139,13 @@ void RangeSelector::handleMouseMove(const QPoint &point) {
 }
 
 void RangeSelector::updateMinMax(const double x, bool minMoved, bool maxMoved) {
-  if (minMoved && x != m_minimum) {
+  if (minMoved) {
     m_minimum = x;
+    m_maxMarker->setXMinimum(m_minimum);
     emit selectionChanged(m_minimum, m_maximum);
-  } else if (maxMoved && x != m_maximum) {
+  } else if (maxMoved) {
     m_maximum = x;
+    m_minMarker->setXMaximum(m_maximum);
     emit selectionChanged(m_minimum, m_maximum);
   }
 }
