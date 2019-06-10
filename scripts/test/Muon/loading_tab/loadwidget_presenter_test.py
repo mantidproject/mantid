@@ -22,6 +22,8 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+from mantid.simpleapi import CreateSampleWorkspace, LoadInstrument
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class LoadRunWidgetPresenterTest(GuiTest):
@@ -73,12 +75,10 @@ class LoadRunWidgetPresenterTest(GuiTest):
         self.obj = None
 
     def create_fake_workspace(self, name):
-        workspace_mock = mock.MagicMock()
-        instrument_mock = mock.MagicMock()
-        instrument_mock.getName.return_value = 'EMU'
-        workspace_mock.workspace.getInstrument.return_value = instrument_mock
+        workspace_mock = CreateSampleWorkspace(StoreInADS=False)
+        LoadInstrument(Workspace=workspace_mock, InstrumentName='EMU', RewriteSpectraMap=False, StoreInADS=False)
 
-        return {'OutputWorkspace': [workspace_mock], 'MainFieldDirection': 'transverse'}
+        return {'OutputWorkspace': [MuonWorkspaceWrapper(workspace_mock)], 'MainFieldDirection': 'transverse'}
 
     def mock_loading_from_browse(self, workspace, filename, run):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(

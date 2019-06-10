@@ -38,6 +38,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter = self.widget.fitting_tab_presenter
         self.view = self.widget.fitting_tab_view
         self.presenter.model = mock.MagicMock()
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
 
     @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.WorkspaceSelectorView.get_selected_data')
     def test_handle_select_fit_data_clicked_updates_current_run_list(self, dialog_mock):
@@ -297,6 +298,7 @@ class FittingTabPresenterTest(GuiTest):
 
     def test_fit_name_not_updated_if_already_changed_by_user(self):
         self.view.function_name = 'test function'
+        self.view.function_name_line_edit.textChanged.emit('test function')
 
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 

@@ -9,7 +9,6 @@ import unittest
 import six
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
-from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
@@ -27,9 +26,6 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import Pairi
 
 class GroupingTabPresenterTest(GuiTest):
     def setUp(self):
-        # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QWidget()
-
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
@@ -39,16 +35,16 @@ class GroupingTabPresenterTest(GuiTest):
 
         self.model = GroupingTabModel(context=self.context)
 
-        self.grouping_table_view = GroupingTableView(parent=self.obj)
+        self.grouping_table_view = GroupingTableView()
         self.grouping_table_widget = GroupingTablePresenter(self.grouping_table_view, self.model)
 
-        self.pairing_table_view = PairingTableView(parent=self.obj)
+        self.pairing_table_view = PairingTableView()
         self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.model)
 
         self.add_three_groups()
         self.add_two_pairs()
 
-        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view, parent=self.obj)
+        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view)
         self.presenter = GroupingTabPresenter(self.view, self.model,
                                               self.grouping_table_widget,
                                               self.pairing_table_widget)
@@ -110,7 +106,7 @@ class GroupingTabPresenterTest(GuiTest):
         groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
                   MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
         pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
-        mock_load.return_value = (groups, pairs, 'description')
+        mock_load.return_value = (groups, pairs, 'description', 'pair1')
 
         self.view.load_grouping_button.clicked.emit(True)
 

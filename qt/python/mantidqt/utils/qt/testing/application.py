@@ -8,6 +8,8 @@
 from __future__ import absolute_import
 
 import atexit
+import sys
+import traceback
 
 from qtpy.QtWidgets import QApplication
 
@@ -25,7 +27,6 @@ def cleanup_qapp_ref():
     global _QAPP
     del _QAPP
 
-
 def get_application(name=''):
     """
     Initialise and return the global application object
@@ -33,7 +34,14 @@ def get_application(name=''):
     :return: Global appliction object
     """
     global _QAPP
+
+    def exception_handler(exctype, value, tb):
+        traceback.print_exception(exctype, value, tb)
+        sys.exit(1)
+
     if _QAPP is None:
         setup_library_paths()
         _QAPP = QApplication([name])
+        sys.excepthook = exception_handler
+
     return _QAPP
