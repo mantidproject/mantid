@@ -61,8 +61,10 @@ class HomePlotWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addWidget(self.plot_selector)
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.overlay)
+        self.overlay.hide()
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.keep)
+        self.keep.hide()
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.raw)
         self.horizontal_layout.addStretch(0)
@@ -105,8 +107,14 @@ class HomePlotWidgetView(QtWidgets.QWidget):
     def if_raw(self):
         return self.raw.isChecked()
 
+    def set_raw_checkbox_state(self, state):
+        self.raw.setChecked(state)
+
     def get_selected(self):
         return self.plot_selector.currentText()
 
     def on_plot_button_clicked(self, slot):
         self.plot_button.clicked.connect(slot)
+
+    def on_rebin_options_changed(self, slot):
+        self.raw.stateChanged.connect(slot)

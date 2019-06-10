@@ -15,8 +15,8 @@ class HomePlotWidgetModel(object):
         self.context = context
         self._plotting_window_constructor = plotting_window_model
 
-    def create_new_plot(self, workspace_list, title):
-        plot_window = self._plotting_window_constructor('Muon Analysis')
+    def create_new_plot(self, workspace_list, title, callback):
+        plot_window = self._plotting_window_constructor('Muon Analysis', close_callback=callback)
 
         plotting = plot_window.multi_plot
         plotting.add_subplot(title)
@@ -24,15 +24,16 @@ class HomePlotWidgetModel(object):
         for workspace in workspace_list:
             plotting.plot(title, workspace)
 
-        plotting.set_all_values_to([0.0, 15.0], [-1., 1])
-
         return plot_window
 
-    def get_workspaces_to_plot(self):
+    def get_workspaces_to_plot(self, is_raw):
         current_group_pair = self.context.group_pair_context.selected
-        return [self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(self.context.data_context.current_runs)[0],
-                self.context.group_pair_context['bkwd'].get_asymmetry_workspace_names(
-                    self.context.data_context.current_runs)[0]]
+        if is_raw:
+            return self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names\
+                (self.context.data_context.current_runs)
+        else:
+            return self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names_rebinned \
+                (self.context.data_context.current_runs)
 
     def get_plot_title(self):
         flattened_run_list = [item for sublist in self.context.data_context.current_runs for item in sublist]
