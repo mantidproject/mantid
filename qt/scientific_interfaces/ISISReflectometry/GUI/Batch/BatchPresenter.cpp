@@ -108,10 +108,12 @@ void BatchPresenter::notifyBatchComplete(bool error) {
 
   // Continue processing the next batch of algorithms, if there is more to do
   auto algorithms = m_jobRunner->getAlgorithms();
-  if (algorithms.size() > 0)
+  if (algorithms.size() > 0) {
     startBatch(std::move(algorithms));
-  else
-    reductionPaused();
+    return;
+  }
+
+  reductionPaused();
 }
 
 void BatchPresenter::notifyBatchCancelled() {
@@ -163,7 +165,7 @@ void BatchPresenter::resumeReduction() {
   // Get the algorithms to process
   auto algorithms = m_jobRunner->getAlgorithms();
   if (algorithms.size() < 1) {
-    m_jobRunner->reductionPaused();
+    reductionPaused();
     return;
   }
   // Start processing
@@ -191,6 +193,9 @@ void BatchPresenter::reductionPaused() {
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
+  // If autoreducing, notify
+  if (isAutoreducing())
+    notifyAutoreductionCompleted();
 }
 
 void BatchPresenter::resumeAutoreduction() {

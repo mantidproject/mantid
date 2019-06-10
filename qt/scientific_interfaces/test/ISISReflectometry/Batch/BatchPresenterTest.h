@@ -97,6 +97,26 @@ public:
     verifyAndClear();
   }
 
+  void testAutoreductionCompletedWhenReductionResumedWithNoRemainingJobs() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_jobRunner, getAlgorithms())
+        .Times(1)
+        .WillOnce(Return(std::deque<IConfiguredAlgorithm_sptr>()));
+    EXPECT_CALL(*m_jobRunner, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(1);
+    presenter.notifyReductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionNotCompletedWhenReductionResumedWithRemainingJobs() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(0);
+    presenter.notifyReductionResumed();
+    verifyAndClear();
+  }
+
   void testBatchIsCancelledWhenReductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, cancelAlgorithmQueue()).Times(1);
@@ -194,8 +214,8 @@ public:
   }
 
   void testAutoreductionComplete() {
-    // TODO Add expectations here when autoreduction is implemented
     auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(1);
     presenter.notifyAutoreductionCompleted();
     verifyAndClear();
   }

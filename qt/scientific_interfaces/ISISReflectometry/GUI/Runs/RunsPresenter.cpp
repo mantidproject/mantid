@@ -323,12 +323,10 @@ void RunsPresenter::autoreduceNewRuns() {
   m_autoreduction.setSearchResultsExist();
   auto rowsToTransfer = m_view->getAllSearchRows();
 
-  if (rowsToTransfer.size() > 0) {
+  if (rowsToTransfer.size() > 0)
     transfer(rowsToTransfer, TransferMatch::Strict);
-    m_mainPresenter->notifyReductionResumed();
-  } else {
-    m_mainPresenter->notifyAutoreductionCompleted();
-  }
+
+  m_mainPresenter->notifyReductionResumed();
 }
 
 bool RunsPresenter::isProcessing() const {
