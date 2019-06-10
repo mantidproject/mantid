@@ -16,12 +16,13 @@ Cell::Cell(std::string const &contentText, std::string const &backgroundColor,
     : m_contentText(contentText), m_backgroundColor(backgroundColor),
       m_borderThickness(borderThickness), m_borderOpacity(borderOpacity),
       m_borderColor(borderColor), m_iconFilePath(), m_isEditable(isEditable),
-      m_toolTip("") {}
+      m_toolTip(""), m_containsOutputValue(false) {}
 
 Cell::Cell(std::string const &contentText)
     : m_contentText(contentText), m_backgroundColor("white"),
       m_borderThickness(1), m_borderOpacity(255), m_borderColor("darkGrey"),
-      m_iconFilePath(), m_isEditable(true), m_toolTip("") {}
+      m_iconFilePath(), m_isEditable(true), m_toolTip(""),
+      m_containsOutputValue(false) {}
 
 std::string const &Cell::contentText() const { return m_contentText; }
 
