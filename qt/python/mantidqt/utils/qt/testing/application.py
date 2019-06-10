@@ -27,6 +27,7 @@ def cleanup_qapp_ref():
     global _QAPP
     del _QAPP
 
+
 def get_application(name=''):
     """
     Initialise and return the global application object

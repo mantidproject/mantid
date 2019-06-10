@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
 
+
 class IteratorWithException:
     """Wraps a simple iterable (i.e. list) so that it throws a ValueError on a particular index."""
 
