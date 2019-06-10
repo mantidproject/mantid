@@ -261,16 +261,18 @@ class MantidAxes(Axes):
 
     def check_axes_distribution_consistency(self):
         """
-        Checks if new workspace to be plotted is consistent with current
-        workspaces on axes in regard to being plotted as distributions.
-        Displays a warning if not.
+        Checks if the curves on the axes are all normalized or all
+        non-normalized and displays a warning if not.
         """
         tracked_ws_distributions = []
         for artists in self.tracked_workspaces.values():
             for artist in artists:
-                tracked_ws_distributions.append(artist.is_normalized)
+                if artist.is_normalized is not None:
+                    tracked_ws_distributions.append(artist.is_normalized)
+
         if len(tracked_ws_distributions) > 0:
-            if not all(tracked_ws_distributions) and any(tracked_ws_distributions):
+            num_normalized = sum(tracked_ws_distributions)
+            if not (num_normalized == 0 or num_normalized == len(tracked_ws_distributions)):
                 logger.warning("You are overlaying distribution and "
                                "non-distribution data!")
 
@@ -415,8 +417,9 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
-                                                               **kwargs)
+            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
+                workspace, self, **kwargs)
+            is_normalized = normalize_by_bin_width or workspace.isDistribution()
             return self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized)

@@ -7,14 +7,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 import matplotlib
+
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 from matplotlib.container import ErrorbarContainer
 import numpy as np
 import unittest
 
-from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.api import WorkspaceFactory
+from mantid.plots.plotfunctions import get_colorplot_extents
+from mantid.py3compat.mock import Mock, patch
 from mantid.simpleapi import (AnalysisDataService, CreateWorkspace,
                               CreateSampleWorkspace, DeleteWorkspace)
 
@@ -23,6 +25,7 @@ class Plots__init__Test(unittest.TestCase):
     '''
     Just test if mantid projection works
     '''
+
     @classmethod
     def setUpClass(cls):
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -115,9 +118,9 @@ class Plots__init__Test(unittest.TestCase):
                                   NSpec=3)
         self.ax.errorbar(eb_data, specNum=2, color='r')
         eb_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40, 20, 30, 40],
-                                     DataY=[3, 4, 5, 3, 4, 5],
-                                     DataE=[.1, .2, .3, .4, .1, .1],
-                                     NSpec=3)
+                                  DataY=[3, 4, 5, 3, 4, 5],
+                                  DataE=[.1, .2, .3, .4, .1, .1],
+                                  NSpec=3)
         self.ax.replace_workspace_artists(eb_data)
         self.assertEqual(1, len(self.ax.containers))
         eb_container = self.ax.containers[0]
@@ -178,6 +181,58 @@ class Plots__init__Test(unittest.TestCase):
         ax = fig.add_subplot(111, projection='3d')
         self.assertRaises(Exception, ax.plot_wireframe, self.ws2d_histo)
         self.assertRaises(Exception, ax.plot_surface, self.ws2d_histo)
+
+    def test_artists_normalization_state_labeled_correctly_dist_workspace(self):
+        dist_ws = CreateWorkspace(DataX=[10, 20],
+                                  DataY=[2, 3],
+                                  DataE=[1, 2],
+                                  NSpec=1,
+                                  Distribution=True,
+                                  OutputWorkspace='dist_workpace')
+        self.ax.plot(dist_ws, specNum=1, distribution=False)
+        self.ax.plot(dist_ws, specNum=1, distribution=True)
+        ws_artists = self.ax.tracked_workspaces[dist_ws.name()]
+        self.assertTrue(ws_artists[0].is_normalized)
+        self.assertTrue(ws_artists[1].is_normalized)
+
+    def test_artists_normalization_state_labeled_correctly_non_dist_workspace(self):
+        non_dist_ws = CreateWorkspace(DataX=[10, 20],
+                                      DataY=[2, 3],
+                                      DataE=[1, 2],
+                                      NSpec=1,
+                                      Distribution=False,
+                                      OutputWorkspace='non_dist_workpace')
+        self.ax.plot(non_dist_ws, specNum=1, distribution=False)
+        self.ax.plot(non_dist_ws, specNum=1, distribution=True)
+        ws_artists = self.ax.tracked_workspaces[non_dist_ws.name()]
+        self.assertTrue(ws_artists[0].is_normalized)
+        self.assertFalse(ws_artists[1].is_normalized)
+
+    def test_check_axes_distribution_consistency_mixed_normalization(self):
+        mock_logger = self._run_check_axes_distribution_consistency(
+            [True, False, True])
+        mock_logger.assert_called_once_with("You are overlaying distribution and "
+                                            "non-distribution data!")
+
+    def test_check_axes_distribution_consistency_all_normalized(self):
+        mock_logger = self._run_check_axes_distribution_consistency(
+            [True, True, True])
+        self.assertEqual(0, mock_logger.call_count)
+
+    def test_check_axes_distribution_consistency_all_non_normalized(self):
+        mock_logger = self._run_check_axes_distribution_consistency(
+            [False, False, False])
+        self.assertEqual(0, mock_logger.call_count)
+
+    def _run_check_axes_distribution_consistency(self, normalization_states):
+        mock_tracked_workspaces = {
+            'ws': [Mock(is_normalized=normalization_states[0]),
+                    Mock(is_normalized=normalization_states[1])],
+            'ws1': [Mock(is_normalized=normalization_states[2])]}
+        with patch('mantid.kernel.logger.warning', Mock()) as mock_logger:
+            with patch.object(self.ax, 'tracked_workspaces', mock_tracked_workspaces):
+                self.ax.check_axes_distribution_consistency()
+        return mock_logger
 
 
 if __name__ == '__main__':
