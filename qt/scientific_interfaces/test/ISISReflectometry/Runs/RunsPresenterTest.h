@@ -274,6 +274,20 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyRowStateChanged() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyRowStateChanged();
+    verifyAndClear();
+  }
+
+  void testNotifyRowOutputsChanged() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged()).Times(1);
+    presenter.notifyRowOutputsChanged();
+    verifyAndClear();
+  }
+
   void testPercentCompleteIsRequestedFromMainPresenter() {
     auto presenter = makePresenter();
     auto progress = 33;

@@ -56,7 +56,7 @@ set(TEST_FILES
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterMergeJobsTest.h
-    test/ISISReflectometry/RunsTable/RunsTablePresenterProgressBarTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterProcessingTest.h
     test/ISISReflectometry/Event/EventPresenterTest.h
     test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
     test/ISISReflectometry/Experiment/ExperimentOptionDefaultsTest.h
