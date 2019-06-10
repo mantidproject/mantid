@@ -694,18 +694,6 @@ private:
     // Use the same pointing up direction as in the without axis test
     int axis{2};
     props->declareProperty(std::make_unique<IntProperty>("Axis", axis), "");
-
-    return props;
-  }
-
-  Mantid::Kernel::PropertyManager_sptr
-  createCylinderWithIndexedAxisGeometryProps() {
-    using namespace Mantid::Kernel;
-    using IntProperty = PropertyWithValue<int>;
-    auto props = createCylinderGeometryProps();
-    // Use the same pointing up direction as in the without axis test
-    int axis{2};
-    props->declareProperty(std::make_unique<IntProperty>("Axis", axis), "");
     return props;
   }
 
@@ -742,18 +730,6 @@ private:
     std::vector<double> axis{0, 0, 1};
     props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
                            "");
-    return props;
-  }
-
-  Mantid::Kernel::PropertyManager_sptr
-  createHollowCylinderWithIndexedAxisGeometryProps() {
-    using namespace Mantid::Kernel;
-    using IntProperty = PropertyWithValue<int>;
-    ;
-    auto props = createHollowCylinderGeometryProps();
-    // Use the same pointing up direction as in the without axis test
-    int axis{2};
-    props->declareProperty(std::make_unique<IntProperty>("Axis", axis), "");
     return props;
   }
 
