@@ -636,6 +636,9 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
  * change
  * @param periodLog :: unique pointer which will point to period logs once they
  * have been changed
+ * @param nPeriods :: the value in the nperiods log of the run. Number of
+ * expected periods
+ * @param nexusfilename :: the filename of the run to load
  */
 void LoadEventNexus::checkForCorruptedPeriods(
     std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
