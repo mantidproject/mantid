@@ -28,8 +28,8 @@ void MaskBinsFromWorkspace::init() {
       "contain histogram data.",
       boost::make_shared<HistogramValidator>());
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the Workspace containing the masked bins.");
 }
 
