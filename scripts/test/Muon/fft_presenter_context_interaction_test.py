@@ -4,12 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets
+import unittest
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
-import unittest
+
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities import load_utils

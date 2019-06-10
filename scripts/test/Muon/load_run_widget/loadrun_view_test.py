@@ -1,13 +1,13 @@
 import unittest
 
+from mantidqt.utils.qt.testing import GuiTest
+
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.test_helpers import mock_widget
 
 
-class LoadRunWidgetViewTest(unittest.TestCase):
+class LoadRunWidgetViewTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         self.view = LoadRunWidgetView()
         self.view.run_edit.insert('')
 

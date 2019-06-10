@@ -1,8 +1,9 @@
 import unittest
-from PyQt4 import QtGui
 
 import six
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
@@ -16,14 +17,12 @@ from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import Gro
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.test_helpers import mock_widget
 
 
-class GroupingTabPresenterTest(unittest.TestCase):
+class GroupingTabPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(self.loaded_data)

@@ -5,12 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
+from mantid.api import FunctionFactory
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 from qtpy import QtWidgets
+
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from mantid.api import FunctionFactory
 
 
 def retrieve_combobox_info(combo_box):

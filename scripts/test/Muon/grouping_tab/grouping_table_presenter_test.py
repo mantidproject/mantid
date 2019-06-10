@@ -1,14 +1,15 @@
 import unittest
-from PyQt4 import QtGui
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.test_helpers import mock_widget
+
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 maximum_number_of_groups = 20
@@ -20,15 +21,14 @@ def group_name():
     return name
 
 
-class GroupingTablePresenterTest(unittest.TestCase):
+class GroupingTablePresenterTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
         setup_context_for_tests(self)
-        
+
         self.gui_variable_observer = Observer()
 
         self.gui_context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
