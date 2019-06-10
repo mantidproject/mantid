@@ -11,27 +11,25 @@ MVP pattern embedded into another MVP is effectively just adding
 another widget. This can be very useful for creating small versatile
 widgets that may be used in multiple GUIs.
 
-We will combine the View from the exercise and the PlotView from the
+We will combine the View widget from the exercise and the PlotView widget from the
 previous section into a single view. To achieve this we will create a
 'master' view:
 
 .. code-block:: python
 
     from __future__ import (absolute_import, division, print_function)
-
-    import PyQt4.QtGui as QtGui
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets, QtCore, QtGui
 
     import numpy as np
     import plot_view
     import view
 
-    class MasterView(QtGui.QWidget):
+    class MasterView(QtWidgets.QWidget):
 
         def __init__(self, parent=None):
             super(MasterView, self).__init__(parent)
 
-            grid = QtGui.QVBoxLayout(self)
+            grid = QtWidgets.QVBoxLayout(self)
             self.plot_view = plot_view.PlotView(parent=self)
             self.options_view = view.view(parent=self)
 
@@ -46,17 +44,17 @@ The main only needs to import the master_view:
 
 .. code-block:: python
 
-    class demo(QtGui.QMainWindow):
+    class demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
             super(demo, self).__init__(parent)
 
-            self.window = QtGui.QMainWindow()
+            self.window = QtWidgets.QMainWindow()
             my_view = master_view.MasterView()
 
             # set the view for the main window
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-You may notice that this main does not incorporate the Presenter.
+You may notice that this main does not incorporate the presenter.
 Now that we have embedded our two views into MasterView, Presenter
 should also be split in the same way.

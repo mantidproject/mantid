@@ -9,10 +9,8 @@ Complete GUI from Exercises
 
 .. code-block:: python
 
-    from __future__ import (absolute_import,division,print_function)
-
-    import PyQt4.QtGui as QtGui 
-    import PyQt4.QtCore as QtCore
+    from __future__ import (absolute_import, division, print_function)
+    from qtpy import QtWidgets, QtCore, QtGui
 
     import sys
 
@@ -24,14 +22,14 @@ Complete GUI from Exercises
     """
     A wrapper class for setting the main window
     """
-    class demo(QtGui.QMainWindow):
+    class demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
             super(demo,self).__init__(parent)
  
             data_model = model.DataGenerator()
-            colour_model = model.ColourConvertor()
+            colour_model = model.ColourConverter()
 
-            self.window = QtGui.QMainWindow()
+            self.window = QtWidgets.QMainWindow()
 
             my_view = master_view.MasterView(parent=self)
             self.master_presenter = master_presenter.MasterPresenter(my_view, data_model, colour_model)
@@ -41,10 +39,10 @@ Complete GUI from Exercises
             self.setWindowTitle("view tutorial")
 
     def qapp():
-        if QtGui.QApplication.instance():
-            _app = QtGui.QApplication.instance()
+        if QtWidgets.QApplication.instance():
+            _app = QtWidgets.QApplication.instance()
         else:
-            _app = QtGui.QApplication(sys.argv)
+            _app = QtWidgets.QApplication(sys.argv)
         return _app
 
     app = qapp()
@@ -53,7 +51,7 @@ Complete GUI from Exercises
     app.exec_()
 
 which has the addition of the data and colour models being passed to
-the Presenter. This makes it easier for us to replace the Model at a
+the presenter. This makes it easier for us to replace the model at a
 later date.
 
 ``master_view.py``
@@ -62,20 +60,17 @@ later date.
 .. code-block:: python
 
     from __future__ import (absolute_import, division, print_function)
-    import PyQt4.QtGui as QtGui
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets, QtCore, QtGui
 
     import view
     import plot_view
 
-    import numpy as np
-
-    class MasterView(QtGui.QWidget):
+    class MasterView(QtWidgets.QWidget):
 
         def __init__(self, parent=None):
             super(MasterView, self).__init__(parent)
 
-            grid = QtGui.QVBoxLayout(self)
+            grid = QtWidgets.QVBoxLayout(self)
             self.plot_view = plot_view.PlotView()
             self.options_view=view.view()
 
@@ -97,7 +92,6 @@ later date.
 
     from __future__ import (absolute_import, division, print_function)
 
-    import model
     import presenter
     import plot_presenter
 
@@ -151,19 +145,18 @@ The signal from the View is caught here and the models are used to create the co
 .. code-block:: python
 
     from __future__ import (absolute_import, division, print_function)
-    import PyQt4.QtGui as QtGui
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets, QtCore, QtGui
     import matplotlib.pyplot as plt
 
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
 
-    class PlotView(QtGui.QWidget):
+    class PlotView(QtWidgets.QWidget):
         def __init__(self, parent=None):
             super(PlotView, self).__init__(parent)
 
             self.figure = plt.figure()
-            grid = QtGui.QVBoxLayout(self)
+            grid = QtWidgets.QVBoxLayout(self)
             self.draw()
             self.canvas = self.getWidget()
             grid.addWidget(self.canvas)
@@ -213,42 +206,41 @@ The signal from the View is caught here and the models are used to create the co
 .. code-block:: python
 
     from __future__ import (absolute_import, division, print_function)
-    import PyQt4.QtGui as QtGui
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets, QtCore, QtGui
 
 
-    class view(QtGui.QWidget):
+    class view(QtWidgets.QWidget):
 
-        plotSignal = QtCore.pyqtSignal()
+        plotSignal = QtCore.Signal()
 
         def __init__(self, parent=None):
             super(view, self).__init__(parent)
 
-            grid = QtGui.QVBoxLayout(self)
+            grid = QtWidgets.QVBoxLayout(self)
 
-            self.table = QtGui.QTableWidget(self)
+            self.table = QtWidgets.QTableWidget(self)
             self.table.setRowCount(4)
             self.table.setColumnCount(2)
 
             grid.addWidget(self.table)
 
-            self.colours = QtGui.QComboBox()
+            self.colours = QtWidgets.QComboBox()
             options=["Blue", "Green", "Red"]
             self.colours.addItems(options)
 
-            self.grid_lines= QtGui.QTableWidgetItem()
+            self.grid_lines= QtWidgets.QTableWidgetItem()
             self.grid_lines.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
             self.grid_lines.setCheckState(QtCore.Qt.Unchecked)
             self.addItemToTable("Show grid lines", self.grid_lines, 1)
 
-            self.freq = QtGui.QTableWidgetItem("1.0")
-            self.phi = QtGui.QTableWidgetItem("0.0")
+            self.freq = QtWidgets.QTableWidgetItem("1.0")
+            self.phi = QtWidgets.QTableWidgetItem("0.0")
 
             self.addWidgetToTable("Colour", self.colours, 0)
             self.addItemToTable("Frequency", self.freq, 2)
             self.addItemToTable("Phase", self.phi, 3)
 
-            self.plot = QtGui.QPushButton('Add', self)
+            self.plot = QtWidgets.QPushButton('Add', self)
             self.plot.setStyleSheet("background-color:lightgrey")
 
             grid.addWidget(self.plot)
@@ -273,7 +265,7 @@ The signal from the View is caught here and the models are used to create the co
             self.plotSignal.emit()
 
         def setTableRow(self, name, row):
-            text = QtGui.QTableWidgetItem(name)
+            text = QtWidgets.QTableWidgetItem(name)
             text.setFlags(QtCore.Qt.ItemIsEnabled)
             col = 0
             self.table.setItem(row, col, text)

@@ -19,17 +19,16 @@ First we need to import the relevant packages, this includes PyQt.
 .. code-block:: python
 
     from __future__ import (absolute_import,division,print_function)
-    import PyQt4.QtGui  as QtGui
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets, QtCore, QtGui
 
-We then create the View class as a QWidget. Each View will have a
-parent. As a result, the View will automatically be destroyed if the
-parent is destroyed (unless the View has been removed, via docking,
+We then create the View class as a QWidget. Each view will have a
+parent. As a result, the view will automatically be destroyed if the
+parent is destroyed (unless the view has been removed, via docking,
 from the parent).
 
 .. code-block:: python
 
-    class view(QtGui.QWidget):
+    class view(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(view, self).__init__(parent)
@@ -39,7 +38,7 @@ Next we create a layout and add a button to it
 .. code-block:: python
 
     grid = QtGui.QGridLayout()
-    self.button = QtGui.QPushButton('Hi', self)
+    self.button = QtWidgets.QPushButton('Hi', self)
     self.button.setStyleSheet("background-color:lightgrey")
 
     # connect button to signal
@@ -67,8 +66,7 @@ all been saved in ``view.py``, the ``main.py`` will contain:
 
     from __future__ import (absolute_import,division,print_function)
 
-    import PyQt4.QtGui as QtGui 
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets
 
     import sys
    
@@ -77,21 +75,21 @@ all been saved in ``view.py``, the ``main.py`` will contain:
     """
     A wrapper class for setting the main window
     """
-    class demo(QtGui.QMainWindow):
+    class demo(QtWidgets.QMainWindow):
         def __init__(self,parent=None):
             super(demo,self).__init__(parent)
 
-            self.window=QtGui.QMainWindow()
+            self.window=QtWidgets.QMainWindow()
             my_view = view.view()
             # set the view for the main window
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
     def qapp():
-        if QtGui.QApplication.instance():
-            _app = QtGui.QApplication.instance()
+        if QtWidgets.QApplication.instance():
+            _app = QtWidgets.QApplication.instance()
         else:
-            _app = QtGui.QApplication(sys.argv)
+            _app = QtWidgets.QApplication(sys.argv)
         return _app
 
     app = qapp()

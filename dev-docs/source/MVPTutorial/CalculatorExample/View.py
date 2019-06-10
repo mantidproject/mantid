@@ -10,8 +10,8 @@ import PyQt4.QtCore as QtCore
 
 class View(QtGui.QDialog):
     # In PyQt signals are the first thing to be defined in a class:
-    displaySignal = QtCore.pyqtSignal()
-    btnSignal = QtCore.pyqtSignal()
+    displaySignal = QtCore.Signal()
+    btnSignal = QtCore.Signal()
 
     def __init__(self, parent=None):
         # Call QDialog's constructor

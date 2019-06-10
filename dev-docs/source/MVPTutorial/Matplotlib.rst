@@ -22,13 +22,12 @@ view.
 This view will exist alongside with the view from the exercise. So we
 will need to call it something different, such as PlotView.
 
-The View has the following imports:
+The view has the following imports:
 
 .. code-block:: python
 
     from __future__ import (absolute_import, division, print_function)
-    import PyQt4.QtGui as QtGui
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets, QtCore, QtGui
     import matplotlib.pyplot as plt
 
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -36,17 +35,17 @@ The View has the following imports:
 The fourth line imports Matplotlib and the last line allows it to
 interface with the GUI.
 
-The main class is shown below and contains methods for adding data to
+The PlotView class is shown below and contains methods for adding data to
 the plot and creating an empty plot (no data).
 
 .. code-block:: python
 
-    class PlotView(QtGui.QWidget):
+    class PlotView(QtWidgets.QWidget):
         def __init__(self, parent=None):
             super(PlotView, self).__init__(parent)
 
             self.figure = plt.figure()
-            grid = QtGui.QVBoxLayout(self)
+            grid = QtWidgets.QVBoxLayout(self)
             self.draw() 
             self.canvas = self.getWidget()
             grid.addWidget(self.canvas)

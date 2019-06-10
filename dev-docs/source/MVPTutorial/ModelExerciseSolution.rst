@@ -4,7 +4,7 @@
 Model Exercise Solution
 =======================
 
-The Model should now contain the following class:
+The model should now contain the following class:
 
 .. code-block:: python
 
@@ -16,7 +16,7 @@ The Model should now contain the following class:
         def getColourSelection(self):
             return self.colour_table.keys()
 
-The View should contain the following method:
+The view should contain the following method:
 
 .. code-block:: python
 
@@ -24,7 +24,7 @@ The View should contain the following method:
          self.colours.clear()
          self.colours.addItems(options)
 
-The Presenter initialisation should now be:
+The presenter initialisation should now be:
 
 .. code-block:: python
 
@@ -38,14 +38,14 @@ The Presenter initialisation should now be:
         # connect statements
         self.view.plotSignal.connect(self.updatePlot)
 
-And the Main module should now pass the two models into the Presenter:
+And the Main module should now pass the two models into the presenter:
 
 .. code-block:: python
 
     def __init__(self, parent=None):
         super(demo,self).__init__(parent)
 
-        self.window = QtGui.QMainWindow()
+        self.window = QtWidgets.QMainWindow()
         my_view = view.view()
         data_model = model.DataGenerator()
         colour_model = model.ColourConvertor()

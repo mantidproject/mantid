@@ -2,8 +2,8 @@
 Final Exercise
 ==============
 
-Now that the View and the Model are complete all that is left to do is
-bring it all together in our Presenter. In this exercise you will need
+Now that the view and the model are complete all that is left to do is
+bring it all together in our presenter. In this exercise you will need
 to create three presenters.
 
 1. A presenter to interact with ``view``, setting the allowed colour
