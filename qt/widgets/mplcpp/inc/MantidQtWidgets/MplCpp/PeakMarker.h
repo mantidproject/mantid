@@ -25,10 +25,23 @@ class MANTID_MPLCPP_DLL PeakMarker : public Common::Python::InstanceHolder {
 public:
   explicit PeakMarker(
       FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom,
-      double fwhm,
+      double fwhm, double yMax,
       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();
+
+  void updatePeak(double centre, double height, double fwhm);
+  bool isMoving() const;
+  std::tuple<double, double> transform(int x, int y);
+
+  void select();
+  void deselect();
+
+  void mouseMoveStart(double x, double y);
+  void mouseMoveStart(int x, int y);
+  void mouseMoveStop();
+  bool mouseMove(double x, double y);
+  bool mouseMove(int x, int y);
 };
 
 } // namespace MplCpp

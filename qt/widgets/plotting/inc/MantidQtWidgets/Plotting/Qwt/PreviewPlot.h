@@ -59,6 +59,8 @@ public:
   ~PreviewPlot() override;
   void watchADS(bool on);
 
+  QwtPlotCanvas *canvas() const;
+  QwtPlot *getPlot() const;
   QColor canvasColour();
   void setCanvasColour(const QColor &colour);
 

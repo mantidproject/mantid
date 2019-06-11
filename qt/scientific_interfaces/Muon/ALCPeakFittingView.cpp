@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget)
-    : m_widget(widget), m_ui() {} //, m_peakPicker(nullptr) {}
+    : m_widget(widget), m_ui(), m_peakPicker(nullptr) {}
 
 ALCPeakFittingView::~ALCPeakFittingView() {}
 
@@ -28,9 +28,9 @@ boost::optional<QString> ALCPeakFittingView::currentFunctionIndex() const {
   return m_ui.peaks->currentFunctionIndex();
 }
 
-// IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const {
-//  return m_peakPicker->peak();
-//}
+IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const {
+  return m_peakPicker->peak();
+}
 
 void ALCPeakFittingView::initialize() {
   m_ui.setupUi(m_widget);
@@ -41,9 +41,9 @@ void ALCPeakFittingView::initialize() {
 
   // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
   // (auto-delete option)
-  // m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
+  m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
 
-  // connect(m_peakPicker, SIGNAL(changed()), SIGNAL(peakPickerChanged()));
+  connect(m_peakPicker, SIGNAL(changed()), SIGNAL(peakPickerChanged()));
 
   connect(m_ui.peaks, SIGNAL(currentFunctionChanged()),
           SIGNAL(currentFunctionChanged()));
@@ -71,8 +71,8 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
 #endif
 
   m_ui.plot->clear();
-  m_ui.plot->addSpectrum("Corrected Data", workspace, workspaceIndex,
-                         Qt::black);
+  m_ui.plot->addSpectrum("Corrected Data", workspace, workspaceIndex, Qt::black,
+                         kwargs);
 }
 
 void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr &workspace,
@@ -109,12 +109,12 @@ void ALCPeakFittingView::setParameter(const QString &funcIndex,
 void ALCPeakFittingView::setPeakPickerEnabled(bool enabled) {
   // m_peakPicker->setEnabled(enabled);
   // m_peakPicker->setVisible(enabled);
-  // m_ui.plot->replot(); // PeakPicker might get hidden/shown
+  m_ui.plot->replot();
 }
 
 void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {
-  // m_peakPicker->setPeak(peak);
-  // m_ui.plot->replot();
+  m_peakPicker->setPeak(peak);
+  m_ui.plot->replot();
 }
 
 void ALCPeakFittingView::help() {

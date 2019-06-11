@@ -11,7 +11,7 @@
 
 #include "DllConfig.h"
 #include "IALCPeakFittingView.h"
-//#include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/PeakPicker.h"
 
 #include "ui_ALCPeakFittingView.h"
 
@@ -31,7 +31,7 @@ public:
 
   Mantid::API::IFunction_const_sptr function(QString index) const override;
   boost::optional<QString> currentFunctionIndex() const override;
-  // Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
+  Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
   void emitFitRequested();
 
 public slots:
@@ -54,8 +54,6 @@ public slots:
   void plotGuess() override;
   void changePlotGuessState(bool plotted) override;
 
-  // -- End of IALCPeakFitting interface
-  // ---------------------------------------------------------
 private:
   /// The widget used
   QWidget *const m_widget;
@@ -64,7 +62,7 @@ private:
   Ui::ALCPeakFittingView m_ui;
 
   /// Peak picker tool - only one on the plot at any given moment
-  // MantidWidgets::PeakPicker *m_peakPicker;
+  MantidWidgets::PeakPicker *m_peakPicker;
 };
 
 } // namespace CustomInterfaces

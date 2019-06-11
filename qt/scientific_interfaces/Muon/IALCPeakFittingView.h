@@ -34,7 +34,7 @@ public:
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
 
   /// @return A peak currently represented by the peak picker
-  // virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;
+  virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;
 
   virtual void removePlot(QString const &plotName) = 0;
 

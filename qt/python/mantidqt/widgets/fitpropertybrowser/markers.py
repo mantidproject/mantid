@@ -117,15 +117,18 @@ class VerticalMarker(QObject):
             return False
         return abs(self.get_x_in_pixels() - x_pixels) < 3
 
-    def transform_pixels_to_coords(self, x_pixels, y_pixels):
+    def transform_pixels_to_coords(self, x_pixels, y_pixels, y_max=0.0):
         """
         Transforms pixel coords to axis coords
         :param x_pixels: An x mouse pixel coordinate.
         :param y_pixels: An y mouse pixel coordinate.
+        :param y_max: The maximum coord on the y axis.
         :return: The x and y position along the axis.
         """
         x_value, y_value = self.patch.get_transform().inverted().transform((x_pixels, y_pixels))
-        return x_value, y_value
+        if y_max == 0.0:
+            return x_value, y_value
+        return x_value, y_max-y_value
 
     def mouse_move_start(self, x, y):
         """
@@ -292,7 +295,7 @@ class PeakMarker(QObject):
     peak_moved = Signal(int, float, float)
     fwhm_changed = Signal(int, float)
 
-    def __init__(self, canvas, peak_id, x, y_top, y_bottom, fwhm):
+    def __init__(self, canvas, peak_id, x, y_top, y_bottom, fwhm, y_max=1.0):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -308,6 +311,7 @@ class PeakMarker(QObject):
         self.left_width = WidthMarker(canvas, x - fwhm / 2)
         self.right_width = WidthMarker(canvas, x + fwhm / 2)
         self.is_selected = False
+        self.y_max = y_max
 
     def redraw(self):
         """
@@ -333,12 +337,16 @@ class PeakMarker(QObject):
                 cursor = self.right_width.override_cursor(x, y)
         return cursor
 
-    def mouse_move_start(self, x, y):
+    def mouse_move_start(self, x, y, pixels=False):
         """
         Start moving an element of this marker if it's under the cursor.
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
+        :param pixels: True if a conversion to coords is needed.
         """
+        if pixels:
+            x, y = self.centre_marker.transform_pixels_to_coords(x, y, self.y_max)
+
         self.centre_marker.mouse_move_start(x, y)
         if self.centre_marker.is_moving:
             self.left_width.is_moving = True
@@ -346,6 +354,10 @@ class PeakMarker(QObject):
         else:
             self.left_width.mouse_move_start(x, y)
             self.right_width.mouse_move_start(x, y)
+
+    def transform(self, x, y):
+        x, y = self.centre_marker.transform_pixels_to_coords(x, y, self.y_max)
+        return [x, y]
 
     def mouse_move_stop(self):
         """
@@ -359,18 +371,22 @@ class PeakMarker(QObject):
             self.right_width.mouse_move_stop()
         self.centre_marker.mouse_move_stop()
 
-    def mouse_move(self, x, y):
+    def mouse_move(self, x, y, pixels=False):
         """
         Move an element of this marker if it's started moving.
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
+        :param pixels: True if a conversion to coords is needed.
         """
+        if pixels:
+            x, y = self.centre_marker.transform_pixels_to_coords(x, y, self.y_max)
+
         moved = self.centre_marker.mouse_move(x, y)
         if moved:
             dx = (self.right_width.x - self.left_width.x) / 2
             self.left_width.mouse_move(x - dx, y)
             self.right_width.mouse_move(x + dx, y)
-            self.peak_moved.emit(self.peak_id, x, self.centre_marker.height())
+            self.peak_moved.emit(self.peak_id, x, self.height())
         else:
             moved = self.left_width.mouse_move(x, y)
             if moved:
@@ -387,7 +403,7 @@ class PeakMarker(QObject):
                 self.fwhm_changed.emit(self.peak_id, self.fwhm())
         return moved
 
-    @property
+#    @property
     def is_moving(self):
         """
         Check if this marker is moving as a whole.
@@ -404,7 +420,7 @@ class PeakMarker(QObject):
         """
         Get peak height.
         """
-        return self.centre_marker.height()
+        return self.centre_marker.y1 - self.centre_marker.y0
 
     def fwhm(self):
         """

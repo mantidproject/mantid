@@ -75,14 +75,14 @@ void ALCPeakFittingPresenter::onPeakPickerChanged() {
   // (See onCurrentFunctionChanged)
   assert(bool(index));
 
-  // auto peakFunc = m_view->peakPicker();
+  auto peakFunc = m_view->peakPicker();
 
   // Update all the defined parameters of the peak function
-  // for (size_t i = 0; i < peakFunc->nParams(); ++i) {
-  //  QString paramName = QString::fromStdString(peakFunc->parameterName(i));
-  //  m_view->setParameter(*index, paramName,
-  //                       peakFunc->getParameter(paramName.toStdString()));
-  //}
+  for (size_t i = 0; i < peakFunc->nParams(); ++i) {
+    QString paramName = QString::fromStdString(peakFunc->parameterName(i));
+    m_view->setParameter(*index, paramName,
+                         peakFunc->getParameter(paramName.toStdString()));
+  }
 }
 
 void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {

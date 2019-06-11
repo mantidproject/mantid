@@ -7,6 +7,7 @@
 #ifndef MANTIDQT_PLOTTING_MPL_PEAKPICKER_H_
 #define MANTIDQT_PLOTTING_MPL_PEAKPICKER_H_
 
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidQtWidgets/MplCpp/PeakMarker.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
@@ -24,7 +25,10 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PeakPicker : public QObject {
 
 public:
   PeakPicker(PreviewPlot *plot, const QColor &colour = Qt::black);
-  //
+
+  void setPeak(const Mantid::API::IPeakFunction_const_sptr &peak);
+  Mantid::API::IPeakFunction_sptr peak() const;
+
   //  void setColour(const QColor &colour);
   //  void setRange(const std::pair<double, double> &range);
   //  std::pair<double, double> getRange() const;
@@ -35,17 +39,19 @@ public:
   // public slots:
   //  void setRange(const double min, const double max);
   //  void detach();
-  //
-  // private slots:
-  //  void handleMouseDown(const QPoint &point);
-  //  void handleMouseMove(const QPoint &point);
-  //  void handleMouseUp(const QPoint &point);
-  //
-  //  void redrawMarker();
+
+private slots:
+  void handleMouseDown(const QPoint &point);
+  void handleMouseMove(const QPoint &point);
+  void handleMouseUp(const QPoint &point);
+
+  void redrawMarker();
 
 private:
   /// The preview plot containing the range selector
   PreviewPlot *m_plot;
+  /// Currently represented peak
+  Mantid::API::IPeakFunction_sptr m_peak;
   /// The minimum marker
   std::unique_ptr<MantidQt::Widgets::MplCpp::PeakMarker> m_peakMarker;
 };

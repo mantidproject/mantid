@@ -155,6 +155,20 @@ void PreviewPlot::watchADS(bool on) {
 }
 
 /**
+ * Gets the canvas.
+ *
+ * @return The preview plot canvas
+ */
+QwtPlotCanvas *PreviewPlot::canvas() const { return m_uiForm.plot->canvas(); }
+
+/**
+ * Gets the QwtPlot.
+ *
+ * @return The QwtPlot.
+ */
+QwtPlot *PreviewPlot::getPlot() const { return m_uiForm.plot; }
+
+/**
  * Gets the background colour of the plot window.
  *
  * @return Plot canvas colour
