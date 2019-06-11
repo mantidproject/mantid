@@ -139,14 +139,15 @@ class FittingTabModel(object):
 
         try:
             function_string_list = []
-            for i in range(function_temp.nFunctions()):
+            number_of_functions = function_temp.nFunctions() if function_temp.nFunctions() else 1
+            for i in range(number_of_functions):
                 function_string_list.append(function_temp.getFunction(i).name())
             if len(function_string_list) > 3:
                 function_string_list = function_string_list[:3]
                 function_string_list.append('...')
             function_string = ','.join(function_string_list)
             return function_string
-        except AttributeError:
+        except (AttributeError, RuntimeError):
             return function_temp.name()
 
     def add_fit_to_context(self, parameter_workspace, function,

@@ -12,7 +12,8 @@ from mantidqt.utils.qt.testing import GuiTest
 
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot import subplot
-
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 
 def rm_logic(name):
@@ -25,7 +26,8 @@ class SubplotTest(GuiTest):
 
     def setUp(self):
         context = PlottingContext()
-        self.subplot = subplot(context)
+        self.canvas = FigureCanvas(Figure())
+        self.subplot = subplot(context, self.canvas)
         self.subplot.canvas.draw = mock.MagicMock()
 
     def setup_rm(self):

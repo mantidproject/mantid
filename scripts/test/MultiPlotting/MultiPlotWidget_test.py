@@ -11,6 +11,8 @@ from mantidqt.utils.qt.testing import GuiTest
 
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 
 class bounds(object):
@@ -45,7 +47,8 @@ class MultiPlotWidgetTest(GuiTest):
 
     def setUp(self):
         context = PlottingContext()
-        self.widget = MultiPlotWidget(context)
+        self.canvas = FigureCanvas(Figure())
+        self.widget = MultiPlotWidget('Muon Analysis',context, self.canvas)
 
     def test_add_subplot(self):
         with mock.patch("MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:

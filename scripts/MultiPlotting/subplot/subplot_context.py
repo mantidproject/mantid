@@ -78,14 +78,14 @@ class subplotContext(object):
         del self._lines[label]
         # replot the line
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot, self.get_ws(
+            line, cap_lines, bar_lines = self._subplot.errorbar(self.get_ws(
                 label), specNum=self.specNum[label], color=colour, marker=marker, label=label)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
             self._lines[label] = all_lines
         else:
-            line, = plots.plotfunctions.plot(self._subplot, self.get_ws(
+            line, = self._subplot.plot(self.get_ws(
                 label), specNum=self.specNum[label], color=colour, marker=marker, label=label)
             self._lines[label] = [line]
 

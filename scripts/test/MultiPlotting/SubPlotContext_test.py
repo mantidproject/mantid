@@ -11,7 +11,6 @@ from MultiPlotting.subplot.subplot_context import subplotContext
 from mantid import plots
 
 
-
 class line(object):
 
     def __init__(self):
@@ -48,72 +47,65 @@ class SubPlotContextTest(unittest.TestCase):
         self.subplot = mock.MagicMock()
         self.context = subplotContext(name, self.subplot)
 
-    def test_add_line_no_erros(self):
+    def test_add_line_no_errors(self):
         ws = mock.MagicMock()
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
-            patch.return_value = tuple([line()])
-            self.context.addLine(ws, 3)
-            self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(self.subplot, ws, specNum=3)
+        self.context._subplot.plot = mock.MagicMock(return_value=(line(), ))
+        self.context.addLine(ws, 3)
+        self.assertEqual(self.context._subplot.plot.call_count, 1)
+        self.context._subplot.plot.assert_called_with(ws, specNum=3)
 
     def test_add_line_errors(self):
         ws = mock.MagicMock()
         self.context.change_errors(True)
         lines = line()
-        with mock.patch("mantid.plots.plotfunctions.plot") as plot:
-            plot.return_value = tuple([lines])
-            with mock.patch("mantid.plots.plotfunctions.errorbar") as patch:
-                patch.return_value = errors()
-                self.context.addLine(ws, 3)
-                self.assertEqual(plot.call_count, 1)
-                self.assertEqual(patch.call_count, 1)
-                patch.assert_called_with(
-                    self.subplot,
-                    ws,
-                    specNum=3,
-                    label=lines.get_label())
+        self.context._subplot.plot = mock.MagicMock(return_value=tuple([lines]))
+        self.context._subplot.errorbar = mock.MagicMock(return_value=errors())
+
+        self.context.addLine(ws, 3)
+        self.assertEqual(self.context._subplot.plot.call_count, 1)
+        self.assertEqual(self.context._subplot.errorbar.call_count, 1)
+        self.context._subplot.errorbar.assert_called_with(
+            ws,
+            specNum=3,
+            label=lines.get_label())
 
     def test_redraw_errors(self):
         ws = mock.MagicMock()
         self.context.change_errors(True)
         lines = line()
-        # add first line
-        with mock.patch("mantid.plots.plotfunctions.plot") as plot:
-            plot.return_value = tuple([lines])
-            with mock.patch("mantid.plots.plotfunctions.errorbar") as patch:
-                patch.return_value = errors()
-                self.context.addLine(ws, 3)
-                self.assertEqual(plot.call_count, 1)
-                self.assertEqual(patch.call_count, 1)
-                # redraw
-                self.context.redraw(lines.get_label())
-                self.assertEqual(patch.call_count, 2)
-                patch.assert_called_with(
-                    self.subplot,
-                    ws,
-                    specNum=3,
-                    color=lines.get_color(),
-                    marker=lines.get_marker(),
-                    label=lines.get_label())
+        self.context._subplot.plot.return_value = tuple([lines])
+        self.context._subplot.errorbar = mock.MagicMock(return_value=errors())
+
+        self.context._subplot.errorbar.return_value = errors()
+        self.context.addLine(ws, 3)
+        self.assertEqual(self.context._subplot.plot.call_count, 1)
+        self.assertEqual(self.context._subplot.errorbar.call_count, 1)
+        # redraw
+        self.context.redraw(lines.get_label())
+        self.assertEqual(self.context._subplot.errorbar.call_count, 2)
+        self.context._subplot.errorbar.assert_called_with(
+            ws,
+            specNum=3,
+            color=lines.get_color(),
+            marker=lines.get_marker(),
+            label=lines.get_label())
 
     def test_redraw_no_errors(self):
+        lines = line()
         ws = mock.MagicMock()
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
-            lines = line()
-            patch.return_value = tuple([lines])
-            self.context.addLine(ws, 3)
-            self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(self.subplot, ws, specNum=3)
-            # redraw
-            self.context.redraw(lines.get_label())
-            self.assertEqual(patch.call_count, 2)
-            patch.assert_called_with(
-                self.subplot,
-                ws,
-                specNum=3,
-                color=lines.get_color(),
-                marker=lines.get_marker(),
-                label=lines.get_label())
+        self.context._subplot.plot = mock.MagicMock(return_value=tuple([lines]))
+        self.context.addLine(ws, 3)
+        self.assertEqual(self.context._subplot.plot.call_count, 1)
+        self.context._subplot.plot.assert_called_with(ws, specNum=3)
+        # redraw
+        self.context.redraw(lines.get_label())
+        self.assertEqual(self.context._subplot.plot.call_count, 2)
+        self.context._subplot.plot.assert_called_with(
+            ws,
+            specNum=3,
+            color=lines.get_color(),
+            marker=lines.get_marker(),
+            label=lines.get_label())
 
     def test_change_errors(self):
         self.context._lines = {"one": 1, "two": 2, "three": 3}
@@ -138,8 +130,6 @@ class SubPlotContextTest(unittest.TestCase):
             self.assertIn(key, result)
         self.assertEqual(len(result), len(expect))
 
-
-
     def test_replaceWS(self):
         ws = mock.Mock()
         ws2 = mock.Mock()
@@ -147,10 +137,9 @@ class SubPlotContextTest(unittest.TestCase):
         ws2.name = mock.Mock(return_value="not used")
         self.context.redraw = mock.Mock()
 
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
-            patch.return_value = tuple([line()])
-            self.context.addLine(ws, 3)
-            self.context.addLine(ws2, 3)
+        self.context._subplot.plot.return_value = tuple([line()])
+        self.context.addLine(ws, 3)
+        self.context.addLine(ws2, 3)
         # check inital set up
         keys = self.context.ws.keys()
         expect = [ws,ws2]
@@ -174,18 +163,15 @@ class SubPlotContextTest(unittest.TestCase):
         ws2.name = mock.Mock(return_value="not used")
         self.context.redraw = mock.Mock()
 
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
-            patch.return_value = tuple([line()])
-            self.context.addLine(ws, 1)
-            self.context.addLine(ws2, 2)
+        self.context._subplot.plot = mock.MagicMock(return_value=tuple([line()]))
+        self.context.addLine(ws, 1)
+        self.context.addLine(ws2, 2)
 
-        lines = self.context.get_lines_from_WS_name("test")
+        self.context.get_lines_from_WS_name("test")
         expect = ["test"]
         for key in expect:
             self.assertIn(key, "test")
  
-
-
 
 if __name__ == "__main__":
     unittest.main()

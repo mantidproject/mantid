@@ -26,18 +26,17 @@ class HomePlotWidgetModelTest(GuiTest):
     def test_create_new_plot_creates_new_plot_with_correct_title(self):
         workspace = self.create_workspace()
 
-        plot_window = self.model.create_new_plot([workspace], 'Test plot')
+        plot_window = self.model.plot([workspace], 'subplot_name')
 
         self.assertEqual(type(plot_window), MultiPlotWindow)
-        self.assertEqual(plot_window.windowTitle(), 'Test plot')
+        self.assertEqual(plot_window.window.windowTitle(), 'Muon Analysis')
 
     def test_create_new_plot_adds_workspaces_in_workspace_list(self):
         workspace = self.create_workspace()
 
-        plot_window = self.model.create_new_plot([workspace], 'Test plot')
+        plot_window = self.model.plot([workspace], 'Test plot')
 
         self.assertTrue(plot_window.multi_plot.has_subplot('Test plot'))
-
 
 
 if __name__ == '__main__':
