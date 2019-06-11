@@ -28,8 +28,8 @@ How to get Started
 ==================
 - Run VSCode
 - Click File->Open Folder
-- Navigate to your clone of the Mantid Repo and select it
-- Install the required extensions
+- Navigate to your Mantid source directory and select it
+- Install the required extensions (see below)
 - For code editing you are good to go!
 
 Extensions
@@ -82,11 +82,11 @@ is required. You can save on window change, on focus change, and on delay.
 
 Building
 --------
-This is where VSCode comes into it's own as a versatile environment for programming
+This is where VSCode comes into its own as a versatile environment for programming
 in any language, because of this it has a Tasks list. These tasks are saved in
 tasks.json inside the .vscode folder now present in any opened folder/workspace.
 
-- To start creating a task open the command line = Ctrl+Shift+P
+- To start creating a task open the command line (Ctrl+Shift+P or ⌘+Shift+P)
 - Type "Task"
 - Select "Task: Configure Task" by navigating using the arrow keys
 - Select the first option that is in the menu and it should open tasks.json
@@ -96,7 +96,7 @@ attempt to make a useful task for you. However it may be better to use this exam
 
 **Linux/OSX:**
 
-This assumes that you have generated in CMake using the ninja the commands can be
+This assumes that you have generated in CMake using ninja. The commands can be
 switched out with the command and various args for whatever you have generated with.
 
 .. code-block:: javascript
@@ -143,7 +143,7 @@ launch.json alongside the tasks.json in the .vscode folder.
 is not covered here.**
 
 To get to this file:
-- Open commandline line Ctrl+Shift+P
+- Open commandline line (Ctrl+Shift+P or ⌘+Shift+P)
 - Type "Debug: Open launch.json"
 - Hit Enter.
 
@@ -305,18 +305,21 @@ Keybindings
 -----------
 
 To get a list of all of possible keybindings the open your command line
-Ctrl+Shift+P and search for "Help: Keyboard Shortcuts Reference" and hit Enter.
+(Ctrl+Shift+P or ⌘+Shift+P) and search for "Help: Keyboard Shortcuts 
+Reference" and hit Enter.
 
 **Very commonly used keybindings:**
 
-+-------------------+---------------+
-| Search in File    | Ctrl+F        |
-+-------------------+---------------+
-| Command Line      | Ctrl+Shift+P  |
-+-------------------+---------------+
-| Fuzzy File Search | Ctrl+P        |
-+-------------------+---------------+
-| Build             | Ctrl+Shift+B  |
-+-------------------+---------------+
-| Launch            | F5            |
-+-------------------+---------------+
++-------------------+---------------+---------------+---------------+
+| Function          | Linux         | MacOS         | Windows       |
++===================+===============+===============+===============+
+| Search in File    | Ctrl+F        | ⌘+F           | Ctrl+F        |
++-------------------+---------------+---------------+---------------+
+| Command Line      | Ctrl+Shift+P  | ⌘+Shift+P     | Ctrl+Shift+P  |
++-------------------+---------------+---------------+---------------+
+| Fuzzy File Search | Ctrl+P        | ⌘+P           | Ctrl+P        |
++-------------------+---------------+---------------+---------------+
+| Build             | Ctrl+Shift+B  | Ctrl+Shift+B  | Ctrl+Shift+B  |
++-------------------+---------------+---------------+---------------+
+| Launch            | F5            | F5            | F5            |
++-------------------+---------------+---------------+---------------+
