@@ -87,10 +87,10 @@ all been saved in ``view.py``, the ``main.py`` will contain:
 
     def qapp():
         if QtWidgets.QApplication.instance():
-            _app = QtWidgets.QApplication.instance()
+            app = QtWidgets.QApplication.instance()
         else:
-            _app = QtWidgets.QApplication(sys.argv)
-        return _app
+            app = QtWidgets.QApplication(sys.argv)
+        return app
 
     app = qapp()
     window = demo()
