@@ -312,7 +312,7 @@ std::vector<std::string> RunsTablePresenter::cellTextFromViewAt(
     MantidWidgets::Batch::RowLocation const &location) const {
   return map(m_view->jobs().cellsAt(location),
              [](MantidWidgets::Batch::Cell const &cell) -> std::string {
-               if (cell.containsOutputValue())
+               if (cell.isOutput())
                  return std::string();
                else
                  return cell.contentText();
@@ -373,7 +373,7 @@ void RunsTablePresenter::updateRowField(
   // User has edited the text so reset the output-value flag as it now contains
   // an input
   auto cell = m_view->jobs().cellAt(itemIndex, column);
-  cell.setContainsOutputValue(false);
+  cell.setInput();
   m_view->jobs().setCellAt(itemIndex, column, cell);
 
   auto const groupIndex = groupOf(itemIndex);

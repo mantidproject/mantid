@@ -36,7 +36,10 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput,
     useOutputValue = true;
   }
   auto result = MantidWidgets::Batch::Cell(optionalToString(maybeValue));
-  result.setContainsOutputValue(useOutputValue);
+  if (useOutputValue)
+    result.setOutput();
+  else
+    result.setInput();
   return result;
 }
 
