@@ -319,7 +319,7 @@ class FitInformationTest(unittest.TestCase):
             self.assertFalse(name in log_names,
                              msg="{} found in log list".format(name))
 
-    def test_log_names_from_workspacegroup_gives_combined_set(self):
+    def test_log_names_from_list_of_workspaces_gives_combined_set(self):
         time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
                             ('ts_4', [3.]))
 
@@ -327,9 +327,8 @@ class FitInformationTest(unittest.TestCase):
                                       time_series_logs=time_series_logs[:2])
         fake2 = create_test_workspace(ws_name='fake2',
                                       time_series_logs=time_series_logs[2:])
-        group_name = 'test_log_names_group'
-        create_test_workspacegroup(group_name, items=(fake1, fake2))
-        fit = FitInformation(mock.MagicMock(), 'func1', group_name)
+        fit = FitInformation(mock.MagicMock(), 'func1',
+                             [fake1.name(), fake2.name()])
 
         log_names = fit.log_names()
         self.assertEqual(len(time_series_logs), len(log_names))

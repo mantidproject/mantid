@@ -10,7 +10,7 @@ from collections import OrderedDict
 import re
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
-from mantid.py3compat import iteritems, iterkeys
+from mantid.py3compat import iteritems, iterkeys, string_types
 
 from Muon.GUI.Common.observer_pattern import Observable
 
@@ -189,8 +189,8 @@ class FitInformation(object):
         :param parameter_workspace: The workspace wrapper
         that contains all of the parameters from the fit
         :param fit_function_name: The name of the function used
-        :param input_workspace: The name of the workspace containing
-        the original data
+        :param input_workspace: The name or list of names
+        of the workspace(s) containing the original data
         :param output_workspace_names: A list containing the names of the output workspaces containing the fits
         :param global_parameters: An optional list of parameters
         that were tied together during the fit
@@ -198,15 +198,16 @@ class FitInformation(object):
         self._fit_parameters = FitParameters(parameter_workspace,
                                              global_parameters)
         self.fit_function_name = fit_function_name
-        self.input_workspace = input_workspace
+        self.input_workspaces = [input_workspace] if isinstance(
+            input_workspace, string_types) else input_workspace
         self.output_workspace_names = output_workspace_names
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self._fit_parameters.parameter_workspace_name == other._fit_parameters.parameter_workspace_name and \
-            self.fit_function_name == other.fit_function_name and \
-            self.input_workspace == other.input_workspace and \
-            self.output_workspace_names == other.output_workspace_names
+        return self.parameters == other.parameters and \
+               self.fit_function_name == other.fit_function_name and \
+               self.input_workspaces == other.input_workspaces and \
+               self.output_workspace_names == other.output_workspace_names
 
     @property
     def parameters(self):
@@ -223,13 +224,10 @@ class FitInformation(object):
         """
         filter_fn = filter_fn if filter_fn is not None else lambda x: True
 
-        workspaces = AnalysisDataService.retrieve(self.input_workspace)
-        if not isinstance(workspaces, WorkspaceGroup):
-            workspaces = [workspaces]
-
         all_names = []
-        for workspace in workspaces:
-            logs = workspace.run().getLogData()
+        for ws_name in self.input_workspaces:
+            logs = AnalysisDataService.Instance().retrieve(
+                ws_name).run().getLogData()
             all_names.extend([log.name for log in logs if filter_fn(log)])
 
         return all_names
@@ -268,7 +266,8 @@ class FittingContext(object):
         """
         self.add_fit(
             FitInformation(parameter_workspace, fit_function_name,
-                           input_workspace, output_workspace_names, global_parameters))
+                           input_workspace, output_workspace_names,
+                           global_parameters))
 
     def add_fit(self, fit):
         """
@@ -286,7 +285,8 @@ class FittingContext(object):
         """
         return list(set([fit.fit_function_name for fit in self.fit_list]))
 
-    def find_output_workspaces_for_input_workspace_name(self, input_workspace_name):
+    def find_output_workspaces_for_input_workspace_name(
+            self, input_workspace_name):
         """
         Find the fits in the list whose input workspace matches
         :param input_workspace_name: The name of the input_workspace
@@ -294,13 +294,10 @@ class FittingContext(object):
         """
         workspace_list = []
         for fit in self.fit_list:
-            if type(fit.input_workspace) == list:
-                for index, workspace in enumerate(fit.input_workspace):
-                    if workspace == input_workspace_name:
-                        workspace_list.append(fit.output_workspace_names[index])
-            else:
-                if input_workspace_name == fit.input_workspace:
-                    workspace_list.append(fit.output_workspace_names[0])
+            for index, workspace in enumerate(fit.input_workspaces):
+                if workspace == input_workspace_name:
+                    workspace_list.append(fit.output_workspace_names[index])
+
         return workspace_list
 
     def log_names(self, filter_fn=None):

@@ -92,8 +92,6 @@ def create_test_model(input_workspaces,
             tsp.addValue("2019-05-30T09:00:05", float(index + 1))
             run.addProperty(name, tsp, replace=True)
 
-        fit.input_workspace = workspace_name
-
     fitting_context = FittingContext()
     for fit in fits:
         fitting_context.add_fit(fit)

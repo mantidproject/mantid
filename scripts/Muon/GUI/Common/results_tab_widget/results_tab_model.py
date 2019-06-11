@@ -141,7 +141,7 @@ class ResultsTabModel(object):
             }
             # logs first
             if len(log_selection) > 0:
-                workspace = _workspace_for_logs(fit.input_workspace)
+                workspace = _workspace_for_logs(fit.input_workspaces)
                 ws_run = workspace.run()
                 for log_name in log_selection:
                     try:
@@ -171,10 +171,14 @@ class ResultsTabModel(object):
         :raises RuntimeError
         """
         all_fits = self._fit_context.fit_list
-        nparams_selected = [len(all_fits[position].parameters) for _, position in results_selection]
+        nparams_selected = [
+            len(all_fits[position].parameters)
+            for _, position in results_selection
+        ]
         if nparams_selected[1:] != nparams_selected[:-1]:
             msg = "The number of parameters for each selected fit does not match:\n"
-            for (_, position), nparams in zip(results_selection, nparams_selected):
+            for (_, position), nparams in zip(results_selection,
+                                              nparams_selected):
                 fit = all_fits[position]
                 msg += "  {}: {}\n".format(
                     fit.parameters.parameter_workspace_name, nparams)
@@ -233,19 +237,12 @@ class ResultsTabModel(object):
 
 
 # Private helper functions
-def _workspace_for_logs(name_or_names):
+def _workspace_for_logs(names):
     """Return the workspace handle to be used to access the logs.
     We assume workspace_name is a string or a list of strings
     :param name_or_names: The name or list of names in the ADS
     """
-    if not isinstance(name_or_names, string_types):
-        name_or_names = name_or_names[0]
-
-    workspace = AnalysisDataService.retrieve(name_or_names)
-    if isinstance(workspace, WorkspaceGroup):
-        workspace = workspace[0]
-
-    return workspace
+    return AnalysisDataService.retrieve(names[0])
 
 
 def _log_should_be_displayed(log):
@@ -276,12 +273,12 @@ def _result_workspace_name(fit):
     :param fit: A FitInformation object describing the fit
     :return: A workspace name to be used in the fit results
     """
-    name_or_names = fit.input_workspace
-    if isinstance(name_or_names, string_types):
-        return name_or_names
+    names = fit.input_workspaces
+    if len(names) == 1:
+        return names[0]
     else:
         return _create_multi_domain_fitted_workspace_name(
-            name_or_names, fit.fit_function_name)
+            names, fit.fit_function_name)
 
 
 def _create_multi_domain_fitted_workspace_name(input_workspaces, function):
