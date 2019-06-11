@@ -112,7 +112,7 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         self.assertEqual(wks.rowCount(), self.NUM_SPEC)
 
     def _check_curves_ws(self, wks):
-        self.assertTrue(0 == wks.getNumberHistograms() % 3)
+        self.assertEqual(0,  wks.getNumberHistograms() % 3)
         self.assertTrue(isinstance(wks, MatrixWorkspace),
                         'The integration workspace should be a matrix workspace.')
 

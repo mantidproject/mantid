@@ -10,7 +10,7 @@ developer.mantidproject.org/BatchWidget/index.html
 */
 #ifndef MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
 #define MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include <memory>
 
@@ -43,7 +43,7 @@ private:
 
 template <typename Predicate>
 std::unique_ptr<RowPredicate> makeFilterFromLambda(Predicate predicate) {
-  return Mantid::Kernel::make_unique<LambdaRowPredicate<Predicate>>(predicate);
+  return std::make_unique<LambdaRowPredicate<Predicate>>(predicate);
 }
 } // namespace Batch
 } // namespace MantidWidgets

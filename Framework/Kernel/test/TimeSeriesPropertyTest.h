@@ -11,7 +11,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
@@ -80,6 +80,65 @@ public:
     TS_ASSERT(!sProp->isDefault())
 
     TS_ASSERT_EQUALS(sProp->isValid(), "");
+  }
+
+  void test_Constructor_with_values() {
+    std::vector<DateAndTime> times = {DateAndTime("2019-01-01T00:00:00"),
+                                      DateAndTime("2019-01-01T00:01:00")};
+
+    // Test int TimeSeriesProperty
+    std::vector<int> iValues = {0, 1};
+    auto iPropWithValues =
+        std::make_unique<TimeSeriesProperty<int>>("intProp", times, iValues);
+    TS_ASSERT(!iPropWithValues->name().compare("intProp"));
+    TS_ASSERT(!iPropWithValues->documentation().compare(""));
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<int>>) ==
+              *iPropWithValues->type_info());
+    TS_ASSERT(!iPropWithValues->isDefault());
+
+    auto iPropTimes = iPropWithValues->timesAsVector();
+    TS_ASSERT_EQUALS(iPropTimes[0], DateAndTime("2019-01-01T00:00:00"));
+    TS_ASSERT_EQUALS(iPropTimes[1], DateAndTime("2019-01-01T00:01:00"));
+
+    auto iPropValues = iPropWithValues->valuesAsVector();
+    TS_ASSERT_EQUALS(iPropValues[0], 0);
+    TS_ASSERT_EQUALS(iPropValues[1], 1);
+
+    // Test double TimeSeriesProperty
+    std::vector<double> dValues = {0.1, 1.2};
+    auto dPropWithValues = std::make_unique<TimeSeriesProperty<double>>(
+        "doubleProp", times, dValues);
+    TS_ASSERT(!dPropWithValues->name().compare("doubleProp"));
+    TS_ASSERT(!dPropWithValues->documentation().compare(""));
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<double>>) ==
+              *dPropWithValues->type_info());
+    TS_ASSERT(!dPropWithValues->isDefault());
+
+    auto dPropTimes = dPropWithValues->timesAsVector();
+    TS_ASSERT_EQUALS(dPropTimes[0], DateAndTime("2019-01-01T00:00:00"));
+    TS_ASSERT_EQUALS(dPropTimes[1], DateAndTime("2019-01-01T00:01:00"));
+
+    auto dPropValues = dPropWithValues->valuesAsVector();
+    TS_ASSERT_EQUALS(dPropValues[0], 0.1);
+    TS_ASSERT_EQUALS(dPropValues[1], 1.2);
+
+    // Test string TimeSeriesProperty
+    std::vector<std::string> sValues = {"test", "test2"};
+    auto sPropWithValues = std::make_unique<TimeSeriesProperty<std::string>>(
+        "stringProp", times, sValues);
+    TS_ASSERT(!sPropWithValues->name().compare("stringProp"));
+    TS_ASSERT(!sPropWithValues->documentation().compare(""));
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<std::string>>) ==
+              *sPropWithValues->type_info());
+    TS_ASSERT(!sPropWithValues->isDefault());
+
+    auto sPropTimes = sPropWithValues->timesAsVector();
+    TS_ASSERT_EQUALS(sPropTimes[0], DateAndTime("2019-01-01T00:00:00"));
+    TS_ASSERT_EQUALS(sPropTimes[1], DateAndTime("2019-01-01T00:01:00"));
+
+    auto sPropValues = sPropWithValues->valuesAsVector();
+    TS_ASSERT_EQUALS(sPropValues[0], "test");
+    TS_ASSERT_EQUALS(sPropValues[1], "test2");
   }
 
   void test_SetValueFromString() {
@@ -2361,8 +2420,7 @@ public:
   void test_getSplittingIntervals_repeatedEntries() {
     const auto &log = getTestLog();
     // Add the filter
-    auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
     Mantid::Types::Core::DateAndTime firstStart("2007-11-30T16:17:00"),
         firstEnd("2007-11-30T16:17:15"), secondStart("2007-11-30T16:18:35"),
         secondEnd("2007-11-30T16:18:40");
@@ -2388,8 +2446,7 @@ public:
   void test_getSplittingIntervals_startEndTimes() {
     const auto &log = getTestLog();
     // Add the filter
-    auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
     Mantid::Types::Core::DateAndTime firstEnd("2007-11-30T16:17:05"),
         secondStart("2007-11-30T16:17:10"), secondEnd("2007-11-30T16:17:15"),
         thirdStart("2007-11-30T16:18:35");
@@ -2415,8 +2472,7 @@ private:
   /// Generate a test log
   std::unique_ptr<TimeSeriesProperty<double>> getTestLog() {
     // Build the log
-    auto log =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("DoubleLog");
+    auto log = std::make_unique<TimeSeriesProperty<double>>("DoubleLog");
     Mantid::Types::Core::DateAndTime logTime("2007-11-30T16:17:00");
     const double incrementSecs(10.0);
     for (int i = 1; i < 12; ++i) {
@@ -2432,8 +2488,7 @@ private:
     // Build the log
     auto log = getTestLog();
     // Add the filter
-    auto filter =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
     filter->addValue("2007-11-30T16:17:00", true);
     filter->addValue("2007-11-30T16:17:15", false);
     filter->addValue("2007-11-30T16:17:25", true);

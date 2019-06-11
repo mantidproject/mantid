@@ -35,7 +35,7 @@ DECLARE_ALGORITHM(SaveIsawPeaks)
 /** Initialize the algorithm's properties.
  */
 void SaveIsawPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
@@ -45,12 +45,12 @@ void SaveIsawPeaks::init() {
                   "If false, new file (default).");
 
   const std::vector<std::string> exts{".peaks", ".integrate"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, exts),
-                  "Path to an ISAW-style peaks or integrate file to save.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
+      "Path to an ISAW-style peaks or integrate file to save.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace2D>>(
+      std::make_unique<WorkspaceProperty<Workspace2D>>(
           "ProfileWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An optional Workspace2D of profiles from integrating cylinder.");
 

@@ -74,11 +74,11 @@ FilterEvents::FilterEvents()
 /** Declare Inputs
  */
 void FilterEvents::init() {
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "SplitterWorkspace", "", Direction::Input),
                   "An input SpilltersWorskpace for filtering");
 
@@ -88,13 +88,13 @@ void FilterEvents::init() {
                   "splitter.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional output for the information of each splitter "
       "workspace index.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputTOFCorrectionWorkspace", "TOFCorrectWS", Direction::Output),
       "Name of output workspace for TOF correction factor. ");
 
@@ -124,13 +124,13 @@ void FilterEvents::init() {
                   "Type of correction on neutron events to sample time from "
                   "detector time. ");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "DetectorTOFCorrectionWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of table workspace containing the log "
                   "time correction factor for each detector. ");
   setPropertySettings("DetectorTOFCorrectionWorkspace",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -138,7 +138,7 @@ void FilterEvents::init() {
   declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
                   "Value of incident energy (Ei) in meV in direct mode.");
   setPropertySettings("IncidentEnergy",
-                      Kernel::make_unique<VisibleWhenProperty>(
+                      std::make_unique<VisibleWhenProperty>(
                           "CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
   // Algorithm to spectra without detectors
@@ -159,7 +159,7 @@ void FilterEvents::init() {
   declareProperty("DBSpectrum", EMPTY_INT(),
                   "Spectrum (workspace index) for debug purpose. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<string>>(
+  declareProperty(std::make_unique<ArrayProperty<string>>(
                       "OutputWorkspaceNames", Direction::Output),
                   "List of output workspaces names");
 
@@ -174,7 +174,7 @@ void FilterEvents::init() {
       "Start time for splitters that can be parsed to DateAndTime.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>("TimeSeriesPropertyLogs"),
+      std::make_unique<ArrayProperty<std::string>>("TimeSeriesPropertyLogs"),
       "List of name of sample logs of TimeSeriesProperty format. "
       "They will be either excluded from splitting if ExcludedSpecifiedLogs is "
       "specified as True. Or "
@@ -552,7 +552,7 @@ void FilterEvents::groupOutputWorkspace() {
   // set the group workspace as output workspace
   if (!this->existsProperty("OutputWorkspace")) {
     declareProperty(
-        make_unique<WorkspaceProperty<WorkspaceGroup>>(
+        std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
             "OutputWorkspace", groupname, Direction::Output),
         "Name of the workspace to be created as the output of grouping ");
   }
@@ -1229,7 +1229,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
       if (!this->m_toGroupWS) {
         if (!this->existsProperty(propertynamess.str())) {
           declareProperty(
-              Kernel::make_unique<
+              std::make_unique<
                   API::WorkspaceProperty<DataObjects::EventWorkspace>>(
                   propertynamess.str(), wsname.str(), Direction::Output),
               "Output");
@@ -1331,7 +1331,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     if (m_toGroupWS) {
       if (!this->existsProperty(propertynamess.str())) {
         declareProperty(
-            Kernel::make_unique<
+            std::make_unique<
                 API::WorkspaceProperty<DataObjects::EventWorkspace>>(
                 propertynamess.str(), wsname.str(), Direction::Output),
             "Output");
@@ -1441,7 +1441,7 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
       }
       if (!this->existsProperty(propertynamess.str())) {
         declareProperty(
-            Kernel::make_unique<
+            std::make_unique<
                 API::WorkspaceProperty<DataObjects::EventWorkspace>>(
                 propertynamess.str(), wsname.str(), Direction::Output),
             "Output");

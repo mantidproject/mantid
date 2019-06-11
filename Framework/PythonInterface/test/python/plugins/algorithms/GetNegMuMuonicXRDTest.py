@@ -27,19 +27,19 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         y_pos_ws = [y_position]*len(au_peak_values)
         au_muon_xr_ws = CreateWorkspace(au_peak_values[:], y_pos_ws[:])
         #Check that au_muon_xr_ws is not null
-        self.assertFalse(au_muon_xr_ws==None)
+        self.assertNotEqual(au_muon_xr_ws, None)
         au_muon_group = GroupWorkspaces(au_muon_xr_ws)
         #Check that au_muon_group is not null
-        self.assertFalse(au_muon_group==None)
+        self.assertNotEqual(au_muon_group, None)
         #Get the algorithm to produce the same workspace
         neg_mu_xr_group = GetNegMuMuonicXRD("Au") #testing default y-Axis position value
         #Check that neg_mu_xr_ws is not null
-        self.assertFalse(neg_mu_xr_group==None)
+        self.assertNotEqual(neg_mu_xr_group, None)
         #Test number of workspaces in group
         self.assertEqual(au_muon_group.getNumberOfEntries(),
                         neg_mu_xr_group.getNumberOfEntries())
-        self.assertTrue(au_muon_group.size() == 1)
-        self.assertTrue(neg_mu_xr_group.size() == 1)
+        self.assertEqual(au_muon_group.size(),  1)
+        self.assertEqual(neg_mu_xr_group.size(),  1)
 
         #now testing the one workspace in the workspace group
         neg_mu_xr_ws = neg_mu_xr_group[0]
@@ -77,33 +77,33 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         #Setting up au_muonic workspace
         au_peak_values = self.au_muonic_xr
         #check to see if workspace has been set to non-None value
-        self.assertFalse(au_peak_values == None)
+        self.assertNotEqual(au_peak_values,  None)
 
         au_y_pos_ws = [y_position]*len(au_peak_values)
 
         #setting up as_muonic workspace
         as_peak_values = self.as_muonic_xr
         #check to see if workspace has been set to non-None value
-        self.assertFalse(as_peak_values == None)
+        self.assertNotEqual(as_peak_values,  None)
 
         as_y_pos_ws = [y_position]*len(as_peak_values)
 
         au_muon_xr_ws = CreateWorkspace(au_peak_values,au_y_pos_ws[:])
         #check to see if workspace creation was successful
-        self.assertFalse(au_muon_xr_ws == None)
+        self.assertNotEqual(au_muon_xr_ws,  None)
         as_muon_xr_ws = CreateWorkspace(as_peak_values, as_y_pos_ws[:])
         #check to see if workspace creation was successful
-        self.assertFalse(as_muon_xr_ws == None)
+        self.assertNotEqual(as_muon_xr_ws,  None)
 
         ws_list = [au_muon_xr_ws,as_muon_xr_ws]
         grouped_muon_ws = GroupWorkspaces(ws_list)
         #check to see whether grouping workspaces was successful
-        self.assertFalse(grouped_muon_ws == None)
+        self.assertNotEqual(grouped_muon_ws,  None)
 
         #Run algorithm that creates muonic_xr group workspace
         group_muonic_xr_ws = GetNegMuMuonicXRD("Au,As", 0.2)
         #check that this has assigned value correctly
-        self.assertFalse(group_muonic_xr_ws == None)
+        self.assertNotEqual(group_muonic_xr_ws,  None)
 
         #Compare histograms for each of the workspaces in GroupWorkspaces created
         self.assertEqual(grouped_muon_ws[0].getNumberHistograms(), group_muonic_xr_ws[0].getNumberHistograms())

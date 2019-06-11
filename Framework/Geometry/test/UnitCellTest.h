@@ -7,12 +7,12 @@
 #ifndef MANTID_GEOMETRY_UNITCELLTEST_H_
 #define MANTID_GEOMETRY_UNITCELLTEST_H_
 
-#include <MantidKernel/Matrix.h>
-#include <MantidKernel/System.h>
-#include <MantidKernel/Timer.h>
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
-#include <MantidGeometry/Crystal/UnitCell.h>
+#include "MantidGeometry/Crystal/UnitCell.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::DblMatrix;

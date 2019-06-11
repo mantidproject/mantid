@@ -20,8 +20,6 @@
 
 #include "MantidDataHandling/Load.h"
 
-#include "MantidKernel/make_unique.h"
-
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidWorkflowAlgorithms/ExtractQENSMembers.h"
@@ -187,7 +185,7 @@ private:
             static_cast<int>(members.size()), static_cast<int>(dataX.size()),
             dataX.data());
 
-    auto axis = Mantid::Kernel::make_unique<TextAxis>(members.size());
+    auto axis = std::make_unique<TextAxis>(members.size());
     for (auto i = 0u; i < members.size(); ++i) {
       auto memberWS = createGenericWorkspace(
           dataX, randomDataVector<double>(dataX.size() - 1, 0.0, 10.0));

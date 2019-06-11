@@ -9,7 +9,6 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-
 ISIS Reflectometry Interface
 ----------------------------
 
@@ -25,6 +24,7 @@ Improvements
 ############
 
 - The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
+- An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
 
 Bug fixes
 #########

@@ -11,7 +11,6 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/make_unique.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
@@ -245,8 +244,8 @@ protected:
       const std::string &doc = "",
       const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
-        Kernel::make_unique<PropertyWithValue<T>>(name, value, validator,
-                                                  direction);
+        std::make_unique<PropertyWithValue<T>>(name, value, validator,
+                                               direction);
     declareProperty(std::move(p), doc);
   }
 
@@ -264,7 +263,7 @@ protected:
   void declareProperty(const std::string &name, T value, const std::string &doc,
                        const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
-        Kernel::make_unique<PropertyWithValue<T>>(
+        std::make_unique<PropertyWithValue<T>>(
             name, value, boost::make_shared<NullValidator>(), direction);
     declareProperty(std::move(p), doc);
   }
@@ -281,7 +280,7 @@ protected:
   void declareProperty(const std::string &name, T value,
                        const unsigned int direction) {
     std::unique_ptr<PropertyWithValue<T>> p =
-        Kernel::make_unique<PropertyWithValue<T>>(
+        std::make_unique<PropertyWithValue<T>>(
             name, value, boost::make_shared<NullValidator>(), direction);
     declareProperty(std::move(p));
   }

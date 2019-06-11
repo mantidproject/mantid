@@ -24,7 +24,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         AnalysisDataService.Instance().clear()
 
     def test_len_returns_correct_value(self):
-        self.assertEquals(len(AnalysisDataService), 0)
+        self.assertEqual(len(AnalysisDataService), 0)
 
     def test_mtd_is_same_object_type_as_analysis_data_service(self):
         self.assertTrue(isinstance(AnalysisDataService, AnalysisDataServiceImpl))
@@ -49,7 +49,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         wsname = 'ADSTest_test_len_increases_when_item_added'
         current_len = len(AnalysisDataService)
         self._run_createws(wsname)
-        self.assertEquals(len(AnalysisDataService), current_len + 1)
+        self.assertEqual(len(AnalysisDataService), current_len + 1)
 
     def test_len_decreases_when_item_removed(self):
         wsname = 'ADSTest_test_len_decreases_when_item_removed'
@@ -57,7 +57,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         current_len = len(AnalysisDataService)
         # Remove to clean the test up
         del AnalysisDataService[wsname]
-        self.assertEquals(len(AnalysisDataService), current_len - 1)
+        self.assertEqual(len(AnalysisDataService), current_len - 1)
 
     def test_add_raises_error_if_name_exists(self):
         data = [1.0,2.0,3.0]
@@ -76,7 +76,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         len_before = len(AnalysisDataService)
         AnalysisDataService.addOrReplace(name, ws)
         len_after = len(AnalysisDataService)
-        self.assertEquals(len_after, len_before)
+        self.assertEqual(len_after, len_before)
 
     def do_check_for_matrix_workspace_type(self, workspace):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
@@ -98,15 +98,15 @@ class AnalysisDataServiceTest(unittest.TestCase):
         self.do_check_for_matrix_workspace_type(ws_from_op)
         self.do_check_for_matrix_workspace_type(ws_from_method)
 
-        self.assertEquals(ws_from_op.name(), ws_from_method.name())
-        self.assertEquals(ws_from_op.getMemorySize(), ws_from_method.getMemorySize())
+        self.assertEqual(ws_from_op.name(), ws_from_method.name())
+        self.assertEqual(ws_from_op.getMemorySize(), ws_from_method.getMemorySize())
 
     def test_retrieve_workspaces_respects_default_not_unrolling_groups(self):
         ws_names = ["test_retrieve_workspaces_1", "test_retrieve_workspaces_2"]
         for name in ws_names:
             self._run_createws(name)
         workspaces = AnalysisDataService.retrieveWorkspaces(ws_names)
-        self.assertEquals(2, len(workspaces))
+        self.assertEqual(2, len(workspaces))
 
     def test_retrieve_workspaces_accepts_unrolling_groups_argument(self):
         ws_names = ["test_retrieve_workspaces_1", "test_retrieve_workspaces_2"]
@@ -117,7 +117,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
                             OutputWorkspace=group_name)
 
         workspaces = AnalysisDataService.retrieveWorkspaces([group_name], True)
-        self.assertEquals(2, len(workspaces))
+        self.assertEqual(2, len(workspaces))
         self.assertTrue(isinstance(workspaces[0], MatrixWorkspace))
         self.assertTrue(isinstance(workspaces[1], MatrixWorkspace))
 
@@ -178,7 +178,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
         group = mtd['NewGroup']
 
-        self.assertEquals(group.size(), 3)
+        self.assertEqual(group.size(), 3)
         six.assertCountEqual(self, group.getNames(), ["ws1", "ws2", "ws3"])
 
     def test_removeFromGroup_removes_workspace_from_group(self):
@@ -192,7 +192,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
         group = mtd['NewGroup']
 
-        self.assertEquals(group.size(), 2)
+        self.assertEqual(group.size(), 2)
         six.assertCountEqual(self, group.getNames(), ["ws1", "ws2"])
 
 

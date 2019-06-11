@@ -47,11 +47,11 @@ DECLARE_ALGORITHM(SpatialGrouping)
  * init() method implemented from Algorithm base class
  */
 void SpatialGrouping::init() {
-  declareProperty(Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Mantid::Kernel::Direction::Input),
                   "Name of the input workspace, which is used only as a means "
                   "of retrieving the instrument geometry.");
-  declareProperty(Kernel::make_unique<Mantid::API::FileProperty>(
+  declareProperty(std::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", Mantid::API::FileProperty::Save, ".xml"),
                   "Name (and location) in which to save the file. Having a "
                   "suffix of ''.xml'' is recommended.");
@@ -88,7 +88,7 @@ void SpatialGrouping::exec() {
   Mantid::API::Progress prog(this, 0.0, 1.0, m_positions.size());
 
   bool ignoreMaskedDetectors = false;
-  m_neighbourInfo = Kernel::make_unique<API::WorkspaceNearestNeighbourInfo>(
+  m_neighbourInfo = std::make_unique<API::WorkspaceNearestNeighbourInfo>(
       *inputWorkspace, ignoreMaskedDetectors);
 
   for (size_t i = 0; i < inputWorkspace->getNumberHistograms(); ++i) {

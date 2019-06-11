@@ -42,6 +42,7 @@ Improvements
 Bug fixes
 #########
 - :ref:`SetSample <algm-SetSample>` now correctly handles the Sample number density being passed as a string, before the algorithm would execute, but silently ignored the provided number density, the number density is now properly used.
+- Mantid no longer crashed when invalid period logs encountered in `LoadEventNexus <algm-LoadEventNexus>`. A clear error message is displayed which explains the problem.
 
 Removed
 #######

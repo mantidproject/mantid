@@ -10,9 +10,9 @@ import re
 
 def get_raw_data_workspace_name(context, run, period='1'):
     if context.data_context.is_multi_period():
-        return context.data_context._base_run_name(run) + "_raw_data" + "_period_" + period
+        return context.data_context._base_run_name(run) + "_raw_data" + "_period_" + period + context.workspace_suffix
     else:
-        return context.data_context._base_run_name(run) + "_raw_data"
+        return context.data_context._base_run_name(run) + "_raw_data"  + context.workspace_suffix
 
 
 def get_group_data_workspace_name(context, group_name, run, rebin):
@@ -25,7 +25,7 @@ def get_group_data_workspace_name(context, group_name, run, rebin):
     if rebin:
         name += ' Rebin;'
 
-    name += ' #1'
+    name += context.workspace_suffix
 
     return name
 
@@ -40,7 +40,7 @@ def get_group_asymmetry_name(context, group_name, run, rebin):
     if rebin:
         name += ' Rebin;'
 
-    name += ' #1'
+    name += context.workspace_suffix
 
     return name
 
@@ -55,46 +55,39 @@ def get_pair_data_workspace_name(context, pair_name, run, rebin):
     if rebin:
         name += ' Rebin;'
 
-    name += ' #1'
+    name += context.workspace_suffix
 
     return name
 
 
 def get_base_data_directory(context, run):
     if context.data_context.is_multi_period():
-        return context.data_context.base_directory + "/" + context.data_context._base_run_name(run) + "/"
+        return context.data_context.base_directory + "/" + context.data_context._base_run_name(run) + context.workspace_suffix + "/"
     else:
-        return context.data_context.base_directory + "/" + context.data_context._base_run_name(run) + "/"
+        return context.data_context.base_directory + "/" + context.data_context._base_run_name(run) + context.workspace_suffix + "/"
 
 
 def get_raw_data_directory(context, run):
     if context.data_context.is_multi_period():
-        return context.data_context._base_run_name(run) + "; Raw Data/"
+        return context.data_context._base_run_name(run) + "; Raw Data" + context.workspace_suffix + "/"
     else:
-        return context.data_context._base_run_name(run) + " Raw Data/"
-
-
-def get_cached_data_directory(context, run):
-    if context.is_multi_period():
-        return context._base_run_name() + " Period " + context.period_string(run) + "; Cached/"
-    else:
-        return context._base_run_name() + " Cached/"
+        return context.data_context._base_run_name(run) + " Raw Data" + context.workspace_suffix + "/"
 
 
 def get_group_data_directory(context, run):
     if context.data_context.is_multi_period():
         return context.data_context._base_run_name(run) + " Period " + context.gui_context.period_string(
-            run) + "; Groups/"
+            run) + "; Groups" + context.workspace_suffix + "/"
     else:
-        return context.data_context._base_run_name(run) + " Groups/"
+        return context.data_context._base_run_name(run) + " Groups" + context.workspace_suffix + "/"
 
 
 def get_pair_data_directory(context, run):
     if context.data_context.is_multi_period():
         return context.data_context._base_run_name(run) + " Period " + context.gui_context.period_string(
-            run) + "; Pairs/"
+            run) + "; Pairs" + context.workspace_suffix + "/"
     else:
-        return context.data_context._base_run_name(run) + " Pairs/"
+        return context.data_context._base_run_name(run) + " Pairs" + context.workspace_suffix + "/"
 
 
 def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group):
@@ -110,16 +103,16 @@ def get_base_run_name(run, instrument):
         return str(instrument) + run
 
 
-def get_phase_table_workspace_group_name(insertion_workspace_name, instrument):
+def get_phase_table_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' Phase Tab/'
+    group = get_base_run_name(run, instrument) + ' Phase Tab' + workspace_suffix + '/'
 
     return group
 
 
-def get_fft_workspace_group_name(insertion_workspace_name, instrument):
+def get_fft_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' FFT/'
+    group = get_base_run_name(run, instrument) + ' FFT' + workspace_suffix + '/'
 
     return group
 
@@ -143,12 +136,12 @@ def get_maxent_workspace_name(input_workspace):
     return input_workspace + '; MaxEnt'
 
 
-def get_maxent_workspace_group_name(insertion_workspace_name, instrument):
+def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' Maxent/'
+    group = get_base_run_name(run, instrument) + ' Maxent' + workspace_suffix + '/'
 
     return group
 
 
-def get_fit_workspace_base_directory():
-    return 'Muon Data/Fitting Output/'
+def get_fit_workspace_directory(group_name, suffix, base_name, workspace_suffix):
+    return base_name + '/' + group_name + workspace_suffix + '/' + group_name + suffix + workspace_suffix + '/'

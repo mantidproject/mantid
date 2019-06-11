@@ -199,7 +199,7 @@ void PoldiCreatePeaksFromCell::init() {
                   "Smallest allowed lattice spacing.");
   declareProperty("LatticeSpacingMax", 0.0, "Largest allowed lattice spacing.");
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "List with calculated peaks.");
 }

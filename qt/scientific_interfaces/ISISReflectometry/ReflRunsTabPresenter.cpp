@@ -609,21 +609,21 @@ ReflRunsTabPresenter::getTransferStrategy() {
         makeCatalogConfigServiceAdapter(ConfigService::Instance()));
 
     // We make a user-based Catalog Info object for the transfer
-    std::unique_ptr<ICatalogInfo> catInfo = make_unique<UserCatalogInfo>(
+    std::unique_ptr<ICatalogInfo> catInfo = std::make_unique<UserCatalogInfo>(
         ConfigService::Instance().getFacility().catalogInfo(),
         *catConfigService);
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
     std::unique_ptr<ReflMeasurementItemSource> source =
-        make_unique<ReflNexusMeasurementItemSource>();
+        std::make_unique<ReflNexusMeasurementItemSource>();
 
     // Finally make and return the Measure based transfer strategy.
-    rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
+    rtnStrategy = std::make_unique<ReflMeasureTransferStrategy>(
         std::move(catInfo), std::move(source));
     return rtnStrategy;
   } else if (m_currentTransferMethod == LegacyTransferMethod) {
-    rtnStrategy = make_unique<ReflLegacyTransferStrategy>();
+    rtnStrategy = std::make_unique<ReflLegacyTransferStrategy>();
     return rtnStrategy;
   } else {
     throw std::runtime_error("Unknown tranfer method selected: " +

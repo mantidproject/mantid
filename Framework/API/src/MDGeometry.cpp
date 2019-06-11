@@ -11,7 +11,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
+
 #include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
 
@@ -68,7 +68,7 @@ MDGeometry::MDGeometry()
     : m_dimensions(), m_originalWorkspaces(), m_origin(),
       m_transforms_FromOriginal(), m_transforms_ToOriginal(),
       m_notificationHelper(
-          Kernel::make_unique<MDGeometryNotificationHelper>(*this)),
+          std::make_unique<MDGeometryNotificationHelper>(*this)),
       m_Wtransf(3, 3, true), m_basisVectors() {}
 
 //----------------------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ MDGeometry::MDGeometry(const MDGeometry &other)
     : m_dimensions(), m_originalWorkspaces(), m_origin(other.m_origin),
       m_transforms_FromOriginal(), m_transforms_ToOriginal(),
       m_notificationHelper(
-          Kernel::make_unique<MDGeometryNotificationHelper>(*this)),
+          std::make_unique<MDGeometryNotificationHelper>(*this)),
       m_Wtransf(other.m_Wtransf), m_basisVectors(other.m_basisVectors) {
   // Perform a deep copy of the dimensions
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;

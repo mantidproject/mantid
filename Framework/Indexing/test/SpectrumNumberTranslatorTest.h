@@ -11,7 +11,6 @@
 
 #include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace Indexing;
@@ -36,7 +35,7 @@ public:
     // Local index          0 0 0 1
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    return Kernel::make_unique<SpectrumNumberTranslator>(
+    return std::make_unique<SpectrumNumberTranslator>(
         spectrumNumbers,
         RoundRobinPartitioner(
             ranks, PartitionIndex(0),

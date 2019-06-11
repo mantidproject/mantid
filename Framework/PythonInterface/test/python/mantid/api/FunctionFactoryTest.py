@@ -43,7 +43,7 @@ class FunctionFactoryTest(unittest.TestCase):
         FrameworkManagerImpl.Instance()
 
     def test_get_function_factory_does_not_return_None(self):
-        self.assertTrue(FunctionFactory is not None)
+        self.assertNotEqual(FunctionFactory, None)
 
     def test_get_functions(self):
         all_funcs = FunctionFactory.getFunctionNames()
@@ -53,8 +53,8 @@ class FunctionFactoryTest(unittest.TestCase):
     def test_get_Gaussian(self):
         name = "Gaussian"
         func = FunctionFactory.createFunction(name)
-        self.assertTrue(func.name() == name)
-        self.assertTrue(len(func.__repr__()) > len(name))
+        self.assertEqual(func.name(),  name)
+        self.assertGreater(len(func.__repr__()), len(name))
         self.assertTrue("Peak" in func.categories())
 
     def test_function_subscription_of_non_class_type_raises_error(self):
@@ -77,7 +77,7 @@ class FunctionFactoryTest(unittest.TestCase):
         nfuncs_orig = len(FunctionFactory.getFunctionNames())
         FunctionFactory.subscribe(TestFunctionCorrectForm)
         new_funcs = FunctionFactory.getFunctionNames()
-        self.assertEquals(nfuncs_orig+1, len(new_funcs))
+        self.assertEqual(nfuncs_orig+1, len(new_funcs))
         self.assertTrue("TestFunctionCorrectForm" in new_funcs)
 
     def test_function_existing_function_can_be_unsubscribed(self):
@@ -85,7 +85,7 @@ class FunctionFactoryTest(unittest.TestCase):
         nfuncs_before = len(FunctionFactory.getFunctionNames())
         FunctionFactory.unsubscribe("TestFunctionCorrectForm")
         available_functions = FunctionFactory.getFunctionNames()
-        self.assertEquals(nfuncs_before - 1, len(available_functions))
+        self.assertEqual(nfuncs_before - 1, len(available_functions))
         self.assertTrue("TestFunctionCorrectForm" not in available_functions)
 
 

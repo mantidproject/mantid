@@ -13,7 +13,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidWorkflowAlgorithms/MuonProcess.h"
 
 using Mantid::DataHandling::LoadMuonNexus2;
@@ -607,7 +607,7 @@ private:
    * @returns LoadedData struct
    */
   std::unique_ptr<LoadedData> loadData(const std::string &filename) {
-    auto data = Mantid::Kernel::make_unique<LoadedData>();
+    auto data = std::make_unique<LoadedData>();
     LoadMuonNexus2 load;
     load.initialize();
     load.setChild(true);

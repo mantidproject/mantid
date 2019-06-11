@@ -68,12 +68,12 @@ void Bin2DPowderDiffraction::init() {
   wsValidator->add<HistogramValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<EventWorkspace>>(
+      std::make_unique<WorkspaceProperty<EventWorkspace>>(
           "InputWorkspace", "", Direction::Input, wsValidator),
       "An input EventWorkspace must be a Histogram workspace, not Point data. "
       "X-axis units must be wavelength.");
 
-  declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
@@ -85,21 +85,21 @@ void Bin2DPowderDiffraction::init() {
       "Negative width values indicate logarithmic binning.";
   auto rebinValidator = boost::make_shared<RebinParamsValidator>(true);
   declareProperty(
-      make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator),
+      std::make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator),
       docString);
-  declareProperty(make_unique<ArrayProperty<double>>("dPerpendicularBinning",
-                                                     rebinValidator),
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "dPerpendicularBinning", rebinValidator),
                   docString);
 
   const std::vector<std::string> exts{".txt", ".dat"};
   declareProperty(
-      make_unique<FileProperty>("BinEdgesFile", "", FileProperty::OptionalLoad,
-                                exts),
+      std::make_unique<FileProperty>("BinEdgesFile", "",
+                                     FileProperty::OptionalLoad, exts),
       "Optional: The ascii file containing the list of bin edges. "
       "Either this or Axis1- and dPerpendicularBinning need to be specified.");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("NormalizeByBinArea", true),
+      std::make_unique<PropertyWithValue<bool>>("NormalizeByBinArea", true),
       "Normalize the binned workspace by the bin area.");
 }
 

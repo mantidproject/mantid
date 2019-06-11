@@ -45,7 +45,7 @@ public:
   /// (default=0.01)
   TestMinimizer() {
     declareProperty(
-        Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+        std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
             "SomeOutput", "abc", Kernel::Direction::Output),
         "Name of the output Workspace holding some output.");
   }

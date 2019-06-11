@@ -148,22 +148,24 @@ public:
 
     std::string instrumentXML = extract<std::string>(state["instrument_xml"]);
     std::string instrumentName = extract<std::string>(state["instrument_name"]);
-    try {
-      auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-          "LoadInstrument");
-      // Do not put the workspace in the ADS
-      alg->setChild(true);
-      alg->initialize();
-      alg->setPropertyValue("InstrumentName", instrumentName);
-      alg->setPropertyValue("InstrumentXML", instrumentXML);
-      alg->setProperty("Workspace", boost::shared_ptr<Workspace2D>(
-                                        &ws, [](Workspace2D *) {}));
-      alg->setProperty("RewriteSpectraMap",
-                       Mantid::Kernel::OptionalBool(false));
-      alg->execute();
-    } catch (std::exception &exc) {
-      Mantid::Kernel::Logger("Workspace2DPickleSuite").warning()
-          << "Could not load instrument XML: " << exc.what() << "\n";
+    if (!instrumentName.empty() && !instrumentXML.empty()) {
+      try {
+        auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "LoadInstrument");
+        // Do not put the workspace in the ADS
+        alg->setChild(true);
+        alg->initialize();
+        alg->setPropertyValue("InstrumentName", instrumentName);
+        alg->setPropertyValue("InstrumentXML", instrumentXML);
+        alg->setProperty("Workspace", boost::shared_ptr<Workspace2D>(
+                                          &ws, [](Workspace2D *) {}));
+        alg->setProperty("RewriteSpectraMap",
+                         Mantid::Kernel::OptionalBool(false));
+        alg->execute();
+      } catch (std::exception &exc) {
+        Mantid::Kernel::Logger("Workspace2DPickleSuite").warning()
+            << "Could not load instrument XML: " << exc.what() << "\n";
+      }
     }
 
     Mantid::Indexing::IndexInfo indexInfo(spectrumNumbers);

@@ -47,7 +47,7 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
                        KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX),
         sampleEnvTopic(m_instrumentName +
                        KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX);
-    m_decoder = Kernel::make_unique<KafkaEventStreamDecoder>(
+    m_decoder = std::make_unique<KafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic, sampleEnvTopic);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaEventListener::connect - Connection Error: "

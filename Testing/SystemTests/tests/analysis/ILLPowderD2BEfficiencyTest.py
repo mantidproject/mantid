@@ -38,9 +38,9 @@ class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
         data = mtd['masked'].extractY().flatten()
         data = data[np.nonzero(data)]
         coeff_max = data.max()
-        self.assertTrue(coeff_max <= 3.)
+        self.assertLessEqual(coeff_max, 3.)
         coeff_min = data.min()
-        self.assertTrue(coeff_min >= 0.3)
+        self.assertGreaterEqual(coeff_min, 0.3)
 
     def runTest(self):
 
