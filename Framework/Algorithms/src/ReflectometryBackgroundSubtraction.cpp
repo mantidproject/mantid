@@ -206,8 +206,8 @@ void ReflectometryBackgroundSubtraction::init() {
                   "performance WorkspaceIndex should be preferred;");
 
   declareProperty(std::make_unique<IndexProperty>("ProcessingInstructions",
-                                                     inputWSPropRef,
-                                                     inputIndexTypeRef),
+                                                  inputWSPropRef,
+                                                  inputIndexTypeRef),
                   "An optional set of spectra containing the background. If "
                   "not set all spectra will be processed. The indices in this "
                   "list can be workspace indices or possibly spectrum numbers, "
@@ -244,7 +244,7 @@ void ReflectometryBackgroundSubtraction::init() {
   // Average pixel properties
   declareProperty(
       std::make_unique<IndexProperty>("PeakRange", inputWSPropRef,
-                                         inputIndexTypeRef),
+                                      inputIndexTypeRef),
       "A set of spectra defining the reflectivity peak. If not set all spectra "
       "will be processed. The indices in this list can be workspace indices or "
       "possibly spectrum numbers, depending on the InputWorkspaceIndexType");
