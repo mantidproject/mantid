@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QMainWindow, QWidget
 
 from qtpy import PYQT5
 if not PYQT5:
-    raise RuntimeError('DRILL interface is supported only in workbench!')
+    raise RuntimeError('Drill is operational only on workbench!')
 
 from Interface.ui.ill.main.ui_main import Ui_MainWindow
 
