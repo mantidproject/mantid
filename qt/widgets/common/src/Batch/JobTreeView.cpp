@@ -57,7 +57,7 @@ void JobTreeView::commitData(QWidget *editor) {
 void JobTreeView::setUserEditedCellStyle(RowLocation const &location,
                                          int column) {
   auto cell = cellAt(location, column);
-  cell.setForegroundColor("black");
+  cell.setContainsOutputValue(false);
   setCellAt(location, column, cell);
 }
 

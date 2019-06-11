@@ -56,6 +56,7 @@ void Cell::setBackgroundColor(std::string const &backgroundColor) {
 
 void Cell::setForegroundColor(std::string const &foregroundColor) {
   m_foregroundColor = foregroundColor;
+  m_containsOutputValue = (m_foregroundColor == OUTPUT_FOREGROUND_COLOR);
 }
 
 std::string const &Cell::backgroundColor() const { return m_backgroundColor; }
@@ -83,9 +84,9 @@ bool Cell::containsOutputValue() const { return m_containsOutputValue; }
 void Cell::setContainsOutputValue(bool containsOutputValue) {
   m_containsOutputValue = containsOutputValue;
   if (m_containsOutputValue)
-    setForegroundColor("grey");
+    m_foregroundColor = OUTPUT_FOREGROUND_COLOR;
   else
-    setForegroundColor("black");
+    m_foregroundColor = INPUT_FOREGROUND_COLOR;
 }
 
 std::ostream &operator<<(std::ostream &os, Cell const &cell) {
