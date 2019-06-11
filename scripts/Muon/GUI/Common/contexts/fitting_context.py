@@ -226,11 +226,22 @@ class FitInformation(object):
 
         all_names = []
         for ws_name in self.input_workspaces:
-            logs = AnalysisDataService.Instance().retrieve(
-                ws_name).run().getLogData()
+            logs = _run(ws_name).getLogData()
             all_names.extend([log.name for log in logs if filter_fn(log)])
 
         return all_names
+
+    def has_log(self, log_name):
+        """
+        :param log_name: A string name
+        :return: True if the log exists on all of the input workspaces False, otherwise
+        """
+        for ws_name in self.input_workspaces:
+            run = _run(ws_name)
+            if not run.hasProperty(log_name):
+                return False
+
+        return True
 
 
 class FittingContext(object):
@@ -311,3 +322,12 @@ class FittingContext(object):
         return [
             name for fit in self.fit_list for name in fit.log_names(filter_fn)
         ]
+
+
+# Private functions
+def _run(ws_name):
+    """
+    :param ws_name: A workspace name in the ADS
+    :return: A list of the log data for a workspace
+    """
+    return AnalysisDataService.Instance().retrieve(ws_name).run()

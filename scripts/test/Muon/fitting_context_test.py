@@ -220,7 +220,6 @@ class FitParametersTest(unittest.TestCase):
                 fit_params.error(name),
                 msg="Mismatch in error for parameter" + name)
 
-
 class FitInformationTest(unittest.TestCase):
     def setUp(self):
         self.fitting_context = FittingContext()
@@ -288,8 +287,8 @@ class FitInformationTest(unittest.TestCase):
                          fit_information_object.parameters.global_parameters)
 
     def test_parameters_are_readonly(self):
-        test_parameters = OrderedDict([('Height', (10., 0.4)),
-                                       ('A0', (1, 0.01)),
+        test_parameters = OrderedDict([('Height', (10., 0.4)), ('A0', (1,
+                                                                       0.01)),
                                        ('Cost function', (0.1, 0.))])
         fit_params = create_test_fit_parameters(test_parameters)
         fit_info = FitInformation(fit_params._parameter_workspace,
@@ -313,39 +312,62 @@ class FitInformationTest(unittest.TestCase):
 
         log_names = fit.log_names()
         for name, _ in time_series_logs:
-            self.assertTrue(name in log_names,
-                            msg="{} not found in log list".format(name))
+            self.assertTrue(
+                name in log_names, msg="{} not found in log list".format(name))
         for name, _ in single_value_logs:
-            self.assertFalse(name in log_names,
-                             msg="{} found in log list".format(name))
+            self.assertFalse(
+                name in log_names, msg="{} found in log list".format(name))
 
     def test_log_names_from_list_of_workspaces_gives_combined_set(self):
         time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
                             ('ts_4', [3.]))
 
-        fake1 = create_test_workspace(ws_name='fake1',
-                                      time_series_logs=time_series_logs[:2])
-        fake2 = create_test_workspace(ws_name='fake2',
-                                      time_series_logs=time_series_logs[2:])
+        fake1 = create_test_workspace(
+            ws_name='fake1', time_series_logs=time_series_logs[:2])
+        fake2 = create_test_workspace(
+            ws_name='fake2', time_series_logs=time_series_logs[2:])
         fit = FitInformation(mock.MagicMock(), 'func1',
                              [fake1.name(), fake2.name()])
 
         log_names = fit.log_names()
         self.assertEqual(len(time_series_logs), len(log_names))
         for name, _ in time_series_logs:
-            self.assertTrue(name in log_names,
-                            msg="{} not found in log list".format(name))
+            self.assertTrue(
+                name in log_names, msg="{} not found in log list".format(name))
 
     def test_log_names_uses_filter_fn(self):
         time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
                             ('ts_4', [3.]))
-        fake1 = create_test_workspace(ws_name='fake1',
-                                      time_series_logs=time_series_logs)
+        fake1 = create_test_workspace(
+            ws_name='fake1', time_series_logs=time_series_logs)
         fit = FitInformation(mock.MagicMock(), 'func1', fake1.name())
 
         log_names = fit.log_names(lambda log: log.name == 'ts_1')
         self.assertEqual(1, len(log_names))
         self.assertEqual(time_series_logs[0][0], log_names[0])
+
+    def test_has_log_returns_true_if_all_workspaces_have_the_log(self):
+        time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )))
+        fake1 = create_test_workspace(
+            ws_name='fake1', time_series_logs=time_series_logs)
+        fake2 = create_test_workspace(
+            ws_name='fake2', time_series_logs=time_series_logs)
+        fit = FitInformation(mock.MagicMock(), 'func1',
+                             [fake1.name(), fake2.name()])
+
+        self.assertTrue(fit.has_log('ts_1'))
+
+    def test_has_log_returns_false_if_all_workspaces_do_not_have_log(self):
+        time_series_logs = [('ts_1', (1., ))]
+        fake1 = create_test_workspace(
+            ws_name='fake1', time_series_logs=time_series_logs)
+        fake2 = create_test_workspace(ws_name='fake2')
+        fit = FitInformation(mock.MagicMock(), 'func1',
+                             [fake1.name(), fake2.name()])
+
+        self.assertFalse(
+            fit.has_log('ts_1'),
+            msg='All input workspaces should have the requested log')
 
 
 class FittingContextTest(unittest.TestCase):
@@ -367,9 +389,8 @@ class FittingContextTest(unittest.TestCase):
         self.assertEqual(1, len(self.fitting_context))
 
     def test_items_can_be_added_to_fitting_context(self):
-        fit_information_object = FitInformation(mock.MagicMock(),
-                                                'MuonGuassOsc',
-                                                mock.MagicMock())
+        fit_information_object = FitInformation(
+            mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
 
         self.fitting_context.add_fit(fit_information_object)
 
@@ -436,10 +457,10 @@ class FittingContextTest(unittest.TestCase):
     def test_log_names_returns_logs_from_all_fits_by_default(self):
         time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
                             ('ts_4', [3.]))
-        fake1 = create_test_workspace(ws_name='fake1',
-                                      time_series_logs=time_series_logs[:2])
-        fake2 = create_test_workspace(ws_name='fake2',
-                                      time_series_logs=time_series_logs[2:])
+        fake1 = create_test_workspace(
+            ws_name='fake1', time_series_logs=time_series_logs[:2])
+        fake2 = create_test_workspace(
+            ws_name='fake2', time_series_logs=time_series_logs[2:])
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake1.name()))
         self.fitting_context.add_fit(
@@ -448,16 +469,16 @@ class FittingContextTest(unittest.TestCase):
         log_names = self.fitting_context.log_names()
         self.assertEqual(len(time_series_logs), len(log_names))
         for name, _ in time_series_logs:
-            self.assertTrue(name in log_names,
-                            msg="{} not found in log list".format(name))
+            self.assertTrue(
+                name in log_names, msg="{} not found in log list".format(name))
 
     def test_log_names_respects_filter(self):
         time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
                             ('ts_4', [3.]))
-        fake1 = create_test_workspace(ws_name='fake1',
-                                      time_series_logs=time_series_logs[:2])
-        fake2 = create_test_workspace(ws_name='fake2',
-                                      time_series_logs=time_series_logs[2:])
+        fake1 = create_test_workspace(
+            ws_name='fake1', time_series_logs=time_series_logs[:2])
+        fake2 = create_test_workspace(
+            ws_name='fake2', time_series_logs=time_series_logs[2:])
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake1.name()))
         self.fitting_context.add_fit(
@@ -468,8 +489,8 @@ class FittingContextTest(unittest.TestCase):
             filter_fn=lambda log: log.name in required_logs)
         self.assertEqual(len(required_logs), len(log_names))
         for name in required_logs:
-            self.assertTrue(name in log_names,
-                            msg="{} not found in log list".format(name))
+            self.assertTrue(
+                name in log_names, msg="{} not found in log list".format(name))
 
 
 if __name__ == '__main__':

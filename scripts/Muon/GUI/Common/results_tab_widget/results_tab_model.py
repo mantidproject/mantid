@@ -128,7 +128,8 @@ class ResultsTabModel(object):
         [(workspace, fit_position),...]
         It is assumed this is not empty and ordered as it should be displayed.
         """
-        self._raise_error_on_incompatible_selection(results_selection)
+        self._raise_error_on_incompatible_selection(log_selection,
+                                                    results_selection)
 
         results_table = self._create_empty_results_table(
             log_selection, results_selection)
@@ -139,36 +140,91 @@ class ResultsTabModel(object):
             row_dict = {
                 'workspace_name': fit_parameters.parameter_workspace_name
             }
-            # logs first
-            if len(log_selection) > 0:
-                workspace = _workspace_for_logs(fit.input_workspaces)
-                ws_run = workspace.run()
-                for log_name in log_selection:
-                    try:
-                        log_value = ws_run.getPropertyAsSingleValue(log_name)
-                    except Exception:
-                        log_value = np.nan
-                    row_dict.update({log_name: log_value})
-            # fit parameters
-            for param_name in fit_parameters.names():
-                row_dict.update({param_name: fit_parameters.value(param_name)})
-                if _param_error_should_be_displayed(param_name):
-                    row_dict.update({
-                        _error_column_name(param_name):
-                        fit_parameters.error(param_name)
-                    })
-
-            results_table.addRow(row_dict)
+            row_dict = self._add_logs_to_table(row_dict, fit, log_selection)
+            results_table.addRow(
+                self._add_parameters_to_table(row_dict, fit_parameters))
 
         AnalysisDataService.Instance().addOrReplace(self.results_table_name(),
                                                     results_table)
         return results_table
 
-    def _raise_error_on_incompatible_selection(self, results_selection):
+    def _add_logs_to_table(self, row_dict, fit, log_selection):
+        """
+        Add the log values into the row for the given fit
+        :param row_dict: The dict of current row values
+        :param fit: The fit object being processed
+        :param log_selection: The current selection of logs
+        :return: The updated row values dict
+        """
+        if not log_selection:
+            return row_dict
+
+        workspace = _workspace_for_logs(fit.input_workspaces)
+        ws_run = workspace.run()
+        for log_name in log_selection:
+            try:
+                log_value = ws_run.getPropertyAsSingleValue(log_name)
+            except Exception:
+                log_value = np.nan
+            row_dict.update({log_name: log_value})
+
+        return row_dict
+
+    def _add_parameters_to_table(self, row_dict, fit_parameters):
+        """
+        Add the parameter values into the row for the given fit
+        :param row_dict: The dict of current row values
+        :param fit_parameters: The list of FitParameter objects
+        :return: The updated row dictionary
+        """
+        for param_name in fit_parameters.names():
+            row_dict.update({param_name: fit_parameters.value(param_name)})
+            if _param_error_should_be_displayed(param_name):
+                row_dict.update({
+                    _error_column_name(param_name):
+                    fit_parameters.error(param_name)
+                })
+
+        return row_dict
+
+    def _raise_error_on_incompatible_selection(self, log_selection,
+                                               results_selection):
         """If the selected results cannot be displayed together then raise an error
 
+        :param log_selection: See create_results_output
         :param results_selection: See create_results_output
-        :raises RuntimeError
+        :raises RuntimeError if the selection cannot produce a valid table
+        """
+        self._raise_if_log_selection_invalid(log_selection, results_selection)
+        self._raise_if_result_selection_is_invalid(results_selection)
+
+    def _raise_if_log_selection_invalid(self, log_selection,
+                                        results_selection):
+        """
+        Raise a RuntimeError if the log selection is invalid.
+        :param results_selection: The selected fit results
+        :param results_selection: The selected log values
+        """
+        all_fits = self._fit_context.fit_list
+        missing_msg = []
+        for selection in results_selection:
+            fit = all_fits[selection[1]]
+            missing = []
+            for log_name in log_selection:
+                if not fit.has_log(log_name):
+                    missing.append(log_name)
+            if missing:
+                missing_msg.append("  Fit '{}' is missing the logs {}".format(
+                    fit.parameters.parameter_workspace_name, missing))
+        if missing_msg:
+            raise RuntimeError(
+                "The logs for each selected fit do not match:\n" +
+                "\n".join(missing_msg))
+
+    def _raise_if_result_selection_is_invalid(self, results_selection):
+        """
+        Raise a RuntimeError if the result selection is invalid.
+        :param results_selection: The selected fit results
         """
         all_fits = self._fit_context.fit_list
         nparams_selected = [

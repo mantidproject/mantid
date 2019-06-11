@@ -9,7 +9,6 @@ from __future__ import (absolute_import, print_function, unicode_literals)
 
 from collections import OrderedDict
 from copy import deepcopy
-import itertools
 import unittest
 
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
@@ -17,11 +16,8 @@ from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import iteritems, mock, string_types
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
-    DEFAULT_TABLE_NAME, ALLOWED_NON_TIME_SERIES_LOGS, ResultsTabModel)
+    DEFAULT_TABLE_NAME, ResultsTabModel)
 from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation
-
-# constants
-LOG_NAMES_FUNC = 'Muon.GUI.Common.results_tab_widget.results_tab_model.log_names'
 
 
 def create_test_workspace(ws_name=None):
@@ -75,7 +71,7 @@ def create_test_model(input_workspaces,
     :param input_workspaces: See create_test_fits
     :param function_name: See create_test_fits
     :param parameters: See create_test_fits
-    :param logs: A list of log names to create
+    :param logs: A list of (name, (values...), (name, (values...)))
     :param global_parameters: An optional list of tied parameters
     :return: A list of Fits with workspaces/logs attached
     """
@@ -83,19 +79,32 @@ def create_test_model(input_workspaces,
                             global_parameters)
     logs = logs if logs is not None else []
     for fit, workspace_name in zip(fits, input_workspaces):
-        test_ws = create_test_workspace(workspace_name)
-        run = test_ws.run()
-        # populate with log data
-        for index, name in enumerate(logs):
-            tsp = FloatTimeSeriesProperty(name)
-            tsp.addValue("2019-05-30T09:00:00", float(index))
-            tsp.addValue("2019-05-30T09:00:05", float(index + 1))
-            run.addProperty(name, tsp, replace=True)
+        add_logs(workspace_name, logs)
 
     fitting_context = FittingContext()
     for fit in fits:
         fitting_context.add_fit(fit)
     return fitting_context, ResultsTabModel(fitting_context)
+
+
+def add_logs(workspace_name, logs):
+    """
+    Add a list of logs to a workspace
+    :param workspace_name: A workspace to contain the logs
+    :param logs: A list of logs and values
+    :return: The workspace reference
+    """
+    workspace = create_test_workspace(workspace_name)
+
+    run = workspace.run()
+    # populate with log data
+    for name, values in logs:
+        tsp = FloatTimeSeriesProperty(name)
+        for value in values:
+            tsp.addValue("2019-05-30T09:00:00", float(value))
+        run.addProperty(name, tsp, replace=True)
+
+    return workspace
 
 
 class ResultsTabModelTest(unittest.TestCase):
@@ -116,7 +125,9 @@ class ResultsTabModelTest(unittest.TestCase):
                                        ('Cost function value',
                                         self.cost_function)])
 
-        self.logs = ['sample_temp', 'sample_magn_field']
+        self.log_names = ['sample_temp', 'sample_magn_field']
+        self.logs = [(self.log_names[0], (50., 60.)),
+                     (self.log_names[1], (2., 3.))]
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
@@ -228,15 +239,15 @@ class ResultsTabModelTest(unittest.TestCase):
         _, model = create_test_model(('ws1', ), 'func1', self.parameters, [],
                                      self.logs)
         selected_results = [('ws1', 0)]
-        table = model.create_results_table(self.logs, selected_results)
+        table = model.create_results_table(self.log_names, selected_results)
 
-        expected_cols = ['workspace_name'] + self.logs + [
+        expected_cols = ['workspace_name'] + self.log_names + [
             'f0.Height', 'f0.HeightError', 'f0.PeakCentre',
             'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.Height',
             'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError',
             'f1.Sigma', 'f1.SigmaError', 'Cost function value'
         ]
-        avg_log_values = 0.5, 1.5
+        avg_log_values = 55., 2.5
         expected_content = [
             ('ws1_Parameters', avg_log_values[0], avg_log_values[1],
              self.f0_height[0], self.f0_height[1], self.f0_centre[0],
@@ -300,6 +311,23 @@ class ResultsTabModelTest(unittest.TestCase):
         selected_results = [('ws1', 0), ('ws2', 1)]
         self.assertRaises(RuntimeError, model.create_results_table, [],
                           selected_results)
+
+    def test_create_results_table_with_logs_missing_from_some_workspaces_raises(
+            self):
+        parameters = OrderedDict([('f0.Height', (100, 0.1))])
+        logs = [('log1', (1., 2.)), ('log2', (3., 4.)), ('log3', (4., 5.)),
+                ('log4', (5., 6.))]
+        fits_logs1 = create_test_fits(('ws1', ), 'func1', parameters)
+        add_logs(fits_logs1[0].input_workspaces[0], logs[:2])
+
+        fits_logs2 = create_test_fits(('ws2', ), 'func1', parameters)
+        add_logs(fits_logs2[0].input_workspaces[0], logs[2:])
+        model = ResultsTabModel(FittingContext(fits_logs1 + fits_logs2))
+
+        selected_results = [('ws1', 0), ('ws2', 1)]
+        selected_logs = ['log1', 'log3']
+        self.assertRaises(RuntimeError, model.create_results_table,
+                          selected_logs, selected_results)
 
     # ---------------------- Private helper functions -------------------------
 
