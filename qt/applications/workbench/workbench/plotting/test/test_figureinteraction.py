@@ -14,7 +14,6 @@ import unittest
 
 # third-party library imports
 import matplotlib
-
 matplotlib.use('AGG')  # noqa
 import numpy as np
 from numpy.testing import assert_almost_equal
@@ -188,14 +187,22 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
 
+        # Earlier versions of matplotlib do not store the data assciated with a
+        # line with high precision and hence we need to set a lower tolerance
+        # when making comparisons of this data
+        if matplotlib.__version__ < "2":
+            decimal_tol = 1
+        else:
+            decimal_tol = 7
+
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
         assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
-        assert_almost_equal(ax.lines[0].get_ydata(), [0.2, 0.3])
+        assert_almost_equal(ax.lines[0].get_ydata(), [0.2, 0.3], decimal=decimal_tol)
         self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
         fig_interactor._toggle_normalization(ax)
         assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
-        assert_almost_equal(ax.lines[0].get_ydata(), [2, 3])
+        assert_almost_equal(ax.lines[0].get_ydata(), [2, 3], decimal=decimal_tol)
         self.assertEqual("Counts", ax.get_ylabel())
 
 
