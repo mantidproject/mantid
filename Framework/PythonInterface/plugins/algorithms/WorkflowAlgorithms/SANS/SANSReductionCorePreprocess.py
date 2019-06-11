@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" SANSReductionCoreInitial algorithm runs the sequence of reduction steps which are necessary to reduce a data set,
+""" SANSReductionCorePreprocess algorithm runs the sequence of reduction steps which are necessary to reduce a data set,
 which can be performed before event slicing."""
 
 from __future__ import (absolute_import, division, print_function)
@@ -21,12 +21,12 @@ from sans.common.general_functions import (create_child_algorithm, append_to_san
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
-class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
+class SANSReductionCorePreprocess(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Reduction'
 
     def summary(self):
-        return 'Runs the the initial core reduction elements. These are the steps which ' \
+        return 'Runs the initial core reduction elements. These are the steps which ' \
                'can be carried out before event slicing.'
 
     def PyInit(self):
@@ -190,7 +190,7 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
         progress.report("Multiplying by volume and absolute scale ...")
         workspace = self._scale(state_serialized, workspace)
 
-        progress.report("Completed SANSReductionCoreInitial ...")
+        progress.report("Completed SANSReductionCorePreprocess ...")
 
         # ------------------------------------------------------------
         # Populate the output
@@ -291,4 +291,4 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(SANSReductionCoreInitial)
+AlgorithmFactory.subscribe(SANSReductionCorePreprocess)

@@ -284,7 +284,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         # Setup initial reduction
         # --------------------------------------------------------------------------------------------------------------
-        initial_reduction_alg = create_child_algorithm(self, "SANSReductionCoreInitial", **{})
+        initial_reduction_alg = create_child_algorithm(self, "SANSReductionCorePreprocess", **{})
         # Decide which core reduction information to run, i.e. HAB, LAB, ALL, MERGED. In the case of ALL and MERGED,
         # the required simple reduction modes need to be run. Normally this is HAB and LAB, future implementations
         # might have more detectors though (or different types)
