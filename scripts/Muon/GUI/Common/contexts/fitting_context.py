@@ -263,17 +263,6 @@ class FittingContext(object):
         """
         return list(set([fit.fit_function_name for fit in self.fit_list]))
 
-    def find_fits_for_function(self, fit_function_name):
-        """
-        Find the fits in the list whose function name matches
-        :param fit_function_name: The name of the function
-        :return: A list of any matching fits
-        """
-        return [
-            fit for fit in self.fit_list
-            if fit.fit_function_name == fit_function_name
-        ]
-
     def find_output_workspaces_for_input_workspace_name(self, input_workspace_name):
         """
         Find the fits in the list whose input workspace matches
