@@ -439,7 +439,7 @@ class MantidAxes(Axes):
                 x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
                 artists[0].set_data(x, y)
                 self.relim()
-                self.autoscale()
+                # self.autoscale()
                 return artists
 
             workspace = args[0]
@@ -521,7 +521,7 @@ class MantidAxes(Axes):
                     artist_new.update_from(artist_orig)
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
-                self.autoscale()
+                # self.autoscale()
                 return container_new
 
             workspace = args[0]

@@ -40,7 +40,7 @@ class HomeTabWidget(object):
         self.run_info_widget = HomeRunInfoWidgetPresenter(self.run_info_view,
                                                           HomeRunInfoWidgetModel(context=context))
 
-        self.plot_widget = HomePlotWidgetPresenter(self.plot_view, HomePlotWidgetModel(MultiPlotWindow, context))
+        self.plot_widget = HomePlotWidgetPresenter(self.plot_view, HomePlotWidgetModel(MultiPlotWindow), context)
 
         self.home_tab_view = HomeTabView(parent=parent,
                                          widget_list=[self.inst_view,

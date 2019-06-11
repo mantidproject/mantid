@@ -14,13 +14,18 @@ from MultiPlotting.multi_plotting_widget import MultiPlotWindow
 
 class HomeTabPlotPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.plotting_manager = MultiPlotWindow
+        self.mock_plot_window = mock.MagicMock()
+        self.plotting_manager = mock.MagicMock(return_value=self.mock_plot_window)
         self.context = mock.MagicMock()
-        self.model = HomePlotWidgetModel(self.plotting_manager, self.context)
+        self.model = HomePlotWidgetModel(self.plotting_manager)
 
     def test_plot_creates_new_plot_window_and_plots_workspace_list(self):
-        self.model.get_workspaces_to_plot.return_value = ['MUSR62260; Group; bottom; Asymmetry; MA',
-                                                          'MUSR62260; Group; fwd; Asymmetry; MA']
+        workspace_list = ['MUSR62260; Group; bottom; Asymmetry; MA', 'MUSR62261; Group; bottom; Asymmetry; MA']
+        subplot_title = 'MUSR62260 bottom'
+
+        plot_window = self.model.plot(workspace_list, subplot_title)
+
+        self.plotting_manager.assert_called_once_with('Muon Analysis', close_callback=self.model._close_plot)
 
 
 

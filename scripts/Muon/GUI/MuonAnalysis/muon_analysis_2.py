@@ -155,8 +155,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer
-        )
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
@@ -166,6 +165,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+
+        self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
+            self.home_tab.plot_widget.group_pair_observer)
 
     def setup_alpha_recalculated_observers(self):
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
