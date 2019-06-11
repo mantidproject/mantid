@@ -159,15 +159,21 @@ class ResultsTabModelTest(unittest.TestCase):
         _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, [],
                                      self.logs)
 
-        expected_list_state = {'ws1': [0, True, True], 'ws2': [1, True, True]}
+        expected_list_state = {
+            'ws1_Parameters': [0, True, True],
+            'ws2_Parameters': [1, True, True]
+        }
         self.assertDictEqual(expected_list_state, model.fit_selection({}))
 
     def test_model_creates_fit_selection_given_existing_state(self):
         _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, [],
                                      self.logs)
 
-        orig_list_state = {'ws1': [0, False, True]}
-        expected_list_state = {'ws1': [0, False, True], 'ws2': [1, True, True]}
+        orig_list_state = {'ws1_Parameters': [0, False, True]}
+        expected_list_state = {
+            'ws1_Parameters': [0, False, True],
+            'ws2_Parameters': [1, True, True]
+        }
         self.assertEqual(expected_list_state,
                          model.fit_selection(orig_list_state))
 

@@ -84,7 +84,7 @@ class ResultsTabModel(object):
         for index, fit in enumerate(self._fit_context.fit_list):
             if fit.fit_function_name != self.selected_fit_function():
                 continue
-            name = _result_workspace_name(fit)
+            name = fit.parameters.parameter_workspace_name
             if name in existing_selection:
                 checked = existing_selection[name][1]
             else:
@@ -263,29 +263,3 @@ def _error_column_name(name):
     :return: A name for the error column
     """
     return name + ERROR_COL_SUFFIX
-
-
-def _result_workspace_name(fit):
-    """
-    Return the result workspace name for a given FitInformation object. The fit.input_workspace
-    can be a list of workspaces or a single value. If a list is found then the
-    first workspace is returned.
-    :param fit: A FitInformation object describing the fit
-    :return: A workspace name to be used in the fit results
-    """
-    names = fit.input_workspaces
-    if len(names) == 1:
-        return names[0]
-    else:
-        return _create_multi_domain_fitted_workspace_name(
-            names, fit.fit_function_name)
-
-
-def _create_multi_domain_fitted_workspace_name(input_workspaces, function):
-    """Construct a name for a result workspace from the input list and function
-
-    :param input_workspaces: The list of input workspaces used for the fit
-    :param function: The fit function name
-    :return: A string result name
-    """
-    return input_workspaces[0] + '+ ...; Fitted; ' + function
