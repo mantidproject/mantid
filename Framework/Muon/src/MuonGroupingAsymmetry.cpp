@@ -13,7 +13,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include <algorithm>
@@ -142,14 +142,13 @@ void MuonGroupingAsymmetry::init() {
   std::vector<int> defaultGrouping = {1};
   std::vector<int> defaultPeriods = {1};
 
-  declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "InputWorkspace", emptyString, Direction::Input,
-          PropertyMode::Mandatory),
-      "Input workspace containing data from detectors which are to "
-      "be grouped.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "InputWorkspace", emptyString, Direction::Input,
+                      PropertyMode::Mandatory),
+                  "Input workspace containing data from detectors which are to "
+                  "be grouped.");
 
-  declareProperty(Mantid::Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", emptyString, Direction::Output),
                   "Output workspace which will hold the results of the group "
                   "asymmetry calculation.");
@@ -160,7 +159,7 @@ void MuonGroupingAsymmetry::init() {
                   "character.",
                   Direction::Input);
 
-  declareProperty(make_unique<ArrayProperty<int>>(
+  declareProperty(std::make_unique<ArrayProperty<int>>(
                       "Grouping", std::move(defaultGrouping),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
@@ -181,13 +180,13 @@ void MuonGroupingAsymmetry::init() {
                   "normalization, instead of being estimated.",
                   Direction::Input);
 
-  declareProperty(make_unique<ArrayProperty<int>>(
+  declareProperty(std::make_unique<ArrayProperty<int>>(
                       "SummedPeriods", std::move(defaultPeriods),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "A list of periods to sum in multiperiod data.");
-  declareProperty(
-      make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
-      "A list of periods to subtract in multiperiod data.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SubtractedPeriods",
+                                                       Direction::Input),
+                  "A list of periods to subtract in multiperiod data.");
 
   // Perform Group Associations.
 

@@ -41,16 +41,17 @@ DECLARE_ALGORITHM(MuonRemoveExpDecay)
  *
  */
 void MuonRemoveExpDecay::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "The name of the input 2D workspace.");
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "The name of the input 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output 2D workspace.");
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra",
-                                                      std::move(empty)),
+      std::make_unique<Kernel::ArrayProperty<int>>("Spectra", std::move(empty)),
       "The workspace indices to remove the exponential decay from.");
 }
 

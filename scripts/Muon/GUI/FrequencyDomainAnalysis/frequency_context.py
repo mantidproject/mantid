@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
-from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
+from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 
@@ -108,7 +108,7 @@ class FrequencyContext(object):
         return runs
 
     def get_detectors_excluded_from_default_grouping_tables(self):
-        groups, _ = get_default_grouping(
+        groups, _, _ = get_default_grouping(
             self.context.data_context.current_workspace, self.context.data_context.instrument,
             self.context.data_context.main_field_direction)
         detectors_in_group = []

@@ -18,7 +18,8 @@ in :literal:`InputWorkspaceIndexSet`. This is done using :ref:`algm-CalculatePol
 The default option is ‘Least squares’ which uses the histogram errors as weights. This might not be desirable, e.g. when there are bins with zero counts and zero errors. 
 An ‘Unweighted least squares’ option is available to deal with such cases. Once this has been done the workspace is then transposed again and subtracted from the input workspace. 
 **AveragePixelFit** uses :ref:`algm-RefRoi` to sum the background region on either side of the peak and finding average of these regions. Then the average is subtracted from 
-the sum of the whole region of interest of the detector. It takes the background range is taken from the :literal:`ProcessingInstructions` and the :literal:`PeakRange` which is the range of pixels containing the peak. Note when using the average pixel fit method the background must only be one region either side of the peak. If any more regions are given the background will be taken as all the spectra between the highest and lowest spectra entered excluding the peak. 
+the sum of the whole region of interest of the detector. It takes the background range from the :literal:`ProcessingInstructions` and the :literal:`PeakRange` which is the range of pixels containing the peak.
+Note when using the average pixel fit method the background must only be one region either side of the peak. If any more regions are given the background will be taken as all the spectra between the highest and lowest spectra entered excluding the peak. 
 This is done using :ref:`algm-LRSubtractAverageBackground`.
 
 Usage

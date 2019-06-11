@@ -227,6 +227,19 @@ class TOSCAReduction(ISISIndirectInelasticReduction):
         return ["II.TOSCAReductionFromFile.nxs"]
 
 
+class TOSCASimpleReductionUsingOldRunNumber(ISISIndirectInelasticReduction):
+
+    def __init__(self):
+        ISISIndirectInelasticReduction.__init__(self)
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC04970.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+
+    def get_reference_files(self):
+        return ["II.TOSCAReductionOfOldRunNumber.nxs"]
+
+
 class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
 
     def __init__(self):

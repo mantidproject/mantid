@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RingProfile.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
@@ -15,7 +16,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include <MantidAPI/IEventWorkspace.h>
 #include <climits>
 #include <cmath>
 
@@ -45,17 +45,17 @@ RingProfile::RingProfile()
  */
 void RingProfile::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input),
       "An input workspace.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "An output workspace.");
 
   auto twoOrThree =
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       "Centre", std::move(myInput), std::move(twoOrThree)),
                   "Coordinate of the centre of the ring");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<double>>();
@@ -63,7 +63,7 @@ void RingProfile::init() {
 
   declareProperty<double>("MinRadius", 0, nonNegative->clone(),
                           "Radius of the inner ring(m)");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                       "MaxRadius", std::numeric_limits<double>::max(),
                       std::move(nonNegative)),
                   "Radius of the outer ring(m)");

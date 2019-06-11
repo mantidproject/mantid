@@ -29,11 +29,11 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void HFIRLoad::init() {
-  declareProperty(make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input file to load");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Then name of the output workspace");
   declareProperty(
       "NoBeamCenter", false,
@@ -132,7 +132,7 @@ void HFIRLoad::exec() {
 
   // If the load algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
-    auto algProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
+    auto algProp = std::make_unique<AlgorithmProperty>("LoadAlgorithm");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
@@ -305,13 +305,15 @@ void HFIRLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterX", center_x));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
+                                                      center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterY", center_y));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
+                                                      center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", center_y);
 

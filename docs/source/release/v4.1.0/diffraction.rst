@@ -23,10 +23,16 @@ Improvements
 
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` has a new property, ``RemoveTemp``, which allows the user to inspect temporary workspaces is left unchecked.
 
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now correctly takes into account scale for translation. Rotation is now applied before translation to reduce confusion.
+
+- The Pearl scripts now automatically disable attenuation on long-mode.
+
 Bug Fixes
 #########
 
 - HRPD Absorption corrections now correctly takes into account the thickness of the slab.
+
+- Pearl no longer produces an output of NaN when long-mode is changed after focusing.
 
 Engineering Diffraction
 -----------------------

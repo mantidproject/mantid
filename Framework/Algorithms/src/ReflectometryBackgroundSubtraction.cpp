@@ -168,14 +168,9 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
       static_cast<int>(peakRangeIndexSet[0]),
       static_cast<int>(peakRangeIndexSet[peakRangeIndexSet.size() - 1])};
 
-  auto outputWSName = getPropertyValue("OutputWorkspace");
-
-  MatrixWorkspace_sptr workspace = inputWS->clone();
-  AnalysisDataService::Instance().addOrReplace(outputWSName, workspace);
-
   IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
-  LRBgd->setProperty("InputWorkspace", workspace);
+  LRBgd->setProperty("InputWorkspace", inputWS);
   LRBgd->setProperty("PeakRange", Strings::toString(peakRange));
   LRBgd->setProperty("BackgroundRange", Strings::toString(backgroundRange));
   LRBgd->setProperty("SumPeak", getPropertyValue("SumPeak"));
@@ -183,10 +178,10 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
   // will need to change if ISIS reflectometry get a 2D detector
   LRBgd->setProperty("LowResolutionRange", "0,0");
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
-  LRBgd->setProperty("OutputWorkspace", outputWSName);
-  LRBgd->executeAsChildAlg();
+  LRBgd->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace"));
+  LRBgd->execute();
 
-  auto outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+  Workspace_sptr outputWS = LRBgd->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
 }
 
@@ -196,13 +191,13 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
 void ReflectometryBackgroundSubtraction::init() {
 
   // Input workspace
-  auto inputWSProp = make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "InputWorkspace", "", Direction::Input,
+  auto inputWSProp = std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      "InputWorkspace", "An input workspace", Direction::Input,
       boost::make_shared<CommonBinsValidator>());
   const auto &inputWSPropRef = *inputWSProp;
   declareProperty(std::move(inputWSProp), "An input workspace.");
 
-  auto inputIndexType = make_unique<IndexTypeProperty>(
+  auto inputIndexType = std::make_unique<IndexTypeProperty>(
       "InputWorkspaceIndexType",
       IndexType::SpectrumNum | IndexType::WorkspaceIndex);
   const auto &inputIndexTypeRef = *inputIndexType;
@@ -210,7 +205,7 @@ void ReflectometryBackgroundSubtraction::init() {
                   "The type of indices in the optional index set; For optimal "
                   "performance WorkspaceIndex should be preferred;");
 
-  declareProperty(Kernel::make_unique<IndexProperty>("ProcessingInstructions",
+  declareProperty(std::make_unique<IndexProperty>("ProcessingInstructions",
                                                      inputWSPropRef,
                                                      inputIndexTypeRef),
                   "An optional set of spectra containing the background. If "
@@ -238,16 +233,17 @@ void ReflectometryBackgroundSubtraction::init() {
                   boost::make_shared<ListValidator<std::string>>(costFuncOpts),
                   "The cost function to be passed to the Fit algorithm.");
 
-  setPropertySettings("DegreeOfPolynomial", make_unique<EnabledWhenProperty>(
-                                                "BackgroundCalculationMethod",
-                                                IS_EQUAL_TO, "Polynomial"));
-  setPropertySettings("CostFunction", make_unique<EnabledWhenProperty>(
+  setPropertySettings(
+      "DegreeOfPolynomial",
+      std::make_unique<EnabledWhenProperty>("BackgroundCalculationMethod",
+                                            IS_EQUAL_TO, "Polynomial"));
+  setPropertySettings("CostFunction", std::make_unique<EnabledWhenProperty>(
                                           "BackgroundCalculationMethod",
                                           IS_EQUAL_TO, "Polynomial"));
 
   // Average pixel properties
   declareProperty(
-      Kernel::make_unique<IndexProperty>("PeakRange", inputWSPropRef,
+      std::make_unique<IndexProperty>("PeakRange", inputWSPropRef,
                                          inputIndexTypeRef),
       "A set of spectra defining the reflectivity peak. If not set all spectra "
       "will be processed. The indices in this list can be workspace indices or "
@@ -256,18 +252,18 @@ void ReflectometryBackgroundSubtraction::init() {
   declareProperty("SumPeak", false,
                   "If True, the resulting peak will be summed");
 
-  setPropertySettings("PeakRange", make_unique<EnabledWhenProperty>(
+  setPropertySettings("PeakRange", std::make_unique<EnabledWhenProperty>(
                                        "BackgroundCalculationMethod",
                                        IS_EQUAL_TO, "AveragePixelFit"));
 
-  setPropertySettings("SumPeak", make_unique<EnabledWhenProperty>(
+  setPropertySettings("SumPeak", std::make_unique<EnabledWhenProperty>(
                                      "BackgroundCalculationMethod", IS_EQUAL_TO,
                                      "AveragePixelFit"));
 
   // Output workspace
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "The output workspace containing the InputWorkspace with the "
                   "background removed.");
 }

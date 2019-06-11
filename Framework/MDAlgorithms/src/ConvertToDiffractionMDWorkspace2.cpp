@@ -43,7 +43,7 @@ void ConvertToDiffractionMDWorkspace2::init() {
 
   std::vector<double> extents = {-50.0, 50.0};
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
+      std::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default "
       "+- 50 in each dimension.");

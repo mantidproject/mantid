@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/DateAndTime.h"
-#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
+#include "MantidPythonInterface/core/Converters/DateAndTime.h"
 #include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>

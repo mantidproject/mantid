@@ -25,7 +25,7 @@ DECLARE_ALGORITHM(ConvertToEventWorkspace)
 /** Initialize the algorithm's properties.
  */
 void ConvertToEventWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input Workspace2D.");
   declareProperty("GenerateZeros", false,
@@ -40,7 +40,7 @@ void ConvertToEventWorkspace::init() {
       "If GenerateMultipleEvents is true, specifies a maximum number of events "
       "to generate in a single bin.\n"
       "Use a value that matches your instrument's TOF resolution. Default 10.");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output EventWorkspace.");
 }

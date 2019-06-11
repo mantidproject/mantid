@@ -223,8 +223,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.copy_button.setIcon(icons.get_icon("mdi.content-copy"))
         self.cut_button.setIcon(icons.get_icon("mdi.content-cut"))
         self.erase_button.setIcon(icons.get_icon("mdi.eraser"))
-        self.delete_row_button.setIcon(icons.get_icon("mdi.trash-can"))
-        self.insert_row_button.setIcon(icons.get_icon("mdi.table"))
+        self.delete_row_button.setIcon(icons.get_icon("mdi.table-row-remove"))
+        self.insert_row_button.setIcon(icons.get_icon("mdi.table-row-plus-after"))
         self.export_table_button.setIcon(icons.get_icon("mdi.file-export"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
@@ -286,7 +286,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
 
-        runs_icon = icons.get_icon("mdi.play-circle-outline")
+        runs_icon = icons.get_icon("mdi.play")
         _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
         settings_icon = icons.get_icon("mdi.settings")
@@ -295,10 +295,10 @@ class SANSDataProcessorGui(QMainWindow,
         centre_icon = icons.get_icon("mdi.adjust")
         _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon = icons.get_icon("mdi.plus-circle-outline")
+        add_runs_page_icon = icons.get_icon("mdi.plus")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon = icons.get_icon("mdi.help-circle-outline")
+        diagnostic_icon = icons.get_icon("mdi.stethoscope")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled

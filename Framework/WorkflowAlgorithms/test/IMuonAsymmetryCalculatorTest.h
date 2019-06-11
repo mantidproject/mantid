@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
@@ -55,9 +55,8 @@ public:
     std::vector<int> summed{1};
     std::vector<int> subtracted{};
     int groupIndex(1);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupCountsCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(outWS = calc->calculate());
     TS_ASSERT(outWS);
@@ -90,9 +89,8 @@ public:
     std::vector<int> summed{1, 2};
     std::vector<int> subtracted{};
     int groupIndex(1);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupCountsCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(outWS = calc->calculate());
     TS_ASSERT(outWS);
@@ -125,9 +123,8 @@ public:
     std::vector<int> summed{1};
     std::vector<int> subtracted{2};
     int groupIndex(1);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupCountsCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(outWS = calc->calculate());
     TS_ASSERT(outWS);
@@ -165,9 +162,8 @@ public:
     std::vector<int> summed{1, 2, 3};
     std::vector<int> subtracted{};
     int groupIndex(1);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupCountsCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -205,9 +201,8 @@ public:
     std::vector<int> summed{1, 2};
     std::vector<int> subtracted{3};
     int groupIndex(1);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupCountsCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -241,9 +236,8 @@ public:
     std::vector<int> summed{1};
     std::vector<int> subtracted{};
     int groupIndex(2);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -278,9 +272,8 @@ public:
     std::vector<int> summed{1};
     std::vector<int> subtracted{2};
     int groupIndex(2);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -315,9 +308,8 @@ public:
     std::vector<int> summed{1, 2};
     std::vector<int> subtracted{};
     int groupIndex(1);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -358,9 +350,8 @@ public:
     std::vector<int> summed{1, 2, 3};
     std::vector<int> subtracted{};
     int groupIndex(1);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -401,9 +392,8 @@ public:
     std::vector<int> summed{1, 2};
     std::vector<int> subtracted{3};
     int groupIndex(1);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, groupIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonGroupAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, groupIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -437,9 +427,8 @@ public:
     std::vector<int> subtracted{};
     int firstIndex(2), secondIndex(0);
     double alpha(0.5);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, firstIndex, secondIndex, alpha);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonPairAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, firstIndex, secondIndex, alpha);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -472,9 +461,8 @@ public:
     std::vector<int> summed{1};
     std::vector<int> subtracted{2};
     int firstIndex(2), secondIndex(0);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, firstIndex, secondIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonPairAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, firstIndex, secondIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -507,9 +495,8 @@ public:
     std::vector<int> summed{1, 2};
     std::vector<int> subtracted{};
     int firstIndex(0), secondIndex(2);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, firstIndex, secondIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonPairAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, firstIndex, secondIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -544,9 +531,8 @@ public:
     std::vector<int> summed{1, 2};
     std::vector<int> subtracted{3};
     int firstIndex(2), secondIndex(0);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, firstIndex, secondIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonPairAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, firstIndex, secondIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -581,9 +567,8 @@ public:
     std::vector<int> summed{1, 2, 3};
     std::vector<int> subtracted{};
     int firstIndex(2), secondIndex(0);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, firstIndex, secondIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonPairAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, firstIndex, secondIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = calc->calculate());
     TS_ASSERT(ws);
@@ -615,9 +600,8 @@ public:
     std::vector<int> summed{1, 2};
     std::vector<int> subtracted{};
     int firstIndex(0), secondIndex(2);
-    IMuonAsymCalc_uptr calc =
-        Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
-            inputWSGroup, summed, subtracted, firstIndex, secondIndex);
+    IMuonAsymCalc_uptr calc = std::make_unique<MuonPairAsymmetryCalculator>(
+        inputWSGroup, summed, subtracted, firstIndex, secondIndex);
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS(ws = calc->calculate(), const std::out_of_range &);
     TS_ASSERT(!ws);

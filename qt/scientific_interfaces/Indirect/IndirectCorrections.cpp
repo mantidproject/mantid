@@ -72,6 +72,7 @@ void IndirectCorrections::initLayout() {
             SLOT(showMessageBox(const QString &)));
   }
 
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));

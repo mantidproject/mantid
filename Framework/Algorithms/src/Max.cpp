@@ -24,12 +24,12 @@ using namespace API;
  *
  */
 void Max::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<HistogramValidator>()),
                   "The name of the Workspace2D to take as input");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace in which to store the result");
 
   declareProperty("RangeLower", EMPTY_DBL(),

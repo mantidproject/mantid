@@ -65,11 +65,11 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
     const ValueType valueInC = extract<ValueType>(defaultValue)();
     std::unique_ptr<Kernel::Property> valueProp;
     if (isNone(validator)) {
-      valueProp = Mantid::Kernel::make_unique<PropertyWithValue<ValueType>>(
-          name, valueInC, direction);
+      valueProp = std::make_unique<PropertyWithValue<ValueType>>(name, valueInC,
+                                                                 direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      valueProp = Mantid::Kernel::make_unique<PropertyWithValue<ValueType>>(
+      valueProp = std::make_unique<PropertyWithValue<ValueType>>(
           name, valueInC, propValidator->clone(), direction);
     }
     return valueProp;
@@ -131,14 +131,12 @@ struct DLLExport TypedPropertyValueHandler<
         extract<PropertyValueType>(defaultValue)();
     std::unique_ptr<Property> valueProp;
     if (isNone(validator)) {
-      valueProp =
-          Mantid::Kernel::make_unique<PropertyWithValue<PropertyValueType>>(
-              name, valueInC, direction);
+      valueProp = std::make_unique<PropertyWithValue<PropertyValueType>>(
+          name, valueInC, direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      valueProp =
-          Mantid::Kernel::make_unique<PropertyWithValue<PropertyValueType>>(
-              name, valueInC, propValidator->clone(), direction);
+      valueProp = std::make_unique<PropertyWithValue<PropertyValueType>>(
+          name, valueInC, propValidator->clone(), direction);
     }
     return valueProp;
   }

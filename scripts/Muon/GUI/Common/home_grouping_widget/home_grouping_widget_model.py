@@ -21,6 +21,9 @@ class HomeGroupingWidgetModel(object):
     def get_pair_names(self):
         return self._context.group_pair_context.pair_names
 
+    def get_default_group_pair(self):
+        return self._context.group_pair_context.selected
+
     def is_group(self, name):
         return name in self.get_group_names()
 
@@ -41,7 +44,7 @@ class HomeGroupingWidgetModel(object):
             return None
 
     def update_selected_group_pair_in_context(self, name):
-        self._context.gui_context.update_and_send_non_calculation_signal(selected_group_pair=name)
+        self._context.group_pair_context.selected = name
 
     # ------------------------------------------------------------------------------------------------------------------
     # Periods

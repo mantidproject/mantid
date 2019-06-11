@@ -26,6 +26,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         self.function_browser = FunctionBrowser(self, True)
         self.function_browser_layout.addWidget(self.function_browser)
+        self.function_browser.setErrorsEnabled(True)
 
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
@@ -70,6 +71,43 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         self.function_browser.addDatasets(data_set_name_list)
 
+    def update_with_fit_outputs(self, fit_function, output_status, output_chi_squared):
+        if not fit_function:
+            self.fit_status_success_failure.setText('No Fit')
+            self.fit_status_success_failure.setStyleSheet('color: black')
+            self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
+            return
+
+        self.function_browser.updateMultiDatasetParameters(fit_function)
+
+        if output_status == 'success':
+            self.fit_status_success_failure.setText('Success')
+            self.fit_status_success_failure.setStyleSheet('color: green')
+        else:
+            self.fit_status_success_failure.setText('Failure: {}'.format(output_status))
+            self.fit_status_success_failure.setStyleSheet('color: red')
+
+        self.fit_status_chi_squared.setText('Chi squared: {:.4g}'.format(output_chi_squared))
+
+    def update_global_fit_state(self, output_list):
+        if self.fit_type == self.single_fit or self.fit_type == self.simultaneous_fit:
+            indexed_fit = output_list[self.get_index_for_start_end_times()]
+            boolean_list = [indexed_fit == 'success'] if indexed_fit else []
+        else:
+            boolean_list = [output == 'success' for output in output_list if output]
+
+        if not boolean_list:
+            self.global_fit_status_label.setText('No Fit')
+            self.global_fit_status_label.setStyleSheet('color: black')
+            return
+
+        if all(boolean_list):
+            self.global_fit_status_label.setText('Fit Successful')
+            self.global_fit_status_label.setStyleSheet('color: green')
+        else:
+            self.global_fit_status_label.setText('{} of {} fits failed'.format(len(boolean_list) - sum(boolean_list), len(boolean_list)))
+            self.global_fit_status_label.setStyleSheet('color: red')
+
     def set_slot_for_select_workspaces_to_fit(self, slot):
         self.select_workspaces_to_fit_button.clicked.connect(slot)
 
@@ -98,8 +136,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         return str(self.parameter_display_combo.currentText())
 
     @property
-    def fit_string(self):
-        return str(self.function_browser.getFitFunctionString())
+    def fit_object(self):
+        return self.function_browser.getGlobalFunction()
 
     @property
     def minimizer(self):
@@ -155,14 +193,37 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         state = QtCore.Qt.Checked if value else QtCore.Qt.Unchecked
         self.fit_to_raw_data_checkbox.setCheckState(state)
 
+    @property
+    def group_name(self):
+        return str(self.ads_group_name_textbox.text())
+
+    @group_name.setter
+    def group_name(self, value):
+        self.ads_group_name_textbox.setText(value)
+
+    @property
+    def function_name(self):
+        return str(self.function_name_line_edit.text())
+
+    @function_name.setter
+    def function_name(self, function_name):
+        self.function_name_line_edit.blockSignals(True)
+        self.function_name_line_edit.setText(function_name)
+        self.function_name_line_edit.blockSignals(False)
+
     def warning_popup(self, message):
         warning(message, parent=self)
 
     def get_index_for_start_end_times(self):
-        if self.fit_type == 'Single Fit':
-            return 0
-
         current_index = self.parameter_display_combo.currentIndex()
+        return current_index if current_index != -1 else 0
+
+    def get_index_for_fit_specification(self):
+        if self.fit_type == self.sequential_fit:
+            current_index = self.parameter_display_combo.currentIndex()
+        else:
+            current_index = 0
+
         return current_index if current_index != -1 else 0
 
     def setup_fit_options_table(self):

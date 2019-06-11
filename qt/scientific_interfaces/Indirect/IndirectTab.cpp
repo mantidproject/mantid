@@ -18,6 +18,10 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/MplCpp/Plot.h"
+#endif
+
 #include <QDomDocument>
 #include <QFile>
 #include <QMessageBox>
@@ -413,12 +417,11 @@ void IndirectTab::setPlotErrorBars(bool errorBars) {
 void IndirectTab::plotMultipleSpectra(
     const QStringList &workspaceNames,
     const std::vector<int> &workspaceIndices) {
-
   if (workspaceNames.isEmpty())
     return;
   if (workspaceNames.length() != static_cast<int>(workspaceIndices.size()))
     return;
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString pyInput = "from mantidplot import plotSpectrum\n";
   pyInput += "current_window = plotSpectrum('";
   pyInput += workspaceNames[0];
@@ -434,6 +437,10 @@ void IndirectTab::plotMultipleSpectra(
     pyInput += ", window=current_window)\n";
   }
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::plot;
+  plot(workspaceNames, boost::none, workspaceIndices);
+#endif
 }
 
 /**
@@ -443,21 +450,26 @@ void IndirectTab::plotMultipleSpectra(
  * This uses the plotSpectrum function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param spectraIndex Index of spectrum from each workspace to plot
+ * @param wsIndex Index of spectrum from each workspace to plot
  */
 void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               const int &spectraIndex) {
+                               const int &wsIndex) {
   if (!workspaceNames.isEmpty()) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     const QString errors = m_plotErrorBars ? "True" : "False";
 
     QString pyInput = "from mantidplot import plotSpectrum\n";
     pyInput += "plotSpectrum(['";
     pyInput += workspaceNames.join("','");
     pyInput += "'], ";
-    pyInput += QString::number(spectraIndex);
+    pyInput += QString::number(wsIndex);
     pyInput += ", error_bars=" + errors + ")\n";
 
     m_pythonRunner.runPythonCode(pyInput);
+#else
+    using MantidQt::Widgets::MplCpp::plot;
+    plot(workspaceNames, boost::none, std::vector<int>{wsIndex});
+#endif
   }
 }
 
@@ -492,6 +504,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
                                int specEnd) {
   if (workspaceNames.isEmpty())
     return;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString const errors = m_plotErrorBars ? "True" : "False";
 
   QString pyInput = "from mantidplot import plotSpectrum\n";
@@ -505,6 +518,15 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   pyInput += ")), error_bars=" + errors + ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::plot;
+  // Range is inclusive of end
+  const auto nSpectra = specEnd - specStart + 1;
+  std::vector<int> wkspIndices(nSpectra);
+  std::iota(std::begin(wkspIndices), std::end(wkspIndices), specStart);
+  plot(workspaceNames, boost::none, wkspIndices, boost::none, boost::none,
+       boost::none, boost::none, m_plotErrorBars);
+#endif
 }
 
 /**
@@ -540,7 +562,7 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
                               const std::vector<int> &wsIndices) {
   if (workspaceNames.isEmpty() || wsIndices.empty())
     return;
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString const errors = m_plotErrorBars ? "True" : "False";
 
   QString pyInput = "from mantidplot import plotSpectrum\n";
@@ -556,6 +578,11 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
   pyInput += "]";
   pyInput += ", error_bars=" + errors + ")\n";
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::plot;
+  plot(workspaceNames, boost::none, wsIndices, boost::none, boost::none,
+       boost::none, boost::none, m_plotErrorBars);
+#endif
 }
 
 /**
@@ -581,6 +608,7 @@ void IndirectTab::plotSpectra(const QString &workspaceName,
 void IndirectTab::plotTiled(std::string const &workspaceName,
                             std::size_t const &fromIndex,
                             std::size_t const &toIndex) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   auto const numberOfPlots = toIndex - fromIndex + 1;
   if (numberOfPlots != 0) {
     QString pyInput = "from mantidplot import newTiledWindow\n";
@@ -596,6 +624,12 @@ void IndirectTab::plotTiled(std::string const &workspaceName,
     pyInput += QString::fromStdString("])\n");
     m_pythonRunner.runPythonCode(pyInput);
   }
+#else
+  Q_UNUSED(workspaceName);
+  Q_UNUSED(fromIndex);
+  Q_UNUSED(toIndex);
+  throw std::runtime_error("plotTiled is not implemented for >= Qt 5.");
+#endif
 }
 
 /**
@@ -609,6 +643,7 @@ void IndirectTab::plot2D(const QString &workspaceName) {
   if (workspaceName.isEmpty())
     return;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString pyInput = "from mantidplot import plot2D\n";
 
   pyInput += "plot2D('";
@@ -616,6 +651,10 @@ void IndirectTab::plot2D(const QString &workspaceName) {
   pyInput += "')\n";
 
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::pcolormesh;
+  pcolormesh({workspaceName});
+#endif
 }
 
 /**
@@ -630,7 +669,7 @@ void IndirectTab::plot2D(const QString &workspaceName) {
 void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   if (workspaceNames.isEmpty())
     return;
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString const errors = m_plotErrorBars ? "True" : "False";
 
   QString pyInput = "from mantidplot import plotTimeBin\n";
@@ -642,6 +681,14 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   pyInput += ", error_bars=" + errors + ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::MantidAxType;
+  using MantidQt::Widgets::MplCpp::plot;
+  QHash<QString, QVariant> plotKwargs{
+      {"axis", static_cast<int>(MantidAxType::Bin)}};
+  plot(workspaceNames, boost::none, std::vector<int>{binIndex}, boost::none,
+       plotKwargs);
+#endif
 }
 
 /**
@@ -658,19 +705,6 @@ void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
   QStringList workspaceNames;
   workspaceNames << workspaceName;
   plotTimeBin(workspaceNames, binIndex);
-}
-
-/*
- * Resizes the range (y-axis) of the specified plot preview given the specified
- * range
- *
- * @param preview The plot preview whose range to resize.
- * @param range   The range to resize to, as a pair of minimum and maximum value
- */
-void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
-                                  QPair<double, double> range) {
-  preview->resizeX();
-  preview->setAxisRange(range, QwtPlot::yLeft);
 }
 
 /**

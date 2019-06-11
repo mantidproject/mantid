@@ -36,10 +36,10 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void SANSSensitivityCorrection::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
   const std::vector<std::string> fileExts{"_event.nxs", ".xml"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, fileExts),
                   "Flood field or sensitivity file.");
   declareProperty("UseSampleDC", true,
@@ -47,7 +47,7 @@ void SANSSensitivityCorrection::init() {
                   "from the sample data will also be "
                   "subtracted from the flood field.");
   declareProperty(
-      Kernel::make_unique<API::FileProperty>(
+      std::make_unique<API::FileProperty>(
           "DarkCurrentFile", "", API::FileProperty::OptionalLoad, fileExts),
       "The name of the input file to load as dark current.");
 
@@ -76,16 +76,16 @@ void SANSSensitivityCorrection::init() {
   declareProperty("MaskedFullComponent", "",
                   "Component Name to fully mask according to the IDF file.");
   declareProperty(
-      make_unique<ArrayProperty<int>>("MaskedEdges"),
+      std::make_unique<ArrayProperty<int>>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
   declareProperty(
       "MaskedComponent", "",
       "Component Name to mask the edges according to the IDF file.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
   declareProperty("ReductionProperties", "__sans_reduction_properties");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputSensitivityWorkspace", "", Direction::Output,
       PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
@@ -137,7 +137,7 @@ void SANSSensitivityCorrection::exec() {
   }
 
   if (!reductionManager->existsProperty("SensitivityAlgorithm")) {
-    auto algProp = make_unique<AlgorithmProperty>("SensitivityAlgorithm");
+    auto algProp = std::make_unique<AlgorithmProperty>("SensitivityAlgorithm");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
@@ -366,9 +366,8 @@ void SANSSensitivityCorrection::exec() {
     if (floodWSOutputName.empty()) {
       setPropertyValue("OutputSensitivityWorkspace", floodWSName);
       AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
-      reductionManager->declareProperty(
-          Kernel::make_unique<WorkspaceProperty<>>(entryName, floodWSName,
-                                                   Direction::InOut));
+      reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
+          entryName, floodWSName, Direction::InOut));
       reductionManager->setPropertyValue(entryName, floodWSName);
       reductionManager->setProperty(entryName, floodWS);
     }

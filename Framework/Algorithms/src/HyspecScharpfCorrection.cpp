@@ -54,7 +54,7 @@ void HyspecScharpfCorrection::init() {
   auto wsValidator = boost::make_shared<Mantid::Kernel::CompositeValidator>();
   wsValidator->add<Mantid::API::WorkspaceUnitValidator>("DeltaE");
   wsValidator->add<Mantid::API::InstrumentValidator>();
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace in units of energy transfer.");
 
@@ -74,7 +74,7 @@ void HyspecScharpfCorrection::init() {
       "If cosine of twice the "
       "Scharpf angle is closer to 0 than the precision, the intensities "
       "and errors will be set to 0");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

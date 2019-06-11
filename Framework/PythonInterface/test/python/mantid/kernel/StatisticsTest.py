@@ -20,17 +20,17 @@ class StatisticsTest(unittest.TestCase):
         stats = Stats.getStatistics(data)
         self.assertAlmostEqual(16.54, stats.mean, places = 10)
         self.assertAlmostEqual(2.0733, stats.standard_deviation, places = 4)
-        self.assertEquals(12.6, stats.minimum)
-        self.assertEquals(18.3, stats.maximum)
-        self.assertEquals(17.2, stats.median)
+        self.assertEqual(12.6, stats.minimum)
+        self.assertEqual(18.3, stats.maximum)
+        self.assertEqual(17.2, stats.median)
 
         data = numpy.sort(data)
         stats = Stats.getStatistics(data, sorted=True)
         self.assertAlmostEqual(16.54, stats.mean, places = 10)
         self.assertAlmostEqual(2.0733, stats.standard_deviation, places = 4)
-        self.assertEquals(12.6, stats.minimum)
-        self.assertEquals(18.3, stats.maximum)
-        self.assertEquals(17.2, stats.median)
+        self.assertEqual(12.6, stats.minimum)
+        self.assertEqual(18.3, stats.maximum)
+        self.assertEqual(17.2, stats.median)
 
     def test_getStatistics_accepts_sorted_arg(self):
         data = numpy.array([17.2,18.1,16.5,18.3,12.6])
@@ -38,9 +38,9 @@ class StatisticsTest(unittest.TestCase):
         stats = Stats.getStatistics(data, sorted=True)
         self.assertAlmostEqual(16.54, stats.mean, places = 10)
         self.assertAlmostEqual(2.0733, stats.standard_deviation, places = 4)
-        self.assertEquals(12.6, stats.minimum)
-        self.assertEquals(18.3, stats.maximum)
-        self.assertEquals(17.2, stats.median)
+        self.assertEqual(12.6, stats.minimum)
+        self.assertEqual(18.3, stats.maximum)
+        self.assertEqual(17.2, stats.median)
 
 
     def test_getZScores(self):
@@ -90,7 +90,7 @@ class StatisticsTest(unittest.TestCase):
 
         aboutOrigin = Stats.getMomentsAboutOrigin(indep, depend)
         self.assertTrue(isinstance(aboutOrigin, numpy.ndarray))
-        self.assertEquals(4, aboutOrigin.shape[0])
+        self.assertEqual(4, aboutOrigin.shape[0])
         self.assertAlmostEqual(1., aboutOrigin[0], places=4)
         self.assertAlmostEqual(mean, aboutOrigin[1], places=4)
         self.assertTrue(math.fabs(expVar - aboutOrigin[2]) < 0.001*expVar)
@@ -98,7 +98,7 @@ class StatisticsTest(unittest.TestCase):
 
         aboutMean = Stats.getMomentsAboutMean(indep, depend)
         self.assertTrue(isinstance(aboutOrigin, numpy.ndarray))
-        self.assertEquals(4, aboutOrigin.shape[0])
+        self.assertEqual(4, aboutOrigin.shape[0])
         self.assertAlmostEqual(1., aboutMean[0], places=4)
         self.assertAlmostEqual(0., aboutMean[1], places=4)
         self.assertTrue(math.fabs(sigma*sigma - aboutMean[2]) < 0.001*expVar)

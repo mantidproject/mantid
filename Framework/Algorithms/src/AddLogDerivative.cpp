@@ -30,7 +30,8 @@ DECLARE_ALGORITHM(AddLogDerivative)
  */
 void AddLogDerivative::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::InOut),
       "An input/output workspace. The new log will be added to it.");
   declareProperty(
       "LogName", "", boost::make_shared<MandatoryValidator<std::string>>(),

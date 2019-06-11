@@ -118,27 +118,27 @@ FABADAMinimizer::FABADAMinimizer()
   declareProperty("PDF", true, "If the PDF's should be calculated or not.");
   declareProperty("NumberBinsPDF", 20,
                   "Number of bins used for the output PDFs");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "Chains", "", Kernel::Direction::Output),
                   "The name to give the output workspace for the"
                   " complete chains.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "ConvergedChain", "", Kernel::Direction::Output,
                       API::PropertyMode::Optional),
                   "The name to give the output workspace for just the"
                   "converged chain");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "CostFunctionTable", "", Kernel::Direction::Output),
       "The name to give the output workspace");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "Parameters", "", Kernel::Direction::Output),
       "The name to give the output workspace (Parameter values and errors)");
 
   // To be implemented in the future
   /*declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           "Chi-squareLandscape", "", Kernel::Direction::Output),
       "The name to give the output workspace containing the chi-square"
       " landscape");*/

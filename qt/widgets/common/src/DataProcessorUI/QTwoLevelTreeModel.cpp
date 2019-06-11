@@ -7,8 +7,8 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include <MantidKernel/StringTokenizer.h>
 
 namespace MantidQt {
 namespace MantidWidgets {

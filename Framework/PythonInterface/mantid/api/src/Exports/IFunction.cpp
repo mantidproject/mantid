@@ -95,6 +95,8 @@ void export_IFunction() {
            "Return a semi-colon(;) separated string for the categories this "
            "class should belong to. For sub-categories use a \\ separator")
 
+      .def("clone", &IFunction::clone, arg("self"), "Clones the function")
+
       .def("initialize", &IFunction::initialize, arg("self"),
            "Declares any parameters and attributes on the function")
 
@@ -144,6 +146,10 @@ void export_IFunction() {
            setParameterType1_Overloads(
                (arg("self"), arg("i"), arg("value"), arg("explicitlySet")),
                "Sets the value of the ith parameter"))
+
+      .def("setError", &IFunction::setError,
+           (args("self"), args("i"), args("err")),
+           "Sets the error on parameter index i")
 
       .def("setParameter", (setParameterType2)&IFunction::setParameter,
            setParameterType2_Overloads(

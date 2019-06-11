@@ -42,7 +42,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.update_view_from_model()
 
         for key, item in self.context.phase_context.options_dict.items():
-            self.assertEquals(getattr(self.view, key), item)
+            self.assertEqual(getattr(self.view, key), item)
 
     def test_update_model_from_view_updates_model_to_have_correct_values_if_view_changed(self):
         workspace_name = 'new_workspace_name'
@@ -51,7 +51,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.presenter.update_model_from_view()
 
-        self.assertEquals(self.context.phase_context.options_dict['input_workspace'], workspace_name)
+        self.assertEqual(self.context.phase_context.options_dict['input_workspace'], workspace_name)
 
     def test_create_parameters_for_cal_muon_phase_returns_correct_parameter_dict(self):
         workspace_name = 'input_workspace_name_raw_data'
@@ -59,7 +59,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         result = self.presenter.create_parameters_for_cal_muon_phase_algorithm()
 
-        self.assertEquals(result, {'BackwardSpectra': [2, 4, 6, 8, 10], 'FirstGoodData': 0.1, 'ForwardSpectra': [1, 3, 5, 7, 9],
+        self.assertEqual(result, {'BackwardSpectra': [2, 4, 6, 8, 10], 'FirstGoodData': 0.1, 'ForwardSpectra': [1, 3, 5, 7, 9],
                                    'InputWorkspace': workspace_name, 'LastGoodData': 15,
                                    'DetectorTable': 'input_workspace_name; PhaseTable; fwd, bwd'})
 
@@ -86,7 +86,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.presenter.add_phase_table_to_ADS('MUSR22222_period_1; PhaseTable', mock_phase_table)
 
-        mock_workspace_wrapper.assert_called_once_with(mock_phase_table, 'Muon Data/MUSR22222/MUSR22222 Phase Tab'
+        mock_workspace_wrapper.assert_called_once_with(mock_phase_table, 'Muon Data/MUSR22222 MA/MUSR22222 Phase Tab MA'
                                                                          '/MUSR22222_period_1; PhaseTable')
         workspace_wrapper.show.assert_called_once_with()
 
@@ -127,7 +127,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         parameters = self.presenter.get_parameters_for_phase_quad()
 
-        self.assertEquals(parameters, {'InputWorkspace': 'MUSR22222_raw_data_period_1', 'PhaseTable': 'MUSR22222_period_1_phase_table'})
+        self.assertEqual(parameters, {'InputWorkspace': 'MUSR22222_raw_data_period_1', 'PhaseTable': 'MUSR22222_period_1_phase_table'})
 
     def test_that_new_phase_table_calculated_if_construct_selected(self):
         self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
@@ -138,7 +138,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         parameters = self.presenter.get_parameters_for_phase_quad()
 
-        self.assertEquals(parameters, {'InputWorkspace': 'MUSR22222_raw_data_period_1',
+        self.assertEqual(parameters, {'InputWorkspace': 'MUSR22222_raw_data_period_1',
                                        'PhaseTable': 'created_phase_table'})
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.MuonWorkspaceWrapper')
@@ -148,7 +148,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.add_phase_quad_to_ADS('MUSR22222_PhaseQuad_phase_table_MUSR22222', 'MUSR22222 PhaseTable',
                                              phase_quad)
 
-        mock_workspace_wrapper.assert_called_once_with(phase_quad, 'Muon Data/MUSR22222/MUSR22222 Phase Tab/MUSR22222_'
+        mock_workspace_wrapper.assert_called_once_with(phase_quad, 'Muon Data/MUSR22222 MA/MUSR22222 Phase Tab MA/MUSR22222_'
                                                                    'PhaseQuad_phase_table_MUSR22222 MUSR22222 PhaseTable')
         mock_workspace_wrapper.return_value.show.assert_called_once_with()
 
@@ -224,7 +224,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.presenter.add_fitting_info_to_ADS_if_required('MUSR22222_PhaseTable',fit_information)
 
-        workspace_wrapper_mock.assert_called_once_with(fit_information, 'Muon Data/MUSR22222/MUSR22222 Phase Tab/'
+        workspace_wrapper_mock.assert_called_once_with(fit_information, 'Muon Data/MUSR22222 MA/MUSR22222 Phase Tab MA/'
                                                                         'MUSR22222_PhaseTable; fit_information')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 

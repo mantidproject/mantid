@@ -15,7 +15,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <MantidAPI/FrameworkManager.h>
+#include "MantidAPI/FrameworkManager.h"
 
 using Mantid::HistogramData::Histogram;
 

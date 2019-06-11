@@ -8,7 +8,7 @@
 #define VTK_MD_QUAD_FACTORY_TEST_H_
 
 #include "MantidAPI/IMDIterator.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
