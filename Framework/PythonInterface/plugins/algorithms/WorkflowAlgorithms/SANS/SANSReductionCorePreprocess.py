@@ -11,17 +11,16 @@ which can be performed before event slicing."""
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        IEventWorkspace, Progress)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from mantid.api import MatrixWorkspaceProperty, AlgorithmFactory, Progress
+from mantid.kernel import Direction
 from sans.algorithm_detail.mask_workspace import mask_bins
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType, DataType)
-from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+
+from SANSReductionCoreBase import SANSReductionCoreBase
 
 
-class SANSReductionCorePreprocess(DistributedDataProcessorAlgorithm):
+class SANSReductionCorePreprocess(SANSReductionCoreBase):
     def category(self):
         return 'SANS\\Reduction'
 
@@ -33,34 +32,8 @@ class SANSReductionCorePreprocess(DistributedDataProcessorAlgorithm):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
-
-        # WORKSPACES
-        # Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('ScatterWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('ScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The scatter monitor workspace. This workspace only contains monitors.')
-
-        self.setPropertyGroup("ScatterWorkspace", 'Data')
-        self.setPropertyGroup("ScatterMonitorWorkspace", 'Data')
-
-        # The component
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
-                             validator=allowed_detectors, direction=Direction.Input,
-                             doc="The component of the instrument which is to be reduced.")
-
-        # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
-                             validator=allowed_data, direction=Direction.Input,
-                             doc="The component of the instrument which is to be reduced.")
+        # SANSReductionCorePreprocess has the same inputs as SANSReductionCore
+        self._pyinit_input()
 
         # ----------
         # OUTPUT
@@ -101,62 +74,8 @@ class SANSReductionCorePreprocess(DistributedDataProcessorAlgorithm):
         # Once the new reduction chain is established, we should remove the compatibility feature.
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         monitor_workspace = self._get_monitor_workspace()
-        compatibility = state.compatibility
-        is_event_workspace = isinstance(workspace, IEventWorkspace)
-        use_dummy_workspace = False
-        if is_event_workspace:
-            if compatibility.use_compatibility_mode:
-                # We convert the workspace here to a histogram workspace, since we cannot otherwise
-                # compare the results between the old and the new reduction workspace in a meaningful manner.
-                # The old one is histogram and the new one is event.
-                # Rebin to monitor workspace
-                if compatibility.time_rebin_string:
-                    rebin_name = "Rebin"
-                    rebin_option = {"InputWorkspace": workspace,
-                                    "Params": compatibility.time_rebin_string,
-                                    "OutputWorkspace": EMPTY_NAME,
-                                    "PreserveEvents": False}
-                    rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
-                    rebin_alg.execute()
-                    workspace = rebin_alg.getProperty("OutputWorkspace").value
-                else:
-                    rebin_name = "RebinToWorkspace"
-                    rebin_option = {"WorkspaceToRebin": workspace,
-                                    "WorkspaceToMatch": monitor_workspace,
-                                    "OutputWorkspace": EMPTY_NAME,
-                                    "PreserveEvents": False}
-                    rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
-                    rebin_alg.execute()
-                    workspace = rebin_alg.getProperty("OutputWorkspace").value
-            else:
-                # If not using compatibility mode, we create a histogram from the workspace, which will store
-                # the bin masking.
-                # Extract a single spectrum to make operations as quick as possible.
-                # We only need the mask flags, not the y data.
-                use_dummy_workspace = True
-
-                # Extract only a single spectrum so dummy workspace which contains bin masks is a small as possible
-                # (cheaper operations).
-                # This is find because we only care about the mask flags in this workspace, not the y data.
-                extract_spectrum_name = "ExtractSingleSpectrum"
-                extract_spectrum_option = {"InputWorkspace": workspace,
-                                           "OutputWorkspace": "dummy_mask_workspace",
-                                           "WorkspaceIndex": 0}
-                extract_spectrum_alg = create_child_algorithm(self, extract_spectrum_name, **extract_spectrum_option)
-                extract_spectrum_alg.execute()
-                dummy_mask_workspace = extract_spectrum_alg.getProperty("OutputWorkspace").value
-
-                rebin_name = "RebinToWorkspace"
-                rebin_option = {"WorkspaceToRebin": dummy_mask_workspace,
-                                "WorkspaceToMatch": monitor_workspace,
-                                "OutputWorkspace": "dummy_mask_workspace",
-                                "PreserveEvents": False}
-                rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
-                rebin_alg.execute()
-                dummy_mask_workspace = rebin_alg.getProperty("OutputWorkspace").value
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        workspace, dummy_mask_workspace, \
+            use_dummy_workspace = self._check_compatibility_mode(workspace, monitor_workspace, state.compatibility)
 
         # ------------------------------------------------------------
         # 3. Move the workspace into the correct position
@@ -200,64 +119,6 @@ class SANSReductionCorePreprocess(DistributedDataProcessorAlgorithm):
             self.setProperty("DummyMaskWorkspace", dummy_mask_workspace)
         self.setProperty("OutputMonitorWorkspace", monitor_workspace)
 
-    def _get_cropped_workspace(self, component):
-        scatter_workspace = self.getProperty("ScatterWorkspace").value
-        crop_name = "SANSCrop"
-        crop_options = {"InputWorkspace": scatter_workspace,
-                        "OutputWorkspace": EMPTY_NAME,
-                        "Component": component}
-        crop_alg = create_child_algorithm(self, crop_name, **crop_options)
-        crop_alg.execute()
-        return crop_alg.getProperty("OutputWorkspace").value
-
-    def _move(self, state_serialized, workspace, component, is_transmission=False):
-        # First we set the workspace to zero, since it might have been moved around by the user in the ADS
-        # Second we use the initial move to bring the workspace into the correct position
-        move_name = "SANSMove"
-        move_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
-        move_alg.execute()
-        workspace = move_alg.getProperty("Workspace").value
-
-        # Do the initial move
-        move_alg.setProperty("MoveType", "InitialMove")
-        move_alg.setProperty("Component", component)
-        move_alg.setProperty("Workspace", workspace)
-        move_alg.setProperty("IsTransmissionWorkspace", is_transmission)
-        move_alg.execute()
-        return move_alg.getProperty("Workspace").value
-
-    def _mask(self, state_serialized, workspace, component):
-        mask_name = "SANSMaskWorkspace"
-        mask_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "Component": component}
-        mask_alg = create_child_algorithm(self, mask_name, **mask_options)
-        mask_alg.execute()
-        return mask_alg.getProperty("Workspace").value
-
-    def _convert_to_wavelength(self, state_serialized, workspace):
-        wavelength_name = "SANSConvertToWavelength"
-        wavelength_options = {"SANSState": state_serialized,
-                              "InputWorkspace": workspace}
-        wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
-        wavelength_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
-        wavelength_alg.setProperty("OutputWorkspace", workspace)
-        wavelength_alg.execute()
-        return wavelength_alg.getProperty("OutputWorkspace").value
-
-    def _scale(self, state_serialized, workspace):
-        scale_name = "SANSScale"
-        scale_options = {"SANSState": state_serialized,
-                         "InputWorkspace": workspace,
-                         "OutputWorkspace": EMPTY_NAME}
-        scale_alg = create_child_algorithm(self, scale_name, **scale_options)
-        scale_alg.execute()
-        return scale_alg.getProperty("OutputWorkspace").value
-
     def validateInputs(self):
         errors = dict()
         # Check that the input can be converted into the right state object
@@ -267,24 +128,6 @@ class SANSReductionCorePreprocess(DistributedDataProcessorAlgorithm):
         except ValueError as err:
             errors.update({"SANSSingleReductionEventSlice": str(err)})
         return errors
-
-    def _get_state(self):
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        state.property_manager = state_property_manager
-        return state
-
-    def _get_monitor_workspace(self):
-        monitor_workspace = self.getProperty("ScatterMonitorWorkspace").value
-        return self._get_cloned_workspace(monitor_workspace)
-
-    def _get_cloned_workspace(self, workspace):
-        clone_name = "CloneWorkspace"
-        clone_options = {"InputWorkspace": workspace,
-                         "OutputWorkspace": EMPTY_NAME}
-        clone_alg = create_child_algorithm(self, clone_name, **clone_options)
-        clone_alg.execute()
-        return clone_alg.getProperty("OutputWorkspace").value
 
     def _get_progress(self):
         return Progress(self, start=0.0, end=1.0, nreports=6)

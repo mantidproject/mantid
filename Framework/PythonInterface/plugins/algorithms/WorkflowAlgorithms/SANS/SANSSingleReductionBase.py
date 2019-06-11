@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-"""A base class to share functionality between."""
+"""A base class to share functionality between SANSSingleReduction versions."""
 
 from __future__ import (absolute_import, division, print_function)
 
