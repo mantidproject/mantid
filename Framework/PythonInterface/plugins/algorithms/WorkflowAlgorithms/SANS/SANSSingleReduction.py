@@ -9,19 +9,26 @@
 """ SANSSingleReduction algorithm performs a single reduction."""
 
 from __future__ import (absolute_import, division, print_function)
+
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory,
+                        PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.simpleapi import CloneWorkspace
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
-from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads)
+from sans.algorithm_detail.bundles import ReductionSettingBundle
 from sans.algorithm_detail.single_execution import (run_core_reduction, get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request, run_optimized_for_can)
-from sans.algorithm_detail.bundles import ReductionSettingBundle
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
+from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads)
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+
+from SANSSingleReductionBase import SANSSingleReductionBase
 
 
-class SANSSingleReduction(DistributedDataProcessorAlgorithm):
+class SANSSingleReduction(SANSSingleReductionBase):
+    def category(self):
+        return 'SANS\\Reduction'
+
     def version(self):
         return 1
 
@@ -101,6 +108,12 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         self.setPropertyGroup("OutputWorkspaceHABCanCount", 'Opt Output')
         self.setPropertyGroup("OutputWorkspaceHABCanNorm", 'Opt Output')
 
+    def PyInit(self):
+        self._pyinit()
+
+    def PyExec(self):
+        self._pyexec()
+
     @staticmethod
     def _reduction_name():
         return "SANSReductionCore"
@@ -113,13 +126,14 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         """
         return [self._get_reduction_setting_bundles(state, overall_reduction_mode)]
 
-    def do_reduction(self, reduction_alg, reduction_setting_bundles, progress):
+    def do_reduction(self, reduction_alg, reduction_setting_bundles, use_optimizations, progress):
         """
         Perform the main reduction.
         :param reduction_alg: SANSReductionCore algorithm
         :param reduction_setting_bundles: a list of lists containing workspaces to be reduced.
                                           The outer list is for compatibility with version 2
                                           and only contains one inner list
+        :param use_optimizations: bool. If true, use can optimizations
         :param progress: a progress bar
         :return: output_bundles: a list containing a single list of output workspaces
                  output_parts_bundles: a list containing a single list of output workspaces
@@ -294,6 +308,24 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
             else:
                 raise RuntimeError("SANSSingleReduction: The data type {0} should be"
                                    " sample or can.".format(transmission_bundle.data_type))
+
+    def _get_workspace_names(self, reduction_mode_vs_workspace_names, event_slice_bundle):
+        """
+        This method is for compatibility with version 2. It is not required for version 1
+        """
+        return reduction_mode_vs_workspace_names
+
+    def _get_merged_workspace_name(self, event_slice_part_bundle):
+        """
+        This method is for compatibility with version 2. It is not required for version 1
+        """
+        return ""
+
+    def _get_output_workspace_name(self, *args, **kwargs):
+        """
+        This method is for compatibility with version 2. It is not required for version 1
+        """
+        return ""
 
 
 # Register algorithm with Mantid

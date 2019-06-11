@@ -62,7 +62,7 @@ def select_reduction_alg(split_for_event_slices, use_compatibility_mode, use_eve
             # Split into separate event slice workspaces here.
             # For event_slice mode, this is done in SANSSingleReductionEventSlice
             reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
-    return ver, event_slice, reduction_packages
+    return event_slice, reduction_packages
 
 
 def single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
@@ -207,7 +207,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     out_shift_factors = []
     for reduction_package in reduction_packages:
         out_scale_factors.extend(reduction_package.out_scale_factor)
-        out_shift_factors.extend(reduction_package.out_shift_factors)
+        out_shift_factors.extend(reduction_package.out_shift_factor)
 
     return out_scale_factors, out_shift_factors
 
@@ -967,7 +967,7 @@ def get_shift_and_scale_factors_from_algorithm(alg, event_slice):
     :return: a list of shift factors, a list of scale factors
     """
     if event_slice:
-        factors_workspace = get_workspace_from_algorithm(alg, "OutShiftAndScaleFactors")
+        factors_workspace = get_workspace_from_algorithm(alg, "OutShiftAndScaleFactor")
         if factors_workspace is None:
             return [], []  # ?
         else:
