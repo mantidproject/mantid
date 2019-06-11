@@ -133,6 +133,8 @@ class SANSMaskDTP(PythonAlgorithm):
         detectors_to_mask = []
         # get detector name
         detector = self.instrument.getComponentByName(detectorOptions["name"])
+        if not detector:
+            raise RuntimeError('Failed to find component "{}"'.format(detectorOptions["name"]))
         # iterate tubes
         for t in tubes:
             tube_component = detector[int(t-1)]  # TODO should be fixed in python API
