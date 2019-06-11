@@ -84,7 +84,18 @@ class MaskBTPTest(unittest.TestCase):
         MaskBTP(Instrument='SEQUOIA', Bank="37")
         MaskBTP(Instrument='SEQUOIA', Bank="38")
         return
-        
+
+    def testEdges(self):
+        # this combined option should probalby be called corners
+        masking = MaskBTP(Instrument='TOPAZ', Tube='edges', Pixel='EdGes')  # funny case just b/c
+        self.assertEqual(4 * 20, len(masking))
+
+        masking = MaskBTP(Instrument='TOPAZ', Tube='edges')
+        self.assertEqual(2 * 256 * 20, len(masking))
+
+        masking = MaskBTP(Instrument='TOPAZ', Pixel='edges')
+        self.assertEqual(2 * 256 * 20, len(masking))
+
 
 if __name__ == '__main__':
     unittest.main()
