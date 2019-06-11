@@ -152,6 +152,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         Helper function to return the handle to a given eightpack
         """
         banknum=int(banknum)
+        if not (self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]):
+            raise ValueError("Out of range index={} for {} instrument bank numbers".format(banknum, self.instname))
+
         if self.instname=="ARCS":
             if self.bankmin[self.instname]<=banknum<= 38:
                 return self.instrument.getComponentByName("B row")[banknum-1][0]
@@ -177,29 +180,16 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers: %s" % (banknum,))
         elif self.instname in ["CNCS", "CORELLI", "HYSPEC", "WAND"]:
-            if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("bank"+str(banknum))[0]
-            else:
-                raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
         elif self.instname=="WISH":
-            if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
-                try:
-                    return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
-                except TypeError: #if not found, the return is None, so None[0] is a TypeError
-                    return None
-            else:
-                raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
+            try:
+                return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
+            except TypeError: #if not found, the return is None, so None[0] is a TypeError
+                return None
         elif self.instname=="REF_M":
-            if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
-                return self.instrument.getComponentByName("detector"+"%1d" % banknum)
-            else:
-                raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
-
+            return self.instrument.getComponentByName("detector"+"%1d" % banknum)
         else:
-            if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
-                return self.instrument.getComponentByName("bank"+str(banknum))
-            else:
-                raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
+            return self.instrument.getComponentByName("bank"+str(banknum))
 
 
 mantid.api.AlgorithmFactory.subscribe(MaskBTP)
