@@ -43,7 +43,7 @@ namespace MplCpp {
 /**
  * @brief Create a RangeMarker instance
  * @param canvas The canvas to draw the range marker on to
- * @param colour The color of the vertical marker
+ * @param colour The color of the range marker
  * @param x_minimum The x coordinate of the minimum marker
  * @param x_maximum The x coordinate of the maximum marker
  */

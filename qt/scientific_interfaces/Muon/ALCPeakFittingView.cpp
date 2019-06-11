@@ -56,8 +56,23 @@ void ALCPeakFittingView::initialize() {
 
 void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
                                       std::size_t const &workspaceIndex) {
+  // These kwargs ensure only the data points are plotted with no line
+  QHash<QString, QVariant> kwargs;
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
+
+  // Error bars on the plot
+  QStringList plotsWithErrors{"Corrected Data"};
+  m_ui.plot->setLinesWithErrors(plotsWithErrors);
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_ui.plot->setCurveStyle("Corrected Data", -1);
+  m_ui.plot->setCurveSymbol("Corrected Data", 0);
+#endif
+
   m_ui.plot->clear();
-  m_ui.plot->addSpectrum("Data", workspace, workspaceIndex, Qt::black);
+  m_ui.plot->addSpectrum("Corrected Data", workspace, workspaceIndex,
+                         Qt::black);
 }
 
 void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr &workspace,
