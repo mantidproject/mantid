@@ -124,6 +124,8 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
     def PyInit(self):
         self._pyinit()
+        self.declareProperty("period", False)
+        self.declareProperty("wavelength_range", False)
 
     def PyExec(self):
         self._pyexec()
@@ -508,10 +510,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
         :param fitted: optional bool. If true then workspace is a fitted transmission workspace, otherwise unfitted
         :return: name of the workspace
         """
-        # TODO check if we're period of multi-wavelength
         _multi = {"event_slice": True,
-                  "period": False,
-                  "wavelength_range": False}
+                  "period": self.getProperty("period").value,
+                  "wavelength_range": self.getProperty("wavelength_range").value}
 
         if not transmission:
             _suffix = ""

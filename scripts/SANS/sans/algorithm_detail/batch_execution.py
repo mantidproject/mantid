@@ -823,11 +823,6 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
                          "OutputWorkspaceHABSample", "reduced_hab_sample_name", "reduced_hab_sample_base_name",
                          multi_reduction_type, HAB_SAMPLE_SUFFIX)
 
-    if event_slice:
-        # In event slice mode, we can have multiple shift and scale factors for one reduction package
-        # there we output these as a workspace containing shifts as X data and scales as Y data.
-        reduction_alg.setProperty("OutShiftAndScaleFactor", "ShiftAndScaleFactors")
-
     # Go through the elements of the reduction package and set them on the reduction algorithm
     # Set the SANSState
     state = reduction_package.state
@@ -857,6 +852,15 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     multi_reduction_type = {"period": is_part_of_multi_period_reduction,
                             "event_slice": is_part_of_event_slice_reduction,
                             "wavelength_range": is_part_of_wavelength_range_reduction}
+
+    # SANSSingleReduction version 2 only properties
+    if event_slice:
+        # In event slice mode, we can have multiple shift and scale factors for one reduction package
+        # there we output these as a workspace containing shifts as X data and scales as Y data.
+        reduction_alg.setProperty("OutShiftAndScaleFactor", "ShiftAndScaleFactors")
+        # Set properties used to generated names for workspaces within the output workspace groups
+        reduction_alg.setProperty("period", is_part_of_multi_period_reduction)
+        reduction_alg.setProperty("wavelength_range", is_part_of_wavelength_range_reduction)
 
     reduction_mode = reduction_package.reduction_mode
     if reduction_mode is ISISReductionMode.Merged:
