@@ -17,8 +17,7 @@ from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import iteritems, mock, string_types
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
-    DEFAULT_TABLE_NAME, ALLOWED_NON_TIME_SERIES_LOGS, log_names,
-    ResultsTabModel)
+    DEFAULT_TABLE_NAME, ALLOWED_NON_TIME_SERIES_LOGS, ResultsTabModel)
 from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation
 
 # constants
@@ -30,20 +29,6 @@ def create_test_workspace(ws_name=None):
     ws_name = ws_name if ws_name is not None else 'results_tab_model_test'
     AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
     return fake_ws
-
-
-def create_test_workspacegroup(size, group_name=None):
-    group_name = group_name if group_name is not None else 'results_tab_model_testgroup'
-    ads = AnalysisDataService.Instance()
-    group = WorkspaceGroup()
-    for i in range(size):
-        fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
-        ws_name = '{}_{}'.format(group_name, i)
-        ads.addOrReplace(ws_name, fake_ws)
-        group.addWorkspace(fake_ws)
-
-    ads.addOrReplace(group_name, group)
-    return group
 
 
 def create_test_fits(input_workspaces,
@@ -162,51 +147,6 @@ class ResultsTabModelTest(unittest.TestCase):
 
         self.assertEqual(model.selected_fit_function(), new_selection)
 
-    def test_log_names_from_workspace_with_logs(self):
-        fake_ws = create_test_workspace()
-        run = fake_ws.run()
-        # populate with log data
-        time_series_names = ('ts_1', 'ts_2')
-        for name in time_series_names:
-            run.addProperty(name, FloatTimeSeriesProperty(name), replace=True)
-        single_value_log_names = ('sv_1', 'sv_2')
-        for name in itertools.chain(single_value_log_names,
-                                    ALLOWED_NON_TIME_SERIES_LOGS):
-            run.addProperty(name,
-                            StringPropertyWithValue(name, 'test'),
-                            replace=True)
-        # verify
-        allowed_logs = log_names(fake_ws.name())
-        for name in itertools.chain(time_series_names,
-                                    ALLOWED_NON_TIME_SERIES_LOGS):
-            self.assertTrue(
-                name in allowed_logs,
-                msg="{} not found in allowed log list".format(name))
-        for name in single_value_log_names:
-            self.assertFalse(name in allowed_logs,
-                             msg="{} found in allowed log list".format(name))
-
-    def test_log_names_from_workspace_without_logs(self):
-        fake_ws = create_test_workspace()
-        allowed_logs = log_names(fake_ws.name())
-        self.assertEqual(0, len(allowed_logs))
-
-    def test_log_names_from_workspacegroup_uses_first_workspace(self):
-        def add_log(workspace, name):
-            run = workspace.run()
-            run.addProperty(name, FloatTimeSeriesProperty(name), replace=True)
-
-        fake_group = create_test_workspacegroup(size=2)
-        logs = ['log_1', 'log_2']
-        for index, name in enumerate(logs):
-            add_log(fake_group[index], name)
-
-        visible_logs = log_names(fake_group.name())
-        self.assertTrue(logs[0] in visible_logs,
-                        msg="{} not found in log list".format(logs[0]))
-        self.assertFalse(logs[1] in visible_logs,
-                         msg="{} not found in log list".format(logs[1]))
-
     def test_model_returns_fit_functions_from_context(self):
         _, model = create_test_model(('ws1', ), 'func1', self.parameters, [],
                                      self.logs)
@@ -237,43 +177,26 @@ class ResultsTabModelTest(unittest.TestCase):
         model = ResultsTabModel(FittingContext())
         self.assertEqual(0, len(model.log_selection({})))
 
-    def test_model_returns_log_selection_of_first_workspace(self):
-        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, [])
-        with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
-            ws1_logs = ('run_number', 'run_start')
-            ws2_logs = ('temp', 'magnetic_field')
-
-            def side_effect(name):
-                return ws1_logs if name == 'ws1' else ws2_logs
-
-            mock_log_names.side_effect = side_effect
-            expected_selection = {
-                'run_number': [0, False, True],
-                'run_start': [1, False, True],
-            }
-
-            self.assertEqual(expected_selection, model.log_selection({}))
-
     def test_model_combines_existing_log_selection(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [])
-        with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
-            mock_log_names.return_value = [
-                'run_number', 'run_start', 'magnetic_field'
-            ]
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters)
+        model._fit_context.log_names = mock.MagicMock()
+        model._fit_context.log_names.return_value = [
+            'run_number', 'run_start', 'magnetic_field'
+        ]
 
-            existing_selection = {
-                'run_number': [0, False, True],
-                'run_start': [1, True, True],
-            }
-            expected_selection = deepcopy(existing_selection)
-            expected_selection.update({
-                'run_number': [0, False, True],
-                'run_start': [1, True, True],
-                'magnetic_field': [2, False, True],
-            })
+        existing_selection = {
+            'run_number': [0, False, True],
+            'run_start': [1, True, True],
+        }
+        expected_selection = deepcopy(existing_selection)
+        expected_selection.update({
+            'run_number': [0, False, True],
+            'run_start': [1, True, True],
+            'magnetic_field': [2, False, True],
+        })
 
-            self.assertDictEqual(expected_selection,
-                                 model.log_selection(existing_selection))
+        self.assertDictEqual(expected_selection,
+                             model.log_selection(existing_selection))
 
     def test_create_results_table_with_no_logs_or_global_parameters(self):
         _, model = create_test_model(('ws1', ), 'func1', self.parameters, [])
@@ -345,9 +268,6 @@ class ResultsTabModelTest(unittest.TestCase):
                                             table, model.results_table_name())
 
     # ------------------------- failure tests ----------------------------
-    def test_log_names_from_workspace_not_in_ADS_raises_exception(self):
-        self.assertRaises(KeyError, log_names, 'not a workspace in ADS')
-
     def test_create_results_table_raises_error_if_number_params_different(
             self):
         parameters = OrderedDict([('Height', (100, 0.1)),

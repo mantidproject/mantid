@@ -103,11 +103,7 @@ class ResultsTabModel(object):
         format matches that of the ListSelectorPresenter class' model.
         """
         selection = {}
-        fits = self._fit_context.fit_list
-        if not fits:
-            return selection
-
-        logs = log_names(fits[0].input_workspace)
+        logs = self._fit_context.log_names(filter_fn=_log_should_be_displayed)
         for index, name in enumerate(logs):
             if name in existing_selection:
                 checked = existing_selection[name][1]
@@ -234,21 +230,6 @@ class ResultsTabModel(object):
         """
         first_fit = self._fit_context.fit_list[results_selection[0][1]]
         return first_fit.parameters
-
-
-# Public helper functions
-def log_names(workspace_name):
-    """
-    Return a list of log names from the given workspace.
-
-    :param workspace: A string name of a workspace in the ADS. If the name points to
-    a group then the logs of the first workspace are returned
-    :return: A list of sample log names
-    :raises KeyError: if the workspace does not exist in the ADS
-    """
-    workspace = _workspace_for_logs(workspace_name)
-    all_logs = workspace.run().getLogData()
-    return [log.name for log in all_logs if _log_should_be_displayed(log)]
 
 
 # Private helper functions

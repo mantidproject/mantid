@@ -9,9 +9,58 @@ from __future__ import (absolute_import, unicode_literals)
 from collections import OrderedDict
 import unittest
 
+from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
+from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import iteritems, mock
 
 from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation, FitParameters
+
+
+def create_test_workspace(ws_name=None,
+                          time_series_logs=None,
+                          string_value_logs=None):
+    """
+    Create a test workspace.
+    :param ws_name: An optional name for the workspace
+    :param time_series_logs: A set of (name, (values,...))
+    :param string_value_logs: A set of (name, value) pairs
+    :return: The new workspace
+    """
+    fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
+    run = fake_ws.run()
+    if time_series_logs is not None:
+        for name, values in time_series_logs:
+            tsp = FloatTimeSeriesProperty(name)
+            for value in values:
+                tsp.addValue("2000-05-01T12:00:00", value)
+            run.addProperty(name, tsp, replace=True)
+    if string_value_logs is not None:
+        for name, value in string_value_logs:
+            run.addProperty(StringPropertyWithValue(name, value), replace=True)
+
+    ws_name = ws_name if ws_name is not None else 'fitting_context_model_test'
+    AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
+    return fake_ws
+
+
+def create_test_workspacegroup(group_name=None, size=None, items=None):
+    if size is not None and items is not None:
+        raise ValueError("Provide either size or items not both.")
+
+    group_name = group_name if group_name is not None else 'fitting_context_testgroup'
+    group = WorkspaceGroup()
+    if size is not None:
+        for i in range(size):
+            ws_name = '{}_{}'.format(group_name, i)
+            fake_ws = create_test_workspace(ws_name)
+            group.addWorkspace(fake_ws)
+    elif items is not None:
+        for item in items:
+            group.addWorkspace(item)
+
+    ads = AnalysisDataService.Instance()
+    ads.addOrReplace(group_name, group)
+    return group
 
 
 def create_test_fit_parameters(test_parameters, global_parameters=None):
@@ -172,35 +221,38 @@ class FitParametersTest(unittest.TestCase):
                 msg="Mismatch in error for parameter" + name)
 
 
-class FittingContextTest(unittest.TestCase):
+class FitInformationTest(unittest.TestCase):
     def setUp(self):
         self.fitting_context = FittingContext()
+
+    def tearDown(self):
+        AnalysisDataService.Instance().clear()
 
     def test_context_constructor_accepts_fit_list(self):
         fit_list = [
             FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(), mock.MagicMock())
         ]
         context = FittingContext(fit_list)
-
         self.assertEqual(fit_list, context.fit_list)
 
     def test_len_gives_length_of_fit_list(self):
         self.assertEqual(0, len(self.fitting_context))
         self.fitting_context.add_fit(
-            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(), []))
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc',
+                           mock.MagicMock(), mock.MagicMock()))
         self.assertEqual(1, len(self.fitting_context))
 
-    def test_fitinformation_equality_with_no_globals(self):
+    def test_equality_with_no_globals(self):
         fit_info = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
                                   mock.MagicMock(), mock.MagicMock())
         self.assertEqual(fit_info, fit_info)
 
-    def test_fitinformation_equality_with_globals(self):
+    def test__equality_with_globals(self):
         fit_info = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
                                   mock.MagicMock(), ['A'])
         self.assertEqual(fit_info, fit_info)
 
-    def test_fitinformation_inequality_with_globals(self):
+    def test_inequality_with_globals(self):
         fit_info1 = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
                                    mock.MagicMock(), ['A'])
         fit_info2 = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
@@ -235,6 +287,96 @@ class FittingContextTest(unittest.TestCase):
         self.assertEqual(['A'],
                          fit_information_object.parameters.global_parameters)
 
+    def test_parameters_are_readonly(self):
+        test_parameters = OrderedDict([('Height', (10., 0.4)),
+                                       ('A0', (1, 0.01)),
+                                       ('Cost function', (0.1, 0.))])
+        fit_params = create_test_fit_parameters(test_parameters)
+        fit_info = FitInformation(fit_params._parameter_workspace,
+                                  mock.MagicMock(), mock.MagicMock())
+
+        self.assertRaises(AttributeError, setattr, fit_info, "parameters",
+                          fit_params)
+
+    def test_logs_from_workspace_without_logs_returns_emtpy_list(self):
+        fake_ws = create_test_workspace()
+        fit = FitInformation(mock.MagicMock(), 'func1', fake_ws.name())
+
+        allowed_logs = fit.log_names()
+        self.assertEqual(0, len(allowed_logs))
+
+    def test_logs_for_single_workspace_return_all_time_series_logs(self):
+        time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )))
+        single_value_logs = (('sv_1', 'val1'), ('sv_2', 'val2'))
+        fake_ws = create_test_workspace(time_series_logs=time_series_logs)
+        fit = FitInformation(mock.MagicMock(), 'func1', fake_ws.name())
+
+        log_names = fit.log_names()
+        for name, _ in time_series_logs:
+            self.assertTrue(name in log_names,
+                            msg="{} not found in log list".format(name))
+        for name, _ in single_value_logs:
+            self.assertFalse(name in log_names,
+                             msg="{} found in log list".format(name))
+
+    def test_log_names_from_workspacegroup_gives_combined_set(self):
+        time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
+                            ('ts_4', [3.]))
+
+        fake1 = create_test_workspace(ws_name='fake1',
+                                      time_series_logs=time_series_logs[:2])
+        fake2 = create_test_workspace(ws_name='fake2',
+                                      time_series_logs=time_series_logs[2:])
+        group_name = 'test_log_names_group'
+        create_test_workspacegroup(group_name, items=(fake1, fake2))
+        fit = FitInformation(mock.MagicMock(), 'func1', group_name)
+
+        log_names = fit.log_names()
+        self.assertEqual(len(time_series_logs), len(log_names))
+        for name, _ in time_series_logs:
+            self.assertTrue(name in log_names,
+                            msg="{} not found in log list".format(name))
+
+    def test_log_names_uses_filter_fn(self):
+        time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
+                            ('ts_4', [3.]))
+        fake1 = create_test_workspace(ws_name='fake1',
+                                      time_series_logs=time_series_logs)
+        fit = FitInformation(mock.MagicMock(), 'func1', fake1.name())
+
+        log_names = fit.log_names(lambda log: log.name == 'ts_1')
+        self.assertEqual(1, len(log_names))
+        self.assertEqual(time_series_logs[0][0], log_names[0])
+
+
+class FittingContextTest(unittest.TestCase):
+    def setUp(self):
+        self.fitting_context = FittingContext()
+
+    def test_context_constructor_accepts_fit_list(self):
+        fit_list = [
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
+        ]
+        context = FittingContext(fit_list)
+
+        self.assertEqual(fit_list, context.fit_list)
+
+    def test_len_gives_length_of_fit_list(self):
+        self.assertEqual(0, len(self.fitting_context))
+        self.fitting_context.add_fit(
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock()))
+        self.assertEqual(1, len(self.fitting_context))
+
+    def test_items_can_be_added_to_fitting_context(self):
+        fit_information_object = FitInformation(mock.MagicMock(),
+                                                'MuonGuassOsc',
+                                                mock.MagicMock())
+
+        self.fitting_context.add_fit(fit_information_object)
+
+        self.assertEqual(fit_information_object,
+                         self.fitting_context.fit_list[0])
+
     def test_fitfunctions_gives_list_of_unique_function_names(self):
         test_fit_function = 'MuonGuassOsc'
         self.fitting_context.add_fit_from_values(mock.MagicMock(),
@@ -248,25 +390,6 @@ class FittingContextTest(unittest.TestCase):
 
         self.assertEqual(len(fit_functions), 1)
         self.assertEqual(test_fit_function, fit_functions[0])
-
-    def test_can_retrieve_a_list_of_fit_objects_based_on_fit_function_name(
-            self):
-        fit_information_object_0 = FitInformation(mock.MagicMock(),
-                                                  'MuonGuassOsc',
-                                                  mock.MagicMock(), [])
-        fit_information_object_1 = FitInformation(mock.MagicMock(), 'MuonOsc',
-                                                  mock.MagicMock(), [])
-        fit_information_object_2 = FitInformation(mock.MagicMock(),
-                                                  'MuonGuassOsc',
-                                                  mock.MagicMock(), [])
-        self.fitting_context.add_fit(fit_information_object_0)
-        self.fitting_context.add_fit(fit_information_object_1)
-        self.fitting_context.add_fit(fit_information_object_2)
-
-        result = self.fitting_context.find_fits_for_function('MuonGuassOsc')
-
-        self.assertEqual([fit_information_object_0, fit_information_object_2],
-                         result)
 
     def test_can_add_fits_without_first_creating_fit_information_objects(self):
         parameter_workspace = mock.MagicMock()
@@ -300,8 +423,8 @@ class FittingContextTest(unittest.TestCase):
                          self.fitting_context.fit_list[0])
 
     def test_parameters_are_readonly(self):
-        test_parameters = OrderedDict([('Height', (10., 0.4)), ('A0', (1,
-                                                                       0.01)),
+        test_parameters = OrderedDict([('Height', (10., 0.4)),
+                                       ('A0', (1, 0.01)),
                                        ('Cost function', (0.1, 0.))])
         fit_params = create_test_fit_parameters(test_parameters)
         fit_info = FitInformation(fit_params._parameter_workspace,
@@ -310,6 +433,44 @@ class FittingContextTest(unittest.TestCase):
 
         self.assertRaises(AttributeError, setattr, fit_info, "parameters",
                           fit_params)
+
+    def test_log_names_returns_logs_from_all_fits_by_default(self):
+        time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
+                            ('ts_4', [3.]))
+        fake1 = create_test_workspace(ws_name='fake1',
+                                      time_series_logs=time_series_logs[:2])
+        fake2 = create_test_workspace(ws_name='fake2',
+                                      time_series_logs=time_series_logs[2:])
+        self.fitting_context.add_fit(
+            FitInformation(mock.MagicMock(), 'func1', fake1.name()))
+        self.fitting_context.add_fit(
+            FitInformation(mock.MagicMock(), 'func1', fake2.name()))
+
+        log_names = self.fitting_context.log_names()
+        self.assertEqual(len(time_series_logs), len(log_names))
+        for name, _ in time_series_logs:
+            self.assertTrue(name in log_names,
+                            msg="{} not found in log list".format(name))
+
+    def test_log_names_respects_filter(self):
+        time_series_logs = (('ts_1', (1., )), ('ts_2', (3., )), ('ts_3', [2.]),
+                            ('ts_4', [3.]))
+        fake1 = create_test_workspace(ws_name='fake1',
+                                      time_series_logs=time_series_logs[:2])
+        fake2 = create_test_workspace(ws_name='fake2',
+                                      time_series_logs=time_series_logs[2:])
+        self.fitting_context.add_fit(
+            FitInformation(mock.MagicMock(), 'func1', fake1.name()))
+        self.fitting_context.add_fit(
+            FitInformation(mock.MagicMock(), 'func1', fake2.name()))
+
+        required_logs = ('ts_2', 'ts_4')
+        log_names = self.fitting_context.log_names(
+            filter_fn=lambda log: log.name in required_logs)
+        self.assertEqual(len(required_logs), len(log_names))
+        for name in required_logs:
+            self.assertTrue(name in log_names,
+                            msg="{} not found in log list".format(name))
 
 
 if __name__ == '__main__':

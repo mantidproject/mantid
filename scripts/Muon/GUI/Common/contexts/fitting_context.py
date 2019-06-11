@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division)
 from collections import OrderedDict
 import re
 
+from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.py3compat import iteritems, iterkeys
 
 from Muon.GUI.Common.observer_pattern import Observable
@@ -211,6 +212,28 @@ class FitInformation(object):
     def parameters(self):
         return self._fit_parameters
 
+    def log_names(self, filter_fn=None):
+        """
+        The names of the logs on the workspaces
+        associated with this fit.
+
+        :filter_fn: An optional unary function to filter the names out. It should accept a log
+        and return True if the log should be accepted
+        :return: A list of names
+        """
+        filter_fn = filter_fn if filter_fn is not None else lambda x: True
+
+        workspaces = AnalysisDataService.retrieve(self.input_workspace)
+        if not isinstance(workspaces, WorkspaceGroup):
+            workspaces = [workspaces]
+
+        all_names = []
+        for workspace in workspaces:
+            logs = workspace.run().getLogData()
+            all_names.extend([log.name for log in logs if filter_fn(log)])
+
+        return all_names
+
 
 class FittingContext(object):
     """Context specific to fitting.
@@ -279,3 +302,15 @@ class FittingContext(object):
                 if input_workspace_name == fit.input_workspace:
                     workspace_list.append(fit.output_workspace_names[0])
         return workspace_list
+
+    def log_names(self, filter_fn=None):
+        """
+        The names of the logs on the workspaces associated with all of the workspaces.
+
+        :filter_fn: An optional unary function to filter the names out. For more information see
+        FitInformation.log_names
+        :return: A list of names of logs
+        """
+        return [
+            name for fit in self.fit_list for name in fit.log_names(filter_fn)
+        ]
