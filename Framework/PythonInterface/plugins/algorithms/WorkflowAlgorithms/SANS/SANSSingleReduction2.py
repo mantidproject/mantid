@@ -6,15 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" SANSSingleReductionEventSlice algorithm performs a single reduction on event sliced data."""
+""" SANSSingleReduction version 2 algorithm performs a single reduction on event sliced data."""
 
 from __future__ import (absolute_import, division, print_function)
 
 from collections import defaultdict
 from copy import deepcopy
 
-from mantid.api import (AnalysisDataService, DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        Progress, WorkspaceGroup, WorkspaceGroupProperty)
+from mantid.api import (AlgorithmFactory, AnalysisDataService, DistributedDataProcessorAlgorithm,
+                        MatrixWorkspaceProperty, Progress, PropertyMode,
+                        WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.simpleapi import CloneWorkspace
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
 from sans.algorithm_detail.bundles import EventSliceSettingBundle, ReductionSettingBundle
@@ -30,77 +31,17 @@ from sans.common.general_functions import (create_child_algorithm, create_unmana
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
-class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
+class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Reduction'
 
+    def version(self):
+        return 2
+
     def summary(self):
-        return 'Performs a single reduction of SANS data which has event slices.'
+        return 'Performs a single reduction of SANS data, optimised for event slices.'
 
-    def PyInit(self):
-        # ----------
-        # INPUT
-        # ----------
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
-
-        self.declareProperty("UseOptimizations", True, direction=Direction.Input,
-                             doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
-                                 "Depending on your concrete reduction, this could provide a significant"
-                                 " performance boost")
-
-        self.declareProperty("SaveCan", False, direction=Direction.Input,
-                             doc="When enabled, the unsubtracted can and sam workspaces are added to the ADS.")
-
-        # Sample Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('SampleScatterWorkspace', '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='The sample scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc='The sample scatter monitor workspace. This workspace only contains monitors.')
-
-        # Sample Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('SampleTransmissionWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The sample transmission workspace.')
-
-        # Sample Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('SampleDirectWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The sample scatter direct workspace.')
-
-        self.setPropertyGroup("SampleScatterWorkspace", 'Sample')
-        self.setPropertyGroup("SampleScatterMonitorWorkspace", 'Sample')
-        self.setPropertyGroup("SampleTransmissionWorkspace", 'Sample')
-        self.setPropertyGroup("SampleDirectWorkspace", 'Sample')
-
-        # Can Scatter Workspaces
-        self.declareProperty(MatrixWorkspaceProperty('CanScatterWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The can scatter workspace. This workspace does not contain monitors.')
-        self.declareProperty(MatrixWorkspaceProperty('CanScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The can scatter monitor workspace. This workspace only contains monitors.')
-
-        # Sample Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('CanTransmissionWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The can transmission workspace.')
-
-        # Sample Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('CanDirectWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The sample scatter direct workspace.')
-
-        self.setPropertyGroup("CanScatterWorkspace", 'Can')
-        self.setPropertyGroup("CanScatterMonitorWorkspace", 'Can')
-        self.setPropertyGroup("CanTransmissionWorkspace", 'Can')
-        self.setPropertyGroup("CanDirectWorkspace", 'Can')
-
-        # ----------
-        # OUTPUT
-        # ----------
+    def _declare_output_properties(self):
         self.declareProperty(MatrixWorkspaceProperty('OutShiftAndScaleFactor', '', optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc='A workspace containing the applied shift factor as X data and applied scale factor '
@@ -179,6 +120,72 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         self.setPropertyGroup("OutputWorkspaceHABCanCount", 'Opt Output')
         self.setPropertyGroup("OutputWorkspaceHABCanNorm", 'Opt Output')
 
+    def PyInit(self):
+        # ----------
+        # INPUT
+        # ----------
+        self.declareProperty(PropertyManagerProperty('SANSState'),
+                             doc='A property manager which fulfills the SANSState contract.')
+
+        self.declareProperty("UseOptimizations", True, direction=Direction.Input,
+                             doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
+                                 "Depending on your concrete reduction, this could provide a significant"
+                                 " performance boost")
+
+        self.declareProperty("SaveCan", False, direction=Direction.Input,
+                             doc="When enabled, the unsubtracted can and sam workspaces are added to the ADS.")
+
+        # Sample Scatter Workspaces
+        self.declareProperty(MatrixWorkspaceProperty('SampleScatterWorkspace', '',
+                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+                             doc='The sample scatter workspace. This workspace does not contain monitors.')
+        self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace', '',
+                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
+                             doc='The sample scatter monitor workspace. This workspace only contains monitors.')
+
+        # Sample Transmission Workspace
+        self.declareProperty(MatrixWorkspaceProperty('SampleTransmissionWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The sample transmission workspace.')
+
+        # Sample Direct Workspace
+        self.declareProperty(MatrixWorkspaceProperty('SampleDirectWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The sample scatter direct workspace.')
+
+        self.setPropertyGroup("SampleScatterWorkspace", 'Sample')
+        self.setPropertyGroup("SampleScatterMonitorWorkspace", 'Sample')
+        self.setPropertyGroup("SampleTransmissionWorkspace", 'Sample')
+        self.setPropertyGroup("SampleDirectWorkspace", 'Sample')
+
+        # Can Scatter Workspaces
+        self.declareProperty(MatrixWorkspaceProperty('CanScatterWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The can scatter workspace. This workspace does not contain monitors.')
+        self.declareProperty(MatrixWorkspaceProperty('CanScatterMonitorWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The can scatter monitor workspace. This workspace only contains monitors.')
+
+        # Sample Transmission Workspace
+        self.declareProperty(MatrixWorkspaceProperty('CanTransmissionWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The can transmission workspace.')
+
+        # Sample Direct Workspace
+        self.declareProperty(MatrixWorkspaceProperty('CanDirectWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The sample scatter direct workspace.')
+
+        self.setPropertyGroup("CanScatterWorkspace", 'Can')
+        self.setPropertyGroup("CanScatterMonitorWorkspace", 'Can')
+        self.setPropertyGroup("CanTransmissionWorkspace", 'Can')
+        self.setPropertyGroup("CanDirectWorkspace", 'Can')
+
+        # ----------
+        # OUTPUT
+        # ----------
+        self._declare_output_properties()
+
     def PyExec(self):
         # Get state
         state = self._get_state()
@@ -187,67 +194,30 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         overall_reduction_mode = self._get_reduction_mode(state)
 
         # --------------------------------------------------------------------------------------------------------------
-        # Setup initial reduction
+        # Perform the initial reduction. Version 1 does not have an initial reduction.
         # --------------------------------------------------------------------------------------------------------------
-        initial_reduction_alg = create_child_algorithm(self, "SANSReductionCoreInitial", **{})
-        # Decide which core reduction information to run, i.e. HAB, LAB, ALL, MERGED. In the case of ALL and MERGED,
-        # the required simple reduction modes need to be run. Normally this is HAB and LAB, future implementations
-        # might have more detectors though (or different types)
-        reduction_setting_bundles = self._get_initial_reduction_setting_bundles(state, overall_reduction_mode)
+        reduction_setting_bundles = self.do_initial_reduction(state, overall_reduction_mode)
 
         # --------------------------------------------------------------------------------------------------------------
-        # Initial Reduction - steps which can be carried out before event slicing
+        # Setup main reduction
         # --------------------------------------------------------------------------------------------------------------
-        intermediate_bundles = []
-        for reduction_setting_bundle in reduction_setting_bundles:
-            intermediate_bundles.append(run_initial_event_slice_reduction(initial_reduction_alg,
-                                                                          reduction_setting_bundle))
-
-        # --------------------------------------------------------------------------------------------------------------
-        # Setup sliced reduction
-        # --------------------------------------------------------------------------------------------------------------
-        slice_reduction_setting_bundles = self._get_slice_reduction_setting_bundles(intermediate_bundles)
 
         # Run core reductions
         use_optimizations = self.getProperty("UseOptimizations").value
         save_can = self.getProperty("SaveCan").value
 
         # Create the reduction core algorithm
-        reduction_alg = create_child_algorithm(self, "SANSReductionCoreEventSlice", **{})
+        reduction_alg = create_child_algorithm(self, self._reduction_name(), **{})
 
         # Set up progress
-        progress = self._get_progress(sum([len(event_list) for event_list in slice_reduction_setting_bundles]),
+        progress = self._get_progress(sum([len(event_list) for event_list in reduction_setting_bundles]),
                                       overall_reduction_mode)
 
         # --------------------------------------------------------------------------------------------------------------
-        # Sliced Reduction - here we slice the workspaces and perform the steps which must be carried out after slicing
+        # Reduction - here we slice the workspaces and perform the steps which must be carried out after slicing
         # --------------------------------------------------------------------------------------------------------------
-        output_bundles = []
-        output_parts_bundles = []
-        output_transmission_bundles = []
-        for event_slice_bundles in slice_reduction_setting_bundles:
-            # Output bundles and parts bundles need to be sepated by a event slices, but grouped by component
-            # e.g. [[workspaces for slice1], [workspaces for slice2]]
-            slice_bundles = []
-            slice_parts_bundles = []
-            for slice_bundle in event_slice_bundles:
-                progress.report("Running a single reduction ...")
-                # We want to make use of optimizations here.
-                # If a can workspace has already been reduced with the same can
-                # settings and is stored in the ADS, then we should use it
-                # (provided the user has optimizations enabled).
-                if use_optimizations and slice_bundle.data_type is DataType.Can:
-                    output_bundle, output_parts_bundle, \
-                        output_transmission_bundle = run_optimized_for_can(reduction_alg,
-                                                                           slice_bundle, event_slice=True)
-                else:
-                    output_bundle, output_parts_bundle, \
-                        output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, slice_bundle)
-                slice_bundles.append(output_bundle)
-                slice_parts_bundles.append(output_parts_bundle)
-                output_transmission_bundles.append(output_transmission_bundle)
-            output_bundles.append(slice_bundles)
-            output_parts_bundles.append(slice_parts_bundles)
+        output_bundles, output_parts_bundles, \
+            output_transmission_bundles = self.do_reduction(reduction_alg, reduction_setting_bundles, progress)
 
         reduction_mode_vs_output_workspaces = defaultdict(list)
         reduction_mode_vs_workspace_names = defaultdict(list)
@@ -262,9 +232,8 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             for reduction_mode, workspace in output_workspaces_non_merged.items():
                 reduction_mode_vs_output_workspaces[reduction_mode].append(workspace)
 
-            output_workspace_names = self._get_final_workspace_names(event_slice_bundle)
-            for reduction_mode, name in output_workspace_names.items():
-                reduction_mode_vs_workspace_names[reduction_mode].append(name)
+            reduction_mode_vs_workspace_names = self._get_workspace_names(reduction_mode_vs_workspace_names,
+                                                                          event_slice_bundle)
 
         # --------------------------------------------------------------------------------------------------------------
         # Deal with merging
@@ -310,6 +279,59 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
 
         self.set_transmission_workspaces_on_output(output_transmission_bundles,
                                                    state.adjustment.calculate_transmission.fit)
+
+    def do_initial_reduction(self, state, overall_reduction_mode):
+        # --------------------------------------------------------------------------------------------------------------
+        # Setup initial reduction
+        # --------------------------------------------------------------------------------------------------------------
+        initial_reduction_alg = create_child_algorithm(self, "SANSReductionCoreInitial", **{})
+        # Decide which core reduction information to run, i.e. HAB, LAB, ALL, MERGED. In the case of ALL and MERGED,
+        # the required simple reduction modes need to be run. Normally this is HAB and LAB, future implementations
+        # might have more detectors though (or different types)
+        reduction_setting_bundles = self._get_initial_reduction_setting_bundles(state, overall_reduction_mode)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Initial Reduction - steps which can be carried out before event slicing
+        # --------------------------------------------------------------------------------------------------------------
+        intermediate_bundles = []
+        for reduction_setting_bundle in reduction_setting_bundles:
+            intermediate_bundles.append(run_initial_event_slice_reduction(initial_reduction_alg,
+                                                                          reduction_setting_bundle))
+        return self._get_slice_reduction_setting_bundles(intermediate_bundles)
+
+    def do_reduction(self, reduction_alg, reduction_setting_bundles, progress):
+        output_bundles = []
+        output_parts_bundles = []
+        output_transmission_bundles = []
+        for event_slice_bundles in reduction_setting_bundles:
+            # Output bundles and parts bundles need to be sepated by a event slices, but grouped by component
+            # e.g. [[workspaces for slice1], [workspaces for slice2]]
+            slice_bundles = []
+            slice_parts_bundles = []
+            for slice_bundle in event_slice_bundles:
+                progress.report("Running a single reduction ...")
+                # We want to make use of optimizations here.
+                # If a can workspace has already been reduced with the same can
+                # settings and is stored in the ADS, then we should use it
+                # (provided the user has optimizations enabled).
+                if use_optimizations and slice_bundle.data_type is DataType.Can:
+                    output_bundle, output_parts_bundle, \
+                        output_transmission_bundle = run_optimized_for_can(reduction_alg,
+                                                                           slice_bundle, event_slice=True)
+                else:
+                    output_bundle, output_parts_bundle, \
+                        output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, slice_bundle)
+                slice_bundles.append(output_bundle)
+                slice_parts_bundles.append(output_parts_bundle)
+                output_transmission_bundles.append(output_transmission_bundle)
+            output_bundles.append(slice_bundles)
+            output_parts_bundles.append(slice_parts_bundles)
+
+        return output_bundles, output_parts_bundles, output_transmission_bundles
+
+    @staticmethod
+    def _reduction_name():
+        return "SANSReductionCoreEventSlice"
 
     def validateInputs(self):
         errors = dict()
@@ -666,6 +688,12 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 raise RuntimeError("SANSSingleReduction: The data type {0} should be"
                                    " sample or can.".format(transmission_bundle.data_type))
 
+    def _get_workspace_names(self, reduction_mode_vs_workspace_names, output_bundle):
+        output_workspace_names = self._get_final_workspace_names(output_bundle)
+        for reduction_mode, name in output_workspace_names.items():
+            reduction_mode_vs_workspace_names[reduction_mode].append(name)
+        return reduction_mode_vs_workspace_names
+
     def _get_final_workspace_names(self, output_bundles):
         """This method retrieves the workspace names for event sliced final output workspaces.
         :param output_bundles: A set of outputBundles
@@ -738,4 +766,4 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(SANSSingleReductionEventSlice)
+AlgorithmFactory.subscribe(SANSSingleReduction2)

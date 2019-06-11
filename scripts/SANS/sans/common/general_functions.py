@@ -98,15 +98,19 @@ def get_single_valued_logs_from_workspace(workspace, log_names, log_types, conve
     return log_results
 
 
-def create_unmanaged_algorithm(name, **kwargs):
+def create_unmanaged_algorithm(name, version=None, **kwargs):
     """
     Creates an unmanaged child algorithm and initializes it.
 
     :param name: the name of the algorithm
+    :param version: optional int. The version of the algorithm to use.
     :param kwargs: settings for the algorithm
     :return: an initialized algorithm instance.
     """
-    alg = AlgorithmManager.createUnmanaged(name)
+    if version is not None:
+        alg = AlgorithmManager.createUnmanaged(name, version)
+    else:
+        alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
     alg.setRethrows(True)
@@ -115,15 +119,20 @@ def create_unmanaged_algorithm(name, **kwargs):
     return alg
 
 
-def create_managed_non_child_algorithm(name, **kwargs):
+def create_managed_non_child_algorithm(name, version=None, **kwargs):
     """
     Creates a managed child algorithm and initializes it.
 
     :param name: the name of the algorithm
+    :param version: optional int. The version of the algorithm to use.
     :param kwargs: settings for the algorithm
     :return: an initialized algorithm instance.
     """
-    alg = AlgorithmManager.create(name)
+    if version is not None:
+        alg = AlgorithmManager.create(name, version)
+    else:
+        # Let the algorithm pick the most recent version
+        alg = AlgorithmManager.create(name)
     alg.initialize()
     alg.setChild(False)
     alg.setRethrows(True)

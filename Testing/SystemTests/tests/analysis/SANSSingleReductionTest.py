@@ -100,7 +100,8 @@ class SingleReductionTest(unittest.TestCase):
     def _run_single_reduction(self, state, sample_scatter, sample_monitor, sample_transmission=None, sample_direct=None,
                               can_scatter=None, can_monitor=None, can_transmission=None, can_direct=None,
                               output_settings=None, event_slice=False, save_can=False, use_optimizations=False):
-        single_reduction_name = "SANSSingleReduction" if not event_slice else "SANSSingleReductionEventSlice"
+        single_reduction_name = "SANSSingleReduction"
+        ver = 1 if not event_slice else 2
         state_dict = state.property_manager
 
         single_reduction_options = {"SANSState": state_dict,
@@ -129,7 +130,8 @@ class SingleReductionTest(unittest.TestCase):
         if output_settings:
             single_reduction_options.update(output_settings)
 
-        single_reduction_alg = create_unmanaged_algorithm(single_reduction_name, **single_reduction_options)
+        single_reduction_alg = create_unmanaged_algorithm(single_reduction_name, version=ver,
+                                                          **single_reduction_options)
 
         # Act
         single_reduction_alg.execute()
@@ -386,9 +388,9 @@ class SANSSingleReductionTest(SingleReductionTest):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Test the new reduction algorithm for event slices, SANSSingleReductionEventSlice
+# Test SANSSingleReduction version 2
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSSingleReductionEventSliceTest(SingleReductionTest):
+class SANSSingleReduction2Test(SingleReductionTest):
     def _assert_group_workspace(self, workspace, n=2):
         """
         Check that a workspace is not None and that it contains n workspaces
@@ -522,7 +524,7 @@ class SANSSingleReductionEventSliceTest(SingleReductionTest):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Compare SANSSingleReduction to SANSSingleReductionEventSlice
+# Compare SANSSingleReduction version 1 to version 2
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSSingleReductionComparisonTest(SingleReductionTest):
     """
@@ -530,12 +532,11 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
     """
     def test_than_event_slice_algorithm_is_quicker(self):
         """
-        In this test we run SANSSingleReductionEventSlice 5 times on HAB data, with event slice 0:300:600.
-        We run SANSSingleReduction repeat_n times for the 0:300 slice and 2 times for the 300:600 slice.
+        In this test we run version 2 repeat_n times on HAB data, with event slice 0:300:600.
+        We run version 1 repeat_n times for the 0:300 slice and repeat_n times for the 300:600 slice.
 
         We compare the data to check that similar workspaces are produced, and we also check that it takes less
-        time to run SANSSingleReductionEventSlice than to run SANSSingleReduction twice
-        (once for each of the event slices)
+        time to run version 2 than to run version 1 twice (version 1 must be run once for each event slice)
         """
         # Arrange
         # Build the data information
@@ -559,7 +560,8 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
         user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.HAB)
 
         # --------------------------------------------------------------------------------------------------------------
-        # SANSSingleReductionEventSlice - Run the event slice optimised algorithm 2 times
+        # version 2 - Run the event slice optimised algorithm repeat_n times. version 2 only need to be run once,
+        #             no matter how many event slices
         # --------------------------------------------------------------------------------------------------------------
         user_file_director.set_compatibility_builder_use_compatibility_mode(False)
         user_file_director.set_slice_event_builder_start_time([0.00, 300.00])
@@ -592,8 +594,8 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
             event_slice_alg_times.append(end - start)
 
         # --------------------------------------------------------------------------------------------------------------
-        # SANSSingleReduction - Run the event slice optimised algorithm 2 times for slice
-        #                       0:300 and 2 times for slice 300:600
+        # version 1 - Run the algorithm repeat_n times for slice
+        #             0:300 and repeat_n times for slice 300:600
         # --------------------------------------------------------------------------------------------------------------
         user_file_director.set_compatibility_builder_use_compatibility_mode(True)
 
@@ -642,7 +644,7 @@ class SANSSingleReductionComparisonTest(SingleReductionTest):
             alg_second_slice_times.append(end - start)
 
         # --------------------------------------------------------------------------------------------------------------
-        # Make checks - Check that SANSSingleReductionEventSlice takes less time to run,
+        # Make checks - Check that version 2 takes less time to run,
         #               and check that output workspace are similar
         # --------------------------------------------------------------------------------------------------------------
         # Check that SingleReductionEventSlice takes less time in total
@@ -691,7 +693,7 @@ class SANSReductionRunnerTest(systemtesting.MantidSystemTest):
     def runTest(self):
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(SANSSingleReductionTest, 'test'))
-        suite.addTest(unittest.makeSuite(SANSSingleReductionEventSliceTest, 'test'))
+        suite.addTest(unittest.makeSuite(SANSSingleReduction2Test, 'test'))
         suite.addTest(unittest.makeSuite(SANSSingleReductionComparisonTest, 'test'))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)

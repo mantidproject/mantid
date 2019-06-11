@@ -40,31 +40,29 @@ else:
 # ----------------------------------------------------------------------------------------------------------------------
 def select_reduction_alg(split_for_event_slices, use_compatibility_mode, use_event_slice_mode, reduction_packages):
     """
-    Select whether the data should be reduced via SANSSingleReduction, or SANSSingleReductionEventSlice.
-    To use SANSSingleReductionEventSlice, the reduction must be carried out with event slices, compatibility mode
+    Select whether the data should be reduced via version 1 or 2 of SANSSingleReduction.
+    To use version 2, the reduction must be carried out with event slices, compatibility mode
     must not have been switched on (via the sans_data_processor_gui), and event slice mode must have been switched on
     (via the sans_data_processor_gui)
     :param split_for_event_slices: bool. If true, event slicing will be carried out in the reduction
     :param use_compatibility_mode: bool. If true, compatibility mode has been turned on
     :param use_event_slice_mode: bool. If true, event slice mode has been turned on
     :param reduction_packages: a list of reduction package objects
-    :return:
+    :return:whether or not we're event slicing (bool); reduction packages
     """
     if (split_for_event_slices and not
             use_compatibility_mode and
             use_event_slice_mode):
         # If using compatibility mode we convert to histogram immediately after taking event slices,
         # so would not be able to perform operations on event workspaces pre-slicing.
-        alg = "SANSSingleReductionEventSlice"
         event_slice = True
     else:
-        alg = "SANSSingleReduction"
         event_slice = False
         if split_for_event_slices:
             # Split into separate event slice workspaces here.
             # For event_slice mode, this is done in SANSSingleReductionEventSlice
             reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
-    return alg, event_slice, reduction_packages
+    return ver, event_slice, reduction_packages
 
 
 def single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
@@ -78,6 +76,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     :param state: a SANSState object
     :param use_optimizations: if true then the optimizations of child algorithms are enabled.
     :param output_mode: the output mode
+    :param plot_results: bool. Whether or not workspaces should be plotted as they are reduced. Currently only works
+                         with event slice compatibility
+    :param output_graph: The graph object for plotting workspaces.
     :param save_can: bool. whether or not to save out can workspaces
     """
     # ------------------------------------------------------------------------------------------------------------------
@@ -102,18 +103,20 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
     split_for_event_slices = reduction_packages_require_splitting_for_event_slices(reduction_packages)
 
-    alg, event_slice, reduction_packages = select_reduction_alg(split_for_event_slices,
-                                                                state.compatibility.use_compatibility_mode,
-                                                                state.compatibility.use_event_slice_mode,
-                                                                reduction_packages)
+    event_slice, reduction_packages = select_reduction_alg(split_for_event_slices,
+                                                           state.compatibility.use_compatibility_mode,
+                                                           state.compatibility.use_event_slice_mode,
+                                                           reduction_packages)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
-    single_reduction_name = alg
+    single_reduction_name = "SANSSingleReduction"
     single_reduction_options = {"UseOptimizations": use_optimizations,
                                 "SaveCan": save_can}
-    reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
+    alg_version = 2 if event_slice else 1
+    reduction_alg = create_managed_non_child_algorithm(single_reduction_name, version=alg_version,
+                                                       **single_reduction_options)
     reduction_alg.setChild(False)
     # Perform the data reduction
     for reduction_package in reduction_packages:
@@ -233,7 +236,6 @@ def plot_workspace(reduction_package, output_graph):
 
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: Name to the plot window
-    :return: None
     """
     if reduction_package.reduction_mode == ISISReductionMode.All:
         graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
@@ -258,7 +260,6 @@ def plot_workspace_matplotlib(reduction_package, output_graph):
 
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: A matplotlib fig
-    :return: None
     """
     plot_kwargs = {"scalex": True,
                    "scaley": True}
