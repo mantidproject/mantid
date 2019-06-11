@@ -17,8 +17,7 @@ void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
   setBackgroundColor(item, cell.backgroundColor());
   setBorderColor(item, cell.borderColor(), cell.borderOpacity());
   setIcon(item, cell.iconFilePath());
-  if (cell.containsOutputValue())
-    setForegroundColor(item, cell.foregroundColor());
+  setForegroundColor(item, cell.foregroundColor());
 }
 
 Cell extractCellPropertiesFromItem(QStandardItem const &item) {

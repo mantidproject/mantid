@@ -312,7 +312,10 @@ std::vector<std::string> RunsTablePresenter::cellTextFromViewAt(
     MantidWidgets::Batch::RowLocation const &location) const {
   return map(m_view->jobs().cellsAt(location),
              [](MantidWidgets::Batch::Cell const &cell) -> std::string {
-               return cell.contentText();
+               if (cell.containsOutputValue())
+                 return std::string();
+               else
+                 return cell.contentText();
              });
 }
 

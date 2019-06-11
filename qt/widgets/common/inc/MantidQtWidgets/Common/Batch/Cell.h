@@ -20,6 +20,9 @@ namespace Batch {
 
 class EXPORT_OPT_MANTIDQT_COMMON Cell {
 public:
+  static constexpr const char *INPUT_FOREGROUND_COLOR = "#000000";
+  static constexpr const char *OUTPUT_FOREGROUND_COLOR = "#808080";
+
   Cell(std::string const &contentText);
   Cell(std::string const &contentText, std::string const &backgroundColor,
        int borderThickness, std::string const &color, int borderOpacity,
