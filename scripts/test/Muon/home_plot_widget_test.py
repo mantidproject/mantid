@@ -5,21 +5,19 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
 
 from mantid.py3compat import mock
-
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
+from mantidqt.utils.qt.testing import GuiTest
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
 
 
-
-class HomeTabPlotPresenterTest(unittest.TestCase):
+class HomeTabPlotPresenterTest(GuiTest):
     def setUp(self):
         self.context = mock.MagicMock()
         self.plotting_window_model = mock.MagicMock()
         self.view = mock.MagicMock()
         self.model = mock.MagicMock()
+
         self.presenter = HomePlotWidgetPresenter(self.view, self.model)
 
     def test_use_rebin_changed_resets_use_raw_to_true_if_no_rebin_specified(self):

@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_view import FittingTabView
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter import FittingTabPresenter
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FittingTabModel

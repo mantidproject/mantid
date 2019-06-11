@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext, default_dict
 import unittest
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_workspace_wrapper_stub_object
