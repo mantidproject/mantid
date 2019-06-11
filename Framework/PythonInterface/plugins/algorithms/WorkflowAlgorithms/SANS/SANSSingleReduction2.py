@@ -288,7 +288,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
         # Decide which core reduction information to run, i.e. HAB, LAB, ALL, MERGED. In the case of ALL and MERGED,
         # the required simple reduction modes need to be run. Normally this is HAB and LAB, future implementations
         # might have more detectors though (or different types)
-        reduction_setting_bundles = self._get_initial_reduction_setting_bundles(state, overall_reduction_mode)
+        reduction_setting_bundles = self._get_reduction_setting_bundles(state, overall_reduction_mode)
 
         # --------------------------------------------------------------------------------------------------------------
         # Initial Reduction - steps which can be carried out before event slicing
@@ -300,11 +300,20 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
         return self._get_slice_reduction_setting_bundles(intermediate_bundles)
 
     def do_reduction(self, reduction_alg, reduction_setting_bundles, progress):
+        """
+        Perform the main reduction
+        :param reduction_alg: SANSReductionCoreEventSlice algorithm
+        :param reduction_setting_bundles: a list of list containing workspaces to be reduced.
+        :param progress: a progress bar
+        :return: output_bundles: a list of list containing output workspaces
+                 output_parts_bundles: a list of lists containing output workspaces
+                 output_transmission_bundles: a list containing transmission workspaces
+        """
         output_bundles = []
         output_parts_bundles = []
         output_transmission_bundles = []
         for event_slice_bundles in reduction_setting_bundles:
-            # Output bundles and parts bundles need to be sepated by a event slices, but grouped by component
+            # Output bundles and parts bundles need to be separated by a event slices, but grouped by component
             # e.g. [[workspaces for slice1], [workspaces for slice2]]
             slice_bundles = []
             slice_parts_bundles = []
@@ -340,7 +349,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
             state = self._get_state()
             state.validate()
         except ValueError as err:
-            errors.update({"SANSSingleReductionEventSlice": str(err)})
+            errors.update({"SANSSingleReduction": str(err)})
         return errors
 
     def _get_state(self):
@@ -354,7 +363,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
         reduction_mode = reduction_info.reduction_mode
         return reduction_mode
 
-    def _get_initial_reduction_setting_bundles(self, state, reduction_mode):
+    def _get_reduction_setting_bundles(self, state, reduction_mode):
         # We need to output the parts if we request a merged reduction mode. This is necessary for stitching later on.
         output_parts = reduction_mode is ReductionMode.Merged
 
@@ -371,24 +380,24 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
             reduction_modes = [reduction_mode]
 
         # Create the Scatter information
-        sample_info = self._create_initial_reduction_bundles_for_data_type(state=state,
-                                                                           data_type=DataType.Sample,
-                                                                           reduction_modes=reduction_modes,
-                                                                           output_parts=output_parts,
-                                                                           scatter_name="SampleScatterWorkspace",
-                                                                           scatter_monitor_name="SampleScatterMonitorWorkspace",
-                                                                           transmission_name="SampleTransmissionWorkspace",
-                                                                           direct_name="SampleDirectWorkspace")
+        sample_info = self._create_reduction_bundles_for_data_type(state=state,
+                                                                   data_type=DataType.Sample,
+                                                                   reduction_modes=reduction_modes,
+                                                                   output_parts=output_parts,
+                                                                   scatter_name="SampleScatterWorkspace",
+                                                                   scatter_monitor_name="SampleScatterMonitorWorkspace",
+                                                                   transmission_name="SampleTransmissionWorkspace",
+                                                                   direct_name="SampleDirectWorkspace")
 
         # Create the Can information
-        can_info = self._create_initial_reduction_bundles_for_data_type(state=state,
-                                                                        data_type=DataType.Can,
-                                                                        reduction_modes=reduction_modes,
-                                                                        output_parts=output_parts,
-                                                                        scatter_name="CanScatterWorkspace",
-                                                                        scatter_monitor_name="CanScatterMonitorWorkspace",
-                                                                        transmission_name="CanTransmissionWorkspace",
-                                                                        direct_name="CanDirectWorkspace")
+        can_info = self._create_reduction_bundles_for_data_type(state=state,
+                                                                data_type=DataType.Can,
+                                                                reduction_modes=reduction_modes,
+                                                                output_parts=output_parts,
+                                                                scatter_name="CanScatterWorkspace",
+                                                                scatter_monitor_name="CanScatterMonitorWorkspace",
+                                                                transmission_name="CanTransmissionWorkspace",
+                                                                direct_name="CanDirectWorkspace")
         reduction_setting_bundles = sample_info
 
         # Make sure that the can information has at least a scatter and a monitor workspace
@@ -397,9 +406,9 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
                 reduction_setting_bundles.append(can_bundle)
         return reduction_setting_bundles
 
-    def _create_initial_reduction_bundles_for_data_type(self, state, data_type, reduction_modes, output_parts,
-                                                        scatter_name, scatter_monitor_name,
-                                                        transmission_name, direct_name):
+    def _create_reduction_bundles_for_data_type(self, state, data_type, reduction_modes, output_parts,
+                                                scatter_name, scatter_monitor_name,
+                                                transmission_name, direct_name):
         # Get workspaces
         scatter_workspace = self.getProperty(scatter_name).value
 
@@ -511,7 +520,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
                 elif reduction_mode is ISISReductionMode.HAB:
                     workspace_group_hab.addWorkspace(output_workspace)
                 else:
-                    raise RuntimeError("SANSSingleReductionEventSlice: Cannot set the output workspace. "
+                    raise RuntimeError("SANSSingleReduction: Cannot set the output workspace. "
                                        "The selected reduction mode {0} is unknown.".format(reduction_mode))
         if workspace_group_merged.size() > 0:
             self.setProperty("OutputWorkspaceMerged", workspace_group_merged)
@@ -548,7 +557,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
                         elif reduction_mode is ISISReductionMode.HAB:
                             workspace_group_hab_can.addWorkspace(output_workspace)
                         else:
-                            raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
+                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                                " be set with a can.".format(reduction_mode))
         if workspace_group_lab_can.size() > 0:
             # LAB group workspace is non-empty, so we want to set it as output
@@ -595,7 +604,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
                             workspace_group_hab_can_count.addWorkspace(output_workspace_count)
                             workspace_group_hab_can_norm.addWorkspace(output_workspace_norm)
                         else:
-                            raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
+                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                                " be set with a partial can.".format(reduction_mode))
         if workspace_group_lab_can_count.size() > 0:
             self.setProperty("OutputWorkspaceLABCanCount", workspace_group_lab_can_count)
@@ -637,7 +646,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
                         elif reduction_mode is ISISReductionMode.HAB:
                             workspace_group_hab_can.addWorkspace(output_workspace)
                         else:
-                            raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
+                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                                " be set with a can.".format(reduction_mode))
                 elif output_bundle.data_type is DataType.Sample:
                     reduction_mode = output_bundle.reduction_mode
@@ -652,7 +661,7 @@ class SANSSingleReduction2(DistributedDataProcessorAlgorithm):
                         elif reduction_mode is ISISReductionMode.HAB:
                             workspace_group_hab_sample.addWorkspace(output_workspace)
                         else:
-                            raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
+                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                                " be set with a sample.".format(reduction_mode))
 
         if workspace_group_hab_can.size() > 0:
