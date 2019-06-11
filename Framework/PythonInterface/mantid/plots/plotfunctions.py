@@ -22,7 +22,6 @@ import numpy
 
 import mantid.api
 import mantid.kernel
-from mantid.kernel import config
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
@@ -208,8 +207,8 @@ def errorbar(axes, workspace, *args, **kwargs):
     """
     normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
         workspace, axes, **kwargs)
-    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs,
-                                                       with_dy=True, with_dx=False)
+    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(
+        axes, workspace, kwargs, with_dy=True, with_dx=False)
     _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
 
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)

@@ -15,6 +15,7 @@ import numpy as np
 import unittest
 
 from mantid.api import WorkspaceFactory
+from mantid.kernel import config
 from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
 from mantid.simpleapi import (AnalysisDataService, CreateWorkspace,
@@ -231,7 +232,7 @@ class Plots__init__Test(unittest.TestCase):
         self.assertRaises(Exception, ax.plot_wireframe, self.ws2d_histo)
         self.assertRaises(Exception, ax.plot_surface, self.ws2d_histo)
 
-    def test_artists_normalization_state_labeled_correctly_dist_workspace(self):
+    def test_artists_normalization_state_labeled_correctly_for_dist_workspace(self):
         dist_ws = CreateWorkspace(DataX=[10, 20],
                                   DataY=[2, 3],
                                   DataE=[1, 2],
@@ -240,11 +241,13 @@ class Plots__init__Test(unittest.TestCase):
                                   OutputWorkspace='dist_workpace')
         self.ax.plot(dist_ws, specNum=1, distribution=False)
         self.ax.plot(dist_ws, specNum=1, distribution=True)
+        self.ax.plot(dist_ws, specNum=1)
         ws_artists = self.ax.tracked_workspaces[dist_ws.name()]
         self.assertTrue(ws_artists[0].is_normalized)
         self.assertTrue(ws_artists[1].is_normalized)
+        self.assertTrue(ws_artists[2].is_normalized)
 
-    def test_artists_normalization_state_labeled_correctly_non_dist_workspace(self):
+    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace(self):
         non_dist_ws = CreateWorkspace(DataX=[10, 20],
                                       DataY=[2, 3],
                                       DataE=[1, 2],
@@ -252,10 +255,18 @@ class Plots__init__Test(unittest.TestCase):
                                       Distribution=False,
                                       OutputWorkspace='non_dist_workpace')
         self.ax.plot(non_dist_ws, specNum=1, distribution=False)
-        self.ax.plot(non_dist_ws, specNum=1, distribution=True)
-        ws_artists = self.ax.tracked_workspaces[non_dist_ws.name()]
-        self.assertTrue(ws_artists[0].is_normalized)
-        self.assertFalse(ws_artists[1].is_normalized)
+        self.assertTrue(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        del self.ax.tracked_workspaces[non_dist_ws.name()]
+
+        self.ax.errorbar(non_dist_ws, specNum=1, distribution=True)
+        self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        del self.ax.tracked_workspaces[non_dist_ws.name()]
+
+        self.ax.plot(non_dist_ws, specNum=1)
+        auto_dist = (config['graph1d.autodistribution'] == 'On')
+        self.assertEqual(auto_dist, self.ax.tracked_workspaces[
+            non_dist_ws.name()][0].is_normalized)
+        del self.ax.tracked_workspaces[non_dist_ws.name()]
 
     def test_check_axes_distribution_consistency_mixed_normalization(self):
         mock_logger = self._run_check_axes_distribution_consistency(
