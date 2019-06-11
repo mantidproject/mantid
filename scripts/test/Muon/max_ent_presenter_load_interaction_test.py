@@ -7,13 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from qtpy import QtWidgets
-from mantidqt.utils.qt.testing import GuiTest
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
-from mantid.py3compat import mock
-from Muon.GUI.Common.muon_pair import MuonPair
+
 from mantid.api import FileFinder
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 from qtpy import QtCore
+
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
+from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model

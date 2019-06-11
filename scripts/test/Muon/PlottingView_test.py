@@ -4,17 +4,16 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import os
+from __future__ import (absolute_import, unicode_literals)
+
 import sys
 import unittest
 
-os.environ["QT_API"] = "pyqt"  # noqa E402
-
 from matplotlib.figure import Figure
-
 from mantid import WorkspaceFactory, plots
 from mantid.py3compat import mock
-from Muon.GUI.Common.test_helpers import mock_widget
+from mantidqt.utils.qt.testing import GuiTest
+
 from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
@@ -37,14 +36,12 @@ def get_subPlot(name):
     subplot.addLine(label1, line1, ws1, 2)
     return subplot, ws1
 
-@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
-class PlottingViewHelperFunctionTests(unittest.TestCase):
+@unittest.skipIf(lambda: sys.platform=='win32'(),
+                 "Test segfaults on Windows and code will be removed soon")
+class PlottingViewHelperFunctionTests(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-
         self.view = PlotView()
-
         self.mock_func = mock.Mock(return_value=True)
         self.mock_args = [mock.Mock() for i in range(3)]
         self.mock_kwargs = {}
@@ -295,10 +292,9 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
 
 @unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
-class PlottingViewPlotFunctionsTests(unittest.TestCase):
+class PlottingViewPlotFunctionsTests(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
 
         self.view = PlotView()
 
