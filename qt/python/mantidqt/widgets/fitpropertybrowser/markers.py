@@ -355,10 +355,6 @@ class PeakMarker(QObject):
             self.left_width.mouse_move_start(x, y)
             self.right_width.mouse_move_start(x, y)
 
-    def transform(self, x, y):
-        x, y = self.centre_marker.transform_pixels_to_coords(x, y, self.y_max)
-        return [x, y]
-
     def mouse_move_stop(self):
         """
         Stop moving.
@@ -403,7 +399,6 @@ class PeakMarker(QObject):
                 self.fwhm_changed.emit(self.peak_id, self.fwhm())
         return moved
 
-#    @property
     def is_moving(self):
         """
         Check if this marker is moving as a whole.
@@ -427,6 +422,12 @@ class PeakMarker(QObject):
         Get peak FWHM.
         """
         return self.right_width.x - self.left_width.x
+
+    def peak_properties(self):
+        """
+        Get the centre, height and fwhm of the peak.
+        """
+        return self.centre(), self.height(), self.fwhm()
 
     def update_peak(self, centre, height, fwhm):
         """

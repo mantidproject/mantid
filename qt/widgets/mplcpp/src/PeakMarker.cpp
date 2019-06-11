@@ -57,13 +57,30 @@ PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x,
 void PeakMarker::redraw() { callMethodNoCheck<void>(pyobj(), "redraw"); }
 
 /**
- * @brief Updates the centre, heigh and fwhm for the peak.
+ * @brief Updates the centre, height and fwhm for the peak.
  * @param centre The new centre.
  * @param height The new height.
  * @param fwhm The new height.
  */
 void PeakMarker::updatePeak(double centre, double height, double fwhm) {
   callMethodNoCheck<void>(pyobj(), "update_peak", centre, height, fwhm);
+}
+
+/**
+ * @brief Get the centre, height and fwhm of the peak.
+ * @return A tuple containing the centre, height and fwhm of the peak
+ */
+std::tuple<double, double, double> PeakMarker::peakProperties() const {
+  GlobalInterpreterLock lock;
+
+  auto const toDouble = [](Python::Object const &value) {
+    return PyFloat_AsDouble(value.ptr());
+  };
+
+  auto const properties = pyobj().attr("peak_properties")();
+  return std::make_tuple<double, double, double>(toDouble(properties[0]),
+                                                 toDouble(properties[1]),
+                                                 toDouble(properties[2]));
 }
 
 /**
@@ -77,20 +94,14 @@ bool PeakMarker::isMoving() const {
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
-std::tuple<double, double> PeakMarker::transform(int x, int y) {
-  GlobalInterpreterLock lock;
-
-  auto const toDouble = [](Python::Object const &value) {
-    return PyFloat_AsDouble(value.ptr());
-  };
-
-  auto const coords = pyobj().attr("transform")(x, y);
-  return std::make_tuple<double, double>(toDouble(coords[0]),
-                                         toDouble(coords[1]));
-}
-
+/**
+ * @brief Selects the PeakMarker.
+ */
 void PeakMarker::select() { callMethodNoCheck<void>(pyobj(), "select"); }
 
+/**
+ * @brief Deselects the PeakMarker.
+ */
 void PeakMarker::deselect() { callMethodNoCheck<void>(pyobj(), "deselect"); }
 
 /**

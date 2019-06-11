@@ -31,8 +31,9 @@ public:
   void redraw();
 
   void updatePeak(double centre, double height, double fwhm);
+  std::tuple<double, double, double> peakProperties() const;
+
   bool isMoving() const;
-  std::tuple<double, double> transform(int x, int y);
 
   void select();
   void deselect();

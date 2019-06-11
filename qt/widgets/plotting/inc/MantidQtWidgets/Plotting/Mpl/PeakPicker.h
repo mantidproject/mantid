@@ -29,15 +29,12 @@ public:
   void setPeak(const Mantid::API::IPeakFunction_const_sptr &peak);
   Mantid::API::IPeakFunction_sptr peak() const;
 
-  //  void setColour(const QColor &colour);
-  //  void setRange(const std::pair<double, double> &range);
-  //  std::pair<double, double> getRange() const;
-  //
-  // signals:
-  //  void selectionChanged(double min, double max);
-  //
+  void select(bool select);
+
+signals:
+  void changed();
+
   // public slots:
-  //  void setRange(const double min, const double max);
   //  void detach();
 
 private slots:

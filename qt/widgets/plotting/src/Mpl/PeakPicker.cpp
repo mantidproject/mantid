@@ -54,6 +54,13 @@ void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
 
 IPeakFunction_sptr PeakPicker::peak() const { return m_peak; }
 
+void PeakPicker::select(bool select) {
+  if (select)
+    m_peakMarker->select();
+  else
+    m_peakMarker->deselect();
+}
+
 void PeakPicker::handleMouseDown(const QPoint &point) {
   m_peakMarker->mouseMoveStart(point.x(), point.y());
   if (m_peakMarker->isMoving())
@@ -65,8 +72,11 @@ void PeakPicker::handleMouseMove(const QPoint &point) {
 
   if (markerMoved) {
     m_plot->replot();
-    // const auto range = m_peakMarker->getXRange();
-    // emit selectionChanged(std::get<0>(range), std::get<1>(range));
+    const auto properties = m_peakMarker->peakProperties();
+    m_peak->setCentre(std::get<0>(properties));
+    m_peak->setHeight(std::get<1>(properties));
+    m_peak->setFwhm(std::get<2>(properties));
+    emit changed();
   }
 }
 

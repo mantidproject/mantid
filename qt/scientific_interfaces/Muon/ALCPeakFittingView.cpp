@@ -107,8 +107,12 @@ void ALCPeakFittingView::setParameter(const QString &funcIndex,
 }
 
 void ALCPeakFittingView::setPeakPickerEnabled(bool enabled) {
-  // m_peakPicker->setEnabled(enabled);
-  // m_peakPicker->setVisible(enabled);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_peakPicker->setEnabled(enabled);
+  m_peakPicker->setVisible(enabled);
+#else
+  m_peakPicker->select(enabled);
+#endif
   m_ui.plot->replot();
 }
 
