@@ -7,7 +7,7 @@ add_subdirectory(ill)
 set(UI_FILES
     stitcher.ui)
 
-UiToPy(UI_FILES CompileUIUIBase)
+UiToPy(UI_FILES CompileUIUIBase 4)
 
 add_custom_target(CompileUIUI
                   DEPENDS CompileUIUIBase
