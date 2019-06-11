@@ -89,7 +89,7 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
                 'InputWorkspaceIndexSet' : '0-7',
                 'BackgroundCalculationMethod' : 'AveragePixelFit',
                 'PeakRange' : '3,4',
-				'SumPeak' : False,
+                'SumPeak' : False,
                 'OutputWorkspace': 'output'}
         output = self._assert_run_algorithm_succeeds(args)
         for i in range(0, output.getNumberHistograms()):
@@ -131,13 +131,9 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
 
     def _assert_run_algorithm_throws(self, args = {}):
         """Run the algorithm with the given args and check it throws"""
-        throws = False
         alg = create_algorithm('ReflectometryBackgroundSubtraction', **args)
-        try:
+        with self.assertRaises(RuntimeError):
             alg.execute()
-        except:
-            throws = True
-        self.assertRaises(throws, True)
 
 if __name__ == '__main__':
     unittest.main()

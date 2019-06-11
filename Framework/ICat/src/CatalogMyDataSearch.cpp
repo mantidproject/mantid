@@ -18,7 +18,7 @@ void CatalogMyDataSearch::init() {
   declareProperty("Session", "",
                   "The session information of the catalog to use.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the workspace to store the search results.");
 }

@@ -44,9 +44,9 @@ const std::string CreateChopperModel::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateChopperModel::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
-                                                           Direction::InOut),
-                  "An workspace to attach the model");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "An workspace to attach the model");
 
   std::array<std::string, 1> keys = {{"FermiChopperModel"}};
   declareProperty("ModelType", "",

@@ -12,7 +12,7 @@
 #include <QRunnable>
 #include <QWidget>
 
-#include <MantidKernel/System.h>
+#include "MantidKernel/System.h"
 
 #include "MantidEVWorker.h"
 #include "MantidQtWidgets/Common/SelectionNotificationService.h"

@@ -10,7 +10,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidKernel/make_unique.h"
+
 #include <memory>
 #include <vector>
 
@@ -211,9 +211,8 @@ using LogManager_const_sptr = boost::shared_ptr<const LogManager>;
 template <class TYPE>
 void LogManager::addProperty(const std::string &name, const TYPE &value,
                              bool overwrite) {
-  addProperty(
-      Mantid::Kernel::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value),
-      overwrite);
+  addProperty(std::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value),
+              overwrite);
 }
 
 /**
@@ -228,8 +227,7 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
 template <class TYPE>
 void LogManager::addProperty(const std::string &name, const TYPE &value,
                              const std::string &units, bool overwrite) {
-  auto newProp =
-      Mantid::Kernel::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value);
+  auto newProp = std::make_unique<Kernel::PropertyWithValue<TYPE>>(name, value);
   newProp->setUnits(units);
   addProperty(std::move(newProp), overwrite);
 }

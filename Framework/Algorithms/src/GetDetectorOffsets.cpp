@@ -32,7 +32,7 @@ using namespace DataObjects;
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D workspace with X values of d-spacing");
@@ -51,15 +51,16 @@ void GetDetectorOffsets::init() {
       "XMax", 0.0,
       "Maximum of CrossCorrelation data to search for peak, usually positive");
 
-  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::OptionalSave, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
+                                                 FileProperty::OptionalSave,
+                                                 ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
-  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
+                                                        Direction::Output),
                   "An output workspace containing the mask.");
   // Only keep peaks
   declareProperty(

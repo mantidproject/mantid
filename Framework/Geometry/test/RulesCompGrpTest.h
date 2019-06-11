@@ -21,7 +21,7 @@
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 #include "boost/make_shared.hpp"
 
 using namespace Mantid;
@@ -147,8 +147,8 @@ public:
 
 private:
   std::unique_ptr<Rule> createUnionSphereAndCylinder() {
-    auto sR1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto sR2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto sR1 = std::make_unique<SurfPoint>();
+    auto sR2 = std::make_unique<SurfPoint>();
     auto sP = boost::make_shared<Sphere>();
     sP->setSurface("s 2.0 0.0 0.0 2");
     sR1->setKey(sP); // Sphere
@@ -157,7 +157,7 @@ private:
     cP->setSurface("cy 1.0");
     sR2->setKey(cP); // cappedcylinder
     sR2->setKeyN(-11);
-    return Mantid::Kernel::make_unique<Union>(std::move(sR1), std::move(sR2));
+    return std::make_unique<Union>(std::move(sR1), std::move(sR2));
   }
 };
 //---------------------------------End of

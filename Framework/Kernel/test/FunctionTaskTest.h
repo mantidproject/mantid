@@ -11,7 +11,7 @@
 
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Task.h"
-#include <MantidKernel/Timer.h>
+#include "MantidKernel/Timer.h"
 
 using namespace Mantid::Kernel;
 

@@ -31,11 +31,11 @@ SaveTBL::SaveTBL() : m_sep(','), m_stichgroups(), m_nogroup() {}
 
 /// Initialisation method.
 void SaveTBL::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".tbl"),
-      "The filename of the output TBL file.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".tbl"),
+                  "The filename of the output TBL file.");
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the workspace containing the data you want to "
                   "save to a TBL file.");

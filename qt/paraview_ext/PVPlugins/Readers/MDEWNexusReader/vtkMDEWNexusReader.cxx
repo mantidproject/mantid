@@ -104,13 +104,13 @@ int vtkMDEWNexusReader::RequestData(
       this, "Drawing...");
 
   auto hexahedronFactory =
-      Mantid::Kernel::make_unique<vtkMDHexFactory>(m_normalization);
+      std::make_unique<vtkMDHexFactory>(m_normalization);
 
   hexahedronFactory
       ->setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDQuadFactory>(m_normalization))
+          std::make_unique<vtkMDQuadFactory>(m_normalization))
       .setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDLineFactory>(m_normalization));
+          std::make_unique<vtkMDLineFactory>(m_normalization));
 
   hexahedronFactory->setTime(m_time);
   vtkDataSet *product = m_presenter->execute(
@@ -143,9 +143,9 @@ int vtkMDEWNexusReader::RequestInformation(
     vtkInformationVector *outputVector) {
   if (m_presenter == nullptr) {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
+        std::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
             this);
-    m_presenter = Mantid::Kernel::make_unique<MDEWEventNexusLoadingPresenter>(
+    m_presenter = std::make_unique<MDEWEventNexusLoadingPresenter>(
         std::move(view), FileName);
     m_presenter->executeLoadMetadata();
     setTimeRange(outputVector);
@@ -159,7 +159,7 @@ void vtkMDEWNexusReader::PrintSelf(ostream &os, vtkIndent indent) {
 
 int vtkMDEWNexusReader::CanReadFile(const char *fname) {
   std::unique_ptr<MDLoadingView> view =
-      Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
+      std::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
           this);
   MDEWEventNexusLoadingPresenter temp(std::move(view), fname);
   return temp.canReadFile();

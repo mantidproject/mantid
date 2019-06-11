@@ -24,7 +24,7 @@ class ArrayLengthValidatorTest(unittest.TestCase):
         fixedlength = 9
         validator = FloatArrayLengthValidator(fixedlength)
         self.assertTrue(validator.hasLength())
-        self.assertEquals(validator.getLength(), fixedlength)
+        self.assertEqual(validator.getLength(), fixedlength)
 
     def test_range_length_constructor_returns_hasMinMax(self):
         lower = 4
@@ -32,8 +32,8 @@ class ArrayLengthValidatorTest(unittest.TestCase):
         validator = FloatArrayLengthValidator(lower, upper)
         self.assertTrue(validator.hasMinLength())
         self.assertTrue(validator.hasMaxLength())
-        self.assertEquals(validator.getMinLength(), lower)
-        self.assertEquals(validator.getMaxLength(), upper)
+        self.assertEqual(validator.getMinLength(), lower)
+        self.assertEqual(validator.getMaxLength(), upper)
 
     def test_setFixedLength_alters_accepted_lenth(self):
         validator = FloatArrayLengthValidator()
@@ -41,7 +41,7 @@ class ArrayLengthValidatorTest(unittest.TestCase):
         fixed = 5
         validator.setLength(fixed)
         self.assertTrue(validator.hasLength())
-        self.assertEquals(validator.getLength(), fixed)
+        self.assertEqual(validator.getLength(), fixed)
         validator.clearLength()
         self.assertFalse(validator.hasLength())
 
@@ -54,11 +54,11 @@ class ArrayLengthValidatorTest(unittest.TestCase):
         validator.setLengthMin(lower)
         self.assertTrue(validator.hasMinLength())
         self.assertFalse(validator.hasMaxLength())
-        self.assertEquals(validator.getMinLength(), lower)
+        self.assertEqual(validator.getMinLength(), lower)
         validator.setLengthMax(upper)
         self.assertTrue(validator.hasMinLength())
         self.assertTrue(validator.hasMaxLength())
-        self.assertEquals(validator.getMaxLength(), upper)
+        self.assertEqual(validator.getMaxLength(), upper)
 
         validator.clearLengthMin()
         self.assertFalse(validator.hasMinLength())

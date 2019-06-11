@@ -27,26 +27,26 @@ class WorkspacePropertiesTest(unittest.TestCase):
     def _do_construction_with_name_default_direction(self, classtype):
         prop = classtype("NoValidation", "test", Direction.Output)
         self.assertTrue(isinstance(prop, classtype))
-        self.assertEquals("NoValidation", prop.name)
-        self.assertEquals(Direction.Output, prop.direction)
-        self.assertEquals("test", prop.valueAsStr)
+        self.assertEqual("NoValidation", prop.name)
+        self.assertEqual(Direction.Output, prop.direction)
+        self.assertEqual("test", prop.valueAsStr)
 
     def _do_construction_with_name_default_direction_optional(self, classtype):
         prop = classtype("IsOptional", "test", Direction.Output, PropertyMode.Optional)
         self.assertTrue(isinstance(prop, classtype))
-        self.assertEquals("IsOptional", prop.name)
-        self.assertEquals(Direction.Output, prop.direction)
+        self.assertEqual("IsOptional", prop.name)
+        self.assertEqual(Direction.Output, prop.direction)
         self.assertTrue(prop.isOptional())
-        self.assertEquals("test", prop.valueAsStr)
+        self.assertEqual("test", prop.valueAsStr)
 
     def _do_construction_with_name_default_direction_optional_no_locking(self, classtype):
         prop = classtype("DoesNotLock", "test", Direction.Output, PropertyMode.Optional, LockMode.NoLock)
         self.assertTrue(isinstance(prop, classtype))
-        self.assertEquals("DoesNotLock", prop.name)
-        self.assertEquals(Direction.Output, prop.direction)
+        self.assertEqual("DoesNotLock", prop.name)
+        self.assertEqual(Direction.Output, prop.direction)
         self.assertTrue(prop.isOptional())
         self.assertFalse(prop.isLocking())
-        self.assertEquals("test", prop.valueAsStr)
+        self.assertEqual("test", prop.valueAsStr)
 
     def test_WorkspaceProperty_can_be_instantiated(self):
         self._do_test(WorkspaceProperty)

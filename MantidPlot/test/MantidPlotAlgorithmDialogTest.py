@@ -36,7 +36,7 @@ class MantidPlotAlgorithmDialogTest(unittest.TestCase):
         threadsafe_call(dialog.close)
         file_abs = os.path.join(screenshotdir, filename)
         file_exists = os.path.isfile(file_abs)
-        self.assertEquals(file_exists, True, "Screenshot was not written out as expected.")
+        self.assertEqual(file_exists, True, "Screenshot was not written out as expected.")
         if file_exists:
             os.remove(file_abs)
 

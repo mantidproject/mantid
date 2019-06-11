@@ -1,14 +1,21 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.test_helpers import mock_widget
+
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
@@ -18,12 +25,12 @@ def pair_name():
         name.append("pair_" + str(i+1))
     return name
 
-class AlphaTest(unittest.TestCase):
+
+class AlphaTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
         setup_context_for_tests(self)
 

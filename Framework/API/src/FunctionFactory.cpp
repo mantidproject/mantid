@@ -16,7 +16,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 

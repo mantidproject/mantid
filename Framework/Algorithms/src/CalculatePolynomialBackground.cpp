@@ -303,16 +303,16 @@ void CalculatePolynomialBackground::init() {
   auto orderedPairs =
       boost::make_shared<Kernel::ArrayOrderedPairsValidator<double>>();
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, increasingAxis),
       "An input workspace.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A workspace containing the fitted background.");
   declareProperty(Prop::POLY_DEGREE, 0, nonnegativeInt,
                   "Degree of the fitted polynomial.");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       Prop::XRANGES, std::vector<double>(), orderedPairs),
                   "A list of fitting ranges given as pairs of X values.");
   std::array<std::string, 2> costFuncOpts{

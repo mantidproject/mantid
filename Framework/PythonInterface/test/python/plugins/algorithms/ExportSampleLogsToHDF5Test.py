@@ -47,8 +47,8 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             self.assertTrue("Sample Logs" in output_file)
             logs_group = output_file["Sample Logs"]
-            self.assertEquals(logs_group["Test1"].value, 1.0)
-            self.assertEquals(logs_group["Test2"].value[0], b"Test2")
+            self.assertEqual(logs_group["Test1"].value, 1.0)
+            self.assertEqual(logs_group["Test2"].value[0], b"Test2")
 
     def test_blacklistExcludesLogs(self):
         input_ws = self._create_sample_workspace()
@@ -74,7 +74,7 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             logs_group = output_file["Sample Logs"]
-            self.assertEquals(logs_group["TestLog"].value, 1.5)
+            self.assertEqual(logs_group["TestLog"].value, 1.5)
 
     def test_unitAreAddedIfPresent(self):
         input_ws = self._create_sample_workspace()
@@ -84,7 +84,7 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             logs_group = output_file["Sample Logs"]
-            self.assertEquals(logs_group["TestLog"].attrs["Units"], "uAmps")
+            self.assertEqual(logs_group["TestLog"].attrs["Units"], "uAmps")
 
     def test_create_timeSeries(self):
         """ Tests that the correct TimeSeriesProperty is returned when given a
@@ -94,19 +94,19 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
         int_log_name = "Int32Series"
         int_log_values = [1,2,3,4,5,6,7]
         int_prop = PropertyFactory.createTimeSeries(int_log_name, int_log_values)
-        self.assertEquals(type(int_prop), Int32TimeSeriesProperty)
+        self.assertEqual(type(int_prop), Int32TimeSeriesProperty)
 
         # Test for BoolTimeSeriesProperty
         bool_log_name = "BoolSeries"
         bool_log_values = [True, False, False, True, False]
         bool_prop = PropertyFactory.createTimeSeries(bool_log_name, bool_log_values)
-        self.assertEquals(type(bool_prop), BoolTimeSeriesProperty)
+        self.assertEqual(type(bool_prop), BoolTimeSeriesProperty)
 
         # Test for StringSeriesProperty
         str_log_name = "StringSeries"
         str_log_values = ["Testing", "string", "time", "series", "property"]
         str_prop = PropertyFactory.createTimeSeries(str_log_name, str_log_values)
-        self.assertEquals(type(str_prop), StringTimeSeriesProperty)
+        self.assertEqual(type(str_prop), StringTimeSeriesProperty)
 
         # Test for FloatTimeSeriesProperty
         float_log_name = "FloatSeries"

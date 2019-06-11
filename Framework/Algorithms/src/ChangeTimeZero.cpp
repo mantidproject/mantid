@@ -50,7 +50,7 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
 /** Initialize the algorithm's properties.
  */
 void ChangeTimeZero::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   declareProperty<double>("RelativeTimeOffset", m_defaultTimeShift,
@@ -60,7 +60,7 @@ void ChangeTimeZero::init() {
                   "An absolute time offset as an ISO8601 string "
                   "(YYYY-MM-DDTHH:MM::SS, eg 2013-10-25T13:58:03).");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

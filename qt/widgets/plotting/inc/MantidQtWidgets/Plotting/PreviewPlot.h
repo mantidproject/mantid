@@ -12,7 +12,7 @@
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Plotting/Qwt/PreviewPlot.h"
 #else
-#error "PreviewPlot not implemented for Qtglobal >= 5"
+#include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
 #endif
 
 #endif // MANTIDQTMANTIDWIDGETS_PREVIEWPLOT_H_

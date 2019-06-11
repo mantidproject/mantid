@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.observer_pattern import Observable
 
 
@@ -28,7 +30,7 @@ class MuonGuiContext(dict):
             return
 
         super(MuonGuiContext, self).update(*args, **kwargs)
-        self.gui_variables_notifier.notify_subscribers()
+        self.gui_variables_notifier.notify_subscribers(kwargs)
 
     def update_and_send_non_calculation_signal(self, *args, **kwargs):
         updated_items = {k: kwargs[k] for k in kwargs if k in self and kwargs[k] != self[k] or k not in self}
@@ -36,7 +38,7 @@ class MuonGuiContext(dict):
             return
 
         super(MuonGuiContext, self).update(*args, **kwargs)
-        self.gui_variable_non_calulation_notifier.notify_subscribers()
+        self.gui_variable_non_calulation_notifier.notify_subscribers(kwargs)
 
     def add_subscriber(self, observer):
         self.gui_variables_notifier.add_subscriber(observer)

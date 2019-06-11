@@ -162,14 +162,9 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
   const std::vector<int> backgroundRange{static_cast<int>(indexList.front()),
                                          static_cast<int>(indexList.back())};
 
-  auto outputWSName = getPropertyValue("OutputWorkspace");
-
-  MatrixWorkspace_sptr workspace = inputWS->clone();
-  AnalysisDataService::Instance().addOrReplace(outputWSName, workspace);
-
   IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
-  LRBgd->setProperty("InputWorkspace", workspace);
+  LRBgd->setProperty("InputWorkspace", inputWS);
   LRBgd->setProperty("PeakRange", getPropertyValue("PeakRange"));
   LRBgd->setProperty("BackgroundRange", Strings::toString(backgroundRange));
   LRBgd->setProperty("SumPeak", getPropertyValue("SumPeak"));
@@ -177,10 +172,10 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
   // will need to change if ISIS reflectometry get a 2D detector
   LRBgd->setProperty("LowResolutionRange", "0,0");
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
-  LRBgd->setProperty("OutputWorkspace", outputWSName);
-  LRBgd->executeAsChildAlg();
+  LRBgd->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace"));
+  LRBgd->execute();
 
-  auto outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+  Workspace_sptr outputWS = LRBgd->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
 }
 
@@ -213,10 +208,11 @@ void ReflectometryBackgroundSubtraction::init() {
                   boost::make_shared<ListValidator<std::string>>(costFuncOpts),
                   "The cost function to be passed to the Fit algorithm.");
 
-  setPropertySettings("DegreeOfPolynomial", make_unique<EnabledWhenProperty>(
-                                                "BackgroundCalculationMethod",
-                                                IS_EQUAL_TO, "Polynomial"));
-  setPropertySettings("CostFunction", make_unique<EnabledWhenProperty>(
+  setPropertySettings(
+      "DegreeOfPolynomial",
+      std::make_unique<EnabledWhenProperty>("BackgroundCalculationMethod",
+                                            IS_EQUAL_TO, "Polynomial"));
+  setPropertySettings("CostFunction", std::make_unique<EnabledWhenProperty>(
                                           "BackgroundCalculationMethod",
                                           IS_EQUAL_TO, "Polynomial"));
 
@@ -224,24 +220,24 @@ void ReflectometryBackgroundSubtraction::init() {
 
   auto lengthArray = boost::make_shared<ArrayLengthValidator<int>>(2);
 
-  declareProperty(
-      make_unique<ArrayProperty<int>>("PeakRange", "147, 163", lengthArray),
-      "Pixel range defining the reflectivity peak");
+  declareProperty(std::make_unique<ArrayProperty<int>>("PeakRange", "147, 163",
+                                                       lengthArray),
+                  "Pixel range defining the reflectivity peak");
   declareProperty("SumPeak", false,
                   "If True, the resulting peak will be summed");
 
-  setPropertySettings("PeakRange", make_unique<EnabledWhenProperty>(
+  setPropertySettings("PeakRange", std::make_unique<EnabledWhenProperty>(
                                        "BackgroundCalculationMethod",
                                        IS_EQUAL_TO, "AveragePixelFit"));
 
-  setPropertySettings("SumPeak", make_unique<EnabledWhenProperty>(
+  setPropertySettings("SumPeak", std::make_unique<EnabledWhenProperty>(
                                      "BackgroundCalculationMethod", IS_EQUAL_TO,
                                      "AveragePixelFit"));
 
   // Output workspace
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "The output workspace containing the InputWorkspace with the "
                   "background removed.");
 }

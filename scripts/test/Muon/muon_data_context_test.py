@@ -23,7 +23,7 @@ class MuonDataContextTest(unittest.TestCase):
 
     def setUp(self):
         self.loaded_data = MuonLoadData()
-        self.context = MuonDataContext(self.loaded_data)
+        self.context = MuonDataContext(load_data=self.loaded_data)
         self.context.instrument = 'EMU'
 
         self.loaded_data.add_data(workspace=self.load_result, run=[self.run_number], filename=self.filename, instrument='EMU')

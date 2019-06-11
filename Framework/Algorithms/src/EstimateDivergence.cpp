@@ -50,7 +50,7 @@ const std::string EstimateDivergence::summary() const {
 /** Initialize the algorithm's properties.
  */
 void EstimateDivergence::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to have divergence calculated from");
 
@@ -67,7 +67,7 @@ void EstimateDivergence::init() {
                   "Other horizontal divergence parameter");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "Workspace containing the divergence of each detector/spectrum");
 }

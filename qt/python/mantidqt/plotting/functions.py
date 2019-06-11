@@ -29,7 +29,7 @@ from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
 from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
-from mantid.py3compat import is_text_string
+from mantid.py3compat import is_text_string, string_types
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 
 # -----------------------------------------------------------------------------
@@ -256,6 +256,7 @@ def use_imshow(ws):
         return False
 
 
+@manage_workspace_names
 def pcolormesh(workspaces, fig=None):
     """
     Create a figure containing pcolor subplots
@@ -348,7 +349,9 @@ def _raise_if_not_sequence(value, seq_name, element_type=None):
     """
     accepted_types = (list, tuple, range)
     if type(value) not in accepted_types:
-        raise ValueError("{} should be a list or tuple".format(seq_name))
+        raise ValueError("{} should be a list or tuple, "
+                         "instead found '{}'".format(seq_name,
+                                                     value.__class__.__name__))
     if element_type is not None:
         def raise_if_not_type(x):
             if not isinstance(x, element_type):
@@ -383,7 +386,7 @@ def _validate_workspace_names(workspaces):
     :return: A list of workspaces
     """
     try:
-        _raise_if_not_sequence(workspaces, 'workspaces', str)
+        _raise_if_not_sequence(workspaces, 'workspaces', string_types)
     except ValueError:
         return workspaces
     else:

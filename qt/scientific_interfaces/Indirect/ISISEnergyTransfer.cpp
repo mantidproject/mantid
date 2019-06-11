@@ -25,6 +25,11 @@ bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
 WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       workspaceName);
@@ -91,6 +96,55 @@ void ungroupWorkspace(std::string const &workspaceName) {
   ungroup->initialize();
   ungroup->setProperty("InputWorkspace", workspaceName);
   ungroup->execute();
+}
+
+IAlgorithm_sptr loadAlgorithm(std::string const &filename,
+                              std::string const &outputName) {
+  auto loader = AlgorithmManager::Instance().create("Load");
+  loader->initialize();
+  loader->setProperty("Filename", filename);
+  loader->setProperty("OutputWorkspace", outputName);
+  return loader;
+}
+
+void deleteWorkspace(std::string const &name) {
+  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleter->initialize();
+  deleter->setProperty("Workspace", name);
+  deleter->execute();
+}
+
+double getSampleLog(MatrixWorkspace_const_sptr workspace,
+                    std::string const &logName, double const &defaultValue) {
+  try {
+    return workspace->getLogAsSingleValue(logName);
+  } catch (std::exception const &) {
+    return defaultValue;
+  }
+}
+
+double getSampleLog(MatrixWorkspace_const_sptr workspace,
+                    std::vector<std::string> const &logNames,
+                    double const &defaultValue) {
+  double value(defaultValue);
+  for (auto const &logName : logNames) {
+    value = getSampleLog(workspace, logName, defaultValue);
+    if (value != defaultValue)
+      break;
+  }
+  deleteWorkspace(workspace->getName());
+  return value;
+}
+
+double loadSampleLog(std::string const &filename,
+                     std::vector<std::string> const &logNames,
+                     double const &defaultValue) {
+  auto const temporaryWorkspace("__sample_log_subject");
+  auto loader = loadAlgorithm(filename, temporaryWorkspace);
+  loader->execute();
+
+  return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames,
+                      defaultValue);
 }
 
 } // namespace
@@ -241,10 +295,7 @@ bool ISISEnergyTransfer::validate() {
     const QFileInfo rawFileInfo(rawFile);
     const std::string name = rawFileInfo.baseName().toStdString();
 
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", rawFile.toStdString());
-    loadAlg->setProperty("OutputWorkspace", name);
+    auto loadAlg = loadAlgorithm(rawFile.toStdString(), name);
     if (extension.compare(".nxs") == 0) {
       loadAlg->setProperty("SpectrumMin", static_cast<int64_t>(detectorMin));
       loadAlg->setProperty("SpectrumMax", static_cast<int64_t>(detectorMax));
@@ -256,8 +307,7 @@ bool ISISEnergyTransfer::validate() {
     loadAlg->execute();
 
     if (m_uiForm.ckBackgroundRemoval->isChecked()) {
-      MatrixWorkspace_sptr tempWs =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+      auto tempWs = getADSMatrixWorkspace(name);
       const double minBack = tempWs->x(0).front();
       const double maxBack = tempWs->x(0).back();
 
@@ -686,10 +736,7 @@ void ISISEnergyTransfer::plotRaw() {
   auto const instName =
       getInstrumentConfiguration()->getInstrumentName().toStdString();
 
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", rawFile.toStdString());
-  loadAlg->setProperty("OutputWorkspace", name);
+  auto loadAlg = loadAlgorithm(rawFile.toStdString(), name);
   if (instName != "TOSCA") {
     loadAlg->setProperty("LoadLogFiles", false);
     loadAlg->setProperty("SpectrumMin", detectorMin);
@@ -698,8 +745,7 @@ void ISISEnergyTransfer::plotRaw() {
   loadAlg->execute();
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
-    MatrixWorkspace_sptr tempWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+    auto tempWs = getADSMatrixWorkspace(name);
 
     const double minBack = tempWs->x(0).front();
     const double maxBack = tempWs->x(0).back();
@@ -836,10 +882,19 @@ void ISISEnergyTransfer::pbRunFinished() {
     updateRunButton(
         false, "unchanged", "Invalid Run(s)",
         "Cannot find data files for some of the run numbers entered.");
-  else
+  else {
+    loadDetailedBalance(m_uiForm.dsRunFiles->getFirstFilename().toStdString());
     updateRunButton();
+  }
 
   m_uiForm.dsRunFiles->setEnabled(true);
+}
+
+void ISISEnergyTransfer::loadDetailedBalance(std::string const &filename) {
+  std::vector<std::string> const logNames{"sample", "sample_top",
+                                          "sample_bottom"};
+  auto const detailedBalance = loadSampleLog(filename, logNames, 300.0);
+  m_uiForm.spDetailedBalance->setValue(detailedBalance);
 }
 
 /**

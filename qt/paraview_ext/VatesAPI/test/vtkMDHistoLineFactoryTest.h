@@ -8,7 +8,7 @@
 #define VTK_MD_HISTO_LINE_FACTORY_TEST_H_
 
 #include "MantidAPI/IMDIterator.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"

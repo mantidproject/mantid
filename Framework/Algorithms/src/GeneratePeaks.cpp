@@ -49,7 +49,7 @@ GeneratePeaks::GeneratePeaks()
  */
 void GeneratePeaks::init() {
   declareProperty(
-      make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
           "PeakParametersWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "Input TableWorkspace for peak's parameters.");
@@ -65,9 +65,10 @@ void GeneratePeaks::init() {
   for (size_t i = 0; i < peakFullNames.size(); ++i)
     g_log.debug() << "Peak function " << i << ": " << peakFullNames[i] << "\n";
 
-  declareProperty(make_unique<ArrayProperty<double>>("PeakParameterValues"),
-                  "List of peak parameter values.  They must have a 1-to-1 "
-                  "mapping to PeakParameterNames list. ");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("PeakParameterValues"),
+      "List of peak parameter values.  They must have a 1-to-1 "
+      "mapping to PeakParameterNames list. ");
 
   // Background properties
   std::vector<std::string> bkgdtypes{"Auto",
@@ -82,12 +83,12 @@ void GeneratePeaks::init() {
                   "Type of Background.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
+      std::make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
       "List of background parameter values.  They must have a "
       "1-to-1 mapping to PeakParameterNames list. ");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "InputWorkspace (optional) to take information for the instrument, and "
       "where to evaluate the x-axis.");
@@ -97,7 +98,7 @@ void GeneratePeaks::init() {
                   "It is only applied to the case by input parameter values in "
                   "vector format. ");
 
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       "BinningParameters",
                       boost::make_shared<Kernel::RebinParamsValidator>(true)),
                   "A comma separated list of first bin boundary, width, last "
@@ -108,9 +109,10 @@ void GeneratePeaks::init() {
 
   declareProperty("NumberWidths", 2.,
                   "Number of peak width to evaluate each peak for. Default=2.");
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Output Workspace to put the calculated data.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "Output Workspace to put the calculated data.");
 
   declareProperty("GenerateBackground", true,
                   "Whether or not to generate the background");

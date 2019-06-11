@@ -39,19 +39,19 @@ using namespace DataObjects;
 
 void EQSANSLoad::init() {
   declareProperty(
-      make_unique<API::FileProperty>(
+      std::make_unique<API::FileProperty>(
           "Filename", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load");
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       PropertyMode::Optional, wsValidator),
                   "Input event workspace. Assumed to be unmodified events "
                   "straight from LoadEventNexus");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Then name of the output EventWorkspace");
   declareProperty(
       "NoBeamCenter", false,
@@ -509,7 +509,7 @@ void EQSANSLoad::exec() {
   }
 
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
-    auto loadProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
+    auto loadProp = std::make_unique<AlgorithmProperty>("LoadAlgorithm");
     setPropertyValue("InputWorkspace", "");
     setProperty("NoBeamCenter", false);
     loadProp->setValue(toString());
@@ -518,8 +518,8 @@ void EQSANSLoad::exec() {
 
   if (!reductionManager->existsProperty("InstrumentName"))
     reductionManager->declareProperty(
-        make_unique<PropertyWithValue<std::string>>("InstrumentName",
-                                                    "EQSANS"));
+        std::make_unique<PropertyWithValue<std::string>>("InstrumentName",
+                                                         "EQSANS"));
 
   // Output log
   m_output_message = "";
@@ -554,7 +554,7 @@ void EQSANSLoad::exec() {
         throw Exception::NotImplementedError("The file contains multi period "
                                              "data, support for this is not "
                                              "implemented in EQSANSLoad yet");
-      declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      declareProperty(std::make_unique<WorkspaceProperty<>>(
                           "MonitorWorkspace", mon_wsname, Direction::Output),
                       "Monitors from the Event NeXus file");
       setProperty("MonitorWorkspace", monWS);
@@ -723,13 +723,15 @@ void EQSANSLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterX", m_center_x));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
+                                                      m_center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", m_center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterY", m_center_y));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
+                                                      m_center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", m_center_y);
   }

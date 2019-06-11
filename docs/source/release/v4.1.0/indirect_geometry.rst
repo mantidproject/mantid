@@ -84,6 +84,7 @@ Data Reduction Interface
 Improvements
 ############
 - Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
+- Improved ISISEnergyTransfer by automatically loading the Detailed Balance from the sample logs if available.
 
 Bug Fixes
 #########

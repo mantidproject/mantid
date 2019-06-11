@@ -15,7 +15,6 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace API;
@@ -60,10 +59,10 @@ public:
     EventList eventList;
     eventList.setHistogram(BinEdges(2));
     std::unique_ptr<const ISpectrum> specHist =
-        Kernel::make_unique<Histogram1D>(histogram);
+        std::make_unique<Histogram1D>(histogram);
     std::unique_ptr<const ISpectrum> specEvent =
-        Kernel::make_unique<EventList>(eventList);
-    std::unique_ptr<ISpectrum> target = make_unique<Histogram1D>(
+        std::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = std::make_unique<Histogram1D>(
         Histogram::XMode::Points, Histogram::YMode::Counts);
 
     TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specHist));
@@ -81,10 +80,10 @@ public:
     EventList eventList;
     eventList.setHistogram(BinEdges(2));
     std::unique_ptr<const ISpectrum> specHist =
-        Kernel::make_unique<Histogram1D>(histogram);
+        std::make_unique<Histogram1D>(histogram);
     std::unique_ptr<const ISpectrum> specEvent =
-        Kernel::make_unique<EventList>(eventList);
-    std::unique_ptr<ISpectrum> target = make_unique<Histogram1D>(
+        std::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = std::make_unique<Histogram1D>(
         Histogram::XMode::Points, Histogram::YMode::Counts);
     target->setSpectrumNo(37);
     target->setDetectorID(42);

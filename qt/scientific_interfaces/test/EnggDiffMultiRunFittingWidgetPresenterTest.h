@@ -370,13 +370,13 @@ private:
   MockEnggDiffMultiRunFittingWidgetView *m_mockView;
 
   std::unique_ptr<EnggDiffMultiRunFittingWidgetPresenter> setUpPresenter() {
-    auto mockModel_uptr = Mantid::Kernel::make_unique<
+    auto mockModel_uptr = std::make_unique<
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetModel>>();
     m_mockModel = mockModel_uptr.get();
 
     m_mockView = new testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>();
 
-    return Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(
+    return std::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(
         std::move(mockModel_uptr), m_mockView);
   }
 

@@ -51,11 +51,11 @@ void LoadRaw3::init() {
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if\n"
       "explicitly set.");
   declareProperty(
-      make_unique<ArrayProperty<int>>("PeriodList"),
+      std::make_unique<ArrayProperty<int>>("PeriodList"),
       "A comma-separated list of individual periods to read.  Only used if\n"
       "explicitly set.");
 

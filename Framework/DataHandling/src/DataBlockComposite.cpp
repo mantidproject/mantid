@@ -250,7 +250,7 @@ void DataBlockComposite::setMaxSpectrumID(int64_t /*minSpecID*/) {
 
 std::unique_ptr<DataBlockGenerator> DataBlockComposite::getGenerator() const {
   const auto intervals = spectrumIDIntervals(m_dataBlocks);
-  return Mantid::Kernel::make_unique<DataBlockGenerator>(intervals);
+  return std::make_unique<DataBlockGenerator>(intervals);
 }
 
 void DataBlockComposite::addDataBlock(DataBlock dataBlock) {

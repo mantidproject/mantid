@@ -19,8 +19,8 @@ class SymmetryOperationTest(unittest.TestCase):
 
     def test_getInfo(self):
         symOp = SymmetryOperationFactory.createSymOp("x, y, -z")
-        self.assertEquals(symOp.getOrder(), 2)
-        self.assertEquals(symOp.getIdentifier(), "x,y,-z")
+        self.assertEqual(symOp.getOrder(), 2)
+        self.assertEqual(symOp.getIdentifier(), "x,y,-z")
 
     def test_apply(self):
         symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
@@ -28,8 +28,8 @@ class SymmetryOperationTest(unittest.TestCase):
         hkl1 = V3D(1, 1, 1)
         hkl2 = symOp.apply(hkl1)
 
-        self.assertEquals(hkl2, V3D(1, 1, -1))
-        self.assertEquals(symOp.transformHKL(hkl2), hkl1)
+        self.assertEqual(hkl2, V3D(1, 1, -1))
+        self.assertEqual(symOp.transformHKL(hkl2), hkl1)
 
 
 if __name__ == '__main__':

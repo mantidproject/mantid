@@ -768,7 +768,7 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
 
     if (orientation[0] == 't') {
       auto p =
-          Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("fromNexus");
+          std::make_unique<Kernel::TimeSeriesProperty<double>>("fromNexus");
       std::string start_time = root.getString("run/start_time");
       p->addValue(start_time, -90.0);
       localWorkspace->mutableRun().addLogData(std::move(p));

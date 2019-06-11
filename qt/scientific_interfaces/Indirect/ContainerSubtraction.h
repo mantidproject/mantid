@@ -58,6 +58,7 @@ private:
   getADSWorkspace(std::string const &name) const;
 
   std::string createOutputName();
+  void removeOutput();
 
   Mantid::API::MatrixWorkspace_sptr
   requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace) const;

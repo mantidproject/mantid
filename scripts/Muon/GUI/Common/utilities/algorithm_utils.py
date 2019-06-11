@@ -143,7 +143,7 @@ def run_Fit(parameters_dict, alg):
     alg.setProperty('EndX', parameters_dict['EndX'])
     alg.execute()
     return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputParameters").value, alg.getProperty(
-        "Function").value
+        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
 
 
 def run_simultaneous_Fit(parameters_dict, alg):
@@ -163,7 +163,8 @@ def run_simultaneous_Fit(parameters_dict, alg):
 
     alg.execute()
 
-    return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value
+    return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
+        alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
 
 
 def run_AppendSpectra(ws1, ws2):

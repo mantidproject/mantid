@@ -41,7 +41,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         run_algorithm('DirectILLApplySelfShielding', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
         numpy.testing.assert_almost_equal(ys, (1.0 - ecFactor) * originalYs)
@@ -64,7 +64,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         run_algorithm('DirectILLApplySelfShielding', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
         numpy.testing.assert_almost_equal(ys, (1.0 - ecScaling * ecFactor) * originalYs)
@@ -88,7 +88,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         run_algorithm('DirectILLApplySelfShielding', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
         numpy.testing.assert_almost_equal(ys, originalYs / corrFactor)
@@ -124,7 +124,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         run_algorithm('DirectILLApplySelfShielding', **algProperties)
         run_algorithm('DirectILLApplySelfShielding', **algProperties)
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms())
+        self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
         numpy.testing.assert_almost_equal(ys, originalYs / corrFactor)
