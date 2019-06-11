@@ -189,22 +189,23 @@ class FigureInteraction(object):
     def _toggle_normalization(self, ax):
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
-            workspace = ads.retrieve(arg_set['workspaces'])
-            arg_set['distribution'] = is_normalized
-            arg_set_copy = copy(arg_set)
-            [arg_set_copy.pop(key) for key in ['function', 'workspaces']]
-            if 'specNum' not in arg_set:
-                if 'wkspIndex' in arg_set:
-                    arg_set['specNum'] = workspace.getSpectrum(
-                        arg_set.pop('wkspIndex')).getSpectrumNo()
-                else:
-                    raise RuntimeError(
-                        "No spectrum number associated with plot of workspace "
-                        "'{}'".format(workspace.name()))
-            for ws_artist in ax.tracked_workspaces[workspace.name()]:
-                if ws_artist.spec_num == arg_set.get('specNum'):
-                    ws_artist.is_normalized = not is_normalized
-                    ws_artist.replace_data(workspace, arg_set_copy)
+            if arg_set['workspaces'] in ax.tracked_workspaces:
+                workspace = ads.retrieve(arg_set['workspaces'])
+                arg_set['distribution'] = is_normalized
+                arg_set_copy = copy(arg_set)
+                [arg_set_copy.pop(key) for key in ['function', 'workspaces']]
+                if 'specNum' not in arg_set:
+                    if 'wkspIndex' in arg_set:
+                        arg_set['specNum'] = workspace.getSpectrum(
+                            arg_set.pop('wkspIndex')).getSpectrumNo()
+                    else:
+                        raise RuntimeError(
+                            "No spectrum number associated with plot of "
+                            "workspace '{}'".format(workspace.name()))
+                for ws_artist in ax.tracked_workspaces[workspace.name()]:
+                    if ws_artist.spec_num == arg_set.get('specNum'):
+                        ws_artist.is_normalized = not is_normalized
+                        ws_artist.replace_data(workspace, arg_set_copy)
         ax.relim()
         ax.autoscale()
         self.canvas.draw()
