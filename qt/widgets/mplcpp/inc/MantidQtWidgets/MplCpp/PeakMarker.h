@@ -25,10 +25,11 @@ class MANTID_MPLCPP_DLL PeakMarker : public Common::Python::InstanceHolder {
 public:
   explicit PeakMarker(
       FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom,
-      double fwhm, double yMax,
+      double fwhm, bool yDependent,
       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();
+  void remove();
 
   void updatePeak(double centre, double height, double fwhm);
   std::tuple<double, double, double> peakProperties() const;

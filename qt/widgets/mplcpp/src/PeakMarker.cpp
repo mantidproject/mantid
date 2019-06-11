@@ -20,7 +20,7 @@ namespace {
 
 Python::Object
 newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop,
-          double yBottom, double fwhm, double yMax,
+          double yBottom, double fwhm, bool yDependent,
           boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
@@ -29,7 +29,7 @@ newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop,
 
   auto const args =
       Python::NewRef(Py_BuildValue("(Oiddddd)", canvas->pyobj().ptr(), peakID,
-                                   x, yTop, yBottom, fwhm, yMax));
+                                   x, yTop, yBottom, fwhm, yDependent));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("PeakMarker")(*args, **kwargs);
@@ -46,15 +46,21 @@ namespace MplCpp {
  * @brief Create a PeakMarker instance
  */
 PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x,
-                       double yTop, double yBottom, double fwhm, double yMax,
+                       double yTop, double yBottom, double fwhm,
+                       bool yDependent,
                        QHash<QString, QVariant> const &otherKwargs)
-    : InstanceHolder(newMarker(canvas, peakID, x, yTop, yBottom, fwhm, yMax,
-                               otherKwargs)) {}
+    : InstanceHolder(newMarker(canvas, peakID, x, yTop, yBottom, fwhm,
+                               yDependent, otherKwargs)) {}
 
 /**
  * @brief Redraw the PeakMarker
  */
 void PeakMarker::redraw() { callMethodNoCheck<void>(pyobj(), "redraw"); }
+
+/**
+ * @brief Removes the PeakMarker from the canvas
+ */
+void PeakMarker::remove() { callMethodNoCheck<void>(pyobj(), "remove"); }
 
 /**
  * @brief Updates the centre, height and fwhm for the peak.

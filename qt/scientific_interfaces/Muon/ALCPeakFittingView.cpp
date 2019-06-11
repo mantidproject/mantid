@@ -47,6 +47,8 @@ void ALCPeakFittingView::initialize() {
 
   connect(m_ui.peaks, SIGNAL(currentFunctionChanged()),
           SIGNAL(currentFunctionChanged()));
+  connect(m_ui.peaks, SIGNAL(functionStructureChanged()), this,
+          SLOT(removePeakPicker()));
   connect(m_ui.peaks, SIGNAL(parameterChanged(QString, QString)),
           SIGNAL(parameterChanged(QString, QString)));
 
@@ -62,16 +64,16 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
   kwargs.insert("marker", QString(".").toLatin1().constData());
 
   // Error bars on the plot
-  QStringList plotsWithErrors{"Corrected Data"};
+  QStringList plotsWithErrors{"Corrected"};
   m_ui.plot->setLinesWithErrors(plotsWithErrors);
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.plot->setCurveStyle("Corrected Data", -1);
-  m_ui.plot->setCurveSymbol("Corrected Data", 0);
+  m_ui.plot->setCurveStyle("Corrected", -1);
+  m_ui.plot->setCurveSymbol("Corrected", 0);
 #endif
 
   m_ui.plot->clear();
-  m_ui.plot->addSpectrum("Corrected Data", workspace, workspaceIndex, Qt::black,
+  m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::black,
                          kwargs);
 }
 
@@ -80,8 +82,23 @@ void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr &workspace,
   m_ui.plot->addSpectrum("Fit", workspace, workspaceIndex, Qt::red);
 }
 
+void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr &workspace,
+                                       std::size_t const &workspaceIndex) {
+  m_ui.plot->addSpectrum("Guess", workspace, workspaceIndex, Qt::green);
+}
+
 void ALCPeakFittingView::removePlot(QString const &plotName) {
   m_ui.plot->removeSpectrum(plotName);
+  m_ui.plot->replot();
+}
+
+void ALCPeakFittingView::removePeakPicker() {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  if (!currentFunctionIndex()) {
+    m_peakPicker->remove();
+    m_ui.plot->replot();
+  }
+#endif
 }
 
 void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
@@ -112,6 +129,10 @@ void ALCPeakFittingView::setPeakPickerEnabled(bool enabled) {
   m_peakPicker->setVisible(enabled);
 #else
   m_peakPicker->select(enabled);
+  if (enabled)
+    m_peakPicker->redraw();
+  else
+    m_peakPicker->remove();
 #endif
   m_ui.plot->replot();
 }

@@ -28,8 +28,7 @@ PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
     : QObject(), m_plot(plot), m_peak(nullptr),
       m_peakMarker(std::make_unique<PeakMarker>(
           m_plot->canvas(), 1, std::get<0>(m_plot->getAxisRange()),
-          std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0,
-          std::get<1>(m_plot->getAxisRange(AxisID::YLeft)))) {
+          std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0, false)) {
   UNUSED_ARG(colour);
 
   m_plot->canvas()->draw();
@@ -42,6 +41,10 @@ PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
 
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
 }
+
+void PeakPicker::redraw() { m_peakMarker->redraw(); }
+
+void PeakPicker::remove() { m_peakMarker->remove(); }
 
 void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
   if (peak) {
@@ -63,6 +66,7 @@ void PeakPicker::select(bool select) {
 
 void PeakPicker::handleMouseDown(const QPoint &point) {
   m_peakMarker->mouseMoveStart(point.x(), point.y());
+
   if (m_peakMarker->isMoving())
     m_peakMarker->select();
 }

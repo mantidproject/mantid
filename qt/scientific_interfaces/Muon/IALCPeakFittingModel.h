@@ -40,6 +40,15 @@ public:
    */
   virtual void fitPeaks(Mantid::API::IFunction_const_sptr peaks) = 0;
 
+  /**
+   * Retrieves a guess fit
+   * @param peaks :: Function representing peaks to fit
+   * @param xValues :: The x values for a guess fit
+   */
+  virtual Mantid::API::MatrixWorkspace_sptr
+  guessData(Mantid::API::IFunction_const_sptr function,
+            const std::vector<double> &xValues) = 0;
+
 signals:
 
   /// Signal to inform that the fitting was done and fitted peaks were updated

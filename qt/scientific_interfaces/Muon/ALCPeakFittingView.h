@@ -41,6 +41,8 @@ public slots:
                     std::size_t const &workspaceIndex = 0) override;
   void setFittedCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
                       std::size_t const &workspaceIndex = 0) override;
+  void setGuessCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+                     std::size_t const &workspaceIndex = 0) override;
   void removePlot(QString const &plotName) override;
   void
   setFunction(const Mantid::API::IFunction_const_sptr &newFunction) override;
@@ -53,6 +55,9 @@ public slots:
   void help() override;
   void plotGuess() override;
   void changePlotGuessState(bool plotted) override;
+
+private slots:
+  void removePeakPicker();
 
 private:
   /// The widget used

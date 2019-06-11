@@ -122,14 +122,14 @@ void ALCPeakFittingPresenter::onDataChanged() {
  */
 void ALCPeakFittingPresenter::onPlotGuessClicked() {
   if (m_guessPlotted) {
-    removePlot("Fit");
+    removePlot("Guess");
   } else {
     if (plotGuessOnGraph()) {
       m_view->changePlotGuessState(true);
       m_guessPlotted = true;
     } else {
       m_view->displayError("Couldn't plot with empty function/data");
-      removePlot("Fit");
+      removePlot("Guess");
     }
   }
 }
@@ -140,12 +140,12 @@ void ALCPeakFittingPresenter::onPlotGuessClicked() {
  * @returns :: success or failure
  */
 bool ALCPeakFittingPresenter::plotGuessOnGraph() {
-  auto func = m_view->function("");
-  auto dataWS = m_model->data();
-  if (func && dataWS) {
-    m_view->setFittedCurve(dataWS, 1);
+  if (const auto fitFunction = m_view->function("")) {
+    const auto &xValues = m_model->data()->x(0);
+    m_view->setGuessCurve(m_model->guessData(fitFunction, xValues.rawData()));
     return true;
   }
+  removePlot("Guess");
   return false;
 }
 

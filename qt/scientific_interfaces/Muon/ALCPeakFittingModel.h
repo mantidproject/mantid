@@ -32,6 +32,10 @@ public:
   }
 
   void fitPeaks(Mantid::API::IFunction_const_sptr peaks) override;
+
+  Mantid::API::MatrixWorkspace_sptr
+  guessData(Mantid::API::IFunction_const_sptr function,
+            const std::vector<double> &xValues) override;
   // -- End of IALCPeakFittingModel interface
   // ----------------------------------------------------
 

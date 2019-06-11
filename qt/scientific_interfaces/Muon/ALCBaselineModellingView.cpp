@@ -121,6 +121,7 @@ void ALCBaselineModellingView::setBaselineCurve(
 
 void ALCBaselineModellingView::removePlot(QString const &plotName) {
   m_ui.dataPlot->removeSpectrum(plotName);
+  m_ui.dataPlot->replot();
 }
 
 void ALCBaselineModellingView::setFunction(IFunction_const_sptr func) {

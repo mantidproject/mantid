@@ -44,6 +44,7 @@ class VerticalMarker(QObject):
                                linewidth=line_width, linestyle=line_style, animated=True)
         self.ax.add_patch(self.patch)
         self.is_moving = False
+        self.check_y_height = True
 
     def _get_y0_y1(self):
         """
@@ -111,10 +112,11 @@ class VerticalMarker(QObject):
         :return: True or False.
         """
         x_pixels, y_pixels = self.patch.get_transform().transform((x, y))
-        if self.y0 is not None and y < self.y0:
-            return False
-        if self.y1 is not None and y > self.y1:
-            return False
+        if self.check_y_height:
+            if self.y0 is not None and y < self.y0:
+                return False
+            if self.y1 is not None and y > self.y1:
+                return False
         return abs(self.get_x_in_pixels() - x_pixels) < 3
 
     def transform_pixels_to_coords(self, x_pixels, y_pixels, y_max=0.0):
@@ -178,13 +180,17 @@ class VerticalMarker(QObject):
         :param y: An y mouse coordinate.
         :return: QCursor or None.
         """
-        if self.y0 is not None and y < self.y0:
-            return None
-        if self.y1 is not None and y > self.y1:
-            return None
+        if self.check_y_height:
+            if self.y0 is not None and y < self.y0:
+                return None
+            if self.y1 is not None and y > self.y1:
+                return None
         if self.is_moving or self.is_above(x, y):
             return self.get_cursor_at_y(y)
         return None
+
+    def check_y_height(self, check):
+        self.check_y_height = check
 
 
 class CentreMarker(VerticalMarker):
@@ -195,15 +201,17 @@ class CentreMarker(VerticalMarker):
     selected_color = 'red'
     deselected_color = 'grey'
 
-    def __init__(self, canvas, x, y0, y1):
+    def __init__(self, canvas, x, y0, y1, y_dependent=True):
         """
         Init the marker.
         :param canvas: A MPL canvas.
         :param x: The x coordinate (data) of the marker.
         :param y0: The y coordinate (data) of the bottom end of the marker.
         :param y1: The y coordinate (data) of the top end of the marker.
+        :param y_dependent: True if the height of the CentreMarker is important when moving the marker.
         """
         VerticalMarker.__init__(self, canvas, self.deselected_color, x, y0, y1)
+        VerticalMarker.check_y_height(self, y_dependent)
         self.is_at_top = False
 
     def _is_at_top(self, y):
@@ -295,7 +303,7 @@ class PeakMarker(QObject):
     peak_moved = Signal(int, float, float)
     fwhm_changed = Signal(int, float)
 
-    def __init__(self, canvas, peak_id, x, y_top, y_bottom, fwhm, y_max=1.0):
+    def __init__(self, canvas, peak_id, x, y_top, y_bottom, fwhm, y_dependent=True):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -304,14 +312,14 @@ class PeakMarker(QObject):
         :param y_top: Peak's top.
         :param y_bottom: Peaks bottom (background level).
         :param fwhm: A full width at half maximum.
+        :param y_dependent: True if the height of the CentreMarker is important when moving the marker.
         """
         super(PeakMarker, self).__init__()
         self.peak_id = peak_id
-        self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top)
+        self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top, y_dependent=y_dependent)
         self.left_width = WidthMarker(canvas, x - fwhm / 2)
         self.right_width = WidthMarker(canvas, x + fwhm / 2)
         self.is_selected = False
-        self.y_max = y_max
 
     def redraw(self):
         """
@@ -345,7 +353,7 @@ class PeakMarker(QObject):
         :param pixels: True if a conversion to coords is needed.
         """
         if pixels:
-            x, y = self.centre_marker.transform_pixels_to_coords(x, y, self.y_max)
+            x, y = self.centre_marker.transform_pixels_to_coords(x, y)
 
         self.centre_marker.mouse_move_start(x, y)
         if self.centre_marker.is_moving:
@@ -375,7 +383,7 @@ class PeakMarker(QObject):
         :param pixels: True if a conversion to coords is needed.
         """
         if pixels:
-            x, y = self.centre_marker.transform_pixels_to_coords(x, y, self.y_max)
+            x, y = self.centre_marker.transform_pixels_to_coords(x, y)
 
         moved = self.centre_marker.mouse_move(x, y)
         if moved:
