@@ -368,8 +368,14 @@ void RunsTablePresenter::updateGroupName(
 }
 
 void RunsTablePresenter::updateRowField(
-    MantidWidgets::Batch::RowLocation const &itemIndex, int,
+    MantidWidgets::Batch::RowLocation const &itemIndex, int column,
     std::string const &, std::string const &) {
+  // User has edited the text so reset the output-value flag as it now contains
+  // an input
+  auto cell = m_view->jobs().cellAt(itemIndex, column);
+  cell.setContainsOutputValue(false);
+  m_view->jobs().setCellAt(itemIndex, column, cell);
+
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
   auto rowValidationResult =
