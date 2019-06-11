@@ -146,9 +146,9 @@ public:
     auto presenter =
         makePresenter(m_view, oneGroupWithARowWithOutputQRangeModel());
     auto cells = rowCellsWithValues(DEFAULT);
-    cells[4].setContainsOutputValue(true);
-    cells[5].setContainsOutputValue(true);
-    cells[6].setContainsOutputValue(true);
+    cells[4].setOutput();
+    cells[5].setOutput();
+    cells[6].setOutput();
     EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), cells)).Times(1);
     presenter.notifyRowOutputsChanged();
     verifyAndClearExpectations();

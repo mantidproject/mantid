@@ -20,6 +20,8 @@ namespace Batch {
 
 class EXPORT_OPT_MANTIDQT_COMMON Cell {
 public:
+  // Cell values may be user inputs or algorithm outputs
+  enum class Direction { INPUT, OUTPUT };
   static constexpr const char *INPUT_FOREGROUND_COLOR = "#000000";
   static constexpr const char *OUTPUT_FOREGROUND_COLOR = "#808080";
 
@@ -56,8 +58,10 @@ public:
   void disableEditing();
   void enableEditing();
 
-  bool containsOutputValue() const;
-  void setContainsOutputValue(bool containsOutputValue);
+  bool isInput() const;
+  bool isOutput() const;
+  void setInput();
+  void setOutput();
 
 private:
   std::string m_contentText;
@@ -69,7 +73,7 @@ private:
   std::string m_iconFilePath;
   bool m_isEditable;
   std::string m_toolTip;
-  bool m_containsOutputValue;
+  Direction m_direction;
 };
 
 EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os,
