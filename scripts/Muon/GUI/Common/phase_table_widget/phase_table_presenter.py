@@ -100,7 +100,7 @@ class PhaseTablePresenter(object):
         run = re.search('[0-9]+', input_workspace).group()
         phasequad_workspace_name = get_phase_quad_workspace_name(input_workspace, input_phase_table)
         phase_table_group = get_phase_table_workspace_group_name(phasequad_workspace_name,
-                                                                 self.context.data_context.instrument)
+                                                                 self.context.data_context.instrument, self.context.workspace_suffix)
         directory = get_base_data_directory(self.context, run) + phase_table_group
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(phase_quad, directory + phasequad_workspace_name)
@@ -146,7 +146,8 @@ class PhaseTablePresenter(object):
         run = re.search('[0-9]+', base_name).group()
 
         phase_table_group = get_phase_table_workspace_group_name(base_name,
-                                                                 self.context.data_context.instrument)
+                                                                 self.context.data_context.instrument,
+                                                                 self.context.workspace_suffix)
         directory = get_base_data_directory(self.context, run) + phase_table_group
         muon_workspace_wrapper = MuonWorkspaceWrapper(detector_table, directory + base_name)
         muon_workspace_wrapper.show()
@@ -159,7 +160,8 @@ class PhaseTablePresenter(object):
 
         run = re.search('[0-9]+', base_name).group()
         phase_table_group = get_phase_table_workspace_group_name(base_name,
-                                                                 self.context.data_context.instrument)
+                                                                 self.context.data_context.instrument,
+                                                                 self.context.workspace_suffix)
         fitting_workspace_name = get_fitting_workspace_name(base_name)
         directory = get_base_data_directory(self.context, run) + phase_table_group
 

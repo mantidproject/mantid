@@ -934,7 +934,6 @@ set(TEST_FILES
     RebinToWorkspaceTest.h
     RebunchTest.h
     RectangularBeamProfileTest.h
-    ReflectometryBackgroundSubtractionTest.h
     ReflectometryBeamStatisticsTest.h
     ReflectometryMomentumTransferTest.h
     ReflectometryReductionOne2Test.h
@@ -1012,7 +1011,9 @@ set(TEST_FILES
     WorkspaceCreationHelperTest.h
     WorkspaceGroupTest.h)
 
-set(TEST_PY_FILES NormaliseToUnityTest.py)
+set(TEST_PY_FILES
+    NormaliseToUnityTest.py
+    ReflectometryBackgroundSubtractionTest.py)
 
 if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
@@ -1047,7 +1048,7 @@ set_property(TARGET Algorithms PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 
-target_include_directories (Algorithms SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+target_include_directories(Algorithms SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(Algorithms
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
