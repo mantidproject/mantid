@@ -81,6 +81,10 @@ class VerticalMarker(QObject):
         self.patch.set_edgecolor(color)
 
     def get_x_position(self):
+        """
+        Get the x coordinate in axes coords.
+        :return: x in axes coords
+        """
         return self.x
 
     def set_x_position(self, x):
@@ -88,15 +92,13 @@ class VerticalMarker(QObject):
         Set the x position of the marker.
         :param x: An x axis coordinate.
         """
-        if self.x_minimum <= x <= self.x_maximum:
-            self.x = x
-            self.x_moved.emit(x)
-            return True
-        return False
+        self.x = x
+        self.x_moved.emit(x)
 
     def get_x_in_pixels(self):
         """
         Get the x coordinate in screen pixels.
+        :return: x in pixels
         """
         x_pixels, _ = self.patch.get_transform().transform((self.x, 0))
         return x_pixels
@@ -147,7 +149,8 @@ class VerticalMarker(QObject):
         :return: True if moved or False if stayed at the old position.
         """
         if self.is_moving and x is not None:
-            return self.set_x_position(x)
+            self.set_x_position(x)
+            return True
         return False
 
     def is_marker_moving(self):
@@ -492,10 +495,12 @@ class RangeMarker(QObject):
         """
         self.min_marker.set_x_position(minimum)
         self.max_marker.set_x_position(maximum)
+        self.redraw()
 
     def get_x_range(self):
         """
         Gets the positions of the min and max of the range
+        :return the minimum and maximum of the range.
         """
         minimum = self.min_marker.get_x_position()
         maximum = self.max_marker.get_x_position()

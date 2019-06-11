@@ -7,9 +7,6 @@
 #include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
 
-#include <QApplication>
-#include <QCursor>
-
 using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
@@ -53,6 +50,7 @@ void RangeSelector::setRange(const std::pair<double, double> &range) {
 
 void RangeSelector::setRange(const double min, const double max) {
   m_rangeMarker->setXRange(min, max);
+  emit selectionChanged(min, max);
 }
 
 std::pair<double, double> RangeSelector::getRange() const {
@@ -65,16 +63,16 @@ void RangeSelector::detach() {
   m_plot->canvas()->draw();
 }
 
-void RangeSelector::setColour(QColor colour) {
+void RangeSelector::setColour(const QColor &colour) {
   m_rangeMarker->setColor(colour.name(QColor::HexRgb));
 }
 
 void RangeSelector::handleMouseDown(const QPoint &point) {
-  m_rangeMarker->mouseMoveStart(point.x(), point.y(), true);
+  m_rangeMarker->mouseMoveStart(point.x(), point.y());
 }
 
 void RangeSelector::handleMouseMove(const QPoint &point) {
-  const auto markerMoved = m_rangeMarker->mouseMove(point.x(), point.y(), true);
+  const auto markerMoved = m_rangeMarker->mouseMove(point.x(), point.y());
 
   if (markerMoved) {
     m_plot->replot();

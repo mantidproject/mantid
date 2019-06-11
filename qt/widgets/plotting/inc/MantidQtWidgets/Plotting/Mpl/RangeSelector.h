@@ -9,6 +9,7 @@
 
 #include "MantidQtWidgets/MplCpp/RangeMarker.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
+
 #include <QWidget>
 
 namespace MantidQt {
@@ -28,6 +29,7 @@ public:
                 bool visible = true, bool infoOnly = false,
                 const QColor &colour = Qt::black);
 
+  void setColour(const QColor &colour);
   void setRange(const std::pair<double, double> &range);
   std::pair<double, double> getRange() const;
 
@@ -37,7 +39,6 @@ signals:
 public slots:
   void setRange(const double min, const double max);
   void detach();
-  void setColour(QColor colour);
 
 private slots:
   void handleMouseDown(const QPoint &point);

@@ -24,20 +24,22 @@ namespace MplCpp {
 class MANTID_MPLCPP_DLL RangeMarker : public Common::Python::InstanceHolder {
 public:
   explicit RangeMarker(
-      FigureCanvasQt *canvas, QString const &colour, double x_minimum,
+      FigureCanvasQt *canvas, QString const &color, double x_minimum,
       double x_maximum,
       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();
   void remove();
 
-  void setColor(QString const &colour);
+  void setColor(QString const &color);
   void setXRange(double minimum, double maximum);
-  std::tuple<double, double> getXRange();
+  std::tuple<double, double> getXRange() const;
 
-  void mouseMoveStart(double x, double y, bool usingPixels = false);
+  void mouseMoveStart(double x, double y);
+  void mouseMoveStart(int x, int y);
   void mouseMoveStop();
-  bool mouseMove(double x, double y, bool usingPixels = false);
+  bool mouseMove(double x, double y);
+  bool mouseMove(int x, int y);
 };
 
 } // namespace MplCpp
