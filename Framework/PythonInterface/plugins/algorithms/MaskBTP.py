@@ -8,7 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi
 import mantid.api
-import mantid.kernel
+from mantid.kernel import Direction, IntArrayProperty, StringListValidator
 import numpy
 from collections import defaultdict
 
@@ -44,15 +44,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         return "Algorithm to mask detectors in particular banks, tube, or pixels."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut,
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=Direction.InOut,
                                                           optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
-        allowedInstrumentList=mantid.kernel.StringListValidator(['']+self.INSTRUMENT_LIST)
+        allowedInstrumentList=StringListValidator(['']+self.INSTRUMENT_LIST)
         self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: "
                              + ', '.join(self.INSTRUMENT_LIST))
         self.declareProperty("Bank","",doc="Bank(s) to be masked. If empty, will apply to all banks")
         self.declareProperty("Tube","",doc="Tube(s) to be masked. If empty, will apply to all tubes")
         self.declareProperty("Pixel","",doc="Pixel(s) to be masked. If empty, will apply to all pixels")
-        self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
+        self.declareProperty(IntArrayProperty(name="MaskedDetectors", direction=Direction.Output),
                              doc="List of  masked detectors")
 
     #pylint: disable=too-many-branches
@@ -60,9 +60,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         ws = self.getProperty("Workspace").value
         self.instrument=None
         self.instname = self.getProperty("Instrument").value
-        bankString = self.getProperty("Bank").value
-        tubeString = self.getProperty("Tube").value
-        pixelString = self.getProperty("Pixel").value
 
         if ws is not None:
             self.instrument = ws.getInstrument()
@@ -87,24 +84,20 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             ws=mantid.simpleapi.LoadEmptyInstrument(IDF,OutputWorkspace=self.instname+"MaskBTP")
             self.instrument=ws.getInstrument()
 
-        if bankString == "":
-            banks=numpy.arange(self.bankmax[self.instname]-self.bankmin[self.instname]+1)+self.bankmin[self.instname]
-        else:
-            banks=self._parseBTPlist(bankString)
+        # get the ranges for banks, tubes and pixels
+        banks=self._parseBTPlist(self.getProperty("Bank").value, self.bankmin[self.instname], self.bankmax[self.instname])
 
-        if tubeString == "":
-            tubes=numpy.arange(tubemax[self.instname]-tubemin[self.instname]+1)+tubemin[self.instname]
-        elif tubeString == "edges":
+        tubeString = self.getProperty("Tube").value
+        if tubeString == "edges":
             tubes=[tubemin[self.instname],tubemax[self.instname]]
         else:
-            tubes=self._parseBTPlist(tubeString)
+            tubes=self._parseBTPlist(tubeString, tubemin[self.instname], tubemax[self.instname])
 
-        if pixelString == "":
-            pixels=numpy.arange(pixmax[self.instname]-pixmin[self.instname]+1)+pixmin[self.instname]
-        elif pixelString == "edges":
+        pixelString = self.getProperty("Pixel").value
+        if pixelString == "edges":
             pixels=[pixmin[self.instname],pixmax[self.instname]]
         else:
-            pixels=self._parseBTPlist(pixelString)
+            pixels=self._parseBTPlist(pixelString, pixmin[self.instname], pixmax[self.instname])
 
         detlist=[]
         for b in banks:
@@ -132,29 +125,26 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.setProperty("Workspace",ws.name())
         self.setProperty("MaskedDetectors", detlist)
 
-    def _parseBTPlist(self,value):
+    def _parseBTPlist(self, value, min_value, max_value):
         """
         Helper function to transform a string into a list of integers
         For example "1,2-4,8-10" will become [1,2,3,4,8,9,10]
         It will deal with lists as well, so range(1,4) will still be [1,2,3]
         """
-        parsed = []
-        #split the commas
-        parts = str(value).strip(']').strip('[').split(',')
-        #now deal with the hyphens
-        for p in parts:
-            if len(p) > 0:
-                elem = p.split("-")
-            if len(elem) == 1:
-                parsed.append(int(elem[0]))
-            if len(elem) == 2:
-                startelem = int(elem[0])
-                endelem = int(elem[1])
-                if endelem < startelem:
-                    raise ValueError("The element after the hyphen needs to be greater or equal than the first element")
-                elemlist = list(range(startelem,endelem+1))
-                parsed.extend(elemlist)
-        return parsed
+        if len(value) == 0:
+            return numpy.arange(min_value, max_value + 1)
+        else:
+            # let IntArrayProperty do the work and make sure that the result is valid
+            prop = IntArrayProperty(name='temp', values=value)
+            validationMsg = prop.isValid
+            if validationMsg:
+                raise RuntimeError(validationMsg)
+            result = prop.value
+            result = result[result >= min_value]
+            result = result[result <= max_value]
+            if len(result) == 0:
+                raise RuntimeError('Could not generate values from "{}"'.format(value))
+            return result
 
     #pylint: disable=too-many-branches,too-many-return-statements
     def _getEightPackHandle(self,banknum):
@@ -186,7 +176,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 return self.instrument.getComponentByName("D row")[banknum-114][0]
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers: %s" % (banknum,))
-        elif self.instname in ["CNCS", "CORELLI","HYSPEC", "WAND"]:
+        elif self.instname in ["CNCS", "CORELLI", "HYSPEC", "WAND"]:
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("bank"+str(banknum))[0]
             else:
