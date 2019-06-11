@@ -4,9 +4,14 @@ import unittest
 
 from mantid.simpleapi import LoadEmptyInstrument, SANSMaskDTP, mtd
 
+# tests run x10 slower with this on, but it may be useful to track down issues refactoring
+CHECK_CONSISTENCY = False
+
 
 class SANSMaskDTPTest(unittest.TestCase):
     def checkConsistentMask(self, wksp, masked):
+        if not CHECK_CONSISTENCY:
+            return
         compInfo = wksp.componentInfo()
         detInfo = wksp.detectorInfo()
         # detector ids are any number, detector index are 0->number of detectors
