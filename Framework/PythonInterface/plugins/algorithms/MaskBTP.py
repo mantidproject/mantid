@@ -49,7 +49,8 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         allowedInstrumentList=StringListValidator(['']+self.INSTRUMENT_LIST)
         self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: "
                              + ', '.join(self.INSTRUMENT_LIST))
-        self.declareProperty("Bank","",doc="Bank(s) to be masked. If empty, will apply to all banks")
+        self.declareProperty(IntArrayProperty(name="Bank", values=[]),
+                             doc="Bank(s) to be masked. If empty, will apply to all banks")
         self.declareProperty("Tube","",doc="Tube(s) to be masked. If empty, will apply to all tubes")
         self.declareProperty("Pixel","",doc="Pixel(s) to be masked. If empty, will apply to all pixels")
         self.declareProperty(IntArrayProperty(name="MaskedDetectors", direction=Direction.Output),
@@ -88,16 +89,17 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         banks=self._parseBTPlist(self.getProperty("Bank").value, self.bankmin[self.instname], self.bankmax[self.instname])
 
         tubeString = self.getProperty("Tube").value
-        if tubeString == "edges":
-            tubes=[tubemin[self.instname],tubemax[self.instname]]
+        if tubeString.lower() == "edges":
+            tubes=[tubemin[self.instname], tubemax[self.instname]]
         else:
             tubes=self._parseBTPlist(tubeString, tubemin[self.instname], tubemax[self.instname])
 
         pixelString = self.getProperty("Pixel").value
-        if pixelString == "edges":
-            pixels=[pixmin[self.instname],pixmax[self.instname]]
+        if pixelString.lower() == "edges":
+            pixels=[pixmin[self.instname], pixmax[self.instname]]
         else:
             pixels=self._parseBTPlist(pixelString, pixmin[self.instname], pixmax[self.instname])
+        self.log().warning('TUBES:{} PIXELS:{}'.format(tubes, pixels))
 
         detlist=[]
         for b in banks:
@@ -126,11 +128,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.setProperty("MaskedDetectors", detlist)
 
     def _parseBTPlist(self, value, min_value, max_value):
-        """
-        Helper function to transform a string into a list of integers
-        For example "1,2-4,8-10" will become [1,2,3,4,8,9,10]
-        It will deal with lists as well, so range(1,4) will still be [1,2,3]
-        """
         if len(value) == 0:
             return numpy.arange(min_value, max_value + 1)
         else:
