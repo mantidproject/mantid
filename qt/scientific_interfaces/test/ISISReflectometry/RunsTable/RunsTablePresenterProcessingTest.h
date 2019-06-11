@@ -132,6 +132,28 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testNotifyRowOutputsChangedForInputQRange() {
+    auto presenter =
+        makePresenter(m_view, oneGroupWithARowWithInputQRangeModel());
+    EXPECT_CALL(m_jobs,
+                setCellsAt(RowLocation({0, 0}), rowCellsWithValues(DEFAULT)))
+        .Times(1);
+    presenter.notifyRowOutputsChanged();
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyRowOutputsChangedForOutputQRange() {
+    auto presenter =
+        makePresenter(m_view, oneGroupWithARowWithOutputQRangeModel());
+    auto cells = rowCellsWithValues(DEFAULT);
+    cells[4].setContainsOutputValue(true);
+    cells[5].setContainsOutputValue(true);
+    cells[6].setContainsOutputValue(true);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), cells)).Times(1);
+    presenter.notifyRowOutputsChanged();
+    verifyAndClearExpectations();
+  }
+
   void testMergeJobsUpdatesProgressBar() {
     auto presenter = makePresenter(m_view, ReductionJobs());
     expectUpdateProgressBar();
@@ -157,6 +179,16 @@ private:
   std::vector<Cell> rowCells(const char *colour) {
     auto cells = std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""),
                                    Cell(""), Cell(""), Cell(""), Cell("")};
+    for (auto &cell : cells)
+      cell.setBackgroundColor(colour);
+    return cells;
+  }
+
+  std::vector<Cell> rowCellsWithValues(const char *colour) {
+    auto cells =
+        std::vector<Cell>{Cell("12345"),    Cell("0.500000"), Cell("Trans A"),
+                          Cell("Trans B"),  Cell("0.500000"), Cell("0.900000"),
+                          Cell("0.010000"), Cell(""),         Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;

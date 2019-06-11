@@ -127,6 +127,28 @@ ReductionJobs oneGroupWithARowModel() {
   return reductionJobs;
 }
 
+ReductionJobs oneGroupWithARowWithInputQRangeModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  auto row = Row({"12345"}, 0.5, TransmissionRunPair({"Trans A", "Trans B"}),
+                 RangeInQ(0.5, 0.01, 0.9), boost::none, ReductionOptionsMap(),
+                 ReductionWorkspaces(
+                     {"12345"}, TransmissionRunPair({"Trans A", "Trans B"})));
+  group1.appendRow(row);
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
+}
+
+ReductionJobs oneGroupWithARowWithOutputQRangeModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  auto row = makeRow("12345", 0.5);
+  row.setOutputQRange(RangeInQ(0.5, 0.01, 0.9));
+  group1.appendRow(row);
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
+}
+
 ReductionJobs oneGroupWithAnotherRowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");

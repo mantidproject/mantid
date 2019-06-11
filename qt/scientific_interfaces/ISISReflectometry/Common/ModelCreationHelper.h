@@ -42,6 +42,10 @@ MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneEmptyGroupModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoEmptyGroupsModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithAnInvalidRowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithARowModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
+oneGroupWithARowWithInputQRangeModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
+oneGroupWithARowWithOutputQRangeModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithAnotherRowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
 oneGroupWithAnotherRunWithSameAngleModel();
