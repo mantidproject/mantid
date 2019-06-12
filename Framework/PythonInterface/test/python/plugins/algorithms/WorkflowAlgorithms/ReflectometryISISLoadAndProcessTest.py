@@ -55,7 +55,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
              'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
              'IvsQ_binned_38415_3', 'TOF_38415', 'TOF_38415_monitors',
              'TOF_38415_sliced', 'TOF_38415_sliced_1', 'TOF_38415_sliced_2',
-             'TOF_38415_sliced_3']
+             'TOF_38415_sliced_3', 'TOF']
 
     def tearDown(self):
         mtd.clear()
@@ -68,53 +68,53 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def test_input_run_is_loaded_if_not_in_ADS(self):
         args = self._default_options
         args['InputRunList'] = '13460'
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_input_run_that_is_in_ADS_with_prefixed_name_is_not_reloaded(self):
         self._create_workspace(13460, 'TOF_')
         args = self._default_options
         args['InputRunList'] = '13460'
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_input_run_that_is_in_ADS_without_prefix_is_not_reloaded(self):
         self._create_workspace(13460)
         args = self._default_options
         args['InputRunList'] = '13460'
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', '13460']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', '13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_input_run_is_reloaded_if_in_ADS_with_unknown_prefix(self):
         self._create_workspace(13460, 'TEST_')
         args = self._default_options
         args['InputRunList'] = '13460'
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TEST_13460', 'TOF_13460']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TEST_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_existing_workspace_is_used_when_name_passed_in_input_list(self):
         self._create_workspace(13460, 'TEST_')
         args = self._default_options
         args['InputRunList'] = 'TEST_13460'
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TEST_13460']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TEST_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_loading_run_with_instrument_prefix_in_name(self):
         args = self._default_options
         args['InputRunList'] = 'INTER13460'
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'RenameWorkspace', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'RenameWorkspace', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_overriding_output_names(self):
@@ -122,9 +122,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '13460'
         args.update(self._mandatory_output_names)
-        outputs = ['testIvsQ', 'testIvsQBin', 'TOF_13460']
+        outputs = ['testIvsQ', 'testIvsQBin', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['testIvsQBin'], history)
 
     def test_overriding_output_names_includes_all_specified_outputs(self):
@@ -134,9 +134,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args.update(self._all_output_names)
         # Current behaviour is that the optional workspaces are output even if
         # Debug is not set
-        outputs = ['testIvsQ', 'testIvsQBin', 'testIvsLam', 'TOF_13460']
+        outputs = ['testIvsQ', 'testIvsQBin', 'testIvsLam', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['testIvsQBin'], history)
 
     def test_debug_option_outputs_extra_workspaces(self):
@@ -144,9 +144,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '13460'
         args['Debug'] = True
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'IvsLam_13460', 'TOF_13460']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'IvsLam_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_debug_option_outputs_extra_workspaces_with_overridden_names(self):
@@ -155,9 +155,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '13460'
         args['Debug'] = True
         args.update(self._all_output_names)
-        outputs = ['testIvsQ', 'testIvsQBin', 'testIvsLam', 'TOF_13460']
+        outputs = ['testIvsQ', 'testIvsQBin', 'testIvsLam', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['testIvsQBin'], history)
 
     def test_multiple_input_runs_are_summed(self):
@@ -166,9 +166,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '13461, 13462'
         outputs = ['IvsQ_13461+13462', 'IvsQ_binned_13461+13462', 'TOF_13461', 'TOF_13462',
-                    'TOF_13461+13462']
+                   'TOF_13461+13462', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['MergeRuns', 'ReflectometryReductionOneAuto']
+        history = ['MergeRuns', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13461+13462'], history)
 
     def test_trans_run_is_not_reloaded_if_in_ADS(self):
@@ -177,9 +177,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '13460'
         args['FirstTransmissionRunList'] = '13463'
-        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463']
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_trans_runs_are_loaded_if_not_in_ADS(self):
@@ -191,9 +191,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # Expect IvsQ outputs from the reduction, and initermediate LAM outputs from
         # creating the stitched transmission run
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
-                    'TRANS_LAM_13463', 'TRANS_LAM_13464']
+                   'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_trans_runs_are_not_loaded_if_in_ADS_without_prefix(self):
@@ -207,9 +207,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # Expect IvsQ outputs from the reduction, and initermediate LAM outputs from
         # creating the stitched transmission run
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', '13463', '13464',
-                    'TRANS_LAM_13463', 'TRANS_LAM_13464']
+                   'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_trans_runs_are_reloaded_if_in_ADS_with_unknown_prefix(self):
@@ -223,9 +223,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # Expect IvsQ outputs from the reduction, and initermediate LAM outputs from
         # creating the stitched transmission run
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
-                    'TEST_13463', 'TEST_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464']
+                   'TEST_13463', 'TEST_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_existing_workspace_is_used_for_trans_runs_when_name_passed_in_input_list(self):
@@ -237,9 +237,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['FirstTransmissionRunList'] = 'TEST_13463'
         args['SecondTransmissionRunList'] = 'TEST_13464'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TEST_13463', 'TEST_13464',
-                   'TRANS_LAM_13463', 'TRANS_LAM_13464']
+                   'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_first_and_second_trans_runs_are_combined(self):
@@ -252,9 +252,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['SecondTransmissionRunList'] = '13464'
         # The intermediate LAM workspaces are output by the algorithm that combines the runs
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
-                    'TRANS_LAM_13463', 'TRANS_LAM_13464']
+                   'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_first_and_second_trans_runs_are_combined_with_debug_output(self):
@@ -269,9 +269,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # The intermediate LAM workspaces are output by the algorithm that combines the runs.
         # The stitched TRANS_LAM_13463_13464 is only output with Debug on.
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'IvsLam_13460', 'TOF_13460', 'TRANS_13463',
-                    'TRANS_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TRANS_LAM_13463_13464']
+                   'TRANS_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TRANS_LAM_13463_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_multiple_trans_runs_are_summed(self):
@@ -282,9 +282,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '13460'
         args['FirstTransmissionRunList'] = '13463, 13464'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
-                    'TRANS_13463+13464']
+                   'TRANS_13463+13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['MergeRuns', 'ReflectometryReductionOneAuto']
+        history = ['MergeRuns', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_slicing_is_disallowed_if_summing_input_runs(self):
@@ -318,7 +318,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
              'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
              'IvsQ_binned_38415_3', '38415', '38415_monitors',
              '38415_sliced', '38415_sliced_1', '38415_sliced_2',
-             '38415_sliced_3']
+             '38415_sliced_3', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -363,7 +363,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['SliceWorkspace'] = True
         outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1',
                    'IvsLam_38415', 'IvsLam_38415_1', 'TOF_38415', 'TOF_38415_monitors',
-                   'TOF_38415_sliced', 'TOF_38415_sliced_1']
+                   'TOF_38415_sliced', 'TOF_38415_sliced_1', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
@@ -373,7 +373,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '38415'
         args['SliceWorkspace'] = True
-        args['NumberOfSlices'] = 3;
+        args['NumberOfSlices'] = 3
         outputs = self._expected_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
@@ -385,8 +385,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '38415'
         args['SliceWorkspace'] = True
-        args['LogName'] = 'proton_charge';
-        args['LogValueInterval'] = 60;
+        args['LogName'] = 'proton_charge'
+        args['LogValueInterval'] = 60
         outputs = self._expected_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
@@ -398,10 +398,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '38415'
         args['SliceWorkspace'] = True
-        args['LogName'] = 'proton_charge';
+        args['LogName'] = 'proton_charge'
         outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1',
                    'IvsLam_38415', 'IvsLam_38415_1', 'TOF_38415', 'TOF_38415_monitors',
-                   'TOF_38415_sliced', 'TOF_38415_sliced_1']
+                   'TOF_38415_sliced', 'TOF_38415_sliced_1', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
@@ -412,7 +412,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '12345'
         outputs = ['IvsQ_12345', 'IvsQ_12345_1', 'IvsQ_12345_2', 'IvsQ_binned_12345',
                    'IvsQ_binned_12345_2', 'IvsQ_binned_12345_1', 'IvsLam_12345',
-                   'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF_12345', 'TOF_12345_1', 'TOF_12345_2']
+                   'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF_12345_1', 'TOF_12345_2', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['CreateSampleWorkspace', 'AddSampleLog',  'CreateSampleWorkspace', 'AddSampleLog',
                    'GroupWorkspaces', 'ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
@@ -422,7 +422,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
-                              BankPixelWidth=2, XMin=200, OutputWorkspace=name)
+                                   BankPixelWidth=2, XMin=200, OutputWorkspace=name)
         AddSampleLog(Workspace=ws, LogName='run_number', LogText=str(run_number))
 
     def _create_event_workspace(self, run_number, prefix='', includeMonitors=True):
