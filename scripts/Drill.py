@@ -13,7 +13,7 @@ from qtpy import PYQT5
 if not PYQT5:
     raise RuntimeError('Drill is operational only on workbench!')
 
-from Interface.ui.ill.main.ui_main import Ui_MainWindow
+from Interface.ui.drill.main.ui_main import Ui_MainWindow
 
 class Drill(QMainWindow, Ui_MainWindow):
     def __init__(self):
