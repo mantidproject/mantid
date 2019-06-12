@@ -7,8 +7,9 @@
 from __future__ import (absolute_import, division)
 
 from collections import OrderedDict
+import re
 
-from mantid.py3compat import iterkeys
+from mantid.py3compat import iteritems, iterkeys
 
 from Muon.GUI.Common.observer_pattern import Observable
 
@@ -16,6 +17,8 @@ from Muon.GUI.Common.observer_pattern import Observable
 NAME_COL = 'Name'
 VALUE_COL = 'Value'
 ERRORS_COL = 'Error'
+
+GLOBAL_PARAM_PREFIX_RE = re.compile(r'^f\d+\.')
 
 
 def is_same_parameter(prefixed_name, unprefixed_name):
@@ -40,8 +43,9 @@ def _create_unique_param_lookup(parameter_workspace, global_parameters):
     """
 
     def is_in(unique_params, param_name):
+        # return 2-tuple(already exists, is_global)
         if not global_parameters:
-            return False
+            return False, False
 
         # Find the global parameter than matches this one
         global_name = None
@@ -51,23 +55,73 @@ def _create_unique_param_lookup(parameter_workspace, global_parameters):
                 break
         if global_name is None:
             # param_name is not in globals
-            return False
+            return False, False
 
         # Do we have this parameter already?
         for unique_name in iterkeys(unique_params):
             if is_same_parameter(unique_name, global_name):
-                return True
+                return True, True
 
-        return False
+        return False, True
 
     unique_params = OrderedDict()
     default_table = parameter_workspace.workspace
     for row in default_table:
         name = row[NAME_COL]
-        if not is_in(unique_params, name):
-            unique_params[name] = (row[VALUE_COL], row[ERRORS_COL])
+        exists, is_global = is_in(unique_params, name)
+        if not exists:
+            parameter = Parameter(name, row[VALUE_COL], row[ERRORS_COL],
+                                  is_global)
+            unique_params[parameter.pretty_name] = parameter
 
-    return unique_params
+    return _move_globals_to_front(unique_params)
+
+
+def _move_globals_to_front(unique_params):
+    """
+    Move the global parameters to the front of the list
+    :param unique_params: An list containing the current parameters in the original order
+    :return: The updated parameters list reordered
+    """
+    return OrderedDict(
+        sorted(iteritems(unique_params), key=lambda x: not x[1].is_global))
+
+
+class Parameter(object):
+    """Hold single parameter from a fit"""
+
+    def __init__(self, raw_name, value, error, isglobal):
+        """
+        :param raw_name: The raw name of the parameter from Fit. The first "fx." prefix
+        is stripped if
+        :param value: The value of the parameter
+        :param error: The error value on the parameter
+        :param isglobal: True if the parameter was global across the fit
+        """
+        self._value = value
+        self._error = error
+        self._isglobal = isglobal
+
+        if isglobal:
+            self._name = GLOBAL_PARAM_PREFIX_RE.sub("", raw_name)
+        else:
+            self._name = raw_name
+
+    @property
+    def pretty_name(self):
+        return self._name
+
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def error(self):
+        return self._error
+
+    @property
+    def is_global(self):
+        return self._isglobal
 
 
 class FitParameters(object):
@@ -95,16 +149,16 @@ class FitParameters(object):
         return len(self._unique_params)
 
     def names(self):
-        """Returns a list of names of parameters"""
+        """Returns a list of names of parameters. Note that any global parameters are first in the list"""
         return list(self._unique_params.keys())
 
     def value(self, name):
         """Return the value of a given parameter"""
-        return self._unique_params[name][0]
+        return self._unique_params[name].value
 
     def error(self, name):
         """Return the error associated with a given parameter"""
-        return self._unique_params[name][1]
+        return self._unique_params[name].error
 
     @property
     def parameter_workspace_name(self):
@@ -163,7 +217,7 @@ class FittingContext(object):
        - function names
     """
 
-    def __init__(self, fit_list = None):
+    def __init__(self, fit_list=None):
         self.fit_list = fit_list if fit_list is not None else []
         # Register callbacks with this object to observe when new fits
         # are added

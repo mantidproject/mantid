@@ -327,7 +327,7 @@ class ResultsTabModelTest(unittest.TestCase):
         table = model.create_results_table(logs, selected_results)
 
         expected_cols = [
-            'workspace_name', 'f0.Height', 'f0.HeightError', 'f0.PeakCentre',
+            'workspace_name', 'Height', 'HeightError', 'f0.PeakCentre',
             'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.PeakCentre',
             'f1.PeakCentreError', 'f1.Sigma', 'f1.SigmaError',
             'Cost function value'
