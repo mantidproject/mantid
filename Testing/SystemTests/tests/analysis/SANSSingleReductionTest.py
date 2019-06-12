@@ -140,7 +140,7 @@ class SingleReductionTest(unittest.TestCase):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Test the non-event slice reduction algorithm, SANSSingleReduction
+# Test version 2 of SANSSingleReductionTest, and compare it to version 1
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSSingleReductionTest(SingleReductionTest):
     def test_that_single_reduction_evaluates_LAB(self):
@@ -170,7 +170,7 @@ class SANSSingleReductionTest(SingleReductionTest):
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Since we are dealing with event based data but we want to compare it with histogram data from the
         # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
+        user_file_director.set_compatibility_builder_use_compatibility_mode(False)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY END
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -239,7 +239,7 @@ class SANSSingleReductionTest(SingleReductionTest):
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Since we are dealing with event based data but we want to compare it with histogram data from the
         # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
+        user_file_director.set_compatibility_builder_use_compatibility_mode(False)
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY END
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -417,7 +417,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
         # Get the rest of the state from the user file
         user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
-        # Set the reduction mode to LAB
+        # Set the reduction mode to HAB
         user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.HAB)
         user_file_director.set_compatibility_builder_use_compatibility_mode(False)
 
@@ -434,31 +434,106 @@ class SANSSingleReduction2Test(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceHAB": EMPTY_NAME}
-        single_reduction_alg = self._run_single_reduction(state, sample_scatter=sample,
-                                                          sample_transmission=transmission_workspace,
-                                                          sample_direct=direct_workspace,
-                                                          sample_monitor=sample_monitor,
-                                                          can_scatter=can,
-                                                          can_monitor=can_monitor,
-                                                          can_transmission=can_transmission,
-                                                          can_direct=can_direct,
-                                                          output_settings=output_settings,
-                                                          event_slice=True,
-                                                          save_can=True,
-                                                          use_optimizations=True)
+        start_time = time.time()
+        single_reduction_v2_alg = self._run_single_reduction(state, sample_scatter=sample,
+                                                             sample_transmission=transmission_workspace,
+                                                             sample_direct=direct_workspace,
+                                                             sample_monitor=sample_monitor,
+                                                             can_scatter=can,
+                                                             can_monitor=can_monitor,
+                                                             can_transmission=can_transmission,
+                                                             can_direct=can_direct,
+                                                             output_settings=output_settings,
+                                                             event_slice=True,
+                                                             save_can=True,
+                                                             use_optimizations=True)
+        version_2_execution_time = time.time() - start_time
 
         # Check output workspaces
-        output_workspace = single_reduction_alg.getProperty("OutputWorkspaceHAB").value
-        hab_can = single_reduction_alg.getProperty("OutputWorkspaceHABCan").value
-        hab_sample = single_reduction_alg.getProperty("OutputWorkspaceHABSample").value
-        hab_can_count = single_reduction_alg.getProperty("OutputWorkspaceHABCanCount").value
-        hab_can_norm = single_reduction_alg.getProperty("OutputWorkspaceHABCanNorm").value
+        output_workspace = single_reduction_v2_alg.getProperty("OutputWorkspaceHAB").value
+        hab_can = single_reduction_v2_alg.getProperty("OutputWorkspaceHABCan").value
+        hab_sample = single_reduction_v2_alg.getProperty("OutputWorkspaceHABSample").value
+        hab_can_count = single_reduction_v2_alg.getProperty("OutputWorkspaceHABCanCount").value
+        hab_can_norm = single_reduction_v2_alg.getProperty("OutputWorkspaceHABCanNorm").value
 
         self._assert_group_workspace(output_workspace)
         self._assert_group_workspace(hab_can)
         self._assert_group_workspace(hab_sample)
         self._assert_group_workspace(hab_can_count)
         self._assert_group_workspace(hab_can_norm)
+
+        # ---------------------------------------------------
+        # Comparison test with version 1
+        # This can be removed once version 2 has been adopted
+        # ---------------------------------------------------
+
+        # Run the first event slice
+        user_file_director.set_slice_event_builder_start_time([0.00])
+        user_file_director.set_slice_event_builder_end_time([300.00])
+        state = user_file_director.construct()
+
+        start_time = time.time()
+        single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
+                                                                      sample_transmission=transmission_workspace,
+                                                                      sample_direct=direct_workspace,
+                                                                      sample_monitor=sample_monitor,
+                                                                      can_scatter=can,
+                                                                      can_monitor=can_monitor,
+                                                                      can_transmission=can_transmission,
+                                                                      can_direct=can_direct,
+                                                                      output_settings=output_settings,
+                                                                      event_slice=False,
+                                                                      save_can=True)
+        first_slice_execution_time = time.time() - start_time
+
+        # Run the second event slice
+        user_file_director.set_slice_event_builder_start_time([300.00])
+        user_file_director.set_slice_event_builder_end_time([600.00])
+        state = user_file_director.construct()
+
+        start_time = time.time()
+        single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
+                                                                       sample_transmission=transmission_workspace,
+                                                                       sample_direct=direct_workspace,
+                                                                       sample_monitor=sample_monitor,
+                                                                       can_scatter=can,
+                                                                       can_monitor=can_monitor,
+                                                                       can_transmission=can_transmission,
+                                                                       can_direct=can_direct,
+                                                                       output_settings=output_settings,
+                                                                       event_slice=False,
+                                                                       save_can=True)
+        version_1_execution_time = time.time() - start_time + first_slice_execution_time
+
+        # Check that running version 2 once is quicker than running version 1 twice (once for each slice)
+        # version 2 has been significantly quicker that multiple runs are not necessary to ensure this test
+        # does not sporadically fail. However, this check could be removed if this changes.
+        self.assertLess(version_2_execution_time, version_1_execution_time)
+
+        # Now compare output workspaces from the two versions
+        # Output HAB workspace
+        event_slice_output_workspace = single_reduction_v2_alg.getProperty("OutputWorkspaceHAB").value
+        first_slice_output_workspace = single_reduction_alg_first_slice.getProperty("OutputWorkspaceHAB").value
+        second_slice_output_workspace = single_reduction_alg_second_slice.getProperty("OutputWorkspaceHAB").value
+
+        self._compare_workspace(event_slice_output_workspace[0], first_slice_output_workspace, tolerance=1e-6)
+        self._compare_workspace(event_slice_output_workspace[1], second_slice_output_workspace, tolerance=1e-6)
+
+        # HAB sample
+        event_slice_output_sample = single_reduction_v2_alg.getProperty("OutputWorkspaceHABSample").value
+        first_slice_output_sample = single_reduction_alg_first_slice.getProperty("OutputWorkspaceHABSample").value
+        second_slice_output_sample = single_reduction_alg_second_slice.getProperty("OutputWorkspaceHABSample").value
+
+        self._compare_workspace(event_slice_output_sample[0], first_slice_output_sample, tolerance=1e-6)
+        self._compare_workspace(event_slice_output_sample[1], second_slice_output_sample, tolerance=1e-6)
+
+        # HAB can
+        event_slice_output_can = single_reduction_v2_alg.getProperty("OutputWorkspaceHABCan").value
+        first_slice_output_can = single_reduction_alg_first_slice.getProperty("OutputWorkspaceHABCan").value
+        second_slice_output_can = single_reduction_alg_second_slice.getProperty("OutputWorkspaceHABCan").value
+
+        self._compare_workspace(event_slice_output_can[0], first_slice_output_can, tolerance=1e-6)
+        self._compare_workspace(event_slice_output_can[1], second_slice_output_can, tolerance=1e-6)
 
     def test_that_single_reduction_evaluates_LAB(self):
         # Arrange
@@ -496,25 +571,27 @@ class SANSSingleReduction2Test(SingleReductionTest):
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
-        single_reduction_alg = self._run_single_reduction(state, sample_scatter=sample,
-                                                          sample_transmission=transmission_workspace,
-                                                          sample_direct=direct_workspace,
-                                                          sample_monitor=sample_monitor,
-                                                          can_scatter=can,
-                                                          can_monitor=can_monitor,
-                                                          can_transmission=can_transmission,
-                                                          can_direct=can_direct,
-                                                          output_settings=output_settings,
-                                                          event_slice=True,
-                                                          save_can=True,
-                                                          use_optimizations=True)
+        start_time = time.time()
+        single_reduction_v2_alg = self._run_single_reduction(state, sample_scatter=sample,
+                                                             sample_transmission=transmission_workspace,
+                                                             sample_direct=direct_workspace,
+                                                             sample_monitor=sample_monitor,
+                                                             can_scatter=can,
+                                                             can_monitor=can_monitor,
+                                                             can_transmission=can_transmission,
+                                                             can_direct=can_direct,
+                                                             output_settings=output_settings,
+                                                             event_slice=True,
+                                                             save_can=True,
+                                                             use_optimizations=True)
+        version_2_execution_time = time.time() - start_time
 
         # Check output workspaces
-        output_workspace = single_reduction_alg.getProperty("OutputWorkspaceLAB").value
-        lab_can = single_reduction_alg.getProperty("OutputWorkspaceLABCan").value
-        lab_sample = single_reduction_alg.getProperty("OutputWorkspaceLABSample").value
-        lab_can_count = single_reduction_alg.getProperty("OutputWorkspaceLABCanCount").value
-        lab_can_norm = single_reduction_alg.getProperty("OutputWorkspaceLABCanNorm").value
+        output_workspace = single_reduction_v2_alg.getProperty("OutputWorkspaceLAB").value
+        lab_can = single_reduction_v2_alg.getProperty("OutputWorkspaceLABCan").value
+        lab_sample = single_reduction_v2_alg.getProperty("OutputWorkspaceLABSample").value
+        lab_can_count = single_reduction_v2_alg.getProperty("OutputWorkspaceLABCanCount").value
+        lab_can_norm = single_reduction_v2_alg.getProperty("OutputWorkspaceLABCanNorm").value
 
         self._assert_group_workspace(output_workspace)
         self._assert_group_workspace(lab_can)
@@ -522,167 +599,77 @@ class SANSSingleReduction2Test(SingleReductionTest):
         self._assert_group_workspace(lab_can_count)
         self._assert_group_workspace(lab_can_norm)
 
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Compare SANSSingleReduction version 1 to version 2
-# ----------------------------------------------------------------------------------------------------------------------
-class SANSSingleReductionComparisonTest(SingleReductionTest):
-    """
-    Test case to check that using event slice optimisations is quicker
-    """
-    def test_than_event_slice_algorithm_is_quicker(self):
-        """
-        In this test we run version 2 repeat_n times on HAB data, with event slice 0:300:600.
-        We run version 1 repeat_n times for the 0:300 slice and repeat_n times for the 300:600 slice.
-
-        We compare the data to check that similar workspaces are produced, and we also check that it takes less
-        time to run version 2 than to run version 1 twice (version 1 must be run once for each event slice)
-        """
-        # Arrange
-        # Build the data information
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information("SANS2D00034484")
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00034484")
-        data_builder.set_sample_transmission("SANS2D00034505")
-        data_builder.set_sample_direct("SANS2D00034461")
-        data_builder.set_can_scatter("SANS2D00034481")
-        data_builder.set_can_transmission("SANS2D00034502")
-        data_builder.set_can_direct("SANS2D00034461")
-
-        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
-        data_info = data_builder.build()
-
-        # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
-        # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.HAB)
-
-        # --------------------------------------------------------------------------------------------------------------
-        # version 2 - Run the event slice optimised algorithm repeat_n times. version 2 only need to be run once,
-        #             no matter how many event slices
-        # --------------------------------------------------------------------------------------------------------------
-        user_file_director.set_compatibility_builder_use_compatibility_mode(False)
-        user_file_director.set_slice_event_builder_start_time([0.00, 300.00])
-        user_file_director.set_slice_event_builder_end_time([300.00, 600.00])
-        state = user_file_director.construct()
-
-        # Load the sample workspaces
-        sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor, \
-        can_transmission, can_direct = self._load_workspace(state)  # noqa
-
-        # Act
-        output_settings = {"OutputWorkspaceHAB": EMPTY_NAME}
-        repeat_n = 2
-
-        event_slice_alg_times = []
-        for _ in range(repeat_n):
-            start = time.time()
-            single_reduction_event_slice_alg = self._run_single_reduction(state, sample_scatter=sample,
-                                                                          sample_transmission=transmission_workspace,
-                                                                          sample_direct=direct_workspace,
-                                                                          sample_monitor=sample_monitor,
-                                                                          can_scatter=can,
-                                                                          can_monitor=can_monitor,
-                                                                          can_transmission=can_transmission,
-                                                                          can_direct=can_direct,
-                                                                          output_settings=output_settings,
-                                                                          event_slice=True,
-                                                                          save_can=True)
-            end = time.time()
-            event_slice_alg_times.append(end - start)
-
-        # --------------------------------------------------------------------------------------------------------------
-        # version 1 - Run the algorithm repeat_n times for slice
-        #             0:300 and repeat_n times for slice 300:600
-        # --------------------------------------------------------------------------------------------------------------
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-
+        # ---------------------------------------------------
+        # Comparison test with version 1
+        # This can be removed once version 2 has been adopted
+        # ---------------------------------------------------
         # Run the first event slice
         user_file_director.set_slice_event_builder_start_time([0.00])
         user_file_director.set_slice_event_builder_end_time([300.00])
         state = user_file_director.construct()
 
-        alg_first_slice_times = []
-        for _ in range(repeat_n):
-            start = time.time()
-            single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
-                                                                          sample_transmission=transmission_workspace,
-                                                                          sample_direct=direct_workspace,
-                                                                          sample_monitor=sample_monitor,
-                                                                          can_scatter=can,
-                                                                          can_monitor=can_monitor,
-                                                                          can_transmission=can_transmission,
-                                                                          can_direct=can_direct,
-                                                                          output_settings=output_settings,
-                                                                          event_slice=False,
-                                                                          save_can=True)
-            end = time.time()
-            alg_first_slice_times.append(end - start)
+        start_time = time.time()
+        single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
+                                                                      sample_transmission=transmission_workspace,
+                                                                      sample_direct=direct_workspace,
+                                                                      sample_monitor=sample_monitor,
+                                                                      can_scatter=can,
+                                                                      can_monitor=can_monitor,
+                                                                      can_transmission=can_transmission,
+                                                                      can_direct=can_direct,
+                                                                      output_settings=output_settings,
+                                                                      event_slice=False,
+                                                                      save_can=True)
+        first_slice_execution_time = time.time() - start_time
 
         # Run the second event slice
         user_file_director.set_slice_event_builder_start_time([300.00])
         user_file_director.set_slice_event_builder_end_time([600.00])
         state = user_file_director.construct()
 
-        alg_second_slice_times = []
-        for _ in range(repeat_n):
-            start = time.time()
-            single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
-                                                                           sample_transmission=transmission_workspace,
-                                                                           sample_direct=direct_workspace,
-                                                                           sample_monitor=sample_monitor,
-                                                                           can_scatter=can,
-                                                                           can_monitor=can_monitor,
-                                                                           can_transmission=can_transmission,
-                                                                           can_direct=can_direct,
-                                                                           output_settings=output_settings,
-                                                                           event_slice=False,
-                                                                           save_can=True)
-            end = time.time()
-            alg_second_slice_times.append(end - start)
+        start_time = time.time()
+        single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
+                                                                       sample_transmission=transmission_workspace,
+                                                                       sample_direct=direct_workspace,
+                                                                       sample_monitor=sample_monitor,
+                                                                       can_scatter=can,
+                                                                       can_monitor=can_monitor,
+                                                                       can_transmission=can_transmission,
+                                                                       can_direct=can_direct,
+                                                                       output_settings=output_settings,
+                                                                       event_slice=False,
+                                                                       save_can=True)
+        version_1_execution_time = time.time() - start_time + first_slice_execution_time
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Make checks - Check that version 2 takes less time to run,
-        #               and check that output workspace are similar
-        # --------------------------------------------------------------------------------------------------------------
-        # Check that SingleReductionEventSlice takes less time in total
-        self.assertLess(sum(event_slice_alg_times),
-                        sum(alg_first_slice_times + alg_second_slice_times))
+        # Check that running version 2 once is quicker than running version 1 twice (once for each slice)
+        # version 2 has been significantly quicker that multiple runs are not necessary to ensure this test
+        # does not sporadically fail. However, this check could be removed if this changes.
+        self.assertLess(version_2_execution_time, version_1_execution_time)
 
-        # Now check that algs give similar results to one another
+        # Now compare output workspaces from the two versions
+        # Output LAB workspace
+        event_slice_output_workspace = single_reduction_v2_alg.getProperty("OutputWorkspaceLAB").value
+        first_slice_output_workspace = single_reduction_alg_first_slice.getProperty("OutputWorkspaceLAB").value
+        second_slice_output_workspace = single_reduction_alg_second_slice.getProperty("OutputWorkspaceLAB").value
 
-        # Output HAB workspace
-        event_slice_output_workspace = single_reduction_event_slice_alg.getProperty("OutputWorkspaceHAB").value
-        first_slice_output_workspace = single_reduction_alg_first_slice.getProperty("OutputWorkspaceHAB").value
-        second_slice_output_workspace = single_reduction_alg_second_slice.getProperty("OutputWorkspaceHAB").value
+        self._compare_workspace(event_slice_output_workspace[0], first_slice_output_workspace, tolerance=1e-6)
+        self._compare_workspace(event_slice_output_workspace[1], second_slice_output_workspace, tolerance=1e-6)
 
-        self._compare_workspace(event_slice_output_workspace[0], first_slice_output_workspace, tolerance=1e-1)
-        self._compare_workspace(event_slice_output_workspace[1], second_slice_output_workspace, tolerance=1e-1)
+        # LAB sample
+        event_slice_output_sample = single_reduction_v2_alg.getProperty("OutputWorkspaceLABSample").value
+        first_slice_output_sample = single_reduction_alg_first_slice.getProperty("OutputWorkspaceLABSample").value
+        second_slice_output_sample = single_reduction_alg_second_slice.getProperty("OutputWorkspaceLABSample").value
 
-        # OutScale and OutShift
-        event_slice_shift_and_scale = single_reduction_event_slice_alg.getProperty("OutShiftAndScaleFactor").value
-        self.assertEqual(event_slice_shift_and_scale.readX(0)[0],
-                         single_reduction_alg_first_slice.getProperty("OutScaleFactor").value)
-        self.assertEqual(event_slice_shift_and_scale.readY(0)[0],
-                         single_reduction_alg_first_slice.getProperty("OutShiftFactor").value)
+        self._compare_workspace(event_slice_output_sample[0], first_slice_output_sample, tolerance=1e-6)
+        self._compare_workspace(event_slice_output_sample[1], second_slice_output_sample, tolerance=1e-6)
 
-        # HAB sample
-        event_slice_output_sample = single_reduction_event_slice_alg.getProperty("OutputWorkspaceHABSample").value
-        first_slice_output_sample = single_reduction_alg_first_slice.getProperty("OutputWorkspaceHABSample").value
-        second_slice_output_sample = single_reduction_alg_second_slice.getProperty("OutputWorkspaceHABSample").value
+        # LAB can
+        event_slice_output_can = single_reduction_v2_alg.getProperty("OutputWorkspaceLABCan").value
+        first_slice_output_can = single_reduction_alg_first_slice.getProperty("OutputWorkspaceLABCan").value
+        second_slice_output_can = single_reduction_alg_second_slice.getProperty("OutputWorkspaceLABCan").value
 
-        self._compare_workspace(event_slice_output_sample[0], first_slice_output_sample, tolerance=1e-1)
-        self._compare_workspace(event_slice_output_sample[1], second_slice_output_sample, tolerance=1e-1)
-
-        # HAB can
-        event_slice_output_can = single_reduction_event_slice_alg.getProperty("OutputWorkspaceHABCan").value
-        first_slice_output_can = single_reduction_alg_first_slice.getProperty("OutputWorkspaceHABCan").value
-        second_slice_output_can = single_reduction_alg_second_slice.getProperty("OutputWorkspaceHABCan").value
-
-        self._compare_workspace(event_slice_output_can[0], first_slice_output_can, tolerance=1e-1)
-        self._compare_workspace(event_slice_output_can[1], second_slice_output_can, tolerance=1e-1)
+        self._compare_workspace(event_slice_output_can[0], first_slice_output_can, tolerance=1e-6)
+        self._compare_workspace(event_slice_output_can[1], second_slice_output_can, tolerance=1e-6)
 
 
 class SANSReductionRunnerTest(systemtesting.MantidSystemTest):
@@ -694,7 +681,6 @@ class SANSReductionRunnerTest(systemtesting.MantidSystemTest):
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(SANSSingleReductionTest, 'test'))
         suite.addTest(unittest.makeSuite(SANSSingleReduction2Test, 'test'))
-        suite.addTest(unittest.makeSuite(SANSSingleReductionComparisonTest, 'test'))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():
