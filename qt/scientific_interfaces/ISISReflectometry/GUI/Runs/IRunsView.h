@@ -108,13 +108,6 @@ public:
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const = 0;
 
-  virtual void loginFailed(std::string const &fullError) = 0;
-  virtual void noActiveICatSessions() = 0;
-  virtual void missingRunsToTransfer() = 0;
-
-  // Start an ICAT search
-  virtual void startIcatSearch() = 0;
-
   // Start live data monitoring
   virtual void startMonitor() = 0;
   virtual void stopMonitor() = 0;

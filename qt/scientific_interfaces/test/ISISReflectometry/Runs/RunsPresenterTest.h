@@ -45,7 +45,8 @@ public:
       : m_thetaTolerance(0.01),
         m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
         m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(), m_pythonRunner(), m_runNotifier(nullptr),
+        m_searcher(nullptr), m_autoreduction(), m_pythonRunner(),
+        m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
@@ -100,7 +101,9 @@ public:
         .Times(1)
         .WillOnce(Return(searchString));
     // TODO: add expected call to python runner when implemented
-    EXPECT_CALL(m_view, noActiveICatSessions()).Times(1);
+    EXPECT_CALL(m_messageHandler,
+                giveUserCritical("Catalog login failed", "Error"))
+        .Times(1);
     expectSearchFailed();
     presenter.notifySearch();
     verifyAndClear();
@@ -238,7 +241,10 @@ public:
     EXPECT_CALL(m_view, getSelectedSearchRows())
         .Times(1)
         .WillOnce(Return(selectedRows));
-    EXPECT_CALL(m_view, missingRunsToTransfer()).Times(1);
+    EXPECT_CALL(m_messageHandler,
+                giveUserCritical("Please select at least one run to transfer.",
+                                 "No runs selected"))
+        .Times(1);
     presenter.notifyTransfer();
     verifyAndClear();
   }
@@ -376,6 +382,9 @@ private:
     presenter.m_runNotifier.reset(new NiceMock<MockRunNotifier>());
     m_runNotifier = dynamic_cast<NiceMock<MockRunNotifier> *>(
         presenter.m_runNotifier.get());
+    presenter.m_searcher.reset(new NiceMock<MockSearcher>());
+    m_searcher =
+        dynamic_cast<NiceMock<MockSearcher> *>(presenter.m_searcher.get());
     // Return an empty table by default
     ON_CALL(*m_runsTablePresenter, runsTable())
         .WillByDefault(ReturnRef(m_runsTable));
@@ -468,13 +477,16 @@ private:
 
   void expectCheckForNewRuns() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-    EXPECT_CALL(m_view, startIcatSearch()).Times(1);
+    EXPECT_CALL(m_view, getSearchString()).Times(1);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(1);
+    EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
   }
 
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_)).Times(0);
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
-    EXPECT_CALL(m_view, startIcatSearch()).Times(0);
+    EXPECT_CALL(m_view, getSearchString()).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
   }
 
   void expectGetValidSearchRowSelection(RunsPresenterFriend &presenter) {
@@ -574,6 +586,7 @@ private:
   NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
+  NiceMock<MockSearcher> *m_searcher;
   MockAutoreduction m_autoreduction;
   MockPythonRunner *m_pythonRunner;
   MockRunNotifier *m_runNotifier;

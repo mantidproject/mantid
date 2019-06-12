@@ -9,7 +9,7 @@
 
 #include "CatalogRunNotifier.h"
 #include "Common/DllConfig.h"
-#include "GUI/Common/CatalogSearcher.h"
+#include "GUI/Common/ISearcher.h"
 #include "GUI/Common/SearchResult.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
@@ -119,6 +119,8 @@ protected:
   std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The run notifier implementation
   std::unique_ptr<IRunNotifier> m_runNotifier;
+  /// The search implementation
+  std::unique_ptr<ISearcher> m_searcher;
 
   std::string liveDataReductionOptions(const std::string &instrument);
 
@@ -131,8 +133,6 @@ private:
   IBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
   IMessageHandler *m_messageHandler;
-  /// The search implementation
-  CatalogSearcher m_searcher;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list

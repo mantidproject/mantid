@@ -63,9 +63,9 @@ RunsPresenter::RunsPresenter(
     IAutoreduction &autoreduction, IPythonRunner *pythonRunner)
     : m_autoreduction(autoreduction),
       m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
+      m_searcher(std::make_unique<CatalogSearcher>(pythonRunner, mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_searcher(CatalogSearcher(pythonRunner, mainView)),
       m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
@@ -75,7 +75,7 @@ RunsPresenter::RunsPresenter(
   m_tablePresenter = makeRunsTablePresenter(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
   m_runNotifier->subscribe(this);
-  m_searcher.subscribe(this);
+  m_searcher->subscribe(this);
 
   updateViewWhenMonitorStopped();
 }
@@ -233,7 +233,7 @@ bool RunsPresenter::search() {
     return false;
 
   try {
-    m_searcher.startSearchAsync(searchString);
+    m_searcher->startSearchAsync(searchString);
   } catch (std::runtime_error &e) {
     m_messageHandler->giveUserCritical(e.what(), "Error");
     return false;
@@ -278,7 +278,7 @@ void RunsPresenter::checkForNewRuns() {
 
   // Initially we just need to start an ICat search and the reduction will be
   // run when the search completes
-  m_view->startIcatSearch();
+  search();
 }
 
 /** Run an autoreduction process based on the latest search results
@@ -327,7 +327,8 @@ bool RunsPresenter::validateRowsToTransfer(
     const std::set<int> &rowsToTransfer) {
   // Check that we have something to transfer
   if (rowsToTransfer.size() == 0) {
-    m_view->missingRunsToTransfer();
+    m_messageHandler->giveUserCritical(
+        "Please select at least one run to transfer.", "No runs selected");
     return false;
   }
   return true;
