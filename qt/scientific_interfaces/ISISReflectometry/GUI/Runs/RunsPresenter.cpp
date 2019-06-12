@@ -232,10 +232,8 @@ bool RunsPresenter::search() {
   if (searchString.empty())
     return false;
 
-  try {
-    m_searcher->startSearchAsync(searchString);
-  } catch (std::runtime_error &e) {
-    m_messageHandler->giveUserCritical(e.what(), "Error");
+  if (!m_searcher->startSearchAsync(searchString)) {
+    m_messageHandler->giveUserCritical("Catalog login failed", "Error");
     return false;
   }
 

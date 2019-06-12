@@ -30,7 +30,7 @@ public:
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
   Mantid::API::ITableWorkspace_sptr search(const std::string &text) override;
-  void startSearchAsync(const std::string &text) override;
+  bool startSearchAsync(const std::string &text) override;
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
@@ -41,7 +41,7 @@ private:
   SearcherSubscriber *m_notifyee;
 
   bool hasActiveSession() const;
-  void logInToCatalog();
+  bool logInToCatalog();
   std::string activeSessionId() const;
   Mantid::API::IAlgorithm_sptr createSearchAlgorithm(const std::string &text);
 };

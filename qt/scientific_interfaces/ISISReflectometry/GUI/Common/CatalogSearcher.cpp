@@ -53,10 +53,15 @@ ITableWorkspace_sptr CatalogSearcher::search(const std::string &text) {
   return results;
 }
 
-void CatalogSearcher::startSearchAsync(const std::string &text) {
+bool CatalogSearcher::startSearchAsync(const std::string &text) {
+  if (!logInToCatalog())
+    return false;
+
   auto algSearch = createSearchAlgorithm(text);
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
+
+  return true;
 }
 
 void CatalogSearcher::notifySearchComplete() {
@@ -79,11 +84,11 @@ bool CatalogSearcher::hasActiveSession() const {
 }
 
 /** Log in to the catalog
- * @throws : if login failed
+ * @returns : true if login succeeded
  */
-void CatalogSearcher::logInToCatalog() {
+bool CatalogSearcher::logInToCatalog() {
   if (hasActiveSession())
-    return;
+    return true;
 
   try {
     std::stringstream pythonSrc;
@@ -93,12 +98,11 @@ void CatalogSearcher::logInToCatalog() {
     pythonSrc << "  pass\n";
     m_pythonRunner->runPythonAlgorithm(pythonSrc.str());
   } catch (std::runtime_error &e) {
-    throw std::runtime_error(std::string("Catalog login failed: ") + e.what());
+    return false;
   }
 
   // Check we logged in ok
-  if (!hasActiveSession())
-    throw std::runtime_error("Catalog login failed");
+  return hasActiveSession();
 }
 
 std::string CatalogSearcher::activeSessionId() const {
@@ -111,7 +115,9 @@ std::string CatalogSearcher::activeSessionId() const {
 
 IAlgorithm_sptr
 CatalogSearcher::createSearchAlgorithm(const std::string &text) {
-  logInToCatalog();
+  if (!logInToCatalog())
+    throw std::runtime_error("Catalog login failed: ");
+
   auto sessionId = activeSessionId();
 
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");

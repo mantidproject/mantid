@@ -31,7 +31,7 @@ public:
   virtual ~ISearcher(){};
   virtual void subscribe(SearcherSubscriber *notifyee) = 0;
   virtual Mantid::API::ITableWorkspace_sptr search(const std::string &text) = 0;
-  virtual void startSearchAsync(const std::string &text) = 0;
+  virtual bool startSearchAsync(const std::string &text) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
