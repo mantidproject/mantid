@@ -82,45 +82,51 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
         if self.instrument is None:
             IDF=mantid.api.ExperimentInfo.getInstrumentFilename(self.instname)
-            ws=mantid.simpleapi.LoadEmptyInstrument(IDF,OutputWorkspace=self.instname+"MaskBTP")
+            ws=mantid.simpleapi.LoadEmptyInstrument(IDF, OutputWorkspace=self.instname+"MaskBTP")
             self.instrument=ws.getInstrument()
 
-        # get the ranges for banks, tubes and pixels
-        banks=self._parseBTPlist(self.getProperty("Bank").value, self.bankmin[self.instname], self.bankmax[self.instname])
+        # get the ranges for banks, tubes and pixels - adding the minimum back in
+        banks = self.getProperty("Bank").value
+        if len(banks) == 0:
+            banks = numpy.arange(self.bankmin[self.instname], self.bankmax[self.instname] + 1)
 
         tubeString = self.getProperty("Tube").value
         if tubeString.lower() == "edges":
-            tubes=[tubemin[self.instname], tubemax[self.instname]]
+            tubes=[0, -1]
         else:
             tubes=self._parseBTPlist(tubeString, tubemin[self.instname], tubemax[self.instname])
 
         pixelString = self.getProperty("Pixel").value
         if pixelString.lower() == "edges":
-            pixels=[pixmin[self.instname], pixmax[self.instname]]
+            pixels=[0, -1]
         else:
             pixels=self._parseBTPlist(pixelString, pixmin[self.instname], pixmax[self.instname])
-        self.log().warning('TUBES:{} PIXELS:{}'.format(tubes, pixels))
+
+        # convert bank numbers into names and remove ones that couldn't be named
+        banks = [self._getName(bank) for bank in banks]
+        banks = [bank for bank in banks if bank]
+
+        compInfo = ws.componentInfo()
+        bankIndices = self._getBankIndices(compInfo, banks)
 
         # generate the list of detector identifiers to mask
         detlist=[]
-        for bank in banks:
-            component = self._getEightPackHandle(bank)
-            if component is not None:
-                for tube in tubes:
-                    if (tube<tubemin[self.instname]) or (tube>tubemax[self.instname]):
-                        raise ValueError("Out of range index for tube number")
-                    else:
-                        for p in pixels:
-                            if (p<pixmin[self.instname]) or (p>pixmax[self.instname]):
-                                raise ValueError("Out of range index for pixel number")
-                            else:
-                                try:
-                                    pid=component[int(tube-tubemin[self.instname])][int(p-pixmin[self.instname])].getID()
-                                except:
-                                    raise RuntimeError("Problem finding pixel in bank={}, tube={}, pixel={}".format(bank,
-                                                                                                                    tube - tubemin[self.instname],
-                                                                                                                    p - pixmin[self.instname]))
-                                detlist.append(pid)
+        fullDetectorIdList = ws.detectorInfo().detectorIDs()
+        for bankIndex in bankIndices:
+            tubeIndices = compInfo.children(bankIndex)
+            if len(tubeIndices) == 1:  # go down one level
+                tubeIndices = compInfo.children(int(tubeIndices[0]))
+
+            if len(tubes):  # use specific tubes if requested
+                tubeIndices = tubeIndices[tubes]
+
+            for tubeIndex in tubeIndices:
+                pixelIndices = compInfo.children(int(tubeIndex))
+                if len(pixels):  # use specific pixels if requested
+                    pixelIndices = pixelIndices[pixels]
+
+                for pixelIndex in pixelIndices:
+                    detlist.append(fullDetectorIdList[pixelIndex])
 
         # mask the detectors
         detlist = numpy.array(detlist)
@@ -135,7 +141,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
     def _parseBTPlist(self, value, min_value, max_value):
         if len(value) == 0:
-            return numpy.arange(min_value, max_value + 1)
+            return list()  # empty list means use everything
         else:
             # let IntArrayProperty do the work and make sure that the result is valid
             prop = IntArrayProperty(name='temp', values=value)
@@ -147,52 +153,42 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             result = result[result <= max_value]
             if len(result) == 0:
                 raise RuntimeError('Could not generate values from "{}"'.format(value))
-            return result
+            return result - min_value
 
-    #pylint: disable=too-many-branches,too-many-return-statements
-    def _getEightPackHandle(self, banknum):
-        """
-        Helper function to return the handle to a given eightpack
-        """
+    def _getName(self, banknum):
         banknum=int(banknum)
         if not (self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]):
             raise ValueError("Out of range index={} for {} instrument bank numbers".format(banknum, self.instname))
 
-        if self.instname=="ARCS":
-            if self.bankmin[self.instname]<=banknum<= 38:
-                return self.instrument.getComponentByName("B row")[banknum-1][0]
-            elif 39<=banknum<= 77:
-                return self.instrument.getComponentByName("M row")[banknum-39][0]
-            elif 78<=banknum<=self.bankmax[self.instname]:
-                return self.instrument.getComponentByName("T row")[banknum-78][0]
-            else:
-                raise ValueError("Out of range index for ARCS instrument bank numbers")
-        elif self.instname=="SEQUOIA":
-            # there are only banks 23-26 in A row
-            if self.bankmin[self.instname]<=banknum<= 37:
-                A_row = self.instrument.getComponentByName("A row")
-                if A_row is None or banknum>26:
-                    return None
-                return A_row[banknum-23][0]
-            if 38<=banknum<= 74:
-                return self.instrument.getComponentByName("B row")[banknum-38][0]
-            elif 75<=banknum<= 113:
-                return self.instrument.getComponentByName("C row")[banknum-75][0]
-            elif 114<=banknum<=self.bankmax[self.instname]:
-                return self.instrument.getComponentByName("D row")[banknum-114][0]
-            else:
-                raise ValueError("Out of range index for SEQUOIA instrument bank numbers: %s" % (banknum,))
-        elif self.instname in ["CNCS", "CORELLI", "HYSPEC", "WAND"]:
-                return self.instrument.getComponentByName("bank"+str(banknum))[0]
-        elif self.instname=="WISH":
-            try:
-                return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
-            except TypeError: #if not found, the return is None, so None[0] is a TypeError
-                return None
-        elif self.instname=="REF_M":
-            return self.instrument.getComponentByName("detector"+"%1d" % banknum)
+        if self.instname == "WISH":
+            return "panel" + "%02d" % banknum
+        elif self.instname == "REF_M":
+            return "detector" + "%1d" % banknum
         else:
-            return self.instrument.getComponentByName("bank"+str(banknum))
+            return "bank" + str(banknum)
+
+    def _getBankIndices(self, compInfo, bankNames):
+        '''This removes banks that don't exist'''
+        bankIndices = []
+        known_banks = {}  # name: index
+        for bank in bankNames:
+            if bank in known_banks:  # use the known index
+                bankIndices.append(known_banks[bank])
+                continue
+            try:
+                bankIndex = int(compInfo.indexOfAny(bank))
+                bankIndices.append(bankIndex)
+
+                # get all of the bank's parent's children
+                parentIndex = int(compInfo.parent(bankIndex))
+                for index in compInfo.children(parentIndex):
+                    index = int(index)
+                    known_banks[compInfo.name(index)] = index
+            except ValueError:
+                continue  # bank wasn't found
+
+        self.log().information('While determining banks, filtered from {} banks to {}'.format(len(bankNames), len(bankIndices)))
+        return bankIndices
 
 
 mantid.api.AlgorithmFactory.subscribe(MaskBTP)
