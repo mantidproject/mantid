@@ -214,7 +214,7 @@ class FunctionsTest(TestCase):
         config['graph1d.autodistribution'] = 'Off'
         self._compare_errorbar_labels_and_title()
 
-    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_plot_as_dist(self):
+    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_normalize_by_bin_width(self):
         config['graph1d.autodistribution'] = 'On'
         self._compare_errorbar_labels_and_title()
 
