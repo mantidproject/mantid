@@ -53,6 +53,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
     : public IRunsPresenter,
       public RunsViewSubscriber,
       public RunNotifierSubscriber,
+      public SearcherSubscriber,
       public Mantid::API::AlgorithmObserver {
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
@@ -94,7 +95,6 @@ public:
   void notifySearch() override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
-  void notifyICATSearchComplete() override;
   void notifyTransfer() override;
   void notifyInstrumentChanged() override;
   void notifyStartMonitor() override;
@@ -103,6 +103,9 @@ public:
 
   // RunNotifierSubscriber overrides
   void notifyCheckForNewRuns() override;
+
+  // SearcherSubscriber overrides
+  void notifySearchResults(Mantid::API::ITableWorkspace_sptr results) override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;
@@ -142,7 +145,7 @@ private:
 
   /// searching
   bool search();
-  void populateSearchResults();
+  void populateSearchResults(Mantid::API::ITableWorkspace_sptr results);
   /// autoreduction
   bool requireNewAutoreduction() const;
   void checkForNewRuns();

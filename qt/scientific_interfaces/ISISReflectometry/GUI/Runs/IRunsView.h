@@ -41,7 +41,6 @@ public:
   virtual void notifySearch() = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
-  virtual void notifyICATSearchComplete() = 0;
   virtual void notifyTransfer() = 0;
   virtual void notifyInstrumentChanged() = 0;
   virtual void notifyStartMonitor() = 0;
@@ -53,6 +52,12 @@ class RunsViewTimerSubscriber {
 public:
   virtual ~RunsViewTimerSubscriber() = default;
   virtual void notifyTimerEvent() = 0;
+};
+
+class RunsViewSearchSubscriber {
+public:
+  virtual ~RunsViewSearchSubscriber() = default;
+  virtual void notifySearchComplete() = 0;
 };
 
 /** @class IRunsView
@@ -68,6 +73,7 @@ public:
 
   virtual void subscribe(RunsViewSubscriber *notifyee) = 0;
   virtual void subscribeTimer(RunsViewTimerSubscriber *notifyee) = 0;
+  virtual void subscribeSearch(RunsViewSearchSubscriber *notifyee) = 0;
   virtual IRunsTableView *table() const = 0;
 
   // Timer methods

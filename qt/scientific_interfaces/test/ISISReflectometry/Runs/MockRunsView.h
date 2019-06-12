@@ -20,6 +20,7 @@ class MockRunsView : public IRunsView {
 public:
   MOCK_METHOD1(subscribe, void(RunsViewSubscriber *));
   MOCK_METHOD1(subscribeTimer, void(RunsViewTimerSubscriber *));
+  MOCK_METHOD1(subscribeSearch, void(RunsViewSearchSubscriber *));
   MOCK_CONST_METHOD0(table, IRunsTableView *());
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
