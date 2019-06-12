@@ -146,6 +146,7 @@ void LoadMcStasNexus::exec() {
       axis1->unit() = lblUnit;
 
       auto axis2 = std::make_unique<NumericAxis>(axis2Length);
+      auto axis2Raw = axis2.get();
       axis2->title() = axis2Name;
       // Set caption
       lblUnit = boost::make_shared<Units::Label>();
@@ -171,7 +172,7 @@ void LoadMcStasNexus::exec() {
           if (!errors.empty())
             dataE[j] = errors[fileDataIndex];
         }
-        axis2->setValue(wsIndex, axis2Values[wsIndex]);
+        axis2Raw->setValue(wsIndex, axis2Values[wsIndex]);
       }
       // Make Mantid store the workspace in the group
       outputGroup->addWorkspace(ws);

@@ -163,18 +163,19 @@ void ConvertSpectrumAxis::exec() {
   // Now set up a new, numeric axis holding the theta values corresponding to
   // each spectrum
   auto newAxis = std::make_unique<NumericAxis>(indexMap.size());
+  auto newAxisRaw = newAxis.get();
   outputWS->replaceAxis(1, std::move(newAxis));
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   if (unitTarget == "theta" || unitTarget == "signed_theta") {
-    newAxis->unit() = boost::make_shared<Units::Degrees>();
+    newAxisRaw->unit() = boost::make_shared<Units::Degrees>();
   } else {
-    newAxis->unit() = UnitFactory::Instance().create(unitTarget);
+    newAxisRaw->unit() = UnitFactory::Instance().create(unitTarget);
   }
   std::multimap<double, size_t>::const_iterator it;
   size_t currentIndex = 0;
   for (it = indexMap.begin(); it != indexMap.end(); ++it) {
     // Set the axis value
-    newAxis->setValue(currentIndex, it->first);
+    newAxisRaw->setValue(currentIndex, it->first);
     // Now copy over the data
     outputWS->setHistogram(currentIndex, inputWS->histogram(it->second));
     // We can keep the spectrum numbers etc.

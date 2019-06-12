@@ -473,10 +473,11 @@ private:
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(inWS, 4);
       ws->getAxis(0)->setUnit("Wavelength");
       auto axis1 = std::make_unique<TextAxis>(4);
+      auto axis1Raw = axis1.get();
       ws->replaceAxis(1, std::move(axis1));
       auto const &current_labels = labels.at(kind);
       for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-        axis1->setLabel(i, current_labels[i]);
+        axis1Raw->setLabel(i, current_labels[i]);
       }
       return ws;
     } else if (kind == "histo") {

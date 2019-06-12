@@ -184,10 +184,11 @@ Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 
   Workspace2D_sptr outputWS = create2DWorkspaceBinned(nHist, nBins);
   auto newAxis = std::make_unique<NumericAxis>(nHist);
+  auto newAxisRaw = newAxis.get();
   outputWS->replaceAxis(1, std::move(newAxis));
-  newAxis->unit() = boost::make_shared<Units::Degrees>();
+  newAxisRaw->unit() = boost::make_shared<Units::Degrees>();
   for (int i = 0; i < nHist; ++i) {
-    newAxis->setValue(i, i + 1);
+    newAxisRaw->setValue(i, i + 1);
   }
 
   return outputWS;

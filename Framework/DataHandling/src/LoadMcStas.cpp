@@ -543,6 +543,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     axis1->unit() = lblUnit;
 
     auto axis2 = std::make_unique<NumericAxis>(axis2Length);
+    auto axis2Raw = axis2.get();
     axis2->title() = axis2Name;
     // Set caption
     lblUnit = boost::make_shared<Units::Label>();
@@ -567,7 +568,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
         if (!errors.empty())
           dataE[j] = errors[fileDataIndex];
       }
-      axis2->setValue(wsIndex, axis2Values[wsIndex]);
+      axis2Raw->setValue(wsIndex, axis2Values[wsIndex]);
     }
 
     // set the workspace title

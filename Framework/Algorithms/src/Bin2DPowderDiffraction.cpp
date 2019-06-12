@@ -214,6 +214,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
   auto verticalAxis = std::make_unique<BinEdgeAxis>(dPerp);
+  auto verticalAxisRaw = verticalAxis.get();
   // Meta data
   verticalAxis->unit() =
       UnitFactory::Instance().create("dSpacingPerpendicular");
@@ -230,7 +231,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   // fill the workspace with data
   g_log.debug() << "newYSize = " << dPerpSize << std::endl;
   g_log.debug() << "newXSize = " << dSize << std::endl;
-  std::vector<double> dp_vec(verticalAxis->getValues());
+  std::vector<double> dp_vec(verticalAxisRaw->getValues());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
   for (int64_t snum = 0; snum < numSpectra; ++snum) {

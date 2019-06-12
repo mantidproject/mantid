@@ -258,25 +258,27 @@ void CreateWorkspace::exec() {
   if (vUnit != "SpectraNumber") {
     if (vUnit == "Text") {
       auto newAxis = std::make_unique<TextAxis>(vAxis.size());
+      auto newAxisRaw = newAxis.get();
       outputWS->replaceAxis(1, std::move(newAxis));
       for (size_t i = 0; i < vAxis.size(); i++) {
-        newAxis->setLabel(i, vAxis[i]);
+        newAxisRaw->setLabel(i, vAxis[i]);
       }
     } else {
       std::unique_ptr<NumericAxis> newAxis(nullptr);
       if (vAxisSize == nSpec)
         newAxis = std::make_unique<NumericAxis>(vAxisSize); // treat as points
       else if (vAxisSize == nSpec + 1)
-        newAxis = std::make_unique<BinEdgeAxis>(vAxisSize); // treat as bin edges
+        newAxis =
+            std::make_unique<BinEdgeAxis>(vAxisSize); // treat as bin edges
       else
         throw std::range_error("Invalid vertical axis length. It must be the "
                                "same length as NSpec or 1 longer.");
-
+      auto newAxisRaw = newAxis.get();
       newAxis->unit() = UnitFactory::Instance().create(vUnit);
       outputWS->replaceAxis(1, std::move(newAxis));
       for (size_t i = 0; i < vAxis.size(); i++) {
         try {
-          newAxis->setValue(i,
+          newAxisRaw->setValue(i,
                             boost::lexical_cast<double, std::string>(vAxis[i]));
         } catch (boost::bad_lexical_cast &) {
           throw std::invalid_argument("CreateWorkspace - YAxisValues property "

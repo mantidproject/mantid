@@ -1539,11 +1539,12 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     try {
       auto newAxis = (verticalHistogram) ? std::make_unique<API::BinEdgeAxis>(nspectra + 1)
                                           : std::make_unique<API::NumericAxis>(nspectra);
+      auto newAxisRaw = newAxis.get();
       local_workspace->replaceAxis(1, std::move(newAxis));
-      newAxis->unit() = UnitFactory::Instance().create(unit2);
+      newAxisRaw->unit() = UnitFactory::Instance().create(unit2);
       if (unit2 == "Label") {
         auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-            newAxis->unit());
+            newAxisRaw->unit());
         auto ax = wksp_cls.openNXDouble("axis2");
         label->setLabel(ax.attributes("caption"), ax.attributes("label"));
       }

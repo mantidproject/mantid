@@ -437,11 +437,12 @@ public:
     constexpr size_t parentNhist{3};
     const auto parent = create<Workspace2D>(parentNhist, Histogram(Points{1}));
     std::vector<double> vec{-1.5, -0.5, 2.3, 3.4};
-    auto parentAxis = std::make_unique<NumericAxis>(vec);
+    auto parentAxis = std::make_unique<BinEdgeAxis>(vec);
     parent->replaceAxis(1, std::move(parentAxis));
     constexpr size_t nhist{2};
     const auto ws = create<Workspace2D>(*parent, nhist, parent->histogram(0));
     auto axis = ws->getAxis(1);
+    auto axis1 = dynamic_cast<BinEdgeAxis *>(axis);
     TS_ASSERT_DIFFERS(dynamic_cast<BinEdgeAxis *>(axis), nullptr)
     TS_ASSERT_EQUALS(axis->length(), nhist + 1);
   }

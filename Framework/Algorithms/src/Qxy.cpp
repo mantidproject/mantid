@@ -453,11 +453,12 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
 
   // Create a numeric axis to replace the vertical one
   auto verticalAxis = std::make_unique<BinEdgeAxis>(nBins);
+  auto verticalAxisRaw=verticalAxis.get();
   outputWorkspace->replaceAxis(1, std::move(verticalAxis));
   for (int i = 0; i < nBins; ++i) {
     const double currentVal = axis[i];
     // Set the Y value on the axis
-    verticalAxis->setValue(i, currentVal);
+    verticalAxisRaw->setValue(i, currentVal);
   }
 
   // Fill the X vectors in the output workspace

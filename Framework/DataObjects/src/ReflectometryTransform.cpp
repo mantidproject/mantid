@@ -161,18 +161,19 @@ MantidVec createXAxis(MatrixWorkspace *const ws, const double gradX,
                       const std::string &caption, const std::string &units) {
   // Create an X - Axis.
   auto xAxis = std::make_unique<BinEdgeAxis>(nBins);
+  auto xAxisRaw = xAxis.get();
   ws->replaceAxis(0, std::move(xAxis));
   auto unitXBasePtr = UnitFactory::Instance().create("Label");
   boost::shared_ptr<Mantid::Kernel::Units::Label> xUnit =
       boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitXBasePtr);
   xUnit->setLabel(caption, units);
-  xAxis->unit() = xUnit;
-  xAxis->title() = caption;
+  xAxisRaw->unit() = xUnit;
+  xAxisRaw->title() = caption;
   MantidVec xAxisVec(nBins);
   for (size_t i = 0; i < nBins; ++i) {
     double qxIncrement =
         ((1 / gradX) * (static_cast<double>(i) + 1) + cxToUnit);
-    xAxis->setValue(i, qxIncrement);
+    xAxisRaw->setValue(i, qxIncrement);
     xAxisVec[i] = qxIncrement;
   }
   return xAxisVec;
@@ -194,19 +195,20 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
                         const std::string &units) {
   // Create a Y (vertical) Axis
   auto verticalAxis = std::make_unique<BinEdgeAxis>(nBins);
+  auto verticalAxisRaw = verticalAxis.get();
   ws->replaceAxis(1, std::move(verticalAxis));
   auto unitZBasePtr = UnitFactory::Instance().create("Label");
   boost::shared_ptr<Mantid::Kernel::Units::Label> verticalUnit =
       boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitZBasePtr);
-  verticalAxis->unit() = verticalUnit;
+  verticalAxisRaw->unit() = verticalUnit;
   verticalUnit->setLabel(caption, units);
-  verticalAxis->title() = caption;
+  verticalAxisRaw->title() = caption;
   auto xAxis = Kernel::make_cow<HistogramData::HistogramX>(xAxisVec);
   for (size_t i = 0; i < nBins; ++i) {
     ws->setX(i, xAxis);
     double qzIncrement =
         ((1 / gradY) * (static_cast<double>(i) + 1) + cyToUnit);
-    verticalAxis->setValue(i, qzIncrement);
+    verticalAxisRaw->setValue(i, qzIncrement);
   }
 }
 
@@ -443,12 +445,13 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
   // Put the correct bin boundaries into the workspace
   auto verticalAxis = std::make_unique<BinEdgeAxis>(zBinsVec);
+  auto verticalAxisRaw = verticalAxis.get();
   outWS->replaceAxis(1, std::move(verticalAxis));
   HistogramData::BinEdges binEdges(xBinsVec);
   for (size_t i = 0; i < zBinsVec.size() - 1; ++i)
     outWS->setBinEdges(i, binEdges);
 
-  verticalAxis->title() = m_d1Label;
+  verticalAxisRaw->title() = m_d1Label;
 
   // Prepare the required theta values
   DetectorAngularCache cache = initAngularCaches(inputWS.get());
