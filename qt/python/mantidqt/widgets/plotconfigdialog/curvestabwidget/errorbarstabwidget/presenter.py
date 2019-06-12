@@ -26,19 +26,19 @@ class ErrorbarsTabWidgetPresenter:
         view_props = self.get_view_properties()
         if view_props:
             if self.line[1]:
-                self.apply_caps_properties(view_props)
+                self._apply_caps_properties(view_props)
             if self.line[2]:
-                self.apply_bars_properties(view_props)
+                self._apply_bars_properties(view_props)
             hide_errorbars(self.line, view_props.hide)
 
-    def apply_caps_properties(self, props):
+    def _apply_caps_properties(self, props):
         caps_set = self.line[1]
         for caps in caps_set:
             caps.set_markersize(2*props.capsize)
             caps.set_markeredgewidth(props.cap_thickness)
             caps.set_color(props.color)
 
-    def apply_bars_properties(self, props):
+    def _apply_bars_properties(self, props):
         bars_set = self.line[2]
         for bars in bars_set:
             bars.set_linewidth(props.width)
@@ -53,11 +53,11 @@ class ErrorbarsTabWidgetPresenter:
     def set_line(self, line):
         self.line = line
 
-    def set_view_field(self, field, props, default=0):
+    def set_view_fields(self, field, props, default=0):
         """
-        Set view field but disable the field if no value is available to
-        update with. This situation typically arises when errobars are
-        plotted without caps or without bars.
+        Set view fields but disable the field if no value is available
+        to update with. This situation typically arises when errorbars
+        are plotted without caps or without bars.
         """
         setter = getattr(self.view, 'set_{}'.format(field))
         enabler = getattr(self.view, 'set_{}_enabled'.format(field))
@@ -73,7 +73,7 @@ class ErrorbarsTabWidgetPresenter:
         line_props = self.get_line_properties()
         if line_props:
             self.view.set_hide(line_props.hide)
-            self.set_view_field('width', line_props)
-            self.set_view_field('capsize', line_props)
-            self.set_view_field('cap_thickness', line_props)
+            self.set_view_fields('width', line_props)
+            self.set_view_fields('capsize', line_props)
+            self.set_view_fields('cap_thickness', line_props)
             self.view.set_color(line_props.color)

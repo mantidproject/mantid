@@ -10,6 +10,8 @@ from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.axes import ErrorbarContainer
 
+from mantid.api import AnalysisDataService as ads
+from mantid.plots import MantidAxes
 from mantidqt.utils import BlockQSignals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, hide_curve
@@ -37,9 +39,9 @@ class CurvesTabWidgetPresenter:
         self.add_tab_to_view(self.errorbars_tab, "Errobars")
 
         # Fill the fields in the view
-        self.axes_names_dict = get_axes_names_dict(self.fig)
-        self.curve_names_dict = {}
+        self.axes_names_dict = get_axes_names_dict(self.fig, curves_only=True)
         self.populate_select_axes_combo_box()
+        self.curve_names_dict = {}
         self.populate_select_curve_combo_box()
         self.update_view()
 
@@ -51,19 +53,31 @@ class CurvesTabWidgetPresenter:
         self.view.remove_curve_button.clicked.connect(
             self.remove_selected_curve)
 
+    def get_plot_kwargs_from_view(self):
+        """
+        From the current view get kwargs that can be passed to
+        matplotlib's plot/errorbar function
+        """
+        plot_kwargs = dict()
+        for tab in [self.line_tab, self.marker_tab, self.errorbars_tab]:
+            props = tab.get_view_properties()
+            if props:
+                plot_kwargs.update(props.get_plot_kwargs())
+        return plot_kwargs
+
     def add_tab_to_view(self, tab, name):
         """Add QWidget to the tab container with given name"""
         self.view.tab_container.addTab(tab.view, name)
 
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
-        view_props = self.get_view_curve_properties()
-        curve = self.get_selected_curve()
         for tab in ['line_tab', 'marker_tab', 'errorbars_tab']:
             getattr(self, tab).apply_properties()
-        self.set_curve_label(curve, view_props.label)
-        hide_curve(curve, view_props.hide,
+        view_props = self.get_view_curve_properties()
+        self.set_curve_label(self.get_selected_curve(), view_props.label)
+        hide_curve(self.get_selected_curve(), view_props.hide,
                    hide_bars=not self.errorbars_tab.view.get_hide())
+        self.get_selected_ax().legend().draggable()
 
     def close_tab(self):
         """Close the tab and set the view to None"""
@@ -120,6 +134,7 @@ class CurvesTabWidgetPresenter:
         Populate curve combo box and update the view with the curve's
         properties.
         """
+        self.curve_names_dict = {}
         if self.populate_select_curve_combo_box():
             self.update_view()
 
@@ -149,56 +164,89 @@ class CurvesTabWidgetPresenter:
             self.view.close()
             return False
 
-        curve_names = []
         for errorbar_container in self.get_selected_ax_errorbars():
-            self._set_curve_name(errorbar_container, curve_names)
+            self.update_selected_curve_name(errorbar_container)
         for line in self.get_selected_ax().get_lines():
-            self._set_curve_name(line, curve_names)
+            self.update_selected_curve_name(line)
 
-        self.view.populate_select_curve_combo_box(curve_names)
+        self.view.populate_select_curve_combo_box(self.curve_names_dict.keys())
         return True
 
-    def _set_curve_name(self, curve, curve_names):
-        label = self._get_curve_name(curve, len(curve_names))
-        if label:
-            curve_names.append(label)
-            self.curve_names_dict[label] = curve
+    def update_selected_curve_name(self, curve):
+        """Update the selected curve's name in the curve_names_dict"""
+        name = self._generate_curve_name(curve, curve.get_label())
+        if name:
+            self.curve_names_dict[name] = curve
 
-    @staticmethod
-    def _get_curve_name(curve, idx=0):
-        if curve.get_label():
-            if 'nolegend' not in curve.get_label():
-                return curve.get_label()
+    def _generate_curve_name(self, curve, label):
+        if label:
+            if not label == '_nolegend_':
+                name = label
+            else:
+                return None
         else:
-            return '_nolabel_{}'.format(idx)
+            name = '_nolabel_'
+        # Deal with case of curves sharing the same label
+        idx, base_name = 1, name
+        while name in self.curve_names_dict:
+            if self.curve_names_dict[name] == curve:
+                break
+            name = base_name + " ({})".format(idx)
+            idx += 1
+        return name
 
     def remove_selected_curve(self):
         """
         Remove selected curve from figure and combobox. If there are no
         curves left on the axes remove that axes from the axes combo box
         """
-        self.get_selected_curve().remove()
-        ax = self.get_selected_ax()
-        ax.figure.canvas.draw()
+        # Remove curve from ax and remove from curve names dictionary
+        self._remove_curve_from_ax(self.get_selected_ax(), self.get_selected_curve())
+        self.curve_names_dict.pop(self.view.get_selected_curve_name())
+
+        # Update the legend and redraw
+        self.get_selected_ax().legend().draggable()
+        self.get_selected_ax().figure.canvas.draw()
+
+        # Remove the curve from the curve selection combo box
+        if self.remove_selected_curve_combo_box_entry():
+            return
+        self.update_view()
+
+    def remove_selected_curve_combo_box_entry(self):
+        """
+        Remove selected entry in 'select_curve_combo_box'. If no curves remain
+        on the axes remove the axes entry from the 'select_axes_combo_box'. If
+        no axes with curves remain close the tab and return True
+        """
         with BlockQSignals(self.view.select_curve_combo_box):
             self.view.remove_select_curve_combo_box_selected_item()
             if self.view.select_curve_combo_box.count() == 0:
                 self.view.remove_select_axes_combo_box_selected_item()
                 if self.view.select_axes_combo_box.count() == 0:
                     self.close_tab()
-                    return
-        self.update_view()
+                    return True
+
+    @staticmethod
+    def _remove_curve_from_ax(ax, curve):
+        if isinstance(curve, MantidAxes):
+            ax.remove_artists_if(lambda art: art == curve)
+        else:
+            curve.remove()
+            if isinstance(curve, ErrorbarContainer):
+                ax.containers.remove(curve)
 
     def set_curve_label(self, curve, label):
         """Set label on curve and update its entry in the combo box"""
-        self.update_legend()
+        old_name = self.view.get_selected_curve_name()
         curve.set_label(label)
         if label:
-            self.view.set_selected_curve_selector_text(label)
-            self.curve_names_dict[label] = curve
+            curve_name = self._generate_curve_name(curve, label)
+            self.view.set_selected_curve_selector_text(curve_name)
+            self.curve_names_dict[curve_name] = self.curve_names_dict.pop(old_name)
 
-    def update_presenter_lines(self):
-        """Update the line in the sub-tabs' presenters to selected curve"""
+    def update_presenter_curves(self):
+        """Update the lines stored in the sub-tabs' presenters"""
         curve = self.get_selected_curve()
         if isinstance(curve, ErrorbarContainer):
             if curve[0]:
@@ -216,18 +264,9 @@ class CurvesTabWidgetPresenter:
         self.view.set_curve_label(curve_props.label)
         self.view.set_hide_curve(curve_props.hide)
         # Update sub-tab view fields
-        self.update_presenter_lines()
+        self.update_presenter_curves()
         self.line_tab.update_view()
         self.marker_tab.update_view()
         self.errorbars_tab.update_view()
         # Enable/disable tabs
         self.enable_tabs()
-
-    def update_legend(self):
-        curve = self.get_selected_curve()
-        if isinstance(curve, ErrorbarContainer):
-            ax = curve.get_children()[0].axes
-        else:
-            ax = curve.axes
-        if ax.get_legend():
-            ax.legend()

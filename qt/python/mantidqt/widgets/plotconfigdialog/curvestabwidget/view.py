@@ -87,25 +87,3 @@ class CurvesTabWidgetView(QWidget):
     # Property object getters and setters
     def get_properties(self):
         return CurveProperties.from_view(self)
-
-    def set_properties(self, curve_props):
-        """Set all fields in the view from CurveProperties object"""
-        self.set_curve_label(curve_props.label)
-        self.set_hide_curve(curve_props.hide_curve)
-        if curve_props.line:
-            self.line.set_style(curve_props.line.style)
-            self.line.set_draw_style(curve_props.line.draw_style)
-            self.line.set_width(curve_props.line.width)
-            self.line.set_color(curve_props.line.color)
-        if curve_props.marker:
-            self.marker.set_style(curve_props.marker.style)
-            self.marker.set_size(curve_props.marker.size)
-            self.marker.face_color_selector_widget.set_color(curve_props.marker.face_color)
-            self.marker.edge_color_selector_widget.set_color(curve_props.marker.edge_color)
-        if curve_props.errorbars:
-            self.errorbars.set_hide(curve_props.errorbars.hide)
-            self.errorbars.set_width(curve_props.errorbars.width)
-            self.errorbars.set_capsize(curve_props.errorbars.capsize)
-            self.errorbars.set_cap_thickness(curve_props.errorbars.cap_thickness)
-            self.errorbars.set_error_every(curve_props.errorbars.error_every)
-            self.errorbars.set_color(curve_props.errorbars.color)

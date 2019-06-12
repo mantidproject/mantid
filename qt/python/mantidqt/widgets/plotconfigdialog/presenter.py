@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.widgets.plotconfigdialog import curves_in_figure
+from mantidqt.widgets.plotconfigdialog import curve_in_figure
 from mantidqt.widgets.plotconfigdialog.view import PlotConfigDialogView
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTabWidgetPresenter
@@ -29,7 +29,7 @@ class PlotConfigDialogPresenter:
         self.tab_widget_presenters.append(axes_tab)
         self.tab_widget_views.append((axes_tab.view, "Axes"))
         # Curves tab (only add if curves present in figure)
-        if curves_in_figure(self.fig):
+        if curve_in_figure(self.fig):
             curves_tab = CurvesTabWidgetPresenter(self.fig, parent=self.view)
             self.tab_widget_presenters.append(curves_tab)
             self.tab_widget_views.append((curves_tab.view, "Curves"))
@@ -55,7 +55,7 @@ class PlotConfigDialogPresenter:
 
     def apply_properties_and_exit(self):
         self.apply_properties()
-        self.view.close()
+        self.exit()
 
     def exit(self):
         self.view.close()
