@@ -16,6 +16,7 @@ import sys
 # 3rdparty imports
 from mantid.api import AnalysisDataServiceObserver
 from mantid.plots import MantidAxes
+from mantid.plots.utility import MantidAxKwargs
 from mantid.py3compat import text_type
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
@@ -285,14 +286,25 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # line is run, leading to a useless AttributeError.
 
     def on_home_clicked(self):
+        """
+        The matplotlib home button centres and scales the figure.
+        When we have visible errorbars, we should scale off of the bounds
+        of the error bars.
+        """
         ax = self.canvas.figure.axes[0]
+        creation_args = ax.creation_args
+
         min_bounds = []
         max_bounds = []
-        for container in ax.containers:
-            caps = container[1]
-            if caps != ():
-                min_bounds.extend(caps[0].get_ydata())
-                max_bounds.extend(caps[1].get_ydata())
+        for cargs in creation_args:
+            # Creation args do not necessarily contain POST_CREATION_ARGS
+            if (MantidAxKwargs.POST_CREATION_ARGS in cargs and
+                    cargs[MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_VISIBLE]):
+                for container in ax.containers:
+                    caps = container[1]
+                    if caps != ():
+                        min_bounds.extend(caps[0].get_ydata())
+                        max_bounds.extend(caps[1].get_ydata())
         if min_bounds and max_bounds:
             # Set ylim if we have caps
             ax.set_ylim((min(min_bounds), max(max_bounds)))

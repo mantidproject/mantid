@@ -295,7 +295,10 @@ class FigureErrorsManager(object):
             # updates the creation args state if the plot would be saved out
             if self._supported_ax(ax):
                 creation_args = ax.creation_args
-                creation_args[index][MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_VISIBLE] = new_state
+                if MantidAxKwargs.POST_CREATION_ARGS in creation_args[index]:
+                    creation_args[index][MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_VISIBLE] = new_state
+                else:
+                    creation_args[index][MantidAxKwargs] = {MantidAxKwargs.ERRORS_VISIBLE: new_state}
 
             error_line.set_visible(new_state)
 
