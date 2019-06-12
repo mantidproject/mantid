@@ -47,7 +47,8 @@ public:
         m_runsTableView(), m_progressView(), m_messageHandler(),
         m_searcher(nullptr), m_autoreduction(), m_pythonRunner(),
         m_runNotifier(nullptr),
-        m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()) {
+        m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
+        m_searchString("test search string") {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -83,34 +84,44 @@ public:
     // TODO
   }
 
-  void testSearchWithEmptyString() {
+  void testSearchWithEmptyStringDoesNotStartSearch() {
     auto presenter = makePresenter();
     auto searchString = std::string("");
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
         .WillOnce(Return(searchString));
-    expectSearchFailed();
+    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
 
   void testSearchCatalogLoginFails() {
     auto presenter = makePresenter();
-    auto searchString = std::string("test string");
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
-        .WillOnce(Return(searchString));
-    // TODO: add expected call to python runner when implemented
+        .WillOnce(Return(m_searchString));
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString))
+        .Times(1)
+        .WillOnce(Return(false));
     EXPECT_CALL(m_messageHandler,
                 giveUserCritical("Catalog login failed", "Error"))
         .Times(1);
-    expectSearchFailed();
     presenter.notifySearch();
     verifyAndClear();
   }
 
   void testSearchSucceeds() {
-    // TODO: add this test when python runner implemented
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getSearchString())
+        .Times(1)
+        .WillOnce(Return(m_searchString));
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString))
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
+
+    presenter.notifySearch();
+    verifyAndClear();
   }
 
   void testNotifyReductionResumed() {
@@ -433,17 +444,11 @@ private:
     EXPECT_CALL(m_autoreduction, stop()).Times(1);
   }
 
-  void expectSearchFailed() {
-    EXPECT_CALL(m_view, getAlgorithmRunner()).Times(0);
-  }
-
   void expectAutoreductionSettingsChanged() {
-    EXPECT_CALL(m_view, getSearchString()).Times(AtLeast(1));
     EXPECT_CALL(m_autoreduction, searchStringChanged(_)).WillOnce(Return(true));
   }
 
   void expectAutoreductionSettingsUnchanged() {
-    EXPECT_CALL(m_view, getSearchString()).Times(AtLeast(1));
     EXPECT_CALL(m_autoreduction, searchStringChanged(_))
         .WillOnce(Return(false));
   }
@@ -477,15 +482,18 @@ private:
 
   void expectCheckForNewRuns() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-    EXPECT_CALL(m_view, getSearchString()).Times(1);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(1);
+    EXPECT_CALL(m_view, getSearchString())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(m_searchString));
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString))
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
   }
 
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_)).Times(0);
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
-    EXPECT_CALL(m_view, getSearchString()).Times(0);
     EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
   }
 
@@ -592,6 +600,7 @@ private:
   MockRunNotifier *m_runNotifier;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   RunsTable m_runsTable;
+  std::string m_searchString;
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H */
