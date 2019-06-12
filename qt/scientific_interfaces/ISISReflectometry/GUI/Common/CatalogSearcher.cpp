@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CatalogSearcher.h"
-#include "GUI/MainWindow/IMainWindowView.h"
+#include "GUI/Runs/IRunsView.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -16,7 +16,8 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-CatalogSearcher::CatalogSearcher(IMainWindowView *view) : m_view(view) {}
+CatalogSearcher::CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *view)
+    : m_pythonRunner(pythonRunner), m_view(view) {}
 
 ITableWorkspace_sptr CatalogSearcher::search(const std::string &text) {
   logInToCatalog();
@@ -68,7 +69,7 @@ void CatalogSearcher::logInToCatalog() {
     pythonSrc << "  algm = CatalogLoginDialog()\n";
     pythonSrc << "except:\n";
     pythonSrc << "  pass\n";
-    m_view->runPythonAlgorithm(pythonSrc.str());
+    m_pythonRunner->runPythonAlgorithm(pythonSrc.str());
   } catch (std::runtime_error &e) {
     throw std::runtime_error(std::string("Catalog login failed: ") + e.what());
   }

@@ -64,8 +64,9 @@ void MainWindowView::initLayout() {
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
 
   auto thetaTolerance = 0.01;
+  auto pythonRunner = this;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  Plotter plotter(this);
+  Plotter plotter(pythonRunner);
 #else
   Plotter plotter;
 #endif
@@ -74,10 +75,9 @@ void MainWindowView::initLayout() {
 
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto messageHandler = this;
-  auto makeRunsPresenter =
-      RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance,
-                           instruments, defaultInstrumentIndex, messageHandler,
-                           Autoreduction(), CatalogSearcher(this));
+  auto makeRunsPresenter = RunsPresenterFactory(
+      std::move(makeRunsTablePresenter), thetaTolerance, instruments,
+      defaultInstrumentIndex, messageHandler, Autoreduction(), pythonRunner);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();

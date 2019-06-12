@@ -7,8 +7,9 @@
 #include "RunsPresenter.h"
 #include "Autoreduction.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Common/CatalogSearcher.h"
 #include "GUI/Common/IMessageHandler.h"
-#include "GUI/Common/ISearcher.h"
+#include "GUI/Common/IPythonRunner.h"
 #include "GUI/Common/SearchModel.h"
 #include "GUI/Runs/IRunNotifier.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
@@ -52,19 +53,20 @@ namespace CustomInterfaces {
  * default.
  * @param messageHandler :: A handler to pass messages to the user
  * @param autoreduction :: [input] The autoreduction implementation
- * @param searcher :: [input] The search implementation
+ * @param pythonRunner :: [input] Interface for running python code
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
     int defaultInstrumentIndex, IMessageHandler *messageHandler,
-    IAutoreduction &autoreduction, ISearcher &searcher)
+    IAutoreduction &autoreduction, IPythonRunner *pythonRunner)
     : m_autoreduction(autoreduction),
       m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_searcher(searcher), m_instruments(instruments),
+      m_searcher(CatalogSearcher(pythonRunner, mainView)),
+      m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
 

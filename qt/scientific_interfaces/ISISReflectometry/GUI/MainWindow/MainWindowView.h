@@ -8,6 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H
 
 #include "GUI/Common/IMessageHandler.h"
+#include "GUI/Common/IPythonRunner.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
 #include "MainWindowPresenter.h"
@@ -26,7 +27,8 @@ functionality defined by the interface IMainWindowView
 */
 class MainWindowView : public MantidQt::API::UserSubWindow,
                        public IMainWindowView,
-                       public IMessageHandler {
+                       public IMessageHandler,
+                       public IPythonRunner {
   Q_OBJECT
 public:
   explicit MainWindowView(QWidget *parent = nullptr);

@@ -11,6 +11,7 @@
 #include "GUI/Batch/IBatchJobRunner.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
+#include "GUI/Common/IPythonRunner.h"
 #include "GUI/Common/ISearcher.h"
 #include "GUI/Common/SearchModel.h"
 #include "GUI/Event/IEventPresenter.h"
@@ -51,7 +52,6 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
-  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   MOCK_METHOD0(newBatch, IBatchView *());
   MOCK_METHOD1(subscribe, void(MainWindowSubscriber *));
   MOCK_METHOD1(removeBatch, void(int));
@@ -62,7 +62,6 @@ public:
 
 class MockMainWindowPresenter : public IMainWindowPresenter {
 public:
-  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   MOCK_METHOD1(settingsChanged, void(int));
   bool isProcessing() const override { return false; }
 
@@ -221,6 +220,11 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
+};
+
+class MockPythonRunner : public IPythonRunner {
+public:
+  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
 };
 
 /**** Saver ****/

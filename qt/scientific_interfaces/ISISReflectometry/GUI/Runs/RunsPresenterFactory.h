@@ -8,7 +8,6 @@
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
 #include "Autoreduction.h"
 #include "Common/DllConfig.h"
-#include "GUI/Common/CatalogSearcher.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
@@ -25,20 +24,20 @@ public:
       RunsTablePresenterFactory runsTablePresenterFactory,
       double thetaTolerance, std::vector<std::string> instruments,
       int defaultInstrumentIndex, IMessageHandler *messageHandler,
-      Autoreduction autoreduction, CatalogSearcher searcher)
+      Autoreduction autoreduction, IPythonRunner *pythonRunner)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
         m_defaultInstrumentIndex(std::move(defaultInstrumentIndex)),
         m_messageHandler(messageHandler),
         m_autoreduction(std::move(autoreduction)),
-        m_searcher(std::move(searcher)) {}
+        m_pythonRunner(pythonRunner) {}
 
   std::unique_ptr<IRunsPresenter> make(IRunsView *view) {
     return std::make_unique<RunsPresenter>(
         view, view, m_runsTablePresenterFactory, m_thetaTolerance,
         m_instruments, m_defaultInstrumentIndex, m_messageHandler,
-        m_autoreduction, m_searcher);
+        m_autoreduction, m_pythonRunner);
   }
 
 private:
@@ -48,7 +47,7 @@ private:
   int m_defaultInstrumentIndex;
   IMessageHandler *m_messageHandler;
   Autoreduction m_autoreduction;
-  CatalogSearcher m_searcher;
+  IPythonRunner *m_pythonRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

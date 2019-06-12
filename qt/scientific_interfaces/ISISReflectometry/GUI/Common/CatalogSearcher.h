@@ -7,6 +7,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 #define MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 
+#include "GUI/Runs/IRunsView.h"
+#include "IPythonRunner.h"
 #include "ISearcher.h"
 
 namespace MantidQt {
@@ -21,12 +23,13 @@ functionality.
 */
 class CatalogSearcher : public ISearcher {
 public:
-  CatalogSearcher(IMainWindowView *view);
+  CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *m_view);
   ~CatalogSearcher() override{};
   Mantid::API::ITableWorkspace_sptr search(const std::string &text) override;
 
 private:
-  IMainWindowView *m_view;
+  IPythonRunner *m_pythonRunner;
+  IRunsView *m_view;
 
   bool hasActiveSession() const;
   void logInToCatalog();
