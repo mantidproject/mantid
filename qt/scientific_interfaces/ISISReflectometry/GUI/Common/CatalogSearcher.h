@@ -11,6 +11,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class IMainWindowView;
+
 /** @class CatalogSearcher
 
 CatalogSearcher implements ISearcher to provide ICAT search
@@ -18,8 +21,16 @@ functionality.
 */
 class CatalogSearcher : public ISearcher {
 public:
+  CatalogSearcher(IMainWindowView *view);
   ~CatalogSearcher() override{};
   Mantid::API::ITableWorkspace_sptr search(const std::string &text) override;
+
+private:
+  IMainWindowView *m_view;
+
+  bool hasActiveSession() const;
+  void logInToCatalog();
+  std::string activeSessionId() const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
