@@ -118,7 +118,12 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     const std::string &sampleEnvTopic, const std::size_t bufferThreshold)
     : IKafkaStreamDecoder(broker, eventTopic, runInfoTopic, spDetTopic,
                           sampleEnvTopic),
-      m_intermediateBufferFlushThreshold(bufferThreshold) {}
+      m_intermediateBufferFlushThreshold(bufferThreshold) {
+#ifndef _OPENMP
+  g_log.warning() << "Multithreading is not available on your system. This "
+                     "is likely to be an issue with high event counts.\n";
+#endif
+}
 
 /**
  * Destructor.
