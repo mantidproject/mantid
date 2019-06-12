@@ -16,7 +16,8 @@ set(
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/Row.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/RowLocation.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeView.h
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h)
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/InstrumentSelector.h)
 
 find_package(BoostPython REQUIRED)
 
