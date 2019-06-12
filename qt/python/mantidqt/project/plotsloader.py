@@ -76,7 +76,10 @@ class PlotsLoader(object):
         fem = FigureErrorsManager(ax.figure.canvas)
         for index, pcargs in enumerate(pcargs):
             if MantidAxKwargs.ERRORS_ADDED in pcargs and pcargs[MantidAxKwargs.ERRORS_ADDED]:
-                fem.show_error_bar_for(index)
+                if MantidAxKwargs.ERRORS_VISIBLE in pcargs and pcargs[MantidAxKwargs.ERRORS_VISIBLE]:
+                    fem.show_error_bar_for(index)
+                else:
+                    fem.hide_error_bar_for(index)
 
         # Make sure that the axes gets it's creation_args as loading doesn't add them
         ax.creation_args = creation_args_copy

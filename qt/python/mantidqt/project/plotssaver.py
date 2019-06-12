@@ -215,9 +215,14 @@ class PlotsSaver(object):
 
     def get_dict_for_errorbars(self, line):
         cargs = self.figure_creation_args[0]
-        if cargs["function"] == "errorbar" or (
-                MantidAxKwargs.POST_CREATION_ARGS in cargs
-                and cargs[MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_ADDED]):
+
+        # cargs may not have POST_CREATION_ARGS. Set visible to false if not, so plots can
+        # be saved/loaded.
+        if MantidAxKwargs.POST_CREATION_ARGS not in cargs:
+            cargs[MantidAxKwargs.POST_CREATION_ARGS] = {MantidAxKwargs.ERRORS_VISIBLE: False,
+                                                        MantidAxKwargs.ERRORS_ADDED: False}
+        if (cargs["function"] == "errorbar" or
+                cargs[MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_ADDED]):
             return {"exists": True,
                     "dashCapStyle": line.get_dash_capstyle(),
                     "dashJoinStyle": line.get_dash_joinstyle(),
