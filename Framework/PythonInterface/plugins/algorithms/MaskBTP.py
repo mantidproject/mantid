@@ -18,12 +18,13 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     """
 
     # list of supported instruments
-    INSTRUMENT_LIST = ['ARCS','CNCS','CORELLI','HYSPEC','MANDI','NOMAD','POWGEN','REF_M','SEQUOIA','SNAP','SXD','TOPAZ','WAND','WISH']
+    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CNCS', 'CORELLI', 'EQ-SANS', 'HYSPEC', 'MANDI', 'NOMAD', 'POWGEN', 'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
 
     instname = None
     instrument = None
-    bankmin = None
-    bankmax = None
+    bankmin = defaultdict(lambda: 1, {"MANDI":1, "SEQUOIA":23, "TOPAZ":10})  # default is one
+    bankmax = {"ARCS":115, 'BIOSANS':2, 'CG2':1, "CNCS":50, "CORELLI":91, 'EQ-SANS':1, "HYSPEC":20, "MANDI":59, "NOMAD":99,
+                      "POWGEN":300, "REF_M":1, "SEQUOIA":150,"SNAP":64,"SXD":11,"TOPAZ":59,"WAND":8,"WISH":10}
 
     def category(self):
         """ Mantid required
@@ -66,14 +67,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             self.instrument = ws.getInstrument()
             self.instname = self.instrument.getName()
 
-        # special cases are defined, default value is in front
-        self.bankmin=defaultdict(lambda: 1, {"MANDI":1,"SEQUOIA":23,"TOPAZ":10})
-        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"REF_M":1,
-                      "SEQUOIA":150,"SNAP":64,"SXD":11,"TOPAZ":59,"WAND":8,"WISH":10}
-
-        tubemin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WAND":1,"WISH":1})
-        pixmin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WAND":1,"WISH":1})
-
         if self.instname not in self.INSTRUMENT_LIST:
             raise ValueError("Instrument '"+self.instname+"' not in the allowed list")
 
@@ -89,15 +82,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
         tubeString = self.getProperty("Tube").value
         if tubeString.lower() == "edges":
-            tubes=[0, -1]
+            tubes = numpy.array([0, -1])
         else:
-            tubes=self._parseBTPlist(tubeString, tubemin[self.instname])
+            tubes = self._parseBTPlist(tubeString, self._startsFrom())
 
         pixelString = self.getProperty("Pixel").value
         if pixelString.lower() == "edges":
-            pixels=[0, -1]
+            pixels = numpy.array([0, -1])
         else:
-            pixels=self._parseBTPlist(pixelString, pixmin[self.instname])
+            pixels = self._parseBTPlist(pixelString, self._startsFrom())
 
         # convert bank numbers into names and remove ones that couldn't be named
         banks = [self._getBankName(bank) for bank in banks]
@@ -129,12 +122,22 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.setProperty("Workspace",ws.name())
         self.setProperty("MaskedDetectors", detlist)
 
+    def _startsFrom(self):
+        '''Returns what the minimum tube/pixel index for the instrument'''
+        if self.instname in ['ARCS', 'BIOSANS', 'CG2', 'CNCS', 'CORELLI', 'EQ-SANS', 'HYSPEC', 'NOMAD', 'SEQUOIA', 'WAND', 'WISH']:
+            return 1
+        else:
+            return 0
+
     def _getChildIndices(self, compInfo, parentIndex, filterIndices):
         indices = compInfo.children(int(parentIndex))
         if len(indices) == 1:  # go down one level
             indices = compInfo.children(int(indices[0]))
         if len(filterIndices):
-            indices = indices[filterIndices]
+            reducedFilter = filterIndices[filterIndices < len(indices)]
+            if len(reducedFilter) == 0:
+                raise ValueError('None of the indices ({}) are in range'.format(filterIndices))
+            indices = indices[reducedFilter]
 
         return indices
 
@@ -191,8 +194,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             return '{}{}'.format(label, banknum)
         elif self.instname == "WISH":
             return "panel" + "%02d" % banknum
-        elif self.instname == "REF_M":
-            return "detector" + "%1d" % banknum
+        elif self.instname in ['CG2', 'EQ-SANS', 'REF_M']:
+            return "detector{}".format(banknum)
+        elif self.instname == 'BIOSANS':
+            if banknum == 1:
+                return 'detector1'
+            elif banknum == 2:
+                return 'wing_detector'
+            else:
+                raise ValueError('Out of range index for BIOSANS instrument bank numbers: {}'.format(banknum))
         else:
             return "bank" + str(banknum)
 
