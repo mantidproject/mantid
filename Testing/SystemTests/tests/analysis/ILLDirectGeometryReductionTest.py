@@ -145,7 +145,7 @@ class IN5(systemtesting.MantidSystemTest):
         mtd['cropped'].mutableRun().addProperty('run_title', '', True)
 
     def validate(self):
-        self.tolerance = 1e-7
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         return ['cropped', 'ILL_IN5_SofQW.nxs']
 
