@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
-using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::callMethodNoCheck;
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
 
