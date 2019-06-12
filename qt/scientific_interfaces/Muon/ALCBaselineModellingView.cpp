@@ -115,6 +115,12 @@ void ALCBaselineModellingView::setCorrectedCurve(
 
 void ALCBaselineModellingView::setBaselineCurve(
     MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_ui.dataPlot->setCurveStyle("Baseline", 1);
+  m_ui.dataPlot->setCurveSymbol("Baseline", -1);
+#endif
+
   m_ui.dataPlot->addSpectrum("Baseline", workspace, workspaceIndex, Qt::red);
   m_ui.dataPlot->replot();
 }

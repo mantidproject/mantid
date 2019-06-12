@@ -13,6 +13,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidAPI/AnalysisDataService.h"
+
 #include "Poco/ActiveResult.h"
 #include <QApplication>
 
@@ -25,7 +27,6 @@ MatrixWorkspace_sptr extractSpectrum(MatrixWorkspace_sptr inputWorkspace,
   auto extracter = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extracter->setChild(true);
   extracter->setProperty("InputWorkspace", inputWorkspace);
-  extracter->setProperty("WorkspaceIndex", workspaceIndex);
   extracter->setProperty("WorkspaceIndex", workspaceIndex);
   extracter->setPropertyValue("OutputWorkspace", "__NotUsed__");
   extracter->execute();
@@ -242,8 +243,15 @@ ALCBaselineModellingModel::baselineData(IFunction_const_sptr function,
   const auto inputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
                                           xValues.size()));
+
   inputWorkspace->mutableX(0) = xValues;
-  return extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
+  Mantid::API::AnalysisDataService::Instance().addOrReplace("input",
+                                                            inputWorkspace);
+  auto const work =
+      extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
+  Mantid::API::AnalysisDataService::Instance().addOrReplace("output", work);
+  return work;
+  // return extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
 }
 
 } // namespace CustomInterfaces

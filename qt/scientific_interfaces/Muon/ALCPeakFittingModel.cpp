@@ -27,7 +27,6 @@ MatrixWorkspace_sptr extractSpectrum(MatrixWorkspace_sptr inputWorkspace,
   extracter->setChild(true);
   extracter->setProperty("InputWorkspace", inputWorkspace);
   extracter->setProperty("WorkspaceIndex", workspaceIndex);
-  extracter->setProperty("WorkspaceIndex", workspaceIndex);
   extracter->setPropertyValue("OutputWorkspace", "__NotUsed__");
   extracter->execute();
   MatrixWorkspace_sptr output = extracter->getProperty("OutputWorkspace");

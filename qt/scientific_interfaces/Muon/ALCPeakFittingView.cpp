@@ -47,8 +47,6 @@ void ALCPeakFittingView::initialize() {
 
   connect(m_ui.peaks, SIGNAL(currentFunctionChanged()),
           SIGNAL(currentFunctionChanged()));
-  connect(m_ui.peaks, SIGNAL(functionStructureChanged()), this,
-          SLOT(removePeakPicker()));
   connect(m_ui.peaks, SIGNAL(parameterChanged(QString, QString)),
           SIGNAL(parameterChanged(QString, QString)));
 
@@ -79,26 +77,29 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
 
 void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr &workspace,
                                         std::size_t const &workspaceIndex) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_ui.plot->setCurveStyle("Fit", 1);
+  m_ui.plot->setCurveSymbol("Fit", -1);
+#endif
+
   m_ui.plot->addSpectrum("Fit", workspace, workspaceIndex, Qt::red);
+  m_ui.plot->replot();
 }
 
 void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr &workspace,
                                        std::size_t const &workspaceIndex) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_ui.plot->setCurveStyle("Guess", 1);
+  m_ui.plot->setCurveSymbol("Guess", -1);
+#endif
+
   m_ui.plot->addSpectrum("Guess", workspace, workspaceIndex, Qt::green);
+  m_ui.plot->replot();
 }
 
 void ALCPeakFittingView::removePlot(QString const &plotName) {
   m_ui.plot->removeSpectrum(plotName);
   m_ui.plot->replot();
-}
-
-void ALCPeakFittingView::removePeakPicker() {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  if (!currentFunctionIndex()) {
-    m_peakPicker->remove();
-    m_ui.plot->replot();
-  }
-#endif
 }
 
 void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
