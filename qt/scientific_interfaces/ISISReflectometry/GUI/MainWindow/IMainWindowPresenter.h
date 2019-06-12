@@ -21,7 +21,6 @@ request information from other tabs.
 */
 class IMainWindowPresenter : public MainWindowSubscriber {
 public:
-  virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
   virtual bool isProcessing() const = 0;
   virtual ~IMainWindowPresenter() = default;
 };

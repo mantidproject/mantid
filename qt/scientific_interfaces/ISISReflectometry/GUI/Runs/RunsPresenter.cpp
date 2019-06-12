@@ -240,7 +240,7 @@ bool RunsPresenter::search() {
       // pythonSrc << "  algm = CatalogLoginDialog()\n";
       // pythonSrc << "except:\n";
       // pythonSrc << "  pass\n";
-      // m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+      // m_view->runPythonAlgorithm(pythonSrc.str());
     } catch (std::runtime_error &e) {
       m_view->loginFailed(e.what());
       return false;
