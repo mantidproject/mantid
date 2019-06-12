@@ -364,7 +364,10 @@ void FunctionFactoryImpl::addTie(IFunction_sptr fun,
 }
 
 std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
-  auto &allNames = getFunctionNames<IFunction1D>();
+  auto allNames = getFunctionNames<IFunction1D>();
+  allNames.push_back("ProductFunction");
+  allNames.push_back("CompositeFunction");
+  allNames.push_back("Convolution");
   std::vector<std::string> names;
   names.reserve(allNames.size());
   auto excludes =
