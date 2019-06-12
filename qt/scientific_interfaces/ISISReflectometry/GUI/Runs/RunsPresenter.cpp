@@ -229,43 +229,22 @@ bool RunsPresenter::search() {
   if (searchString.empty())
     return false;
 
-  // This is breaking the abstraction provided by ISearcher, but provides a
-  // nice usability win
-  // If we're not logged into a catalog, prompt the user to do so
-  if (CatalogManager::Instance().getActiveSessions().empty()) {
-    try {
-      // TODO: replace python runner
-      // std::stringstream pythonSrc;
-      // pythonSrc << "try:\n";
-      // pythonSrc << "  algm = CatalogLoginDialog()\n";
-      // pythonSrc << "except:\n";
-      // pythonSrc << "  pass\n";
-      // m_view->runPythonAlgorithm(pythonSrc.str());
-    } catch (std::runtime_error &e) {
-      m_view->loginFailed(e.what());
-      return false;
-    }
-  }
-  std::string sessionId;
-  // check to see if we have any active sessions for ICAT
-  if (!CatalogManager::Instance().getActiveSessions().empty()) {
-    // we have an active session, so grab the ID
-    sessionId =
-        CatalogManager::Instance().getActiveSessions().front()->getSessionId();
-  } else {
-    // there are no active sessions, we return here to avoid an exception
-    m_view->noActiveICatSessions();
+  try {
+    m_searcher.search(searchString);
+  } catch (std::runtime_error &e) {
+    m_messageHandler->giveUserCritical(e.what(), "Error");
     return false;
   }
-  auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
-  algSearch->initialize();
-  algSearch->setChild(true);
-  algSearch->setLogging(false);
-  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
-  algSearch->setProperty("Session", sessionId);
-  algSearch->setProperty("InvestigationId", searchString);
-  auto algRunner = m_view->getAlgorithmRunner();
-  algRunner->startAlgorithm(algSearch);
+
+  //auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
+  //algSearch->initialize();
+  //algSearch->setChild(true);
+  //algSearch->setLogging(false);
+  //algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
+  //algSearch->setProperty("Session", sessionId);
+  //algSearch->setProperty("InvestigationId", searchString);
+  //auto algRunner = m_view->getAlgorithmRunner();
+  //algRunner->startAlgorithm(algSearch);
 
   return true;
 }
