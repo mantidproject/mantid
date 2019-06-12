@@ -352,7 +352,7 @@ void export_UnitCell() {
            "convention. This will return a :class:`numpy.ndarray` with shape "
            "``(3,3)``.")
       .def("getMaxOrder", &UnitCell::getMaxOrder, arg("self"),
-           "Returns the number of modulation vectorsell. This will return an "
+           "Returns the number of modulation vectors. This will return an "
            "int.")
       .def("recalculateFromGstar", &recalculateFromGstar,
            (arg("self"), arg("NewGstar")),
