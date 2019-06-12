@@ -27,5 +27,4 @@ void export_ICompAssembly() {
       .def("__getitem__",
            &ICompAssembly::operator[],(arg("self"), arg("index")),
            "Return the component at the given index");
-
 }
