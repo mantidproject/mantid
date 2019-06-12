@@ -6,11 +6,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import datetime
+
 import argparse
+import datetime
 import os
 import pprint
 import re
+
+import six
 
 ######################################################################################################################
 # Script level variables
@@ -247,9 +250,9 @@ process_file_tree(root_path)
 # Reporting
 if not args.noreport:
     #write out reporting files
-    for reporting_filename, reporting_dict in reporting_dictionaries.iteritems():
+    for reporting_filename, reporting_dict in six.iteritems(reporting_dictionaries):
         with open(reporting_filename,"w") as reporting_file:
-                for key, value in reporting_dict.iteritems():
+                for key, value in six.iteritems(reporting_dict):
                     reporting_file.write("{0}\t{1}{2}".format(key,value,os.linesep))
 
 # Final comments

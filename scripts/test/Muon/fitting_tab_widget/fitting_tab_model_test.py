@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FittingTabModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
@@ -20,7 +26,7 @@ class FittingTabModelTest(unittest.TestCase):
     def test_create_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'Muon Data/Fitting Output/Fitting Output_workspaces/'
+        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_workspaces MA/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc'
         self.model.function_name = 'GausOsc'
 
@@ -33,7 +39,7 @@ class FittingTabModelTest(unittest.TestCase):
     def test_create_parameter_table_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'Muon Data/Fitting Output/Fitting Output_parameter_tables/'
+        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_parameter_tables MA/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters; GausOsc'
         self.model.function_name = 'GausOsc'
 
@@ -78,7 +84,7 @@ class FittingTabModelTest(unittest.TestCase):
             ' n = 0, A0 = 0,$domains = i;name = Polynomial, n = 0, A0 = 0,'
             '$domains = i;name = Polynomial, n = 0, A0 = 0,$domains = i;'
             'name = Polynomial, n = 0, A0 = 0,$domains = i')
-        expected_directory_name = 'Muon Data/Fitting Output/Fitting Output_workspaces/'
+        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_workspaces MA/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted; Polynomial'
         self.model.function_name = 'Polynomial'
 
@@ -104,6 +110,38 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.do_single_fit.assert_called_with(
             {'Function': mock.ANY, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
              'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'})
+
+    def test_do_simultaneous_fit_adds_single_input_workspace_to_fit_context(self):
+        trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
+        x_data = range(0, 100)
+        y_data = [5 + x * x for x in x_data]
+        workspace = CreateWorkspace(x_data, y_data)
+        parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace.name()],
+                          'Minimizer': 'Levenberg-Marquardt',
+                          'StartX': [0.0], 'EndX': [100.0], 'EvaluationType': 'CentrePoint',
+                          'FitGroupName': 'SimulFit'}
+        self.model.do_simultaneous_fit(parameter_dict)
+
+        fit_context = self.model.context.fitting_context
+        self.assertEqual(1, len(fit_context))
+
+    def test_do_simultaneous_fit_adds_multi_input_workspace_to_fit_context(self):
+        # create function
+        single_func = ';name=FlatBackground,$domains=i,A0=0'
+        multi_func = 'composite=MultiDomainFunction,NumDeriv=1' + single_func + single_func +";"
+        trial_function = FunctionFactory.createInitialized(multi_func)
+        x_data = range(0, 100)
+        y_data = [5 + x * x for x in x_data]
+        workspace1 = CreateWorkspace(x_data, y_data)
+        workspace2 = CreateWorkspace(x_data, y_data)
+        parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace1.name(), workspace2.name()],
+                          'Minimizer': 'Levenberg-Marquardt',
+                          'StartX': [0.0]*2, 'EndX': [100.0]*2, 'EvaluationType': 'CentrePoint',
+                          'FitGroupName': 'SimulFit'}
+        self.model.do_simultaneous_fit(parameter_dict)
+
+        fit_context = self.model.context.fitting_context
+        self.assertEqual(1, len(fit_context))
 
     def test_get_function_name_returns_correctly_for_composite_functions(self):
         function_string = 'name=FlatBackground,A0=22.5129;name=Polynomial,n=0,A0=-22.5221;name=ExpDecayOsc,A=-0.172352,Lambda=0.111109,Frequency=-0.280031,Phi=-3.03983'

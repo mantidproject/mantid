@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_raw_data_directory, get_group_data_directory,
@@ -23,13 +25,15 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_groupin
 class MuonContext(object):
     def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
                  muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext(),
-                 fitting_context=FittingContext()):
+                 workspace_suffix=' MA', fitting_context=FittingContext()):
+
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
         self._phase_context = muon_phase_context
         self.fitting_context = fitting_context
         self.base_directory = base_directory
+        self.workspace_suffix = workspace_suffix
 
         self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
 
