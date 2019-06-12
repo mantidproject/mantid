@@ -123,7 +123,7 @@ V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
  * @param axis The height-axis of the cylinder
  */
 V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
-                  std::vector<double> axis) {
+                  const std::vector<double> axis) {
   using Kernel::V3D;
   V3D axisVector = V3D{axis[0], axis[1], axis[2]};
   axisVector.normalize();
@@ -154,7 +154,7 @@ std::string axisXML(unsigned axisIdx) {
  * @param axis 3D vector of double
  * @return A string containing the axis tag representation
  */
-std::string axisXML(std::vector<double> axis) {
+std::string axisXML(const std::vector<double> axis) {
   std::ostringstream str;
   str << "<axis x=\"" << axis[0] << "\" y=\"" << axis[1] << "\" z=\"" << axis[2]
       << "\" /> ";
@@ -589,12 +589,12 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   V3D baseCentre;
   std::ostringstream XMLString;
   if (args.existsProperty(ShapeArgs::AXIS)) {
-    try {
-      int axisInt = std::stoi(args.getPropertyValue(ShapeArgs::AXIS));
-      const unsigned axisId = static_cast<unsigned>(axisInt);
+    std::string axis = args.getPropertyValue(ShapeArgs::AXIS);
+    if (axis.length() == 1) {
+      const unsigned axisId = static_cast<unsigned>(std::stoi(axis));
       XMLString << axisXML(axisId);
       baseCentre = cylBaseCentre(centre, height, axisId);
-    } catch (std::runtime_error &) {
+    } else {
       const std::vector<double> axis =
           getPropertyAsVectorDouble(args, ShapeArgs::AXIS);
       XMLString << axisXML(axis);
