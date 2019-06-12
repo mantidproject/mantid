@@ -7,9 +7,9 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, unicode_literals)
 
-from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
+from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
-from mantid.py3compat import string_types
+from mantid.py3compat import Enum
 import numpy as np
 
 from Muon.GUI.Common.observer_pattern import GenericObserver
@@ -22,6 +22,21 @@ ERROR_COL_SUFFIX = 'Error'
 # This is not a particularly robust way of ignoring this as it
 # depends on how Fit chooses to output the name of that value
 RESULTS_TABLE_COLUMNS_NO_ERRS = ['Cost function value']
+WORKSPACE_NAME_COL = 'workspace_name'
+
+
+class TableColumnType(Enum):
+    """Enumeration to match the expected int used for TableWorkspace.addColumn
+    for specifying the column type"""
+
+    NotSet = -1000
+    NoType = 0
+    X = 1
+    Y = 2
+    Z = 3
+    XErr = 4
+    YErr = 5
+    Label = 6
 
 
 class ResultsTabModel(object):
@@ -138,7 +153,7 @@ class ResultsTabModel(object):
             fit = all_fits[position]
             fit_parameters = fit.parameters
             row_dict = {
-                'workspace_name': fit_parameters.parameter_workspace_name
+                WORKSPACE_NAME_COL: fit_parameters.parameter_workspace_name
             }
             row_dict = self._add_logs_to_table(row_dict, fit, log_selection)
             results_table.addRow(
@@ -248,16 +263,17 @@ class ResultsTabModel(object):
         :return: A new TableWorkspace
         """
         table = WorkspaceFactory.Instance().createTable()
-        table.addColumn('str', 'workspace_name')
+        table.addColumn('str', 'workspace_name', TableColumnType.NoType.value)
         for log_name in log_selection:
-            table.addColumn('float', log_name)
+            table.addColumn('float', log_name, TableColumnType.X.value)
         # assume all fit functions are the same in fit_selection and take
         # the parameter names from the first fit.
         parameters = self._find_parameters_for_table(results_selection)
         for name in parameters.names():
-            table.addColumn('float', name)
+            table.addColumn('float', name, TableColumnType.Y.value)
             if _param_error_should_be_displayed(name):
-                table.addColumn('float', _error_column_name(name))
+                table.addColumn('float', _error_column_name(name),
+                                TableColumnType.YErr.value)
         return table
 
     # Private API

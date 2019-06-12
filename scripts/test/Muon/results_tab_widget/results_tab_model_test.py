@@ -16,7 +16,7 @@ from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import iteritems, mock, string_types
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
-    DEFAULT_TABLE_NAME, ResultsTabModel)
+    DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
 from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation
 
 
@@ -225,6 +225,13 @@ class ResultsTabModelTest(unittest.TestCase):
             'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError',
             'f1.Sigma', 'f1.SigmaError', 'Cost function value'
         ]
+        expected_types = (TableColumnType.NoType, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y)
         expected_content = [
             ('ws1_Parameters', self.f0_height[0], self.f0_height[1],
              self.f0_centre[0], self.f0_centre[1], self.f0_sigma[0],
@@ -232,8 +239,9 @@ class ResultsTabModelTest(unittest.TestCase):
              self.f1_centre[0], self.f1_centre[1], self.f1_sigma[0],
              self.f1_sigma[1], self.cost_function[0])
         ]
-        self._assert_table_matches_expected(expected_cols, expected_content,
-                                            table, model.results_table_name())
+        self._assert_table_matches_expected(zip(expected_cols, expected_types),
+                                            expected_content, table,
+                                            model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
         _, model = create_test_model(('ws1', ), 'func1', self.parameters, [],
@@ -247,6 +255,14 @@ class ResultsTabModelTest(unittest.TestCase):
             'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError',
             'f1.Sigma', 'f1.SigmaError', 'Cost function value'
         ]
+        expected_types = (TableColumnType.NoType, TableColumnType.X,
+                          TableColumnType.X, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y)
         avg_log_values = 55., 2.5
         expected_content = [
             ('ws1_Parameters', avg_log_values[0], avg_log_values[1],
@@ -256,8 +272,9 @@ class ResultsTabModelTest(unittest.TestCase):
              self.f1_centre[1], self.f1_sigma[0], self.f1_sigma[1],
              self.cost_function[0])
         ]
-        self._assert_table_matches_expected(expected_cols, expected_content,
-                                            table, model.results_table_name())
+        self._assert_table_matches_expected(zip(expected_cols, expected_types),
+                                            expected_content, table,
+                                            model.results_table_name())
 
     def test_create_results_table_with_fit_with_global_parameters(self):
         logs = []
@@ -273,14 +290,21 @@ class ResultsTabModelTest(unittest.TestCase):
             'f1.PeakCentreError', 'f1.Sigma', 'f1.SigmaError',
             'Cost function value'
         ]
+        expected_types = (TableColumnType.NoType, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y,
+                          TableColumnType.YErr, TableColumnType.Y)
         expected_content = [
             ('simul-1_Parameters', self.f0_height[0], self.f0_height[1],
              self.f0_centre[0], self.f0_centre[1], self.f0_sigma[0],
              self.f0_sigma[1], self.f1_centre[0], self.f1_centre[1],
              self.f1_sigma[0], self.f1_sigma[1], self.cost_function[0])
         ]
-        self._assert_table_matches_expected(expected_cols, expected_content,
-                                            table, model.results_table_name())
+        self._assert_table_matches_expected(zip(expected_cols, expected_types),
+                                            expected_content, table,
+                                            model.results_table_name())
 
     # ------------------------- failure tests ----------------------------
     def test_create_results_table_raises_error_if_number_params_different(
@@ -335,9 +359,12 @@ class ResultsTabModelTest(unittest.TestCase):
                                        table, table_name):
         self.assertTrue(isinstance(table, ITableWorkspace))
         self.assertTrue(table_name in AnalysisDataService.Instance())
-        self.assertEqual(len(expected_cols), table.columnCount())
         self.assertEqual(len(expected_content), table.rowCount())
-        self.assertEqual(expected_cols, table.getColumnNames())
+        self.assertEqual(len(expected_cols), table.columnCount())
+        actual_col_names = table.getColumnNames()
+        for index, (expected_name, expected_type) in enumerate(expected_cols):
+            self.assertEqual(expected_name, actual_col_names[index])
+            self.assertEqual(expected_type.value, table.getPlotType(index))
 
         for row_index, (expected_row,
                         actual_row) in enumerate(zip(expected_content, table)):

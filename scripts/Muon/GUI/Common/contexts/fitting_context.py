@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division)
 from collections import OrderedDict
 import re
 
-from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.api import AnalysisDataService
 from mantid.py3compat import iteritems, iterkeys, string_types
 
 from Muon.GUI.Common.observer_pattern import Observable
