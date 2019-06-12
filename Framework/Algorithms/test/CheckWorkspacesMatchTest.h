@@ -666,7 +666,8 @@ public:
         WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     // Put numeric axes on these workspaces as checkAxes won't test values on
     // spectra axes
-    auto newAxisWS1 = std::make_unique<NumericAxis>(ws1local->getAxis(1)->length());
+    auto newAxisWS1 =
+        std::make_unique<NumericAxis>(ws1local->getAxis(1)->length());
     newAxisWS1->setValue(0, 1);
     newAxisWS1->setValue(1, 2);
     auto newAxisWS2 = std::make_unique<NumericAxis>(ws2->getAxis(1)->length());

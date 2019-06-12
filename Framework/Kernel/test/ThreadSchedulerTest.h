@@ -70,18 +70,18 @@ public:
     ThreadSchedulerTest_numDestructed = 0;
 
     // Create and push them in order
-    TaskDoNothing * tasks[4];
+    TaskDoNothing *tasks[4];
     for (size_t i = 0; i < 4; i++) {
-      auto temp =std::make_shared<TaskDoNothing>(costs[i]);
+      auto temp = std::make_shared<TaskDoNothing>(costs[i]);
       sc->push(temp);
-      tasks[i]=temp.get();
+      tasks[i] = temp.get();
     }
-    std::vector<std::shared_ptr<TaskDoNothing>> task(4,nullptr);
-    
+    std::vector<std::shared_ptr<TaskDoNothing>> task(4, nullptr);
+
     // Pop them, and check that we get them in the order we expected
     for (size_t i = 0; i < 4; i++) {
-      
-      task[i]=std::dynamic_pointer_cast<TaskDoNothing>(sc->pop(0));
+
+      task[i] = std::dynamic_pointer_cast<TaskDoNothing>(sc->pop(0));
       size_t index = 0;
       for (index = 0; index < 4; index++)
         if (task[i]->cost() == tasks[index]->cost())

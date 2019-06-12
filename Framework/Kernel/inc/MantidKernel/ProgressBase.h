@@ -10,8 +10,8 @@
 #include "MantidKernel/DllConfig.h"
 
 #include <atomic>
-#include <string>
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {

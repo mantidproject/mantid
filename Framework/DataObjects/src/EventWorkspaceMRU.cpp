@@ -39,7 +39,8 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
     m_bufferedDataE.resize(thread_num + 1);
     for (auto &data : m_bufferedDataE) {
       if (!data)
-        data = std::make_unique<mru_listE>(50); // Create a MRU list with this many entries.
+        data = std::make_unique<mru_listE>(
+            50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -54,7 +55,8 @@ void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
     m_bufferedDataY.resize(thread_num + 1);
     for (auto &data : m_bufferedDataY) {
       if (!data)
-        data = std::make_unique<mru_listY>(50); // Create a MRU list with this many entries.
+        data = std::make_unique<mru_listY>(
+            50); // Create a MRU list with this many entries.
     }
   }
 }

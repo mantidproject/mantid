@@ -47,7 +47,8 @@ public:
     TS_ASSERT_EQUALS(m.size(), 3);
 
     // This will drop one from the list
-    std::shared_ptr<MyTestClass> being_dropped = m.insert(std::make_shared<MyTestClass>(40, 80));
+    std::shared_ptr<MyTestClass> being_dropped =
+        m.insert(std::make_shared<MyTestClass>(40, 80));
     TS_ASSERT_EQUALS(m.size(), 3);
     // # 10 was dropped off; the calling class takes care of whatever this means
     TS_ASSERT_EQUALS(being_dropped->hash, 10);

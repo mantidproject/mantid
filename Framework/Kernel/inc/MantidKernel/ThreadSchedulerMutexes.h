@@ -131,19 +131,22 @@ public:
     // Add up the sizes of all contained maps.
     return std::accumulate(
         m_supermap.cbegin(), m_supermap.cend(), size_t{0},
-        [](size_t total,
-           const std::pair<const boost::shared_ptr<std::mutex>&, const InnerMap &>
-               &mutexedMap) { return total + mutexedMap.second.size(); });
+        [](size_t total, const std::pair<const boost::shared_ptr<std::mutex> &,
+                                         const InnerMap &> &mutexedMap) {
+          return total + mutexedMap.second.size();
+        });
   }
 
   //-------------------------------------------------------------------------------
   /// @return true if the queue is empty
   bool empty() override {
     std::lock_guard<std::mutex> lock(m_queueLock);
-    auto mapWithTasks = std::find_if_not(
-        m_supermap.cbegin(), m_supermap.cend(),
-        [](const std::pair<const boost::shared_ptr<std::mutex>, const InnerMap &>
-               &mutexedMap) { return mutexedMap.second.empty(); });
+    auto mapWithTasks =
+        std::find_if_not(m_supermap.cbegin(), m_supermap.cend(),
+                         [](const std::pair<const boost::shared_ptr<std::mutex>,
+                                            const InnerMap &> &mutexedMap) {
+                           return mutexedMap.second.empty();
+                         });
     return mapWithTasks == m_supermap.cend();
   }
 

@@ -27,9 +27,11 @@ public:
   FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
                              const TimeSeriesProperty<bool> &filterProp);
 
-    /// Construct with a source time series to take ownership of & a filter property
-  FilteredTimeSeriesProperty(std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
-                             const TimeSeriesProperty<bool> &filterProp);
+  /// Construct with a source time series to take ownership of & a filter
+  /// property
+  FilteredTimeSeriesProperty(
+      std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
+      const TimeSeriesProperty<bool> &filterProp);
   /// Destructor
   ~FilteredTimeSeriesProperty() override;
 

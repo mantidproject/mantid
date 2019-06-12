@@ -22,10 +22,10 @@
 
 #include <istream>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "MantidKernel/System.h"
 
@@ -85,17 +85,15 @@ public:
   // return false and leave v unchanged.
 
 private:
-
   VALUE_TYPE m_type;
 
   // This is where the actual value is stored
-  
-    bool m_bool;
-    double m_num;
-    std::unique_ptr<std::string> mp_string;
-    std::unique_ptr<JSONArray> mp_array;
-    std::unique_ptr<JSONObject> mp_object;
-  
+
+  bool m_bool;
+  double m_num;
+  std::unique_ptr<std::string> mp_string;
+  std::unique_ptr<JSONArray> mp_array;
+  std::unique_ptr<JSONObject> mp_object;
 };
 
 class DLLExport JSONException : public std::exception {

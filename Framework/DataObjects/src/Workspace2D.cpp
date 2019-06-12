@@ -95,7 +95,7 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
   Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
   spec.setHistogram(initializedHistogram);
   for (auto &i : data) {
-    i =std::make_unique<Histogram1D>(spec);
+    i = std::make_unique<Histogram1D>(spec);
   }
 
   // Add axes that reference the data
@@ -113,10 +113,11 @@ size_t Workspace2D::getNumberHistograms() const {
 
 /// get pseudo size
 size_t Workspace2D::size() const {
-  return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
-                         [](const size_t value, const std::unique_ptr<Histogram1D>& histo) {
-                           return value + histo->size();
-                         });
+  return std::accumulate(
+      data.begin(), data.end(), static_cast<size_t>(0),
+      [](const size_t value, const std::unique_ptr<Histogram1D> &histo) {
+        return value + histo->size();
+      });
 }
 
 /// get the size of each vector

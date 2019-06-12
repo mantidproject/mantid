@@ -248,7 +248,6 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     newAxis = std::make_unique<NumericAxis>(m_axis);
   }
 
-
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
       targetUnit == "signed_theta" || targetUnit == "SignedTheta") {

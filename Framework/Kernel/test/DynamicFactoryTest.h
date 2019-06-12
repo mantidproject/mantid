@@ -114,8 +114,9 @@ public:
   void testSubscribeWithReplaceEqualsOverwriteCurrentReplacesMatchingClass() {
     TS_ASSERT_THROWS_NOTHING(
         factory.subscribe("int", std::make_unique<Instantiator<int, int>>()));
-    TS_ASSERT_THROWS_NOTHING(factory.subscribe(
-        "int", std::make_unique<Instantiator<int, int>>(), IntFactory::OverwriteCurrent));
+    TS_ASSERT_THROWS_NOTHING(
+        factory.subscribe("int", std::make_unique<Instantiator<int, int>>(),
+                          IntFactory::OverwriteCurrent));
 
     factory.unsubscribe("int");
   }

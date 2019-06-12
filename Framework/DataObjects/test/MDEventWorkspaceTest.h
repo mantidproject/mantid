@@ -416,8 +416,7 @@ public:
     max.push_back(1.5);
 
     // Create a function to mask some of the workspace.
-    auto function =
-        std::make_unique<MDBoxImplicitFunction>(min, max);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
     ew->setMDMasking(std::move(function));
     ew->refreshCache();
 

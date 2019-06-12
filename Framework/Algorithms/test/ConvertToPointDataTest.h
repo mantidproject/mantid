@@ -59,7 +59,7 @@ public:
     // add a new vertical axis
     auto verticalAxis =
         std::make_unique<Mantid::API::NumericAxis>(numSpectra + 1);
-    
+
     for (int i = 0; i < numSpectra + 1; i++) {
       verticalAxis->setValue(i, 2 * i);
     }

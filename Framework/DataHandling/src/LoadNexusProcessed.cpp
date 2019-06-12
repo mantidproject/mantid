@@ -1537,8 +1537,9 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     local_workspace->replaceAxis(1, std::move(newAxis));
   } else if (unit2 != "spectraNumber") {
     try {
-      auto newAxis = (verticalHistogram) ? std::make_unique<API::BinEdgeAxis>(nspectra + 1)
-                                          : std::make_unique<API::NumericAxis>(nspectra);
+      auto newAxis = (verticalHistogram)
+                         ? std::make_unique<API::BinEdgeAxis>(nspectra + 1)
+                         : std::make_unique<API::NumericAxis>(nspectra);
       auto newAxisRaw = newAxis.get();
       local_workspace->replaceAxis(1, std::move(newAxis));
       newAxisRaw->unit() = UnitFactory::Instance().create(unit2);

@@ -33,7 +33,8 @@ public:
 
   void test_run() {
     std::unique_ptr<ThreadPoolRunnable> tpr;
-    std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerFIFO>();
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerFIFO>();
     tpr = std ::make_unique<ThreadPoolRunnable>(0, sc.get());
     sc->push(std::make_shared<SimpleTask>());
     TS_ASSERT_EQUALS(sc->size(), 1);
@@ -46,7 +47,6 @@ public:
     TS_ASSERT_EQUALS(ThreadPoolRunnableTest_value, 1234);
     // Nothing more in the queue.
     TS_ASSERT_EQUALS(sc->size(), 0);
-
   }
 
   //=======================================================================================
@@ -61,7 +61,8 @@ public:
 
   void test_run_throws() {
     std::unique_ptr<ThreadPoolRunnable> tpr;
-    std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerFIFO>();
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerFIFO>();
     tpr = std::make_unique<ThreadPoolRunnable>(0, sc.get());
 
     // Put 10 tasks in

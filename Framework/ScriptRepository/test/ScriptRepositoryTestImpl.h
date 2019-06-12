@@ -242,13 +242,13 @@ public:
     ConfigServiceImpl &config = ConfigService::Instance();
     backup_local_repository_path = config.getString("ScriptLocalRepository");
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
-    TS_ASSERT_THROWS_NOTHING(
-        repo = std::make_unique<ScriptRepositoryImplLocal>(local_rep, webserverurl));
+    TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>(
+                                 local_rep, webserverurl));
   }
 
   // ensure that the local files are free from the test created.
   void tearDown() override {
-    repo=nullptr;
+    repo = nullptr;
     try {
       Poco::File f(local_rep);
       f.remove(true);
@@ -933,7 +933,8 @@ public:
   }
 
   void test_construct_without_parameters() {
-    TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>());
+    TS_ASSERT_THROWS_NOTHING(repo =
+                                 std::make_unique<ScriptRepositoryImplLocal>());
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
   }

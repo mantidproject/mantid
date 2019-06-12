@@ -56,7 +56,7 @@ void AddPeakHKL::init() {
 void AddPeakHKL::exec() {
   IPeaksWorkspace_sptr peakWS = this->getProperty("Workspace");
   const std::vector<double> hklValue = this->getProperty("HKL");
-  auto peak =std::unique_ptr<Mantid::Geometry::IPeak>(
+  auto peak = std::unique_ptr<Mantid::Geometry::IPeak>(
       peakWS->createPeakHKL(V3D(hklValue[0], hklValue[1], hklValue[2])));
   peakWS->addPeak(*peak);
 }

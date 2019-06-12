@@ -2845,9 +2845,8 @@ void InstrumentDefinitionParser::adjust(
 
       // Translate and rotate shape xml string according to
       // <translate-rotate-combined-shape-to>
-      cuboidStr =
-          translateRotateXMLcuboid(baseCoor.get(), cuboidStr, locationElementName);
-
+      cuboidStr = translateRotateXMLcuboid(baseCoor.get(), cuboidStr,
+                                           locationElementName);
     }
 
     DOMParser pParser;

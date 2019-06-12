@@ -60,7 +60,8 @@ public:
     m_mockInheritingClass->observeUpdate();
 
     std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newAlg =
-        std::make_unique<Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
     af.subscribe(std::move(newAlg));
 
     TS_ASSERT(!m_mockInheritingClass->m_updateHandleCalled)
@@ -72,7 +73,8 @@ public:
     af.enableNotifications();
 
     std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newAlg =
-        std::make_unique<Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
     af.subscribe(std::move(newAlg));
 
     TS_ASSERT(m_mockInheritingClass->m_updateHandleCalled)

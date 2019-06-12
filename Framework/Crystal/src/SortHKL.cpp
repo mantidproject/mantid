@@ -136,7 +136,8 @@ void SortHKL::exec() {
           "Workspace2D", uniqueReflections.getReflections().size(), 20, 20);
   int counter = 0;
   size_t maxPeaks = 0;
-  auto tAxis = std::make_unique<TextAxis>(uniqueReflections.getReflections().size());
+  auto tAxis =
+      std::make_unique<TextAxis>(uniqueReflections.getReflections().size());
   UniqWksp->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   for (const auto &unique : uniqueReflections.getReflections()) {
     /* Since all possible unique reflections are explored

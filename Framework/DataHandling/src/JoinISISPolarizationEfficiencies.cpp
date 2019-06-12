@@ -129,7 +129,7 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
   MatrixWorkspace_sptr outWS = DataObjects::create<Workspace2D>(
       *inWS, labels.size(), inWS->histogram(0));
   auto axis1 = std::make_unique<TextAxis>(labels.size());
-  auto axis1Raw =axis1.get();
+  auto axis1Raw = axis1.get();
   outWS->replaceAxis(1, std::move(axis1));
   outWS->getAxis(0)->setUnit("Wavelength");
 

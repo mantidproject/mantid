@@ -60,8 +60,9 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     TimeInterval time2 = filter2->nthInterval(filter2->size() - 1);
 
     if (time1.begin() < time2.begin()) {
-      filter1->addValue(time2.begin(), true); // should be f1->lastValue, but it doesnt
-                                      // matter for boolean AND
+      filter1->addValue(time2.begin(),
+                        true); // should be f1->lastValue, but it doesnt
+                               // matter for boolean AND
     } else if (time2.begin() < time1.begin()) {
       filter2->addValue(time1.begin(), true);
     }
@@ -89,7 +90,8 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       TimeInterval time3;
       time3 = time1.intersection(time2);
       if (time3.isValid()) {
-        filterProperty->addValue(time3.begin(), (filter1->nthValue(i) && filter2->nthValue(j)));
+        filterProperty->addValue(
+            time3.begin(), (filter1->nthValue(i) && filter2->nthValue(j)));
       }
 
       if (time1.end() < time2.end()) {

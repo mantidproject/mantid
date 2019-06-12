@@ -45,7 +45,8 @@ using std::size_t;
 using namespace Mantid::Kernel;
 
 EventWorkspace::EventWorkspace(const Parallel::StorageMode storageMode)
-    : IEventWorkspace(storageMode), mru(std::make_unique<EventWorkspaceMRU>()) {}
+    : IEventWorkspace(storageMode), mru(std::make_unique<EventWorkspaceMRU>()) {
+}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(std::make_unique<EventWorkspaceMRU>()) {
@@ -58,9 +59,7 @@ EventWorkspace::EventWorkspace(const EventWorkspace &other)
   }
 }
 
-EventWorkspace::~EventWorkspace() {
-  data.clear();
-}
+EventWorkspace::~EventWorkspace() { data.clear(); }
 
 /** Returns true if the EventWorkspace is safe for multithreaded operations.
  * WARNING: This is only true for OpenMP threading. EventWorkspace is NOT thread
@@ -140,10 +139,11 @@ void EventWorkspace::init(const HistogramData::Histogram &histogram) {
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
-  return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
-                         [](size_t value, const std::unique_ptr<EventList> &histo) {
-                           return value + histo->histogram_size();
-                         });
+  return std::accumulate(
+      data.begin(), data.end(), static_cast<size_t>(0),
+      [](size_t value, const std::unique_ptr<EventList> &histo) {
+        return value + histo->histogram_size();
+      });
 }
 
 /// Get the blocksize, aka the number of bins in the histogram
@@ -402,10 +402,9 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
 /// The total number of events across all of the spectra.
 /// @returns The total number of events
 size_t EventWorkspace::getNumberEvents() const {
-  return std::accumulate(data.begin(), data.end(), size_t{0},
-                         [](size_t total, auto &list) {
-                           return total + list->getNumberEvents();
-                         });
+  return std::accumulate(
+      data.begin(), data.end(), size_t{0},
+      [](size_t total, auto &list) { return total + list->getNumberEvents(); });
 }
 
 /** Get the EventType of the most-specialized EventList in the workspace
@@ -454,10 +453,9 @@ size_t EventWorkspace::getMemorySize() const {
   // TODO: Add the MRU buffer
 
   // Add the memory from all the event lists
-  size_t total = std::accumulate(data.begin(), data.end(), size_t{0},
-                                 [](size_t total, auto &list) {
-                                   return total + list->getMemorySize();
-                                 });
+  size_t total = std::accumulate(
+      data.begin(), data.end(), size_t{0},
+      [](size_t total, auto &list) { return total + list->getMemorySize(); });
 
   total += run().getMemorySize();
 

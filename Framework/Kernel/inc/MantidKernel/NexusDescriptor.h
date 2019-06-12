@@ -10,10 +10,10 @@
 #include "MantidKernel/DllConfig.h"
 
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_set>
 #include <utility>
-#include <memory>
 
 namespace NeXus {
 class File;
@@ -111,7 +111,7 @@ private:
   std::map<std::string, std::string> m_pathsToTypes;
 
   /// Open NeXus handle
-  std::unique_ptr< ::NeXus::File> m_file;
+  std::unique_ptr<::NeXus::File> m_file;
 };
 
 } // namespace Kernel

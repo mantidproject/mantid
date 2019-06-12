@@ -278,8 +278,8 @@ void CreateWorkspace::exec() {
       outputWS->replaceAxis(1, std::move(newAxis));
       for (size_t i = 0; i < vAxis.size(); i++) {
         try {
-          newAxisRaw->setValue(i,
-                            boost::lexical_cast<double, std::string>(vAxis[i]));
+          newAxisRaw->setValue(
+              i, boost::lexical_cast<double, std::string>(vAxis[i]));
         } catch (boost::bad_lexical_cast &) {
           throw std::invalid_argument("CreateWorkspace - YAxisValues property "
                                       "could not be converted to a double.");

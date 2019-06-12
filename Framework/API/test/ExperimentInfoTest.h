@@ -695,8 +695,8 @@ public:
 
     ExperimentInfo other;
     std::string InstrParameters;
-    TS_ASSERT_THROWS_NOTHING(
-        other.loadExperimentInfoNexus(filename, th.file.get(), InstrParameters));
+    TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(
+        filename, th.file.get(), InstrParameters));
 
     std::vector<double> wMatrRestored =
         other.run().getPropertyValueAsType<std::vector<double>>("W_MATRIX");

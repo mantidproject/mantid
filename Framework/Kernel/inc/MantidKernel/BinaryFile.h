@@ -70,7 +70,8 @@ public:
       throw std::invalid_argument("File does not exist.");
     }
     // Open the file
-    this->handle = std::make_unique<std::ifstream>(filename.c_str(), std::ios::binary);
+    this->handle =
+        std::make_unique<std::ifstream>(filename.c_str(), std::ios::binary);
     // Count the # of elements.
     this->num_elements = this->getFileSize();
     // Make sure we are starting at 0
@@ -80,9 +81,7 @@ public:
   //------------------------------------------------------------------------------------
   /** Close the file
    * */
-  void close() {
-    handle.reset(nullptr);
-  }
+  void close() { handle.reset(nullptr); }
 
   //-----------------------------------------------------------------------------
   /// Returns the # of elements in the file (cached result of getFileSize)

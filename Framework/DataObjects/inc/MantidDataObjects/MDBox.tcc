@@ -173,7 +173,9 @@ TMDE(void MDBox)::clear() {
 }
 
 TMDE(Kernel::ISaveable *MDBox)::getISaveable() { return m_Saveable.get(); }
-TMDE(Kernel::ISaveable *MDBox)::getISaveable() const { return m_Saveable.get(); }
+TMDE(Kernel::ISaveable *MDBox)::getISaveable() const {
+  return m_Saveable.get();
+}
 
 //-----------------------------------------------------------------------------------------------
 /** Clear the data[] vector ONLY but does not change the file-backed settings.

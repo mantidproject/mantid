@@ -73,8 +73,6 @@ void LoadSampleDetailsFromRaw::exec() {
                 << "\tsample width: " << data_ws->mutableSample().getWidth()
                 << '\n';
 
-
-
   // Not much happens really
   progress(1.);
 }

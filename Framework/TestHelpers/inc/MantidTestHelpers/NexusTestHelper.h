@@ -13,8 +13,8 @@
 #ifndef MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
 #define MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace NeXus {
 class File;

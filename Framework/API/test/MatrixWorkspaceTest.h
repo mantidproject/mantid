@@ -556,7 +556,8 @@ public:
   void testReplaceAxis() {
     auto ax = std::make_unique<SpectraAxis>(ws.get());
     auto ax1 = std::make_unique<SpectraAxis>(ws.get());
-    TS_ASSERT_THROWS(ws->replaceAxis(2, std::move(ax)), const Exception::IndexError &);
+    TS_ASSERT_THROWS(ws->replaceAxis(2, std::move(ax)),
+                     const Exception::IndexError &);
     TS_ASSERT_THROWS_NOTHING(ws->replaceAxis(0, std::move(ax1)));
     TS_ASSERT(ws->getAxis(0)->isSpectra());
   }
@@ -830,7 +831,8 @@ public:
 
     // Check it throws for non-spectra axis
     ws.replaceAxis(1, std::make_unique<NumericAxis>(1));
-    TS_ASSERT_THROWS(ws.getSpectrumToWorkspaceIndexMap(), const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getSpectrumToWorkspaceIndexMap(),
+                     const std::runtime_error &);
   }
 
   void test_getDetectorIDToWorkspaceIndexMap() {

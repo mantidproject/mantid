@@ -100,7 +100,8 @@ public:
     if (depth < 4) {
       // Add ten tasks (one level deeper)
       for (size_t i = 0; i < 10; i++) {
-        m_scheduler->push(std::make_shared<TaskThatAddsTasks>(m_scheduler, depth + 1));
+        m_scheduler->push(
+            std::make_shared<TaskThatAddsTasks>(m_scheduler, depth + 1));
       }
     } else {
       // Lock to ensure you don't step on yourself.
@@ -279,8 +280,8 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(
-        std::make_shared<FunctionTask>(boost::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(
+          boost::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -298,8 +299,8 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(
-          std::make_shared<FunctionTask>(boost::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(
+          boost::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -316,8 +317,8 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(
-          std::make_shared<FunctionTask>(boost::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(
+          boost::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);

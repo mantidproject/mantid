@@ -30,7 +30,7 @@ public:
     auto filter = createTestFilter();
 
     auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
-              std::move(source), filter);
+        std::move(source), filter);
     TS_ASSERT_EQUALS(filtered->name(), name);
   }
 
@@ -77,7 +77,8 @@ private:
 
     // Pointer comparison
     if (transferOwnership) {
-      auto copy = std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>(source->clone());
+      auto copy = std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>(
+          source->clone());
       TS_ASSERT_THROWS_NOTHING(
           filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
               std::move(source), filter));

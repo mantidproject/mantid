@@ -59,7 +59,8 @@ public:
 
   /// Subscribes a scatterer class into the factory.
   template <class C> void subscribeScatterer() {
-    auto instantiator = std::make_unique<Kernel::Instantiator<C, BraggScatterer>>();
+    auto instantiator =
+        std::make_unique<Kernel::Instantiator<C, BraggScatterer>>();
     BraggScatterer_sptr scatterer = instantiator->createInstance();
 
     subscribe(scatterer->name(), std::move(instantiator));

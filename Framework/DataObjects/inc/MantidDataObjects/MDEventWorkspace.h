@@ -174,7 +174,7 @@ public:
 
   /// Return true if the underlying box is a MDGridBox.
   bool isGridBox() {
-    return dynamic_cast<MDGridBox<MDE, nd>*>(data.get()) != nullptr;
+    return dynamic_cast<MDGridBox<MDE, nd> *>(data.get()) != nullptr;
   }
 
   /** @returns a pointer to the box (MDBox or MDGridBox) contained within, */
@@ -192,8 +192,8 @@ public:
   }
 
   /// Apply masking
-  void
-  setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) override;
+  void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
+                        maskingRegion) override;
 
   /// Clear masking
   void clearMDMasking() override;

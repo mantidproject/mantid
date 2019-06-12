@@ -54,13 +54,14 @@ public:
         value2(prop2Value)
 
   {
-    Prop1 = std::make_unique<Kernel::EnabledWhenProperty>(propName1, Criteria1, value1);
-    Prop2 = std::make_unique<Kernel::EnabledWhenProperty>(propName2, Criteria2, value2);
+    Prop1 = std::make_unique<Kernel::EnabledWhenProperty>(propName1, Criteria1,
+                                                          value1);
+    Prop2 = std::make_unique<Kernel::EnabledWhenProperty>(propName2, Criteria2,
+                                                          value2);
   }
   ~OrEnabledWhenProperties() override // responsible for deleting all supplied
                                       // EnabledWhenProperites
-  {
-  }
+  {}
 
   IPropertySettings *clone() const override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,

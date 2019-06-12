@@ -14,7 +14,6 @@
 #include "MantidDataHandling/SaveISISNexus.h"
 #include "MantidAPI/FileProperty.h"
 
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/regex.hpp>
 #include <boost/scoped_array.hpp>

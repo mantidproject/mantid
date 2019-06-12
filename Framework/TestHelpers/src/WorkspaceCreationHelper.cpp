@@ -1193,7 +1193,6 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Create a numeric axis to replace the default vertical one
   auto verticalAxis = std::make_unique<NumericAxis>(numY);
 
-
   // Now set the axis values
   for (int i = 0; i < numHist; ++i) {
     outputWS->setBinEdges(i, x1);
@@ -1205,7 +1204,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set the 'y' axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   verticalAxis->title() = "|Q|";
-    outputWS->replaceAxis(1, std::move(verticalAxis));
+  outputWS->replaceAxis(1, std::move(verticalAxis));
 
   // Set the X axis title (for conversion to MD)
   outputWS->getAxis(0)->title() = "Energy transfer";

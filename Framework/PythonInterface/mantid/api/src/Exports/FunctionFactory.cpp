@@ -152,7 +152,8 @@ void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   func->initialize();
 
   // Takes ownership of instantiator
-  self.subscribe(func->name(), std::move(creator), FunctionFactoryImpl::OverwriteCurrent);
+  self.subscribe(func->name(), std::move(creator),
+                 FunctionFactoryImpl::OverwriteCurrent);
 }
 ///@endcond
 } // namespace

@@ -48,8 +48,10 @@ private:
                        Mantid::signal_t(const Mantid::Kernel::VMD &,
                                         const Mantid::API::MDNormalization &));
 
-    MOCK_METHOD1(mockSetMDMasking, void(Mantid::Geometry::MDImplicitFunction* func));
-    void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> func){
+    MOCK_METHOD1(mockSetMDMasking,
+                 void(Mantid::Geometry::MDImplicitFunction *func));
+    void
+    setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> func) {
       mockSetMDMasking(func.get());
     }
     MOCK_METHOD0(clearMDMasking, void());

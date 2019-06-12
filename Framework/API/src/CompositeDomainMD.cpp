@@ -32,14 +32,14 @@ CompositeDomainMD::CompositeDomainMD(IMDWorkspace_const_sptr ws,
     m_domains[i] = std::make_unique<FunctionDomainMD>(ws, start, maxDomainSize);
   }
   size_t start = (nParts - 1) * maxDomainSize;
-  m_domains.back() = std::make_unique<FunctionDomainMD>(ws, start, m_totalSize - start);
+  m_domains.back() =
+      std::make_unique<FunctionDomainMD>(ws, start, m_totalSize - start);
 }
 
 /**
  * Destructor.
  */
-CompositeDomainMD::~CompositeDomainMD() {
-}
+CompositeDomainMD::~CompositeDomainMD() {}
 
 /// Return i-th domain reset to its start.
 const FunctionDomain &CompositeDomainMD::getDomain(size_t i) const {

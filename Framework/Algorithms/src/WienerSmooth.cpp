@@ -109,8 +109,8 @@ void WienerSmooth::exec() {
   // not possible
   // at he moment and as it turned out not straight-forward to implement
   auto inAxis = inputWS->getAxis(1);
-  auto outAxis = std::unique_ptr<API::Axis>(inAxis->clone(nOutputSpectra, outputWS.get()));
-
+  auto outAxis =
+      std::unique_ptr<API::Axis>(inAxis->clone(nOutputSpectra, outputWS.get()));
 
   bool isSpectra = outAxis->isSpectra();
   bool isNumeric = outAxis->isNumeric();

@@ -224,8 +224,7 @@ FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() {
-}
+FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() {}
 
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file

@@ -24,8 +24,9 @@ DECLARE_LISTENER(FakeEventDataListener)
 
 /// Constructor
 FakeEventDataListener::FakeEventDataListener()
-    : LiveListener(), m_buffer(), m_rand(std::make_unique<Kernel::MersenneTwister>(5489)),
-      m_timer(), m_callbackloop(1), m_numExtractDataCalls(0), m_runNumber(1) {
+    : LiveListener(), m_buffer(),
+      m_rand(std::make_unique<Kernel::MersenneTwister>(5489)), m_timer(),
+      m_callbackloop(1), m_numExtractDataCalls(0), m_runNumber(1) {
 
   auto datarateConfigVal =
       ConfigService::Instance().getValue<int>("fakeeventdatalistener.datarate");
@@ -43,9 +44,7 @@ FakeEventDataListener::FakeEventDataListener()
 }
 
 /// Destructor
-FakeEventDataListener::~FakeEventDataListener() {
-  m_timer.stop();
-}
+FakeEventDataListener::~FakeEventDataListener() { m_timer.stop(); }
 
 bool FakeEventDataListener::connect(
     const Poco::Net::SocketAddress & /*address*/) {

@@ -28,8 +28,7 @@ DataItem::DataItem(const DataItem & /*other*/) {
  * Destructor. Required in cpp do avoid linker errors when other projects try to
  * inherit from DataItem
  */
-DataItem::~DataItem() {
-}
+DataItem::~DataItem() {}
 
 /** Private method to access the RWLock object.
  *
