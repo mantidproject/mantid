@@ -31,7 +31,7 @@ previous section into a single view. To achieve this we will create a
 
             grid = QtWidgets.QVBoxLayout(self)
             self.plot_view = plot_view.PlotView(parent=self)
-            self.options_view = view.view(parent=self)
+            self.options_view = view.View(parent=self)
 
             grid.addWidget(self.plot_view)
             grid.addWidget(self.options_view)          
@@ -44,9 +44,9 @@ The main only needs to import the master_view:
 
 .. code-block:: python
 
-    class demo(QtWidgets.QMainWindow):
+    class Demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
-            super(demo, self).__init__(parent)
+            super(Demo, self).__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
             my_view = master_view.MasterView()

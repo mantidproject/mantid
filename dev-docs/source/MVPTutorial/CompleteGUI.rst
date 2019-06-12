@@ -14,7 +14,8 @@ Complete GUI from Exercises
 
     import sys
 
-    import model
+    import model_colour
+    import model_data
     import master_view
     import master_presenter
 
@@ -22,12 +23,12 @@ Complete GUI from Exercises
     """
     A wrapper class for setting the main window
     """
-    class demo(QtWidgets.QMainWindow):
+    class Demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
-            super(demo,self).__init__(parent)
+            super(Demo,self).__init__(parent)
  
-            data_model = model.DataGenerator()
-            colour_model = model.ColourConverter()
+            data_model = model_data.DataGenerator()
+            colour_model = model_colour.ColourConverter()
 
             self.window = QtWidgets.QMainWindow()
 
@@ -38,15 +39,15 @@ Complete GUI from Exercises
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-    def qapp():
+    def get_qapplication_instance():
         if QtWidgets.QApplication.instance():
             app = QtWidgets.QApplication.instance()
         else:
             app = QtWidgets.QApplication(sys.argv)
         return app
 
-    app = qapp()
-    window = demo()
+    app = get_qapplication_instance()
+    window = Demo()
     window.show()
     app.exec_()
 
@@ -72,7 +73,7 @@ later date.
 
             grid = QtWidgets.QVBoxLayout(self)
             self.plot_view = plot_view.PlotView()
-            self.options_view=view.view()
+            self.options_view=view.View()
 
             grid.addWidget(self.plot_view)          
             grid.addWidget(self.options_view)          
@@ -209,7 +210,7 @@ The signal from the View is caught here and the models are used to create the co
     from qtpy import QtWidgets, QtCore, QtGui
 
 
-    class view(QtWidgets.QWidget):
+    class View(QtWidgets.QWidget):
 
         plotSignal = QtCore.Signal()
 
@@ -284,13 +285,30 @@ The signal from the View is caught here and the models are used to create the co
             self.colours.clear()
             self.colours.addItems(options)
 
-``model.py``
+``model_colour.py``
+############
+
+.. code-block:: python
+
+    from __future__ import (absolute_import, division, print_function)
+
+
+    class ColourConverter(object):
+
+        def __init__(self):
+            self.colour_table = {"red": "r", "blue": "b", "black": "k"}
+
+        def getColourSelection(self):
+            return self.colour_table.keys()
+
+``model_data.py``
 ############
 
 .. code-block:: python
 
     from __future__ import (absolute_import, division, print_function)
     import numpy as np
+
 
     class DataGenerator(object):
 
@@ -306,13 +324,4 @@ The signal from the View is caught here and the models are used to create the co
 
         def getYData(self):
             return self.y_data
-
-
-    class ColourConverter(object):
-
-        def __init__(self):
-            self.colour_table = {"red": "r", "blue": "b", "black": "k"}
-
-        def getColourSelection(self):
-            return self.colour_table.keys()
 

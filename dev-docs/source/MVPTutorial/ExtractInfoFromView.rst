@@ -13,7 +13,7 @@ be used.
     from qtpy import QtWidgets, QtCore, QtGui
 
 
-    class view(QtWidgets.QWidget):
+    class View(QtWidgets.QWidget):
 
         doSomethingSignal = QtCore.Signal()
 

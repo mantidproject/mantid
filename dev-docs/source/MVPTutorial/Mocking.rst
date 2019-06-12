@@ -31,9 +31,9 @@ The test class is then initialised:
 
 .. code-block:: python
 
-    class presenterTest(unittest.TestCase):
+    class PresenterTest(unittest.TestCase):
         def setUp(self):
-            self.view = mock.create_autospec(view.view)
+            self.view = mock.create_autospec(view.View)
         
             # mock view
             self.view.doSomethingSignal = mock.Mock()

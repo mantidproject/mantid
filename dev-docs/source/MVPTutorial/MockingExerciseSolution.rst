@@ -15,9 +15,9 @@ Mocking Exercise Solution
     import unittest
     from mantid.py3compat import mock
 
-    class presenterTest(unittest.TestCase):
+    class PresenterTest(unittest.TestCase):
         def setUp(self):
-            self.view = mock.create_autospec(view.view)
+            self.view = mock.create_autospec(view.View)
 
             # mock view
             self.view.plotSignal = mock.Mock()

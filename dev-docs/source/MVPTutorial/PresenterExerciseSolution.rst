@@ -13,7 +13,7 @@ View
     from qtpy import QtWidgets, QtCore, QtGui
 
 
-    class view(QtWidgets.QWidget):
+    class View(QtWidgets.QWidget):
 
         plotSignal = QtCore.Signal()
 
@@ -124,25 +124,25 @@ Main module
     """
     A wrapper class for setting the main window
     """
-    class demo(QtWidgets.QMainWindow):
+    class Demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
-            super(demo,self).__init__(parent)
+            super(Demo,self).__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
-            my_view = view.view()
+            my_view = view.View()
             self.presenter = presenter.Presenter(my_view)
             # set the view for the main window
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-    def qapp():
+    def get_qapplication_instance():
         if QtWidgets.QApplication.instance():
             app = QtWidgets.QApplication.instance()
         else:
             app = QtWidgets.QApplication(sys.argv)
         return app
 
-    app = qapp()
-    window = demo()
+    app = get_qapplication_instance()
+    window = Demo()
     window.show()
     app.exec_()

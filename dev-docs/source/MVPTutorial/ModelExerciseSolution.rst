@@ -43,10 +43,10 @@ And the Main module should now pass the two models into the presenter:
 .. code-block:: python
 
     def __init__(self, parent=None):
-        super(demo,self).__init__(parent)
+        super(Demo,self).__init__(parent)
 
         self.window = QtWidgets.QMainWindow()
-        my_view = view.view()
+        my_view = view.View()
         data_model = model.DataGenerator()
         colour_model = model.ColourConvertor()
 

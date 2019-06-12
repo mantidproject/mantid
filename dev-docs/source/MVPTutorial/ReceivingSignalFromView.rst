@@ -20,7 +20,7 @@ pressed. First we will start with the view:
     from qtpy import QtWidgets, QtCore, QtGui
 
 
-    class view(QtWidgets.QWidget):
+    class View(QtWidgets.QWidget):
 
         doSomethingSignal = QtCore.Signal()
 
@@ -92,19 +92,19 @@ The main is now:
     """
     A wrapper class for setting the main window
     """
-    class demo(QtWidgets.QMainWindow):
+    class Demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
-            super(demo, self).__init__(parent)
+            super(Demo, self).__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
-            my_view = view.view(self)
+            my_view = view.View(self)
             self.my_presenter = presenter.Presenter(my_view)
             # set the view for the main window
 
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-        def qapp():
+        def get_qapplication_instance():
             if QtWidgets.QApplication.instance():
                 app = QtWidgets.QApplication.instance()
             else:
@@ -112,11 +112,11 @@ The main is now:
             return app
 
 
-    app = qapp()
-    window = demo()
+    app = get_qapplication_instance()
+    window = Demo()
     window.show()
     app.exec_()
 
 The view and presenter are both created, but only the presenter has to
-be a member of the demo class. The view is created to be passed to the
+be a member of the Demo class. The view is created to be passed to the
 presenter and the view could easily be replaced.
