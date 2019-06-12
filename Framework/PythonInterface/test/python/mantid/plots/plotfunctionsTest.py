@@ -159,82 +159,71 @@ class PlotFunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(4.0, ax.get_ylim()[0])
         self.assertAlmostEqual(8.0, ax.get_ylim()[1])
 
+    def test_update_colorplot_datalimits_for_pcolormesh(self):
+        self._do_update_colorplot_datalimits(funcs.pcolormesh)
 
-def test_update_colorplot_datalimits_for_pcolormesh(self):
-    self._do_update_colorplot_datalimits(funcs.pcolormesh)
+    def test_update_colorplot_datalimits_for_pcolor(self):
+        self._do_update_colorplot_datalimits(funcs.pcolor)
 
+    def test_update_colorplot_datalimits_for_imshow(self):
+        self._do_update_colorplot_datalimits(funcs.imshow)
 
-def test_update_colorplot_datalimits_for_pcolor(self):
-    self._do_update_colorplot_datalimits(funcs.pcolor)
+    def test_1d_plots_with_unplottable_type_raises_attributeerror(self):
+        table = CreateEmptyTableWorkspace()
+        _, ax = plt.subplots()
+        self.assertRaises(AttributeError, funcs.plot, ax, table, wkspIndex=0)
+        self.assertRaises(AttributeError, funcs.errorbar, ax, table, wkspIndex=0)
 
+    def test_2d_plots_with_unplottable_type_raises_attributeerror(self):
+        table = CreateEmptyTableWorkspace()
+        _, ax = plt.subplots()
+        self.assertRaises(AttributeError, funcs.pcolor, ax, table)
+        self.assertRaises(AttributeError, funcs.pcolormesh, ax, table)
+        self.assertRaises(AttributeError, funcs.pcolorfast, ax, table)
 
-def test_update_colorplot_datalimits_for_imshow(self):
-    self._do_update_colorplot_datalimits(funcs.imshow)
+    def test_1d_indices(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws_MD_2d, indices=(slice(None), 0, 0))
+        funcs.plot(ax, self.ws_MD_2d, indices=(0, slice(None), 0))
+        funcs.plot(ax, self.ws_MD_2d, indices=(0, 0, slice(None)))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, indices=(0, slice(None), slice(None)))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
 
+    def test_1d_slicepoint(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(None, 0, 0))
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, None, 0))
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, 0, None))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, slicepoint=(0, None, None))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
 
-def test_1d_plots_with_unplottable_type_raises_attributeerror(self):
-    table = CreateEmptyTableWorkspace()
-    _, ax = plt.subplots()
-    self.assertRaises(AttributeError, funcs.plot, ax, table, wkspIndex=0)
-    self.assertRaises(AttributeError, funcs.errorbar, ax, table, wkspIndex=0)
-
-
-def test_2d_plots_with_unplottable_type_raises_attributeerror(self):
-    table = CreateEmptyTableWorkspace()
-    _, ax = plt.subplots()
-    self.assertRaises(AttributeError, funcs.pcolor, ax, table)
-    self.assertRaises(AttributeError, funcs.pcolormesh, ax, table)
-    self.assertRaises(AttributeError, funcs.pcolorfast, ax, table)
-
-
-def test_1d_indices(self):
-    fig, ax = plt.subplots()
-    funcs.plot(ax, self.ws_MD_2d, indices=(slice(None), 0, 0))
-    funcs.plot(ax, self.ws_MD_2d, indices=(0, slice(None), 0))
-    funcs.plot(ax, self.ws_MD_2d, indices=(0, 0, slice(None)))
-    self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, indices=(0, slice(None), slice(None)))
-    self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
-
-
-def test_1d_slicepoint(self):
-    fig, ax = plt.subplots()
-    funcs.plot(ax, self.ws_MD_2d, slicepoint=(None, 0, 0))
-    funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, None, 0))
-    funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, 0, None))
-    self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, slicepoint=(0, None, None))
-    self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
-
-
-def test_1d_y_axes_label_auto_distribution_on(self):
-    fig, ax = plt.subplots()
-    funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1)
-    self.assertEqual(ax.get_ylabel(), "Counts ($\\AA$)$^{-1}$")
-
-
-def test_1d_y_axes_label_distribution_workspace_auto_distribution_on(self):
-    fig, ax = plt.subplots()
-    funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1)
-    self.assertEqual(ax.get_ylabel(), "Counts ($\\AA$)$^{-1}$")
-
-
-def test_1d_y_axes_label_auto_distribution_off(self):
-    try:
-        config['graph1d.autodistribution'] = 'Off'
+    def test_1d_y_axes_label_auto_distribution_on(self):
         fig, ax = plt.subplots()
         funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1)
-        self.assertEqual(ax.get_ylabel(), "Counts")
-    finally:
-        config['graph1d.autodistribution'] = 'On'
+        self.assertEqual(ax.get_ylabel(), "Counts ($\\AA$)$^{-1}$")
 
-
-def test_1d_y_axes_label_distribution_workspace_auto_distribution_off(self):
-    try:
-        config['graph1d.autodistribution'] = 'Off'
+    def test_1d_y_axes_label_distribution_workspace_auto_distribution_on(self):
         fig, ax = plt.subplots()
         funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1)
         self.assertEqual(ax.get_ylabel(), "Counts ($\\AA$)$^{-1}$")
-    finally:
-        config['graph1d.autodistribution'] = 'On'
+
+    def test_1d_y_axes_label_auto_distribution_off(self):
+        try:
+            config['graph1d.autodistribution'] = 'Off'
+            fig, ax = plt.subplots()
+            funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1)
+            self.assertEqual(ax.get_ylabel(), "Counts")
+        finally:
+            config['graph1d.autodistribution'] = 'On'
+
+    def test_1d_y_axes_label_distribution_workspace_auto_distribution_off(self):
+        try:
+            config['graph1d.autodistribution'] = 'Off'
+            fig, ax = plt.subplots()
+            funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1)
+            self.assertEqual(ax.get_ylabel(), "Counts ($\\AA$)$^{-1}$")
+        finally:
+            config['graph1d.autodistribution'] = 'On'
 
 
 if __name__ == '__main__':
