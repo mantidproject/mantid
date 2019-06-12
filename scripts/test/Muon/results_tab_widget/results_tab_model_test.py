@@ -9,6 +9,7 @@ from __future__ import (absolute_import, print_function, unicode_literals)
 
 from collections import OrderedDict
 from copy import deepcopy
+import datetime
 import unittest
 
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
@@ -98,10 +99,13 @@ def add_logs(workspace_name, logs):
 
     run = workspace.run()
     # populate with log data
+    dt_format = "%Y-%m-%dT%H:%M:%S"
     for name, values in logs:
         tsp = FloatTimeSeriesProperty(name)
+        time = datetime.datetime.strptime("2019-05-30T09:00:00", dt_format)
         for value in values:
-            tsp.addValue("2019-05-30T09:00:00", float(value))
+            tsp.addValue(time.strftime(dt_format), float(value))
+            time += datetime.timedelta(seconds=5)
         run.addProperty(name, tsp, replace=True)
 
     return workspace
@@ -263,7 +267,7 @@ class ResultsTabModelTest(unittest.TestCase):
                           TableColumnType.YErr, TableColumnType.Y,
                           TableColumnType.YErr, TableColumnType.Y,
                           TableColumnType.YErr, TableColumnType.Y)
-        avg_log_values = 55., 2.5
+        avg_log_values = 50., 2.0
         expected_content = [
             ('ws1_Parameters', avg_log_values[0], avg_log_values[1],
              self.f0_height[0], self.f0_height[1], self.f0_centre[0],

@@ -10,7 +10,6 @@ from __future__ import (absolute_import, division, unicode_literals)
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 from mantid.py3compat import Enum
-import numpy as np
 
 from Muon.GUI.Common.observer_pattern import GenericObserver
 
@@ -168,20 +167,14 @@ class ResultsTabModel(object):
         Add the log values into the row for the given fit
         :param row_dict: The dict of current row values
         :param fit: The fit object being processed
-        :param log_selection: The current selection of logs
+        :param log_selection: The current selection of logs as a list of names
         :return: The updated row values dict
         """
         if not log_selection:
             return row_dict
 
-        workspace = _workspace_for_logs(fit.input_workspaces)
-        ws_run = workspace.run()
         for log_name in log_selection:
-            try:
-                log_value = ws_run.getPropertyAsSingleValue(log_name)
-            except Exception:
-                log_value = np.nan
-            row_dict.update({log_name: log_value})
+            row_dict.update({log_name: fit.log_value(log_name)})
 
         return row_dict
 
@@ -309,14 +302,6 @@ class ResultsTabModel(object):
 
 
 # Private helper functions
-def _workspace_for_logs(names):
-    """Return the workspace handle to be used to access the logs.
-    We assume workspace_name is a string or a list of strings
-    :param name_or_names: The name or list of names in the ADS
-    """
-    return AnalysisDataService.retrieve(names[0])
-
-
 def _log_should_be_displayed(log):
     """Returns true if the given log should be included in the display"""
     return isinstance(log, FloatTimeSeriesProperty) or \

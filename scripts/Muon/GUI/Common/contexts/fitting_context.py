@@ -11,6 +11,7 @@ import re
 
 from mantid.api import AnalysisDataService
 from mantid.py3compat import iteritems, iterkeys, string_types
+import numpy as np
 
 from Muon.GUI.Common.observer_pattern import Observable
 
@@ -242,6 +243,33 @@ class FitInformation(object):
                 return False
 
         return True
+
+    def log_value(self, log_name):
+        """
+        Compute and return the log value for the named log.
+        If the log is a string then the value is converted to a float
+        if possible. If the log is a time series then the time-average
+        value is computed. If multiple workspaces are part of the fit
+        then the values computed above are averaged over each workspace.
+        It is assumed that all logs have been checked for existence.
+        :param log_name: The name of an existing log
+        :return: A single double value
+        """
+        ads = AnalysisDataService.Instance()
+
+        def value_from_workspace(wksp_name):
+            run = ads.retrieve(wksp_name).run()
+            prop = run.getProperty(log_name)
+            if hasattr(prop, 'timeAverageValue'):
+                return prop.timeAverageValue()
+            else:
+                return float(prop.value)
+
+        values = [
+            value_from_workspace(wksp_name)
+            for wksp_name in self.input_workspaces
+        ]
+        return np.mean(values)
 
 
 class FittingContext(object):
