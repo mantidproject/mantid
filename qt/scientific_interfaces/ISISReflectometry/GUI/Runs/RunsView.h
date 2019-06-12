@@ -76,7 +76,6 @@ public:
   void setProgressRange(int min, int max) override;
   void setProgress(int progress) override;
   void clearProgress() override;
-  void loginFailed(std::string const &fullError) override;
 
   // Accessor methods
   std::set<int> getSelectedSearchRows() const override;
@@ -89,11 +88,6 @@ public:
   getAlgorithmRunner() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const override;
-
-  // Start an ICAT search
-  void startIcatSearch() override;
-  void noActiveICatSessions() override;
-  void missingRunsToTransfer() override;
 
   // Live data monitor
   void startMonitor() override;

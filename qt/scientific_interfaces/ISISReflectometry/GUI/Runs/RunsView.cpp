@@ -32,10 +32,6 @@ RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
       m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()) {
   initLayout();
 }
-void RunsView::loginFailed(std::string const &fullError) {
-  QMessageBox::critical(this, QString::fromStdString(fullError),
-                        "Login Failed!");
-}
 
 void RunsView::subscribe(RunsViewSubscriber *notifyee) {
   m_notifyee = notifyee;
@@ -84,6 +80,9 @@ void RunsView::initLayout() {
   // Synchronize the slit calculator
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onInstrumentChanged(int)));
+  // Connect signal for when search algorithm completes
+  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(onSearchComplete()), Qt::UniqueConnection);
 
   // Synchronize the instrument selection widgets
   // Processing table in group 1
@@ -106,17 +105,6 @@ void RunsView::initLayout() {
   // connect(qDataProcessorWidget_2,
   //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
   //        SLOT(instrumentChanged(int)));
-}
-
-void RunsView::noActiveICatSessions() {
-  QMessageBox::information(
-      this, "Login Failed",
-      "Error Logging in: Please press 'Search' to try again.");
-}
-
-void RunsView::missingRunsToTransfer() {
-  QMessageBox::critical(this, "No runs selected",
-                        "Error: Please select at least one run to transfer.");
 }
 
 /**
@@ -246,15 +234,6 @@ void RunsView::showSearch(SearchModel_sptr model) {
   ui.tableSearchResults->resizeColumnsToContents();
 }
 
-/** Start an icat search
- */
-void RunsView::startIcatSearch() {
-  m_algoRunner.get()->disconnect(); // disconnect any other connections
-  m_notifyee->notifySearch();
-  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(onSearchComplete()), Qt::UniqueConnection);
-}
-
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
@@ -263,7 +242,7 @@ void RunsView::onSearchComplete() { m_searchNotifyee->notifySearchComplete(); }
 /**
 This slot notifies the presenter that the "search" button has been pressed
 */
-void RunsView::on_actionSearch_triggered() { startIcatSearch(); }
+void RunsView::on_actionSearch_triggered() { m_notifyee->notifySearch(); }
 
 /**
 This slot conducts a search operation before notifying the presenter that the

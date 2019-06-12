@@ -39,7 +39,6 @@ public:
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
   MOCK_METHOD0(clearProgress, void());
-  MOCK_METHOD1(loginFailed, void(std::string const &));
 
   MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
   MOCK_CONST_METHOD0(getAllSearchRows, std::set<int>());
@@ -51,10 +50,6 @@ public:
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_CONST_METHOD0(getMonitorAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
-
-  MOCK_METHOD0(startIcatSearch, void());
-  MOCK_METHOD0(noActiveICatSessions, void());
-  MOCK_METHOD0(missingRunsToTransfer, void());
 
   MOCK_METHOD0(startMonitor, void());
   MOCK_METHOD0(stopMonitor, void());
