@@ -29,7 +29,7 @@ QtReflSettingsView::QtReflSettingsView(int group, QWidget *parent) {
 
   UNUSED_ARG(parent);
   initLayout();
-  m_presenter = Mantid::Kernel::make_unique<ReflSettingsPresenter>(this, group);
+  m_presenter = std::make_unique<ReflSettingsPresenter>(this, group);
   auto alg = m_presenter->createReductionAlg();
   registerSettingsWidgets(alg);
 }

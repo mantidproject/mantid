@@ -102,8 +102,8 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self._check_values(prop, **default)
 
     def _check_object_attributes(self, prop, name, direction):
-        self.assertEquals(prop.name, name)
-        self.assertEquals(prop.direction, direction)
+        self.assertEqual(prop.name, name)
+        self.assertEqual(prop.direction, direction)
 
     def _check_values(self, prop, **kwargs):
 

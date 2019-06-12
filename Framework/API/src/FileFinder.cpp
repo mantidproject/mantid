@@ -18,7 +18,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>

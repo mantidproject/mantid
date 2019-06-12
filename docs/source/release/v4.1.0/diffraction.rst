@@ -25,6 +25,8 @@ Improvements
 
 - :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now correctly takes into account scale for translation. Rotation is now applied before translation to reduce confusion.
 
+- The Pearl scripts now automatically disable attenuation on long-mode.
+
 Bug Fixes
 #########
 

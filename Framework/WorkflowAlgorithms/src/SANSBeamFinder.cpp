@@ -33,7 +33,7 @@ using namespace DataObjects;
 
 void SANSBeamFinder::init() {
   const std::vector<std::string> fileExts{"_event.nxs", ".xml"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, fileExts),
                   "Data filed used to find beam center");
 
@@ -115,9 +115,8 @@ SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
         m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
       }
     }
-    m_reductionManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<>>(entryName, "",
-                                                 Direction::Output));
+    m_reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
+        entryName, "", Direction::Output));
     m_reductionManager->setPropertyValue(entryName, finderWSName);
     m_reductionManager->setProperty(entryName, finderWS);
   }
@@ -139,7 +138,8 @@ void SANSBeamFinder::exec() {
   const bool persistent = getProperty("PersistentCorrection");
   if (!m_reductionManager->existsProperty("SANSBeamFinderAlgorithm") &&
       persistent) {
-    auto algProp = make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
+    auto algProp =
+        std::make_unique<AlgorithmProperty>("SANSBeamFinderAlgorithm");
     algProp->setValue(toString());
     m_reductionManager->declareProperty(std::move(algProp));
   }
@@ -216,12 +216,12 @@ void SANSBeamFinder::exec() {
   if (persistent) {
     if (!m_reductionManager->existsProperty("LatestBeamCenterX"))
       m_reductionManager->declareProperty(
-          make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
-                                                 center_x));
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
+                                                      center_x));
     if (!m_reductionManager->existsProperty("LatestBeamCenterY"))
       m_reductionManager->declareProperty(
-          make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
-                                                 center_y));
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
+                                                      center_y));
 
     m_reductionManager->setProperty("LatestBeamCenterX", center_x);
     m_reductionManager->setProperty("LatestBeamCenterY", center_y);

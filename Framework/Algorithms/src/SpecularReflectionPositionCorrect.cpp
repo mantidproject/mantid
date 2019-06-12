@@ -85,18 +85,18 @@ void SpecularReflectionPositionCorrect::init() {
   thetaValidator->add(boost::make_shared<MandatoryValidator<double>>());
   thetaValidator->add(
       boost::make_shared<BoundedValidator<double>>(0, 90, true));
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace to correct.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("TwoThetaIn", Mantid::EMPTY_DBL(),
-                                             thetaValidator, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "TwoThetaIn", Mantid::EMPTY_DBL(), thetaValidator, Direction::Input),
       "Input two theta angle in degrees.");
 
   this->initCommonProperties();
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

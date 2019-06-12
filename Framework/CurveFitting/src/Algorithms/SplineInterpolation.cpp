@@ -59,21 +59,21 @@ const std::string SplineInterpolation::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SplineInterpolation::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>("WorkspaceToMatch", "",
-                                                   Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("WorkspaceToMatch", "",
+                                                        Direction::Input),
                   "The workspace which defines the points of the spline.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("WorkspaceToInterpolate", "",
-                                       Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("WorkspaceToInterpolate", "",
+                                            Direction::Input),
       "The workspace on which to perform the interpolation algorithm.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The workspace containing the calculated points and derivatives");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspaceDeriv", "", Direction::Output,
                       PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");

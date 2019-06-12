@@ -7,7 +7,7 @@
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/LibraryManager.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <sstream>
 
 namespace Mantid {

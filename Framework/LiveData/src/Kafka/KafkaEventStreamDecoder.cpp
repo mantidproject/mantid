@@ -12,7 +12,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"

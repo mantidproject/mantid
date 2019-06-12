@@ -1,10 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
+from mantid.api import FunctionFactory
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 from qtpy import QtWidgets
+
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from mantid.api import FunctionFactory
 
 
 def retrieve_combobox_info(combo_box):
@@ -30,6 +38,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter = self.widget.fitting_tab_presenter
         self.view = self.widget.fitting_tab_view
         self.presenter.model = mock.MagicMock()
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
 
     @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.WorkspaceSelectorView.get_selected_data')
     def test_handle_select_fit_data_clicked_updates_current_run_list(self, dialog_mock):
@@ -65,13 +74,15 @@ class FittingTabPresenterTest(GuiTest):
             self):
         self.presenter.selected_data = ['Input Workspace Name']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.model.do_single_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                           'Fit Suceeded', 0.5)
 
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
 
         self.presenter.model.do_single_fit.assert_called_once_with(
             {'Function': mock.ANY, 'InputWorkspace': 'Input Workspace Name',
-             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint'})
+             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint', 'FitGroupName': 'Fitting Results'})
 
         self.assertEqual(str(self.presenter.model.do_single_fit.call_args[0][0]['Function']), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 
@@ -83,7 +94,7 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual(result, {'Function': mock.ANY,
                                   'InputWorkspace': 'Input Workspace Name',
                                   'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0,
-                                  'EvaluationType': 'CentrePoint'}
+                                  'EvaluationType': 'CentrePoint', 'FitGroupName': 'Fitting Results'}
                          )
 
     def test_for_single_fit_mode_when_display_workspace_changes_updates_fitting_browser_with_new_name(self):
@@ -97,6 +108,8 @@ class FittingTabPresenterTest(GuiTest):
         self.view.simul_fit_radio.toggle()
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                                 'Fit Suceeded', 0.5)
 
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
@@ -253,8 +266,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter._end_x = [0.56, 0.78, 0.34]
         self.presenter._fit_status = ['success', 'failure with message', 'success']
         self.presenter._fit_chi_squared = [12.3, 3.4, 0.35]
-        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        fit_function_1 = FunctionFactory.createInitialized('name=GausOsc,A=0.6,Sigma=0.6,Frequency=0.6,Phi=0')
+
         self.presenter._fit_function = [fit_function, fit_function_1, fit_function]
 
         self.view.parameter_display_combo.setCurrentIndex(1)
@@ -276,6 +288,21 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter.selected_data = []
 
         self.assertEqual(self.view.fit_status_success_failure.text(), 'No Fit')
+
+    def test_updating_function_updates_displayed_fit_name(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
+
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+        self.assertEqual(self.view.function_name, 'GausOsc')
+
+    def test_fit_name_not_updated_if_already_changed_by_user(self):
+        self.view.function_name = 'test function'
+        self.view.function_name_line_edit.textChanged.emit('test function')
+
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+        self.assertEqual(self.view.function_name, 'test function')
 
 
 if __name__ == '__main__':

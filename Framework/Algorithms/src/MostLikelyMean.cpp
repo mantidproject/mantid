@@ -46,10 +46,10 @@ const std::string MostLikelyMean::summary() const {
 void MostLikelyMean::init() {
   auto lengthValidator = boost::make_shared<ArrayLengthValidator<double>>();
   lengthValidator->setLengthMin(1);
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "InputArray", lengthValidator, Direction::Input),
                   "An input array.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "Output", 0., Direction::Output),
                   "The output (mean).");
 }

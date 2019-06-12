@@ -74,8 +74,8 @@ class LoadTests(unittest.TestCase):
         ws_smooth = mtd['enginxOutSpline']
 
         # SplineSmooth all three spectrum
-        self.assertEquals(3, ws_smooth.getNumberHistograms())
-        self.assertEquals(14168, ws_smooth.blocksize())
+        self.assertEqual(3, ws_smooth.getNumberHistograms())
+        self.assertEqual(14168, ws_smooth.blocksize())
 
         self.assertAlmostEqual(0.24360103, ws_smooth.readX(2)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(0.86546920, ws_smooth.readX(2)[1738], places=DIFF_PLACES)
@@ -86,8 +86,8 @@ class LoadTests(unittest.TestCase):
         ws_smooth = mtd['SthetaOutSpline']
 
         # SplineSmooth all three spectrum
-        self.assertEquals(1, ws_smooth.getNumberHistograms())
-        self.assertEquals(463, ws_smooth.blocksize())
+        self.assertEqual(1, ws_smooth.getNumberHistograms())
+        self.assertEqual(463, ws_smooth.blocksize())
 
         self.assertAlmostEqual(2.3405, ws_smooth.readX(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(56.9972, ws_smooth.readX(0)[231], places=DIFF_PLACES)

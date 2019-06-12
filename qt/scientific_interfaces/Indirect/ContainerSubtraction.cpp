@@ -148,6 +148,17 @@ std::string ContainerSubtraction::createOutputName() {
 }
 
 /**
+ * Removes the output workspace from the ADS if exists
+ */
+void ContainerSubtraction::removeOutput() {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(m_pythonExportWsName)) {
+    ads.remove(m_pythonExportWsName);
+  }
+  m_pythonExportWsName.clear();
+}
+
+/**
  * Validates the user input in the UI
  * @return if the input was valid
  */
@@ -233,9 +244,11 @@ void ContainerSubtraction::setFileExtensionsByName(bool filter) {
  * @param dataName Name of new data source
  */
 void ContainerSubtraction::newSample(const QString &dataName) {
-  // Remove old sample and fit
+  // Remove old sample and fit curves from plot
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Sample");
+  // Remove the subtracted workspace as it is no longer valid
+  removeOutput();
 
   m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
@@ -267,6 +280,8 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Remove old container and fit
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Container");
+  // Remove the subtracted workspace as it is no longer valid
+  removeOutput();
 
   // Get new workspace
   m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(

@@ -19,9 +19,9 @@ class TestCaseReportTest(unittest.TestCase):
         failure_txt = "Test failed"
         report = TestCaseReport(classname, name, failure_txt)
 
-        self.assertEquals(name, report.name)
-        self.assertEquals(classname, report.classname)
-        self.assertEquals(failure_txt, report.failure_descr)
+        self.assertEqual(name, report.name)
+        self.assertEqual(classname, report.classname)
+        self.assertEqual(failure_txt, report.failure_descr)
 
     def test_case_passed_with_empty_failure_description(self):
         name = "DummyTest"
@@ -60,16 +60,16 @@ class TestSuiteReportTest(unittest.TestCase):
         testcases = [TestCaseReport("doctests", "DummyTest", "failed")]
         report =  TestSuiteReport(name, testcases, package)
 
-        self.assertEquals(name, report.name)
-        self.assertEquals(package, report.package)
-        self.assertEquals(testcases, report.testcases)
+        self.assertEqual(name, report.name)
+        self.assertEqual(package, report.package)
+        self.assertEqual(testcases, report.testcases)
 
     def test_report_gives_correct_number_test_passed_and_failed(self):
         report = self.__createDummyReport()
 
-        self.assertEquals(1, report.npassed)
-        self.assertEquals(1, report.nfailed)
-        self.assertEquals(2, report.ntests)
+        self.assertEqual(1, report.npassed)
+        self.assertEqual(1, report.nfailed)
+        self.assertEqual(2, report.ntests)
 
     #========================= Failure cases ==================================
 
@@ -243,42 +243,42 @@ class DocTestOutputParserTest(unittest.TestCase):
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
-        self.assertEquals("doctests", suite.name)
-        self.assertEquals("docs", suite.package)
-        self.assertEquals(3, suite.ntests)
+        self.assertEqual("doctests", suite.name)
+        self.assertEqual("docs", suite.package)
+        self.assertEqual(3, suite.ntests)
 
         cases = suite.testcases
         expected_names = ["Ex 2", "default", "default"]
         for idx, case in enumerate(cases):
             self.assertTrue(case.passed)
-            self.assertEquals(expected_names[idx], case.name)
-            self.assertEquals("docs.algorithms/AllPassed", case.classname)
+            self.assertEqual(expected_names[idx], case.name)
+            self.assertEqual("docs.algorithms/AllPassed", case.classname)
 
     def test_pass_with_cleanup_fail_parse_correctly(self):
         parser = DocTestOutputParser(TEST_PASS_CLEANUP_FAIL, isfile = False)
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
-        self.assertEquals("doctests", suite.name)
-        self.assertEquals("docs", suite.package)
-        self.assertEquals(3, suite.ntests)
+        self.assertEqual("doctests", suite.name)
+        self.assertEqual("docs", suite.package)
+        self.assertEqual(3, suite.ntests)
 
         cases = suite.testcases
         expected_names = ["Ex 2", "default", "default"]
         expected_pass = [True, False, True]
         for idx, case in enumerate(cases):
-            self.assertEquals(expected_pass[idx], case.passed)
-            self.assertEquals(expected_names[idx], case.name)
-            self.assertEquals("docs.algorithms/TestPassedCleanupFail", case.classname)
+            self.assertEqual(expected_pass[idx], case.passed)
+            self.assertEqual(expected_names[idx], case.name)
+            self.assertEqual("docs.algorithms/TestPassedCleanupFail", case.classname)
 
     def test_all_failed_gives_expected_results(self):
         parser = DocTestOutputParser(ALL_FAIL_EX, isfile = False)
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
-        self.assertEquals("doctests", suite.name)
-        self.assertEquals("docs", suite.package)
-        self.assertEquals(2, suite.ntests)
+        self.assertEqual("doctests", suite.name)
+        self.assertEqual("docs", suite.package)
+        self.assertEqual(2, suite.ntests)
 
         cases = suite.testcases
         expected_names = ["Ex2[31]", "Ex1"]
@@ -303,18 +303,18 @@ Got:
         # test
         for idx, case in enumerate(cases):
             self.assertTrue(case.failed)
-            self.assertEquals(expected_names[idx], case.name)
-            self.assertEquals(expected_errors[idx], case.failure_descr)
-            self.assertEquals("docs.algorithms/AllFailed", case.classname)
+            self.assertEqual(expected_names[idx], case.name)
+            self.assertEqual(expected_errors[idx], case.failure_descr)
+            self.assertEqual("docs.algorithms/AllFailed", case.classname)
 
     def test_mix_pass_fail_gives_expected_results(self):
         parser = DocTestOutputParser(MIX_PASSFAIL_EX, isfile = False)
 
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
-        self.assertEquals("doctests", suite.name)
-        self.assertEquals("docs", suite.package)
-        self.assertEquals(4, suite.ntests)
+        self.assertEqual("doctests", suite.name)
+        self.assertEqual("docs", suite.package)
+        self.assertEqual(4, suite.ntests)
 
         cases = suite.testcases
         expected_names = ["Ex3", "default", "default", "Ex1"]
@@ -337,10 +337,10 @@ Got:
         # test
         for idx, case in enumerate(cases):
             expected_fail = (expected_errors[idx] != "")
-            self.assertEquals(expected_fail, case.failed)
-            self.assertEquals(expected_names[idx], case.name)
-            self.assertEquals(expected_errors[idx], case.failure_descr)
-            self.assertEquals("docs.algorithms/MixPassFail", case.classname)
+            self.assertEqual(expected_fail, case.failed)
+            self.assertEqual(expected_names[idx], case.name)
+            self.assertEqual(expected_errors[idx], case.failure_descr)
+            self.assertEqual("docs.algorithms/MixPassFail", case.classname)
 
     def test_multi_document_text(self):
         multi_doc = "\n".join(ALL_PASS_EX.splitlines()[:-6]) # hack off summary
@@ -350,7 +350,7 @@ Got:
         self.assertTrue(hasattr(parser, "testsuite"))
         suite = parser.testsuite
         # The other checks should be sufficient if this passes
-        self.assertEquals(5, suite.ntests)
+        self.assertEqual(5, suite.ntests)
 
     #========================= Failure cases ==================================
 

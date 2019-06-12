@@ -57,10 +57,10 @@ void GroupToXResolution::init() {
   inputValidator->add(
       boost::make_shared<API::HistogramValidator>(acceptHistograms));
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, inputValidator),
       "An input workspace with Dx values.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::OUTPUT_WS, "", Kernel::Direction::Output),
                   "The grouped workspace.");
   auto positive = boost::make_shared<Kernel::BoundedValidator<double>>();

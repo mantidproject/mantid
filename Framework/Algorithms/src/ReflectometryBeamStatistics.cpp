@@ -112,7 +112,7 @@ void ReflectometryBeamStatistics::init() {
   auto mandatoryString =
       boost::make_shared<Kernel::MandatoryValidator<std::string>>();
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::REFLECTED_WS, "", Kernel::Direction::InOut),
       "A reflected beam workspace.");
   declareProperty(Prop::REFLECTED_FOREGROUND, std::vector<int>(),
@@ -120,7 +120,7 @@ void ReflectometryBeamStatistics::init() {
                   "A list of three workspace indices [start, beam centre, end] "
                   "defining the reflected foreground.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::DIRECT_WS, "", Kernel::Direction::InOut),
       "A direct beam workspace.");
   declareProperty(Prop::DIRECT_FOREGROUND, std::vector<int>(),

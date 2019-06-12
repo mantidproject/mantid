@@ -30,9 +30,9 @@ using namespace Mantid;
 // It is used to print out information, warning and error messages
 
 void InvertMDDim::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "InputWorkspace", "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
 }
 

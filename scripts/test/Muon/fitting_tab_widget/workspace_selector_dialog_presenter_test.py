@@ -1,8 +1,16 @@
-from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
 from mantid.py3compat import mock
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantidqt.utils.qt.testing import GuiTest
+
+from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 class WorkspaceSelectorPresenterTest(GuiTest):

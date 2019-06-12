@@ -23,7 +23,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/make_unique.h"
 
 #include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
@@ -63,7 +62,7 @@ PredictPeaks::PredictPeaks()
 /** Initialize the algorithm's properties.
  */
 void PredictPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace (MatrixWorkspace, MDEventWorkspace, or "
                   "PeaksWorkspace) containing:\n"
@@ -72,21 +71,21 @@ void PredictPeaks::init() {
                   "  - The goniometer rotation matrix.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
+                                                  Direction::Input),
       "Minimum wavelength limit at which to start looking for single-crystal "
       "peaks.");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
+                                                  Direction::Input),
       "Maximum wavelength limit at which to stop looking for single-crystal "
       "peaks.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("MinDSpacing", 1.0,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "MinDSpacing", 1.0, Direction::Input),
                   "Minimum d-spacing of peaks to consider. Default = 1.0");
-  declareProperty(make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "MaxDSpacing", 100.0, Direction::Input),
                   "Maximum d-spacing of peaks to consider.");
 
   declareProperty("CalculateGoniometerForCW", false,
@@ -97,23 +96,23 @@ void PredictPeaks::init() {
   nonNegativeDbl->setLower(0);
   declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
                   "Wavelength to use when calculating goniometer angle");
-  setPropertySettings(
-      "Wavelength", make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
-                                                     IS_NOT_DEFAULT));
+  setPropertySettings("Wavelength",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW", IS_NOT_DEFAULT));
 
-  declareProperty(make_unique<PropertyWithValue<double>>("MinAngle", -180,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MinAngle", -180,
+                                                              Direction::Input),
                   "Minimum goniometer rotation angle");
-  setPropertySettings(
-      "MinAngle", make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
-                                                   IS_NOT_DEFAULT));
+  setPropertySettings("MinAngle",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW", IS_NOT_DEFAULT));
 
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("MaxAngle", 180, Direction::Input),
-      "Maximum goniometer rotation angle");
-  setPropertySettings(
-      "MaxAngle", make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
-                                                   IS_NOT_DEFAULT));
+  declareProperty(std::make_unique<PropertyWithValue<double>>("MaxAngle", 180,
+                                                              Direction::Input),
+                  "Maximum goniometer rotation angle");
+  setPropertySettings("MaxAngle",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW", IS_NOT_DEFAULT));
 
   // Build up a list of reflection conditions to use
   std::vector<std::string> propOptions;
@@ -132,7 +131,7 @@ void PredictPeaks::init() {
                   "a crystal structure assigned.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "HKLPeaksWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An input PeaksWorkspace with the HKL of the peaks "
       "that we should predict. \n"
@@ -145,13 +144,13 @@ void PredictPeaks::init() {
                   "checked.\n"
                   "Keep unchecked to use the original values");
 
-  setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
+  setPropertySettings("RoundHKL", std::make_unique<EnabledWhenProperty>(
                                       "HKLPeaksWorkspace", IS_NOT_DEFAULT));
 
   // Disable some props when using HKLPeaksWorkspace
   auto makeSet = [] {
     std::unique_ptr<IPropertySettings> set =
-        make_unique<EnabledWhenProperty>("HKLPeaksWorkspace", IS_DEFAULT);
+        std::make_unique<EnabledWhenProperty>("HKLPeaksWorkspace", IS_DEFAULT);
     return set;
   };
   setPropertySettings("WavelengthMin", makeSet());
@@ -160,7 +159,7 @@ void PredictPeaks::init() {
   setPropertySettings("MaxDSpacing", makeSet());
   setPropertySettings("ReflectionCondition", makeSet());
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
 
@@ -300,7 +299,7 @@ void PredictPeaks::exec() {
   prog.setNotifyStep(0.01);
 
   m_detectorCacheSearch =
-      Kernel::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
+      std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
   if (getProperty("CalculateGoniometerForCW")) {
     size_t allowedPeakCount = 0;
@@ -591,7 +590,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
   if (hitDetector) {
     // peak hit a detector to add it to the list
-    peak = Kernel::make_unique<Peak>(m_inst, det.getID(), wl);
+    peak = std::make_unique<Peak>(m_inst, det.getID(), wl);
     if (!peak->getDetector())
       return;
 
@@ -614,8 +613,8 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
     // The exit point is the vector to the place that we hit a detector
     const auto magnitude = track.back().exitPoint.norm();
-    peak = Kernel::make_unique<Peak>(m_inst, q,
-                                     boost::optional<double>(magnitude));
+    peak =
+        std::make_unique<Peak>(m_inst, q, boost::optional<double>(magnitude));
   }
 
   if (m_edge > 0 && edgePixel(m_inst, peak->getBankName(), peak->getCol(),

@@ -44,12 +44,12 @@ const std::string IntegrateByComponent::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateByComponent::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<HistogramValidator>()),
                   "The input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The output workspace.");
   auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);

@@ -58,8 +58,8 @@ public:
   const std::string summary() const override { return ""; }
 
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                     Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                          Direction::Input));
   }
 
   void exec() override {}
@@ -74,17 +74,17 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "Input1", "", Kernel::Direction::Input));
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "Input2", "", Kernel::Direction::Input, PropertyMode::Optional));
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "Input3", "", Kernel::Direction::Input, PropertyMode::Optional));
-    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         "InOut1", "", Direction::InOut));
-    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         "InOut2", "", Direction::InOut, PropertyMode::Optional));
-    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         "InOut3", "", Direction::InOut, PropertyMode::Optional));
   }
   void exec() override {}
@@ -132,10 +132,10 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace", "", Kernel::Direction::Input,
-        Kernel::make_unique<HistogramValidator>()));
-    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+        std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
@@ -158,12 +158,12 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace1", "", Kernel::Direction::Input,
-        Kernel::make_unique<HistogramValidator>()));
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Kernel::Direction::Input,
-        Kernel::make_unique<HistogramValidator>()));
+        std::make_unique<HistogramValidator>()));
   }
   void exec() override {
     boost::shared_ptr<MatrixWorkspace> ws1 = getProperty("InputWorkspace1");
@@ -185,13 +185,13 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace1", "", Kernel::Direction::Input,
-        Kernel::make_unique<HistogramValidator>()));
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Kernel::Direction::Input,
-        Kernel::make_unique<HistogramValidator>()));
-    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+        std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
@@ -218,11 +218,11 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
-    auto ws = Kernel::make_unique<FakeWorkspaceA>(storageMode);
+    auto ws = std::make_unique<FakeWorkspaceA>(storageMode);
     ws->initialize(1, 2, 1);
     setProperty("OutputWorkspace", std::move(ws));
   }
@@ -246,16 +246,16 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace", "", Kernel::Direction::Input,
-        Kernel::make_unique<HistogramValidator>()));
-    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+        std::make_unique<HistogramValidator>()));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
     boost::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
     setProperty("OutputWorkspace",
-                Kernel::make_unique<FakeWorkspaceA>(storageModeOut));
+                std::make_unique<FakeWorkspaceA>(storageModeOut));
   }
 
 protected:

@@ -32,12 +32,13 @@ using namespace Mantid::Geometry;
 // It is used to print out information,
 
 void SavePAR::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The name of the workspace to save.");
-  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
-                  "The name to give to the saved file.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+      "The name to give to the saved file.");
 }
 
 void SavePAR::exec() {

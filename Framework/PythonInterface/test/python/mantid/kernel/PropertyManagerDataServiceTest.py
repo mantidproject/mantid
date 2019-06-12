@@ -40,7 +40,7 @@ class PropertyManagerDataServiceTest(unittest.TestCase):
         pmds.add(name, value)
         pmds.addOrReplace(name, value2)
         pmgr = pmds[name]
-        self.assertEquals(value2['key2'], pmgr['key2'].value)
+        self.assertEqual(value2['key2'], pmgr['key2'].value)
         pmds.remove(name)
 
 if __name__ == "__main__":

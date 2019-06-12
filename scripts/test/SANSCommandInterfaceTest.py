@@ -424,7 +424,7 @@ class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCas
         combinations.remove(selected_combination)
 
         for combination in combinations:
-            self.assertTrue(ReductionSingleton().get_dark_run_setting(combination[0], combination[1]) is None)
+            self.assertEqual(ReductionSingleton().get_dark_run_setting(combination[0], combination[1]), None)
 
     def test_that_correct_setting_can_be_passed_in(self):
         # Arrange

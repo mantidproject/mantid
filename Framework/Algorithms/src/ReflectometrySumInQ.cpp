@@ -255,7 +255,7 @@ void ReflectometrySumInQ::init() {
       Prop::INPUT_WS, "A workspace in X units of wavelength to be summed.",
       inputWSValidator);
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A single histogram workspace containing the result of summation in Q.");
   declareProperty(

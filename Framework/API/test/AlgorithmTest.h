@@ -46,16 +46,16 @@ public:
   const std::string summary() const override { return "Test summary"; }
 
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
-                                                     Direction::Input));
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
+                                                          Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
-    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace1", "",
-                                                     Direction::Output));
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace1", "", Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
 
@@ -90,10 +90,10 @@ public:
   const std::string category() const override { return "Cat;Leopard;Mink"; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "NonLockingInputWorkspace", "", Direction::Input,
         PropertyMode::Optional, LockMode::NoLock));
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "NonLockingOutputWorkspace", "", Direction::Output,
         PropertyMode::Optional, LockMode::NoLock));
   }
@@ -150,8 +150,8 @@ public:
   static const std::string FAIL_MSG;
 
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                     Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                          Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 
@@ -180,9 +180,8 @@ public:
 
   void init() override {
     declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace", "");
-    declareProperty(
-        Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-            "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+        "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
     declareWorkspaceInputProperties<
         MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
         "InputWorkspace3", "");
@@ -1000,7 +999,7 @@ public:
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     TS_ASSERT_THROWS(indexAlg.declareProperty(
-                         make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                         std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                              "InputWorkspace", "", Direction::Input)),
                      const std::runtime_error &);
   }

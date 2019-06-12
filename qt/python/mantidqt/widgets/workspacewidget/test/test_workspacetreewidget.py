@@ -21,7 +21,7 @@ class WorkspaceWidgetTest(GuiTest):
 
     def test_widget_creation(self):
         widget = WorkspaceTreeWidget()
-        self.assertTrue(widget is not None)
+        self.assertNotEqual(widget, None)
         sip.delete(widget)
 
 

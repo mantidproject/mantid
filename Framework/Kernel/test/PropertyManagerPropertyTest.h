@@ -92,8 +92,7 @@ public:
     // Create a top-level PropertyManager, add a PropertyManagerProperty
     // as a nested PropertyManager
     auto topMgr = boost::make_shared<PropertyManager>();
-    topMgr->declareProperty(
-        Mantid::Kernel::make_unique<PropertyManagerProperty>("Args"));
+    topMgr->declareProperty(std::make_unique<PropertyManagerProperty>("Args"));
     topMgr->setProperty("Args", createPropMgrWithInt());
 
     PropertyManager_sptr args;
@@ -262,7 +261,7 @@ private:
 
     auto testMgr = boost::make_shared<PropertyManager>();
     testMgr->declareProperty(
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("Prop1", 1));
+        std::make_unique<PropertyWithValue<int>>("Prop1", 1));
 
     return testMgr;
   }

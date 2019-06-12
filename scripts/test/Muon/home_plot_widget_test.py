@@ -5,20 +5,19 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
-from Muon.GUI.Common.test_helpers import mock_widget
 
 
-class HomeTabPlotPresenterTest(unittest.TestCase):
+class HomeTabPlotPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
         self.view = HomePlotWidgetView(self.obj)
         self.model = HomePlotWidgetModel()
         self.presenter = HomePlotWidgetPresenter(self.view, self.model)

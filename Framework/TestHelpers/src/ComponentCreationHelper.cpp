@@ -33,7 +33,6 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/Path.h>
 #include <boost/make_shared.hpp>
@@ -327,8 +326,8 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        auto det = Mantid::Kernel::make_unique<Detector>(os.str(), ic + 1,
-                                                         detShape, nullptr);
+        auto det =
+            std::make_unique<Detector>(os.str(), ic + 1, detShape, nullptr);
         det->setPos(x, y, z0);
         allDetectors.emplace_back(std::move(det));
       }
