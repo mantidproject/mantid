@@ -28,8 +28,6 @@ public:
   /// Constructor
   MainWindowPresenter(IMainWindowView *view,
                       BatchPresenterFactory batchPresenterFactory);
-  /// Run a python algorithm
-  std::string runPythonAlgorithm(const std::string &pythonCode) override;
   bool isProcessing() const override;
   void notifyHelpPressed() override;
   void notifyNewBatchRequested() override;
