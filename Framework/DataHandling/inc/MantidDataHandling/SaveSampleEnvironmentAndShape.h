@@ -13,12 +13,12 @@
 namespace Mantid {
 namespace Geometry {
 class MeshObject;
+class IObject;
 }
 namespace DataHandling {
 /**
  * Save the Shape of the sample and environment into a single binary .stl file
  */
-
 class DLLExport SaveSampleEnvironmentAndShape : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -31,7 +31,6 @@ public:
            "instrument of a "
            "workspace. ";
   }
-
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Related algorithms
@@ -55,7 +54,7 @@ private:
   std::vector<Kernel::V3D> m_vertices;
   std::vector<uint32_t> m_triangle;
 };
-
+const Mantid::Geometry::MeshObject &toMeshObject(const Mantid::Geometry::IObject &object);
 } // end namespace DataHandling
 } // namespace Mantid
 

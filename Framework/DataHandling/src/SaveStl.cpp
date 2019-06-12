@@ -9,13 +9,19 @@
 #include "MantidKernel/DateAndTime.h"
 
 #include <Poco/File.h>
-#include <boost/functional/hash.hpp>
 #include <fstream>
 #include <vector>
 namespace Mantid {
 namespace DataHandling {
 enum class ScaleUnits { metres, centimetres, millimetres };
+
 namespace {
+/**
+ * Class to contain functionality for writing out STL files for
+ * SaveShapeAndEnvironment. handles actual writing to file, creating the header,
+ * and removing the scale applied when loading.
+ *
+ */
 
 void writeNumberTriangles(Kernel::BinaryStreamWriter streamWriter,
                           uint32_t numberTrianglesLong) {
