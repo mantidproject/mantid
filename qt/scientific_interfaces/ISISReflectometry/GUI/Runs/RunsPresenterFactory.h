@@ -7,8 +7,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
 #include "Autoreduction.h"
-#include "CatalogSearcher.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/CatalogSearcher.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
