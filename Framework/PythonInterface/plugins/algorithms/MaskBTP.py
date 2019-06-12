@@ -70,12 +70,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.bankmin=defaultdict(lambda: 1, {"MANDI":1,"SEQUOIA":23,"TOPAZ":10})
         self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"REF_M":1,
                       "SEQUOIA":150,"SNAP":64,"SXD":11,"TOPAZ":59,"WAND":8,"WISH":10}
+
         tubemin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WAND":1,"WISH":1})
-        tubemax=defaultdict(lambda: 8, {"CORELLI":16,"MANDI":255,"POWGEN":153,"REF_M":303,"SNAP":255,"SXD":63,"TOPAZ":255,
-                                        "WAND":480,"WISH":152})
         pixmin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WAND":1,"WISH":1})
-        pixmax=defaultdict(lambda: 128, {"CORELLI":256,"MANDI":255,"POWGEN":6,"REF_M":255,"SNAP":255,"SXD":63,"TOPAZ":255,
-                                         "WAND":512,"WISH":512})
 
         if self.instname not in self.INSTRUMENT_LIST:
             raise ValueError("Instrument '"+self.instname+"' not in the allowed list")
@@ -94,16 +91,16 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         if tubeString.lower() == "edges":
             tubes=[0, -1]
         else:
-            tubes=self._parseBTPlist(tubeString, tubemin[self.instname], tubemax[self.instname])
+            tubes=self._parseBTPlist(tubeString, tubemin[self.instname])
 
         pixelString = self.getProperty("Pixel").value
         if pixelString.lower() == "edges":
             pixels=[0, -1]
         else:
-            pixels=self._parseBTPlist(pixelString, pixmin[self.instname], pixmax[self.instname])
+            pixels=self._parseBTPlist(pixelString, pixmin[self.instname])
 
         # convert bank numbers into names and remove ones that couldn't be named
-        banks = [self._getName(bank) for bank in banks]
+        banks = [self._getBankName(bank) for bank in banks]
         banks = [bank for bank in banks if bank]
 
         compInfo = ws.componentInfo()
@@ -113,17 +110,10 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         detlist=[]
         fullDetectorIdList = ws.detectorInfo().detectorIDs()
         for bankIndex in bankIndices:
-            tubeIndices = compInfo.children(bankIndex)
-            if len(tubeIndices) == 1:  # go down one level
-                tubeIndices = compInfo.children(int(tubeIndices[0]))
-
-            if len(tubes):  # use specific tubes if requested
-                tubeIndices = tubeIndices[tubes]
+            tubeIndices = self._getChildIndices(compInfo, bankIndex, tubes)
 
             for tubeIndex in tubeIndices:
-                pixelIndices = compInfo.children(int(tubeIndex))
-                if len(pixels):  # use specific pixels if requested
-                    pixelIndices = pixelIndices[pixels]
+                pixelIndices = self._getChildIndices(compInfo, tubeIndex, pixels)
 
                 for pixelIndex in pixelIndices:
                     detlist.append(fullDetectorIdList[pixelIndex])
@@ -139,7 +129,16 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.setProperty("Workspace",ws.name())
         self.setProperty("MaskedDetectors", detlist)
 
-    def _parseBTPlist(self, value, min_value, max_value):
+    def _getChildIndices(self, compInfo, parentIndex, filterIndices):
+        indices = compInfo.children(int(parentIndex))
+        if len(indices) == 1:  # go down one level
+            indices = compInfo.children(int(indices[0]))
+        if len(filterIndices):
+            indices = indices[filterIndices]
+
+        return indices
+
+    def _parseBTPlist(self, value, min_value):
         if len(value) == 0:
             return list()  # empty list means use everything
         else:
@@ -149,18 +148,48 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             if validationMsg:
                 raise RuntimeError(validationMsg)
             result = prop.value
-            result = result[result >= min_value]
-            result = result[result <= max_value]
             if len(result) == 0:
                 raise RuntimeError('Could not generate values from "{}"'.format(value))
             return result - min_value
 
-    def _getName(self, banknum):
+    def _getBankName(self, banknum):
         banknum=int(banknum)
         if not (self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]):
             raise ValueError("Out of range index={} for {} instrument bank numbers".format(banknum, self.instname))
 
-        if self.instname == "WISH":
+        if self.instname == 'ARCS':
+            if self.bankmin[self.instname] < banknum <= 38:
+                label = 'B'
+                # do nothing with banknum
+            elif 38 < banknum <= 77:
+                label = 'M'
+                banknum = banknum - 38
+            elif 77 < banknum < self.bankmax[self.instname]:
+                label = 'T'
+                banknum = banknum - 77
+            else:
+                raise ValueError("Out of range index for ARCS instrument bank numbers: {}".format(banknum))
+            return '{}{}'.format(label, banknum)
+        elif self.instname == 'SEQUOIA':
+            # there are only banks 23-26 in A row
+            if self.bankmin[self.instname] <= banknum <= 37:
+                label = 'A'
+                # do nothing with banknum
+                if banknum > 26:  # not built yet
+                    return None
+            elif 37 < banknum <= 74:
+                label = 'B'
+                banknum = banknum - 37
+            elif 74 < banknum <= 113:
+                label = 'C'
+                banknum = banknum-74
+            elif 113 <banknum <= self.bankmax[self.instname]:
+                label = 'D'
+                banknum = banknum-113
+            else:
+                raise ValueError("Out of range index for SEQUOIA instrument bank numbers: {}".format(banknum))
+            return '{}{}'.format(label, banknum)
+        elif self.instname == "WISH":
             return "panel" + "%02d" % banknum
         elif self.instname == "REF_M":
             return "detector" + "%1d" % banknum
@@ -169,6 +198,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
     def _getBankIndices(self, compInfo, bankNames):
         '''This removes banks that don't exist'''
+        if len(bankNames) == 0:
+            return list()
+
         bankIndices = []
         known_banks = {}  # name: index
         for bank in bankNames:
@@ -188,6 +220,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 continue  # bank wasn't found
 
         self.log().information('While determining banks, filtered from {} banks to {}'.format(len(bankNames), len(bankIndices)))
+        if len(bankIndices) == 0:
+            raise RuntimeError('Filtered out all detectors from list of things to mask')
+
         return bankIndices
 
 
