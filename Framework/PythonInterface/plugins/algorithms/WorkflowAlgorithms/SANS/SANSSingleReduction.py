@@ -10,17 +10,12 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory,
-                        PropertyMode, Progress)
-from mantid.kernel import (Direction, PropertyManagerProperty, Property)
+from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.kernel import (Direction, Property)
 from mantid.simpleapi import CloneWorkspace
-from sans.algorithm_detail.bundles import ReductionSettingBundle
-from sans.algorithm_detail.single_execution import (run_core_reduction, get_final_output_workspaces,
-                                                    get_merge_bundle_for_merge_request, run_optimized_for_can)
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans.algorithm_detail.single_execution import (run_core_reduction, run_optimized_for_can)
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
-from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads)
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.common.general_functions import does_can_workspace_exist_on_ads
 
 from SANSSingleReductionBase import SANSSingleReductionBase
 

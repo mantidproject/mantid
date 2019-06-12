@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, Progress
 
 from sans.algorithm_detail.mask_workspace import mask_bins
-from sans.common.enums import (DetectorType, DataType)
+from sans.common.enums import DetectorType
 
 from SANSReductionCoreBase import SANSReductionCoreBase
 

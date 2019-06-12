@@ -7,7 +7,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from copy import deepcopy
-import time
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from sans.common.general_functions import (add_to_sample_log, create_managed_non_child_algorithm,
@@ -1343,13 +1342,13 @@ def get_all_names_to_save(reduction_packages, save_can):
 
 def get_event_slice_names_to_save(reduction_packages, save_can):
     """
-        Extracts all the output names from a list of reduction packages which contain event sliced data.
-        The workspaces in these reduction packages are gruop workspaces, except for transmissions.
+    Extracts all the output names from a list of reduction packages which contain event sliced data.
+    The workspaces in these reduction packages are gruop workspaces, except for transmissions.
 
-        :param reduction_packages: a list of reduction packages
-        :param save_can: a bool, whether or not to save unsubtracted can workspace
-        :return: a list of workspace names to save.
-        """
+    :param reduction_packages: a list of reduction packages
+    :param save_can: a bool, whether or not to save unsubtracted can workspace
+    :return: a list of workspace names to save.
+    """
     names_to_save = []
     for reduction_package in reduction_packages:
         reduced_lab = reduction_package.reduced_lab
@@ -1368,39 +1367,25 @@ def get_event_slice_names_to_save(reduction_packages, save_can):
         reduced_lab_sample_names = [] if reduced_lab_sample is None else reduced_lab_sample.getNames()
         reduced_hab_sample_names = [] if reduced_hab_sample is None else reduced_hab_sample.getNames()
 
-        transmission = reduction_package.unfitted_transmission
-        transmission_can = reduction_package.unfitted_transmission_can
-        try:
-            # Does not always work for event slice data as transmission
-            # workspaces can get deleted.
-            # This is a temporary fix to allow file saving with
-            # event sliced data.
-            trans_name = '' if not transmission else transmission.name()
-        except RuntimeError:
-            trans_name = ''
-            Logger("SANS").notice("Transmission run not found. Not saving to file.")
-        try:
-            transCan_name = '' if not transmission_can else transmission_can.name()
-        except RuntimeError:
-            transCan_name = ''
-            Logger("SANS").notice("Can transmission run not found. Not saving to file.")
+        trans_name = get_transmission_names_to_save(reduction_package, False)
+        trans_can_name = get_transmission_names_to_save(reduction_package, True)
 
         def _get_names_in_list(_list, _trans_name, _trans_can_name):
             return ((name, _trans_name, _trans_can_name) for name in _list if name not in (None, ""))
 
         if save_can:
-            names_to_save.extend(_get_names_in_list(reduced_merged_names, trans_name, transCan_name))
-            names_to_save.extend(_get_names_in_list(reduced_lab_names, trans_name, transCan_name))
-            names_to_save.extend(_get_names_in_list(reduced_hab_names, trans_name, transCan_name))
-            names_to_save.extend(_get_names_in_list(reduced_lab_can_names, '', transCan_name))
-            names_to_save.extend(_get_names_in_list(reduced_hab_can_names, '', transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_merged_names, trans_name, trans_can_name))
+            names_to_save.extend(_get_names_in_list(reduced_lab_names, trans_name, trans_can_name))
+            names_to_save.extend(_get_names_in_list(reduced_hab_names, trans_name, trans_can_name))
+            names_to_save.extend(_get_names_in_list(reduced_lab_can_names, '', trans_can_name))
+            names_to_save.extend(_get_names_in_list(reduced_hab_can_names, '', trans_can_name))
             names_to_save.extend(_get_names_in_list(reduced_lab_sample_names, trans_name, ''))
             names_to_save.extend(_get_names_in_list(reduced_hab_sample_names, trans_name, ''))
         elif reduced_merged:
-            names_to_save.extend(_get_names_in_list(reduced_merged_names, trans_name, transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_merged_names, trans_name, trans_can_name))
         else:
-            names_to_save.extend(_get_names_in_list(reduced_lab_names, trans_name, transCan_name))
-            names_to_save.extend(_get_names_in_list(reduced_hab_names, trans_name, transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_lab_names, trans_name, trans_can_name))
+            names_to_save.extend(_get_names_in_list(reduced_hab_names, trans_name, trans_can_name))
 
     # We might have some workspaces as duplicates (the group workspaces), so make them unique
     return set(names_to_save)

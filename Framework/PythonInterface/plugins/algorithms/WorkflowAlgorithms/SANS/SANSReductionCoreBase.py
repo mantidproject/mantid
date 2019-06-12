@@ -10,11 +10,9 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        IEventWorkspace, Progress)
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.algorithm_detail.mask_workspace import mask_bins
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
 from sans.common.enums import (DetectorType, DataType)

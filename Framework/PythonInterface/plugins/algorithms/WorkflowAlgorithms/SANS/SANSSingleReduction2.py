@@ -10,25 +10,19 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from collections import defaultdict
 from copy import deepcopy
 
-from mantid.api import (AlgorithmFactory, AnalysisDataService, DistributedDataProcessorAlgorithm,
-                        MatrixWorkspaceProperty, Progress, PropertyMode,
+from mantid.api import (AlgorithmFactory, AnalysisDataService,
+                        MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.simpleapi import CloneWorkspace
-from mantid.kernel import (Direction, PropertyManagerProperty, Property)
-from sans.algorithm_detail.bundles import EventSliceSettingBundle, ReductionSettingBundle
+from mantid.kernel import Direction
+from sans.algorithm_detail.bundles import EventSliceSettingBundle
 from sans.algorithm_detail.single_execution import (run_initial_event_slice_reduction, run_core_event_slice_reduction,
-                                                    get_final_output_workspaces,
-                                                    get_merge_bundle_for_merge_request,
                                                     get_reduction_mode_vs_output_bundles, run_optimized_for_can)
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
-from sans.common.general_functions import (create_child_algorithm, create_unmanaged_algorithm,
-                                           does_can_workspace_exist_on_ads, get_transmission_output_name,
-                                           get_output_name)
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads,
+                                           get_transmission_output_name, get_output_name)
 
 from SANSSingleReductionBase import SANSSingleReductionBase
 

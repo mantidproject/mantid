@@ -211,6 +211,9 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     _instrument = mock.PropertyMock(return_value=SANSInstrument.SANS2D)
     type(view).instrument = _instrument
 
+    _event_slice_mode = mock.PropertyMock(return_value=False)
+    type(view).event_slice_mode = _event_slice_mode
+
     return view, settings_diagnostic_tab, masking_table
 
 

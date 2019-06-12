@@ -1140,7 +1140,7 @@ class RunTabPresenterTest(unittest.TestCase):
             if PropertyManagerDataService.doesExist(element):
                 PropertyManagerDataService.remove(element)
 
-    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path = ""):
+    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path=""):
         if row_user_file_path:
             content[1].update({BatchReductionEntry.UserFile : row_user_file_path})
 

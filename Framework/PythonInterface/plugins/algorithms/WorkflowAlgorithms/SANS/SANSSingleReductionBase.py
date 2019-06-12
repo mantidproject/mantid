@@ -14,14 +14,12 @@ from collections import defaultdict
 
 from mantid.api import (DistributedDataProcessorAlgorithm,
                         MatrixWorkspaceProperty, Progress, PropertyMode)
-from mantid.kernel import (Direction, PropertyManagerProperty, Property)
+from mantid.kernel import (Direction, PropertyManagerProperty)
 from sans.algorithm_detail.bundles import ReductionSettingBundle
-from sans.algorithm_detail.single_execution import (run_core_event_slice_reduction,
-                                                    get_final_output_workspaces,
-                                                    get_merge_bundle_for_merge_request,
-                                                    run_optimized_for_can)
+from sans.algorithm_detail.single_execution import (get_final_output_workspaces,
+                                                    get_merge_bundle_for_merge_request)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
+from sans.common.enums import (ReductionMode, DataType, ISISReductionMode)
 from sans.common.general_functions import create_child_algorithm
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 

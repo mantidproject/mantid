@@ -14,8 +14,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import MatrixWorkspaceProperty, AlgorithmFactory, Progress
 from mantid.kernel import Direction
 from sans.algorithm_detail.mask_workspace import mask_bins
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DetectorType, DataType)
+from sans.common.enums import DetectorType
 
 from SANSReductionCoreBase import SANSReductionCoreBase
 
