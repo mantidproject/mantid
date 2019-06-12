@@ -86,14 +86,12 @@ class MaskBTPTest(unittest.TestCase):
         return
 
     def testEdges(self):
-        # this combined option should probalby be called corners
+        # this combined option should probably be called corners
         masking = MaskBTP(Instrument='TOPAZ', Tube='edges', Pixel='EdGes')  # funny case just b/c
         self.assertEqual(4 * 20, len(masking))
 
-        masking = MaskBTP(Instrument='TOPAZ', Tube='edges')
-        self.assertEqual(2 * 256 * 20, len(masking))
-
-        masking = MaskBTP(Instrument='TOPAZ', Pixel='edges')
+        # keep on masking the same workspace to speed up the test
+        masking = MaskBTP(Workspace='TOPAZMaskBTP', Tube='edges')
         self.assertEqual(2 * 256 * 20, len(masking))
 
 
