@@ -56,9 +56,6 @@ public slots:
   void plotGuess() override;
   void changePlotGuessState(bool plotted) override;
 
-private slots:
-  void removePeakPicker();
-
 private:
   /// The widget used
   QWidget *const m_widget;

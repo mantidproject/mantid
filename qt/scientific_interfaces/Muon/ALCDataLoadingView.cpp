@@ -38,6 +38,10 @@ void ALCDataLoadingView::initialize() {
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
+  // Error bars on the plot
+  QStringList plotsWithErrors{"Data"};
+  m_ui.dataPlot->setLinesWithErrors(plotsWithErrors);
+
   // The following lines disable the groups' titles when the
   // group is disabled
   QPalette palette;
@@ -148,16 +152,12 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr &workspace,
                                       std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;
-  kwargs.insert("linestyle", QString("None").toLatin1().constData());
-  kwargs.insert("marker", QString(".").toLatin1().constData());
-
-  // Error bars on the plot
-  QStringList plotsWithErrors{"Data"};
-  m_ui.dataPlot->setLinesWithErrors(plotsWithErrors);
-
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_ui.dataPlot->setCurveStyle("Data", -1);
   m_ui.dataPlot->setCurveSymbol("Data", 0);
+#else
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
 #endif
 
   m_ui.dataPlot->clear();

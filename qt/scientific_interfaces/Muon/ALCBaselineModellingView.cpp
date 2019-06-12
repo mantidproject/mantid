@@ -30,6 +30,12 @@ void ALCBaselineModellingView::initialize() {
   m_ui.dataPlot->setCanvasColour(Qt::white);
   m_ui.correctedPlot->setCanvasColour(Qt::white);
 
+  // Error bars on the plot
+  const QStringList dataPlotErrors{"Data"};
+  m_ui.dataPlot->setLinesWithErrors(dataPlotErrors);
+  const QStringList correctedPlotErrors{"Corrected"};
+  m_ui.correctedPlot->setLinesWithErrors(correctedPlotErrors);
+
   // Context menu for sections table
   m_ui.sections->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_ui.sections, SIGNAL(customContextMenuRequested(const QPoint &)),
@@ -74,19 +80,7 @@ int ALCBaselineModellingView::noOfSectionRows() const {
 
 void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr &workspace,
                                             std::size_t const &workspaceIndex) {
-  // These kwargs ensure only the data points are plotted with no line
-  QHash<QString, QVariant> kwargs;
-  kwargs.insert("linestyle", QString("None").toLatin1().constData());
-  kwargs.insert("marker", QString(".").toLatin1().constData());
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.dataPlot->setCurveStyle("Data", -1);
-  m_ui.dataPlot->setCurveSymbol("Data", 0);
-#endif
-
-  // Error bars on the plot
-  QStringList plotsWithErrors{"Data"};
-  m_ui.dataPlot->setLinesWithErrors(plotsWithErrors);
+  const auto kwargs = getPlotKwargs(m_ui.dataPlot, "Data");
 
   m_ui.dataPlot->clear();
   m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black,
@@ -95,32 +89,28 @@ void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr &workspace,
 
 void ALCBaselineModellingView::setCorrectedCurve(
     MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
-  // These kwargs ensure only the data points are plotted with no line
-  QHash<QString, QVariant> kwargs;
-  kwargs.insert("linestyle", QString("None").toLatin1().constData());
-  kwargs.insert("marker", QString(".").toLatin1().constData());
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.correctedPlot->setCurveStyle("Corrected", -1);
-  m_ui.correctedPlot->setCurveSymbol("Corrected", 0);
-#endif
-
-  // Error bars on the plot
-  QStringList plotsWithErrors{"Corrected"};
-  m_ui.correctedPlot->setLinesWithErrors(plotsWithErrors);
-
+  const auto kwargs = getPlotKwargs(m_ui.correctedPlot, "Corrected");
   m_ui.correctedPlot->addSpectrum("Corrected", workspace, workspaceIndex,
                                   Qt::blue, kwargs);
 }
 
+QHash<QString, QVariant>
+ALCBaselineModellingView::getPlotKwargs(PreviewPlot *plot,
+                                        const QString &curveName) {
+  // Ensures the plot is plotted only with data points and no lines
+  QHash<QString, QVariant> kwargs;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  plot->setCurveStyle(curveName, -1);
+  plot->setCurveSymbol(curveName, 0);
+#else
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
+#endif
+  return kwargs;
+}
+
 void ALCBaselineModellingView::setBaselineCurve(
     MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.dataPlot->setCurveStyle("Baseline", 1);
-  m_ui.dataPlot->setCurveSymbol("Baseline", -1);
-#endif
-
   m_ui.dataPlot->addSpectrum("Baseline", workspace, workspaceIndex, Qt::red);
   m_ui.dataPlot->replot();
 }

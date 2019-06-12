@@ -44,7 +44,7 @@ class VerticalMarker(QObject):
                                linewidth=line_width, linestyle=line_style, animated=True)
         self.ax.add_patch(self.patch)
         self.is_moving = False
-        self.check_y_height = True
+        self.y_dependent = True
 
     def _get_y0_y1(self):
         """
@@ -78,6 +78,7 @@ class VerticalMarker(QObject):
     def set_color(self, color):
         """
         Set the colour of the marker
+        :param color: The color to set the marker to.
         """
         self.patch.set_edgecolor(color)
 
@@ -112,25 +113,21 @@ class VerticalMarker(QObject):
         :return: True or False.
         """
         x_pixels, y_pixels = self.patch.get_transform().transform((x, y))
-        if self.check_y_height:
-            if self.y0 is not None and y < self.y0:
-                return False
-            if self.y1 is not None and y > self.y1:
-                return False
+        if self.y_dependent and self.y0 is not None and y < self.y0:
+            return False
+        if self.y_dependent and self.y1 is not None and y > self.y1:
+            return False
         return abs(self.get_x_in_pixels() - x_pixels) < 3
 
-    def transform_pixels_to_coords(self, x_pixels, y_pixels, y_max=0.0):
+    def transform_pixels_to_coords(self, x_pixels, y_pixels):
         """
         Transforms pixel coords to axis coords
         :param x_pixels: An x mouse pixel coordinate.
         :param y_pixels: An y mouse pixel coordinate.
-        :param y_max: The maximum coord on the y axis.
         :return: The x and y position along the axis.
         """
         x_value, y_value = self.patch.get_transform().inverted().transform((x_pixels, y_pixels))
-        if y_max == 0.0:
-            return x_value, y_value
-        return x_value, y_max-y_value
+        return x_value, y_value
 
     def mouse_move_start(self, x, y):
         """
@@ -180,17 +177,16 @@ class VerticalMarker(QObject):
         :param y: An y mouse coordinate.
         :return: QCursor or None.
         """
-        if self.check_y_height:
-            if self.y0 is not None and y < self.y0:
-                return None
-            if self.y1 is not None and y > self.y1:
-                return None
+        if self.y_dependent and self.y0 is not None and y < self.y0:
+            return None
+        if self.y_dependent and self.y1 is not None and y > self.y1:
+            return None
         if self.is_moving or self.is_above(x, y):
             return self.get_cursor_at_y(y)
         return None
 
-    def check_y_height(self, check):
-        self.check_y_height = check
+    def set_y_dependent(self, y_dependent):
+        self.y_dependent = y_dependent
 
 
 class CentreMarker(VerticalMarker):
@@ -211,7 +207,7 @@ class CentreMarker(VerticalMarker):
         :param y_dependent: True if the height of the CentreMarker is important when moving the marker.
         """
         VerticalMarker.__init__(self, canvas, self.deselected_color, x, y0, y1)
-        VerticalMarker.check_y_height(self, y_dependent)
+        VerticalMarker.set_y_dependent(self, y_dependent)
         self.is_at_top = False
 
     def _is_at_top(self, y):

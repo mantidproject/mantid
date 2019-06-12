@@ -37,8 +37,8 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
       m_curves(), m_magnifyTool(nullptr), m_panTool(nullptr),
       m_zoomTool(nullptr), m_contextMenu(new QMenu(this)),
       m_showLegendAction(nullptr), m_showErrorsMenuAction(nullptr),
-      m_showErrorsMenu(nullptr), m_errorBarOptionCache(),
-      m_curveStyle(QwtPlotCurve::Lines), m_curveSymbol(QwtSymbol::NoSymbol) {
+      m_showErrorsMenu(nullptr), m_errorBarOptionCache(), m_curveStyle(),
+      m_curveSymbol() {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
   watchADS(init);
@@ -296,7 +296,7 @@ void PreviewPlot::addSpectrum(const QString &curveName,
   m_showErrorsMenu->addAction(m_curves[curveName].showErrorsAction);
 
   // Create the curve
-  addCurve(m_curves[curveName], ws, wsIndex, curveColour);
+  addCurve(m_curves[curveName], ws, wsIndex, curveColour, curveName);
 
   // Create the curve label
   QLabel *label = new QLabel(curveName);
@@ -648,7 +648,8 @@ void PreviewPlot::handleReplaceEvent(
  */
 void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
                            MatrixWorkspace_sptr ws, const size_t wsIndex,
-                           const QColor &curveColour) {
+                           const QColor &curveColour,
+                           const QString &curveName) {
   // Check the workspace index is in range
   if (wsIndex >= ws->getNumberHistograms())
     throw std::runtime_error("Workspace index is out of range, cannot plot.");
@@ -699,11 +700,19 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY.rawData());
   QwtArrayData wsData(dataX, dataY);
 
+  auto curveStyle = QwtPlotCurve::Lines;
+  if (m_curveStyle.contains(curveName))
+    curveStyle = m_curveStyle[curveName];
+
+  auto curveSymbol = QwtSymbol::NoSymbol;
+  if (m_curveSymbol.contains(curveName))
+    curveSymbol = m_curveSymbol[curveName];
+
   // Create the new curve
   curveConfig.curve = new QwtPlotCurve();
-  curveConfig.curve->setStyle(m_curveStyle);
+  curveConfig.curve->setStyle(curveStyle);
   curveConfig.curve->setSymbol(
-      QwtSymbol(m_curveSymbol, QBrush(), QPen(), QSize(7, 7)));
+      QwtSymbol(curveSymbol, QBrush(), QPen(), QSize(7, 7)));
   curveConfig.curve->setData(wsData);
   curveConfig.curve->setPen(curveColour);
   curveConfig.curve->attach(m_uiForm.plot);
@@ -725,7 +734,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
  * @param style The style of the curve
  */
 void PreviewPlot::setCurveStyle(const QString &curveName, const int style) {
-  m_curveStyle = QwtPlotCurve::CurveStyle(style);
+  m_curveStyle[curveName] = QwtPlotCurve::CurveStyle(style);
 }
 
 /**
@@ -735,7 +744,7 @@ void PreviewPlot::setCurveStyle(const QString &curveName, const int style) {
  * @param symbol The symbol for each data point
  */
 void PreviewPlot::setCurveSymbol(const QString &curveName, const int symbol) {
-  m_curveSymbol = QwtSymbol::Style(symbol);
+  m_curveSymbol[curveName] = QwtSymbol::Style(symbol);
 }
 
 /**

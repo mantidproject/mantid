@@ -39,6 +39,10 @@ void ALCPeakFittingView::initialize() {
 
   m_ui.plot->setCanvasColour(Qt::white);
 
+  // Error bars on the plot
+  QStringList plotsWithErrors{"Corrected"};
+  m_ui.plot->setLinesWithErrors(plotsWithErrors);
+
   // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
   // (auto-delete option)
   m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
@@ -58,16 +62,12 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
                                       std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;
-  kwargs.insert("linestyle", QString("None").toLatin1().constData());
-  kwargs.insert("marker", QString(".").toLatin1().constData());
-
-  // Error bars on the plot
-  QStringList plotsWithErrors{"Corrected"};
-  m_ui.plot->setLinesWithErrors(plotsWithErrors);
-
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_ui.plot->setCurveStyle("Corrected", -1);
   m_ui.plot->setCurveSymbol("Corrected", 0);
+#else
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
 #endif
 
   m_ui.plot->clear();
@@ -77,22 +77,12 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
 
 void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr &workspace,
                                         std::size_t const &workspaceIndex) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.plot->setCurveStyle("Fit", 1);
-  m_ui.plot->setCurveSymbol("Fit", -1);
-#endif
-
   m_ui.plot->addSpectrum("Fit", workspace, workspaceIndex, Qt::red);
   m_ui.plot->replot();
 }
 
 void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr &workspace,
                                        std::size_t const &workspaceIndex) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.plot->setCurveStyle("Guess", 1);
-  m_ui.plot->setCurveSymbol("Guess", -1);
-#endif
-
   m_ui.plot->addSpectrum("Guess", workspace, workspaceIndex, Qt::green);
   m_ui.plot->replot();
 }

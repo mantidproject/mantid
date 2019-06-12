@@ -16,6 +16,9 @@
 
 #include "ui_ALCBaselineModellingView.h"
 
+#include <QHash>
+#include <QVariant>
+
 class QSignalMapper;
 
 namespace MantidQt {
@@ -74,6 +77,8 @@ private:
   /// Helper to set range selector values
   void setSelectorValues(MantidWidgets::RangeSelector *selector,
                          SectionSelector values);
+  QHash<QString, QVariant> getPlotKwargs(MantidWidgets::PreviewPlot *plot,
+                                         const QString &curveName);
 
   /// The widget used
   QWidget *const m_widget;

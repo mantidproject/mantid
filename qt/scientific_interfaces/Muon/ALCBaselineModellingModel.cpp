@@ -13,8 +13,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidAPI/AnalysisDataService.h"
-
 #include "Poco/ActiveResult.h"
 #include <QApplication>
 
@@ -245,13 +243,7 @@ ALCBaselineModellingModel::baselineData(IFunction_const_sptr function,
                                           xValues.size()));
 
   inputWorkspace->mutableX(0) = xValues;
-  Mantid::API::AnalysisDataService::Instance().addOrReplace("input",
-                                                            inputWorkspace);
-  auto const work =
-      extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
-  Mantid::API::AnalysisDataService::Instance().addOrReplace("output", work);
-  return work;
-  // return extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
+  return extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
 }
 
 } // namespace CustomInterfaces

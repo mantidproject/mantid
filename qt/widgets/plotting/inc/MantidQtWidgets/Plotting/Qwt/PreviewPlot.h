@@ -143,7 +143,7 @@ private:
 
   void addCurve(PlotCurveConfiguration &curveConfig,
                 Mantid::API::MatrixWorkspace_sptr ws, const size_t wsIndex,
-                const QColor &curveColour);
+                const QColor &curveColour, const QString &curveName = "");
   void removeCurve(QwtPlotItem *curve);
 
   QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group,
@@ -202,8 +202,8 @@ private:
   // readded
   QMap<QString, bool> m_errorBarOptionCache;
 
-  QwtPlotCurve::CurveStyle m_curveStyle;
-  QwtSymbol::Style m_curveSymbol;
+  QMap<QString, QwtPlotCurve::CurveStyle> m_curveStyle;
+  QMap<QString, QwtSymbol::Style> m_curveSymbol;
 
   friend class DisplayCurveFit;
 };

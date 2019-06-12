@@ -11,16 +11,6 @@
 using namespace Mantid::API;
 using namespace MantidQt::Widgets::MplCpp;
 
-namespace {
-
-QHash<QString, QVariant> defaultLineKwargs() {
-  QHash<QString, QVariant> kwargs;
-  kwargs.insert("line_style", QString("--"));
-  return kwargs;
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace MantidWidgets {
 
