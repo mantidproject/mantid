@@ -121,11 +121,11 @@ const std::string {algname}::summary() const {{
  */
 void {algname}::init() {{
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
                                                              Direction::Input),
       "An input workspace.");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
                                                              Direction::Output),
       "An output workspace.");
 }}

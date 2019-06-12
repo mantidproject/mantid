@@ -308,8 +308,7 @@ set(INC_FILES
     inc/MantidKernel/WriteLock.h
     inc/MantidKernel/XMLInstantiator.h
     inc/MantidKernel/cow_ptr.h
-    inc/MantidKernel/make_cow.h
-    inc/MantidKernel/make_unique.h)
+    inc/MantidKernel/make_cow.h)
 
 set(TEST_FILES
     ArrayBoundedValidatorTest.h
@@ -379,7 +378,6 @@ set(TEST_FILES
     MagneticFormFactorTableTest.h
     MagneticIonTest.h
     MakeCowTest.h
-    MakeUniqueTest.h
     MandatoryValidatorTest.h
     MaskedPropertyTest.h
     MaterialBuilderTest.h

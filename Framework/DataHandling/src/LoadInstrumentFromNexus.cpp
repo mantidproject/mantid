@@ -35,12 +35,13 @@ void LoadInstrumentFromNexus::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
-                                                      Direction::InOut),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "Workspace", "Anonymous", Direction::InOut),
       "The name of the workspace in which to attach the imported instrument");
 
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                     ".nxs"),
       "The name (including its full or relative path) of the Nexus file to "
       "attempt to load the instrument from. The file extension must either be "
       ".nxs or .NXS");

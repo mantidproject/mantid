@@ -42,6 +42,7 @@
 #include "Grid.h"
 #include "ImageMarker.h"
 #include "LegendWidget.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "PatternBox.h"
 #include "PlotCurve.h"
 #include "QwtBarCurve.h"
@@ -57,7 +58,6 @@
 #include "TitlePicker.h"
 #include "VectorCurve.h"
 #include "cursors.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include "Mantid/ErrorBarSettings.h"
 #include "Mantid/MantidMDCurve.h"

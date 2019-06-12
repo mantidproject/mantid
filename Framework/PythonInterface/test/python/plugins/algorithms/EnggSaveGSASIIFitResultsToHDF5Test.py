@@ -79,14 +79,14 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
             self.assertTrue("Refinement Parameters" in fit_results_group)
             refinement_params = fit_results_group["Refinement Parameters"]
 
-            self.assertEquals(len(refinement_params), 5)
+            self.assertEqual(len(refinement_params), 5)
 
             # refinement_params is a tuple, so test that parameters are at the correct index
-            self.assertEquals(refinement_params["RefinementMethod"].value, refinement_method)
+            self.assertEqual(refinement_params["RefinementMethod"].value, refinement_method)
             self.assertTrue(refinement_params["RefineSigma"].value)
             self.assertFalse(refinement_params["RefineGamma"].value)
-            self.assertEquals(refinement_params["XMin"].value, x_min)
-            self.assertEquals(refinement_params["XMax"].value, x_max)
+            self.assertEqual(refinement_params["XMin"].value, x_min)
+            self.assertEqual(refinement_params["XMax"].value, x_max)
 
     def test_saveProfileCoefficients(self):
         sigma = 13
@@ -103,9 +103,9 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
             self.assertTrue("Profile Coefficients" in fit_results_group)
             profile_coeffs = fit_results_group["Profile Coefficients"]
 
-            self.assertEquals(len(profile_coeffs), 2)
-            self.assertEquals(profile_coeffs["Sigma"].value, sigma)
-            self.assertEquals(profile_coeffs["Gamma"].value, gamma)
+            self.assertEqual(len(profile_coeffs), 2)
+            self.assertEqual(profile_coeffs["Sigma"].value, sigma)
+            self.assertEqual(profile_coeffs["Gamma"].value, gamma)
 
     def test_profileCoeffsNotSavedWhenNotRefined(self):
         run_algorithm(self.ALG_NAME,
@@ -127,9 +127,9 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             fit_results_group = output_file["Bank 1"]["GSAS-II Fitting"]
             refinement_params = fit_results_group["Refinement Parameters"]
-            self.assertEquals(len(refinement_params), 7)
-            self.assertEquals(refinement_params["PawleyDMin"].value, d_min)
-            self.assertEquals(refinement_params["PawleyNegativeWeight"].value, negative_weight)
+            self.assertEqual(len(refinement_params), 7)
+            self.assertEqual(refinement_params["PawleyDMin"].value, d_min)
+            self.assertEqual(refinement_params["PawleyNegativeWeight"].value, negative_weight)
 
     def test_saveRwp(self):
         rwp = 75
@@ -141,7 +141,7 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
             fit_results_group = output_file["Bank 1"]["GSAS-II Fitting"]
             self.assertTrue("Rwp" in fit_results_group)
             rwp_from_file = fit_results_group["Rwp"]
-            self.assertEquals(rwp_from_file.value, rwp)
+            self.assertEqual(rwp_from_file.value, rwp)
 
     def test_saveToExistingFileDoesNotOverwrite(self):
         run_algorithm(self.ALG_NAME,

@@ -12,6 +12,7 @@
 
 #include <QHash>
 #include <QString>
+#include <QStringList>
 #include <QVariant>
 #include <boost/none_t.hpp>
 #include <boost/optional.hpp>
@@ -21,9 +22,16 @@ namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
+/// C++ counterpart to MantidAxType in mantid.plots.utility
+/// This does duplicate the information above but exposing the
+/// Python type to C++ and allowing it to be passed through the
+/// plot functions below is not trivial. It was not considered
+/// worthwhile for its limited use.
+/// Any changes here will require changes in the above module.
+enum class MantidAxType : int { Bin = 0, Spectrum = 1 };
+
 /**
- * Makes a call to the Mantid variation of plt.plot in Python utilizing the
- * Python C API, and the MantidQt::Widgets::Common::Python functionality.
+ * Makes a call to mantidqt.plotting.plot.
  *
  * Each of the inputs to this function are optional and thus can be replaced
  * with boost::none if no other item should be given. However it does require
@@ -55,7 +63,7 @@ namespace MplCpp {
  *
  * @param overplot If the plot should overplot other plots
  *
- * @return MANTID_MPLCPP_DLL plot Returns the figure that was created by the
+ * @return Returns the figure that was created by the
  * function in Python
  */
 MANTID_MPLCPP_DLL Common::Python::Object
@@ -67,6 +75,40 @@ plot(const std::vector<std::string> &workspaces,
      boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
      boost::optional<std::string> windowTitle = boost::none,
      bool errors = false, bool overplot = false);
+
+/**
+ * \overload plot(const std::vector<std::string> &workspaces,
+     boost::optional<std::vector<int>> spectrumNums,
+     boost::optional<std::vector<int>> wkspIndices,
+     boost::optional<Common::Python::Object> fig = boost::none,
+     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+     boost::optional<std::string> windowTitle = boost::none,
+     bool errors = false, bool overplot = false)
+ */
+MANTID_MPLCPP_DLL Common::Python::Object
+plot(const QStringList &workspaces,
+     boost::optional<std::vector<int>> spectrumNums,
+     boost::optional<std::vector<int>> wkspIndices,
+     boost::optional<Common::Python::Object> fig = boost::none,
+     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+     boost::optional<std::string> windowTitle = boost::none,
+     bool errors = false, bool overplot = false);
+
+/**
+ * Makes a call to mantidqt.plotting.pcolormesh.
+ *
+ * @param workspaces A vector of workspace names that are present in the ADS
+ *
+ * @param fig The python object that represents the matplotlib figure.
+ *
+ * @return Returns the figure that was created by the
+ * function in Python
+ */
+MANTID_MPLCPP_DLL Common::Python::Object
+pcolormesh(const QStringList &workspaces,
+           boost::optional<Common::Python::Object> fig = boost::none);
 
 } // namespace MplCpp
 } // namespace Widgets

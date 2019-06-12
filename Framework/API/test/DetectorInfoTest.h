@@ -440,7 +440,7 @@ private:
   WorkspaceTester m_workspaceNoInstrument;
 
   std::unique_ptr<MatrixWorkspace> makeWorkspace(size_t numSpectra) {
-    auto ws = Kernel::make_unique<WorkspaceTester>();
+    auto ws = std::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {

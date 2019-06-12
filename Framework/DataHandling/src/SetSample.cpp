@@ -257,19 +257,19 @@ void SetSample::init() {
   using Kernel::PropertyManagerProperty;
 
   // Inputs
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       PropertyNames::INPUT_WORKSPACE, "", Direction::InOut),
                   "A workspace whose sample properties will be updated");
-  declareProperty(Kernel::make_unique<PropertyManagerProperty>(
+  declareProperty(std::make_unique<PropertyManagerProperty>(
                       PropertyNames::GEOMETRY, Direction::Input),
                   "A dictionary of geometry parameters for the sample.");
-  declareProperty(Kernel::make_unique<PropertyManagerProperty>(
+  declareProperty(std::make_unique<PropertyManagerProperty>(
                       PropertyNames::MATERIAL, Direction::Input),
                   "A dictionary of material parameters for the sample. See "
                   "SetSampleMaterial for all accepted parameters");
   declareProperty(
-      Kernel::make_unique<PropertyManagerProperty>(PropertyNames::ENVIRONMENT,
-                                                   Direction::Input),
+      std::make_unique<PropertyManagerProperty>(PropertyNames::ENVIRONMENT,
+                                                Direction::Input),
       "A dictionary of parameters to configure the sample environment");
 }
 
@@ -308,8 +308,8 @@ void SetSample::exec() {
       // only add the volume if it isn't already specfied
       if (!materialArgs->existsProperty(VOLUME_ARG)) {
         materialArgs->declareProperty(
-            Kernel::make_unique<PropertyWithValue<double>>(VOLUME_ARG,
-                                                           sampleVolume));
+            std::make_unique<PropertyWithValue<double>>(VOLUME_ARG,
+                                                        sampleVolume));
       }
     }
     runChildAlgorithm("SetSampleMaterial", workspace, *materialArgs);
@@ -353,8 +353,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   for (auto &direc : environDirs) {
     direc = Poco::Path(direc).append("sampleenvironments").toString();
   }
-  auto finder =
-      Kernel::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
+  auto finder = std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);

@@ -7,6 +7,7 @@
 #ifndef MANTID_ALGORITHMS_SORTXAXISTEST_H_
 #define MANTID_ALGORITHMS_SORTXAXISTEST_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/SortXAxis.h"
@@ -100,6 +101,22 @@ MatrixWorkspace_sptr createHistoWorkspace(const std::vector<double> &xData,
   }
   return outputWorkspace;
 }
+
+MatrixWorkspace_sptr sortXAxis(MatrixWorkspace_sptr workspace,
+                               std::string const &outputName,
+                               std::string const &ordering,
+                               bool histValidation = false) {
+  auto alg = AlgorithmManager::Instance().create("SortXAxis");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", workspace);
+  alg->setProperty("OutputWorkspace", outputName);
+  alg->setProperty("Ordering", ordering);
+  alg->setProperty("IgnoreHistogramValidation", histValidation);
+  alg->execute();
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      outputName);
+}
+
 } // namespace
 
 class SortXAxisTest : public CxxTest::TestSuite {
@@ -108,6 +125,8 @@ public:
   // This means the constructor isn't called when running other tests
   static SortXAxisTest *createSuite() { return new SortXAxisTest(); }
   static void destroySuite(SortXAxisTest *suite) { delete suite; }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testXAscending() {
     std::vector<double> xData = {1, 2, 3};
@@ -363,6 +382,20 @@ public:
         AnalysisDataService::Instance().remove("unsortedws"));
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("sortedws"));
+  }
+
+  void
+  test_that_SortXAxis_will_work_when_passed_a_histogram_workspace_but_no_workspace_validation_occurs() {
+    auto const unsortedWorkspace =
+        createHistoWorkspace({1.0, 2.0, 3.0, 4.0}, {1.0, 2.0, 3.0}, 2);
+
+    auto const sortedWorkspace =
+        sortXAxis(unsortedWorkspace, "sortedws", "Descending", true);
+
+    std::vector<double> const reverseXData{4.0, 3.0, 2.0, 1.0};
+    std::vector<double> const reverseYData{3.0, 2.0, 1.0};
+    TS_ASSERT_EQUALS(sortedWorkspace->x(0).rawData(), reverseXData);
+    TS_ASSERT_EQUALS(sortedWorkspace->y(0).rawData(), reverseYData);
   }
 };
 #endif /*MANTID_ALGORITHMS_SORTXAXISTEST_H_*/

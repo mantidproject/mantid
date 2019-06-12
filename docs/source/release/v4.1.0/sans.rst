@@ -28,6 +28,7 @@ Improvements
 - When the main save directory is changed, the add runs save directory is also updated. Add runs save directory can be still changed independently of the main save directory.
 - File type buttons are disabled when memory mode is selected to make it clearer that SANS will not save to file.
 - The path to the user file used to reduce the data is now added to the workspace sample logs. This user file path is added to canSAS file metadata.
+- The **diagnostic** page icon has been changed from a question mark to a stethoscope, to distinguish it from the **Help** page icon. The **Export Table** button now has an icon. There have been minor icon changes elsewhere on the interface.
 
 Bug Fixes
 #########
@@ -38,3 +39,4 @@ Bug Fixes
 - The algorithm :ref:`Load <algm-Load>` can now load NXcanSAS files.
 - You can now process in **memory** mode with no file type buttons selected. A warning box will open if you process with no file types while in **file** or **both** mode, and processing will not continue.
 - A bug in which the final column in a batch file was sometimes ignored if empty, and therefore impossible to load, has been fixed.
+- The differences between non-compatibility and compatibility modes has been minimised. Compatibility mode can now be turned off in the settings tab. When off, workspaces stay as EventWorkspaces until the penultimate stage of **SANSReductionCore**. Bin masking is not performed until workspace has been converted to a histogram.

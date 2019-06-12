@@ -13,7 +13,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
@@ -415,7 +415,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   if (nd > 3) {
     // Slice from >3D down to 3D
     this->slice = true;
-    this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
+    this->sliceMask = std::make_unique<bool[]>(nd);
     this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
     // Make the mask of dimensions
     // TODO: Smarter mapping

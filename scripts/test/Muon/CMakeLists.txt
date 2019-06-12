@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
    fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    fitting_tab_widget/fitting_tab_presenter_test.py
    fitting_tab_widget/fitting_tab_model_test.py
+   fitting_context_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
@@ -46,6 +47,8 @@ set ( TEST_PY_FILES
    muon_group_pair_context_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
+   results_tab_widget/results_tab_model_test.py
+   results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
    utilities/muon_group_test.py
    utilities/muon_pair_test.py
@@ -58,6 +61,7 @@ set ( TEST_PY_FILES
    utilities/run_string_utils_operator_test.py
    utilities/run_string_utils_conversion_test.py
    help_widget_presenter_test.py
+   xml_utils_test.py
 )
 
 # LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible
@@ -65,6 +69,7 @@ set ( TEST_PY_FILES_QT5
    FFTModel_test.py
    FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
+   fitting_tab_widget/fitting_tab_presenter_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
@@ -92,6 +97,8 @@ set ( TEST_PY_FILES_QT5
    max_ent_presenter_load_interaction_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
+   results_tab_widget/results_tab_presenter_test.py
+   results_tab_widget/results_tab_model_test.py
    help_widget_presenter_test.py
 )
 

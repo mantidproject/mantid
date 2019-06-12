@@ -20,10 +20,10 @@ namespace Algorithms {
  *  Defines input and output workspace properties
  */
 void UnaryOperation::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       inputPropName(), "", Direction::Input),
                   "The name of the input workspace");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       outputPropName(), "", Direction::Output),
                   "The name to use for the output workspace (can be the same "
                   "as the input one).");

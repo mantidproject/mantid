@@ -125,18 +125,18 @@ bool isEventMonitor(::NeXus::File &file) {
 /// Initialization method.
 void LoadNexusMonitors2::init() {
   declareProperty(
-      Kernel::make_unique<API::FileProperty>("Filename", "",
-                                             API::FileProperty::Load, ".nxs"),
+      std::make_unique<API::FileProperty>("Filename", "",
+                                          API::FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the NeXus file to "
       "attempt to load. The file extension must either be .nxs or .NXS");
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 
   declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
+      std::make_unique<Kernel::PropertyWithValue<std::string>>(
           "NXentryName", "", Kernel::Direction::Input),
       "Optional: Name of the NXentry to load if it's not the default.");
 

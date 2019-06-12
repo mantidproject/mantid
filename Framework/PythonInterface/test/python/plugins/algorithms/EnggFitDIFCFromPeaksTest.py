@@ -53,13 +53,13 @@ class EnggFitDIFCFromPeaksTest(unittest.TestCase):
 						FittedPeaks=test_fit_peaks_table)
 
 
-        self.assertEquals(difa, 0)
+        self.assertEqual(difa, 0)
 
         pTable = mtd[paramsTblName]
-        self.assertEquals(pTable.rowCount(), 1)
-        self.assertEquals(pTable.columnCount(), 3)
+        self.assertEqual(pTable.rowCount(), 1)
+        self.assertEqual(pTable.columnCount(), 3)
 
-        self.assertEquals(test_fit_peaks_table.rowCount(), 2)
+        self.assertEqual(test_fit_peaks_table.rowCount(), 2)
 
         # fitting results on some platforms (OSX) are different by ~0.07%
         expected_difc = 19229.3699679
@@ -98,17 +98,17 @@ class EnggFitDIFCFromPeaksTest(unittest.TestCase):
         difa, difc, zero = EnggFitDIFCFromPeaks(FittedPeaks=test_fit_peaks_table,
                                                 OutParametersTable=paramsTblName)
 
-        self.assertEquals(difa, 0)
+        self.assertEqual(difa, 0)
 
         pTable = mtd[paramsTblName]
-        self.assertEquals(pTable.rowCount(), 1)
-        self.assertEquals(pTable.columnCount(), 3)
+        self.assertEqual(pTable.rowCount(), 1)
+        self.assertEqual(pTable.columnCount(), 3)
 
-        self.assertEquals(test_fit_peaks_table.rowCount(), 3)
-        self.assertEquals(3, len(test_fit_peaks_table.column('dSpacing')))
-        self.assertEquals(3, len(test_fit_peaks_table.column('X0')))
-        self.assertEquals(3, len(test_fit_peaks_table.column('A')))
-        self.assertEquals(3, len(test_fit_peaks_table.column('S')))
+        self.assertEqual(test_fit_peaks_table.rowCount(), 3)
+        self.assertEqual(3, len(test_fit_peaks_table.column('dSpacing')))
+        self.assertEqual(3, len(test_fit_peaks_table.column('X0')))
+        self.assertEqual(3, len(test_fit_peaks_table.column('A')))
+        self.assertEqual(3, len(test_fit_peaks_table.column('S')))
 
         expected_difc = 17500.7287679
         # assertLess would be nices, but only available in unittest >= 2.7

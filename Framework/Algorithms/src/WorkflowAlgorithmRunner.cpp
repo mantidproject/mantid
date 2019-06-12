@@ -94,10 +94,10 @@ void WorkflowAlgorithmRunner::init() {
   declareProperty(PropertyNames::ALGORITHM, "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "Name of the algorithm to run");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       PropertyNames::SETUP_TABLE.c_str(), "", Direction::Input),
                   "Table workspace containing the setup of the runs.");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       PropertyNames::IO_MAP.c_str(), "", Direction::Input),
                   "Table workspace mapping algorithm outputs to inputs.");
 }

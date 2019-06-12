@@ -20,7 +20,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
 
 #include <H5Cpp.h>
 #include <Poco/Path.h>
@@ -100,10 +99,10 @@ LoadILLDiffraction::LoadILLDiffraction()
  * Initialize the algorithm's properties.
  */
 void LoadILLDiffraction::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "File path of the data file to load");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "File path of the data file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
@@ -113,8 +112,8 @@ void LoadILLDiffraction::init() {
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("AlignTubes", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
+                                                Direction::Input),
       "Apply vertical and horizontal alignment of tubes as defined in IPF");
 }
 
@@ -594,7 +593,7 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
       const std::string scanVarProp =
           boost::algorithm::to_lower_copy(m_scanVar[i].property);
       const std::string propName = scanVarName + "." + scanVarProp;
-      auto property = Kernel::make_unique<TimeSeriesProperty<double>>(propName);
+      auto property = std::make_unique<TimeSeriesProperty<double>>(propName);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));

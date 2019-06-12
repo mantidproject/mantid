@@ -33,7 +33,7 @@ class LoadLiveDataTest(unittest.TestCase):
 
         ws = mtd['fake']
         # The rebin call in the code made 20 bins
-        self.assertEquals( len(ws.readY(0)), 20 )
+        self.assertEqual( len(ws.readY(0)), 20 )
         # First bin is correct
         self.assertAlmostEqual(ws.readX(0)[0], 40e3, 3)
 
@@ -72,7 +72,7 @@ MyMethod(input, output)
 
         ws = mtd['fake']
         # The rebin call in the code made 20 bins
-        self.assertEquals( len(ws.readY(0)), 20 )
+        self.assertEqual( len(ws.readY(0)), 20 )
         # First bin is correct
         self.assertAlmostEqual(ws.readX(0)[0], 40e3, 3)
 

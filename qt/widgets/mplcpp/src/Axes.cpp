@@ -80,6 +80,34 @@ void Axes::forEachArtist(const char *containerAttr, const ArtistOperation &op) {
 }
 
 /**
+ * Remove any artists in the container with a matching label. If none are found
+ * then this is a no-op.
+ * @param containerAttr The name of the container attribute
+ * @param label The label of the artists to remove
+ */
+void Axes::removeArtists(const char *containerAttr, const QString label) {
+  GlobalInterpreterLock lock;
+  const auto lineNameAsUnicode =
+      Python::NewRef(PyUnicode_FromString(label.toLatin1().constData()));
+  try {
+    const auto container = pyobj().attr(containerAttr);
+    auto containerLength = Python::Len(container);
+    decltype(containerLength) index(0);
+    while (index < containerLength) {
+      Artist artist{container[index]};
+      if (lineNameAsUnicode == artist.pyobj().attr("get_label")()) {
+        artist.remove();
+        containerLength = Python::Len(container);
+      } else {
+        index++;
+      }
+    }
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
+}
+
+/**
  * @brief Set the X-axis label
  * @param label String for the axis label
  */

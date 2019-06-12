@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffMultiRunFittingQtWidget.h"
 
-#include "MantidKernel/make_unique.h"
-
 namespace {
 
 MantidQt::CustomInterfaces::RunLabel
@@ -32,7 +30,7 @@ EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
     : m_pythonRunner(pythonRunner) {
   setupUI();
 
-  m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
+  m_zoomTool = std::make_unique<QwtPlotZoomer>(
       QwtPlot::xBottom, QwtPlot::yLeft,
       QwtPicker::DragSelection | QwtPicker::CornerToCorner,
       QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
@@ -111,7 +109,7 @@ void EnggDiffMultiRunFittingQtWidget::plotFittedPeaksStateChanged() {
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
     const std::vector<boost::shared_ptr<QwtData>> &curves) {
   for (const auto &curve : curves) {
-    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
+    auto plotCurve = std::make_unique<QwtPlotCurve>();
 
     plotCurve->setPen(QColor(Qt::red));
     plotCurve->setData(*curve);
@@ -131,7 +129,7 @@ void EnggDiffMultiRunFittingQtWidget::processPlotToSeparateWindow() {
 void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
     const std::vector<boost::shared_ptr<QwtData>> &curves) {
   for (const auto &curve : curves) {
-    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
+    auto plotCurve = std::make_unique<QwtPlotCurve>();
 
     plotCurve->setData(*curve);
     plotCurve->attach(m_ui.plotArea);

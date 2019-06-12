@@ -125,17 +125,17 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
     auto factory =
-        Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+        std::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
             m_normalizationOption, m_time);
 
     factory
-        ->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+        ->setSuccessor(std::make_unique<vtkMDHistoHexFactory>(
             m_normalizationOption))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
+        .setSuccessor(std::make_unique<vtkMDHistoQuadFactory>(
             m_normalizationOption))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
+        .setSuccessor(std::make_unique<vtkMDHistoLineFactory>(
             m_normalizationOption))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
+        .setSuccessor(std::make_unique<vtkMD0DFactory>());
 
     auto product = m_presenter->execute(factory.get(), loadingProgressUpdate,
                                         drawingProgressUpdate);
@@ -145,7 +145,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       
     try
     {
-      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      auto workspaceProvider = std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
       m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider),
                                      &drawingProgressUpdate);
     }
@@ -168,8 +168,8 @@ int vtkMDHWSource::RequestInformation(
     vtkInformationVector *outputVector) {
   if (m_presenter == nullptr && !m_wsName.empty()) {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWSource>>(this);
-    m_presenter = Mantid::Kernel::make_unique<MDHWInMemoryLoadingPresenter>(
+        std::make_unique<MDLoadingViewAdapter<vtkMDHWSource>>(this);
+    m_presenter = std::make_unique<MDHWInMemoryLoadingPresenter>(
         std::move(view),
         new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>, m_wsName);
   }
