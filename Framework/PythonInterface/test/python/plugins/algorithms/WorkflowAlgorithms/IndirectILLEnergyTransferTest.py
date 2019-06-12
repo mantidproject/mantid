@@ -94,7 +94,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self.assertTrue(res.getItem(0).getAxis(1).getUnit().unitID(), "Theta")
 
     def test_bats(self):
-        args = {'Run': self._runs['bats']}
+        args = {'Run': self._runs['bats'], 'PulseChopper': '34'}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 2050, 1121)
 

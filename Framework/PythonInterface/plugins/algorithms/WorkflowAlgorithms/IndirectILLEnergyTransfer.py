@@ -68,6 +68,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _sample_coords = None
     _fit_option = None
     _group_by = None
+    _pulse_chopper = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -150,6 +151,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("SampleCoordinates", [0.,0.,0.], FloatArrayLengthValidator(3), direction=Direction.Input),
                              doc='The sample coordinates X, Y, Z.')
 
+        self.declareProperty(name='PulseChopper', defaultValue='Auto',
+                             validator=StringListValidator(['Auto', '12', '34']),
+                             doc='Define the pulse chopper.')
+
         bats_options = 'BATS only options'
         self.setPropertyGroup('MonitorCutoff', bats_options)
         self.setPropertyGroup('InputElasticChannelWorkspace', bats_options)
@@ -157,6 +162,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.setPropertyGroup('ElasticPeakFitting', bats_options)
         self.setPropertyGroup('GroupPixelsBy', bats_options)
         self.setPropertyGroup('SampleCoordinates', bats_options)
+        self.setPropertyGroup('PulseChopper', bats_options)
 
     def validateInputs(self):
 
@@ -197,6 +203,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._sample_coords = self.getProperty('SampleCoordinates').value
         self._fit_option = self.getPropertyValue('ElasticPeakFitting')
         self._group_by = self.getProperty('GroupPixelsBy').value
+        self._pulse_chopper = self.getPropertyValue('PulseChopper')
 
         if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == N_PIXELS_PER_TUBE):
             self._use_map_file = True
@@ -383,10 +390,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace',self._red_ws)
 
-    def _get_trigger_chopper_info(self, run):
-        # check the trigger chopper flag from run
-        return [run.getLogData('CH3.rotation_speed').value, run.getLogData('CH3.phase').value]
-
     def _create_elastic_channel_ws(self, epp_ws, run, epp_equator_ws=None):
         """
         Creates the elastic channel table workspace.
@@ -394,7 +397,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param run: run object
         @param epp_equator_ws: EPP workspace of the equatorial line
         """
-        speed, phase = self._get_trigger_chopper_info(run)
+        speed, phase, _ = self._get_pulse_chopper_info(run, self._pulse_chopper)
         delay = run.getLogData('PSD.time_of_flight_2').value
         epp_ws.removeColumn('WorkspaceIndex')
         epp_ws.removeColumn('PeakCentreError')
@@ -422,12 +425,40 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         return - (shifted_chopper_phase - center_chopper_phase) / center_chopper_speed / 6 + (shifted_psd_delay - center_psd_delay) * 1E-6
 
-    def _set_source_distance(self, ws):
+    def _get_pulse_chopper_info(self, run, pulse):
         """
-        Sets the source distance based on chopper configuration
+        Retrieves information on pulse chopper pair.
+        In low repetition mode pulse chopper and trigger chopper are not the same.
+        In high repetition mode pulse trigger is always 1.
+        @param run : the run of workspace
+        @param pulse : 'Auto', '12' or '34'
+        @return : [pulse chopper speed, pulse chopper phase, source distance]
         """
-        #TODO
-        pass
+        pulse_index = 1
+        distance = 0.
+        if pulse == 'Auto':
+            if run.hasProperty('monitor.master_pickup'):
+                trigger = run.getLogData('monitor.master_pickup').value
+                if not 1 <= trigger <= 4:
+                    self.log().information('Unexpected trigger chopper '+str(trigger))
+                else:
+                    if trigger == 1 or trigger == 2: # and low repetition rate
+                        pulse_index = 3
+                        distance = 33.388
+        elif pulse == '34':
+            pulse_index = 3
+            distance = 33.388
+
+        chopper_speed_param = 'CH{0}.rotation_speed'.format(pulse_index)
+        chopper_phase_param = 'CH{0}.phase'.format(pulse_index)
+
+        if not run.hasProperty(chopper_speed_param) or not run.hasProperty(chopper_phase_param):
+            raise RuntimeError('Unable to retrieve the pulse chopper speed and phase.')
+        else:
+            speed = run.getLogData(chopper_speed_param).value
+            phase = run.getLogData(chopper_phase_param).value
+
+        return [speed, phase, distance]
 
     def _convert_to_energy_bats(self, ws, epp_ws, t0_offset=0.):
         """
@@ -517,7 +548,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         x,y,z = self._sample_coords
         if x**2+y**2+z**2 != 0.:
             MoveInstrumentComponent(Workspace=ws, ComponentName='sample-position', X=x, Y=y, Z=z, RelativePosition=False)
-        self._set_source_distance(ws)
+        distance = self._get_pulse_chopper_info(mtd[ws].getRun(), self._pulse_chopper)[2]
+        if distance != 0.:
+            MoveInstrumentComponent(Workspace=ws, ComponentName='chopper', Z=-distance, RelativePosition=False)
+
         input_epp = self.getProperty('InputElasticChannelWorkspace').value
 
         if not input_epp:
@@ -548,7 +582,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             center_chopper_phase = input_epp.cell('ChopperPhase', 0)
             center_psd_delay = input_epp.cell('PSD_TOF_Delay', 0)
             run = mtd[ws].getRun()
-            shifted_chopper_phase = self._get_trigger_chopper_info(run)[1]
+            shifted_chopper_phase = self._get_pulse_chopper_info(run, self._pulse_chopper)[1]
             shifted_psd_delay = run.getLogData('PSD.time_of_flight_2').value
             t0_offset = self._t0_offset(center_chopper_speed, center_chopper_phase,
                                         shifted_chopper_phase, center_psd_delay, shifted_psd_delay)

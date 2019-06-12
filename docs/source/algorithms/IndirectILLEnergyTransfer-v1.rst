@@ -106,7 +106,7 @@ Output:
 
 .. testcode:: ExIndirectILLEnergyTransferBATS
 
-    ws = IndirectILLEnergyTransfer(Run='ILL/IN16B/215962.nxs')
+    ws = IndirectILLEnergyTransfer(Run='ILL/IN16B/215962.nxs', PulseChopper='34')
     print("The output workspace has {:d} spectra".format(ws.getItem(0).getNumberHistograms()))
     print("and {:d} bins".format(ws.getItem(0).blocksize()))
 
