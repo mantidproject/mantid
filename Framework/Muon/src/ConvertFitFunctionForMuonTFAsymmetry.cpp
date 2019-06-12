@@ -16,7 +16,10 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
+
 #include "MantidAPI/Run.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -170,8 +173,6 @@ ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
       if(!run.hasProperty("analysis_asymmetry_norm")){
         result["NormalizationTable"] = "NormalizationTable has not been included and no sample logs for nrmalization.";
 	  }
-	  
-	  // if none fail ...
     }
   }
   // Check units, should be microseconds

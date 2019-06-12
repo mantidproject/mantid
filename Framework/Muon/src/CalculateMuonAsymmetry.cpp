@@ -20,11 +20,15 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
+
+#include "MantidMuon/MuonAlgorithmHelper.h"
+
 
 #include <cmath>
 #include <numeric>
@@ -203,6 +207,9 @@ void CalculateMuonAsymmetry::exec() {
     normWS->mutableY(0) = ws->y(0) / norms[j];
     normWS->mutableY(0) -= 1.0;
     normWS->mutableE(0) = ws->e(0) / norms[j];
+
+    MuonAlgorithmHelper::addSampleLog(normWS, "analysis_asymmetry_norm", std::to_string(norms[j]));
+
   }
   // update table with new norm
   std::vector<std::string> methods(wsNames.size(), "Calculated");
