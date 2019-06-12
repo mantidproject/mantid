@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsView.h"
+#include "GUI/Common/SearchModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
@@ -12,7 +13,6 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
-#include "SearchModel.h"
 #include <QMenu>
 #include <QMessageBox>
 

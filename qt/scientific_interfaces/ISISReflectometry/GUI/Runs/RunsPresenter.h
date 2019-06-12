@@ -9,13 +9,13 @@
 
 #include "CatalogRunNotifier.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/SearchResult.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "SearchResult.h"
 #include <boost/shared_ptr.hpp>
 
 class ProgressPresenter;

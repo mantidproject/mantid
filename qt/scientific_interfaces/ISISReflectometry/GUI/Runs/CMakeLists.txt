@@ -2,9 +2,7 @@ set(RUNS_SRC_FILES
     RunsPresenter.cpp
     RunsView.cpp
     CatalogRunNotifier.cpp
-    CatalogSearcher.cpp
-    Autoreduction.cpp
-    SearchModel.cpp)
+    Autoreduction.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -17,13 +15,10 @@ set(RUNS_INC_FILES
     RunsView.h
     IAutoreduction.h
     IRunNotifier.h
-    ISearcher.h
     Autoreduction.h
-    CatalogRunNotifier.h
-    CatalogSearcher.h
-    SearchModel.h)
+    CatalogRunNotifier.h)
 
-set(RUNS_MOC_FILES RunsView.h SearchModel.h)
+set(RUNS_MOC_FILES RunsView.h)
 
 set(RUNS_UI_FILES RunsWidget.ui)
 
