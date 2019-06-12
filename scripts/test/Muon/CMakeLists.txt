@@ -43,7 +43,6 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_gui_context_test.py
    muon_group_pair_context_test.py
-   muon_plot_model_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
    results_tab_widget/results_tab_model_test.py
@@ -65,22 +64,22 @@ set ( TEST_PY_FILES
 
 # LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible
 set ( TEST_PY_FILES_QT4
-   FFTModel_test.py
+   LoadWidgetModel_test.py
+   LoadWidgetPresenter_test.py
+   LoadWidgetView_test.py
    FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
+   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    fitting_tab_widget/fitting_tab_presenter_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
    home_runinfo_presenter_test.py
-   LoadWidgetModel_test.py
-   LoadWidgetPresenter_test.py
-   LoadWidgetView_test.py
-   load_run_widget/loadrun_model_test.py
+   list_selector/list_selector_view_test.py
+   list_selector/list_selector_presenter_test.py
    load_run_widget/loadrun_presenter_current_run_test.py
    load_run_widget/loadrun_presenter_single_file_test.py
    load_run_widget/loadrun_presenter_multiple_file_test.py
-   load_file_widget/loadfile_model_test.py
    load_file_widget/loadfile_presenter_single_file_test.py
    load_file_widget/loadfile_presenter_multiple_file_test.py
    load_file_widget/loadfile_view_test.py
@@ -97,11 +96,10 @@ set ( TEST_PY_FILES_QT4
    grouping_tab/pairing_table_alpha_test.py
    MaxEntPresenter_test.py
    max_ent_presenter_load_interaction_test.py
-   muon_plot_model_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
    results_tab_widget/results_tab_presenter_test.py
-   results_tab_widget/results_tab_model_test.py
+   transformWidget_test.py
    help_widget_presenter_test.py
 )
 

@@ -144,7 +144,6 @@ class MultiPlotWidget(QtWidgets.QMainWindow):
         self._context.set_yBounds(yrange)
         self._x_range_changed(xrange)
         self._y_range_changed(yrange)
- 
 
     def connectCloseSignal(self, slot):
         self.closeSignal.connect(slot)

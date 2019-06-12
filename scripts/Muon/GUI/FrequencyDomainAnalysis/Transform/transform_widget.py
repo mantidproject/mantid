@@ -82,7 +82,7 @@ class LoadObserver(Observer):
         self.outer = outer
 
     def update(self, observable, arg):
-        self.outer.handle_data_updated()
+        self.outer.handle_new_data_loaded()
 
 
 class instrumentObserver(Observer):
@@ -129,4 +129,4 @@ class PhaseQuadObserver(Observer):
         self.outer = outer
 
     def update(self, observable, arg):
-        self.outer.handle_data_updated()
+        self.outer.handle_new_data_loaded()

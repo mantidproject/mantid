@@ -103,4 +103,3 @@ class FittingContext(object):
             fit for fit in self.fit_list
             if fit.input_workspace == input_workspace_name
         ]
-

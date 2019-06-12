@@ -89,7 +89,6 @@ class _WorkspaceArtists(object):
         """
         Remove the tracked artists from the given axes
         :param axes: A reference to the axes instance the artists are attached to
-        :returns: Returns a bool specifying whether the class is now empty
         """
         # delete the artists from the axes
         self._remove(axes, self._artists)
@@ -127,8 +126,6 @@ class _WorkspaceArtists(object):
 
         if (not axes.is_empty(axes)) and axes.legend_ is not None:
             axes.legend()
-
-
 
     def replace_data(self, workspace):
         """Replace or replot artists based on a new workspace
@@ -439,7 +436,7 @@ class MantidAxes(Axes):
                 x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
                 artists[0].set_data(x, y)
                 self.relim()
-                # self.autoscale()
+                self.autoscale()
                 return artists
 
             workspace = args[0]
@@ -521,7 +518,7 @@ class MantidAxes(Axes):
                     artist_new.update_from(artist_orig)
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
-                # self.autoscale()
+                self.autoscale()
                 return container_new
 
             workspace = args[0]

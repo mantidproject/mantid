@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 from six import iteritems
-from mantid import plots
 from copy import copy
 
 # use this to manage lines and workspaces directly
