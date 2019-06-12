@@ -101,12 +101,13 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             pixels=self._parseBTPlist(pixelString, pixmin[self.instname], pixmax[self.instname])
         self.log().warning('TUBES:{} PIXELS:{}'.format(tubes, pixels))
 
+        # generate the list of detector identifiers to mask
         detlist=[]
-        for b in banks:
-            ep=self._getEightPackHandle(b)
-            if ep is not None:
-                for t in tubes:
-                    if (t<tubemin[self.instname]) or (t>tubemax[self.instname]):
+        for bank in banks:
+            component = self._getEightPackHandle(bank)
+            if component is not None:
+                for tube in tubes:
+                    if (tube<tubemin[self.instname]) or (tube>tubemax[self.instname]):
                         raise ValueError("Out of range index for tube number")
                     else:
                         for p in pixels:
@@ -114,16 +115,21 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                                 raise ValueError("Out of range index for pixel number")
                             else:
                                 try:
-                                    pid=ep[int(t-tubemin[self.instname])][int(p-pixmin[self.instname])].getID()
+                                    pid=component[int(tube-tubemin[self.instname])][int(p-pixmin[self.instname])].getID()
                                 except:
-                                    raise RuntimeError("Problem finding pixel in bank="+str(b)+
-                                                       ", tube="+str(t-tubemin[self.instname])+", pixel="+str(p-pixmin[self.instname]))
+                                    raise RuntimeError("Problem finding pixel in bank={}, tube={}, pixel={}".format(bank,
+                                                                                                                    tube - tubemin[self.instname],
+                                                                                                                    p - pixmin[self.instname]))
                                 detlist.append(pid)
+
+        # mask the detectors
         detlist = numpy.array(detlist)
         if detlist.size > 0:
-            mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=detlist, EnableLogging=False)
+            mantid.simpleapi.MaskDetectors(Workspace=ws, DetectorList=detlist, EnableLogging=False)
         else:
             self.log().information("no detectors within this range")
+
+        # set the outputs
         self.setProperty("Workspace",ws.name())
         self.setProperty("MaskedDetectors", detlist)
 
@@ -144,7 +150,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             return result
 
     #pylint: disable=too-many-branches,too-many-return-statements
-    def _getEightPackHandle(self,banknum):
+    def _getEightPackHandle(self, banknum):
         """
         Helper function to return the handle to a given eightpack
         """
