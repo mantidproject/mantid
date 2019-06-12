@@ -75,6 +75,7 @@ RunsPresenter::RunsPresenter(
   m_tablePresenter = makeRunsTablePresenter(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
   m_runNotifier->subscribe(this);
+  m_searcher.subscribe(this);
 
   updateViewWhenMonitorStopped();
 }
@@ -110,8 +111,8 @@ void RunsPresenter::notifySearch() { search(); }
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
-void RunsPresenter::notifyICATSearchComplete() {
-  populateSearchResults();
+void RunsPresenter::notifySearchResults(ITableWorkspace_sptr results) {
+  populateSearchResults(results);
 
   if (isAutoreducing())
     autoreduceNewRuns();
@@ -232,36 +233,18 @@ bool RunsPresenter::search() {
     return false;
 
   try {
-    m_searcher.search(searchString);
+    m_searcher.startSearchAsync(searchString);
   } catch (std::runtime_error &e) {
     m_messageHandler->giveUserCritical(e.what(), "Error");
     return false;
   }
-
-  //auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
-  //algSearch->initialize();
-  //algSearch->setChild(true);
-  //algSearch->setLogging(false);
-  //algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
-  //algSearch->setProperty("Session", sessionId);
-  //algSearch->setProperty("InvestigationId", searchString);
-  //auto algRunner = m_view->getAlgorithmRunner();
-  //algRunner->startAlgorithm(algSearch);
 
   return true;
 }
 
 /** Populates the search results table
  */
-void RunsPresenter::populateSearchResults() {
-  auto algRunner = m_view->getAlgorithmRunner();
-  IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
-  if (!searchAlg->isExecuted())
-    return;
-
-  // Get the results from the algorithm
-  ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
-
+void RunsPresenter::populateSearchResults(ITableWorkspace_sptr results) {
   // Update the state and model
   m_instrumentChanged = false;
 

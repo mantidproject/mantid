@@ -49,6 +49,7 @@ public:
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
+  void subscribeSearch(RunsViewSearchSubscriber *notifyee) override;
   IRunsTableView *table() const override;
 
   // Timer methods
@@ -111,6 +112,7 @@ private:
 
   RunsViewSubscriber *m_notifyee;
   RunsViewTimerSubscriber *m_timerNotifyee;
+  RunsViewSearchSubscriber *m_searchNotifyee;
 
   boost::shared_ptr<SearchModel> m_searchModel;
 

@@ -110,6 +110,8 @@ public:
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
+  MOCK_METHOD1(notifySearchResults,
+               void(Mantid::API::ITableWorkspace_sptr results));
 };
 
 class MockEventPresenter : public IEventPresenter {

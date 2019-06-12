@@ -45,6 +45,10 @@ void RunsView::subscribeTimer(RunsViewTimerSubscriber *notifyee) {
   m_timerNotifyee = notifyee;
 }
 
+void RunsView::subscribeSearch(RunsViewSearchSubscriber *notifyee) {
+  m_searchNotifyee = notifyee;
+}
+
 IRunsTableView *RunsView::table() const { return m_tableView; }
 
 /**
@@ -254,7 +258,7 @@ void RunsView::startIcatSearch() {
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
-void RunsView::onSearchComplete() { m_notifyee->notifyICATSearchComplete(); }
+void RunsView::onSearchComplete() { m_searchNotifyee->notifySearchComplete(); }
 
 /**
 This slot notifies the presenter that the "search" button has been pressed
