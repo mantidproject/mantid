@@ -16,13 +16,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-class IMainWindowView;
+class IPythonRunner;
 #endif
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter : public IPlotter {
 public:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  Plotter(MantidQt::CustomInterfaces::IMainWindowView *mainWindowView);
+  Plotter(MantidQt::CustomInterfaces::IPythonRunner *pythonRunner);
   void runPython(const std::string &pythonCode) const;
 #endif
   void
@@ -32,7 +32,7 @@ private:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   // Object only needed for MantidPlot implementation as it requires Python
   // execution
-  MantidQt::CustomInterfaces::IMainWindowView *m_mainWindowView;
+  MantidQt::CustomInterfaces::IPythonRunner *m_pythonRunner;
 #endif
 };
 

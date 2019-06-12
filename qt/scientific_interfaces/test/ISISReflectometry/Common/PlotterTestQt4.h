@@ -17,23 +17,23 @@ public:
   static void destroySuite(PlotterTestQt4 *suite) { delete suite; }
 
   void testReflectometryPlot() {
-    MockMainWindowView mainWindow;
-    auto plotter = Plotter(&mainWindow);
+    MockPythonRunner pythonRunner;
+    auto plotter = Plotter(&pythonRunner);
     const std::string testCode =
         "base_graph = None\nbase_graph = plotSpectrum(\"ws1\", 0, True, window "
         "= base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
-    EXPECT_CALL(mainWindow, runPythonAlgorithm(testCode));
+    EXPECT_CALL(pythonRunner, runPythonAlgorithm(testCode));
 
     plotter.reflectometryPlot({"ws1"});
   }
 
   void testRunPythonCode() {
-    MockMainWindowView mainWindow;
-    auto plotter = Plotter(&mainWindow);
+    MockPythonRunner pythonRunner;
+    auto plotter = Plotter(&pythonRunner);
     const std::string testCode = "test code";
 
-    EXPECT_CALL(mainWindow, runPythonAlgorithm(testCode));
+    EXPECT_CALL(pythonRunner, runPythonAlgorithm(testCode));
 
     plotter.runPython(testCode);
   }

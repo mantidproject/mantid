@@ -8,7 +8,7 @@
 #include "Plotter.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "../MainWindow/IMainWindowView.h"
+#include "../Common/IPythonRunner.h"
 #else
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
@@ -22,8 +22,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-Plotter::Plotter(MantidQt::CustomInterfaces::IMainWindowView *mainWindowView)
-    : m_mainWindowView(mainWindowView) {}
+Plotter::Plotter(MantidQt::CustomInterfaces::IPythonRunner *pythonRunner)
+    : m_pythonRunner(pythonRunner) {}
 #endif
 
 void Plotter::reflectometryPlot(
@@ -64,7 +64,7 @@ void Plotter::reflectometryPlot(
 // workbench.
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 void Plotter::runPython(const std::string &pythonCode) const {
-  m_mainWindowView->runPythonAlgorithm(pythonCode);
+  m_pythonRunner->runPythonAlgorithm(pythonCode);
 }
 #endif
 

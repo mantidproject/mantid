@@ -9,6 +9,7 @@ set(
 set(
   COMMON_INC_FILES
   IMessageHandler.h
+  IPythonRunner.h
   IPlotter.h
   Plotter.h
   ISearcher.h

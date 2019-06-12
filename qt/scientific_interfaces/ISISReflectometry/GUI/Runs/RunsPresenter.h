@@ -9,6 +9,7 @@
 
 #include "CatalogRunNotifier.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/CatalogSearcher.h"
 #include "GUI/Common/SearchResult.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
@@ -32,7 +33,7 @@ namespace CustomInterfaces {
 // Forward decs
 class IAutoreduction;
 class IMessageHandler;
-class ISearcher;
+class IPythonRunner;
 class SearchModel;
 
 using MantidWidgets::ProgressableView;
@@ -59,7 +60,7 @@ public:
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
                 int defaultInstrumentIndex, IMessageHandler *messageHandler,
-                IAutoreduction &autoreduction, ISearcher &searcher);
+                IAutoreduction &autoreduction, IPythonRunner *pythonRunner);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -128,7 +129,7 @@ private:
   /// The message reporting implementation
   IMessageHandler *m_messageHandler;
   /// The search implementation
-  ISearcher &m_searcher;
+  CatalogSearcher m_searcher;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list

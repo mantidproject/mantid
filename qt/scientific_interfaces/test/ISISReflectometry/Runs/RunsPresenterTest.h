@@ -42,10 +42,10 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
-      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
-                                              "POLREF", "OFFSPEC"},
-        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(), m_searcher(), m_runNotifier(nullptr),
+      : m_thetaTolerance(0.01),
+        m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
+        m_runsTableView(), m_progressView(), m_messageHandler(),
+        m_autoreduction(), m_pythonRunner(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
@@ -347,17 +347,18 @@ private:
                         std::vector<std::string> const &instruments,
                         int defaultInstrumentIndex,
                         IMessageHandler *messageHandler,
-                        IAutoreduction &autoreduction, ISearcher &searcher)
+                        IAutoreduction &autoreduction,
+                        IPythonRunner *pythonRunner)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
-                        messageHandler, autoreduction, searcher) {}
+                        messageHandler, autoreduction, pythonRunner) {}
   };
 
   RunsPresenterFriend makePresenter() {
     auto const defaultInstrumentIndex = 0;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    IMainWindowView *mainWindowMock = new MockMainWindowView();
-    Plotter plotter(mainWindowMock);
+    IPythonRunner *pythonRunner = new MockPythonRunner();
+    Plotter plotter(pythonRunner);
 #else
     Plotter plotter;
 #endif
@@ -366,7 +367,7 @@ private:
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
         m_instruments, defaultInstrumentIndex, &m_messageHandler,
-        m_autoreduction, m_searcher);
+        m_autoreduction, m_pythonRunner);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
@@ -392,7 +393,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_progressView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_autoreduction));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searcher));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_pythonRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_runNotifier));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
@@ -574,7 +575,7 @@ private:
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
   MockAutoreduction m_autoreduction;
-  MockSearcher m_searcher;
+  MockPythonRunner *m_pythonRunner;
   MockRunNotifier *m_runNotifier;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   RunsTable m_runsTable;
