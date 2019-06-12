@@ -42,7 +42,7 @@ public:
 
   /**
    * Retrieves a guess fit
-   * @param peaks :: Function representing peaks to fit
+   * @param function :: Function representing peaks to fit
    * @param xValues :: The x values for a guess fit
    */
   virtual Mantid::API::MatrixWorkspace_sptr

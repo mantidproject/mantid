@@ -78,7 +78,7 @@ int ALCBaselineModellingView::noOfSectionRows() const {
   return m_ui.sections->rowCount();
 }
 
-void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr &workspace,
+void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace,
                                             std::size_t const &workspaceIndex) {
   const auto kwargs = getPlotKwargs(m_ui.dataPlot, "Data");
 
@@ -88,7 +88,7 @@ void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr &workspace,
 }
 
 void ALCBaselineModellingView::setCorrectedCurve(
-    MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
+    MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   const auto kwargs = getPlotKwargs(m_ui.correctedPlot, "Corrected");
   m_ui.correctedPlot->addSpectrum("Corrected", workspace, workspaceIndex,
                                   Qt::blue, kwargs);
@@ -110,7 +110,7 @@ ALCBaselineModellingView::getPlotKwargs(PreviewPlot *plot,
 }
 
 void ALCBaselineModellingView::setBaselineCurve(
-    MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
+    MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   m_ui.dataPlot->addSpectrum("Baseline", workspace, workspaceIndex, Qt::red);
   m_ui.dataPlot->replot();
 }

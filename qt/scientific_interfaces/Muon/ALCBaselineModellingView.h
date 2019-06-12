@@ -52,11 +52,11 @@ public:
 
 public slots:
   void initialize() override;
-  void setDataCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::size_t const &workspaceIndex = 0) override;
-  void setCorrectedCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  void setCorrectedCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                          std::size_t const &workspaceIndex = 0) override;
-  void setBaselineCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  void setBaselineCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                         std::size_t const &workspaceIndex = 0) override;
   void setFunction(Mantid::API::IFunction_const_sptr func) override;
   void setNoOfSectionRows(int rows) override;

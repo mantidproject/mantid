@@ -181,8 +181,9 @@ void ALCBaselineModellingPresenter::updateCorrectedCurve() {
 void ALCBaselineModellingPresenter::updateBaselineCurve() {
   if (const auto fitFunction = m_model->fittedFunction()) {
     const auto &xValues = m_model->data()->x(0);
-    m_view->setBaselineCurve(
-        m_model->baselineData(fitFunction, xValues.rawData()));
+    const auto baslineWorkspace =
+        m_model->baselineData(fitFunction, xValues.rawData());
+    m_view->setBaselineCurve(baslineWorkspace);
   } else {
     m_view->removePlot("Baseline");
   }
