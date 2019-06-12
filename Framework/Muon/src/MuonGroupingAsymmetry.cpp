@@ -36,10 +36,10 @@ bool checkPeriodInWorkspaceGroup(const int &period,
  * for "unset"
  * @returns Result of the removal
  */
-std::pair < MatrixWorkspace_sptr, MatrixWorkspace_sptr > estimateAsymmetry(const Workspace_sptr &inputWS,
-                                       const int index, const double startX,
-                                       const double endX,
-                                       const double normalizationIn) {
+std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr>
+estimateAsymmetry(const Workspace_sptr &inputWS, const int index,
+                  const double startX, const double endX,
+                  const double normalizationIn) {
   IAlgorithm_sptr asym = AlgorithmManager::Instance().createUnmanaged(
       "EstimateMuonAsymmetryFromCounts");
   asym->initialize();
@@ -80,15 +80,14 @@ std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> estimateMuonAsymmetry(
         Mantid::MuonAlgorithmHelper::sumPeriods(inputWS, subtractedPeriods);
 
     // Remove decay (summed periods ws)
-    std::pair < MatrixWorkspace_sptr,
-        MatrixWorkspace_sptr> asymSummedPeriods =
+    std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> asymSummedPeriods =
         estimateAsymmetry(summedWS, groupIndex, startX, endX, normalizationIn);
 
     if (!subtractedPeriods.empty()) {
       // Remove decay (subtracted periods ws)
       std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr>
           asymSubtractedPeriods = estimateAsymmetry(
-          subtractedWS, groupIndex, startX, endX, normalizationIn);
+              subtractedWS, groupIndex, startX, endX, normalizationIn);
 
       // Now subtract
       tempWS = Mantid::MuonAlgorithmHelper::subtractWorkspaces(
@@ -173,7 +172,6 @@ void MuonGroupingAsymmetry::init() {
           "OutputUnNormWorkspace", "unNormalisedData", Direction::Output,
           API::PropertyMode::Optional),
       "The name of the output unnormalized workspace.");
-  
 
   declareProperty("GroupName", emptyString,
                   "The name of the group. Must "

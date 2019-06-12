@@ -17,9 +17,8 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 
-#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
+#include "MantidAPI/Run.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -170,9 +169,11 @@ ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
           API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
               name);
       const Mantid::API::Run &run = ws->run();
-      if(!run.hasProperty("analysis_asymmetry_norm")){
-        result["NormalizationTable"] = "NormalizationTable has not been included and no sample logs for nrmalization.";
-	  }
+      if (!run.hasProperty("analysis_asymmetry_norm")) {
+        result["NormalizationTable"] = "NormalizationTable has not been "
+                                       "included and no sample logs for "
+                                       "nrmalization.";
+      }
     }
   }
   // Check units, should be microseconds
@@ -305,31 +306,30 @@ std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
   std::vector<double> norms(wsNames.size(), 0);
 
   if (table) {
-  auto colNames = table->getColumnNames();
-  auto wsNamesIndex = findName(colNames, "name");
-  auto normIndex = findName(colNames, "norm");
+    auto colNames = table->getColumnNames();
+    auto wsNamesIndex = findName(colNames, "name");
+    auto normIndex = findName(colNames, "norm");
 
-  for (size_t row = 0; row < table->rowCount(); row++) {
-    for (size_t wsPosition = 0; wsPosition < wsNames.size(); wsPosition++) {
-      std::string wsName = wsNames[wsPosition];
-      std::replace(wsName.begin(), wsName.end(), ' ', ';');
-      if (table->String(row, wsNamesIndex) == wsName) {
-        norms[wsPosition] = table->Double(row, normIndex);
-      }
-    }
-  }
-  } else {
+    for (size_t row = 0; row < table->rowCount(); row++) {
       for (size_t wsPosition = 0; wsPosition < wsNames.size(); wsPosition++) {
         std::string wsName = wsNames[wsPosition];
-        API::MatrixWorkspace_const_sptr ws =
-            API::AnalysisDataService::Instance()
-                .retrieveWS<API::MatrixWorkspace>(wsName);
-        const Mantid::API::Run &run = ws->run();
-        norms[wsPosition] = 
-            std::stod(run.getProperty("analysis_asymmetry_norm")->value());
-        
+        std::replace(wsName.begin(), wsName.end(), ' ', ';');
+        if (table->String(row, wsNamesIndex) == wsName) {
+          norms[wsPosition] = table->Double(row, normIndex);
+        }
       }
     }
+  } else {
+    for (size_t wsPosition = 0; wsPosition < wsNames.size(); wsPosition++) {
+      std::string wsName = wsNames[wsPosition];
+      API::MatrixWorkspace_const_sptr ws =
+          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+              wsName);
+      const Mantid::API::Run &run = ws->run();
+      norms[wsPosition] =
+          std::stod(run.getProperty("analysis_asymmetry_norm")->value());
+    }
+  }
 
   return norms;
 }

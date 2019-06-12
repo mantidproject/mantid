@@ -29,7 +29,6 @@
 
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
-
 #include <cmath>
 #include <numeric>
 #include <vector>
@@ -133,45 +132,46 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
   API::ITableWorkspace_const_sptr tabWS = getProperty("NormalizationTable");
 
   if (tabWS) {
-  if (tabWS->columnCount() == 0) {
-    validationOutput["NormalizationTable"] =
-        "Please provide a non-empty NormalizationTable.";
-  }
-  // NormalizationTable should have three columns: (norm, name, method)
-  if (tabWS->columnCount() != 3) {
-    validationOutput["NormalizationTable"] =
-        "NormalizationTable must have three columns";
-  }
-  auto names = tabWS->getColumnNames();
-  int normCount = 0;
-  int wsNamesCount = 0;
-  for (const std::string &name : names) {
-
-    if (name == "norm") {
-      normCount += 1;
+    if (tabWS->columnCount() == 0) {
+      validationOutput["NormalizationTable"] =
+          "Please provide a non-empty NormalizationTable.";
     }
-
-    if (name == "name") {
-      wsNamesCount += 1;
+    // NormalizationTable should have three columns: (norm, name, method)
+    if (tabWS->columnCount() != 3) {
+      validationOutput["NormalizationTable"] =
+          "NormalizationTable must have three columns";
     }
-  }
-  if (normCount == 0) {
-    validationOutput["NormalizationTable"] =
-        "NormalizationTable needs norm column";
-  }
-  if (wsNamesCount == 0) {
-    validationOutput["NormalizationTable"] =
-        "NormalizationTable needs a name column";
-  }
-  if (normCount > 1) {
-    validationOutput["NormalizationTable"] =
-        "NormalizationTable has " + std::to_string(normCount) + " norm columns";
-  }
-  if (wsNamesCount > 1) {
-    validationOutput["NormalizationTable"] = "NormalizationTable has " +
-                                             std::to_string(wsNamesCount) +
-                                             " name columns";
-  }
+    auto names = tabWS->getColumnNames();
+    int normCount = 0;
+    int wsNamesCount = 0;
+    for (const std::string &name : names) {
+
+      if (name == "norm") {
+        normCount += 1;
+      }
+
+      if (name == "name") {
+        wsNamesCount += 1;
+      }
+    }
+    if (normCount == 0) {
+      validationOutput["NormalizationTable"] =
+          "NormalizationTable needs norm column";
+    }
+    if (wsNamesCount == 0) {
+      validationOutput["NormalizationTable"] =
+          "NormalizationTable needs a name column";
+    }
+    if (normCount > 1) {
+      validationOutput["NormalizationTable"] = "NormalizationTable has " +
+                                               std::to_string(normCount) +
+                                               " norm columns";
+    }
+    if (wsNamesCount > 1) {
+      validationOutput["NormalizationTable"] = "NormalizationTable has " +
+                                               std::to_string(wsNamesCount) +
+                                               " name columns";
+    }
   }
   return validationOutput;
 }
@@ -208,18 +208,17 @@ void CalculateMuonAsymmetry::exec() {
     normWS->mutableY(0) -= 1.0;
     normWS->mutableE(0) = ws->e(0) / norms[j];
 
-    MuonAlgorithmHelper::addSampleLog(normWS, "analysis_asymmetry_norm", std::to_string(norms[j]));
-
+    MuonAlgorithmHelper::addSampleLog(normWS, "analysis_asymmetry_norm",
+                                      std::to_string(norms[j]));
   }
   // update table with new norm
   std::vector<std::string> methods(wsNames.size(), "Calculated");
   API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
   if (table) {
-  
-  updateNormalizationTable(table, wsNames, norms, methods);
-  }
 
- }
+    updateNormalizationTable(table, wsNames, norms, methods);
+  }
+}
 
 /**
  * Calculate normalization constant after the exponential decay has been removed
