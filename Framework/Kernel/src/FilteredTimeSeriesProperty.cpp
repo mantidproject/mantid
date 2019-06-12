@@ -17,9 +17,6 @@ namespace Kernel {
  * Construct with a source time series & a filter property
  * @param seriesProp :: A pointer to a property to filter.
  * @param filterProp :: A boolean series property to filter on
- * @param transferOwnership :: Flag marking whether this object takes
- * ownership of the time series (default = false). Avoids unnecessary
- * clones when the original is going to be deleted anyway
  */
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
@@ -36,7 +33,7 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
 
 /**
  * Construct with a source time series & a filter property
- * @param seriesProp :: A mart pointer to take ownership of pointer to a
+ * @param seriesProp :: A smart pointer to take ownership of pointer to a
  * property to filter.
  * @param filterProp :: A boolean series property to filter on
  */
