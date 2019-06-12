@@ -8,8 +8,6 @@
 #define MANTID_ISISREFLECTOMETRY_IMAINWINDOWPRESENTER_H
 
 #include "IMainWindowView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <string>
 
 namespace MantidQt {
