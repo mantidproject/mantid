@@ -88,7 +88,8 @@ class FittingTabModel(object):
                                                                 table_directory)
         self.add_fit_to_context(wrapped_parameter_workspace,
                                 parameter_dict['Function'],
-                                parameter_dict['InputWorkspace'])
+                                parameter_dict['InputWorkspace'],
+                                global_parameters)
 
         return function_object, output_status, output_chi_squared
 

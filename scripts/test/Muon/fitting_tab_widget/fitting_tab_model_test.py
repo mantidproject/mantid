@@ -111,7 +111,7 @@ class FittingTabModelTest(unittest.TestCase):
             {'Function': mock.ANY, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
              'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'})
 
-    def test_do_simultaneous_fit_adds_single_input_workspace_to_fit_context(self):
+    def test_do_simultaneous_fit_adds_single_input_workspace_to_fit_context_with_globals(self):
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         x_data = range(0, 100)
         y_data = [5 + x * x for x in x_data]
@@ -120,10 +120,12 @@ class FittingTabModelTest(unittest.TestCase):
                           'Minimizer': 'Levenberg-Marquardt',
                           'StartX': [0.0], 'EndX': [100.0], 'EvaluationType': 'CentrePoint',
                           'FitGroupName': 'SimulFit'}
-        self.model.do_simultaneous_fit(parameter_dict, global_parameters=[])
+        global_parameters = ['A0']
+        self.model.do_simultaneous_fit(parameter_dict, global_parameters)
 
         fit_context = self.model.context.fitting_context
         self.assertEqual(1, len(fit_context))
+        self.assertEqual(global_parameters, fit_context.fit_list[0].parameters.global_parameters)
 
     def test_do_simultaneous_fit_adds_multi_input_workspace_to_fit_context(self):
         # create function
