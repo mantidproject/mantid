@@ -82,6 +82,8 @@ Improvements
 
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
 
+- Maximum order of modulated vectors is now available to python: ws.sample().getOrientedLattice().getMaxOrder()
+
 
 Imaging
 -------
