@@ -360,7 +360,7 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertTrue(isinstance(table, ITableWorkspace))
         self.assertTrue(table_name in AnalysisDataService.Instance())
         self.assertEqual(len(expected_content), table.rowCount())
-        self.assertEqual(len(expected_cols), table.columnCount())
+        self.assertEqual(len(list(expected_cols)), table.columnCount())
         actual_col_names = table.getColumnNames()
         for index, (expected_name, expected_type) in enumerate(expected_cols):
             self.assertEqual(expected_name, actual_col_names[index])
