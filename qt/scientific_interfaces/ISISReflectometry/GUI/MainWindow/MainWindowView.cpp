@@ -77,7 +77,7 @@ void MainWindowView::initLayout() {
   auto makeRunsPresenter =
       RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance,
                            instruments, defaultInstrumentIndex, messageHandler,
-                           Autoreduction(), CatalogSearcher());
+                           Autoreduction(), CatalogSearcher(this));
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();

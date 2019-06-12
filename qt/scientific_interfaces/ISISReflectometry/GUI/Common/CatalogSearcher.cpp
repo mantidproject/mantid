@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CatalogSearcher.h"
+#include "GUI/MainWindow/IMainWindowView.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -15,12 +16,11 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ITableWorkspace_sptr CatalogSearcher::search(const std::string &text) {
-  auto sessions = CatalogManager::Instance().getActiveSessions();
-  if (sessions.empty())
-    throw std::runtime_error("You are not logged into any catalogs.");
+CatalogSearcher::CatalogSearcher(IMainWindowView *view) : m_view(view) {}
 
-  const std::string sessionId = sessions.front()->getSessionId();
+ITableWorkspace_sptr CatalogSearcher::search(const std::string &text) {
+  logInToCatalog();
+  auto sessionId = activeSessionId();
 
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
   algSearch->initialize();
@@ -48,6 +48,42 @@ ITableWorkspace_sptr CatalogSearcher::search(const std::string &text) {
     results->removeRow(*row);
 
   return results;
+}
+
+bool CatalogSearcher::hasActiveSession() const {
+  auto sessions = CatalogManager::Instance().getActiveSessions();
+  return !sessions.empty();
+}
+
+/** Log in to the catalog
+ * @throws : if login failed
+ */
+void CatalogSearcher::logInToCatalog() {
+  if (hasActiveSession())
+    return;
+
+  try {
+    std::stringstream pythonSrc;
+    pythonSrc << "try:\n";
+    pythonSrc << "  algm = CatalogLoginDialog()\n";
+    pythonSrc << "except:\n";
+    pythonSrc << "  pass\n";
+    m_view->runPythonAlgorithm(pythonSrc.str());
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(std::string("Catalog login failed: ") + e.what());
+  }
+
+  // Check we logged in ok
+  if (!hasActiveSession())
+    throw std::runtime_error("Catalog login failed");
+}
+
+std::string CatalogSearcher::activeSessionId() const {
+  auto sessions = CatalogManager::Instance().getActiveSessions();
+  if (sessions.empty())
+    throw std::runtime_error("You are not logged into any catalogs.");
+
+  return sessions.front()->getSessionId();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
