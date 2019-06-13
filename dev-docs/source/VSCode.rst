@@ -34,7 +34,7 @@ How to get Started
 
 Extensions
 ==========
-All Extensions have been tested working on Ubuntu 18.04 LTS and Ubuntu 19.04,
+All Extensions have been tested working on Ubuntu 18.04 and Ubuntu 19.04,
 however most, if not all, extensions should be cross-platform.
 
 Install extensions either by running the commands given on the marketplace or by
@@ -65,8 +65,9 @@ Features
 
 Auto Formatting
 ---------------
-With a formatter installed as an extension it is recommended to use Clang-Format. It
-is possible to format your code using on save, type, paste and save timeout. To set
+With a formatter installed as an extension it is possible to format any open file in VSCode.
+It is recommended to use `Clang-Format <https://marketplace.visualstudio.com/items?itemName=xaver.clang-format>`_.
+It is possible to format your code using on save, type, paste and save timeout. To set
 when you want to format:
 - Open the File->Preferences->Settings menu
 - Search for "Format On"
@@ -84,7 +85,7 @@ Building
 --------
 This is where VSCode comes into its own as a versatile environment for programming
 in any language, because of this it has a Tasks list. These tasks are saved in
-tasks.json inside the .vscode folder now present in any opened folder/workspace.
+``tasks.json`` inside the ``.vscode`` folder now present in any opened folder/workspace.
 
 - To start creating a task open the command line (Ctrl+Shift+P or ⌘+Shift+P)
 - Type "Task"
@@ -95,9 +96,8 @@ The tasks.json allows the creation of Build Tasks default or otherwise. VSCode w
 attempt to make a useful task for you. However it may be better to use this example:
 
 **Linux/OSX:**
-
-This assumes that you have generated in CMake using ninja. The commands can be
-switched out with the command and various args for whatever you have generated with.
+The commands can be switched out with the command and various args for the generator
+used to generate your CMake with.
 
 .. code-block:: javascript
 
@@ -107,8 +107,9 @@ switched out with the command and various args for whatever you have generated w
             {
                 "label": "Build Mantid",
                 "type": "shell",
-                "command": "ninja",
+                "command": "cmake",
                 "args": [
+                    "--build",
                     "-C",
                     "Build/Directory/Here"
                 ],
@@ -137,7 +138,7 @@ Debugging and Launching
 -----------------------
 Debugging is similar to Building in the sense that you complete a task that has been
 defined. For Debugging and Launching all of these 'Tasks' are stored in the
-launch.json alongside the tasks.json in the .vscode folder.
+``launch.json`` alongside the ``tasks.json`` in the ``.vscode`` folder.
 
 **If you want to debug/launch Mantid Workbench, please consider using PyCharm as that
 is not covered here.**
