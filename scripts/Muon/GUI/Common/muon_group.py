@@ -131,3 +131,6 @@ class MuonGroup(object):
                 return self._counts_workspace[key].workspace_name
 
         return None
+
+    def remove_workspace_by_name(self, workspace_name):
+        for item in 

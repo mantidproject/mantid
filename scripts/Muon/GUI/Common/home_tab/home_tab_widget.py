@@ -52,3 +52,6 @@ class HomeTabWidget(object):
                                                             self.group_widget,
                                                             self.plot_widget,
                                                             self.run_info_widget])
+
+        context.update_view_from_model_notifier.add_subscriber(self.home_tab_widget.update_view_from_model_observer)
+

@@ -40,6 +40,8 @@ class PhaseTablePresenter(object):
         self.phase_table_calculation_complete_notifier = Observable()
         self.phase_quad_calculation_complete_nofifier = Observable()
 
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+
         self.update_current_phase_tables()
 
     def update_view_from_model(self):

@@ -20,6 +20,8 @@ from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
+from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
+from Muon.GUI.Common.observer_pattern import Observable
 
 
 class MuonContext(object):
@@ -34,8 +36,11 @@ class MuonContext(object):
         self.fitting_context = fitting_context
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
+        self.ads_observer = MuonContextADSObserver(self.remove_workspace_by_name)
 
         self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
+
+        self.update_view_from_model_notifier = Observable()
 
     @property
     def data_context(self):
@@ -92,6 +97,12 @@ class MuonContext(object):
                 if self._do_rebin():
                     name = get_pair_data_workspace_name(self, pair_name, run_as_string, rebin=True)
                     self.group_pair_context[pair_name].show_rebin(run, directory + name)
+
+    def ensure_all_required_data_loaded(self):
+        for run in self._data_context.current_runs:
+            if not self.data_context.get_loaded_data_for_run(run):
+                return False
+        return True
 
     def calculate_all_pairs(self):
         for run in self._data_context.current_runs:
@@ -264,3 +275,9 @@ class MuonContext(object):
                 equivalent_list.append(equivalent_group_pair)
 
         return equivalent_list
+
+    def remove_workspace_by_name(self, workspace_name):
+        print('Entered context remove workspace by name')
+        self.data_context.remove_workspace_by_name(workspace_name)
+        self.group_pair_context.remove_workspace_by_name(workspace_name)
+        self.update_view_from_model_notifier.notify_subscribers()

@@ -198,3 +198,7 @@ class MuonGroupPairContext(object):
                 return equivalent_name
 
         return None
+
+    def remove_workspace_by_name(self, workspace_name):
+        for item in self.groups + self.pairs:
+            item.remove_workspace_by_name(workspace_name)

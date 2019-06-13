@@ -72,7 +72,7 @@ class MuonDataContext(object):
         Groups and Pairs associated to the current run are stored in _grousp and _pairs as ordered dictionaries.
         """
         self._loaded_data = load_data
-        self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}  # self.get_result(False)
+        # self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}  # self.get_result(False)
 
         self._current_runs = []
         self._main_field_direction = ''
@@ -129,13 +129,25 @@ class MuonDataContext(object):
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
-        self._current_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
+        # self._current_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
 
         if self.current_data['MainFieldDirection'] and self.current_data['MainFieldDirection'] != self._main_field_direction\
                 and self._main_field_direction:
             self.message_notifier.notify_subscribers('MainFieldDirection has changed between'
                                                      ' data sets, click default to reset grouping if required')
         self._main_field_direction = self.current_data['MainFieldDirection']
+
+    @property
+    def _current_data(self):
+        if self.current_runs:
+            loaded_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
+        else:
+            loaded_data = {}
+
+        if loaded_data:
+            return loaded_data
+        else:
+            return {"workspace": load_utils.empty_loaded_data(), 'run': []}  # self.get_result(False)
 
     @property
     def current_data(self):
@@ -217,7 +229,7 @@ class MuonDataContext(object):
     # Clearing data
     # ------------------------------------------------------------------------------------------------------------------
     def clear(self):
-        self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}
+        self._loaded_data.clear()
 
     def _base_run_name(self, run=None):
         """ e.g. EMU0001234 """
@@ -261,6 +273,9 @@ class MuonDataContext(object):
         message += 'transverse field runs {}\n'.format(run_list_to_string(transverse))
         message += 'longitudinal field runs {}\n'.format(run_list_to_string(longitudinal))
         return message
+
+    def remove_workspace_by_name(self, workspace_name):
+        self._loaded_data.remove_workspace_by_name(workspace_name)
 
     class InstrumentNotifier(Observable):
         def __init__(self, outer):

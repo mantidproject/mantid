@@ -137,3 +137,14 @@ class MuonLoadData:
             return self.get_data(**kwargs)['workspace']['MainFieldDirection']
         else:
             return None
+
+    def remove_workspace_by_name(self, workspace_name):
+        list_of_workspace_names_to_remove = []
+        for entry in self.params:
+            if any([workspace.workspace_name == workspace_name for workspace in entry['workspace']['OutputWorkspace']]):
+                list_of_workspace_names_to_remove.append(entry)
+
+        print('Removing {} from raw data'.format(list_of_workspace_names_to_remove))
+
+        for entry in list_of_workspace_names_to_remove:
+            self.remove_data(**entry)
