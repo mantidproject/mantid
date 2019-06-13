@@ -13,10 +13,12 @@
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
+#include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
 
 #include <Poco/NObserver.h>
 
 #include <QHash>
+#include <QPair>
 #include <QVariant>
 #include <QWidget>
 #include <list>
@@ -61,6 +63,12 @@ public:
       const QColor &lineColour = QColor(),
       const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
   void removeSpectrum(const QString &lineName);
+
+  RangeSelector *
+  addRangeSelector(const QString &name,
+                   RangeSelector::SelectType type = RangeSelector::XMINMAX);
+  RangeSelector *getRangeSelector(const QString &name) const;
+
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
@@ -117,6 +125,8 @@ private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   // Map a line label to the boolean indicating whether error bars are shown
   QHash<QString, bool> m_lines;
+  // Range selector widgets
+  QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
 
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;

@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISCalibration.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+
 #include <QDebug>
 #include <QFileInfo>
 #include <stdexcept>
@@ -520,7 +522,7 @@ void ISISCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws) {
     if (!params.empty()) {
       double res = params[0];
 
-      const auto energyRange = m_uiForm.ppResolution->getCurveRange("Energy");
+      const auto energyRange = getXRangeFromWorkspace(ws);
       // Set default rebinning bounds
       QPair<double, double> peakERange(-res * 10, res * 10);
       auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");

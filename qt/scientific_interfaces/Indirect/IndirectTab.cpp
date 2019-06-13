@@ -838,6 +838,21 @@ bool IndirectTab::getResolutionRangeFromWs(
   return false;
 }
 
+QPair<double, double>
+IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName) const {
+  auto const &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName))
+    return getXRangeFromWorkspace(
+        ads.retrieveWS<MatrixWorkspace>(workspaceName));
+  return QPair<double, double>(0.0, 0.0);
+}
+
+QPair<double, double> IndirectTab::getXRangeFromWorkspace(
+    Mantid::API::MatrixWorkspace_const_sptr workspace) const {
+  const auto xValues = workspace->x(0);
+  return QPair<double, double>(xValues[0], xValues[xValues.size() - 1]);
+}
+
 /**
  * Runs an algorithm async
  *

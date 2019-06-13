@@ -58,6 +58,27 @@ std::pair<double, double> RangeSelector::getRange() const {
   return std::make_pair(std::get<0>(range), std::get<1>(range));
 }
 
+void RangeSelector::setMinimum(const double min) {
+  m_rangeMarker->setMinimum(min);
+  emit selectionChanged(min, m_rangeMarker->getMaximum());
+}
+
+void RangeSelector::setMaximum(const double max) {
+  m_rangeMarker->setMaximum(max);
+  emit selectionChanged(m_rangeMarker->getMinimum(), max);
+}
+
+double RangeSelector::getMinimum() const { return m_rangeMarker->getMinimum(); }
+
+double RangeSelector::getMaximum() const { return m_rangeMarker->getMaximum(); }
+
+void RangeSelector::setVisible(bool visible) {
+  if (visible)
+    redrawMarker();
+  else
+    detach();
+}
+
 void RangeSelector::detach() {
   m_rangeMarker->remove();
   m_plot->canvas()->draw();

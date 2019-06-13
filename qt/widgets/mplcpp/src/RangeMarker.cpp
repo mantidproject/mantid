@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::callMethodNoCheck;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
 
@@ -94,6 +94,40 @@ std::tuple<double, double> RangeMarker::getXRange() const {
   auto const coords = pyobj().attr("get_x_range")();
   return std::make_tuple<double, double>(toDouble(coords[0]),
                                          toDouble(coords[1]));
+}
+
+/**
+ * @brief Sets the minimum the RangeMarker.
+ * @param minimum The minimum of the range.
+ */
+void RangeMarker::setMinimum(double minimum) {
+  callMethodNoCheck<void>(pyobj(), "set_minimum", minimum);
+}
+
+/**
+ * @brief Sets the minimum the RangeMarker.
+ * @param minimum The minimum of the range.
+ */
+void RangeMarker::setMaximum(double maximum) {
+  callMethodNoCheck<void>(pyobj(), "set_maximum", maximum);
+}
+
+/**
+ * @brief Gets minimum of the RangeMarker.
+ * @return The minimum of the range.
+ */
+double RangeMarker::getMinimum() const {
+  GlobalInterpreterLock lock;
+  return PyFloat_AsDouble(pyobj().attr("get_minimum")().ptr());
+}
+
+/**
+ * @brief Gets maximum of the RangeMarker.
+ * @return The maximum of the range.
+ */
+double RangeMarker::getMaximum() const {
+  GlobalInterpreterLock lock;
+  return PyFloat_AsDouble(pyobj().attr("get_maximum")().ptr());
 }
 
 /**

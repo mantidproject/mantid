@@ -523,9 +523,37 @@ class RangeMarker(QObject):
         Gets the positions of the min and max of the range
         :return the minimum and maximum of the range.
         """
-        minimum = self.min_marker.get_x_position()
-        maximum = self.max_marker.get_x_position()
-        return [minimum, maximum] if minimum <= maximum else [maximum, minimum]
+        return sorted([self.min_marker.get_x_position(), self.max_marker.get_x_position()])
+
+    def set_minimum(self, minimum):
+        """
+        Sets the minimum for the range.
+        :param minimum: The minimum of the range.
+        """
+        maximum = max([self.min_marker.get_x_position(), self.max_marker.get_x_position()])
+        self.set_x_range(minimum, maximum)
+
+    def set_maximum(self, maximum):
+        """
+        Sets the maximum for the range.
+        :param maximum: The maximum of the range.
+        """
+        minimum = min([self.min_marker.get_x_position(), self.max_marker.get_x_position()])
+        self.set_x_range(minimum, maximum)
+
+    def get_minimum(self):
+        """
+        Gets the minimum of the range.
+        :return the minimum of the range.
+        """
+        return min([self.min_marker.get_x_position(), self.max_marker.get_x_position()])
+
+    def get_maximum(self):
+        """
+        Gets the maximum of the range.
+        :return the maximum of the range.
+        """
+        return max([self.min_marker.get_x_position(), self.max_marker.get_x_position()])
 
     def mouse_move_start(self, x, y, pixels=False):
         """

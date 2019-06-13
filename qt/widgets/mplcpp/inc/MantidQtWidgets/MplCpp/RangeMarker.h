@@ -35,6 +35,11 @@ public:
   void setXRange(double minimum, double maximum);
   std::tuple<double, double> getXRange() const;
 
+  void setMinimum(double minimum);
+  void setMaximum(double maximum);
+  double getMinimum() const;
+  double getMaximum() const;
+
   void mouseMoveStart(double x, double y);
   void mouseMoveStart(int x, int y);
   void mouseMoveStop();

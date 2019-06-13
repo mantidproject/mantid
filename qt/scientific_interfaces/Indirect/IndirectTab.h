@@ -172,6 +172,12 @@ protected:
   bool getResolutionRangeFromWs(Mantid::API::MatrixWorkspace_const_sptr ws,
                                 QPair<double, double> &res);
 
+  /// Gets the x range from a workspace
+  QPair<double, double>
+  getXRangeFromWorkspace(std::string const &workspaceName) const;
+  QPair<double, double> getXRangeFromWorkspace(
+      Mantid::API::MatrixWorkspace_const_sptr workspace) const;
+
   /// Converts a standard vector of standard strings to a QVector of QStrings.
   QVector<QString>
   convertStdStringVector(const std::vector<std::string> &stringVec) const;

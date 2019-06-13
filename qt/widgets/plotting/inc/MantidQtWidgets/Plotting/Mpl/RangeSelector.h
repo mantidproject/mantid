@@ -33,6 +33,13 @@ public:
   void setRange(const std::pair<double, double> &range);
   std::pair<double, double> getRange() const;
 
+  void setMinimum(const double min);
+  void setMaximum(const double max);
+  double getMinimum() const;
+  double getMaximum() const;
+
+  void setVisible(bool visible);
+
 signals:
   void selectionChanged(double min, double max);
 

@@ -73,20 +73,20 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   // Indicators for Y value at each EMin position
   auto negativeEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
       "NegativeEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
-  negativeEMinYPos->setInfoOnly(true);
+  // negativeEMinYPos->setInfoOnly(true);
   negativeEMinYPos->setColour(Qt::blue);
   negativeEMinYPos->setMinimum(0.0);
 
   auto positiveEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
       "PositiveEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
-  positiveEMinYPos->setInfoOnly(true);
+  // positiveEMinYPos->setInfoOnly(true);
   positiveEMinYPos->setColour(Qt::red);
   positiveEMinYPos->setMinimum(0.0);
 
   // Indicator for centre of symmetry (x=0)
   auto centreMarkRaw = m_uiForm.ppRawPlot->addRangeSelector(
       "CentreMark", MantidWidgets::RangeSelector::XSINGLE);
-  centreMarkRaw->setInfoOnly(true);
+  // centreMarkRaw->setInfoOnly(true);
   centreMarkRaw->setColour(Qt::cyan);
   centreMarkRaw->setMinimum(0.0);
 
@@ -103,17 +103,17 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
 
   // Indicators for negative and positive X range values on X axis
   auto negativeEPV = m_uiForm.ppPreviewPlot->addRangeSelector("NegativeE");
-  negativeEPV->setInfoOnly(true);
+  // negativeEPV->setInfoOnly(true);
   negativeEPV->setColour(Qt::darkGreen);
 
   auto positiveEPV = m_uiForm.ppPreviewPlot->addRangeSelector("PositiveE");
-  positiveEPV->setInfoOnly(true);
+  // positiveEPV->setInfoOnly(true);
   positiveEPV->setColour(Qt::darkGreen);
 
   // Indicator for centre of symmetry (x=0)
   auto centreMarkPV = m_uiForm.ppPreviewPlot->addRangeSelector(
       "CentreMark", MantidWidgets::RangeSelector::XSINGLE);
-  centreMarkPV->setInfoOnly(true);
+  // centreMarkPV->setInfoOnly(true);
   centreMarkPV->setColour(Qt::cyan);
   centreMarkPV->setMinimum(0.0);
 
@@ -251,7 +251,7 @@ void IndirectSymmetrise::plotRawInput(const QString &workspaceName) {
   updateMiniPlots();
 
   // Set the preview range to the maximum absolute X value
-  QPair<double, double> axisRange = m_uiForm.ppRawPlot->getCurveRange("Raw");
+  auto const axisRange = getXRangeFromWorkspace(sampleWS);
   double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
 
   // Set valid range for range selectors
@@ -289,8 +289,8 @@ void IndirectSymmetrise::updateMiniPlots() {
   m_uiForm.ppRawPlot->addSpectrum("Raw", input, spectrumIndex);
 
   // Match X axis range on preview plot
-  m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange("Raw"),
-                                       AxisID::XBottom);
+  auto const axisRange = getXRangeFromWorkspace(input);
+  m_uiForm.ppPreviewPlot->setAxisRange(axisRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
 }
 

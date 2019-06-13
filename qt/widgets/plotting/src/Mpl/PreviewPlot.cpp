@@ -155,6 +155,32 @@ void PreviewPlot::removeSpectrum(const QString &lineName) {
 }
 
 /**
+ * Add a range selector to a preview plot
+ * @param name The name to give the range selector
+ * @param type The type of the range selector
+ * @return The range selector
+ */
+RangeSelector *PreviewPlot::addRangeSelector(const QString &name,
+                                             RangeSelector::SelectType type) {
+  if (m_rangeSelectors.contains(name))
+    throw std::runtime_error("RangeSelector already exists on PreviewPlot.");
+
+  m_rangeSelectors[name] = new MantidWidgets::RangeSelector(this, type);
+  return m_rangeSelectors[name];
+}
+
+/**
+ * Gets a range selector from the PreviewPlot
+ * @param name The name of the range selector
+ * @return The range selector
+ */
+RangeSelector *PreviewPlot::getRangeSelector(const QString &name) const {
+  if (!m_rangeSelectors.contains(name))
+    throw std::runtime_error("RangeSelector was not found on PreviewPlot.");
+  return m_rangeSelectors[name];
+}
+
+/**
  * Set the range of the specified axis
  * @param range The new range
  * @param axisID An enumeration defining the axis
