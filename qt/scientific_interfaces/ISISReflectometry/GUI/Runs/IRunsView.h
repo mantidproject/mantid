@@ -9,6 +9,7 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/RunsTable/IRunsTableView.h"
+#include "ISearchModel.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
@@ -29,7 +30,7 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 namespace DataProcessor = MantidWidgets::DataProcessor;
-class SearchModel;
+class ISearchModel;
 
 /**
 IRunsView is the base view class for the Reflectometry "Runs"
@@ -81,7 +82,7 @@ public:
   virtual void stopTimer() = 0;
 
   // Connect the model
-  virtual void showSearch(boost::shared_ptr<SearchModel> model) = 0;
+  virtual void showSearch(ISearchModel_sptr model) = 0;
 
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,

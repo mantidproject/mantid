@@ -13,6 +13,7 @@
 #include "../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
@@ -23,6 +24,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using Mantid::DataObjects::TableWorkspace;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
@@ -45,7 +47,7 @@ public:
                                               "POLREF", "OFFSPEC"},
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
         m_searcher(nullptr), m_autoreduction(), m_pythonRunner(),
-        m_runNotifier(nullptr),
+        m_runNotifier(nullptr), m_searchModel(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
         m_searchString("test search string") {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
@@ -128,7 +130,7 @@ public:
 
   void testNotifyReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyReductionResumed());
+    EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
     presenter.notifyReductionResumed();
     verifyAndClear();
   }
@@ -237,11 +239,46 @@ public:
     verifyAndClear();
   }
 
-  void testICATSearchComplete() {
-    // TODO
-    // auto presenter = makePresenter();
-    // presenter.notifyICATSearchComplete();
-    // verifyAndClear();
+  void testNotifySearchResults() {
+    auto presenter = makePresenter();
+    auto results = expectPopulateSearchResultsCreatesNewModel();
+    presenter.notifySearchResults(results);
+    verifyAndClear();
+  }
+
+  void testNotifySearchResultsResumesReductionWhenAutoreducing() {
+    auto presenter = makePresenter();
+    auto results = expectPopulateSearchResultsAddsToExistingModel();
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_autoreduction, setSearchResultsExist()).Times(AtLeast(1));
+    EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
+    presenter.notifySearchResults(results);
+    verifyAndClear();
+  }
+
+  void testNotifySearchResultsTransfersRowsWhenAutoreducing() {
+    auto presenter = makePresenter();
+    auto results = expectPopulateSearchResultsAddsToExistingModel();
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_autoreduction, setSearchResultsExist()).Times(AtLeast(1));
+    // Transfer some valid rows
+    auto rowsToTransfer = std::set<int>{0, 1, 2};
+    EXPECT_CALL(m_view, getAllSearchRows())
+        .Times(1)
+        .WillOnce(Return(rowsToTransfer));
+    auto searchResult =
+        SearchResult("12345", "Test run th=0.5", "test location");
+    for (auto rowIndex : rowsToTransfer)
+      EXPECT_CALL(*m_searchModel, getRowData(rowIndex))
+          .Times(1)
+          .WillOnce(ReturnRef(searchResult));
+    EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
+    presenter.notifySearchResults(results);
+    verifyAndClear();
   }
 
   void testTransferWithNoRowsSelected() {
@@ -260,10 +297,10 @@ public:
 
   void testTransferWithAutoreductionRunning() {
     auto presenter = makePresenter();
-    expectGetValidSearchRowSelection(presenter);
+    expectGetValidSearchRowSelection();
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(true));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
     expectCreateEndlessProgressIndicator();
     presenter.notifyTransfer();
     verifyAndClear();
@@ -271,11 +308,20 @@ public:
 
   void testTransferWithAutoreductionStopped() {
     auto presenter = makePresenter();
-    expectGetValidSearchRowSelection(presenter);
+    expectGetValidSearchRowSelection();
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(false));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
     expectCreatePercentageProgressIndicator();
+    presenter.notifyTransfer();
+    verifyAndClear();
+  }
+
+  void testTransferSetsErrorForInvalidRows() {
+    auto presenter = makePresenter();
+    expectGetValidSearchRowSelection();
+    EXPECT_CALL(*m_searchModel, setError(3, _)).Times(1);
+    EXPECT_CALL(*m_searchModel, setError(5, _)).Times(1);
     presenter.notifyTransfer();
     verifyAndClear();
   }
@@ -394,6 +440,10 @@ private:
     presenter.m_searcher.reset(new NiceMock<MockSearcher>());
     m_searcher =
         dynamic_cast<NiceMock<MockSearcher> *>(presenter.m_searcher.get());
+    presenter.m_searchModel = boost::make_shared<NiceMock<MockSearchModel>>();
+    m_searchModel = dynamic_cast<NiceMock<MockSearchModel> *>(
+        presenter.m_searchModel.get());
+
     // Return an empty table by default
     ON_CALL(*m_runsTablePresenter, runsTable())
         .WillByDefault(ReturnRef(m_runsTable));
@@ -495,7 +545,7 @@ private:
     EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
   }
 
-  void expectGetValidSearchRowSelection(RunsPresenterFriend &presenter) {
+  void expectGetValidSearchRowSelection() {
     // Select a couple of rows with random indices
     auto row1Index = 3;
     auto row2Index = 5;
@@ -503,11 +553,10 @@ private:
     EXPECT_CALL(m_view, getSelectedSearchRows())
         .Times(1)
         .WillOnce(Return(selectedRows));
-    // Set up a mock search model in the presenter to return something
-    // sensible for getRowData
-    auto searchModel = boost::make_shared<MockSearchModel>(
-        "13460", "my title th=0.5", "my location");
-    presenter.m_searchModel = searchModel;
+    for (auto rowIndex : selectedRows)
+      EXPECT_CALL(*m_searchModel, getRowData(rowIndex))
+          .Times(1)
+          .WillOnce(ReturnRef(m_searchResult));
   }
 
   void expectCreateEndlessProgressIndicator() {
@@ -584,6 +633,33 @@ private:
     EXPECT_CALL(m_view, setTransferButtonEnabled(true));
   }
 
+  ITableWorkspace_sptr expectPopulateSearchResultsCreatesNewModel() {
+    auto const instrument = std::string("test_instrument");
+    ITableWorkspace_sptr results = boost::make_shared<TableWorkspace>();
+    EXPECT_CALL(m_view, getSearchInstrument())
+        .Times(1)
+        .WillOnce(Return(instrument));
+    EXPECT_CALL(m_autoreduction, searchResultsExist())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_searchModel, addDataFromTable(results, instrument)).Times(0);
+    EXPECT_CALL(m_view, showSearch(_)).Times(1);
+    return results;
+  }
+
+  ITableWorkspace_sptr expectPopulateSearchResultsAddsToExistingModel() {
+    auto const instrument = std::string("test_instrument");
+    ITableWorkspace_sptr results = boost::make_shared<TableWorkspace>();
+    EXPECT_CALL(m_autoreduction, searchResultsExist())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(m_view, getSearchInstrument())
+        .Times(1)
+        .WillOnce(Return(instrument));
+    EXPECT_CALL(*m_searchModel, addDataFromTable(results, instrument)).Times(1);
+    return results;
+  }
+
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   NiceMock<MockRunsView> m_view;
@@ -593,12 +669,14 @@ private:
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
   NiceMock<MockSearcher> *m_searcher;
-  MockAutoreduction m_autoreduction;
+  NiceMock<MockAutoreduction> m_autoreduction;
   MockPythonRunner *m_pythonRunner;
   MockRunNotifier *m_runNotifier;
+  NiceMock<MockSearchModel> *m_searchModel;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   RunsTable m_runsTable;
   std::string m_searchString;
+  SearchResult m_searchResult;
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H */

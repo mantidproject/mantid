@@ -34,7 +34,7 @@ namespace CustomInterfaces {
 class IAutoreduction;
 class IMessageHandler;
 class IPythonRunner;
-class SearchModel;
+class ISearchModel;
 
 using MantidWidgets::ProgressableView;
 
@@ -112,7 +112,7 @@ protected:
   /// Information about the autoreduction process
   IAutoreduction &m_autoreduction;
   /// The search model
-  boost::shared_ptr<SearchModel> m_searchModel;
+  boost::shared_ptr<ISearchModel> m_searchModel;
   /// The current transfer method
   std::string m_currentTransferMethod;
   /// The data processor presenters stored in a vector

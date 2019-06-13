@@ -36,6 +36,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
@@ -202,20 +203,16 @@ public:
   MOCK_METHOD0(notifyCheckForNewRuns, void());
 };
 
-class MockSearchModel : public SearchModel {
+class MockSearchModel : public ISearchModel {
 public:
-  MockSearchModel(std::string const &run, std::string const &description,
-                  std::string const &location)
-      : SearchModel(ITableWorkspace_sptr(), std::string()),
-        m_result(run, description, location) {}
-  ~MockSearchModel() override {}
-  MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
+  MOCK_METHOD2(addDataFromTable,
+               void(Mantid::API::ITableWorkspace_sptr, const std::string &));
+  MOCK_CONST_METHOD1(getRowData, SearchResult const &(int));
   MOCK_METHOD2(setError, void(int, std::string const &));
-
-  SearchResult const &getRowData(int) const override { return m_result; }
+  MOCK_METHOD0(clear, void());
 
 private:
-  SearchResult m_result;
+  SearchResult m_searchResult;
 };
 
 class MockMessageHandler : public IMessageHandler {

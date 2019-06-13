@@ -8,6 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_SEARCHMODEL_H_
 
 #include "Common/DllConfig.h"
+#include "ISearchModel.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "SearchResult.h"
 #include <QAbstractTableModel>
@@ -22,13 +23,14 @@ namespace CustomInterfaces {
 /** SearchModel : Provides a QAbstractTableModel for a Mantid
 ITableWorkspace of Reflectometry search results.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL SearchModel : public QAbstractTableModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL SearchModel : public QAbstractTableModel,
+                                                   public ISearchModel {
   Q_OBJECT
 public:
   SearchModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
               const std::string &instrument);
   void addDataFromTable(Mantid::API::ITableWorkspace_sptr tableWorkspace,
-                        const std::string &instrument);
+                        const std::string &instrument) override;
   // row and column counts
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -41,14 +43,14 @@ public:
   // get flags for a cell
   Qt::ItemFlags flags(const QModelIndex &index) const override;
   /// clear the model
-  void clear();
+  void clear() override;
   bool knownFileType(std::string const &filename) const;
   /// Add details of an error
   std::vector<SearchResult> const &results() const;
 
-  virtual SearchResult const &getRowData(int index) const;
+  virtual SearchResult const &getRowData(int index) const override;
 
-  void setError(int index, std::string const &error);
+  void setError(int index, std::string const &error) override;
 
 protected:
   // map of run numbers to search result details
@@ -57,10 +59,6 @@ protected:
 private:
   bool runHasError(const SearchResult &run) const;
 };
-
-/// Typedef for a shared pointer to \c SearchModel
-using SearchModel_sptr = boost::shared_ptr<SearchModel>;
-
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

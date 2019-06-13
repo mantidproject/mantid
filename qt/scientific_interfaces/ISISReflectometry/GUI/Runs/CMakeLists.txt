@@ -21,6 +21,7 @@ set(RUNS_INC_FILES
     Autoreduction.h
     CatalogRunNotifier.h
     CatalogSearcher.h
+    ISearchModel.h
     SearchModel.h)
 
 set(RUNS_MOC_FILES RunsView.h SearchModel.h)
