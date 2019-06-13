@@ -143,4 +143,4 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         flattened_run_list = [item for sublist in self.context.data_context.current_runs for item in sublist]
         return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' + \
-        self.context.group_pair_context.selected
+            self.context.group_pair_context.selected
