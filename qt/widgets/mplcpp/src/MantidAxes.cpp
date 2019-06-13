@@ -41,7 +41,9 @@ MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
 
-  Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
+  Python::Dict kwargs;
+  if (otherKwargs)
+    kwargs = Python::qHashToDict(otherKwargs.get());
   kwargs["wkspIndex"] = wkspIndex;
   kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
@@ -65,7 +67,9 @@ ErrorbarContainer MantidAxes::errorbar(
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
 
-  Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
+  Python::Dict kwargs;
+  if (otherKwargs)
+    kwargs = Python::qHashToDict(otherKwargs.get());
   kwargs["wkspIndex"] = wkspIndex;
   kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
