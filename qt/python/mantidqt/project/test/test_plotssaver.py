@@ -101,10 +101,28 @@ class PlotsSaverTest(unittest.TestCase):
         self.fig.axes[0].creation_args = [{u"specNum": 2, "function": "plot"}]
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
 
-        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot"}]]
+        # If post_creation_args not in creation_args, we should add error_added = False and
+        # errors_visible = False by default
+        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot",
+                                                         "post_creation_args": {"errors_added": False,
+                                                                                "errors_visible": False}}]]
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
+
+    def test_post_creation_args_are_not_overwritten_if_they_exist(self):
+        self.fig.axes[0].creation_args = [{u"specNum": 2, "function": "plot",
+                                           "post_creation_args": {"errors_added": True,
+                                                                  "errors_visible": True}}]
+        return_value = self.plot_saver.get_dict_from_fig(self.fig)
+
+        # Since the creation args contain post_creation_args, they are not changed during saving
+        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot",
+                                                         "post_creation_args": {"errors_added": True,
+                                                                                "errors_visible": True}}]]
+
+        self.maxDiff = None
+        self.assertEqual(return_value[u"creationArguments"], self.loader_plot_dict[u"creationArguments"])
 
     def test_get_dict_from_axes(self):
         self.plot_saver.figure_creation_args = [{"function": "plot"}]

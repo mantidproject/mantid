@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import matplotlib
+import unittest
 
 matplotlib.use('AGG')
 
@@ -147,9 +148,6 @@ class PlotFunctionsTest(unittest.TestCase):
         ax.set_ylim(-0.05, 0.05)
         funcs.update_colorplot_datalimits(ax, mesh)
         self.assertAlmostEqual(10.0, ax.get_xlim()[0])
-        self.assertAlmostEqual(30.0, ax.get_xlim()[1])
-        # self.assertAlmostEqual(4.0, ax.get_ylim()[0])
-        # self.assertAlmostEqual(8.0, ax.get_ylim()[1])
         from distutils.version import LooseVersion
 
         # different results with 1.5.3 and 2.1.1

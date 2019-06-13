@@ -298,7 +298,7 @@ class FigureErrorsManager(object):
                 if MantidAxKwargs.POST_CREATION_ARGS in creation_args[index]:
                     creation_args[index][MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_VISIBLE] = new_state
                 else:
-                    creation_args[index][MantidAxKwargs] = {MantidAxKwargs.ERRORS_VISIBLE: new_state}
+                    creation_args[index][MantidAxKwargs.POST_CREATION_ARGS] = {MantidAxKwargs.ERRORS_VISIBLE: new_state}
 
             error_line.set_visible(new_state)
 

@@ -24,8 +24,8 @@ from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_une
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
     get_wksp_index_dist_and_label, check_resample_to_regular_grid, get_indices, get_normalize_by_bin_width
-
 import mantid.plots.modest_image
+from mantid.plots.utility import MantidAxType, MantidAxKwargs
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize

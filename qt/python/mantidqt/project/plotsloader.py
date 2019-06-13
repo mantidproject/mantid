@@ -57,21 +57,17 @@ class PlotsLoader(object):
         # Make a copy so it can be applied to the axes, of the plot once created.
         creation_args_copy = copy.deepcopy(creation_args[0])
 
-        # Populate workspace names
-        # workspace_name = creation_args[0][0].pop('workspaces')
-        # post_creation_args = creation_args[0][0].pop(MantidAxKwargs.POST_CREATION_ARGS)
-        # workspace = ADS.retrieve(workspace_name)
-
         # Make initial plot
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
 
         pcargs = []
         # If an overplot is necessary plot onto the same figure
         for cargs in creation_args[0]:
-            workspace_name = cargs.pop('workspaces')
-            pcargs.append(cargs.pop(MantidAxKwargs.POST_CREATION_ARGS, {}))
-            workspace = ADS.retrieve(workspace_name)
-            self.plot_func(workspace, ax, ax.figure, cargs)
+            if "workspaces" in cargs:
+                workspace_name = cargs.pop('workspaces')
+                pcargs.append(cargs.pop(MantidAxKwargs.POST_CREATION_ARGS, {}))
+                workspace = ADS.retrieve(workspace_name)
+                self.plot_func(workspace, ax, ax.figure, cargs)
 
         fem = FigureErrorsManager(ax.figure.canvas)
         for index, pcargs in enumerate(pcargs):
@@ -123,21 +119,6 @@ class PlotsLoader(object):
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)
-
-    def plot_extra_lines(self, creation_args, ax):
-        """
-        This method currently only considers single matplotlib.axes.Axes based figures as that is the most common case,
-        to make it more than that the lines creation_args[0] needs to be rewrote to handle multiple axes args.
-        :param creation_args:
-        :param ax:
-        :return:
-        """
-        # If an overplot is necessary plot onto the same figure
-        if len(creation_args[0]) > 1:
-            for ii in range(1, len(creation_args[0])):
-                workspace_name = creation_args[0][ii].pop('workspaces')
-                workspace = ADS.retrieve(workspace_name)
-                self.plot_func(workspace, ax, ax.figure, creation_args[0][ii])
 
     def restore_figure_data(self, fig, dic):
         self.restore_fig_properties(fig, dic["properties"])

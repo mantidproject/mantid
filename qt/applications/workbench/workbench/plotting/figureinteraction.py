@@ -20,13 +20,11 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu
 
 # third party imports
+from mantid.api import AnalysisDataService as ads
+from mantid.plots import MantidAxes
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
-from workbench.plotting.toolbar import ToolbarStateManager
-# local imports
-from mantid.api import AnalysisDataService as ads
-from mantid.plots import MantidAxes
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import ToolbarStateManager
 
