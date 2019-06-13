@@ -12,7 +12,7 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/Chainable.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
+
 #include "vtkDataSet.h"
 #include "vtkSmartPointer.h"
 #include <boost/shared_ptr.hpp>

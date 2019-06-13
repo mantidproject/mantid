@@ -84,8 +84,8 @@ class SpectraSelectionDialogTest(GuiTest):
     def test_plot_all_gives_only_workspaces_indices(self):
         dlg = SpectraSelectionDialog([self._multi_spec_ws])
         dlg._ui.buttonBox.button(QDialogButtonBox.YesToAll).click()
-        self.assertTrue(dlg.selection is not None)
-        self.assertTrue(dlg.selection.spectra is None)
+        self.assertNotEqual(dlg.selection, None)
+        self.assertEqual(dlg.selection.spectra, None)
         self.assertEqual(range(200), dlg.selection.wksp_indices)
 
     def test_entered_workspace_indices_gives_correct_selection_back(self):
@@ -93,8 +93,8 @@ class SpectraSelectionDialogTest(GuiTest):
         dlg._ui.wkspIndices.setText("1-3,5")
         dlg._ui.buttonBox.button(QDialogButtonBox.Ok).click()
 
-        self.assertTrue(dlg.selection is not None)
-        self.assertTrue(dlg.selection.spectra is None)
+        self.assertNotEqual(dlg.selection, None)
+        self.assertEqual(dlg.selection.spectra, None)
         self.assertEqual([1, 2, 3, 5], dlg.selection.wksp_indices)
 
     def test_entered_spectra_gives_correct_selection_back(self):
@@ -103,8 +103,8 @@ class SpectraSelectionDialogTest(GuiTest):
         dlg._ui.buttonBox.button(QDialogButtonBox.Ok).click()
 
         self._mock_get_icon.assert_called_once_with('mdi.asterisk', 'red', 0.6)
-        self.assertTrue(dlg.selection is not None)
-        self.assertTrue(dlg.selection.spectra is None)
+        self.assertNotEqual(dlg.selection, None)
+        self.assertEqual(dlg.selection.spectra, None)
         self.assertEqual(list(range(50, 61)), dlg.selection.wksp_indices)
 
     @mock.patch('mantidqt.dialogs.spectraselectordialog.SpectraSelectionDialog', autospec=True)
@@ -118,7 +118,7 @@ class SpectraSelectionDialogTest(GuiTest):
         selection = get_spectra_selection([self._multi_spec_ws])
 
         dialog_mock.exec_.assert_called_once_with()
-        self.assertTrue(selection is None)
+        self.assertEqual(selection, None)
 
     @mock.patch('mantidqt.dialogs.spectraselectordialog.SpectraSelectionDialog')
     def test_get_spectra_selection_does_not_use_dialog_for_single_spectrum(self, dialog_mock):
@@ -136,11 +136,11 @@ class SpectraSelectionDialogTest(GuiTest):
         s = '3'
         self.assertEqual([3], parse_selection_str(s, 1, 3))
         s = '-1'
-        self.assertTrue(parse_selection_str(s, 1, 1) is None)
+        self.assertEqual(parse_selection_str(s, 1, 1), None)
         s = '1'
-        self.assertTrue(parse_selection_str(s, 2, 2) is None)
+        self.assertEqual(parse_selection_str(s, 2, 2), None)
         s = '1'
-        self.assertTrue(parse_selection_str(s, 2, 3) is None)
+        self.assertEqual(parse_selection_str(s, 2, 3), None)
 
     def test_parse_selection_str_single_range(self):
         s = '1-3'
@@ -148,9 +148,9 @@ class SpectraSelectionDialogTest(GuiTest):
         s = '2-4'
         self.assertEqual([2, 3, 4], parse_selection_str(s, 1, 5))
         s = '2-4'
-        self.assertTrue(parse_selection_str(s, 2, 3) is None)
+        self.assertEqual(parse_selection_str(s, 2, 3), None)
         s = '2-4'
-        self.assertTrue(parse_selection_str(s, 3, 5) is None)
+        self.assertEqual(parse_selection_str(s, 3, 5), None)
 
     def test_parse_selection_str_mix_number_range_spaces(self):
         s = '1-3, 5,8,10, 11 ,12-14 , 15 -16, 16- 19'

@@ -65,15 +65,19 @@ MantidAxes::errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
 }
 
 /**
- * Remove any artists plotted from the given workspace
+ * Remove any artists plotted from the given workspace.
  * @param ws A reference to a workspace whose name is used to
  * lookup any artists for removal
  */
 void MantidAxes::removeWorkspaceArtists(
     const Mantid::API::MatrixWorkspace_sptr &ws) {
   GlobalInterpreterLock lock;
-  pyobj().attr("remove_workspace_artists")(
-      Python::NewRef(MatrixWorkpaceToPython()(ws)));
+  try {
+    pyobj().attr("remove_workspace_artists")(
+        Python::NewRef(MatrixWorkpaceToPython()(ws)));
+  } catch (Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonException();
+  }
 }
 
 /**

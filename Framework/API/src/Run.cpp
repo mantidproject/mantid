@@ -11,7 +11,6 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/make_unique.h"
 
 #include <nexus/NeXusFile.hpp>
 
@@ -46,11 +45,11 @@ const char *OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
 Kernel::Logger g_log("Run");
 } // namespace
 
-Run::Run() : m_goniometer(Kernel::make_unique<Geometry::Goniometer>()) {}
+Run::Run() : m_goniometer(std::make_unique<Geometry::Goniometer>()) {}
 
 Run::Run(const Run &other)
-    : LogManager(other), m_goniometer(Kernel::make_unique<Geometry::Goniometer>(
-                             *other.m_goniometer)),
+    : LogManager(other),
+      m_goniometer(std::make_unique<Geometry::Goniometer>(*other.m_goniometer)),
       m_histoBins(other.m_histoBins) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -58,7 +57,7 @@ Run::~Run() = default;
 
 Run &Run::operator=(const Run &other) {
   LogManager::operator=(other);
-  m_goniometer = Kernel::make_unique<Geometry::Goniometer>(*other.m_goniometer);
+  m_goniometer = std::make_unique<Geometry::Goniometer>(*other.m_goniometer);
   m_histoBins = other.m_histoBins;
   return *this;
 }
@@ -69,7 +68,7 @@ boost::shared_ptr<Run> Run::clone() {
     clone->addProperty(property->clone());
   }
   clone->m_goniometer =
-      Kernel::make_unique<Geometry::Goniometer>(*this->m_goniometer);
+      std::make_unique<Geometry::Goniometer>(*this->m_goniometer);
   clone->m_histoBins = this->m_histoBins;
   return clone;
 }
@@ -324,7 +323,7 @@ void Run::setGoniometer(const Geometry::Goniometer &goniometer,
                         const bool useLogValues) {
   auto old = std::move(m_goniometer);
   try {
-    m_goniometer = Kernel::make_unique<Geometry::Goniometer>(goniometer);
+    m_goniometer = std::make_unique<Geometry::Goniometer>(goniometer);
     if (useLogValues)
       calculateGoniometerMatrix();
   } catch (std::runtime_error &) {

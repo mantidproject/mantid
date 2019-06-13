@@ -41,15 +41,15 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
 
     def test_calculate_correction(self):
         correction = SANSWideAngleCorrection(self._sample, self._trans)
-        self.assertTrue(correction.getNumberHistograms()==self._sample.getNumberHistograms())
-        self.assertTrue(len(correction.readX(0))== len(self._sample.readX(0)))
-        self.assertTrue(len(correction.readY(0))==len(self._sample.readY(0)))
+        self.assertEqual(correction.getNumberHistograms(), self._sample.getNumberHistograms())
+        self.assertEqual(len(correction.readX(0)),  len(self._sample.readX(0)))
+        self.assertEqual(len(correction.readY(0)), len(self._sample.readY(0)))
         lRange = Min(correction)
         hRange = Max(correction)
         lRange = Transpose(lRange)
         hRange = Transpose(hRange)
-        self.assertTrue(97 > hRange.dataY(0).all())
-        self.assertTrue(1 >= hRange.dataY(0).all())
+        self.assertGreater(97, hRange.dataY(0).all())
+        self.assertGreaterEqual(1, hRange.dataY(0).all())
 
 
     def test_negative_trans_data(self):

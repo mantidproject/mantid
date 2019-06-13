@@ -10,16 +10,16 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
 
-#include <MantidAPI/ExperimentInfo.h>
-#include <MantidAPI/IAlgorithm_fwd.h>
-#include <MantidAPI/IMDEventWorkspace_fwd.h>
-#include <MantidAPI/IMDWorkspace.h>
-#include <MantidAPI/IPeaksWorkspace_fwd.h>
-#include <MantidAPI/ITableWorkspace_fwd.h>
-#include <MantidAPI/MatrixWorkspace_fwd.h>
-#include <MantidAPI/WorkspaceGroup_fwd.h>
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
-#include <MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h>
+#include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 #include <QDockWidget>
 #include <QHash>
 #include <QMap>

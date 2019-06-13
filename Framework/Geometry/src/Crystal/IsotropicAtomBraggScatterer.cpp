@@ -104,16 +104,16 @@ void IsotropicAtomBraggScatterer::declareScattererProperties() {
   uValidator->setLower(0.0);
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<double>>("U", 0.0, uValidator),
+      std::make_unique<PropertyWithValue<double>>("U", 0.0, uValidator),
       "Isotropic atomic displacement in Angstrom^2");
 
   IValidator_sptr occValidator =
       boost::make_shared<BoundedValidator<double>>(0.0, 1.0);
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
-                      "Occupancy", 1.0, occValidator),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Occupancy", 1.0,
+                                                              occValidator),
                   "Site occupancy, values on interval [0,1].");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
       "Element", "H", boost::make_shared<MandatoryValidator<std::string>>()));
 }
 

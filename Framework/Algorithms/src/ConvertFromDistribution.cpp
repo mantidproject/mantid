@@ -25,7 +25,7 @@ void ConvertFromDistribution::init() {
   auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>(false);
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Kernel::Direction::InOut, wsValidator),
                   "The name of the workspace to convert.");
 }

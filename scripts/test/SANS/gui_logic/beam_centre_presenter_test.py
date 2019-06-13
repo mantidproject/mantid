@@ -34,7 +34,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter.on_run_clicked()
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
-        self.assertTrue(self.presenter._work_handler.process.call_args[0][1] == self.presenter._beam_centre_model.find_beam_centre)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][1],  self.presenter._beam_centre_model.find_beam_centre)
 
     def test_that_on_run_clicked_updates_model_from_view(self):
         self.view.left_right = False
@@ -56,7 +56,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.view.set_options.assert_called_once_with(self.presenter._beam_centre_model)
 
         self.presenter.on_update_rows()
-        self.assertTrue(self.view.set_options.call_count == 2)
+        self.assertEqual(self.view.set_options.call_count,  2)
 
     def test_that_model_reset_to_defaults_for_instrument_is_called_on_update_rows(self):
         self.presenter.set_view(self.view)

@@ -198,10 +198,9 @@ void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
   const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "The name of the Nexus file to read, as a full or relative path.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
@@ -219,7 +218,7 @@ void LoadNexusProcessed::init() {
                   "Number of first spectrum to read.");
   declareProperty("SpectrumMax", static_cast<int>(Mantid::EMPTY_INT()),
                   mustBePositive, "Number of last spectrum to read.");
-  declareProperty(make_unique<ArrayProperty<int>>("SpectrumList"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", static_cast<int>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
@@ -229,8 +228,8 @@ void LoadNexusProcessed::init() {
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
+                                                Direction::Input),
       "For multiperiod workspaces. Copy instrument, parameter and x-data "
       "rather than loading it directly for each workspace. Y, E and log "
       "information is always loaded.");
@@ -493,7 +492,7 @@ void LoadNexusProcessed::exec() {
                       1. / nWorkspaceEntries_d);
       }
 
-      declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
           prop_name + indexStr, wsName, Direction::Output));
 
       wksp_group->addWorkspace(local_workspace);

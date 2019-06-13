@@ -37,21 +37,21 @@ void LoadCalFile::getInstrument3WaysInit(Algorithm *alg) {
   std::string grpName("Specify the Instrument");
 
   alg->declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
-  alg->declareProperty(make_unique<PropertyWithValue<std::string>>(
+  alg->declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                            "InstrumentName", "", Direction::Input),
                        "Optional: Name of the instrument to base the "
                        "GroupingWorkspace on which to base the "
                        "GroupingWorkspace.");
 
-  alg->declareProperty(make_unique<FileProperty>("InstrumentFilename", "",
-                                                 FileProperty::OptionalLoad,
-                                                 ".xml"),
-                       "Optional: Path to the instrument definition file on "
-                       "which to base the GroupingWorkspace.");
+  alg->declareProperty(
+      std::make_unique<FileProperty>("InstrumentFilename", "",
+                                     FileProperty::OptionalLoad, ".xml"),
+      "Optional: Path to the instrument definition file on "
+      "which to base the GroupingWorkspace.");
 
   alg->setPropertyGroup("InputWorkspace", grpName);
   alg->setPropertyGroup("InstrumentName", grpName);
@@ -126,28 +126,29 @@ void LoadCalFile::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
   declareProperty(
-      make_unique<FileProperty>("CalFilename", "", FileProperty::Load, ".cal"),
+      std::make_unique<FileProperty>("CalFilename", "", FileProperty::Load,
+                                     ".cal"),
       "Path to the old-style .cal grouping/calibration file (multi-column "
       "ASCII). You must also specify the instrument.");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("MakeGroupingWorkspace",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "MakeGroupingWorkspace", true, Direction::Input),
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("MakeOffsetsWorkspace",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "MakeOffsetsWorkspace", true, Direction::Input),
                   "Set to true to create a OffsetsWorkspace with called "
                   "WorkspaceName_offsets.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("MakeMaskWorkspace", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("MakeMaskWorkspace", true,
+                                                Direction::Input),
       "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
+                                                       Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_cal', '_offsets', '_mask' appended to them.");
 }
@@ -178,7 +179,7 @@ void LoadCalFile::exec() {
   if (MakeGroupingWorkspace) {
     groupWS = GroupingWorkspace_sptr(new GroupingWorkspace(inst));
     groupWS->setTitle(title);
-    declareProperty(Kernel::make_unique<WorkspaceProperty<GroupingWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
                         "OutputGroupingWorkspace", WorkspaceName + "_group",
                         Direction::Output),
                     "Set the the output GroupingWorkspace, if any.");
@@ -189,7 +190,7 @@ void LoadCalFile::exec() {
   if (MakeOffsetsWorkspace) {
     offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inst));
     offsetsWS->setTitle(title);
-    declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                         "OutputOffsetsWorkspace", WorkspaceName + "_offsets",
                         Direction::Output),
                     "Set the the output OffsetsWorkspace, if any.");
@@ -201,7 +202,7 @@ void LoadCalFile::exec() {
     maskWS = MaskWorkspace_sptr(new MaskWorkspace(inst));
     maskWS->setTitle(title);
     declareProperty(
-        Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+        std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
             "OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
         "Set the the output MaskWorkspace, if any.");
     maskWS->mutableRun().addProperty("Filename", CalFilename);
@@ -217,7 +218,7 @@ void LoadCalFile::exec() {
     ITableWorkspace_sptr calWS = alg->getProperty("OutputWorkspace");
     calWS->setTitle(title);
     declareProperty(
-        Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+        std::make_unique<WorkspaceProperty<ITableWorkspace>>(
             "OutputCalWorkspace", WorkspaceName + "_cal", Direction::Output),
         "Set the output Diffraction Calibration workspace, if any.");
     setProperty("OutputCalWorkspace", calWS);

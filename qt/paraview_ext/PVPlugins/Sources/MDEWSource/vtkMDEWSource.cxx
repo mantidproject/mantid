@@ -139,14 +139,14 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **,
         this, "Drawing...");
 
     auto hexahedronFactory =
-        Mantid::Kernel::make_unique<vtkMDHexFactory>(m_normalization);
+        std::make_unique<vtkMDHexFactory>(m_normalization);
 
     hexahedronFactory
         ->setSuccessor(
-            Mantid::Kernel::make_unique<vtkMDQuadFactory>(m_normalization))
+            std::make_unique<vtkMDQuadFactory>(m_normalization))
         .setSuccessor(
-            Mantid::Kernel::make_unique<vtkMDLineFactory>(m_normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
+            std::make_unique<vtkMDLineFactory>(m_normalization))
+        .setSuccessor(std::make_unique<vtkMD0DFactory>());
 
     hexahedronFactory->setTime(m_time);
     vtkSmartPointer<vtkDataSet> product;
@@ -169,7 +169,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **,
     output->ShallowCopy(clipperOutput);
 
     try {
-      auto workspaceProvider = Mantid::Kernel::make_unique<
+      auto workspaceProvider = std::make_unique<
           ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
       m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider),
                                      &drawingProgressUpdate);
@@ -192,14 +192,14 @@ int vtkMDEWSource::RequestInformation(
     vtkInformationVector *outputVector) {
   if (!m_presenter && !m_wsName.empty()) {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWSource>>(this);
-    m_presenter = Mantid::Kernel::make_unique<MDEWInMemoryLoadingPresenter>(
+        std::make_unique<MDLoadingViewAdapter<vtkMDEWSource>>(this);
+    m_presenter = std::make_unique<MDEWInMemoryLoadingPresenter>(
         std::move(view),
         new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
     if (m_presenter->canReadFile()) {
       // If the MDEvent workspace has had top level splitting applied to it,
       // then use the a deptgit stah of 1
-      auto workspaceProvider = Mantid::Kernel::make_unique<
+      auto workspaceProvider = std::make_unique<
           ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
       if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
               m_wsName, *workspaceProvider)) {

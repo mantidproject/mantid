@@ -13,6 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 from collections import OrderedDict
+from copy import copy
 from functools import partial
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
@@ -24,7 +25,10 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.toolbar import ToolbarStateManager
 # local imports
-from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
+from mantid.api import AnalysisDataService as ads
+from mantid.plots import MantidAxes
+from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
+from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
 AXES_SCALE_MENU_OPTS = OrderedDict([
@@ -77,10 +81,10 @@ class FigureInteraction(object):
         """Respond to a MouseEvent where a button was pressed"""
         # local variables to avoid constant self lookup
         canvas = self.canvas
-        if (event.button == canvas.buttond[Qt.RightButton] and
+        if (event.button == canvas.buttond.get(Qt.RightButton) and
                 not self.toolbar_manager.is_tool_active()):
             self._show_context_menu(event)
-        elif event.dblclick and event.button == canvas.buttond[Qt.LeftButton]:
+        elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
             self._show_axis_editor(event)
 
     def _show_axis_editor(self, event):
@@ -128,6 +132,8 @@ class FigureInteraction(object):
             self.fit_browser.add_to_menu(menu)
             menu.addSeparator()
         self._add_axes_scale_menu(menu)
+        if isinstance(event.inaxes, MantidAxes):
+            self._add_normalization_option_menu(menu, event.inaxes)
         self.errors_manager.add_error_bars_menu(menu)
         menu.exec_(QCursor.pos())
 
@@ -143,6 +149,88 @@ class FigureInteraction(object):
                 action.setChecked(True)
             axes_actions.addAction(action)
         menu.addMenu(axes_menu)
+
+    def _add_normalization_option_menu(self, menu, ax):
+        # Check if toggling normalization makes sense
+        can_toggle_normalization = self._can_toggle_normalization(ax)
+        if not can_toggle_normalization:
+            return None
+
+        # Create menu
+        norm_menu = QMenu("Normalization", menu)
+        norm_actions_group = QActionGroup(norm_menu)
+        none_action = norm_menu.addAction(
+            'None', lambda: self._set_normalization_none(ax))
+        norm_action = norm_menu.addAction(
+            'Bin Width', lambda: self._set_normalization_bin_width(ax))
+        for action in [none_action, norm_action]:
+            norm_actions_group.addAction(action)
+            action.setCheckable(True)
+
+        # Update menu state
+        is_normalized = self._is_normalized(ax)
+        if is_normalized:
+            norm_action.setChecked(True)
+        else:
+            none_action.setChecked(True)
+
+        menu.addMenu(norm_menu)
+
+    def _is_normalized(self, ax):
+        artists = [art for art in ax.tracked_workspaces.values()]
+        return all(art[0].is_normalized for art in artists)
+
+    def _set_normalization_bin_width(self, ax):
+        if self._is_normalized(ax):
+            return
+        self._toggle_normalization(ax)
+
+    def _set_normalization_none(self, ax):
+        if not self._is_normalized(ax):
+            return
+        self._toggle_normalization(ax)
+
+    def _toggle_normalization(self, ax):
+        is_normalized = self._is_normalized(ax)
+        for arg_set in ax.creation_args:
+            if arg_set['workspaces'] in ax.tracked_workspaces:
+                workspace = ads.retrieve(arg_set['workspaces'])
+                arg_set['distribution'] = is_normalized
+                arg_set_copy = copy(arg_set)
+                [arg_set_copy.pop(key) for key in ['function', 'workspaces']]
+                if 'specNum' not in arg_set:
+                    if 'wkspIndex' in arg_set:
+                        arg_set['specNum'] = workspace.getSpectrum(
+                            arg_set.pop('wkspIndex')).getSpectrumNo()
+                    else:
+                        raise RuntimeError(
+                            "No spectrum number associated with plot of "
+                            "workspace '{}'".format(workspace.name()))
+                for ws_artist in ax.tracked_workspaces[workspace.name()]:
+                    if ws_artist.spec_num == arg_set.get('specNum'):
+                        ws_artist.is_normalized = not is_normalized
+                        ws_artist.replace_data(workspace, arg_set_copy)
+        ax.relim()
+        ax.autoscale()
+        self.canvas.draw()
+
+    def _can_toggle_normalization(self, ax):
+        """
+        Return True if no plotted workspaces are distributions and all curves
+        on the figure are either distributions or non-distributions. Return
+        False otherwise.
+        :param ax: A MantidAxes object
+        :return: bool
+        """
+        plotted_normalized = []
+        for workspace_name, artists in ax.tracked_workspaces.items():
+            if not ads.retrieve(workspace_name).isDistribution():
+                plotted_normalized += [a.is_normalized for a in artists]
+            else:
+                return False
+        if all(plotted_normalized) or not any(plotted_normalized):
+            return True
+        return False
 
     def _get_axes_scale_types(self):
         """Return a 2-tuple containing the axis scale types if all Axes on the figure are the same

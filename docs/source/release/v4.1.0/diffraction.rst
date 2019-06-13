@@ -25,6 +25,8 @@ Improvements
 
 - :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now correctly takes into account scale for translation. Rotation is now applied before translation to reduce confusion.
 
+- The Pearl scripts now automatically disable attenuation on long-mode.
+
 Bug Fixes
 #########
 
@@ -79,6 +81,8 @@ Improvements
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` will integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
 
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
+
+- Maximum order of modulated vectors is now available to python: ws.sample().getOrientedLattice().getMaxOrder()
 
 
 Imaging

@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 
 import mantid.api
 import mantid.plots.plotfunctions as funcs
+from mantid.plots.utility import MantidAxType
 from mantid.kernel import config
 from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, DeleteWorkspace,
                               CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog)
@@ -196,6 +197,16 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, 0, None))
         self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, slicepoint=(0, None, None))
         self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
+
+    def test_1d_x_axes_label_spectrum_plot(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1, axis=MantidAxType.SPECTRUM)
+        self.assertEqual(ax.get_xlabel(), "Wavelength ($\\AA$)")
+
+    def test_1d_x_axes_label_bin_plot(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1, axis=MantidAxType.BIN)
+        self.assertEqual(ax.get_xlabel(), "Spectrum")
 
     def test_1d_y_axes_label_auto_distribution_on(self):
         fig, ax = plt.subplots()

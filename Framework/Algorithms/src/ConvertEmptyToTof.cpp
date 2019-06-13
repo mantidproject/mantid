@@ -51,14 +51,14 @@ const std::string ConvertEmptyToTof::category() const {
 void ConvertEmptyToTof::init() {
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Empty");
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
   declareProperty(
-      make_unique<Kernel::ArrayProperty<int>>("ListOfSpectraIndices"),
+      std::make_unique<Kernel::ArrayProperty<int>>("ListOfSpectraIndices"),
       "A list of spectra workspace indices as a string with ranges; e.g. "
       "5-10,15,20-23. \n"
       "Optional: if not specified, then the Start/EndIndex fields "
@@ -68,7 +68,7 @@ void ConvertEmptyToTof::init() {
       "a list '12,15,26,28' gives '10-20,26,28'.");
 
   declareProperty(
-      make_unique<Kernel::ArrayProperty<int>>("ListOfChannelIndices"),
+      std::make_unique<Kernel::ArrayProperty<int>>("ListOfChannelIndices"),
       "A list of spectra indices as a string with ranges; e.g. "
       "5-10,15,20-23. \n"
       "Optional: if not specified, then the Start/EndIndex fields "

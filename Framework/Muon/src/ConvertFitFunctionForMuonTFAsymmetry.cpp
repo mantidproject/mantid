@@ -76,16 +76,16 @@ DECLARE_ALGORITHM(ConvertFitFunctionForMuonTFAsymmetry)
  *
  */
 void ConvertFitFunctionForMuonTFAsymmetry::init() {
-  declareProperty(make_unique<FunctionProperty>("InputFunction"),
+  declareProperty(std::make_unique<FunctionProperty>("InputFunction"),
                   "The fitting function to be converted.");
   // table of name, norms
   // if construct -> read relevant norms into sorted list
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "NormalizationTable", "", Direction::Input),
       "Name of the table containing the normalizations for the asymmetries.");
   // list of workspaces
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
                       "WorkspaceList", boost::make_shared<API::ADSValidator>()),
                   "An ordered list of workspaces (to get the initial values "
                   "for the normalizations).");
@@ -102,7 +102,7 @@ void ConvertFitFunctionForMuonTFAsymmetry::init() {
       " from a function that is suitable for TF Asymmetry calculations.");
 
   declareProperty(
-      make_unique<FunctionProperty>("OutputFunction", Direction::Output),
+      std::make_unique<FunctionProperty>("OutputFunction", Direction::Output),
       "The converted fitting function.");
 }
 

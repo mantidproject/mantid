@@ -41,11 +41,11 @@ void Rebin2D::init() {
   using Kernel::Direction;
   using Kernel::PropertyWithValue;
   using Kernel::RebinParamsValidator;
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
   const std::string docString =
       "A comma separated list of first bin boundary, width, last bin boundary. "
@@ -54,21 +54,20 @@ void Rebin2D::init() {
       "pairs. "
       "Negative width values indicate logarithmic binning.";
   auto rebinValidator = boost::make_shared<RebinParamsValidator>();
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Axis1Binning",
-                                                             rebinValidator),
-                  docString);
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Axis2Binning",
-                                                             rebinValidator),
-                  docString);
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("UseFractionalArea", false,
-                                                   Direction::Input),
+      std::make_unique<ArrayProperty<double>>("Axis1Binning", rebinValidator),
+      docString);
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("Axis2Binning", rebinValidator),
+      docString);
+  declareProperty(
+      std::make_unique<PropertyWithValue<bool>>("UseFractionalArea", false,
+                                                Direction::Input),
       "Flag to turn on the using the fractional area tracking RebinnedOutput "
       "workspace\n."
       "Default is false.");
-  declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("Transpose", false),
-      "Run the Transpose algorithm on the resulting matrix.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Transpose", false),
+                  "Run the Transpose algorithm on the resulting matrix.");
 }
 
 /**

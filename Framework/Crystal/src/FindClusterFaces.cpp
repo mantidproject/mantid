@@ -271,12 +271,12 @@ const std::string FindClusterFaces::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindClusterFaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input image workspace consisting of cluster ids.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "FilterWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional filtering peaks workspace. Used to restrict face finding to "
       "clusters in image which correspond to peaks in the workspace.");
@@ -284,21 +284,21 @@ void FindClusterFaces::init() {
   declareProperty("LimitRows", true,
                   "Limit the report output to a maximum number of rows");
 
-  declareProperty(make_unique<PropertyWithValue<int>>(
+  declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "MaximumRows", 100000,
                       boost::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings(
-      "MaximumRows", make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
+  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
+                                         "LimitRows", IS_DEFAULT));
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "An output table workspace containing cluster face information.");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("TruncatedOutput", false,
-                                                       Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "TruncatedOutput", false, Direction::Output),
                   "Indicates that the output results were truncated if True");
 }
 

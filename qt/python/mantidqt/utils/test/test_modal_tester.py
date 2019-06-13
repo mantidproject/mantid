@@ -85,7 +85,7 @@ class TestModalTester(GuiTest):
             tester = ModalTester(create, testing_function)
             tester.start()
             print_exc.assert_called_once_with()
-        self.assertTrue(tester.widget is None)
+        self.assertEqual(tester.widget, None)
         self.assertFalse(tester.passed)
 
 

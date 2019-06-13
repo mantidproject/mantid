@@ -7,7 +7,7 @@
 #ifndef MANTID_PYTHONINTERFACE_EXTRACTWORKSPACE_H_
 #define MANTID_PYTHONINTERFACE_EXTRACTWORKSPACE_H_
 
-#include <MantidAPI/Workspace.h>
+#include "MantidAPI/Workspace.h"
 
 #include <boost/python/object_fwd.hpp>
 

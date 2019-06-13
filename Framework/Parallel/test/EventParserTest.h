@@ -218,7 +218,7 @@ public:
     anonymous::FakeParserDataGenerator<int32_t, int32_t, double> gen(1, 10, 1);
     auto parser = gen.generateTestParser();
     parser->setEventDataPartitioner(
-        Kernel::make_unique<EventDataPartitioner<int32_t, int32_t, double>>(
+        std::make_unique<EventDataPartitioner<int32_t, int32_t, double>>(
             1, PulseTimeGenerator<int32_t, int32_t>{
                    gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0}));
     parser->setEventTimeOffsetUnit("microsecond");
@@ -236,7 +236,7 @@ public:
     anonymous::FakeParserDataGenerator<int32_t, int64_t, float> gen(1, 10, 2);
     auto parser = gen.generateTestParser();
     parser->setEventDataPartitioner(
-        Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, float>>(
+        std::make_unique<EventDataPartitioner<int32_t, int64_t, float>>(
             1, PulseTimeGenerator<int32_t, int64_t>{
                    gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0}));
     parser->setEventTimeOffsetUnit("microsecond");
@@ -258,7 +258,7 @@ public:
 
     for (int i = 0; i < numBanks; i++) {
       parser->setEventDataPartitioner(
-          Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
+          std::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
               1, PulseTimeGenerator<int32_t, int64_t>{
                      gen.eventIndex(i), gen.eventTimeZero(), "nanosecond", 0}));
       parser->setEventTimeOffsetUnit("microsecond");
@@ -276,7 +276,7 @@ public:
     anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(1, 11, 7);
     auto parser = gen.generateTestParser();
     parser->setEventDataPartitioner(
-        Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
+        std::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
             1, PulseTimeGenerator<int32_t, int64_t>{
                    gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0}));
     parser->setEventTimeOffsetUnit("microsecond");
@@ -308,7 +308,7 @@ public:
 
     for (size_t bank = 0; bank < numBanks; bank++) {
       parser->setEventDataPartitioner(
-          Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
+          std::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
               1, PulseTimeGenerator<int32_t, int64_t>{gen.eventIndex(bank),
                                                       gen.eventTimeZero(),
                                                       "nanosecond", 0}));
@@ -345,7 +345,7 @@ public:
     PulseTimeGenerator<int32_t, int32_t> pulseTimes({0}, {0}, "nanosecond", 0);
 
     parser.setEventDataPartitioner(
-        Kernel::make_unique<EventDataPartitioner<int32_t, int32_t, double>>(
+        std::make_unique<EventDataPartitioner<int32_t, int32_t, double>>(
             1, std::move(pulseTimes)));
 
     int32_t event_id{0};
@@ -426,7 +426,7 @@ public:
   void testCompletePerformance() {
     for (size_t i = 0; i < NUM_BANKS; ++i) {
       parser->setEventDataPartitioner(
-          Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
+          std::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
               1, PulseTimeGenerator<int32_t, int64_t>{
                      gen.eventIndex(i), gen.eventTimeZero(), "nanosecond", 0}));
       parser->setEventTimeOffsetUnit("microsecond");

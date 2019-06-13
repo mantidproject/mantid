@@ -403,7 +403,7 @@ This can be done by adjusting the property settings when implementing ``Algorith
 
   void MyAlg::init() {
     // ...
-    setPropertySettings("MyProperty", Kernel::make_unique<InvisibleProperty>());
+    setPropertySettings("MyProperty", std::make_unique<InvisibleProperty>());
   }
 
 Units Tests

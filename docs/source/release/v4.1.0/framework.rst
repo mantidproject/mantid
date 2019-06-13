@@ -17,6 +17,11 @@ Concepts
 Algorithms
 ----------
 
+New
+###
+
+- :ref: `RemoveSpectra <algm-RemoveSpectra>` is a new general purpose algorithm that enables you to optionally remove spectra from an algorithm given one of 3 criteria, if it's masked, if it doesn't have a detector, and if presented in a user defined list.
+
 Improvements
 ############
 
@@ -41,6 +46,7 @@ Improvements
 Bug fixes
 #########
 - :ref:`SetSample <algm-SetSample>` now correctly handles the Sample number density being passed as a string, before the algorithm would execute, but silently ignored the provided number density, the number density is now properly used.
+- Mantid no longer crashed when invalid period logs encountered in `LoadEventNexus <algm-LoadEventNexus>`. A clear error message is displayed which explains the problem.
 
 Removed
 #######
@@ -54,8 +60,16 @@ Data Objects
 Python
 ------
 
+New
+###
+
 - The ``mantid.plots`` module now registers a ``power`` and ``square`` scale type to be used with ``set_xscale`` and ``set_xscale`` functions.
 - In :class:`mantid.kernel.DateAndTime`, the method :py:meth:`~mantid.kernel.DateAndTime.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.DateAndTime.totalNanoseconds` should be used instead.
 - In :class:`mantid.kernel.time_duration`, The method :py:meth:`~mantid.kernel.time_duration.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.time_duration.totalNanoseconds` should be used instead.
+
+Bugfixes
+########
+
+- The TypeError raised when calibrating tubes has been fixed.
 
 :ref:`Release 4.1.0 <v4.1.0>`

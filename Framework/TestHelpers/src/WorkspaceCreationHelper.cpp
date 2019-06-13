@@ -45,7 +45,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_cow.h"
-#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <sstream>
@@ -64,8 +63,7 @@ using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps)
-    : m_Progress(
-          Mantid::Kernel::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
+    : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
@@ -959,8 +957,7 @@ void addTSPEntry(Run &runInfo, std::string name, double val) {
  */
 void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c) {
-  auto latt =
-      Mantid::Kernel::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
+  auto latt = std::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
   ws->mutableSample().setOrientedLattice(latt.release());
 }
 
@@ -1001,8 +998,7 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
   pAxis0->setUnit("DeltaE");
   ws->replaceAxis(0, pAxis0);
   if (has_oriented_lattice) {
-    auto latt =
-        Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+    auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt.release());
 
     addTSPEntry(ws->mutableRun(), "phi", 0);
@@ -1079,8 +1075,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   ws->replaceAxis(0, pAxis0);
 
   // define oriented lattice which requested for processed ws
-  auto latt =
-      Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+  auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
   ws->mutableSample().setOrientedLattice(latt.release());
 
   ws->mutableRun().addProperty(

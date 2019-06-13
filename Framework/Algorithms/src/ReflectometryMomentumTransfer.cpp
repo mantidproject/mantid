@@ -129,11 +129,11 @@ void ReflectometryMomentumTransfer::init() {
   auto acceptableSumTypes =
       boost::make_shared<Kernel::ListValidator<std::string>>(sumTypes);
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, inWavelength),
       "A reflectivity workspace with X units in wavelength.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "The input workspace with X units converted to Q and DX values set to "
       "the Q resolution.");

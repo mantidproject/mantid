@@ -220,7 +220,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
-        self._fig_interation = FigureInteraction(self)
+        self._fig_interaction = FigureInteraction(self)
         self._ads_observer = FigureManagerADSObserver(self)
 
         self.window.raise_()
@@ -274,7 +274,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.destroy()
         self._ads_observer.observeAll(False)
         del self._ads_observer
-        self._fig_interation.disconnect()
+        self._fig_interaction.disconnect()
         self.window.close()
 
         try:

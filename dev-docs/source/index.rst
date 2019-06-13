@@ -179,6 +179,7 @@ GUI Development
    GUIDesignGuidelines
    MVPTutorial/index
    QtDesignerForPython
+   MantidUsedIconsTable
 
 :doc:`GUIDesignGuidelines`
    Gives some guidelines to consider when developing a new graphical user interface.
@@ -188,6 +189,9 @@ GUI Development
 
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
+
+:doc:`MantidUsedIconsTable`
+   The currently used Icons in Mantid and what they are used for.
 
 =========
 Workbench

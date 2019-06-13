@@ -20,7 +20,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>

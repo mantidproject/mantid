@@ -23,7 +23,7 @@ using namespace Geometry;
 
 void EQSANSQ2D::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Workspace to calculate I(qx,qy) from");
   declareProperty("OutputWorkspace", "", Direction::Input);
@@ -161,7 +161,7 @@ void EQSANSQ2D::exec() {
     replaceAlg->executeAsChildAlg();
 
     std::string outputWSName_frame = outputWSName + "_frame1_Iqxy";
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "OutputWorkspaceFrame1", outputWSName_frame, Direction::Output));
     MatrixWorkspace_sptr result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame1", result);
@@ -192,7 +192,7 @@ void EQSANSQ2D::exec() {
     replaceAlg->executeAsChildAlg();
 
     outputWSName_frame = outputWSName + "_frame2_Iqxy";
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "OutputWorkspaceFrame2", outputWSName_frame, Direction::Output));
     result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame2", result);
@@ -217,7 +217,7 @@ void EQSANSQ2D::exec() {
     replaceAlg->executeAsChildAlg();
 
     outputWSName += "_Iqxy";
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "OutputWorkspaceFrame1", outputWSName, Direction::Output));
     MatrixWorkspace_sptr result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame1", result);

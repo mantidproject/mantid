@@ -521,9 +521,8 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+        wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws2);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -586,9 +585,8 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+        wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -681,9 +679,8 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+        wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, ws);
 
     FitMW fitmw(propManager.get(), wsPropName);
@@ -734,9 +731,8 @@ public:
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
-    propManager->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+        wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<Workspace_sptr>(wsPropName, data);
 
     IFunction_sptr fitfun;

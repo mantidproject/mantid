@@ -16,7 +16,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cfloat>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -83,62 +83,60 @@ private:
   std::unique_ptr<Rule> createAUnionTree() { // A:B:C:A
                                              // A Node
     // SurfPoint *A, *B, *C;
-    auto A = Mantid::Kernel::make_unique<SurfPoint>();
+    auto A = std::make_unique<SurfPoint>();
     A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
-    auto B = Mantid::Kernel::make_unique<SurfPoint>();
+    auto B = std::make_unique<SurfPoint>();
     B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
-    auto C = Mantid::Kernel::make_unique<SurfPoint>();
+    auto C = std::make_unique<SurfPoint>();
     C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
 
-    auto Left = Mantid::Kernel::make_unique<Union>(A->clone(), A->clone());
-    auto Right = Mantid::Kernel::make_unique<Union>(std::move(C), std::move(B));
-    return Mantid::Kernel::make_unique<Union>(std::move(Left),
-                                              std::move(Right));
+    auto Left = std::make_unique<Union>(A->clone(), A->clone());
+    auto Right = std::make_unique<Union>(std::move(C), std::move(B));
+    return std::make_unique<Union>(std::move(Left), std::move(Right));
   }
 
   std::unique_ptr<Rule> createAIntersectionTree() { // A B C A
     // A Node
-    auto A = Mantid::Kernel::make_unique<SurfPoint>();
+    auto A = std::make_unique<SurfPoint>();
     A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
-    auto B = Mantid::Kernel::make_unique<SurfPoint>();
+    auto B = std::make_unique<SurfPoint>();
     B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
-    auto C = Mantid::Kernel::make_unique<SurfPoint>();
+    auto C = std::make_unique<SurfPoint>();
     C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
 
-    auto Left = Mantid::Kernel::make_unique<Intersection>();
+    auto Left = std::make_unique<Intersection>();
 
     Left->setLeaves(A->clone(), std::move(B));
 
-    auto Right = Mantid::Kernel::make_unique<Intersection>();
+    auto Right = std::make_unique<Intersection>();
     Right->setLeaves(std::move(C), std::move(A));
 
-    return Mantid::Kernel::make_unique<Intersection>(std::move(Left),
-                                                     std::move(Right));
+    return std::make_unique<Intersection>(std::move(Left), std::move(Right));
   }
 
   std::unique_ptr<Rule> createAMixedTree() { // A B : C A
-    auto A = Mantid::Kernel::make_unique<SurfPoint>();
+    auto A = std::make_unique<SurfPoint>();
     A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
-    auto B = Mantid::Kernel::make_unique<SurfPoint>();
+    auto B = std::make_unique<SurfPoint>();
     B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
-    auto C = Mantid::Kernel::make_unique<SurfPoint>();
+    auto C = std::make_unique<SurfPoint>();
     C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
 
-    auto Root = Mantid::Kernel::make_unique<Union>();
+    auto Root = std::make_unique<Union>();
 
-    auto Left = Mantid::Kernel::make_unique<Intersection>();
+    auto Left = std::make_unique<Intersection>();
     Left->setLeaves(A->clone(), std::move(B));
 
-    auto Right = Mantid::Kernel::make_unique<Intersection>();
+    auto Right = std::make_unique<Intersection>();
     Right->setLeaves(std::move(C), std::move(A));
 
     Root->setLeaves(std::move(Left), std::move(Right));
