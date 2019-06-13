@@ -103,6 +103,8 @@ ALCBaselineModellingView::getPlotKwargs(PreviewPlot *plot,
   plot->setCurveStyle(curveName, -1);
   plot->setCurveSymbol(curveName, 0);
 #else
+  UNUSED_ARG(plot);
+  UNUSED_ARG(curveName);
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
 #endif
