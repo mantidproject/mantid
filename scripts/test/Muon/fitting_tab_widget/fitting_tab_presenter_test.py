@@ -5,12 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
+from mantid.api import FunctionFactory
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 from qtpy import QtWidgets
+
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from mantid.api import FunctionFactory
 
 
 def retrieve_combobox_info(combo_box):
@@ -36,6 +38,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter = self.widget.fitting_tab_presenter
         self.view = self.widget.fitting_tab_view
         self.presenter.model = mock.MagicMock()
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
 
     @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.WorkspaceSelectorView.get_selected_data')
     def test_handle_select_fit_data_clicked_updates_current_run_list(self, dialog_mock):
@@ -71,6 +74,8 @@ class FittingTabPresenterTest(GuiTest):
             self):
         self.presenter.selected_data = ['Input Workspace Name']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.model.do_single_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                           'Fit Suceeded', 0.5)
 
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
@@ -103,6 +108,8 @@ class FittingTabPresenterTest(GuiTest):
         self.view.simul_fit_radio.toggle()
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                                 'Fit Suceeded', 0.5)
 
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
@@ -291,6 +298,7 @@ class FittingTabPresenterTest(GuiTest):
 
     def test_fit_name_not_updated_if_already_changed_by_user(self):
         self.view.function_name = 'test function'
+        self.view.function_name_line_edit.textChanged.emit('test function')
 
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 

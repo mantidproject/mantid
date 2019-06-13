@@ -204,8 +204,6 @@ void IndexPeaks::exec() {
         iteration++;
       }
 
-      g_log.notice() << "Maximum Order: " << o_lattice.getMaxOrder() << '\n';
-
       if (o_lattice.getMaxOrder() ==
           0) // If data not modulated, recalculate fractional HKL
       {
@@ -236,6 +234,7 @@ void IndexPeaks::exec() {
           }
         }
       } else {
+        g_log.notice() << "Maximum Order: " << o_lattice.getMaxOrder() << '\n';
         int ModDim = 0;
         int main_indexed = 0;
         int sate_indexed = 0;

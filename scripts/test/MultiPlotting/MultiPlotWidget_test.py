@@ -7,10 +7,10 @@
 import unittest
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
-from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class bounds(object):
@@ -41,13 +41,12 @@ def data():
     return values
 
 
-class MultiPlotWidgetTest(unittest.TestCase):
+class MultiPlotWidgetTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         context = PlottingContext()
         self.widget = MultiPlotWidget(context)
- 
+
     def test_add_subplot(self):
         with mock.patch("MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
             self.widget.add_subplot("test")
