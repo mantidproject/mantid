@@ -37,11 +37,11 @@ public:
 public slots:
 
   void initialize() override;
-  void setDataCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::size_t const &workspaceIndex = 0) override;
-  void setFittedCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  void setFittedCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                       std::size_t const &workspaceIndex = 0) override;
-  void setGuessCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                      std::size_t const &workspaceIndex = 0) override;
   void removePlot(QString const &plotName) override;
   void

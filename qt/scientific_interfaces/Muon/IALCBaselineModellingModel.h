@@ -44,7 +44,7 @@ public:
    */
   virtual Mantid::API::MatrixWorkspace_sptr
   baselineData(Mantid::API::IFunction_const_sptr function,
-               const std::vector<double> &xValues) = 0;
+               const std::vector<double> &xValues) const = 0;
 
   /**
    * @return Current data used for fitting

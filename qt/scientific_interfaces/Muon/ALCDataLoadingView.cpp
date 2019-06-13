@@ -148,7 +148,7 @@ ALCDataLoadingView::timeRange() const {
   return boost::make_optional(range);
 }
 
-void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr &workspace,
+void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
                                       std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;

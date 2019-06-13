@@ -84,7 +84,7 @@ public slots:
   /// Updates the plotted data
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: the index to plot
-  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                             std::size_t const &workspaceIndex = 0) = 0;
 
   /// Displays an error

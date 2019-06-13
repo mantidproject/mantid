@@ -235,9 +235,8 @@ MatrixWorkspace_sptr ALCBaselineModellingModel::correctedData() const {
   return MatrixWorkspace_sptr();
 }
 
-MatrixWorkspace_sptr
-ALCBaselineModellingModel::baselineData(IFunction_const_sptr function,
-                                        const std::vector<double> &xValues) {
+MatrixWorkspace_sptr ALCBaselineModellingModel::baselineData(
+    IFunction_const_sptr function, const std::vector<double> &xValues) const {
   const auto inputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
                                           xValues.size()));

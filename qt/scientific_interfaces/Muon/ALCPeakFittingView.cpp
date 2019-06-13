@@ -58,7 +58,7 @@ void ALCPeakFittingView::initialize() {
   connect(m_ui.plotGuess, SIGNAL(clicked()), this, SLOT(plotGuess()));
 }
 
-void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
+void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace,
                                       std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;
@@ -75,13 +75,13 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
                          kwargs);
 }
 
-void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr &workspace,
+void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr workspace,
                                         std::size_t const &workspaceIndex) {
   m_ui.plot->addSpectrum("Fit", workspace, workspaceIndex, Qt::red);
   m_ui.plot->replot();
 }
 
-void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr &workspace,
+void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr workspace,
                                        std::size_t const &workspaceIndex) {
   m_ui.plot->addSpectrum("Guess", workspace, workspaceIndex, Qt::green);
   m_ui.plot->replot();

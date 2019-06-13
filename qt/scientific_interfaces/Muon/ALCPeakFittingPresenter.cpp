@@ -107,6 +107,7 @@ void ALCPeakFittingPresenter::onFittedPeaksChanged() {
     m_view->setFittedCurve(dataWS, 1);
     m_view->setFunction(fitted);
   } else {
+    m_view->removePlot("Fit");
     m_view->setFunction(IFunction_const_sptr());
   }
 }
@@ -142,11 +143,12 @@ void ALCPeakFittingPresenter::onPlotGuessClicked() {
  */
 bool ALCPeakFittingPresenter::plotGuessOnGraph() {
   if (const auto fitFunction = m_view->function("")) {
-    const auto &xValues = m_model->data()->x(0);
-    m_view->setGuessCurve(m_model->guessData(fitFunction, xValues.rawData()));
-    return true;
+    if (const auto dataWorkspace = m_model->data()) {
+      const auto &xValues = dataWorkspace->x(0);
+      m_view->setGuessCurve(m_model->guessData(fitFunction, xValues.rawData()));
+      return true;
+    }
   }
-  removePlot("Guess");
   return false;
 }
 

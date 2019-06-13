@@ -56,8 +56,8 @@ public:
   MOCK_CONST_METHOD0(autoString, std::string());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD2(setDataCurve,
-               void(const QwtData &, const std::vector<double> &));
+  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
+                                  const std::size_t &workspaceIndex));
   MOCK_METHOD1(displayError, void(const std::string &));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string> &));
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string> &));
@@ -74,14 +74,11 @@ public:
   void selectFirstRun() { emit firstRunSelected(); }
 };
 
-MATCHER_P3(QwtDataX, i, value, delta, "") {
-  return fabs(arg.x(i) - value) < delta;
+MATCHER_P4(WorkspaceX, i, j, value, delta, "") {
+  return fabs(arg->x(i)[j] - value) < delta;
 }
-MATCHER_P3(QwtDataY, i, value, delta, "") {
-  return fabs(arg.y(i) - value) < delta;
-}
-MATCHER_P3(VectorValue, i, value, delta, "") {
-  return fabs(arg.at(i) - value) < delta;
+MATCHER_P4(WorkspaceY, i, j, value, delta, "") {
+  return fabs(arg->y(i)[j] - value) < delta;
 }
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -141,34 +138,27 @@ public:
 
     EXPECT_CALL(
         *m_view,
-        setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1350, 1E-8),
-                           QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
-                           QwtDataY(0, 0.150, 1E-3), QwtDataY(1, 0.143, 1E-3),
-                           QwtDataY(2, 0.128, 1E-3)),
-                     AllOf(Property(&std::vector<double>::size, 3),
-                           VectorValue(0, 1.285E-3, 1E-6),
-                           VectorValue(1, 1.284E-3, 1E-6),
-                           VectorValue(2, 1.280E-3, 1E-6))));
+        setDataCurve(
+            AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1360, 1E-8),
+                  WorkspaceX(0, 2, 1370, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
+                  WorkspaceY(0, 1, 0.143, 1E-3), WorkspaceY(0, 2, 0.128, 1E-3)),
+            0));
 
     EXPECT_CALL(*m_view, enableAll());
 
-    m_view->requestLoading();
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 
   void test_load_differential() {
     // Change to differential calculation type
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Differential"));
 
-    EXPECT_CALL(
-        *m_view,
-        setDataCurve(
-            AllOf(Property(&QwtData::size, 3), QwtDataY(0, 3.00349, 1E-3),
-                  QwtDataY(1, 2.3779, 1E-3), QwtDataY(2, 2.47935, 1E-3)),
-            AllOf(Property(&std::vector<double>::size, 3),
-                  VectorValue(0, 0.539, 1E-3), VectorValue(1, 0.535, 1E-3),
-                  VectorValue(2, 0.541, 1E-3))));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 3.00349, 1E-3),
+                                            WorkspaceY(0, 1, 2.3779, 1E-3),
+                                            WorkspaceY(0, 2, 2.47935, 1E-3)),
+                                      0));
 
-    m_view->requestLoading();
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 
   void test_load_timeLimits() {
@@ -176,16 +166,12 @@ public:
     ON_CALL(*m_view, timeRange())
         .WillByDefault(Return(boost::make_optional(std::make_pair(5.0, 10.0))));
 
-    EXPECT_CALL(*m_view,
-                setDataCurve(
-                    AllOf(Property(&QwtData::size, 3), QwtDataY(0, 0.137, 1E-3),
-                          QwtDataY(1, 0.141, 1E-3), QwtDataY(2, 0.111, 1E-3)),
-                    AllOf(Property(&std::vector<double>::size, 3),
-                          VectorValue(0, 4.244E-3, 1E-6),
-                          VectorValue(1, 4.243E-3, 1E-6),
-                          VectorValue(2, 4.200E-3, 1E-6))));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.137, 1E-3),
+                                            WorkspaceY(0, 1, 0.141, 1E-3),
+                                            WorkspaceY(0, 2, 0.111, 1E-3)),
+                                      0));
 
-    m_view->requestLoading();
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 
   void test_updateAvailableInfo() {
@@ -289,15 +275,10 @@ public:
     EXPECT_CALL(*m_view, deadTimeType()).Times(2);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(0);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
-    EXPECT_CALL(*m_view,
-                setDataCurve(AllOf(Property(&QwtData::size, 3),
-                                   QwtDataY(0, 0.150616, 1E-3),
-                                   QwtDataY(1, 0.143444, 1E-3),
-                                   QwtDataY(2, 0.128856, 1E-3)),
-                             AllOf(Property(&std::vector<double>::size, 3),
-                                   VectorValue(0, 1.278E-3, 1E-6),
-                                   VectorValue(1, 1.278E-3, 1E-6),
-                                   VectorValue(2, 1.274E-3, 1E-6))));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.150616, 1E-3),
+                                            WorkspaceY(0, 1, 0.143444, 1E-3),
+                                            WorkspaceY(0, 2, 0.128856, 1E-3)),
+                                      0));
     m_view->requestLoading();
   }
 
@@ -322,14 +303,11 @@ public:
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(
         *m_view,
-        setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1350, 1E-8),
-                           QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
-                           QwtDataY(0, 0.150, 1E-3), QwtDataY(1, 0.143, 1E-3),
-                           QwtDataY(2, 0.128, 1E-3)),
-                     AllOf(Property(&std::vector<double>::size, 3),
-                           VectorValue(0, 1.285E-3, 1E-6),
-                           VectorValue(1, 1.284E-3, 1E-6),
-                           VectorValue(2, 1.280E-3, 1E-6))));
+        setDataCurve(
+            AllOf(WorkspaceX(0, 0, 1350, 1E-8), WorkspaceX(0, 1, 1360, 1E-8),
+                  WorkspaceX(0, 2, 1370, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
+                  WorkspaceY(0, 1, 0.143, 1E-3), WorkspaceY(0, 2, 0.128, 1E-3)),
+            0));
     m_view->selectFirstRun();
     m_view->requestLoading();
   }
@@ -341,36 +319,32 @@ public:
     ON_CALL(*m_view, subtractIsChecked()).WillByDefault(Return(true));
     ON_CALL(*m_view, redPeriod()).WillByDefault(Return("2"));
     ON_CALL(*m_view, greenPeriod()).WillByDefault(Return("1"));
+
     EXPECT_CALL(*m_view, greenPeriod()).Times(1);
     // Check results
-    EXPECT_CALL(
-        *m_view,
-        setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1350, 1E-8),
-                           QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
-                           QwtDataY(0, 0.012884, 1E-6),
-                           QwtDataY(1, 0.022489, 1E-6),
-                           QwtDataY(2, 0.038717, 1E-6)),
-                     AllOf(Property(&std::vector<double>::size, 3),
-                           VectorValue(0, 1.821E-3, 1E-6),
-                           VectorValue(1, 1.821E-3, 1E-6),
-                           VectorValue(2, 1.817E-3, 1E-6))));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1350, 1E-8),
+                                            WorkspaceX(0, 1, 1360, 1E-8),
+                                            WorkspaceX(0, 2, 1370, 1E-8),
+                                            WorkspaceY(0, 0, 0.012884, 1E-6),
+                                            WorkspaceY(0, 1, 0.022489, 1E-6),
+                                            WorkspaceY(0, 2, 0.038717, 1E-6)),
+                                      0));
+    // EXPECT_CALL(*m_view, setDataCurve(dataWorkspace, 0));
     m_view->requestLoading();
   }
 
   void test_logFunction() {
     ON_CALL(*m_view, function()).WillByDefault(Return("First"));
     ON_CALL(*m_view, log()).WillByDefault(Return("Field_Danfysik"));
-    EXPECT_CALL(
-        *m_view,
-        setDataCurve(
-            AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1360.200, 1E-3),
-                  QwtDataX(1, 1364.520, 1E-3), QwtDataX(2, 1398.090, 1E-3),
-                  QwtDataY(0, 0.14289, 1E-5), QwtDataY(1, 0.12837, 1E-5),
-                  QwtDataY(2, 0.15004, 1E-5)),
-            AllOf(Property(&std::vector<double>::size, 3),
-                  VectorValue(0, 1.284E-3, 1E-6),
-                  VectorValue(1, 1.280E-3, 1E-6),
-                  VectorValue(2, 1.285E-3, 1E-6))));
+
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1360.200, 1E-3),
+                                            WorkspaceX(0, 1, 1364.520, 1E-3),
+                                            WorkspaceX(0, 2, 1398.090, 1E-3),
+                                            WorkspaceY(0, 0, 0.14289, 1E-5),
+                                            WorkspaceY(0, 1, 0.12837, 1E-5),
+                                            WorkspaceY(0, 2, 0.15004, 1E-5)),
+                                      0));
+
     m_view->requestLoading();
   }
 

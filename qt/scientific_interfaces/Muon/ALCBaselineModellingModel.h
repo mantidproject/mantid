@@ -34,7 +34,7 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr
   baselineData(Mantid::API::IFunction_const_sptr function,
-               const std::vector<double> &xValues) override;
+               const std::vector<double> &xValues) const override;
 
   Mantid::API::ITableWorkspace_sptr parameterTable() const {
     return m_parameterTable;

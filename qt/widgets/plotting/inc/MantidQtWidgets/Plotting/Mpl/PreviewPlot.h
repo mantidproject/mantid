@@ -16,6 +16,8 @@
 
 #include <Poco/NObserver.h>
 
+#include <QHash>
+#include <QVariant>
 #include <QWidget>
 #include <list>
 

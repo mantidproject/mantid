@@ -56,7 +56,7 @@ public:
   std::string calculationType() const override;
   boost::optional<std::pair<double, double>> timeRange() const override;
 
-  void setDataCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::size_t const &workspaceIndex = 0) override;
   void displayError(const std::string &error) override;
   void setAvailableLogs(const std::vector<std::string> &logs) override;

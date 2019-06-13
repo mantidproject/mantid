@@ -45,19 +45,19 @@ public slots:
   /// Update the data curve displayed
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: The index to plot
-  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                             std::size_t const &workspaceIndex = 0) = 0;
 
   /// Update the fitted curve displayed
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: The index to plot
-  virtual void setFittedCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  virtual void setFittedCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                               std::size_t const &workspaceIndex = 0) = 0;
 
   /// Update the guess curve displayed
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: The index to plot
-  virtual void setGuessCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+  virtual void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                              std::size_t const &workspaceIndex = 0) = 0;
 
   /// Set function displayed in Function Browser

@@ -21,8 +21,8 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 class ALCBaselineModellingModelTest : public CxxTest::TestSuite {
@@ -142,7 +142,7 @@ public:
 
   void test_noData() {
     // Set a null shared pointer
-    MatrixWorkspace_const_sptr data = MatrixWorkspace_const_sptr();
+    MatrixWorkspace_sptr data = MatrixWorkspace_sptr();
     m_model->setData(data);
 
     TS_ASSERT_THROWS_NOTHING(m_model->data());
