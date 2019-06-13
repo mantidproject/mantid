@@ -30,15 +30,15 @@ void SaveSampleEnvironmentAndShape::init() {
 
   // input workspace
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
       "The name of the workspace containing the environment to save ");
 
   // Environment file
   const std::vector<std::string> extensions{".stl"};
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, extensions),
-      "The path name of the file to save");
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Save, extensions),
+                  "The path name of the file to save");
 
   // scale to use for stl
   declareProperty("Scale", "m", "The scale of the stl: m, cm, or mm");
