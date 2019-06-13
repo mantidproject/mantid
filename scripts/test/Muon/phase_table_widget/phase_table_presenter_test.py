@@ -6,23 +6,24 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy import QtCore
+from qtpy.QtWidgets import QApplication
+
 from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 from Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
 from Muon.GUI.Common.muon_group import MuonGroup
-from mantid.py3compat import mock
-from qtpy import QtCore
-from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
-class PhaseTablePresenterTest(unittest.TestCase):
+class PhaseTablePresenterTest(GuiTest):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            self._qapp.processEvents()
+            QApplication.instance().processEvents()
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         self.view = PhaseTableView()
         self.context = setup_context()
         self.context.data_context.instrument = 'MUSR'

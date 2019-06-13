@@ -7,15 +7,13 @@
 import unittest
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 
 from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
-from Muon.GUI.Common.test_helpers import mock_widget
 
 
-class AxisChangerTwoViewTest(unittest.TestCase):
+class AxisChangerTwoViewTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-
         label = "test"
         self.view = AxisChangerView(label)
         self.test_bounds = ["10", "20"]

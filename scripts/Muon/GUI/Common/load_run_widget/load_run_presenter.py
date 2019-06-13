@@ -244,7 +244,6 @@ class LoadRunWidgetPresenter(object):
                 else:
                     self.run_list[0] = latest_loaded_run
                 self._model.current_run = self.run_list
-
             run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
             self._model.current_runs = run_list
 

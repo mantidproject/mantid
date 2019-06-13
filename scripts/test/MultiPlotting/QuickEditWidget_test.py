@@ -7,15 +7,14 @@
 import unittest
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
-from Muon.GUI.Common.test_helpers import mock_widget
 
 
-class QuickEditWidgetTest(unittest.TestCase):
+class QuickEditWidgetTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         self.pres = mock.create_autospec(QuickEditPresenter)
         self.widget = QuickEditWidget()
         self.slot = mock.Mock()
@@ -32,7 +31,7 @@ class QuickEditWidgetTest(unittest.TestCase):
     def test_connect_x_range(self):
         self.widget.connect_x_range_changed(self.slot)
         self.pres.connect_x_range_changed.assert_called_with(self.slot)
- 
+
     def test_connect_y_range(self):
         self.widget.connect_y_range_changed(self.slot)
         self.pres.connect_y_range_changed.assert_called_with(self.slot)
@@ -62,14 +61,14 @@ class QuickEditWidgetTest(unittest.TestCase):
     def test_set_plot_x_range(self):
         self.widget.set_plot_x_range([0,1])
         self.pres.set_plot_x_range.assert_called_with([0,1])
-        
+
     def test_set_plot_y_range(self):
         self.widget.set_plot_y_range([0,1])
         self.pres.set_plot_y_range.assert_called_with([0,1])
-           
+
     def test_set_errors_TT(self):
         self.widget.set_errors(True)
         self.pres.set_errors.assert_called_with(True)
- 
+
 if __name__ == "__main__":
     unittest.main()

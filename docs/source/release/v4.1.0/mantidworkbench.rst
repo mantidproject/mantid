@@ -17,6 +17,7 @@ Improvements
   script window, then drag and drop a workspace on top of it.
 - Mantid's offline help is now available in Workbench.
 - A colorfill plot of a workspace with logarithmic bins is plotted on a log scale.
+- You can now toggle the normalization of plots in Workbench from the plot's context menu
 
 Bugfixes
 ########

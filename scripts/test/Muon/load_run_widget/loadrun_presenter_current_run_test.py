@@ -5,19 +5,18 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from qtpy import QtWidgets
-
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QApplication, QWidget
 
 import Muon.GUI.Common.utilities.muon_file_utils as fileUtils
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
+class LoadRunWidgetLoadCurrentRunTest(GuiTest):
     def run_test_with_and_without_threading(test_function):
         def run_twice(self):
             test_function(self)
@@ -33,15 +32,14 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            self._qapp.processEvents()
+            QApplication.instance().processEvents()
 
     def create_fake_workspace(self):
         return {'MainFieldDirection': 'transverse'}
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtWidgets.QWidget()
+        self.obj = QWidget()
 
         setup_context_for_tests(self)
 

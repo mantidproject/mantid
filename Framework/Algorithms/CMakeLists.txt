@@ -181,6 +181,7 @@ set(SRC_FILES
     src/MagFormFactorCorrection.cpp
     src/MaskBins.cpp
     src/MaskBinsFromTable.cpp
+    src/MaskBinsFromWorkspace.cpp
     src/MaskBinsIf.cpp
     src/MaskDetectorsIf.cpp
     src/MaskInstrument.cpp
@@ -260,6 +261,7 @@ set(SRC_FILES
     src/RemoveLowResTOF.cpp
     src/RemoveMaskedSpectra.cpp
     src/RemovePromptPulse.cpp
+    src/RemoveSpectra.cpp
     src/RemoveWorkspaceHistory.cpp
     src/RenameWorkspace.cpp
     src/RenameWorkspaces.cpp
@@ -521,6 +523,7 @@ set(INC_FILES
     inc/MantidAlgorithms/MagFormFactorCorrection.h
     inc/MantidAlgorithms/MaskBins.h
     inc/MantidAlgorithms/MaskBinsFromTable.h
+    inc/MantidAlgorithms/MaskBinsFromWorkspace.h
     inc/MantidAlgorithms/MaskBinsIf.h
     inc/MantidAlgorithms/MaskDetectorsIf.h
     inc/MantidAlgorithms/MaskInstrument.h
@@ -603,6 +606,7 @@ set(INC_FILES
     inc/MantidAlgorithms/RemoveLowResTOF.h
     inc/MantidAlgorithms/RemoveMaskedSpectra.h
     inc/MantidAlgorithms/RemovePromptPulse.h
+    inc/MantidAlgorithms/RemoveSpectra.h
     inc/MantidAlgorithms/RemoveWorkspaceHistory.h
     inc/MantidAlgorithms/RenameWorkspace.h
     inc/MantidAlgorithms/RenameWorkspaces.h
@@ -871,6 +875,7 @@ set(TEST_FILES
     MCInteractionVolumeTest.h
     MagFormFactorCorrectionTest.h
     MaskBinsFromTableTest.h
+    MaskBinsFromWorkspaceTest.h
     MaskBinsIfTest.h
     MaskBinsTest.h
     MaskDetectorsIfTest.h
@@ -945,6 +950,7 @@ set(TEST_FILES
     RemoveLowResTOFTest.h
     RemoveMaskedSpectraTest.h
     RemovePromptPulseTest.h
+    RemoveSpectraTest.h
     RemoveWorkspaceHistoryTest.h
     RenameWorkspaceTest.h
     RenameWorkspacesTest.h

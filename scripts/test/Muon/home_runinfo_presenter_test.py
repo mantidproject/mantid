@@ -5,24 +5,23 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from qtpy import QtWidgets
-
 from mantid.api import FileFinder
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRunInfoWidgetView
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.test_helpers import mock_widget
+
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class HomeTabRunInfoPresenterTest(unittest.TestCase):
+class HomeTabRunInfoPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        self.obj = QtWidgets.QWidget()
+        self.obj = QWidget()
         setup_context_for_tests(self)
         self.data_context.instrument = 'MUSR'
         self.view = HomeRunInfoWidgetView(self.obj)

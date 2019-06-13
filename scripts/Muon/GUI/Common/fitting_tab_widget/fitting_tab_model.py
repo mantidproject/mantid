@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_Fit
 import mantid
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
@@ -82,11 +84,11 @@ class FittingTabModel(object):
             self.rename_members_of_fitted_workspace_group(output_workspace, parameter_dict['InputWorkspace'],
                                                           parameter_dict['Function'],
                                                           fit_group_name)
-            wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
-                                                                    table_directory)
-            self.add_fit_to_context(wrapped_parameter_workspace,
-                                    parameter_dict['Function'],
-                                    parameter_dict['InputWorkspace'])
+        wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
+                                                                table_directory)
+        self.add_fit_to_context(wrapped_parameter_workspace,
+                                parameter_dict['Function'],
+                                parameter_dict['InputWorkspace'])
 
         return function_object, output_status, output_chi_squared
 

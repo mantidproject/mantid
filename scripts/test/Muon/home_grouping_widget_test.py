@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from qtpy import QtWidgets
-
 from mantid import ConfigService
 from mantid.api import FileFinder
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
@@ -17,7 +17,6 @@ from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import 
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
@@ -52,10 +51,9 @@ def perform_musr_file_finder(self):
     self.presenter.update_group_pair_list()
 
 
-class HomeTabGroupingPresenterTest(unittest.TestCase):
+class HomeTabGroupingPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        self.obj = QtWidgets.QWidget()
+        self.obj = QWidget()
         setup_context_for_tests(self)
         self.gui_context['RebinType'] = 'None'
         self.view = HomeGroupingWidgetView(self.obj)
