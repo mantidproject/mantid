@@ -63,7 +63,7 @@ set ( QWT_INC_FILES
 )
 
 set ( QWT_UI_FILES
-  inc/MantidQtWidgets/Plotting/Qwt/ContourPreviewPlot.ui
+  inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui
   inc/MantidQtWidgets/Plotting/Qwt/ColorBarWidget.ui
   inc/MantidQtWidgets/Plotting/Qwt/DisplayCurveFit.ui
   inc/MantidQtWidgets/Plotting/Qwt/MWView.ui
@@ -138,12 +138,14 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsPlottingTest
 # Matplotlib-based implementation
 ###########################################################################
 set(MPL_SRC_FILES
+    src/Mpl/ContourPreviewPlot.cpp
     src/Mpl/PeakPicker.cpp
     src/Mpl/PreviewPlot.cpp
     src/Mpl/RangeSelector.cpp
 )
 
 set(MPL_MOC_FILES
+    inc/MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h
     inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
     inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h
     inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
@@ -153,12 +155,15 @@ set(MPL_MOC_FILES
 set(MPL_INC_FILES
     ${MPL_MOC_FILES}
     inc/MantidQtWidgets/Plotting/AxisID.h
+    inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h
     inc/MantidQtWidgets/Plotting/PeakPicker.h
     inc/MantidQtWidgets/Plotting/PreviewPlot.h
 )
 
 set(MPL_UI_FILES
-    inc/MantidQtWidgets/Plotting/PreviewPlot.ui)
+    inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui
+    inc/MantidQtWidgets/Plotting/PreviewPlot.ui
+)
 
 find_package(BoostPython)
 
