@@ -17,7 +17,6 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
     for (auto &data : m_bufferedDataY) {
       if (data) {
         data->clear();
-        delete data;
       }
     }
   }
@@ -25,7 +24,6 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
   for (auto &data : m_bufferedDataE) {
     if (data) {
       data->clear();
-      delete data;
     }
   }
 }
@@ -38,10 +36,10 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
 void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
   Poco::ScopedWriteRWLock _lock(m_changeMruListsMutexE);
   if (m_bufferedDataE.size() <= thread_num) {
-    m_bufferedDataE.resize(thread_num + 1, nullptr);
+    m_bufferedDataE.resize(thread_num + 1);
     for (auto &data : m_bufferedDataE) {
       if (!data)
-        data = new mru_listE(50); // Create a MRU list with this many entries.
+        data = std::make_unique<mru_listE>(50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -53,10 +51,10 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
 void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
   Poco::ScopedWriteRWLock _lock(m_changeMruListsMutexY);
   if (m_bufferedDataY.size() <= thread_num) {
-    m_bufferedDataY.resize(thread_num + 1, nullptr);
+    m_bufferedDataY.resize(thread_num + 1);
     for (auto &data : m_bufferedDataY) {
       if (!data)
-        data = new mru_listY(50); // Create a MRU list with this many entries.
+        data = std::make_unique<mru_listY>(50); // Create a MRU list with this many entries.
     }
   }
 }

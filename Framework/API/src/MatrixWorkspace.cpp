@@ -904,7 +904,8 @@ Axis *MatrixWorkspace::getAxis(const std::size_t &axisIndex) const {
 
 /** Replaces one of the workspace's axes with the new one provided.
  *  @param axisIndex :: The index of the axis to replace
- *  @param newAxis :: A pointer to the new axis. The class will take ownership.
+ *  @param newAxis :: A Unique_ptr to the new axis. The class will take
+ * ownership.
  *  @throw IndexError If the axisIndex given is outside the range of axes held
  * by this workspace
  *  @throw std::runtime_error If the new axis is not of the correct length
@@ -919,8 +920,19 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
         "Value of axisIndex is invalid for this workspace");
   }
   // If we're OK, then delete the old axis and set the pointer to the new one
-  delete m_axes[axisIndex];
-  m_axes[axisIndex] = newAxis;
+
+  m_axes[axisIndex] = std::move(newAxis);
+}
+
+/**
+ * Raw Pointer version of replaceAxis to allow it to work with python
+ *
+ * @param axisIndex :: The index of the axis to replace
+ * @param newAxis :: A pointer to the new axis. The class will take ownership.
+ */
+void MatrixWorkspace::pythonReplaceAxis(const std::size_t &axisIndex,
+                                        Axis *newAxis) {
+  replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
 }
 
 /**
@@ -1798,7 +1810,7 @@ MDMasking for a Matrix Workspace has not been implemented.
 @param :
 */
 void MatrixWorkspace::setMDMasking(
-    Mantid::Geometry::MDImplicitFunction * /*maskingRegion*/) {
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> /*maskingRegion*/) {
   throw std::runtime_error(
       "MatrixWorkspace::setMDMasking has no implementation");
 }

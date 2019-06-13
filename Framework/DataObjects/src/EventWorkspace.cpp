@@ -45,23 +45,21 @@ using std::size_t;
 using namespace Mantid::Kernel;
 
 EventWorkspace::EventWorkspace(const Parallel::StorageMode storageMode)
-    : IEventWorkspace(storageMode), mru(new EventWorkspaceMRU) {}
+    : IEventWorkspace(storageMode), mru(std::make_unique<EventWorkspaceMRU>()) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
-    : IEventWorkspace(other), mru(new EventWorkspaceMRU) {
+    : IEventWorkspace(other), mru(std::make_unique<EventWorkspaceMRU>()) {
   for (const auto &el : other.data) {
     // Create a new event list, copying over the events
-    auto newel = new EventList(*el);
+    auto newel = std::make_unique<EventList>(*el);
     // Make sure to update the MRU to point to THIS event workspace.
-    newel->setMRU(this->mru);
-    this->data.push_back(newel);
+    newel->setMRU(this->mru.get());
+    this->data.push_back(std::move(newel));
   }
 }
 
 EventWorkspace::~EventWorkspace() {
-  for (auto &eventList : data)
-    delete eventList;
-  delete mru;
+  data.clear();
 }
 
 /** Returns true if the EventWorkspace is safe for multithreaded operations.
@@ -100,20 +98,20 @@ void EventWorkspace::init(const std::size_t &NVectors,
   HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
 
   // Initialize the data
-  data.resize(NVectors, nullptr);
+  data.resize(NVectors);
   // Make sure SOMETHING exists for all initialized spots.
   EventList el;
   el.setHistogram(edges);
   for (size_t i = 0; i < NVectors; i++) {
-    data[i] = new EventList(el);
-    data[i]->setMRU(mru);
+    data[i] = std::make_unique<EventList>(el);
+    data[i]->setMRU(mru.get());
     data[i]->setSpectrumNo(specnum_t(i));
   }
 
   // Create axes.
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(this);
-  m_axes[1] = new API::SpectraAxis(this);
+  m_axes[0] = std::make_unique<API::RefAxis>(this);
+  m_axes[1] = std::make_unique<API::SpectraAxis>(this);
 }
 
 void EventWorkspace::init(const HistogramData::Histogram &histogram) {
@@ -125,25 +123,25 @@ void EventWorkspace::init(const HistogramData::Histogram &histogram) {
     throw std::runtime_error(
         "EventWorkspace cannot be initialized non-NULL Y or E data");
 
-  data.resize(numberOfDetectorGroups(), nullptr);
+  data.resize(numberOfDetectorGroups());
   EventList el;
   el.setHistogram(histogram);
   for (size_t i = 0; i < data.size(); i++) {
-    data[i] = new EventList(el);
-    data[i]->setMRU(mru);
+    data[i] = std::make_unique<EventList>(el);
+    data[i]->setMRU(mru.get());
     data[i]->setSpectrumNo(specnum_t(i));
   }
 
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(this);
-  m_axes[1] = new API::SpectraAxis(this);
+  m_axes[0] = std::make_unique<API::RefAxis>(this);
+  m_axes[1] = std::make_unique<API::SpectraAxis>(this);
 }
 
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
   return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
-                         [](size_t value, EventList *histo) {
+                         [](size_t value, const std::unique_ptr<EventList> &histo) {
                            return value + histo->histogram_size();
                          });
 }
@@ -156,7 +154,7 @@ size_t EventWorkspace::blocksize() const {
                            "therefore cannot determine blocksize (# of bins).");
   } else {
     size_t numBins = data[0]->histogram_size();
-    for (const auto *iter : data)
+    for (const auto &iter : data)
       if (numBins != iter->histogram_size())
         throw std::length_error(
             "blocksize undefined because size of histograms is not equal");
@@ -405,7 +403,7 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
 /// @returns The total number of events
 size_t EventWorkspace::getNumberEvents() const {
   return std::accumulate(data.begin(), data.end(), size_t{0},
-                         [](size_t total, EventList *list) {
+                         [](size_t total, auto &list) {
                            return total + list->getNumberEvents();
                          });
 }
@@ -416,7 +414,7 @@ size_t EventWorkspace::getNumberEvents() const {
  */
 Mantid::API::EventType EventWorkspace::getEventType() const {
   Mantid::API::EventType out = Mantid::API::TOF;
-  for (auto list : this->data) {
+  for (auto &list : this->data) {
     Mantid::API::EventType thisType = list->getEventType();
     if (static_cast<int>(out) < static_cast<int>(thisType)) {
       out = thisType;
@@ -457,7 +455,7 @@ size_t EventWorkspace::getMemorySize() const {
 
   // Add the memory from all the event lists
   size_t total = std::accumulate(data.begin(), data.end(), size_t{0},
-                                 [](size_t total, EventList *list) {
+                                 [](size_t total, auto &list) {
                                    return total + list->getMemorySize();
                                  });
 
@@ -695,7 +693,7 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
   for (int wksp_index = 0; wksp_index < int(this->getNumberHistograms());
        wksp_index++) {
     // Get Handle to data
-    EventList *el = this->data[wksp_index];
+    EventList *el = this->data[wksp_index].get();
 
     // Let the eventList do the integration
     out[wksp_index] = el->integrate(minX, maxX, entireRange);

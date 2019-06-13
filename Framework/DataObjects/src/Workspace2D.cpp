@@ -33,31 +33,12 @@ Workspace2D::Workspace2D(const Workspace2D &other)
     : HistoWorkspace(other), m_monitorList(other.m_monitorList) {
   data.resize(other.data.size());
   for (size_t i = 0; i < data.size(); ++i) {
-    data[i] = new Histogram1D(*(other.data[i]));
+    data[i] = std::make_unique<Histogram1D>(*(other.data[i]));
   }
 }
 
 /// Destructor
-Workspace2D::~Workspace2D() {
-// On MSVC when you allocate memory in a multithreaded loop, like our cow_ptrs
-// will do, the
-// deallocation time increases by a huge amount if the memory is just
-// naively deallocated in a serial order. This is because when it was
-// allocated in the omp loop then the actual memory ends up being
-// interleaved and then trying to deallocate this serially leads to
-// lots of swapping in and out of memory. See
-// http://social.msdn.microsoft.com/Forums/en-US/2fe4cfc7-ca5c-4665-8026-42e0ba634214/visual-studio-$
-
-#ifdef _MSC_VER
-  PARALLEL_FOR_IF(Kernel::threadSafe(*this))
-  for (int64_t i = 0; i < static_cast<int64_t>(data.size()); i++) {
-#else
-  for (size_t i = 0; i < data.size(); ++i) { // NOLINT (modernize-loop-convert)
-#endif
-    // Clear out the memory
-    delete data[i];
-  }
-}
+Workspace2D::~Workspace2D() {}
 
 /**
  * Sets the size of the workspace and initializes arrays to zero
@@ -85,15 +66,15 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   spec.setCounts(y);
   spec.setCountStandardDeviations(e);
   for (size_t i = 0; i < data.size(); i++) {
-    data[i] = new Histogram1D(spec);
+    data[i] = std::make_unique<Histogram1D>(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
     data[i]->setSpectrumNo(specnum_t(i + 1));
   }
 
   // Add axes that reference the data
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(this);
-  m_axes[1] = new API::SpectraAxis(this);
+  m_axes[0] = std::make_unique<API::RefAxis>(this);
+  m_axes[1] = std::make_unique<API::SpectraAxis>(this);
 }
 
 void Workspace2D::init(const HistogramData::Histogram &histogram) {
@@ -114,13 +95,13 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
   Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
   spec.setHistogram(initializedHistogram);
   for (auto &i : data) {
-    i = new Histogram1D(spec);
+    i =std::make_unique<Histogram1D>(spec);
   }
 
   // Add axes that reference the data
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(this);
-  m_axes[1] = new API::SpectraAxis(this);
+  m_axes[0] = std::make_unique<API::RefAxis>(this);
+  m_axes[1] = std::make_unique<API::SpectraAxis>(this);
 }
 
 /** Gets the number of histograms
@@ -133,7 +114,7 @@ size_t Workspace2D::getNumberHistograms() const {
 /// get pseudo size
 size_t Workspace2D::size() const {
   return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
-                         [](const size_t value, const Histogram1D *histo) {
+                         [](const size_t value, const std::unique_ptr<Histogram1D>& histo) {
                            return value + histo->size();
                          });
 }
@@ -144,7 +125,7 @@ size_t Workspace2D::blocksize() const {
     return 0;
   } else {
     size_t numBins = data[0]->size();
-    for (const auto *iter : data)
+    for (const auto &iter : data)
       if (numBins != iter->size())
         throw std::length_error(
             "blocksize undefined because size of histograms is not equal");

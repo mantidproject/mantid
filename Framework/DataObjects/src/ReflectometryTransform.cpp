@@ -160,8 +160,8 @@ MantidVec createXAxis(MatrixWorkspace *const ws, const double gradX,
                       const double cxToUnit, const size_t nBins,
                       const std::string &caption, const std::string &units) {
   // Create an X - Axis.
-  auto *const xAxis = new BinEdgeAxis(nBins);
-  ws->replaceAxis(0, xAxis);
+  auto xAxis = std::make_unique<BinEdgeAxis>(nBins);
+  ws->replaceAxis(0, std::move(xAxis));
   auto unitXBasePtr = UnitFactory::Instance().create("Label");
   boost::shared_ptr<Mantid::Kernel::Units::Label> xUnit =
       boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitXBasePtr);
@@ -193,8 +193,8 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
                         const size_t nBins, const std::string &caption,
                         const std::string &units) {
   // Create a Y (vertical) Axis
-  auto *const verticalAxis = new BinEdgeAxis(nBins);
-  ws->replaceAxis(1, verticalAxis);
+  auto verticalAxis = std::make_unique<BinEdgeAxis>(nBins);
+  ws->replaceAxis(1, std::move(verticalAxis));
   auto unitZBasePtr = UnitFactory::Instance().create("Label");
   boost::shared_ptr<Mantid::Kernel::Units::Label> verticalUnit =
       boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitZBasePtr);
@@ -442,8 +442,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
                                           xBinsVec);
 
   // Put the correct bin boundaries into the workspace
-  auto verticalAxis = new BinEdgeAxis(zBinsVec);
-  outWS->replaceAxis(1, verticalAxis);
+  auto verticalAxis = std::make_unique<BinEdgeAxis>(zBinsVec);
+  outWS->replaceAxis(1, std::move(verticalAxis));
   HistogramData::BinEdges binEdges(xBinsVec);
   for (size_t i = 0; i < zBinsVec.size() - 1; ++i)
     outWS->setBinEdges(i, binEdges);
