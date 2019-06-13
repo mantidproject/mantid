@@ -24,7 +24,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -102,13 +101,13 @@ void LoadSQW2::init() {
 
   // Inputs
   declareProperty(
-      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        StringInitializerList({".sqw"})),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                     StringInitializerList({".sqw"})),
       "File of type SQW format");
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("MetadataOnly", false),
+      std::make_unique<PropertyWithValue<bool>>("MetadataOnly", false),
       "Load Metadata without events.");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "OutputFilename", "", FileProperty::OptionalSave,
                       StringInitializerList({".nxs"})),
                   "If specified, the output workspace will be a file-backed "
@@ -119,7 +118,7 @@ void LoadSQW2::init() {
                   "The required frame for the output workspace");
 
   // Outputs
-  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Output IMDEventWorkspace reflecting SQW data");
 }
@@ -144,9 +143,9 @@ void LoadSQW2::cacheInputs() { m_outputFrame = getPropertyValue("Q3DFrames"); }
 void LoadSQW2::initFileReader() {
   using API::Progress;
 
-  m_file = Kernel::make_unique<std::ifstream>(getPropertyValue("Filename"),
-                                              std::ios_base::binary);
-  m_reader = Kernel::make_unique<BinaryStreamReader>(*m_file);
+  m_file = std::make_unique<std::ifstream>(getPropertyValue("Filename"),
+                                           std::ios_base::binary);
+  m_reader = std::make_unique<BinaryStreamReader>(*m_file);
 }
 
 /**
@@ -234,7 +233,7 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
   // lattice - alatt, angdeg, cu, cv = 12 values
   std::vector<float> floats;
   m_reader->read(floats, 12);
-  auto lattice = Kernel::make_unique<OrientedLattice>(
+  auto lattice = std::make_unique<OrientedLattice>(
       floats[0], floats[1], floats[2], floats[3], floats[4], floats[5]);
   V3D uVec(floats[6], floats[7], floats[8]),
       vVec(floats[9], floats[10], floats[11]);

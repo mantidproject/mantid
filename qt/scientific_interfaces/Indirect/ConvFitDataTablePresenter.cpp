@@ -52,8 +52,7 @@ void ConvFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
 
   const auto resolution = m_convFitModel->getResolution(dataIndex);
   const auto name = resolution ? resolution->getName() : "";
-  auto cell = Mantid::Kernel::make_unique<QTableWidgetItem>(
-      QString::fromStdString(name));
+  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);

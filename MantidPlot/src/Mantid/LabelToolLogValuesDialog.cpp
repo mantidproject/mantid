@@ -11,8 +11,8 @@
 #include "LabelToolLogValuesDialog.h"
 
 // Mantid
+#include "Mantid/MantidUI.h"
 #include <LegendWidget.h>
-#include <Mantid/MantidUI.h>
 
 // Qt
 #include <QFormLayout>

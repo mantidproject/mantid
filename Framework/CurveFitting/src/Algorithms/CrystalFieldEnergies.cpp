@@ -8,7 +8,6 @@
 //#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/make_unique.h"
 
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
@@ -100,13 +99,13 @@ void CrystalFieldEnergies::init() {
   declareProperty("IB66", 0.0, "Imaginary part of the B66 field parameter.");
 
   // Output
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       "Energies", Kernel::Direction::Output),
                   "The energies starting at 0 in ascending order.");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       "Eigenvectors", Kernel::Direction::Output),
                   "The eigenvectors.");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       "Hamiltonian", Kernel::Direction::Output),
                   "The Hamiltonian.");
 }

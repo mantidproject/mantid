@@ -171,7 +171,7 @@ void IndirectFitOutputOptionsPresenter::editResult() {
 
 std::unique_ptr<IndirectEditResultsDialog>
 IndirectFitOutputOptionsPresenter::getEditResultsDialog(QWidget *parent) const {
-  return Mantid::Kernel::make_unique<IndirectEditResultsDialog>(parent);
+  return std::make_unique<IndirectEditResultsDialog>(parent);
 }
 
 void IndirectFitOutputOptionsPresenter::replaceSingleFitResult() {

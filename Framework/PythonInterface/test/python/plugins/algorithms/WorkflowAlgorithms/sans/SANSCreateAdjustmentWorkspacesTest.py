@@ -163,7 +163,7 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
                 SANSCreateAdjustmentWorkspacesTest._run_test(serialized_state, sample_data, sample_monitor_data,
                                                              transmission_data, direct_data)
         except Exception as e:
-            self.assertFalse(True, "Did not expect an error to be raised. Raised error is: {}".format(str(e)))
+            self.fail("Did not expect an error to be raised. Raised error is: {}".format(str(e)))
         else:
             # We expect a wavelength adjustment workspace
             self.assertTrue(wavelength_adjustment)

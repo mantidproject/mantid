@@ -49,13 +49,13 @@ LoadMuonNexus::LoadMuonNexus()
 
 /// Initialisation method.
 void LoadMuonNexus::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "The name of the Nexus file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "The name of the Nexus file to load");
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                Direction::Output),
+      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+                                                     Direction::Output),
       "The name of the workspace to be created as the output of the\n"
       "algorithm. For multiperiod files, one workspace will be\n"
       "generated for each period");
@@ -71,7 +71,7 @@ void LoadMuonNexus::init() {
                   "Index of last spectrum to read\n"
                   "(default the last spectrum)");
 
-  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
+  declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"
                   "load. If a range and a list of spectra are both supplied,\n"
                   "all the specified spectra will be loaded.");
@@ -104,15 +104,15 @@ void LoadMuonNexus::init() {
                   Direction::Output);
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
       "Table or a group of tables containing detector dead times. Version 1 "
       "only.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable", "",
-                                                Direction::Output,
-                                                PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable",
+                                                     "", Direction::Output,
+                                                     PropertyMode::Optional),
       "Table or a group of tables with information about the "
       "detector grouping stored in the file (if any). Version 1 only.");
 }

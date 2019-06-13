@@ -118,7 +118,7 @@ int vtkSplatterPlot::RequestData(vtkInformation * info,
 
     try
     {
-      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      auto workspaceProvider = std::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
       vtkDataSetToNonOrthogonalDataSet converter(output, m_wsName, std::move(workspaceProvider));
       converter.execute();
     }
@@ -140,7 +140,7 @@ int vtkSplatterPlot::RequestInformation(vtkInformation *,
 
     try {
       std::string scalarName = "signal";
-      m_presenter = Mantid::Kernel::make_unique<vtkSplatterPlotFactory>(
+      m_presenter = std::make_unique<vtkSplatterPlotFactory>(
           scalarName, m_numberPoints, m_topPercentile);
 
       // Get the info objects

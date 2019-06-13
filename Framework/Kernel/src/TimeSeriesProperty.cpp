@@ -9,7 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/make_unique.h"
+
 #include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
@@ -32,6 +32,20 @@ template <typename TYPE>
 TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name)
     : Property(name, typeid(std::vector<TimeValueUnit<TYPE>>)), m_values(),
       m_size(), m_propSortedFlag(), m_filterApplied() {}
+
+/**
+ * Constructor
+ * @param name :: The name to assign to the property
+ * @param times :: A vector of DateAndTime objects
+ * @param values :: A vector of TYPE
+ */
+template <typename TYPE>
+TimeSeriesProperty<TYPE>::TimeSeriesProperty(
+    const std::string &name, const std::vector<Types::Core::DateAndTime> &times,
+    const std::vector<TYPE> &values)
+    : TimeSeriesProperty(name) {
+  addValues(times, values);
+}
 
 /// Virtual destructor
 template <typename TYPE> TimeSeriesProperty<TYPE>::~TimeSeriesProperty() {}
@@ -88,7 +102,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
   TYPE v0 = it->value();
 
   it++;
-  auto timeSeriesDeriv = Kernel::make_unique<TimeSeriesProperty<double>>(
+  auto timeSeriesDeriv = std::make_unique<TimeSeriesProperty<double>>(
       this->name() + "_derivative");
   timeSeriesDeriv->reserve(this->m_values.size() - 1);
   for (; it != m_values.end(); it++) {

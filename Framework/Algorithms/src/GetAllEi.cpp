@@ -48,7 +48,7 @@ GetAllEi::GetAllEi()
 void GetAllEi::init() {
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "Workspace", "", Kernel::Direction::Input),
       "The input workspace containing the monitor's spectra "
       "measured after the last chopper");
@@ -93,7 +93,7 @@ void GetAllEi::init() {
       "E.g. the 'proton_chage' log grows for each frame "
       "when instrument is counting and is constant otherwise.");
   setPropertySettings("FilterWithDerivative",
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "FilterBaseLog",
                           Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           "Defined in IDF"));
@@ -136,7 +136,7 @@ void GetAllEi::init() {
       "This is debugging option as getEi has to use both monitors.");
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output matrix workspace, containing single spectra with"
       " monitor peaks energies\n"

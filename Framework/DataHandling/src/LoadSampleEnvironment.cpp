@@ -44,23 +44,23 @@ using namespace Geometry;
 void LoadSampleEnvironment::init() {
   auto wsValidator = boost::make_shared<InstrumentValidator>();
   // input workspace
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the workspace containing the instrument to add "
                   "the Environment");
 
   // Environment file
   const std::vector<std::string> extensions{".stl"};
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
-      "The path name of the file containing the Environment");
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
+                  "The path name of the file containing the Environment");
 
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
 
   // Output workspace
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace that will contain the loaded "
                   "Environment of the sample");
 
@@ -77,7 +77,7 @@ void LoadSampleEnvironment::init() {
 
   // Vector to translate mesh
   declareProperty(
-      make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
+      std::make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
       "Vector by which to translate the loaded environment");
 
   declareProperty("SetMaterial", false);
@@ -127,11 +127,11 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("ChemicalFormula", formulaGrp);
   setPropertyGroup("AtomicNumber", formulaGrp);
   setPropertyGroup("MassNumber", formulaGrp);
-  setPropertySettings("ChemicalFormula", make_unique<EnabledWhenProperty>(
+  setPropertySettings("ChemicalFormula", std::make_unique<EnabledWhenProperty>(
                                              "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("AtomicNumber", make_unique<EnabledWhenProperty>(
+  setPropertySettings("AtomicNumber", std::make_unique<EnabledWhenProperty>(
                                           "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("MassNumber", make_unique<EnabledWhenProperty>(
+  setPropertySettings("MassNumber", std::make_unique<EnabledWhenProperty>(
                                         "SetMaterial", IS_NOT_DEFAULT));
 
   std::string densityGrp("Sample Density");
@@ -142,31 +142,34 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("SampleMassDensity", densityGrp);
   setPropertySettings(
       "SampleNumberDensity",
-      make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("ZParameter", make_unique<EnabledWhenProperty>(
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ZParameter", std::make_unique<EnabledWhenProperty>(
                                         "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("UnitCellVolume", make_unique<EnabledWhenProperty>(
+  setPropertySettings("UnitCellVolume", std::make_unique<EnabledWhenProperty>(
                                             "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("SampleMassDensity", make_unique<EnabledWhenProperty>(
-                                               "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
-      "NumberDensityUnit",
-      make_unique<EnabledWhenProperty>("SampleNumberDensity", IS_NOT_DEFAULT));
+      "SampleMassDensity",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("NumberDensityUnit",
+                      std::make_unique<EnabledWhenProperty>(
+                          "SampleNumberDensity", IS_NOT_DEFAULT));
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
   setPropertyGroup("IncoherentXSection", specificValuesGrp);
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
-  setPropertySettings("CoherentXSection", make_unique<EnabledWhenProperty>(
+  setPropertySettings("CoherentXSection", std::make_unique<EnabledWhenProperty>(
                                               "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("IncoherentXSection", make_unique<EnabledWhenProperty>(
-                                                "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "IncoherentXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
       "AttenuationXSection",
-      make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("ScatteringXSection", make_unique<EnabledWhenProperty>(
-                                                "SetMaterial", IS_NOT_DEFAULT));
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "ScatteringXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
 }
 
 std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {

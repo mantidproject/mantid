@@ -93,7 +93,7 @@ class SANSSliceEventTest(unittest.TestCase):
 
         # Assert
         # We expect a scale factor of 1 and an output workspace which is Workspace2D
-        self.assertTrue(slice_factor == 1.0)
+        self.assertEqual(slice_factor,  1.0)
         self.assertTrue(isinstance(output_workspace, Workspace2D))
         self.assertTrue(isinstance(output_workspace_monitor, Workspace2D))
 
@@ -117,9 +117,9 @@ class SANSSliceEventTest(unittest.TestCase):
         slice_factor = slice_alg.getProperty("SliceEventFactor").value
 
         # Assert
-        self.assertTrue(slice_factor == 0.2)
-        self.assertTrue(output_workspace.getNumberEvents() < workspace.getNumberEvents())
-        self.assertTrue(output_workspace_monitor.dataY(0)[0] < monitor_workspace.dataY(0)[0])
+        self.assertEqual(slice_factor,  0.2)
+        self.assertLess(output_workspace.getNumberEvents(), workspace.getNumberEvents())
+        self.assertLess(output_workspace_monitor.dataY(0)[0], monitor_workspace.dataY(0)[0])
 
 
 if __name__ == '__main__':

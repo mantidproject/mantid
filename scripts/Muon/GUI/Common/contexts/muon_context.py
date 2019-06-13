@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_raw_data_directory, get_group_data_directory,
@@ -17,19 +19,21 @@ from Muon.GUI.Common.contexts.fitting_context import FittingContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
-from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
+from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 
 
 class MuonContext(object):
     def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
                  muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext(),
-                 fitting_context=FittingContext()):
+                 workspace_suffix=' MA', fitting_context=FittingContext()):
+
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
         self._phase_context = muon_phase_context
         self.fitting_context = fitting_context
         self.base_directory = base_directory
+        self.workspace_suffix = workspace_suffix
 
         self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
 
@@ -165,7 +169,7 @@ class MuonContext(object):
         return workspace_options
 
     def get_detectors_excluded_from_default_grouping_tables(self):
-        groups, _ = get_default_grouping(
+        groups, _, _ = get_default_grouping(
             self.data_context.current_workspace, self.data_context.instrument,
             self.data_context.main_field_direction)
         detectors_in_group = []

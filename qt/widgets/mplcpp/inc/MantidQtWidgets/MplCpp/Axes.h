@@ -28,6 +28,7 @@ public:
   /// Function-signature required for operation applied to each artist
   using ArtistOperation = std::function<void(Artist &&)>;
   void forEachArtist(const char *containerAttr, const ArtistOperation &op);
+  void removeArtists(const char *containerAttr, const QString label);
   void setXLabel(const char *label);
   void setYLabel(const char *label);
   void setTitle(const char *label);

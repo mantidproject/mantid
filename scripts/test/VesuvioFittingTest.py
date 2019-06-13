@@ -75,10 +75,10 @@ class VesuvioFittingTest(unittest.TestCase):
         constraints_str = "[1,-4]"
 
         fit_opts = parse_fit_options(mass_values, profile_strs, background_str, constraints_str)
-        self.assertEquals(2, len(fit_opts.mass_profiles))
+        self.assertEqual(2, len(fit_opts.mass_profiles))
         self.assertTrue(isinstance(fit_opts.background, PolynomialBackground))
-        self.assertEquals(1, len(fit_opts.intensity_constraints))
-        self.assertEquals(2, len(fit_opts.intensity_constraints[0]))
+        self.assertEqual(1, len(fit_opts.intensity_constraints))
+        self.assertEqual(2, len(fit_opts.intensity_constraints[0]))
 
     def _create_test_fitting_opts(self):
         gramc = GramCharlierMassProfile([2, 5, 7], 1.0079, [1, 0, 0], 1, 1)

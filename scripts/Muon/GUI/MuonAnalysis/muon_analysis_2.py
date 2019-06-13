@@ -64,7 +64,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
+        self.data_context = MuonDataContext('Muon Data', self.loaded_data)
         self.gui_context = MuonGuiContext()
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
@@ -75,7 +75,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
                                    muon_gui_context=self.gui_context,
                                    muon_group_context=self.group_pair_context,
                                    muon_phase_context=self.phase_context,
-                                   fitting_context=self.fitting_context)
+                                   fitting_context=self.fitting_context,
+                                   workspace_suffix=' MA')
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -150,9 +151,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.run_change_observer)
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.run_changed_observer)
-
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.gui_variables_observer
@@ -163,6 +161,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
+
+        self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
 
     def setup_alpha_recalculated_observers(self):
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
@@ -227,6 +228,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+
+    def setup_on_recalulation_finished_notifer(self):
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
     def setup_phase_quad_changed_notifer(self):
         pass

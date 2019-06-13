@@ -39,18 +39,18 @@ class StateReductionModeTest(unittest.TestCase):
 
         # Assert
         merge_strategy = state.get_merge_strategy()
-        self.assertTrue(merge_strategy[0] is ISISReductionMode.LAB)
-        self.assertTrue(merge_strategy[1] is ISISReductionMode.HAB)
+        self.assertEqual(merge_strategy[0],  ISISReductionMode.LAB)
+        self.assertEqual(merge_strategy[1],  ISISReductionMode.HAB)
 
         all_reductions = state.get_all_reduction_modes()
-        self.assertTrue(len(all_reductions) == 2)
-        self.assertTrue(all_reductions[0] is ISISReductionMode.LAB)
-        self.assertTrue(all_reductions[1] is ISISReductionMode.HAB)
+        self.assertEqual(len(all_reductions),  2)
+        self.assertEqual(all_reductions[0],  ISISReductionMode.LAB)
+        self.assertEqual(all_reductions[1],  ISISReductionMode.HAB)
 
         result_lab = state.get_detector_name_for_reduction_mode(ISISReductionMode.LAB)
-        self.assertTrue(result_lab == "Test1")
+        self.assertEqual(result_lab,  "Test1")
         result_hab = state.get_detector_name_for_reduction_mode(ISISReductionMode.HAB)
-        self.assertTrue(result_hab == "Test2")
+        self.assertEqual(result_hab,  "Test2")
 
         self.assertRaises(RuntimeError, state.get_detector_name_for_reduction_mode, "non_sense")
 
@@ -93,16 +93,16 @@ class StateReductionModeBuilderTest(unittest.TestCase):
         state = builder.build()
 
         # Assert
-        self.assertTrue(state.reduction_mode is mode)
-        self.assertTrue(state.reduction_dimensionality is dim)
-        self.assertTrue(state.merge_fit_mode == fit_mode)
-        self.assertTrue(state.merge_shift == merge_shift)
-        self.assertTrue(state.merge_scale == merge_scale)
+        self.assertEqual(state.reduction_mode,  mode)
+        self.assertEqual(state.reduction_dimensionality,  dim)
+        self.assertEqual(state.merge_fit_mode,  fit_mode)
+        self.assertEqual(state.merge_shift,  merge_shift)
+        self.assertEqual(state.merge_scale,  merge_scale)
         detector_names = state.detector_names
-        self.assertTrue(detector_names[DetectorType.to_string(DetectorType.LAB)] == "main-detector-bank")
+        self.assertEqual(detector_names[DetectorType.to_string(DetectorType.LAB)],  "main-detector-bank")
         self.assertTrue(state.merge_mask)
-        self.assertTrue(state.merge_min == merge_min)
-        self.assertTrue(state.merge_max == merge_max)
+        self.assertEqual(state.merge_min,  merge_min)
+        self.assertEqual(state.merge_max,  merge_max)
 
 
 if __name__ == '__main__':

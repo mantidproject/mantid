@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
-#include <MantidKernel/StringTokenizer.h>
 
 #include <algorithm>
 #include <iterator>

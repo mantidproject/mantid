@@ -14,7 +14,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_ptr.hpp>
@@ -71,10 +71,10 @@ public:
     eventList.setHistogram(BinEdges{0.0, 2.0});
     eventList += TofEvent(1.0, 2);
     std::unique_ptr<const ISpectrum> specHist =
-        Kernel::make_unique<Histogram1D>(histogram);
+        std::make_unique<Histogram1D>(histogram);
     std::unique_ptr<const ISpectrum> specEvent =
-        Kernel::make_unique<EventList>(eventList);
-    std::unique_ptr<ISpectrum> target = make_unique<EventList>();
+        std::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = std::make_unique<EventList>();
 
     TS_ASSERT_THROWS_EQUALS(target->copyDataFrom(*specHist),
                             const std::runtime_error &e, std::string(e.what()),
@@ -91,8 +91,8 @@ public:
     eventList.setHistogram(BinEdges{0.0, 2.0});
     eventList += TofEvent(1.0, 2);
     std::unique_ptr<const ISpectrum> specEvent =
-        Kernel::make_unique<EventList>(eventList);
-    std::unique_ptr<ISpectrum> target = make_unique<EventList>();
+        std::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = std::make_unique<EventList>();
     target->setSpectrumNo(37);
     target->setDetectorID(42);
 

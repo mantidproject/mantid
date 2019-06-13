@@ -9,12 +9,12 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MockObjects.h"
-#include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

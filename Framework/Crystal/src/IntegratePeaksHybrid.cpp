@@ -106,10 +106,10 @@ const std::string IntegratePeaksHybrid::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksHybrid::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
@@ -117,9 +117,9 @@ void IntegratePeaksHybrid::init() {
   positiveIntValidator->setExclusive(true);
   positiveIntValidator->setLower(0);
 
-  declareProperty(make_unique<PropertyWithValue<int>>("NumberOfBins", 20,
-                                                      positiveIntValidator,
-                                                      Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NumberOfBins", 20,
+                                                           positiveIntValidator,
+                                                           Direction::Input),
                   "Number of bins to use while creating each local image. "
                   "Defaults to 20. Increase to reduce pixelation");
 
@@ -131,15 +131,15 @@ void IntegratePeaksHybrid::init() {
   compositeValidator->add(boost::make_shared<MandatoryValidator<double>>());
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "BackgroundOuterRadius", 0.0, compositeValidator, Direction::Input),
       "Background outer radius estimate. Choose liberal value.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspaces", "", Direction::Output),
                   "MDHistoWorkspaces containing the labeled clusters used by "
                   "the algorithm.");

@@ -16,7 +16,7 @@ from the University of Derby
 #ifndef GRIDDETAILS_H_
 #define GRIDDETAILS_H_
 
-#include <MantidQtWidgets/Common/DoubleSpinBox.h>
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 #include <QList>
 #include <QWidget>
 class ApplicationWindow;

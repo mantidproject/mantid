@@ -8,10 +8,11 @@
 #define BINARYFILE_H_
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/make_unique.h"
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -119,7 +120,7 @@ public:
 
     // A buffer to load from
     size_t buffer_size = getBufferSize(num_elements);
-    auto buffer = Mantid::Kernel::make_unique<T[]>(buffer_size);
+    auto buffer = std::make_unique<T[]>(buffer_size);
 
     // Make sure we are at the beginning
     offset = 0;

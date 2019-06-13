@@ -38,7 +38,7 @@ const std::string Comment::summary() const {
 /** Initialize the algorithm's properties.
  */
 void Comment::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "", Direction::InOut),
                   "An InOut workspace that will store the new history comment");
 

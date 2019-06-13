@@ -8,8 +8,8 @@
 #define MANTID_MANTIDWIDGETS_ADSADAPTER_H_
 
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h"
-#include <MantidQtWidgets/Common/WorkspaceObserver.h>
 #include <Poco/NObserver.h>
 
 namespace MantidQt {

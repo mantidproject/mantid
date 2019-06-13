@@ -538,7 +538,7 @@ class ISISPowderCommonTest(unittest.TestCase):
                     'Height': 4.0,
                     'Radius': 3.0,
                     'Center': [0.5, 1.0, -3.2]}
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_generate_sample_material(self):
         # Create mock SampleDetails
@@ -554,7 +554,7 @@ class ISISPowderCommonTest(unittest.TestCase):
                     'SampleNumberDensity': 1.5,
                     'AttenuationXSection': 123.0,
                     'ScatteringXSection': 456.0}
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
 
 class ISISPowderMockInst(object):
