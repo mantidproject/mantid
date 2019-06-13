@@ -511,9 +511,9 @@ public:
     group->addWorkspace(ws1);
     group->addWorkspace(ws2);
 
-    TS_ASSERT_THROWS(ads.add("ws1", group), const std::runtime_error &);
+    TS_ASSERT_THROWS(ads.add("ws1", group), const std::invalid_argument &);
     TS_ASSERT_THROWS(ads.addOrReplace("ws1", group),
-                     const std::runtime_error &);
+                     const std::invalid_argument &);
   }
 
   void test_throws_when_adding_to_a_group_a_workspace_with_the_same_name() {
