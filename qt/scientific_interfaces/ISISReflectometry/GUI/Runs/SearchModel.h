@@ -58,6 +58,7 @@ protected:
 
 private:
   bool runHasError(const SearchResult &run) const;
+  void mergeNewResults(std::vector<SearchResult> const &source);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
