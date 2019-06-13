@@ -110,7 +110,6 @@ used to generate your CMake with.
                 "command": "cmake",
                 "args": [
                     "--build",
-                    "-C",
                     "Build/Directory/Here"
                 ],
                 "group": {
