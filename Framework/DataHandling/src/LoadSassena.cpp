@@ -312,11 +312,11 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   unitPtr->setLabel("Time", "picoseconds");
 
   // Create a numeric axis to replace the default vertical one
-  API::Axis *const verticalAxisRe = new API::NumericAxis(nq);
-  API::Axis *const verticalAxisIm = new API::NumericAxis(nq);
+  auto verticalAxisRe = std::make_unique<API::NumericAxis>(nq);
+  auto verticalAxisIm = std::make_unique<API::NumericAxis>(nq);
 
-  wsRe->replaceAxis(1, verticalAxisRe);
-  wsIm->replaceAxis(1, verticalAxisIm);
+  wsRe->replaceAxis(1, std::move(verticalAxisRe));
+  wsIm->replaceAxis(1, std::move(verticalAxisIm));
 
   // Now set the axis values
   for (int i = 0; i < nq; ++i) {

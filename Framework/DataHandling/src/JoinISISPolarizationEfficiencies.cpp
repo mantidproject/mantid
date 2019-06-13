@@ -128,8 +128,8 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
   auto const &inWS = interpolatedWorkspaces.front();
   MatrixWorkspace_sptr outWS = DataObjects::create<Workspace2D>(
       *inWS, labels.size(), inWS->histogram(0));
-  auto axis1 = new TextAxis(labels.size());
-  outWS->replaceAxis(1, axis1);
+  auto axis1 = std::make_unique<TextAxis>(labels.size());
+  outWS->replaceAxis(1, std::move(axis1));
   outWS->getAxis(0)->setUnit("Wavelength");
 
   for (size_t i = 0; i < interpolatedWorkspaces.size(); ++i) {

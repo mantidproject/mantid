@@ -167,12 +167,12 @@ API::MatrixWorkspace_sptr LoadDaveGrp::setupWorkspace() const {
   outputWorkspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create(getProperty("XAxisUnits"));
 
-  API::Axis *const verticalAxis = new API::NumericAxis(nGroups);
+  auto verticalAxis = std::make_unique<API::NumericAxis>(nGroups);
   // Set the y-axis units
   verticalAxis->unit() =
       Kernel::UnitFactory::Instance().create(getProperty("YAxisUnits"));
 
-  outputWorkspace->replaceAxis(1, verticalAxis);
+  outputWorkspace->replaceAxis(1, std::move(verticalAxis));
   return outputWorkspace;
 }
 

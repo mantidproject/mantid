@@ -145,7 +145,7 @@ void LoadMcStasNexus::exec() {
       lblUnit->setLabel(axis1Name, "");
       axis1->unit() = lblUnit;
 
-      Axis *axis2 = new NumericAxis(axis2Length);
+      auto axis2 = std::make_unique<NumericAxis>(axis2Length);
       axis2->title() = axis2Name;
       // Set caption
       lblUnit = boost::make_shared<Units::Label>();
@@ -153,7 +153,7 @@ void LoadMcStasNexus::exec() {
       axis2->unit() = lblUnit;
 
       ws->setYUnit(axis2Name);
-      ws->replaceAxis(1, axis2);
+      ws->replaceAxis(1, std::move(axis2));
 
       ws->mutableX(0) = std::move(axis1Values);
 

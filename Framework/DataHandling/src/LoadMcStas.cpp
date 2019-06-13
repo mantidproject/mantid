@@ -542,7 +542,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     lblUnit->setLabel(axis1Name, "");
     axis1->unit() = lblUnit;
 
-    Axis *axis2 = new NumericAxis(axis2Length);
+    auto axis2 = std::make_unique<NumericAxis>(axis2Length);
     axis2->title() = axis2Name;
     // Set caption
     lblUnit = boost::make_shared<Units::Label>();
@@ -550,7 +550,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     axis2->unit() = lblUnit;
 
     ws->setYUnit(axis2Name);
-    ws->replaceAxis(1, axis2);
+    ws->replaceAxis(1, std::move(axis2));
 
     for (size_t wsIndex = 0; wsIndex < axis2Length; ++wsIndex) {
       auto &dataX = ws->mutableX(wsIndex);
