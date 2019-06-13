@@ -24,14 +24,27 @@ namespace Kernel {
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
     TimeSeriesProperty<HeldType> *seriesProp,
-    const TimeSeriesProperty<bool> &filterProp, const bool transferOwnership)
+    const TimeSeriesProperty<bool> &filterProp)
     : TimeSeriesProperty<HeldType>(*seriesProp), m_unfiltered(nullptr) {
-  if (transferOwnership)
-    m_unfiltered = std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp);
-  else
-    m_unfiltered =
-        std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp->clone());
 
+  m_unfiltered =
+      std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp->clone());
+
+  // Now filter us with the filter
+  this->filterWith(&filterProp);
+}
+
+/**
+ * Construct with a source time series & a filter property
+ * @param seriesProp :: A mart pointer to take ownership of pointer to a property to filter.
+ * @param filterProp :: A boolean series property to filter on
+ */
+template <typename HeldType>
+FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
+    std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
+    const TimeSeriesProperty<bool> &filterProp)
+    : TimeSeriesProperty<HeldType>(*seriesProp){
+  m_unfiltered = std::move(seriesProp);
   // Now filter us with the filter
   this->filterWith(&filterProp);
 }
