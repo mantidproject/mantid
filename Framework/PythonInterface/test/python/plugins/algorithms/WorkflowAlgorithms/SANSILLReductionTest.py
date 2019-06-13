@@ -14,15 +14,23 @@ from mantid.simpleapi import SANSILLReduction, config, mtd
 class SANSILLReductionTest(unittest.TestCase):
 
     _facility = None
+    _instrument = None
 
     def setUp(self):
-        self._facility = config['default.facility']
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
+
+        self._facility = config['default.facility']
+        self._instrument = config['default.instrument']
+
         config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
 
     def tearDown(self):
-        config['default.facility'] = self._facility
+        if self._facility:
+            config['default.facility'] = self._facility
+        if self._instrument:
+            config['default.instrument'] = self._instrument
         mtd.clear()
 
     def test_absorber(self):

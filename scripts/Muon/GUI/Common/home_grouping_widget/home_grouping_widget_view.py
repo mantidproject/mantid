@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets, QtCore, QtGui
 from Muon.GUI.Common.utilities.run_string_utils import valid_alpha_regex
 from Muon.GUI.Common.message_box import warning
+from Muon.GUI.Common.utilities.run_string_utils import run_string_regex
 
 
 class HomeGroupingWidgetView(QtWidgets.QWidget):
@@ -67,7 +68,7 @@ class HomeGroupingWidgetView(QtWidgets.QWidget):
 
         self.summed_period_edit = QtWidgets.QLineEdit(self)
         self.summed_period_edit.setText("1")
-        reg_ex = QtCore.QRegExp("^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$")
+        reg_ex = QtCore.QRegExp(run_string_regex)
         period_validator = QtGui.QRegExpValidator(reg_ex, self.summed_period_edit)
         self.summed_period_edit.setValidator(period_validator)
 

@@ -1591,7 +1591,10 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
     try {
       newDirPath = Poco::Path(path);
       newDirPath.append(subDirPath);
-      newDataDirs.push_back(newDirPath.toString());
+      // only add new path if it isn't already there
+      if (std::find(newDataDirs.begin(), newDataDirs.end(),
+                    newDirPath.toString()) == newDataDirs.end())
+        newDataDirs.push_back(newDirPath.toString());
     } catch (Poco::PathSyntaxException &) {
       continue;
     }
