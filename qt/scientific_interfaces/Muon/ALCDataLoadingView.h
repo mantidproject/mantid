@@ -9,7 +9,6 @@
 
 #include "MantidKernel/System.h"
 
-#include "ALCDataLoadingPresenter.h"
 #include "DllConfig.h"
 #include "IALCDataLoadingView.h"
 

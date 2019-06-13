@@ -12,7 +12,7 @@
 #include "DllConfig.h"
 
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QObject>
 

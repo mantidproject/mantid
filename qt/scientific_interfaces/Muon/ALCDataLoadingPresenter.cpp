@@ -7,7 +7,6 @@
 #include "ALCDataLoadingPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"

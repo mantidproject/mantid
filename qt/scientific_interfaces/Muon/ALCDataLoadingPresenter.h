@@ -7,6 +7,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGPRESENTER_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
 #include "DllConfig.h"

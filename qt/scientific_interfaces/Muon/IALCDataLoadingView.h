@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "DllConfig.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
 #include <QObject>
