@@ -11,6 +11,7 @@
 
 #include "DllConfig.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QObject>
 

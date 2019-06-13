@@ -329,7 +329,6 @@ public:
                                             WorkspaceY(0, 1, 0.022489, 1E-6),
                                             WorkspaceY(0, 2, 0.038717, 1E-6)),
                                       0));
-    // EXPECT_CALL(*m_view, setDataCurve(dataWorkspace, 0));
     m_view->requestLoading();
   }
 
