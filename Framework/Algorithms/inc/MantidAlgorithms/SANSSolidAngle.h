@@ -20,19 +20,8 @@ namespace Mantid {
 namespace Algorithms {
 /**
 
-    Performs a solid angle correction on a 2D SANS data set to correct
-    for the absence of curvature of the detector.
-
-    Note: one could use SolidAngle to perform this calculation. Solid Angle
-    returns the solid angle of each detector pixel. The correction is then
-    given by:
-      Omega(theta) = Omega(0) cos^3(theta)
-      where Omega is the solid angle.
-    This approach requires more un-necessary calculations so we simply apply the
-   cos^3(theta).
-
-    Brulet et al, J. Appl. Cryst. (2007) 40, 165-177.
-    See equation 22.
+    Computes the solid angle for each detector pixel according to the type
+    of detector.
 
     Required Properties:
     <UL>
@@ -50,7 +39,7 @@ public:
   const std::string name() const override { return "SANSSolidAngle"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Performs solid angle correction on SANS 2D data.";
+    return "Compute solid angle for a SANS detector.";
   }
   /// Algorithm's version
   int version() const override { return (1); }
