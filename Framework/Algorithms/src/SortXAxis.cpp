@@ -51,27 +51,13 @@ void SortXAxis::init() {
       boost::make_shared<StringListValidator>(orderingValues);
   declareProperty("Ordering", orderingValues[0], orderingValidator,
                   "Ascending or descending sorting", Direction::Input);
-  declareProperty("IgnoreHistogramValidation", false,
-                  "This will stop SortXAxis from throwing if the workspace is "
-                  "not a valid histogram for this algorithm to work on. THIS "
-                  "IS TEMPORARY, this item will be removed for 4.1 and thus "
-                  "should only be used internally for the TOSCA legacy data "
-                  "in indirect .");
 }
 
 void SortXAxis::exec() {
-
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
-  const bool ignoreHistogramValidation =
-      getProperty("IgnoreHistogramValidation");
-
   // Check if it is a valid histogram here
-  const bool isAProperHistogram =
-      ignoreHistogramValidation ||
-      determineIfHistogramIsValid(
-          *inputWorkspace); // Assume a valid histogram if validation is to be
-                            // ignored
+  const bool isAProperHistogram = determineIfHistogramIsValid(*inputWorkspace);
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
