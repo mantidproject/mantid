@@ -13,7 +13,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
-#include "MantidRemoteJobManagers/SimpleJSON.h"
+#include "MantidKernel/SimpleJSON.h"
 
 #include <boost/make_shared.hpp>
 
