@@ -28,7 +28,7 @@ Complete GUI from Exercises
             super(Demo,self).__init__(parent)
  
             data_model = model_data.DataGenerator()
-            colour_model = model_colour.ColourConverter()
+            colour_list = model_colour.line_colours()
 
             self.window = QtWidgets.QMainWindow()
 
@@ -98,15 +98,12 @@ later date.
 
     class MasterPresenter(object):
 
-        def __init__(self, view, data_model, colour_model):
+        def __init__(self, view, data_model, colour_list):
         self.view = view
 
         self.data_model = data_model
-        self.colour_model = colour_model
 
-        colours = self.colour_model.getColourSelection()
-
-        self.presenter = presenter.Presenter(self.view.getOptionView(), colours)
+        self.presenter = presenter.Presenter(self.view.getOptionView(), colour_list)
         self.plot_presenter = plot_presenter.PlotPresenter(self.view.getPlotView())
         # connect statements
         self.view.getOptionView().plotSignal.connect(self.updatePlot)             
@@ -293,13 +290,10 @@ The signal from the View is caught here and the models are used to create the co
     from __future__ import (absolute_import, division, print_function)
 
 
-    class ColourConverter(object):
+    def line_colours(object):
+        colour_table = ["red", "blue", "black"]
+        return colour_table
 
-        def __init__(self):
-            self.colour_table = {"red": "r", "blue": "b", "black": "k"}
-
-        def getColourSelection(self):
-            return self.colour_table.keys()
 
 ``model_data.py``
 ############
