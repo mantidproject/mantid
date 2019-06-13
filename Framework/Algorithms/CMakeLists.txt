@@ -261,6 +261,7 @@ set(SRC_FILES
     src/RemoveLowResTOF.cpp
     src/RemoveMaskedSpectra.cpp
     src/RemovePromptPulse.cpp
+    src/RemoveSpectra.cpp
     src/RemoveWorkspaceHistory.cpp
     src/RenameWorkspace.cpp
     src/RenameWorkspaces.cpp
@@ -605,6 +606,7 @@ set(INC_FILES
     inc/MantidAlgorithms/RemoveLowResTOF.h
     inc/MantidAlgorithms/RemoveMaskedSpectra.h
     inc/MantidAlgorithms/RemovePromptPulse.h
+    inc/MantidAlgorithms/RemoveSpectra.h
     inc/MantidAlgorithms/RemoveWorkspaceHistory.h
     inc/MantidAlgorithms/RenameWorkspace.h
     inc/MantidAlgorithms/RenameWorkspaces.h
@@ -948,6 +950,7 @@ set(TEST_FILES
     RemoveLowResTOFTest.h
     RemoveMaskedSpectraTest.h
     RemovePromptPulseTest.h
+    RemoveSpectraTest.h
     RemoveWorkspaceHistoryTest.h
     RenameWorkspaceTest.h
     RenameWorkspacesTest.h
