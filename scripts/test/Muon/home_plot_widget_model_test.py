@@ -39,7 +39,7 @@ class HomeTabPlotModelTest(unittest.TestCase):
 
         plot_window = self.model.plot([workspace], 'Test plot')
 
-        self.assertTrue(plot_window.multi_plot.has_subplot('Test plot'))
+        self.assertTrue(plot_window.window.has_subplot('Test plot'))
 
 
 if __name__ == '__main__':

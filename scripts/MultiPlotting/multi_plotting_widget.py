@@ -25,8 +25,7 @@ class MultiPlotWindow(object):
         self.close_callback = close_callback
 
         self.plot_context = PlottingContext()
-        self.multi_plot = MultiPlotWidget(window_title, self.plot_context, self.canvas)
-        self.window = self.multi_plot
+        self.window = MultiPlotWidget(window_title, self.plot_context, self.canvas)
         self.window.closeSignal.connect(self.close_callback)
 
         self._ADSObserver = FigureManagerADSObserver(self)

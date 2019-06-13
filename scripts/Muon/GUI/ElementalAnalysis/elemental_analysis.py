@@ -193,7 +193,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         name = "{}; Detector {}".format(run, detector[-1])
         if self.plot_window is None:
             self.plot_window = MultiPlotWindow(str(run), self._unset_detectors)
-            self.plotting = self.plot_window.multi_plot
+            self.plotting = self.plot_window.window
             self.add_detector_to_plot(detector, name)
             self.plotting.set_all_values()
             self.plotting.removeSubplotConnection(self.subplotRemoved)

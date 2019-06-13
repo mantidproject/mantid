@@ -29,7 +29,7 @@ class HomePlotWidgetModel(object):
 
         self.plot_window = self._plotting_window_constructor('Muon Analysis', close_callback=self._close_plot)
 
-        plotting = self.plot_window.multi_plot
+        plotting = self.plot_window.window
         plotting.add_subplot(title)
 
         for workspace in workspace_list:
@@ -47,7 +47,7 @@ class HomePlotWidgetModel(object):
         :param specNum: Spectrum number to plot from workspace
         :return:
         """
-        self.plot_window.multi_plot.plot(subplot_name, workspace, specNum=specNum)
+        self.plot_window.window.plot(subplot_name, workspace, specNum=specNum)
 
     def _close_plot(self):
         """
