@@ -29,7 +29,6 @@ using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
 using testing::_;
-using testing::_;
 
 //=====================================================================================
 // Functional tests
@@ -42,9 +41,9 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
-      : m_thetaTolerance(0.01),
-        m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
-        m_runsTableView(), m_progressView(), m_messageHandler(),
+      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
+                                              "POLREF", "OFFSPEC"},
+        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
         m_searcher(nullptr), m_autoreduction(), m_pythonRunner(),
         m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
@@ -81,7 +80,10 @@ public:
   }
 
   void testSettingsChanged() {
-    // TODO
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, settingsChanged()).Times(1);
+    presenter.settingsChanged();
+    verifyAndClear();
   }
 
   void testSearchWithEmptyStringDoesNotStartSearch() {
@@ -137,10 +139,6 @@ public:
     presenter.notifyReductionPaused();
     verifyAndClear();
   }
-
-  void testReductionResumed() {}
-
-  void testReductionPaused() {}
 
   void testNotifyAutoreductionResumed() {
     auto presenter = makePresenter();
