@@ -6,11 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
 #include "Autoreduction.h"
+#include "CatalogSearcher.h"
 #include "GUI/Batch/IBatchPresenter.h"
-#include "GUI/Common/CatalogSearcher.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
-#include "GUI/Common/SearchModel.h"
 #include "GUI/Runs/IRunNotifier.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
@@ -22,6 +21,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "SearchModel.h"
 
 #include <QStringList>
 #include <algorithm>

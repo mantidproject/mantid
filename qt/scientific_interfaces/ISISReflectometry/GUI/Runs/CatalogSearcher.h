@@ -7,8 +7,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 #define MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 
+#include "GUI/Common/IPythonRunner.h"
 #include "GUI/Runs/IRunsView.h"
-#include "IPythonRunner.h"
 #include "ISearcher.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 
