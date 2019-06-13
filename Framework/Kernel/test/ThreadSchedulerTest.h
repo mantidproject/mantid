@@ -33,7 +33,7 @@ public:
     void run() override {}
   };
 
-  void do_basic_test(ThreadScheduler *sc) {
+  void do_basic_test(std::unique_ptr<ThreadScheduler> sc) {
     ThreadSchedulerTest_numDestructed = 0;
     TS_ASSERT(!sc->getAborted());
     TS_ASSERT_EQUALS(std::string(sc->getAbortException().what()), "");
@@ -50,20 +50,18 @@ public:
     TS_ASSERT_EQUALS(sc->size(), 0);
     // And deletes the tasks properly
     TS_ASSERT_EQUALS(ThreadSchedulerTest_numDestructed, 2);
-
-    delete sc;
   }
 
   void test_basic_ThreadSchedulerFIFO() {
-    do_basic_test(new ThreadSchedulerFIFO());
+    do_basic_test(std::make_unique<ThreadSchedulerFIFO>());
   }
 
   void test_basic_ThreadSchedulerLIFO() {
-    do_basic_test(new ThreadSchedulerLIFO());
+    do_basic_test(std::make_unique<ThreadSchedulerLIFO>());
   }
 
   void test_basic_ThreadSchedulerLargestCost() {
-    do_basic_test(new ThreadSchedulerLargestCost());
+    do_basic_test(std::make_unique<ThreadSchedulerLargestCost>());
   }
 
   //==================================================================================================
@@ -99,27 +97,27 @@ public:
   }
 
   void test_ThreadSchedulerFIFO() {
-    ThreadScheduler *sc = new ThreadSchedulerFIFO();
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerFIFO>();
     double costs[4] = {0, 1, 2, 3};
     size_t poppedIndices[4] = {0, 1, 2, 3};
-    do_test(sc, costs, poppedIndices);
-    delete sc;
+    do_test(sc.get(), costs, poppedIndices);
   }
 
   void test_ThreadSchedulerLIFO() {
-    ThreadScheduler *sc = new ThreadSchedulerLIFO();
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerLIFO>();
     double costs[4] = {0, 1, 2, 3};
     size_t poppedIndices[4] = {3, 2, 1, 0};
-    do_test(sc, costs, poppedIndices);
-    delete sc;
+    do_test(sc.get(), costs, poppedIndices);
   }
 
   void test_ThreadSchedulerLargestCost() {
-    ThreadScheduler *sc = new ThreadSchedulerLargestCost();
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerLargestCost>();
     double costs[4] = {1, 5, 2, -3};
     size_t poppedIndices[4] = {1, 2, 0, 3};
-    do_test(sc, costs, poppedIndices);
-    delete sc;
+    do_test(sc.get(), costs, poppedIndices);
   }
 };
 
