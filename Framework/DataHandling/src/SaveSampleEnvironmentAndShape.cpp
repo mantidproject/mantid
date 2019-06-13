@@ -122,7 +122,12 @@ void SaveSampleEnvironmentAndShape::exec() {
   writer.writeStl();
 }
 
-// Add a mesh to the vectors
+/**
+ * Function to add the triangles and vertices of a mesh object into a vector to
+ * allow combining with multiple meshes.
+ *
+ * @param mesh The mesh object to get the triangles and vertices from.
+ */
 void SaveSampleEnvironmentAndShape::addMeshToVector(const MeshObject &mesh) {
   auto vertices = mesh.getV3Ds();
   auto triangles = mesh.getTriangles();
@@ -132,8 +137,16 @@ void SaveSampleEnvironmentAndShape::addMeshToVector(const MeshObject &mesh) {
                     std::end(triangles));
 }
 
-// Add a mesh to the vectors, with the addresses changed by the offset, then
-// return the new offset
+/**
+ * Function to add the triangles and vertices of a mesh object into a vector to
+ * allow combining with multiple meshes, with an offset to take into account
+ * meshes that are already added.
+ *
+ * @param mesh The mesh object to get the triangles and vertices from.
+ * @param offset The value to offset the triangles by.
+ *
+ * @return size_t the new offset value to use if this needs to be used again.
+ */
 size_t SaveSampleEnvironmentAndShape::addMeshToVector(
     const Mantid::Geometry::MeshObject &mesh, size_t offset) {
   auto vertices = mesh.getV3Ds();
@@ -153,6 +166,12 @@ size_t SaveSampleEnvironmentAndShape::addMeshToVector(
   return offset += vertices.size();
 }
 
+/**
+ * Function to convert an IObject to a mesh, and throw if this can't be done.
+ *
+ * @param object The IObject to convert.
+ * @return const Geometry::MeshObject& The converted MeshObject.
+ */
 const Geometry::MeshObject &toMeshObject(const Geometry::IObject &object) {
 
   try {

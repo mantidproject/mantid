@@ -16,20 +16,26 @@ namespace DataHandling {
 enum class ScaleUnits { metres, centimetres, millimetres };
 
 namespace {
-/**
- * Class to contain functionality for writing out STL files for
- * SaveShapeAndEnvironment. handles actual writing to file, creating the header,
- * and removing the scale applied when loading.
- *
- */
 
+/**
+ * Function to write out number of triangles to files.
+ *
+ * @param streamWriter The binary stream to write to.
+ * @param numberTrianglesLong The number of triangles to write out.
+ */
 void writeNumberTriangles(Kernel::BinaryStreamWriter streamWriter,
                           uint32_t numberTrianglesLong) {
 
-  // Write the number of triangles
+  // Write the number of triangles.
   streamWriter << numberTrianglesLong;
 }
 
+/**
+ * Function to write out a default normal, as we don't save this information in
+ * mantid.
+ *
+ * @param streamWriter The binary stream to write to.
+ */
 void writeNormal(Kernel::BinaryStreamWriter StreamWriter) {
   float normal = 0;
   StreamWriter << normal;
@@ -39,6 +45,13 @@ void writeNormal(Kernel::BinaryStreamWriter StreamWriter) {
 
 } // namespace
 
+/**
+ * Function to write the header of the STL file, the header has no requirements
+ * other than it being 80 bytes long and not being a valid ascii stl header, so
+ * store creation info and scale here.
+ *
+ * @param streamWriter The binary stream to write to.
+ */
 void SaveStl::writeHeader(Kernel::BinaryStreamWriter streamWriter) {
   const std::string headerStart =
       "Binary STL File created using Mantid Environment:";
@@ -64,6 +77,11 @@ void SaveStl::writeHeader(Kernel::BinaryStreamWriter streamWriter) {
                       std::string(emptySize, ' ');
 }
 
+/**
+ * Function to write out the full mesh to an stl binary file.
+ * Handles the format of the file e.g.
+ * Header->NumberOfTriangles->Normal->Triangle->attribute->Next Normal...
+ */
 void SaveStl::writeStl() {
   if (m_triangle.size() % 3 != 0) {
     throw std::runtime_error("Invalid mesh, could not save.");
@@ -75,20 +93,25 @@ void SaveStl::writeStl() {
   writeNumberTriangles(streamWriter, numberOfTriangles);
   const uint16_t attributeByte = 0;
   for (uint32_t i = 0; i < numberOfTriangles; ++i) {
-    // Write out 0, 0, 0 to act as default normal vector
     writeNormal(streamWriter);
-    // write out vertices of triangle
     writeTriangle(streamWriter, i * 3);
-
+    // write out attribute, currently always zero
     streamWriter << attributeByte;
   }
   myFile.close();
 }
 
+/**
+ * Function to write out an individual triangle with the scale removed.
+ *
+ * @param streamWriter The binary stream to write to.
+ * @param triangle the first index of the triangles in the m_triangles vector.
+ */
 void SaveStl::writeTriangle(Kernel::BinaryStreamWriter streamWriter,
                             uint32_t triangle) {
-  // get each vertex
+  // for each vertex
   for (int i = 0; i < 3; ++i) {
+    // write out the coords
     uint32_t index = m_triangle[triangle + i];
     Kernel::V3D vertex = m_vertices[index];
     float xVal = removeScale(vertex.X());
@@ -100,6 +123,13 @@ void SaveStl::writeTriangle(Kernel::BinaryStreamWriter streamWriter,
   }
 }
 
+/**
+ * Function to remove the current scaling set on this object from a double value
+ * and return it as a float.
+ *
+ * @param value The double to remove the scale from.
+ * @return float the new value without scaling.
+ */
 float SaveStl::removeScale(double value) {
   switch (m_units) {
   case ScaleUnits::centimetres:
