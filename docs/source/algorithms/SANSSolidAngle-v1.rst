@@ -10,7 +10,7 @@
 Description
 -----------
 
-Performs a solid angle calculation on all detector pixels.
+Computes the solid angle for all detector pixels.
 
 Depending on the option selected, the solid angle is calculated as follows:
 
