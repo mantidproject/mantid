@@ -92,3 +92,14 @@ class FittingContext(object):
             fit for fit in self.fit_list
             if fit.fit_function_name == fit_function_name
         ]
+
+    def find_fit_for_input_workspace_name(self, input_workspace_name):
+        """
+        Find the fits in the list whose input workspace matches
+        :param input_workspace_name: The name of the input_workspace
+        :return: A list of matching fits
+        """
+        return [
+            fit for fit in self.fit_list
+            if fit.input_workspace == input_workspace_name
+        ]
