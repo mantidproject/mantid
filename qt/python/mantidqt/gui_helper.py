@@ -19,8 +19,6 @@ def set_matplotlib_backend():
     the name of the backend to be the name to be used for importing the
     correct matplotlib widgets.'''
     backend = matplotlib.get_backend()
-    if 'MPLBACKEND' in os.environ:
-        return backend
     if backend.startswith('module://'):
         if backend.endswith('qt4agg'):
             backend = 'Qt4Agg'
