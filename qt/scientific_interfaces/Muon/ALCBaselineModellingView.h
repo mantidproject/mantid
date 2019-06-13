@@ -7,7 +7,6 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGVIEW_H_
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
 #include "DllConfig.h"
@@ -16,16 +15,7 @@
 
 #include "ui_ALCBaselineModellingView.h"
 
-#include <QHash>
-#include <QVariant>
-
 class QSignalMapper;
-
-namespace MantidQt {
-namespace MantidWidgets {
-class ErrorCurve;
-}
-} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {

@@ -7,7 +7,6 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGVIEW_H_
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
 #include "ALCDataLoadingPresenter.h"
@@ -18,7 +17,6 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-class ErrorCurve;
 class LogValueSelector;
 } // namespace MantidWidgets
 } // namespace MantidQt
