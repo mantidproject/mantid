@@ -23,6 +23,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/LogarithmicGenerator.h"

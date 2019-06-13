@@ -466,7 +466,7 @@ public:
   }
 
   void
-  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override {
+  setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) override {
     UNUSED_ARG(maskingRegion);
     throw std::runtime_error("Not Implemented");
   }
