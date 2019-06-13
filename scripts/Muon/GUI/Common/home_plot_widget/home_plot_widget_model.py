@@ -5,15 +5,16 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+from mantidqt.plotting.functions import plot
+from mantid.api import AnalysisDataService
 
 
 class HomePlotWidgetModel(object):
-    def __init__(self, plotting_window_model):
+    def __init__(self):
         """
         :param plotting_window_model: This is the plotting manager class to use
         """
-        self._plotting_window_constructor = plotting_window_model
-        self.plot_window = None
+        self.plot_figure = None
         self.plotted_workspaces = []
         self.plotted_group = ''
 
@@ -24,35 +25,36 @@ class HomePlotWidgetModel(object):
         :param title: The name to give to the subplot created, currently only one subplot is ever created
         :return: A reference to the newly created plot window is passed back
         """
-        if self.plot_window:
-            self.plot_window.emit_close()
+        workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
+        if self.plot_figure:
+            self.plot_figure.clear()
+            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title)
+        else:
+            self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title)
 
-        self.plot_window = self._plotting_window_constructor('Muon Analysis', close_callback=self._close_plot)
+        self.plot_figure.canvas.set_window_title('Muon Analysis')
+        self.plot_figure.gca().set_title(title)
 
-        plotting = self.plot_window.window
-        plotting.add_subplot(title)
-
-        for workspace in workspace_list:
-            plotting.plot(title, workspace)
+        self.plot_figure.canvas.window().closing.connect(self._close_plot)
 
         self.plotted_workspaces = workspace_list
 
-        return self.plot_window
+        return self.plot_figure
 
-    def add_workspace_to_plot(self, subplot_name, workspace, specNum):
+    def add_workspace_to_plot(self, workspace, specNum):
         """
         Adds a plot line to the specified subplot
-        :param subplot_name: Name of subplot to which to add a workspace
         :param workspace: Name of workspace to get plot data from
         :param specNum: Spectrum number to plot from workspace
         :return:
         """
-        self.plot_window.window.plot(subplot_name, workspace, specNum=specNum)
+        workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace], unrollGroups=True)
+        self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True)
 
     def _close_plot(self):
         """
         callback to call when the plot window is closed. Removes the reference and resets plotted workspaces
         :return:
         """
-        self._plot_window = None
+        self.plot_figure = None
         self.plotted_workspaces = []

@@ -91,7 +91,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             return
         self._model.plotted_group = self.context.group_pair_context.selected
 
-        if not self._model.plot_window:
+        if not self._model.plot_figure:
             return
 
         self.plot_standard_workspaces()
@@ -104,9 +104,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.get_workspaces_to_plot(self.context.group_pair_context.selected, self._view.if_raw(),
                                                      self._view.get_selected())
 
-        plot_window = self._model.plot(workspace_list, self.get_plot_title())
-
-        plot_window.show()
+        self._model.plot(workspace_list, self.get_plot_title())
 
     def handle_fit_completed(self):
         """
@@ -117,7 +115,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             list_of_fits = self.context.fitting_context.find_fit_for_input_workspace_name(plotted_workspace)
             list_of_workspaces_to_plot = [fit.parameter_name.replace(' Parameters', '') for fit in list_of_fits]
             for workspace_name in list_of_workspaces_to_plot:
-                self._model.add_workspace_to_plot(self.get_plot_title(), workspace_name, 3)
+                self._model.add_workspace_to_plot(workspace_name, 3)
 
     def get_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """

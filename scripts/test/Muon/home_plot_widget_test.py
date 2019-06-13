@@ -89,7 +89,7 @@ class HomeTabPlotPresenterTest(GuiTest):
     def test_handle_group_pair_to_plot_changed_does_nothing_if_plot_window_does_not_exist(self):
         self.model.plotted_group = 'top'
         self.context.group_pair_context.selected = 'bottom'
-        self.model.plot_window = None
+        self.model.plot_figure = None
 
         self.presenter.handle_group_pair_to_plot_changed()
 
@@ -114,9 +114,7 @@ class HomeTabPlotPresenterTest(GuiTest):
         self.presenter.handle_fit_completed()
 
         self.assertEqual(self.model.add_workspace_to_plot.call_count, 2)
-        self.model.add_workspace_to_plot.assert_called_with('MUSR62260-62261 bottom',
-                                                            'MUSR62260; Group; bottom; Asymmetry; MA; Fitted;',
-                                                            3)
+        self.model.add_workspace_to_plot.assert_called_with('MUSR62260; Group; bottom; Asymmetry; MA; Fitted;', 3)
 
 
 if __name__ == '__main__':
