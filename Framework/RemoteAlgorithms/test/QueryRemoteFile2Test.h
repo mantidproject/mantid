@@ -65,9 +65,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // Transaction id missing
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     QueryRemoteFile2 alg2;
@@ -76,7 +76,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg2.setPropertyValue("TransactionID", "trans0001"));
 
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
   }
 
@@ -84,11 +84,11 @@ public:
     QueryRemoteFile2 qrf;
     TS_ASSERT_THROWS_NOTHING(qrf.initialize();)
     TS_ASSERT_THROWS(qrf.setPropertyValue("Compute", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(qrf.setPropertyValue("TransID", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(qrf.setPropertyValue("ComputeResourc", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_propertiesOK() {

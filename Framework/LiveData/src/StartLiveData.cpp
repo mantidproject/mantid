@@ -45,25 +45,26 @@ int StartLiveData::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void StartLiveData::init() {
-  declareProperty(
-      make_unique<PropertyWithValue<bool>>("FromNow", true, Direction::Input),
-      "Process live data starting from the current time only.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("FromNow", true,
+                                                            Direction::Input),
+                  "Process live data starting from the current time only.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("FromStartOfRun", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("FromStartOfRun", false,
+                                                Direction::Input),
       "Record live data, but go back to the the start of the run and process "
       "all data since then.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("FromTime", false, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("FromTime", false,
+                                                Direction::Input),
       "Record live data, but go back to a specific time and process all data "
       "since then.\n"
       "You must specify the StartTime property if this is checked.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
+                                                  Direction::Input),
       "Frequency of updates, in seconds. Default 60.\n"
       "If you specify 0, MonitorLiveData will not launch and you will get only "
       "one chunk.");
@@ -71,7 +72,7 @@ void StartLiveData::init() {
   // Initialize the properties common to LiveDataAlgorithm.
   initProps();
 
-  declareProperty(make_unique<AlgorithmProperty>(
+  declareProperty(std::make_unique<AlgorithmProperty>(
                       "MonitorLiveData", boost::make_shared<NullValidator>(),
                       Direction::Output),
                   "A handle to the MonitorLiveData algorithm instance that "

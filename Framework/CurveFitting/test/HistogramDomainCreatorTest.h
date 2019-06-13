@@ -61,7 +61,7 @@ public:
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     // Data points workspace
@@ -69,14 +69,15 @@ public:
     manager.setProperty("InputWorkspace", ws);
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
-    TS_ASSERT_THROWS(creator.createDomain(domain, values), std::runtime_error);
+    TS_ASSERT_THROWS(creator.createDomain(domain, values),
+                     const std::runtime_error &);
   }
 
   void test_domain_values() {
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     // Histogram workspace
@@ -101,7 +102,7 @@ public:
     PropertyManager manager;
     HistogramDomainCreator creator(manager, "InputWorkspace");
     creator.declareDatasetProperties();
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
 

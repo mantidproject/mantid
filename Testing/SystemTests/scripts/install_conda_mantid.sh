@@ -5,13 +5,13 @@
 # which has cmake and gcc installed
 
 CONDA_PREFIX=/opt/conda
+CONDA_DEFAULT_ENV_PREFIX=${CONDA_PREFIX}
 
 conda config --add channels conda-forge
 conda config --add channels mantid
 conda config --set always_yes true
 
 # checking
-source activate mantid-systemtests
 echo "checking installation environment..."
 pwd
 which conda
@@ -29,7 +29,10 @@ mkdir -p ${CONDA_PREFIX}/conda-bld/linux-64
 cp ${package} ${CONDA_PREFIX}/conda-bld/linux-64
 set -e
 conda index ${CONDA_PREFIX}/conda-bld
-conda install -c ${CONDA_PREFIX}/conda-bld mantid-framework=${VERSION}=${BUILD}
+
+# install
+source activate mantid-systemtests
+conda install -c ${CONDA_DEFAULT_ENV_PREFIX}/conda-bld mantid-framework=${VERSION}=${BUILD}
 
 # post-install check
 echo "post-installation check ..."

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -519,6 +520,23 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
 }
 
+void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("ApplyCorrections");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                             : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
+                                             : noSuffixes);
+  m_uiForm.dsCorrections->setFBSuffixes(
+      filter ? getCorrectionsFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsCorrections->setWSSuffixes(
+      filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
+}
+
 /**
  * Replots the preview plot.
  *
@@ -638,7 +656,7 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
 }
 
 void ApplyAbsorptionCorrections::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 

@@ -25,15 +25,15 @@ using namespace Kernel;
 void GroupWorkspaces::init() {
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces", boost::make_shared<ADSValidator>(true, true)),
       "Names of the Input Workspaces to Group");
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("GlobExpression", ""),
       "Add all Workspaces that match Glob expression to Group");
   declareProperty(
-      make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "Name of the workspace to be created as the output of grouping ");
 }
 

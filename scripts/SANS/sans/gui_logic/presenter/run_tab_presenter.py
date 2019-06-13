@@ -24,7 +24,8 @@ from mantid.py3compat import csv_open_type
 
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.common.enums import (BatchReductionEntry, FitType, RangeStepType, RowState, SampleShape,
+                               SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch, SANSGuiPropertiesHandler)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -118,7 +119,10 @@ class RunTabPresenter(object):
             self._presenter.on_multiperiod_changed(show_periods)
 
         def on_reduction_dimensionality_changed(self, is_1d):
-            self._presenter.verify_output_modes(is_1d)
+            self._presenter.on_reduction_dimensionality_changed(is_1d)
+
+        def on_output_mode_changed(self):
+            self._presenter.on_output_mode_changed()
 
         def on_data_changed(self, row, column, new_value, old_value):
             self._presenter.on_data_changed(row, column, new_value, old_value)
@@ -155,9 +159,6 @@ class RunTabPresenter(object):
 
         def on_sample_geometry_selection(self, show_geometry):
             self._presenter.on_sample_geometry_view_changed(show_geometry)
-
-        def on_compatibility_unchecked(self):
-            self._presenter.on_compatibility_unchecked()
 
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
@@ -541,6 +542,9 @@ class RunTabPresenter(object):
         """
         error_msg = ""
         try:
+            # Trip up early if output modes are invalid
+            self._validate_output_modes()
+
             for row in rows:
                 self._table_model.reset_row_state(row)
             self.update_view_from_table_model()
@@ -572,20 +576,49 @@ class RunTabPresenter(object):
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e) + error_msg)
 
-    def verify_output_modes(self, is_1d):
+    def on_reduction_dimensionality_changed(self, is_1d):
         """
         Unchecks and disabled canSAS output mode if switching to 2D reduction.
         Enabled canSAS if switching to 1D.
         :param is_1d: bool. If true then switching TO 1D reduction.
         """
-        if is_1d:
-            self._view.can_sas_checkbox.setEnabled(True)
+        if not self._view.output_mode_memory_radio_button.isChecked():
+            # If we're in memory mode, all file types should always be disabled
+            if is_1d:
+                self._view.can_sas_checkbox.setEnabled(True)
+            else:
+                if self._view.can_sas_checkbox.isChecked():
+                    self._view.can_sas_checkbox.setChecked(False)
+                    self.sans_logger.information("2D reductions are incompatible with canSAS output. "
+                                                 "canSAS output has been unchecked.")
+                self._view.can_sas_checkbox.setEnabled(False)
+
+    def _validate_output_modes(self):
+        """
+        Check which output modes has been checked (memory, file, both), and which
+        file types. If no file types have been selected and output mode is not memory,
+        we want to raise an error here. (If we don't, an error will be raised on attempting
+        to save after performing the reductions)
+        """
+        if (self._view.output_mode_file_radio_button.isChecked() or
+                self._view.output_mode_both_radio_button.isChecked()):
+            if self._view.save_types == [SaveType.NoType]:
+                raise RuntimeError("You have selected an output mode which saves to file, "
+                                   "but no file types have been selected.")
+
+    def on_output_mode_changed(self):
+        """
+        When output mode changes, dis/enable file type buttons
+        based on the output mode and reduction dimensionality
+        """
+        if self._view.output_mode_memory_radio_button.isChecked():
+            # If in memory mode, disable all buttons regardless of dimension
+            self._view.disable_file_type_buttons()
         else:
-            if self._view.can_sas_checkbox.isChecked():
-                self._view.can_sas_checkbox.setChecked(False)
-                self.sans_logger.information("2D reductions are incompatible with canSAS output. "
-                                             "canSAS output has been unchecked.")
-            self._view.can_sas_checkbox.setEnabled(False)
+            self._view.nx_can_sas_checkbox.setEnabled(True)
+            self._view.rkh_checkbox.setEnabled(True)
+            if self._view.reduction_dimensionality_1D.isChecked():
+                self._view.can_sas_checkbox.setEnabled(True)
 
     def on_process_all_clicked(self):
         """
@@ -796,11 +829,6 @@ class RunTabPresenter(object):
             self._view.show_geometry()
         else:
             self._view.hide_geometry()
-
-    def on_compatibility_unchecked(self):
-        self.display_warning_box('Warning', 'Are you sure you want to uncheck compatibility mode?',
-                                 'Non-compatibility mode has known issues. DO NOT USE if applying bin masking'
-                                 ' to event workspaces.')
 
     def get_row_indices(self):
         """

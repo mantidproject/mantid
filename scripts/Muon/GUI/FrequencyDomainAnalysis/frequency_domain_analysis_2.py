@@ -44,7 +44,6 @@ def check_facility():
 
 
 class FrequencyAnalysisGui(QtWidgets.QMainWindow):
-
     """
     The Frequency Domain Analaysis 2.0 interface.
     """
@@ -63,13 +62,14 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
+        self.data_context = MuonDataContext('Frequency Domain Data', self.loaded_data)
         self.gui_context = MuonGuiContext()
         self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
-                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context)
+                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
+                                   workspace_suffix=' FD')
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -79,7 +79,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
 
         self.setup_tabs()
-        self.help_widget = HelpWidget()
+        self.help_widget = HelpWidget("Frequency Domain Analysis")
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()

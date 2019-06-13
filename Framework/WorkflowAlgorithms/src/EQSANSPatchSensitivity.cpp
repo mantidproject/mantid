@@ -22,10 +22,11 @@ using namespace Geometry;
 
 void EQSANSPatchSensitivity::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "Input sensitivity workspace to be patched");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("PatchWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("PatchWorkspace", "",
+                                            Direction::Input),
       "Workspace defining the patch. Masked detectors will be patched.");
   declareProperty("UseLinearRegression", true,
                   "If true, a linear regression "

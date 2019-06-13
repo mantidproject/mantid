@@ -29,6 +29,9 @@ public:
   EnggDiffPresenterNoThread(IEnggDiffractionView *view)
       : EnggDiffractionPresenter(view) {}
 
+  using EnggDiffractionPresenter::outputFocusCroppedFilename;
+  using EnggDiffractionPresenter::outputFocusFilenames;
+
 private:
   // not async at all
   void startAsyncCalibWorker(const std::string &outFilename,
@@ -253,8 +256,7 @@ public:
     ON_CALL(mockView, currentCalibSettings())
         .WillByDefault(Return(calibSettings));
 
-    EXPECT_CALL(mockView,
-                userWarning("No calibration directory selected", testing::_));
+    EXPECT_CALL(mockView, userWarning("Calibration Error", testing::_));
 
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
@@ -277,7 +279,7 @@ public:
     // them
     EnggDiffCalibSettings calibSettings;
 
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -300,7 +302,7 @@ public:
 
   // this test actually starts the calibration process - which implies starting
   // the thread unless you use the mock without thread
-  void test_calcCalibWithRunNumbersButError() {
+  void testcalcCalibWithRunNumbersButError() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test would start a Qt thread that needs signals/slots
@@ -318,7 +320,7 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -406,7 +408,7 @@ public:
 
   // This would test the cropped calibration with no cerial number
   // which should produce a warning
-  void test_calcCroppedCalibWithoutRunNumbers() {
+  void testcalcCroppedCalibWithoutRunNumbers() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -434,7 +436,7 @@ public:
   // this can start the cropped calibration thread, so watch out
   // the test provide gui with missing calib settings
   // which should return a single error
-  void test_calcCroppedCalibWithSettingsMissing() {
+  void testcalcCroppedCalibWithSettingsMissing() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test can start a Qt thread that needs signals/slots
@@ -450,7 +452,7 @@ public:
     EnggDiffCalibSettings calibSettings;
 
     // doesn't get here
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -469,7 +471,7 @@ public:
 
   // This should not start the process, tests with an empty spec number which
   // should generate a user warning that spec number is missing
-  void test_calcCroppedCalibWithEmptySpec() {
+  void testcalcCroppedCalibWithEmptySpec() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test would start a Qt thread that needs signals/slots
@@ -487,7 +489,7 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -517,7 +519,7 @@ public:
   // the thread unless you use the mock without thread
   // this will utlise the bank name north and not still carry out the cropped
   // calibration process normal
-  void test_calcCroppedCalibWithBankName() {
+  void testcalcCroppedCalibWithBankName() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test would start a Qt thread that needs signals/slots
@@ -535,7 +537,7 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
     // if it got here it would: .WillRepeatedly(Return(calibSettings));
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
@@ -583,7 +585,7 @@ public:
   // starting the thread unless you use the mock without thread
   // this test case includes all valid settings, run numbers, spectrum no
   // selected & valid spectrum no provided
-  void test_calcCroppedCalibWithRunNumbers() {
+  void testcalcCroppedCalibWithRunNumbers() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test would start a Qt thread that needs signals/slots
@@ -601,7 +603,7 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
     // if it was called it would: .WillRepeatedly(Return(calibSettings));
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
@@ -692,7 +694,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_focusWithoutRunNumber() {
+  void testfocusWithoutRunNumber() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -729,7 +731,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_focusWithRunNumberButWrongBanks() {
+  void testfocusWithRunNumberButWrongBanks() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -764,7 +766,7 @@ public:
   }
 
   // the focusing process starts but the input run number cannot be found
-  void test_focusWithNumbersButError() {
+  void testfocusWithNumbersButError() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test starts the focusing process which would start a Qt
@@ -892,7 +894,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_focusCropped_withoutRunNo() {
+  void testfocusCropped_withoutRunNo() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -932,7 +934,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_focusCropped_withoutBanks() {
+  void testfocusCropped_withoutBanks() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -972,7 +974,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_focusCropped_withoutSpectrumNos() {
+  void testfocusCropped_withoutSpectrumNos() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1012,7 +1014,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_focusTexture_withoutRunNo() {
+  void testfocusTexture_withoutRunNo() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1048,7 +1050,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_focusTexture_withoutFilename() {
+  void testfocusTexture_withoutFilename() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1084,7 +1086,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_focusTexture_withInexistentTextureFile() {
+  void testfocusTexture_withInexistentTextureFile() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1120,7 +1122,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_resetFocus() {
+  void testresetFocus() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1137,7 +1139,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_resetFocus_thenFocus() {
+  void testresetFocus_thenFocus() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1173,7 +1175,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_preproc_event_time_bin_missing_runno() {
+  void testpreproc_event_time_bin_missing_runno() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1194,7 +1196,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_preproc_event_time_wrong_bin() {
+  void testpreproc_event_time_wrong_bin() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1219,12 +1221,12 @@ public:
   }
 
   // this test does run Load and then Rebin //
-  void test_preproc_event_time_ok() {
+  void testpreproc_event_time_ok() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
-        .Times(1)
+        .Times(2)
         .WillRepeatedly(Return(g_rebinRunNo));
 
     EXPECT_CALL(mockView, rebinningTimeBin())
@@ -1232,7 +1234,7 @@ public:
         .WillRepeatedly(Return(0.100000));
 
     // doesn't effectively finish the processing
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(2);
 
     // A warning complaining about the run number / path Because the
     // real QtView uses MWRunFile::getFilenames, if we give a run
@@ -1241,7 +1243,7 @@ public:
     // returning the run number without the path that would be
     // needed. EnggDiffractionPresenter::isValidRunNumber() will not
     // find the file (when it tries Poco::File(path).exists()).
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::RebinTime);
@@ -1251,7 +1253,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_preproc_event_multiperiod_missing_runno() {
+  void testpreproc_event_multiperiod_missing_runno() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1441,6 +1443,46 @@ public:
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
+  void test_Output_Focus_Filename_With_Instrument() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    std::vector<bool> vec(true, 1);
+    EXPECT_CALL(mockView, currentInstrument())
+        .WillOnce(Return(std::string("INSTRUMENT")));
+    TS_ASSERT_EQUALS(pres.outputFocusFilenames("INSTRUMENT1234", vec)[0],
+                     "INSTRUMENT_1234_focused_bank_1.nxs");
+  }
+
+  void test_Output_Focus_Filename_Without_Instrument() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    std::vector<bool> vec(true, 1);
+    EXPECT_CALL(mockView, currentInstrument())
+        .WillOnce(Return(std::string("INSTRUMENT")));
+    TS_ASSERT_EQUALS(pres.outputFocusFilenames("004567", vec)[0],
+                     "INSTRUMENT_4567_focused_bank_1.nxs");
+  }
+
+  void test_Output_Focus_Cropped_Filename_With_Instrument() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    std::vector<bool> vec(true, 1);
+    EXPECT_CALL(mockView, currentInstrument())
+        .WillOnce(Return(std::string("INSTRUMENT")));
+    TS_ASSERT_EQUALS(pres.outputFocusCroppedFilename("INSTRUMENT1234"),
+                     "INSTRUMENT_1234_focused_cropped.nxs");
+  }
+
+  void test_Output_Focus_Cropped_Filename_Without_Instrument() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+    std::vector<bool> vec(true, 1);
+    EXPECT_CALL(mockView, currentInstrument())
+        .WillOnce(Return(std::string("INSTRUMENT")));
+    TS_ASSERT_EQUALS(pres.outputFocusCroppedFilename("004567"),
+                     "INSTRUMENT_4567_focused_cropped.nxs");
   }
 
 private:

@@ -32,12 +32,12 @@ namespace Crystal {
 DECLARE_ALGORITHM(ShowPeakHKLOffsets)
 
 void ShowPeakHKLOffsets::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "Workspace of Peaks with UB loaded");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "HKLIntegerOffsets", "HKLIntegerOffsets", Direction::Output),
       "Workspace with the Results");
 }

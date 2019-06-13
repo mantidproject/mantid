@@ -43,7 +43,7 @@ public:
                                                               testMatrixWS);
 
     TS_ASSERT_THROWS(alg->setPropertyValue("InputWorkspace", m_inputName),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     Mantid::API::AnalysisDataService::Instance().remove(m_inputName);
   }

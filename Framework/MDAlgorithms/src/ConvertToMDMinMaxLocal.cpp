@@ -33,9 +33,9 @@ const std::string ConvertToMDMinMaxLocal::name() const {
 void ConvertToMDMinMaxLocal::init() {
   ConvertToMDParent::init();
 
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
       "MinValues", Direction::Output));
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
       "MaxValues", Direction::Output));
 }
 

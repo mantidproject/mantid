@@ -551,7 +551,7 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
     exts.emplace_back(".hdf");
   else
     exts.emplace_back(".tar");
-  Base::declareProperty(Kernel::make_unique<API::FileProperty>(
+  Base::declareProperty(std::make_unique<API::FileProperty>(
                             FilenameStr, "", API::FileProperty::Load, exts),
                         "The input filename of the stored data");
 
@@ -565,7 +565,7 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
   // mask
   exts.clear();
   exts.emplace_back(".xml");
-  Base::declareProperty(Kernel::make_unique<API::FileProperty>(
+  Base::declareProperty(std::make_unique<API::FileProperty>(
                             MaskStr, "", API::FileProperty::OptionalLoad, exts),
                         "The input filename of the mask data");
 
@@ -575,7 +575,7 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
       "  eg 16,19-45,47");
 
   Base::declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output));
 
   if (hdfLoader) {

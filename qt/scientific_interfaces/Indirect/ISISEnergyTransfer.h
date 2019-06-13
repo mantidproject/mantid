@@ -69,6 +69,8 @@ private:
                                      QMap<QString, QString> const &instDetails,
                                      QString const &instrumentProperty);
 
+  void setFileExtensionsByName(bool filter) override;
+
   std::pair<std::string, std::string> createMapFile(
       const std::string
           &groupType); ///< create the mapping file with which to group results
@@ -80,6 +82,8 @@ private:
   QString validateDetectorGrouping() const;
   std::string getDetectorGroupingString() const;
 
+  void loadDetailedBalance(std::string const &filename);
+
   void setRunEnabled(bool enable);
   void setPlotEnabled(bool enable);
   void setPlotTimeEnabled(bool enable);
@@ -89,6 +93,7 @@ private:
 
   std::string m_outputGroupName;
   std::vector<std::string> m_outputWorkspaces;
+
   Ui::ISISEnergyTransfer m_uiForm;
 };
 } // namespace CustomInterfaces

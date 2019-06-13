@@ -31,13 +31,13 @@ class PyChop2Tests(unittest.TestCase):
             res.append(rr)
             flux.append(ff)
         # Checks that the flux should be highest for MERLIN, MARI and MAPS in that order
-        self.assertTrue(flux[2] > flux[1])
+        self.assertGreater(flux[2], flux[1])
         # Note that MAPS has been upgraded so now should have higher flux than MARI.
-        self.assertTrue(flux[0] > flux[1])
+        self.assertGreater(flux[0], flux[1])
         # Checks that the resolution should be best for MARI, MAPS, and MERLIN in that order
         # actually MAPS and MARI resolutions are very close
-        self.assertTrue(res[1][0] < res[0][0])
-        self.assertTrue(res[0][0] < res[2][0])
+        self.assertLess(res[1][0], res[0][0])
+        self.assertLess(res[0][0], res[2][0])
         # Now tests the standalone function
         for inc, instname in enumerate(instnames):
             rr, ff = PyChop2.calculate(instname, 's', 200, 18, 0)
@@ -62,11 +62,11 @@ class PyChop2Tests(unittest.TestCase):
             res.append(rr)
             flux.append(ff)
         # Checks that the flux should be highest for 'High flux', then 'Intermediate', 'High resolution'
-        self.assertTrue(flux[0] > flux[1])
-        self.assertTrue(flux[1] >= flux[2])
+        self.assertGreater(flux[0], flux[1])
+        self.assertGreaterEqual(flux[1], flux[2])
         # Checks that the resolution should be best for 'High resolution', then 'Intermediate', 'High flux'
-        self.assertTrue(res[2][0] <= res[1][0])
-        self.assertTrue(res[1][0] <= res[0][0]) 
+        self.assertLessEqual(res[2][0], res[1][0])
+        self.assertLessEqual(res[1][0], res[0][0]) 
         # Now tests the standalone function
         for inc, variant in enumerate(variants):
             rr, ff = PyChop2.calculate('LET', variant, 200, 18, 0)

@@ -44,7 +44,7 @@ SortHKL::SortHKL() {
 SortHKL::~SortHKL() = default;
 
 void SortHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
 
@@ -80,15 +80,15 @@ void SortHKL::init() {
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty("OutputChi2", 0.0, "Chi-square is available as output",
                   Direction::Output);
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "RowName", "Overall", Direction::Input),
                   "name of row");
   declareProperty("Append", false,
@@ -99,12 +99,12 @@ void SortHKL::init() {
                   boost::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "SigmaCritical", 3.0, Direction::Input),
                   "Removes peaks whose intensity deviates more than "
                   "SigmaCritical from the mean (or median).");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
       "Output Equivalent Intensities");
   declareProperty("WeightedZScore", false,

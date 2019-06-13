@@ -960,7 +960,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
     temptablews = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             outputWorkspaceName));
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
     std::cout << "TableWorkspace " << outputWorkspaceName
               << " cannot be found in ADS."
               << ".\n";

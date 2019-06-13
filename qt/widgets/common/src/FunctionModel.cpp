@@ -110,6 +110,7 @@ void MultiDomainFunctionModel::addFunction(const QString &prefix,
                                " is not composite.");
     }
   }
+  m_function->checkFunction();
   updateGlobals();
 }
 
@@ -133,11 +134,9 @@ void MultiDomainFunctionModel::removeFunction(const QString &functionIndex) {
     cf->removeFunction(index);
     if (cf->nFunctions() == 1 && prefix.isEmpty()) {
       m_function->replaceFunction(i, cf->getFunction(0));
-      m_function->checkFunction();
-    } else {
-      cf->checkFunction();
     }
   }
+  m_function->checkFunction();
   updateGlobals();
 }
 

@@ -160,7 +160,7 @@ public:
     TS_ASSERT_EQUALS(alg.m_indexedPeaks.size(), 0);
 
     TS_ASSERT_THROWS(alg.initializeIndexedPeaks(expectedPeaks),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     PoldiPeakCollection_sptr peaks =
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
@@ -249,7 +249,7 @@ public:
         WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
 
     TS_ASSERT_THROWS(alg.getPeakCollections(badWorkspaces),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testReshapeVector() {
@@ -260,13 +260,14 @@ public:
     std::vector<double> empty;
 
     TestablePoldiIndexKnownCompounds alg;
-    TS_ASSERT_THROWS(alg.reshapeVector(empty, 1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.reshapeVector(empty, 1),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(one, 1));
     TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(one, 2));
     TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(two, 1));
     TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(two, 2));
     TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(two, 3));
-    TS_ASSERT_THROWS(alg.reshapeVector(one, 0), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.reshapeVector(one, 0), const std::invalid_argument &);
 
     std::vector<double> t11 = alg.reshapeVector(one, 1);
     TS_ASSERT_EQUALS(t11.size(), 1);
@@ -298,7 +299,7 @@ public:
     alg.initialize();
 
     alg.setPropertyValue("Tolerances", "");
-    TS_ASSERT_THROWS(alg.getTolerances(1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.getTolerances(1), const std::invalid_argument &);
 
     alg.setPropertyValue("Tolerances", "0.1");
     TS_ASSERT_THROWS_NOTHING(alg.getTolerances(1));
@@ -309,7 +310,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.getTolerances(2));
     TS_ASSERT_THROWS_NOTHING(alg.getTolerances(3));
 
-    TS_ASSERT_THROWS(alg.getTolerances(0), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.getTolerances(0), const std::invalid_argument &);
   }
 
   void testGetContributions() {
@@ -317,7 +318,7 @@ public:
     alg.initialize();
 
     alg.setPropertyValue("ScatteringContributions", "");
-    TS_ASSERT_THROWS(alg.getContributions(1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.getContributions(1), const std::invalid_argument &);
 
     alg.setPropertyValue("ScatteringContributions", "0.1");
     TS_ASSERT_THROWS_NOTHING(alg.getContributions(1));
@@ -328,7 +329,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.getContributions(2));
     TS_ASSERT_THROWS_NOTHING(alg.getContributions(3));
 
-    TS_ASSERT_THROWS(alg.getContributions(0), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.getContributions(0), const std::invalid_argument &);
   }
 
   void testGetNormalizedContributions() {
@@ -347,11 +348,11 @@ public:
 
     std::vector<double> empty;
     TS_ASSERT_THROWS(alg.getNormalizedContributions(empty),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     std::vector<double> negative(1, -2.0);
     TS_ASSERT_THROWS(alg.getNormalizedContributions(negative),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testScaleIntensityEstimates() {
@@ -360,7 +361,7 @@ public:
 
     PoldiPeakCollection_sptr null;
     TS_ASSERT_THROWS(alg.scaleIntensityEstimates(null, 0.1),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     PoldiPeakCollection_sptr indexedSilicon =
         PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon();
@@ -382,7 +383,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.scaleIntensityEstimates(phases, goodContributions));
     TS_ASSERT_THROWS(alg.scaleIntensityEstimates(phases, badContributions),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testFwhmSigmaConversion() {
@@ -402,7 +403,8 @@ public:
     alg.initialize();
 
     PoldiPeakCollection_sptr null;
-    TS_ASSERT_THROWS(alg.assignFwhmEstimates(null, 0.1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.assignFwhmEstimates(null, 0.1),
+                     const std::invalid_argument &);
 
     PoldiPeakCollection_sptr indexedSilicon =
         PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon();
@@ -420,7 +422,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.assignFwhmEstimates(phases, goodFwhms));
     TS_ASSERT_THROWS(alg.scaleIntensityEstimates(phases, badFwhms),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testInPeakSet() {
@@ -466,8 +468,10 @@ public:
 
     // throw if one of the peaks is invalid
     PoldiPeak_sptr null;
-    TS_ASSERT_THROWS(alg.isCandidate(null, candidate1), std::invalid_argument);
-    TS_ASSERT_THROWS(alg.isCandidate(peak, null), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.isCandidate(null, candidate1),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.isCandidate(peak, null),
+                     const std::invalid_argument &);
   }
 
   void testGetIndexCandidatePairs() {
@@ -524,7 +528,7 @@ public:
      * is thrown.
      */
     TS_ASSERT_THROWS(alg.getAllIndexCandidatePairs(measuredSi, theoreticalSi),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     // After initialization, everything is fine.
     alg.initializeUnindexedPeaks();
@@ -537,7 +541,8 @@ public:
     TestablePoldiIndexKnownCompounds alg;
 
     PoldiPeak_sptr peak = PoldiPeak::create(1.0);
-    TS_ASSERT_THROWS(alg.collectUnindexedPeak(peak), std::runtime_error);
+    TS_ASSERT_THROWS(alg.collectUnindexedPeak(peak),
+                     const std::runtime_error &);
 
     alg.initializeUnindexedPeaks();
 
@@ -571,12 +576,14 @@ public:
                         PoldiPeak::Relative);
 
     // Null peaks don't work
-    TS_ASSERT_THROWS(IndexCandidatePair(peak, null, 0), std::invalid_argument);
+    TS_ASSERT_THROWS(IndexCandidatePair(peak, null, 0),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(IndexCandidatePair(null, candidate1, 0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // Range error when no fwhm is set (division by zero).
-    TS_ASSERT_THROWS(IndexCandidatePair(peak, noFwhm, 0), std::range_error);
+    TS_ASSERT_THROWS(IndexCandidatePair(peak, noFwhm, 0),
+                     const std::range_error &);
 
     IndexCandidatePair peakCandidate1(peak, candidate1, 1);
     TS_ASSERT_EQUALS(peakCandidate1.observed, peak);

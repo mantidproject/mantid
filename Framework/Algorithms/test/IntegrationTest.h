@@ -130,7 +130,7 @@ public:
 
     // Check setting of invalid property value causes failure
     TS_ASSERT_THROWS(alg.setPropertyValue("StartWorkspaceIndex", "-1"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

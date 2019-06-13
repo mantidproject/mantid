@@ -49,7 +49,7 @@ private:
 };
 
 void TableWorkspaceAlgorithm::init() {
-  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "Table", "", Direction::Input));
 }
 

@@ -43,17 +43,17 @@ class MantidPlotFoldersTest(unittest.TestCase):
         """ Create a folder then delete it """
         f = addFolder("test_folder")
         deleteFolder(f)
-        self.assertTrue(f._getHeldObject() is None, "Folder was deleted")
+        self.assertEqual(f._getHeldObject(), None, "Folder was deleted")
 
     def test_Folder_accessing_windows(self):
         """ Access windows through a folder """
         f, old_windows = self.setup_folder("fld")
         windows = f.windows()
         self.assertEqual(len(windows), 4, "4 windows in folder")
-        self.assertTrue( f.window("table-fld") is not None)
-        self.assertTrue( f.table("table-fld") is not None)
-        self.assertTrue( f.matrix("matrix-fld") is not None)
-        self.assertTrue( f.graph("graph-fld") is not None)
+        self.assertNotEqual( f.window("table-fld"), None)
+        self.assertNotEqual( f.table("table-fld"), None)
+        self.assertNotEqual( f.matrix("matrix-fld"), None)
+        self.assertNotEqual( f.graph("graph-fld"), None)
         for w in windows: w.close()
         deleteFolder(f)
 

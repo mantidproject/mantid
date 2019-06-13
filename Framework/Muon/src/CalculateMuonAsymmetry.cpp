@@ -45,18 +45,18 @@ DECLARE_ALGORITHM(CalculateMuonAsymmetry)
 void CalculateMuonAsymmetry::init() {
   // norm table to update
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "NormalizationTable", "", Direction::Input),
       "Name of the table containing the normalizations for the asymmetries.");
   // list of uNonrm workspaces to fit to
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Kernel::ArrayProperty<std::string>>(
           "UnNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
       "An ordered list of workspaces (to get the initial values "
       "for the normalizations).");
   // list of workspaces to output renormalized result to
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Kernel::ArrayProperty<std::string>>(
           "ReNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
       "An ordered list of workspaces (to get the initial values "
       "for the normalizations).");
@@ -70,7 +70,7 @@ void CalculateMuonAsymmetry::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
-  declareProperty(make_unique<API::FunctionProperty>("InputFunction"),
+  declareProperty(std::make_unique<API::FunctionProperty>("InputFunction"),
                   "The fitting function to be converted.");
 
   std::vector<std::string> minimizerOptions =
@@ -86,8 +86,8 @@ void CalculateMuonAsymmetry::init() {
       "Stop after this number of iterations if a good fit is not found");
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
   declareProperty("ChiSquared", 0.0, Kernel::Direction::Output);
-  declareProperty(make_unique<API::FunctionProperty>("OutputFunction",
-                                                     Kernel::Direction::Output),
+  declareProperty(std::make_unique<API::FunctionProperty>(
+                      "OutputFunction", Kernel::Direction::Output),
                   "The fitting function after fit.");
 }
 /*
@@ -223,7 +223,8 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   double endX = getProperty("EndX");
   int maxIterations = getProperty("MaxIterations");
   auto minimizer = getProperty("Minimizer");
-  API::IAlgorithm_sptr fit = API::AlgorithmManager::Instance().create("Fit");
+  API::IAlgorithm_sptr fit =
+      API::AlgorithmManager::Instance().createUnmanaged("Fit");
   fit->initialize();
 
   API::IFunction_sptr function = getProperty("InputFunction");

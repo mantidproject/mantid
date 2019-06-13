@@ -308,8 +308,7 @@ set(INC_FILES
     inc/MantidKernel/WriteLock.h
     inc/MantidKernel/XMLInstantiator.h
     inc/MantidKernel/cow_ptr.h
-    inc/MantidKernel/make_cow.h
-    inc/MantidKernel/make_unique.h)
+    inc/MantidKernel/make_cow.h)
 
 set(TEST_FILES
     ArrayBoundedValidatorTest.h
@@ -379,7 +378,6 @@ set(TEST_FILES
     MagneticFormFactorTableTest.h
     MagneticIonTest.h
     MakeCowTest.h
-    MakeUniqueTest.h
     MandatoryValidatorTest.h
     MaskedPropertyTest.h
     MaterialBuilderTest.h
@@ -490,7 +488,7 @@ target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
                                   ${JSONCPP_INCLUDE_DIR}
                            PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
-                                   ${OPENSSL_INCLUDE_DIR})
+                                   ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
 
 if(OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")

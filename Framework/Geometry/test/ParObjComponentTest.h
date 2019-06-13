@@ -196,7 +196,7 @@ public:
     ObjComponent pcomp(&comp, pmap.get());
 
     TS_ASSERT_THROWS(pcomp.interceptSurface(track),
-                     Exception::NullPointerException);
+                     const Exception::NullPointerException &);
   }
 
   void testSolidAngleCappedCylinder() {
@@ -232,7 +232,7 @@ public:
     ObjComponent pB(&B, pmap.get());
 
     TS_ASSERT_THROWS(pB.solidAngle(V3D(1, 2, 3)),
-                     Exception::NullPointerException);
+                     const Exception::NullPointerException &);
   }
 
   void testBoundingBoxCappedCylinder() {

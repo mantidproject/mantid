@@ -13,7 +13,6 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -51,7 +50,7 @@ DetectorInfo::DetectorInfo(
  * ComponentInfo must be set up. */
 DetectorInfo::DetectorInfo(const DetectorInfo &other)
     : m_detectorInfo(
-          Kernel::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
+          std::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
       m_instrument(other.m_instrument), m_detectorIDs(other.m_detectorIDs),
       m_detIDToIndex(other.m_detIDToIndex),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),

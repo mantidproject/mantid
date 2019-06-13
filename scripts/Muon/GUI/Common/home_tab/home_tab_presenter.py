@@ -44,10 +44,6 @@ class HomeTabPresenter(object):
     def show(self):
         self._view.show()
 
-    def show_all_data(self):
-        if self._model.is_data_loaded():
-            self._model.show_all_data()
-
     def update_all_widgets(self):
         """
         Update all widgets from the context.
@@ -82,7 +78,6 @@ class HomeTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer.update_all_widgets()
-            self.outer.show_all_data()
 
     class GroupingObserver(Observer):
 

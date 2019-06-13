@@ -51,7 +51,7 @@ public:
     TS_ASSERT_EQUALS(grid.m_hasCachedCalculation, false);
     TS_ASSERT_EQUALS(grid.m_deltaD, 0.0);
 
-    TS_ASSERT_THROWS(grid.createGrid(), std::runtime_error);
+    TS_ASSERT_THROWS(grid.createGrid(), const std::runtime_error &);
   }
 
   void testdeltaD() {

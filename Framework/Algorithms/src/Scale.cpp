@@ -32,9 +32,9 @@ const std::string ADD("Add");
 } // anonymous namespace
 
 void Scale::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       PropertyNames::INPUT_WORKSPACE, "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output));
 
   declareProperty(PropertyNames::FACTOR, 1.0,

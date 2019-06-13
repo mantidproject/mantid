@@ -11,7 +11,7 @@
 
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Task.h"
-#include <MantidKernel/Timer.h>
+#include "MantidKernel/Timer.h"
 
 using namespace Mantid::Kernel;
 
@@ -31,7 +31,7 @@ class FunctionTaskTest : public CxxTest::TestSuite {
 public:
   void test_NullFunction_throws() {
     FunctionTask mytask(nullptr);
-    TS_ASSERT_THROWS(mytask.run(), std::runtime_error);
+    TS_ASSERT_THROWS(mytask.run(), const std::runtime_error &);
   }
 
   void test_VoidFunction() {

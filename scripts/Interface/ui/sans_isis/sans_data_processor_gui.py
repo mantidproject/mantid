@@ -137,6 +137,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_output_mode_changed(self):
+            pass
+
+        @abstractmethod
         def on_data_changed(self, row, column, new_value, old_value):
             pass
 
@@ -180,10 +184,6 @@ class SANSDataProcessorGui(QMainWindow,
         def on_save_other(self):
             pass
 
-        @abstractmethod
-        def on_compatibility_unchecked(self):
-            pass
-
     def __init__(self):
         """
         Initialise the interface
@@ -219,8 +219,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.copy_button.setIcon(icons.get_icon("mdi.content-copy"))
         self.cut_button.setIcon(icons.get_icon("mdi.content-cut"))
         self.erase_button.setIcon(icons.get_icon("mdi.eraser"))
-        self.delete_row_button.setIcon(icons.get_icon("mdi.trash-can"))
-        self.insert_row_button.setIcon(icons.get_icon("mdi.table"))
+        self.delete_row_button.setIcon(icons.get_icon("mdi.table-row-remove"))
+        self.insert_row_button.setIcon(icons.get_icon("mdi.table-row-plus-after"))
         self.export_table_button.setIcon(icons.get_icon("mdi.file-export"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
@@ -282,7 +282,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
 
-        runs_icon = icons.get_icon("mdi.play-circle-outline")
+        runs_icon = icons.get_icon("mdi.play")
         _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
         settings_icon = icons.get_icon("mdi.settings")
@@ -291,10 +291,10 @@ class SANSDataProcessorGui(QMainWindow,
         centre_icon = icons.get_icon("mdi.adjust")
         _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon = icons.get_icon("mdi.plus-circle-outline")
+        add_runs_page_icon = icons.get_icon("mdi.plus")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon = icons.get_icon("mdi.help-circle-outline")
+        diagnostic_icon = icons.get_icon("mdi.stethoscope")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
@@ -536,14 +536,12 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_save_other_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_save_other())
 
-    def _on_compatibility_unchecked(self):
-        self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
-
     def _on_help_button_clicked(self):
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_output_mode_clicked(self):
+        """This method is called when an output mode is clicked on the gui"""
         if self.output_mode_memory_radio_button.isChecked():
             output_mode = "PublishToADS"
         elif self.output_mode_file_radio_button.isChecked():
@@ -553,6 +551,9 @@ class SANSDataProcessorGui(QMainWindow,
         else:
             output_mode = None
         set_setting(self.__generic_settings, self.__output_mode_key, output_mode)
+
+        # Notify the presenter
+        self._call_settings_listeners(lambda listener: listener.on_output_mode_changed())
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
@@ -595,12 +596,22 @@ class SANSDataProcessorGui(QMainWindow,
             self._check_output_mode(default_output_mode)
 
     def _check_output_mode(self, value):
+        """
+        Set the output mode radio button from a SANS enum.
+        This method is called when:
+        1. The gui is launched
+        2. Via the presenter, from state
+        :param value: An OutputMode (SANS enum) object
+        """
         if value is OutputMode.PublishToADS:
             self.output_mode_memory_radio_button.setChecked(True)
         elif value is OutputMode.SaveToFile:
             self.output_mode_file_radio_button.setChecked(True)
         elif value is OutputMode.Both:
             self.output_mode_both_radio_button.setChecked(True)
+
+        # Notify the presenter
+        self._call_settings_listeners(lambda listener: listener.on_output_mode_changed())
 
     def set_out_default_save_can(self):
         try:
@@ -619,7 +630,6 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
     def disable_buttons(self):
-
         self.process_selected_button.setEnabled(False)
         self.process_all_button.setEnabled(False)
         self.batch_button.setEnabled(False)
@@ -636,6 +646,16 @@ class SANSDataProcessorGui(QMainWindow,
         self.manage_directories_button.setEnabled(True)
         self.load_button.setEnabled(True)
         self.export_table_button.setEnabled(True)
+
+    def disable_file_type_buttons(self):
+        self.can_sas_checkbox.setEnabled(False)
+        self.nx_can_sas_checkbox.setEnabled(False)
+        self.rkh_checkbox.setEnabled(False)
+
+    def enable_file_type_buttons(self):
+        self.can_sas_checkbox.setEnabled(True)
+        self.nx_can_sas_checkbox.setEnabled(True)
+        self.rkh_checkbox.setEnabled(True)
 
     def disable_process_buttons(self):
         self.process_selected_button.setEnabled(False)
@@ -962,6 +982,9 @@ class SANSDataProcessorGui(QMainWindow,
             checked_save_types.append(SaveType.NXcanSAS)
         if self.rkh_checkbox.isChecked():
             checked_save_types.append(SaveType.RKH)
+        # If empty, provide the NoType type
+        if not checked_save_types:
+            checked_save_types = [SaveType.NoType]
         return checked_save_types
 
     @save_types.setter
@@ -1062,7 +1085,10 @@ class SANSDataProcessorGui(QMainWindow,
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
         if not value:
-            self._on_compatibility_unchecked()
+            # If you uncheck it, post to logger, in
+            # case user didn't realise user file had
+            # turned it off
+            self.gui_logger.notice("Compatibility mode has been turned off.")
 
     @property
     def instrument(self):

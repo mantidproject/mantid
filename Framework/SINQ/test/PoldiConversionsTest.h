@@ -30,11 +30,16 @@ public:
     TS_ASSERT_DELTA(d, 0.000606307, 1e-9);
     TS_ASSERT_EQUALS(Conversions::dtoTOF(d, distance, sinTheta), tof);
 
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 0.0, 2.0), std::domain_error);
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, -2.0, 2.0), std::domain_error);
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 2.0, 0.0), std::domain_error);
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 2.0, -2.0), std::domain_error);
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 0.0, 0.0), std::domain_error);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 0.0, 2.0),
+                     const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, -2.0, 2.0),
+                     const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 2.0, 0.0),
+                     const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 2.0, -2.0),
+                     const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 0.0, 0.0),
+                     const std::domain_error &);
   }
 
   void testDandQConversions() {
@@ -43,8 +48,8 @@ public:
     TS_ASSERT_DELTA(Conversions::dToQ(d), 8.37758040957278196923, 1e-15);
     TS_ASSERT_EQUALS(Conversions::qToD(Conversions::dToQ(0.75)), 0.75);
 
-    TS_ASSERT_THROWS(Conversions::dToQ(0.0), std::domain_error);
-    TS_ASSERT_THROWS(Conversions::qToD(0.0), std::domain_error);
+    TS_ASSERT_THROWS(Conversions::dToQ(0.0), const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::qToD(0.0), const std::domain_error &);
   }
 
   void testDegAndRadConversions() {
