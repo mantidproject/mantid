@@ -18,13 +18,14 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     """
 
     # list of supported instruments
-    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CNCS', 'CORELLI', 'EQ-SANS', 'HYSPEC', 'MANDI', 'NOMAD', 'POWGEN', 'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
+    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CNCS', 'CORELLI', 'EQ-SANS', 'HYSPEC', 'MANDI', 'NOMAD',
+                       'POWGEN', 'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
 
     instname = None
     instrument = None
-    bankmin = defaultdict(lambda: 1, {"MANDI":1, "SEQUOIA":23, "TOPAZ":10})  # default is one
-    bankmax = {"ARCS":115, 'BIOSANS':2, 'CG2':1, "CNCS":50, "CORELLI":91, 'EQ-SANS':1, "HYSPEC":20, "MANDI":59, "NOMAD":99,
-                      "POWGEN":300, "REF_M":1, "SEQUOIA":150,"SNAP":64,"SXD":11,"TOPAZ":59,"WAND":8,"WISH":10}
+    bankmin = defaultdict(lambda: 1, {'SEQUOIA':23, 'TOPAZ':10})  # default is one
+    bankmax = {'ARCS':115, 'BIOSANS':2, 'CG2':1, 'CNCS':50, 'CORELLI':91, 'EQ-SANS':1, 'HYSPEC':20, 'MANDI':59,
+               'NOMAD':99, 'POWGEN':300, 'REF_M':1, 'SEQUOIA':150,'SNAP':64,'SXD':11,'TOPAZ':59,'WAND':8,'WISH':10}
 
     def category(self):
         """ Mantid required
