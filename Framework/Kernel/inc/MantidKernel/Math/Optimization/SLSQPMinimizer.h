@@ -56,7 +56,7 @@ public:
   template <typename T>
   SLSQPMinimizer(const size_t nparams, const T &objfunc)
       : m_nparams(nparams), m_neq(0), m_nineq(0),
-        m_objfunc(FunctionWrapper(objfunc)), m_constraintNorms() {}
+        m_objfunc(objfunc), m_constraintNorms() {}
 
   /**
    * Constructor with constraints
@@ -75,7 +75,7 @@ public:
   SLSQPMinimizer(const size_t nparams, const T &objfunc,
                  const DblMatrix &equality, const DblMatrix &inequality)
       : m_nparams(nparams), m_neq(equality.numRows()),
-        m_nineq(inequality.numRows()), m_objfunc(FunctionWrapper(objfunc)),
+        m_nineq(inequality.numRows()), m_objfunc(objfunc),
         m_constraintNorms() {
     initializeConstraints(equality, inequality);
   }
@@ -141,8 +141,9 @@ private:
   public:
     /// Construct
     template <typename T>
-    FunctionWrapper(const T &func) : m_funcHolder(new TypeHolder<T>(func)) {}
-    ~FunctionWrapper() { delete m_funcHolder; }
+    FunctionWrapper(const T &func)
+        : m_funcHolder(std::make_unique<TypeHolder<T>>(func)) {}
+    ~FunctionWrapper(){}
     /**
      * Calls user supplied function
      * @param x - The current pt
@@ -152,7 +153,7 @@ private:
       return m_funcHolder->eval(x);
     }
     /// Templated holder
-    BaseHolder *m_funcHolder;
+    std::unique_ptr<BaseHolder> m_funcHolder;
   };
 
   /// Number of parameters under minimization
