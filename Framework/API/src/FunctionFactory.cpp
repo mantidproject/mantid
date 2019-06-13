@@ -368,6 +368,7 @@ std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
   allNames.push_back("ProductFunction");
   allNames.push_back("CompositeFunction");
   allNames.push_back("Convolution");
+  std::sort(allNames.begin(), allNames.end());
   std::vector<std::string> names;
   names.reserve(allNames.size());
   auto excludes =
