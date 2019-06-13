@@ -231,12 +231,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         "Workspace2D", histogramNumber, numSteps, numSteps);
     wsDiff2D = boost::dynamic_pointer_cast<Workspace2D>(wsDiff);
     AnalysisDataService::Instance().addOrReplace("ProfilesFitDiff", wsDiff2D);
-    auto const newAxis1 = new TextAxis(peakWS->getNumberPeaks());
-    auto const newAxis2 = new TextAxis(peakWS->getNumberPeaks());
-    auto const newAxis3 = new TextAxis(peakWS->getNumberPeaks());
-    wsProfile2D->replaceAxis(1, newAxis1);
-    wsFit2D->replaceAxis(1, newAxis2);
-    wsDiff2D->replaceAxis(1, newAxis3);
+    auto newAxis1 = std::make_unique<TextAxis>(peakWS->getNumberPeaks());
+    auto newAxis2 = std::make_unique<TextAxis>(peakWS->getNumberPeaks());
+    auto newAxis3 = std::make_unique<TextAxis>(peakWS->getNumberPeaks());
+    wsProfile2D->replaceAxis(1, std::move(newAxis1));
+    wsFit2D->replaceAxis(1, std::move(newAxis2));
+    wsDiff2D->replaceAxis(1, std::move(newAxis3));
     for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
       // Get a direct ref to that peak.
       IPeak &p = peakWS->getPeak(i);
