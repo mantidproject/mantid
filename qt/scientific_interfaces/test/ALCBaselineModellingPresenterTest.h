@@ -24,11 +24,11 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
-using boost::scoped_ptr;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
+using boost::scoped_ptr;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
