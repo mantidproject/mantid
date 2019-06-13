@@ -144,6 +144,6 @@ class BackId(object):
                    "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
                    "user_specified_output_name_suffix", "use_reduction_mode_as_suffix", "sample_width", "sample_height",
                    "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "wavelength_range",
-                   "use_event_slice_mode")
+                   "use_event_slice_optimisation")
 class OtherId(object):
     pass

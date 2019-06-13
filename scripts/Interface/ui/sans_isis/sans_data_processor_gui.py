@@ -1086,12 +1086,12 @@ class SANSDataProcessorGui(QMainWindow,
         self.event_binning_group_box.setChecked(value)
 
     @property
-    def event_slice_mode(self):
-        return self.event_slice_mode_checkbox.isChecked()
+    def event_slice_optimisation(self):
+        return self.event_slice_optimisation_checkbox.isChecked()
 
-    @event_slice_mode.setter
-    def event_slice_mode(self, value):
-        self.event_slice_mode_checkbox.setChecked(value)
+    @event_slice_optimisation.setter
+    def event_slice_optimisation(self, value):
+        self.event_slice_optimisation_checkbox.setChecked(value)
 
     @property
     def instrument(self):

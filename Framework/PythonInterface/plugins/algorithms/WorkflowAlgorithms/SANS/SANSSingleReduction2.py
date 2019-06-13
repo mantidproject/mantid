@@ -118,8 +118,8 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
     def PyInit(self):
         self._pyinit()
-        self.declareProperty("period", False)
-        self.declareProperty("wavelength_range", False)
+        self.declareProperty("Period", False)
+        self.declareProperty("WavelengthRange", False)
 
     def PyExec(self):
         self._pyexec()
@@ -171,7 +171,8 @@ class SANSSingleReduction(SANSSingleReductionBase):
                 if use_optimizations and slice_bundle.data_type is DataType.Can:
                     output_bundle, output_parts_bundle, \
                         output_transmission_bundle = run_optimized_for_can(reduction_alg,
-                                                                           slice_bundle, event_slice=True)
+                                                                           slice_bundle,
+                                                                           event_slice_optimisation=True)
                 else:
                     output_bundle, output_parts_bundle, \
                         output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, slice_bundle)
@@ -505,8 +506,8 @@ class SANSSingleReduction(SANSSingleReductionBase):
         :return: name of the workspace
         """
         _multi = {"event_slice": True,
-                  "period": self.getProperty("period").value,
-                  "wavelength_range": self.getProperty("wavelength_range").value}
+                  "period": self.getProperty("Period").value,
+                  "wavelength_range": self.getProperty("WavelengthRange").value}
 
         if not transmission:
             _suffix = ""

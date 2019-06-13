@@ -203,43 +203,43 @@ class GetAllNamesToSaveTest(unittest.TestCase):
 
         self.assertEqual(names_to_save, names_expected)
 
-    def test_does_not_use_event_slice_mode_when_not_requiring_event_slices(self):
+    def test_does_not_use_event_slice_optimisation_when_not_requiring_event_slices(self):
         require_event_slices = False
         compatibility_mode = False
-        event_slice_optimisation = True
-        actual_using_event_slice_mode, _ = select_reduction_alg(require_event_slices, compatibility_mode,
-                                                                event_slice_optimisation, [])
-        self.assertEqual(actual_using_event_slice_mode, False)
+        event_slice_optimisation_checkbox = True
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
+                                                                        event_slice_optimisation_checkbox, [])
+        self.assertEqual(actual_using_event_slice_optimisation, False)
 
     @mock.patch("sans.algorithm_detail.batch_execution.split_reduction_packages_for_event_slice_packages")
-    def test_does_not_use_event_slice_mode_when_compatibility_mode_turned_on(self, event_slice_splitter_mock):
+    def test_does_not_use_event_slice_optimisation_when_compatibility_mode_turned_on(self, event_slice_splitter_mock):
         require_event_slices = True
         compatibility_mode = True
-        event_slice_optimisation = True
-        actual_using_event_slice_mode, _ = select_reduction_alg(require_event_slices, compatibility_mode,
-                                                                event_slice_optimisation, [])
-        self.assertEqual(actual_using_event_slice_mode, False)
+        event_slice_optimisation_checkbox = True
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
+                                                                        event_slice_optimisation_checkbox, [])
+        self.assertEqual(actual_using_event_slice_optimisation, False)
         # Test that reduction packages have been split into event slices
         event_slice_splitter_mock.assert_called_once_with([])
 
     @mock.patch("sans.algorithm_detail.batch_execution.split_reduction_packages_for_event_slice_packages")
-    def test_does_not_use_event_slice_mode_when_event_slice_optimisation_not_selected(self, event_slice_splitter_mock):
+    def test_does_not_use_event_slice_optimisation_when_optimisation_not_selected(self, event_slice_splitter_mock):
         require_event_slices = True
         compatibility_mode = False
-        event_slice_optimisation = False
-        actual_using_event_slice_mode, _ = select_reduction_alg(require_event_slices, compatibility_mode,
-                                                                event_slice_optimisation, [])
-        self.assertEqual(actual_using_event_slice_mode, False)
+        event_slice_optimisation_checkbox = False
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
+                                                                        event_slice_optimisation_checkbox, [])
+        self.assertEqual(actual_using_event_slice_optimisation, False)
         # Test that reduction packages have been split into event slices
         event_slice_splitter_mock.assert_called_once_with([])
 
-    def test_use_event_slice_mode_when_using_event_slice_mode(self):
+    def test_use_event_slice_optimisation_when_using_event_slice_optimisation_is_checked(self):
         require_event_slices = True
         compatibility_mode = False
-        event_slice_optimisation = True
-        actual_using_event_slice_mode, _ = select_reduction_alg(require_event_slices, compatibility_mode,
-                                                                event_slice_optimisation, [])
-        self.assertEqual(actual_using_event_slice_mode, True)
+        event_slice_optimisation_checkbox = True
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
+                                                                        event_slice_optimisation_checkbox, [])
+        self.assertEqual(actual_using_event_slice_optimisation, True)
 
 
 if __name__ == '__main__':

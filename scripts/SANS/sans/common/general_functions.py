@@ -739,7 +739,7 @@ def get_transmission_output_name(state, data_type=DataType.Sample, multi_reducti
 
 
 def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None,
-                    event_slice=False):
+                    event_slice_optimisation=False):
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
@@ -753,8 +753,9 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
         use_reduction_mode_as_suffix = True
 
     # Get the standard workspace name
-    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
-                                                                             include_slice_limits=(not event_slice))
+    workspace_name, \
+        workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
+                                                                 include_slice_limits=(not event_slice_optimisation))
 
     # If user specified output name is not none then we use it for the base name
     if user_specified_output_name and not is_group:

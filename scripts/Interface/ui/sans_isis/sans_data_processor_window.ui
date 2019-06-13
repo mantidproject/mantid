@@ -869,7 +869,7 @@ QGroupBox::title {
                         </widget>
                        </item>
                        <item row="0" column="0">
-                        <widget class="QLabel" name="event_slice_mode_label">
+                        <widget class="QLabel" name="event_slice_optimisation_label">
                          <property name="toolTip">
                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, the reduction workflow is changed to perform most operations on event workspaces before event slicing.  This speeds up reduction by not repeating operations for each event slice.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Leaving this unchecked will perform reductions as before.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Checking this, but also checking &lt;span style=&quot; font-weight:600;&quot;&gt;Use compatibility mode&lt;/span&gt;, will perform reductions as before.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
@@ -879,7 +879,7 @@ QGroupBox::title {
                         </widget>
                        </item>
                        <item row="0" column="2">
-                        <widget class="QCheckBox" name="event_slice_mode_checkbox">
+                        <widget class="QCheckBox" name="event_slice_optimisation_checkbox">
                          <property name="toolTip">
                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, the reduction workflow is changed to perform most operations on event workspaces before event slicing.  This speeds up reduction by not repeating operations for each event slice.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Leaving this unchecked will perform reductions as before.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Checking this, but also checking &lt;span style=&quot; font-weight:600;&quot;&gt;Use compatibility mode&lt;/span&gt;, will perform reductions as before.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>

@@ -312,13 +312,13 @@ def get_component_to_reduce(reduction_setting_bundle):
     return reduction_mode_setting
 
 
-def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice=False):
+def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_optimisation=False):
     """
     Check if the state can reduction already exists, and if so, use it else reduce it and add it to the ADS.
 
     :param reduction_alg: a handle to the SANSReductionCore algorithm
     :param reduction_setting_bundle: a ReductionSettingBundle tuple.
-    :param event_slice: An optional bool. If true then run run_core_event_slice_reduction, else run_core_reduction.
+    :param event_slice_optimisation: An optional bool. If true then run run_core_event_slice_reduction, else run_core_reduction.
     :return: a reduced workspace, a partial output workspace for the counts, a partial workspace for the normalization.
     """
     state = reduction_setting_bundle.state
@@ -367,7 +367,7 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice=F
 
     if must_reload:
         # if output_bundle.output_workspace is None or partial_output_require_reload:
-        if not event_slice:
+        if not event_slice_optimisation:
             output_bundle, output_parts_bundle, \
                 output_transmission_bundle = run_core_reduction(reduction_alg, reduction_setting_bundle)
         else:

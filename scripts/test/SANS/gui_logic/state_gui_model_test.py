@@ -35,14 +35,14 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.compatibility_mode = False
         self.assertFalse(state_gui_model.compatibility_mode)
 
-    def test_that_default_event_slice_mode_is_false(self):
+    def test_that_default_event_slice_optimisation_is_false(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertFalse(state_gui_model.event_slice_mode)
+        self.assertFalse(state_gui_model.event_slice_optimisation)
 
-    def test_that_can_set_event_slice_mode(self):
+    def test_that_can_set_event_slice_optimisation(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.event_slice_mode = True
-        self.assertTrue(state_gui_model.event_slice_mode)
+        state_gui_model.event_slice_optimisation = True
+        self.assertTrue(state_gui_model.event_slice_optimisation)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Save options

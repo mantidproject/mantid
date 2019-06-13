@@ -26,12 +26,12 @@ from sans.common.enums import SANSFacility
 class StateCompatibility(StateBase):
     use_compatibility_mode = BoolParameter()
     time_rebin_string = StringParameter()
-    use_event_slice_mode = BoolParameter()
+    use_event_slice_optimisation = BoolParameter()
 
     def __init__(self):
         super(StateCompatibility, self).__init__()
         self.use_compatibility_mode = False
-        self.use_event_slice_mode = False
+        self.use_event_slice_optimisation = False
         self.time_rebin_string = ""
 
     def validate(self):

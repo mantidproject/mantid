@@ -37,7 +37,8 @@ else:
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
-def select_reduction_alg(split_for_event_slices, use_compatibility_mode, use_event_slice_mode, reduction_packages):
+def select_reduction_alg(split_for_event_slices, use_compatibility_mode,
+                         event_slice_optimisation_selected, reduction_packages):
     """
     Select whether the data should be reduced via version 1 or 2 of SANSSingleReduction.
     To use version 2, the reduction must be carried out with event slices, compatibility mode
@@ -45,23 +46,23 @@ def select_reduction_alg(split_for_event_slices, use_compatibility_mode, use_eve
     (via the sans_data_processor_gui)
     :param split_for_event_slices: bool. If true, event slicing will be carried out in the reduction
     :param use_compatibility_mode: bool. If true, compatibility mode has been turned on
-    :param use_event_slice_mode: bool. If true, event slice mode has been turned on
+    :param event_slice_optimisation_selected: bool. If true, event slice mode has been turned on
     :param reduction_packages: a list of reduction package objects
     :return:whether or not we're event slicing (bool); reduction packages
     """
     if (split_for_event_slices and not
             use_compatibility_mode and
-            use_event_slice_mode):
+            event_slice_optimisation_selected):
         # If using compatibility mode we convert to histogram immediately after taking event slices,
         # so would not be able to perform operations on event workspaces pre-slicing.
-        event_slice = True
+        event_slice_optimisation = True
     else:
-        event_slice = False
+        event_slice_optimisation = False
         if split_for_event_slices:
             # Split into separate event slice workspaces here.
             # For event_slice mode, this is done in SANSSingleReductionEventSlice
             reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
-    return event_slice, reduction_packages
+    return event_slice_optimisation, reduction_packages
 
 
 def single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
@@ -102,10 +103,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
     split_for_event_slices = reduction_packages_require_splitting_for_event_slices(reduction_packages)
 
-    event_slice, reduction_packages = select_reduction_alg(split_for_event_slices,
-                                                           state.compatibility.use_compatibility_mode,
-                                                           state.compatibility.use_event_slice_mode,
-                                                           reduction_packages)
+    event_slice_optimisation, reduction_packages = select_reduction_alg(split_for_event_slices,
+                                                                        state.compatibility.use_compatibility_mode,
+                                                                        state.compatibility.use_event_slice_optimisation,
+                                                                        reduction_packages)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
@@ -113,7 +114,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     single_reduction_name = "SANSSingleReduction"
     single_reduction_options = {"UseOptimizations": use_optimizations,
                                 "SaveCan": save_can}
-    alg_version = 2 if event_slice else 1
+    alg_version = 2 if event_slice_optimisation else 1
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, version=alg_version,
                                                        **single_reduction_options)
     reduction_alg.setChild(False)
@@ -123,7 +124,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # Set the properties on the algorithm
         # -----------------------------------
         set_properties_for_reduction_algorithm(reduction_alg, reduction_package,
-                                               workspace_to_name, workspace_to_monitor, event_slice=event_slice)
+                                               workspace_to_name, workspace_to_monitor,
+                                               event_slice_optimisation=event_slice_optimisation)
 
         # -----------------------------------
         #  Run the reduction
@@ -162,11 +164,12 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_package.reduced_lab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABSample")
         reduction_package.reduced_hab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABSample")
 
-        out_scale_factor, out_shift_factor = get_shift_and_scale_factors_from_algorithm(reduction_alg, event_slice)
+        out_scale_factor, out_shift_factor = get_shift_and_scale_factors_from_algorithm(reduction_alg,
+                                                                                        event_slice_optimisation)
         reduction_package.out_scale_factor = out_scale_factor
         reduction_package.out_shift_factor = out_shift_factor
 
-        if not event_slice and plot_results:
+        if not event_slice_optimisation and plot_results:
             # Plot results is intended to show the result of each workspace/slice as it is reduced
             # as we reduce in bulk, it is not possible to plot live results while in event_slice mode
             if PYQT4:
@@ -176,7 +179,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
-        group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice=event_slice)
+        group_workspaces_if_required(reduction_package, output_mode, save_can,
+                                     event_slice_optimisation=event_slice_optimisation)
 
     # --------------------------------
     # Perform output of all workspaces
@@ -191,10 +195,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     #    * This means that we need to save out the reduced data
     #    * The data is already on the ADS, so do nothing
     if output_mode is OutputMode.SaveToFile:
-        save_to_file(reduction_packages, save_can, event_slice=event_slice)
+        save_to_file(reduction_packages, save_can, event_slice_optimisation=event_slice_optimisation)
         delete_reduced_workspaces(reduction_packages)
     elif output_mode is OutputMode.Both:
-        save_to_file(reduction_packages, save_can, event_slice=event_slice)
+        save_to_file(reduction_packages, save_can, event_slice_optimisation=event_slice_optimisation)
 
     # -----------------------------------------------------------------------
     # Clean up other workspaces if the optimizations have not been turned on.
@@ -747,7 +751,7 @@ def get_workspace_for_index(index, workspace_list):
 
 
 def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, workspace_to_name, workspace_to_monitor,
-                                           event_slice=False):
+                                           event_slice_optimisation=False):
     """
     Sets up everything necessary on the reduction algorithm.
 
@@ -755,7 +759,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     :param reduction_package: a reduction package object
     :param workspace_to_name: the workspace to name map
     :param workspace_to_monitor: a workspace to monitor map
-    :param event_slice: optional bool. If true then using SANSSingleReductionEventSlice algorithm.
+    :param event_slice_optimisation: optional bool. If true then using SANSSingleReductionEventSlice algorithm.
                         In this base, names and base names should not include time slice information.
     """
     def _set_output_name(_reduction_alg, _reduction_package, _is_group, _reduction_mode, _property_name,
@@ -764,7 +768,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
             # Use event_slice from set_properties_for_reduction_algorithm scope
             _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
                                                         multi_reduction_type=multi_reduction_type,
-                                                        event_slice=event_slice)
+                                                        event_slice_optimisation=event_slice_optimisation)
         else:
             _out_name, _out_name_base = get_transmission_output_name(_reduction_package.state, _reduction_mode
                                                                      , multi_reduction_type=multi_reduction_type)
@@ -847,13 +851,13 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
     is_group = (is_part_of_multi_period_reduction or is_part_of_event_slice_reduction or
-                is_part_of_wavelength_range_reduction or event_slice)
+                is_part_of_wavelength_range_reduction or event_slice_optimisation)
     multi_reduction_type = {"period": is_part_of_multi_period_reduction,
                             "event_slice": is_part_of_event_slice_reduction,
                             "wavelength_range": is_part_of_wavelength_range_reduction}
 
     # SANSSingleReduction version 2 only properties
-    if event_slice:
+    if event_slice_optimisation:
         # In event slice mode, we can have multiple shift and scale factors for one reduction package
         # there we output these as a workspace containing shifts as X data and scales as Y data.
         reduction_alg.setProperty("OutShiftAndScaleFactor", "ShiftAndScaleFactors")
@@ -961,18 +965,18 @@ def get_workspace_from_algorithm(alg, output_property_name, add_logs=False, user
         return None
 
 
-def get_shift_and_scale_factors_from_algorithm(alg, event_slice):
+def get_shift_and_scale_factors_from_algorithm(alg, event_slice_optimisation):
     """
     Retrieve the shift and scale factors from the algorithm. In event slice mode there can be multiple shift
     and scale factors. These are output as a workspace containing scale and shift as X, Y data, respectively.
     :param alg: The SingleReduction algorithm
-    :param event_slice: bool. If true, then SANSSingleReductionEventSlice has been run, otherwise SANSSingleReduction.
+    :param event_slice_optimisation: bool. If true, then version 2 has been run, otherwise v1.
     :return: a list of shift factors, a list of scale factors
     """
-    if event_slice:
+    if event_slice_optimisation:
         factors_workspace = get_workspace_from_algorithm(alg, "OutShiftAndScaleFactor")
         if factors_workspace is None:
-            return [], []  # ?
+            return [], []
         else:
             scales = factors_workspace.readX(0)
             shifts = factors_workspace.readY(0)
@@ -986,7 +990,7 @@ def get_shift_and_scale_factors_from_algorithm(alg, event_slice):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for outputs to the ADS and saving the file
 # ----------------------------------------------------------------------------------------------------------------------
-def group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice=False):
+def group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice_optimisation=False):
     """
     The output workspaces have already been published to the ADS by the algorithm. Now we might have to
     bundle them into a group if:
@@ -996,11 +1000,11 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can, event
     :param reduction_package: a list of reduction packages
     :param output_mode: one of OutputMode. SaveToFile, PublishToADS, Both.
     :param save_can: a bool. If true save out can and sample workspaces.
-    :param event_slice: an optional bool. If true group_workspaces is being called on event sliced data, so the
+    :param event_slice_optimisation: an optional bool. If true group_workspaces is being called on event sliced data, so the
                         reduction_package contains grouped workspaces.
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-    is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction or event_slice
+    is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction or event_slice_optimisation
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
     requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction\
         or is_part_of_wavelength_range_reduction
@@ -1147,15 +1151,15 @@ def rename_group_workspace(name_of_workspace, name_of_group_workspace):
     rename_alg.execute()
 
 
-def save_to_file(reduction_packages, save_can, event_slice=False):
+def save_to_file(reduction_packages, save_can, event_slice_optimisation=False):
     """
     Extracts all workspace names which need to be saved and saves them into a file.
 
     :param reduction_packages: a list of reduction packages which contain all the relevant information for saving
     :param save_can: a bool. When true save the unsubtracted can and sample workspaces
-    :param event_slice: an optional bool. If true then reduction packages contain event slice data
+    :param event_slice_optimisation: an optional bool. If true then reduction packages contain event slice data
     """
-    if not event_slice:
+    if not event_slice_optimisation:
         workspaces_names_to_save = get_all_names_to_save(reduction_packages, save_can=save_can)
     else:
         workspaces_names_to_save = get_event_slice_names_to_save(reduction_packages, save_can=save_can)

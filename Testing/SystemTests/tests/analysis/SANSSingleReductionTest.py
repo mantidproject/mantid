@@ -99,9 +99,9 @@ class SingleReductionTest(unittest.TestCase):
 
     def _run_single_reduction(self, state, sample_scatter, sample_monitor, sample_transmission=None, sample_direct=None,
                               can_scatter=None, can_monitor=None, can_transmission=None, can_direct=None,
-                              output_settings=None, event_slice=False, save_can=False, use_optimizations=False):
+                              output_settings=None, event_slice_optimisation=False, save_can=False, use_optimizations=False):
         single_reduction_name = "SANSSingleReduction"
-        ver = 1 if not event_slice else 2
+        ver = 1 if not event_slice_optimisation else 2
         state_dict = state.property_manager
 
         single_reduction_options = {"SANSState": state_dict,
@@ -140,7 +140,7 @@ class SingleReductionTest(unittest.TestCase):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Test version 2 of SANSSingleReductionTest, and compare it to version 1
+# Test version 1 of SANSSingleReduction
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSSingleReductionTest(SingleReductionTest):
     def test_that_single_reduction_evaluates_LAB(self):
@@ -388,7 +388,7 @@ class SANSSingleReductionTest(SingleReductionTest):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Test SANSSingleReduction version 2
+# Test version 2 of SANSSingleReduction, and compare it to version 1
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSSingleReduction2Test(SingleReductionTest):
     def _assert_group_workspace(self, workspace, n=2):
@@ -444,7 +444,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                              can_transmission=can_transmission,
                                                              can_direct=can_direct,
                                                              output_settings=output_settings,
-                                                             event_slice=True,
+                                                             event_slice_optimisation=True,
                                                              save_can=True,
                                                              use_optimizations=True)
         version_2_execution_time = time.time() - start_time
@@ -482,7 +482,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                       can_transmission=can_transmission,
                                                                       can_direct=can_direct,
                                                                       output_settings=output_settings,
-                                                                      event_slice=False,
+                                                                      event_slice_optimisation=False,
                                                                       save_can=True)
         first_slice_execution_time = time.time() - start_time
 
@@ -501,7 +501,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                        can_transmission=can_transmission,
                                                                        can_direct=can_direct,
                                                                        output_settings=output_settings,
-                                                                       event_slice=False,
+                                                                       event_slice_optimisation=False,
                                                                        save_can=True)
         version_1_execution_time = time.time() - start_time + first_slice_execution_time
 
@@ -581,7 +581,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                              can_transmission=can_transmission,
                                                              can_direct=can_direct,
                                                              output_settings=output_settings,
-                                                             event_slice=True,
+                                                             event_slice_optimisation=True,
                                                              save_can=True,
                                                              use_optimizations=True)
         version_2_execution_time = time.time() - start_time
@@ -618,7 +618,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                       can_transmission=can_transmission,
                                                                       can_direct=can_direct,
                                                                       output_settings=output_settings,
-                                                                      event_slice=False,
+                                                                      event_slice_optimisation=False,
                                                                       save_can=True)
         first_slice_execution_time = time.time() - start_time
 
@@ -637,7 +637,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                        can_transmission=can_transmission,
                                                                        can_direct=can_direct,
                                                                        output_settings=output_settings,
-                                                                       event_slice=False,
+                                                                       event_slice_optimisation=False,
                                                                        save_can=True)
         version_1_execution_time = time.time() - start_time + first_slice_execution_time
 

@@ -220,44 +220,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         raise NotImplementedError("set_output_workspaces must be implemented.")
 
     def do_reduction(self, reduction_alg, reduction_setting_bundles, use_optimizations, progress):
-        """
-        Perform the main reduction
-        :param reduction_alg: SANSReductionCoreEventSlice algorithm
-        :param reduction_setting_bundles: a list of list containing workspaces to be reduced.
-        :param use_optimizations: bool. If true, use can optimizations
-        :param progress: a progress bar
-        :return: output_bundles: a list of list containing output workspaces
-                 output_parts_bundles: a list of lists containing output workspaces
-                 output_transmission_bundles: a list containing transmission workspaces
-        """
-        output_bundles = []
-        output_parts_bundles = []
-        output_transmission_bundles = []
-        for event_slice_bundles in reduction_setting_bundles:
-            # Output bundles and parts bundles need to be separated by a event slices, but grouped by component
-            # e.g. [[workspaces for slice1], [workspaces for slice2]]
-            slice_bundles = []
-            slice_parts_bundles = []
-            for slice_bundle in event_slice_bundles:
-                progress.report("Running a single reduction ...")
-                # We want to make use of optimizations here.
-                # If a can workspace has already been reduced with the same can
-                # settings and is stored in the ADS, then we should use it
-                # (provided the user has optimizations enabled).
-                if use_optimizations and slice_bundle.data_type is DataType.Can:
-                    output_bundle, output_parts_bundle, \
-                        output_transmission_bundle = run_optimized_for_can(reduction_alg,
-                                                                           slice_bundle, event_slice=True)
-                else:
-                    output_bundle, output_parts_bundle, \
-                        output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, slice_bundle)
-                slice_bundles.append(output_bundle)
-                slice_parts_bundles.append(output_parts_bundle)
-                output_transmission_bundles.append(output_transmission_bundle)
-            output_bundles.append(slice_bundles)
-            output_parts_bundles.append(slice_parts_bundles)
-
-        return output_bundles, output_parts_bundles, output_transmission_bundles
+        raise NotImplementedError("do_reduction must be implemented.")
 
     def validateInputs(self):
         errors = dict()
