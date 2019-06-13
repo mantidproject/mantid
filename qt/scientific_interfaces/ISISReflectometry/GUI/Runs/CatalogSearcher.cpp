@@ -36,7 +36,7 @@ void removeResultsWithoutFilenameExtension(ITableWorkspace_sptr results) {
 } // unnamed namespace
 
 CatalogSearcher::CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *view)
-    : m_pythonRunner(pythonRunner), m_view(view) {
+    : m_pythonRunner(pythonRunner), m_view(view), m_searchInProgress(false) {
   m_view->subscribeSearch(this);
 }
 
@@ -60,11 +60,13 @@ bool CatalogSearcher::startSearchAsync(const std::string &text) {
   auto algSearch = createSearchAlgorithm(text);
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
+  m_searchInProgress = true;
 
   return true;
 }
 
 void CatalogSearcher::notifySearchComplete() {
+  m_searchInProgress = false;
   auto algRunner = m_view->getAlgorithmRunner();
   IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
 
@@ -73,10 +75,11 @@ void CatalogSearcher::notifySearchComplete() {
   if (!searchAlg->isExecuted())
     return;
 
-  // TODO: pass the results as a search model instead of table workspace?
   ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
   m_notifyee->notifySearchResults(results);
 }
+
+bool CatalogSearcher::searchInProgress() const { return m_searchInProgress; }
 
 bool CatalogSearcher::hasActiveSession() const {
   auto sessions = CatalogManager::Instance().getActiveSessions();

@@ -189,6 +189,7 @@ public:
   MOCK_METHOD1(subscribe, void(SearcherSubscriber *notifyee));
   MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
   MOCK_METHOD1(startSearchAsync, bool(const std::string &));
+  MOCK_CONST_METHOD0(searchInProgress, bool());
 };
 
 class MockRunNotifier : public IRunNotifier {

@@ -88,6 +88,31 @@ public:
     verifyAndClear();
   }
 
+  void testStartingSearchDisablesSearchInputs() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_searcher, searchInProgress())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(false)).Times(1);
+    EXPECT_CALL(m_view, setSearchButtonEnabled(false)).Times(1);
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false)).Times(1);
+    presenter.notifySearch();
+    verifyAndClear();
+  }
+
+  void testNotifySearchResultsEnablesSearchInputs() {
+    auto presenter = makePresenter();
+    ITableWorkspace_sptr results = boost::make_shared<TableWorkspace>();
+    EXPECT_CALL(*m_searcher, searchInProgress())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(true)).Times(1);
+    EXPECT_CALL(m_view, setSearchButtonEnabled(true)).Times(1);
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true)).Times(1);
+    presenter.notifySearchResults(results);
+    verifyAndClear();
+  }
+
   void testSearchWithEmptyStringDoesNotStartSearch() {
     auto presenter = makePresenter();
     auto searchString = std::string("");

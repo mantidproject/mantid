@@ -107,12 +107,16 @@ RunsTable &RunsPresenter::mutableRunsTable() {
    Used by the view to tell the presenter something has changed
 */
 
-void RunsPresenter::notifySearch() { search(); }
+void RunsPresenter::notifySearch() {
+  updateWidgetEnabledState();
+  search();
+}
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
 void RunsPresenter::notifySearchResults(ITableWorkspace_sptr results) {
   populateSearchResults(results);
+  updateWidgetEnabledState();
 
   if (isAutoreducing())
     autoreduceNewRuns();
@@ -300,6 +304,10 @@ bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
 
+bool RunsPresenter::searchInProgress() const {
+  return m_searcher->searchInProgress();
+}
+
 int RunsPresenter::percentComplete() const {
   if (!m_mainPresenter)
     return 0;
@@ -417,9 +425,10 @@ void RunsPresenter::updateWidgetEnabledState() const {
 
   // Update components
   m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
-  m_view->setSearchTextEntryEnabled(!isAutoreducing());
-  m_view->setSearchButtonEnabled(!isAutoreducing());
-  m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing());
+  m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
+  m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
+  m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing() &&
+                                     !searchInProgress());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
   m_view->setTransferButtonEnabled(!isProcessing() && !isAutoreducing());
 }
