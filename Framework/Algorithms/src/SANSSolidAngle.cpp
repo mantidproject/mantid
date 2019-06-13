@@ -54,7 +54,7 @@ void SANSSolidAngle::init() {
   declareProperty("Type", "Normal",
                   boost::make_shared<StringListValidator>(exp_options),
                   "Select the method to calculate the Solid Angle.\n"
-                  "Normal: cos^3(theta); Tube: cons(alpha)*cos^3(theta); "
+                  "Normal: cos^3(theta); Tube: cos(alpha)*cos^3(theta); "
                   "Wing: cos^3(alpha);");
 }
 
