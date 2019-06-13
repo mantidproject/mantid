@@ -46,9 +46,9 @@ class MaxEntPresenterTest(GuiTest):
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename, _ = load_utils.load_workspace_from_filename(file_path)
-        self.data_context._loaded_data.remove_data(run=run)
-        self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
-        self.data_context.current_runs = [[22725]]
+        self.context.data_context._loaded_data.remove_data(run=run)
+        self.context.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
+        self.context.data_context.current_runs = [[22725]]
 
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)

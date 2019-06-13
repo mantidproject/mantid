@@ -28,7 +28,7 @@ def get_grouping_psi(workspace):
             sample_log_value = workspace_run.getProperty(sample_log_label_name).value
         grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
 
-    return grouping_list, [], None
+    return grouping_list, [], ''
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
@@ -42,10 +42,10 @@ def get_default_grouping(workspace, instrument, main_field_direction):
                 grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
             else:
                 grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
-    except IndexError:
-        return [], [], ''
+        except IndexError:
+            return [], [], ''
     else:
-        return get_grouping_psi(workspace), ''
+        return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = os.path.join(instrument_directory, grouping_file)
     new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
