@@ -24,6 +24,7 @@ public:
   MOCK_CONST_METHOD0(table, IRunsTableView *());
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
+  MOCK_METHOD1(showSearch, void(ISearchModel_sptr));
 
   MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
@@ -53,9 +54,6 @@ public:
 
   MOCK_METHOD0(startMonitor, void());
   MOCK_METHOD0(stopMonitor, void());
-
-  // Calls we don't care about
-  void showSearch(SearchModel_sptr) override{};
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

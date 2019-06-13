@@ -228,9 +228,10 @@ void RunsView::clearProgress() { ui.progressBar->reset(); }
 Set a new model for search results
 @param model : the model to be attached to the search results
 */
-void RunsView::showSearch(SearchModel_sptr model) {
+void RunsView::showSearch(ISearchModel_sptr model) {
   m_searchModel = model;
-  ui.tableSearchResults->setModel(m_searchModel.get());
+  ui.tableSearchResults->setModel(
+      boost::dynamic_pointer_cast<SearchModel>(m_searchModel).get());
   ui.tableSearchResults->resizeColumnsToContents();
 }
 

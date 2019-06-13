@@ -32,7 +32,7 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 // Forward decs
-class SearchModel;
+class ISearchModel;
 
 using MantidWidgets::SlitCalculator;
 namespace DataProcessor = MantidWidgets::DataProcessor;
@@ -57,7 +57,7 @@ public:
   void stopTimer() override;
 
   // Connect the model
-  void showSearch(boost::shared_ptr<SearchModel> model) override;
+  void showSearch(boost::shared_ptr<ISearchModel> model) override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
@@ -108,7 +108,7 @@ private:
   RunsViewTimerSubscriber *m_timerNotifyee;
   RunsViewSearchSubscriber *m_searchNotifyee;
 
-  boost::shared_ptr<SearchModel> m_searchModel;
+  boost::shared_ptr<ISearchModel> m_searchModel;
 
   // the interface
   Ui::RunsWidget ui;
