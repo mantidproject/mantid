@@ -11,6 +11,9 @@ from __future__ import (absolute_import, unicode_literals)
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget.view import ErrorbarsTabWidgetView
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.linetabwidget.view import LineTabWidgetView
+from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MarkerTabWidgetView
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.utils.qt import load_ui
 
@@ -23,6 +26,12 @@ class CurvesTabWidgetView(QWidget):
         self.ui = load_ui(__file__,
                           'curves_tab.ui',
                           baseinstance=self)
+        self.line = LineTabWidgetView(parent=self)
+        self.tab_container.addTab(self.line, "Line")
+        self.marker = MarkerTabWidgetView(parent=self)
+        self.tab_container.addTab(self.marker, "Marker")
+        self.errorbars = ErrorbarsTabWidgetView(parent=self)
+        self.tab_container.addTab(self.errorbars, "Errorbars")
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
     def populate_select_axes_combo_box(self, axes_names):
@@ -44,23 +53,8 @@ class CurvesTabWidgetView(QWidget):
         self.select_curve_combo_box.removeItem(current_index)
 
     # Tab enablers and disablers
-    def enable_errorbars_tab(self):
-        self.tab_container.setTabEnabled(2, True)
-
-    def disable_errorbars_tab(self):
-        self.tab_container.setTabEnabled(2, False)
-
-    def enable_line_tab(self):
-        self.tab_container.setTabEnabled(0, True)
-
-    def disable_line_tab(self):
-        self.tab_container.setTabEnabled(0, False)
-
-    def enable_marker_tab(self):
-        self.tab_container.setTabEnabled(1, True)
-
-    def disable_marker_tab(self):
-        self.tab_container.setTabEnabled(1, False)
+    def set_errorbars_tab_enabled(self, enable):
+        self.tab_container.setTabEnabled(2, enable)
 
     # Top level entries
     def get_selected_ax_name(self):
@@ -87,3 +81,10 @@ class CurvesTabWidgetView(QWidget):
     # Property object getters and setters
     def get_properties(self):
         return CurveProperties.from_view(self)
+
+    def update_fields(self, curve_props):
+        self.set_curve_label(curve_props.label)
+        self.set_hide_curve(curve_props.hide)
+        self.line.update_fields(curve_props)
+        self.marker.update_fields(curve_props)
+        self.errorbars.update_fields(curve_props)

@@ -8,8 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from matplotlib import colors
-
+from matplotlib import colors, rcParams
 from qtpy.QtGui import QColor, QPalette
 from qtpy.QtWidgets import (QWidget, QLineEdit, QPushButton, QHBoxLayout,
                             QColorDialog)
@@ -23,14 +22,15 @@ def convert_color_to_hex(color):
         return colors.to_hex(color)
 
 
+MPL_DEFAULT = convert_color_to_hex(rcParams['lines.color'])
+
+
 class ColorSelector(QWidget):
 
-    def __init__(self, initial_color=None, parent=None):
+    def __init__(self, initial_color=MPL_DEFAULT, parent=None):
         super(ColorSelector, self).__init__(parent=parent)
 
         self.initial_color = initial_color
-        if not self.initial_color:
-            self.initial_color = QColor('#1f77b4')  # default matplotlib blue
 
         # Create line edit and push button and add to a horizontal layout
         self.line_edit = QLineEdit(self)
@@ -42,6 +42,8 @@ class ColorSelector(QWidget):
 
         self.line_edit.setText(self.initial_color.name())
         self.line_edit.setReadOnly(True)
+        self.button.setAutoFillBackground(True)
+        self.button.setFlat(True)
         self.update_color_button()
 
         # Signals
@@ -57,6 +59,7 @@ class ColorSelector(QWidget):
         color_dialog.colorSelected.connect(
             lambda: self.set_line_edit(color_dialog.selectedColor().name())
         )
+        color_dialog.setModal(True)
         color_dialog.show()
 
     def set_color(self, color_hex):
@@ -69,7 +72,5 @@ class ColorSelector(QWidget):
         palette = QPalette(self.button.palette())
         qcolor = QColor(self.get_color())
         palette.setColor(QPalette.Button, qcolor)
-        self.button.setAutoFillBackground(True)
         self.button.setPalette(palette)
-        self.button.setFlat(True)
         self.button.update()

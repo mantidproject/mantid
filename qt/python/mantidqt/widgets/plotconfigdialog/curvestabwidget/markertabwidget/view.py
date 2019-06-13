@@ -54,3 +54,9 @@ class MarkerTabWidgetView(QWidget):
 
     def set_edge_color(self, color):
         self.edge_color_selector_widget.set_color(color)
+
+    def update_fields(self, curve_props):
+        self.set_style(curve_props.marker)
+        self.set_size(curve_props.markersize)
+        self.set_face_color(curve_props.markerfacecolor)
+        self.set_edge_color(curve_props.markeredgecolor)

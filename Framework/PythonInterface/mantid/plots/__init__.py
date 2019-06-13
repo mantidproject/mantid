@@ -17,10 +17,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from collections import Iterable
 
-from mantid.kernel import logger
-from mantid.plots import helperfunctions, plotfunctions
-from mantid.plots import plotfunctions3D
-from mantid.plots.scales import PowerScale, SquareScale
 from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
@@ -53,7 +49,12 @@ except ImportError:
     del sys.modules['mpl_toolkits']
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
+from mantid.api import AnalysisDataService as ads
+from mantid.kernel import logger
+from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
+from mantid.plots import plotfunctions3D
+from mantid.plots.scales import PowerScale, SquareScale
 
 
 def plot_decorator(func):
@@ -246,14 +247,24 @@ class MantidAxes(Axes):
     def get_spec_num_from_wksp_index(workspace, wksp_index):
         return workspace.getSpectrum(wksp_index).getSpectrumNo()
 
-    def _get_spec_number(self, workspace, kwargs):
+    @staticmethod
+    def get_spec_number(workspace, kwargs):
         if kwargs.get('specNum', None) is not None:
             return kwargs['specNum']
         elif kwargs.get('wkspIndex', None) is not None:
-            return self.get_spec_num_from_wksp_index(workspace,
-                                                     kwargs['wkspIndex'])
+            return MantidAxes.get_spec_num_from_wksp_index(workspace,
+                                                           kwargs['wkspIndex'])
         else:
             return None
+
+    def get_artists_workspace_and_spec_num(self, artist):
+        """Retrieve the workspace and spec num of the given artist"""
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        return ads.retrieve(ws_name), ws_artists.spec_num
+        raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
 
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
                                spec_num=None, is_normalized=None):
@@ -299,6 +310,14 @@ class MantidAxes(Axes):
             if not (num_normalized == 0 or num_normalized == len(tracked_ws_distributions)):
                 logger.warning("You are overlaying distribution and "
                                "non-distribution data!")
+
+    def artist_has_errorbars(self, artist):
+        """Check if the given artist's workspace has errors"""
+        workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
+        workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+        if any(workspace.readE(workspace_index) != 0):
+            return True
+        return False
 
     def remove_workspace_artists(self, workspace):
         """
@@ -376,6 +395,26 @@ class MantidAxes(Axes):
         for workspace_artist in artist_info:
             workspace_artist.replace_data(workspace)
         return True
+
+    def replot_artist(self, artist, errorbars=False, **kwargs):
+        """
+        Replot an artist with a new set of kwargs via 'plot' or 'errorbar'
+        :param artist: The artist to replace
+        :param errorbars: Plot with or without errorbars
+        :returns: The new artist that has been plotted
+        For keywords related to workspaces, see :func:`plotfunctions.plot` or
+        :func:`plotfunctions.errorbar`
+        """
+        workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
+        self.remove_artists_if(lambda art: art == artist)
+        workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+        if errorbars:
+            new_artist = self.errorbar(workspace, wkspIndex=workspace_index,
+                                       **kwargs)
+        else:
+            new_artist = self.plot(workspace, wkspIndex=workspace_index,
+                                   **kwargs)
+        return new_artist
 
     @staticmethod
     def is_empty(axes):
@@ -487,7 +526,7 @@ class MantidAxes(Axes):
                 return artists
 
             workspace = args[0]
-            spec_num = self._get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
@@ -592,7 +631,7 @@ class MantidAxes(Axes):
                 return container_new
 
             workspace = args[0]
-            spec_num = self._get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
                                                                **kwargs)
 

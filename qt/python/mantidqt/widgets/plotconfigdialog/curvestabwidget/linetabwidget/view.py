@@ -51,3 +51,9 @@ class LineTabWidgetView(QWidget):
 
     def set_color(self, color_hex):
         self.color_selector_widget.set_color(color_hex)
+
+    def update_fields(self, curve_props):
+        self.set_style(curve_props.linestyle)
+        self.set_draw_style(curve_props.drawstyle)
+        self.set_width(curve_props.linewidth)
+        self.set_color(curve_props.color)

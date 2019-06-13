@@ -28,11 +28,18 @@ class ErrorbarsTabWidgetView(QWidget):
                                   self.color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        self.hide_errorbars_tickbox.stateChanged.connect(
+            lambda: self.set_fields_enabled(not self.get_hide())
+        )
+
     def get_hide(self):
         return self.hide_errorbars_tickbox.checkState() == Qt.Checked
 
     def set_hide(self, state):
-        self.hide_errorbars_tickbox.setCheckState(state)
+        if state:
+            self.hide_errorbars_tickbox.setCheckState(Qt.Checked)
+        else:
+            self.hide_errorbars_tickbox.setCheckState(Qt.Unchecked)
 
     def get_width(self):
         return self.width_spin_box.value()
@@ -40,26 +47,17 @@ class ErrorbarsTabWidgetView(QWidget):
     def set_width(self, width):
         self.width_spin_box.setValue(width)
 
-    def set_width_enabled(self, enabled):
-        self.width_spin_box.setEnabled(enabled)
-
     def get_capsize(self):
         return self.capsize_spin_box.value()
 
     def set_capsize(self, size):
         self.capsize_spin_box.setValue(size)
 
-    def set_capsize_enabled(self, enabled):
-        self.capsize_spin_box.setEnabled(enabled)
-
     def get_cap_thickness(self):
         return self.cap_thickness_spin_box.value()
 
     def set_cap_thickness(self, thickness):
         self.cap_thickness_spin_box.setValue(thickness)
-
-    def set_cap_thickness_enabled(self, enabled):
-        self.cap_thickness_spin_box.setEnabled(enabled)
 
     def get_error_every(self):
         return self.error_every_spin_box.value()
@@ -72,3 +70,21 @@ class ErrorbarsTabWidgetView(QWidget):
 
     def set_color(self, color):
         self.color_selector_widget.set_color(color)
+
+    def set_fields_enabled(self, enable):
+        self.width_spin_box.setEnabled(enable)
+        self.capsize_spin_box.setEnabled(enable)
+        self.cap_thickness_spin_box.setEnabled(enable)
+        self.error_every_spin_box.setEnabled(enable)
+        self.color_selector_widget.setEnabled(enable)
+
+    def update_fields(self, curve_props):
+        try:
+            self.set_hide(curve_props.hide_errors)
+            self.set_width(curve_props.elinewidth)
+            self.set_capsize(curve_props.capsize)
+            self.set_cap_thickness(curve_props.capthick)
+            self.set_error_every(curve_props.errorevery)
+            self.set_color(curve_props.ecolor)
+        except AttributeError:
+            pass
