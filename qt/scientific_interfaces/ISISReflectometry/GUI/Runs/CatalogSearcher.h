@@ -27,6 +27,8 @@ public:
   CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *m_view);
   ~CatalogSearcher() override{};
 
+  bool searchInProgress() const override;
+
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
   Mantid::API::ITableWorkspace_sptr search(const std::string &text) override;
@@ -39,6 +41,7 @@ private:
   IPythonRunner *m_pythonRunner;
   IRunsView *m_view;
   SearcherSubscriber *m_notifyee;
+  bool m_searchInProgress;
 
   bool hasActiveSession() const;
   bool logInToCatalog();

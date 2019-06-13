@@ -146,6 +146,7 @@ private:
   /// searching
   bool search();
   void populateSearchResults(Mantid::API::ITableWorkspace_sptr results);
+  bool searchInProgress() const;
   /// autoreduction
   bool requireNewAutoreduction() const;
   void checkForNewRuns();
