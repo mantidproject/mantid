@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Geometry {
 class MeshObject;
 class IObject;
-}
+} // namespace Geometry
 namespace DataHandling {
 /**
  * Save the Shape of the sample and environment into a single binary .stl file
@@ -54,7 +54,8 @@ private:
   std::vector<Kernel::V3D> m_vertices;
   std::vector<uint32_t> m_triangle;
 };
-const Mantid::Geometry::MeshObject &toMeshObject(const Mantid::Geometry::IObject &object);
+const Mantid::Geometry::MeshObject &
+toMeshObject(const Mantid::Geometry::IObject &object);
 } // end namespace DataHandling
 } // namespace Mantid
 
