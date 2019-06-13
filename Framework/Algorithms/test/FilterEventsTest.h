@@ -1154,8 +1154,7 @@ public:
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("InputWS", inpWS);
 
-    SplittersWorkspace_sptr splws =
-        boost::shared_ptr<SplittersWorkspace>(new SplittersWorkspace);
+    SplittersWorkspace_sptr splws = boost::make_shared<SplittersWorkspace>();
     for (int i = 0; i < 5; i++) {
       auto t0 = runstart_i64 + i * pulsedt;
       auto t1 = runstart_i64 + (i + 1) * pulsedt;
@@ -1164,8 +1163,7 @@ public:
     }
     AnalysisDataService::Instance().addOrReplace("TableSplitter", splws);
 
-    DataObjects::TableWorkspace_sptr infows =
-        createInformationWorkspace(3, true);
+    TableWorkspace_sptr infows = createInformationWorkspace(3, true);
     AnalysisDataService::Instance().addOrReplace("InfoWorkspace", infows);
 
     FilterEvents filter;
@@ -1499,7 +1497,7 @@ public:
                                                    int64_t pulsedt,
                                                    int64_t tofdt) {
     SplittersWorkspace_sptr splitterws =
-        boost::shared_ptr<SplittersWorkspace>(new SplittersWorkspace);
+        boost::make_shared<SplittersWorkspace>();
 
     // 1. Splitter 0: 0 ~ 3+ (first pulse)
     int64_t t0 = runstart_i64;
@@ -1707,7 +1705,7 @@ public:
 
     // 1. Create an empty splitter workspace
     SplittersWorkspace_sptr splitterws =
-        boost::shared_ptr<SplittersWorkspace>(new SplittersWorkspace);
+        boost::make_shared<SplittersWorkspace>();
 
     // 2. Create splitters
     for (size_t i = 0; i < numpulses; ++i) {

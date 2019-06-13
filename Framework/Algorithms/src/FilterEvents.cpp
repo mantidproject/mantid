@@ -321,15 +321,14 @@ void FilterEvents::exec() {
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   Goniometer inputGonio = m_eventWS->run().getGoniometer();
-  for (auto miter = m_outputWorkspacesMap.begin();
-       miter != m_outputWorkspacesMap.end(); ++miter) {
+  for (auto miter : m_outputWorkspacesMap) {
     try {
-      DataObjects::EventWorkspace_sptr ws_i = miter->second;
+      DataObjects::EventWorkspace_sptr ws_i = miter.second;
       ws_i->mutableRun().setGoniometer(inputGonio, true);
     } catch (std::runtime_error &) {
       g_log.warning("Cannot set goniometer.");
     }
-    outputwsnames.push_back(miter->second->getName());
+    outputwsnames.push_back(miter.second->getName());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);
 
@@ -495,8 +494,7 @@ void FilterEvents::processAlgorithmProperties() {
   bool start_time_set = false;
   // Get run start time
   try {
-    Types::Core::DateAndTime run_start_time(m_eventWS->run().startTime());
-    m_runStartTime = run_start_time;
+    m_runStartTime = m_eventWS->run().startTime();
     start_time_set = true;
   } catch (std::runtime_error &) {
   }
@@ -1137,13 +1135,12 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   double numnewws = static_cast<double>(m_targetWorkspaceIndexSet.size());
   double wsgindex = 0.;
 
-  // Work out the  how it has been split so the naming can be done
+  // Work out how it has been split so the naming can be done
   // if generateEventsFilter has been used the infoWS will contain time or log
   // otherwise it is assumed that it has been split by time.
   bool descriptiveNames = getProperty("DescriptiveOutputNames");
-  bool splitByTime = false;
+  bool splitByTime = true;
   if (descriptiveNames) {
-    splitByTime = true;
     if ((m_hasInfoWS && infomap[0].find("Log") != std::string::npos) ||
         m_targetWorkspaceIndexSet.size() - 1 != m_splitters.size()) {
       splitByTime = false;
@@ -1156,8 +1153,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
     std::stringstream wsname;
     wsname << m_outputWSNameBase << "_";
     if (wsgroup >= 0) {
-      // splitByTime will only be true if descriptiveNames is true
-      if (splitByTime) {
+      if (descriptiveNames && splitByTime) {
         auto splitter = m_splitters[wsgroup];
         auto startTimeInSeconds =
             Mantid::Types::Core::DateAndTime::secondsFromDuration(
