@@ -73,25 +73,25 @@ void LoadDNSEvent::init() {
   /// Initialise the properties
 
   const std::vector<std::string> exts{".mdat"};
-  declareProperty(Kernel::make_unique<FileProperty>("InputFile", "",
+  declareProperty(std::make_unique<FileProperty>("InputFile", "",
                                                     FileProperty::Load, exts),
                   "The XML or Map file with full path.");
 
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<uint>>(
                       "ChopperChannel", 1,
                       boost::shared_ptr<BoundedValidator<uint>>(
                           new BoundedValidator<uint>(0, 4)),
                       Kernel::Direction::Input),
                   "The Chopper Channel");
 
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<uint>>(
                       "MonitorChannel", 1,
                       boost::shared_ptr<BoundedValidator<uint>>(
                           new BoundedValidator<uint>(0, 4)),
                       Kernel::Direction::Input),
                   "The Monitor Channel");
 
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 }
