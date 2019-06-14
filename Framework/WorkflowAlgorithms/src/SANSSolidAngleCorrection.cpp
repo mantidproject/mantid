@@ -46,7 +46,7 @@ static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
   return sampleDetVec.angle(inPlane);
 }
 
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
