@@ -37,7 +37,7 @@ public:
 
 class MDWSTransfTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws2D;
-  Geometry::OrientedLattice *pLattice;
+  std::unique_ptr<Geometry::OrientedLattice> pLattice;
   // this is permutation matrix which transforms Mantid coordinate system (beam
   // along Z-axis)
   // to Horace coordinate system (beam along X-axis);
@@ -73,7 +73,7 @@ public:
     TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,
                      Transf.findTargetFrame(TargWSDescription));
 
-    spws->mutableSample().setOrientedLattice(pLattice);
+    spws->mutableSample().setOrientedLattice(pLattice.get());
     TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,
                      Transf.findTargetFrame(TargWSDescription));
   }
@@ -93,14 +93,14 @@ public:
         "Forced HKL frame would not accept workspace without oriented lattice",
         Transf.getTransfMatrix(TargWSDescription, CnvrtToMD::HKLFrame,
                                CnvrtToMD::HKLScale),
-        std::invalid_argument);
+        const std::invalid_argument &);
     TSM_ASSERT_THROWS("Forced SampleFrame frame would not accept workspace "
                       "without goniometer defined",
                       Transf.getTransfMatrix(TargWSDescription,
                                              CnvrtToMD::SampleFrame,
                                              CnvrtToMD::HKLScale),
-                      std::invalid_argument);
-    spws->mutableSample().setOrientedLattice(pLattice);
+                      const std::invalid_argument &);
+    spws->mutableSample().setOrientedLattice(pLattice.get());
 
     WorkspaceCreationHelper::setGoniometer(spws, 20, 0, 0);
 
@@ -148,11 +148,9 @@ public:
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TWS.setMinMax(minVal, maxVal);
 
-    if (pLattice)
-      delete pLattice;
-    pLattice =
-        new Geometry::OrientedLattice(5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(pLattice);
+    pLattice = std::make_unique<Geometry::OrientedLattice>(
+        5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
+    ws2D->mutableSample().setOrientedLattice(pLattice.get());
     TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 
     std::vector<double> u(3, 0);
@@ -410,8 +408,8 @@ public:
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 13., "meV", true);
 
-    pLattice = new Geometry::OrientedLattice(3, 3, 2, 90, 90, 90);
-    ws2D->mutableSample().setOrientedLattice(pLattice);
+    pLattice = std::make_unique<Geometry::OrientedLattice>(3, 3, 2, 90, 90, 90);
+    ws2D->mutableSample().setOrientedLattice(pLattice.get());
 
     // S_mantid*k_mantid = S_hor*k_hor; -- both Mantid and Horace produce the
     // same kind of crystal frame

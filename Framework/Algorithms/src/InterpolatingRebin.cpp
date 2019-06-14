@@ -7,7 +7,10 @@
 #include "MantidAlgorithms/InterpolatingRebin.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -27,20 +30,21 @@ DECLARE_ALGORITHM(InterpolatingRebin)
 using namespace Kernel;
 using namespace API;
 using namespace HistogramData;
+using namespace DataObjects;
 
 /** Only calls its parent's (Rebin) init()
  *
  */
 void InterpolatingRebin::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace containing the input data");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace containing the input data");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to give the output workspace");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally "
@@ -75,7 +79,7 @@ void InterpolatingRebin::exec() {
   const int nHists = static_cast<int>(inputW->getNumberHistograms());
   // make output Workspace the same type as the input but with the new axes
   MatrixWorkspace_sptr outputW =
-      WorkspaceFactory::Instance().create(inputW, nHists, ntcnew, ntcnew - 1);
+      create<MatrixWorkspace>(*inputW, BinEdges(ntcnew));
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
     outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));

@@ -71,7 +71,7 @@ private:
     alg.setProperty("LHSWorkspace", a);
     alg.setProperty("RHSWorkspace", b);
     alg.setPropertyValue("OutputWorkspace", outName);
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
 public:
@@ -205,9 +205,9 @@ public:
     // Create some input data. Signal values as two offset sine waves.
     using VecDouble = std::vector<double>;
     VecDouble s1, s2, e1, e2, x;
-    double theta_shift = 0.4;
+    const double theta_shift = 0.4;
     for (size_t i = 0; i < 40; ++i) {
-      double theta = 0.02 * double(i) * M_PI;
+      const double theta = 0.02 * double(i) * M_PI;
       s1.push_back(std::sin(theta));
       e1.push_back(std::sin(theta));
       s2.push_back(std::sin(theta + theta_shift));

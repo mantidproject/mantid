@@ -9,15 +9,46 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include "MantidAPI/RawCountValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include <boost/iterator/counting_iterator.hpp>
-
 #include <numeric>
 #include <sstream>
+
+namespace {
+struct Variances {
+  double y;
+  double e;
+};
+
+Variances subtractMean(std::vector<double> &signal,
+                       std::vector<double> &error) {
+  double mean = std::accumulate(signal.cbegin(), signal.cend(), 0.0);
+  double errorMeanSquared =
+      std::accumulate(error.cbegin(), error.cend(), 0.0,
+                      Mantid::Kernel::VectorHelper::SumSquares<double>());
+  const auto n = signal.size();
+  mean /= static_cast<double>(n);
+  errorMeanSquared /= static_cast<double>(n * n);
+  double variance = 0.0, errorVariance = 0.0;
+  auto itY = signal.begin();
+  auto itE = error.begin();
+  for (; itY != signal.end(); ++itY, ++itE) {
+    (*itY) -= mean; // Now the vector is (y[i]-refMean)
+    (*itE) = (*itE) * (*itE) + errorMeanSquared; // New error squared
+    const double t = (*itY) * (*itY);            //(y[i]-refMean)^2
+    variance += t;                               // Sum previous term
+    errorVariance += 4.0 * t * (*itE);           // Error squared
+  }
+  return {variance, errorVariance};
+}
+
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -27,6 +58,8 @@ DECLARE_ALGORITHM(CrossCorrelate)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
+using namespace HistogramData;
 
 /// Initialisation method.
 void CrossCorrelate::init() {
@@ -35,10 +68,10 @@ void CrossCorrelate::init() {
   wsValidator->add<API::RawCountValidator>();
 
   // Input and output workspaces
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
@@ -97,8 +130,8 @@ void CrossCorrelate::exec() {
   // Now loop on the spectra in the range spectra_min and spectra_max and get
   // valid spectra
 
-  int specmin = getProperty("WorkspaceIndexMin");
-  int specmax = getProperty("WorkspaceIndexMax");
+  const int specmin = getProperty("WorkspaceIndexMin");
+  const int specmax = getProperty("WorkspaceIndexMax");
   if (specmin >= specmax)
     throw std::runtime_error(
         "Must specify WorkspaceIndexMin<WorkspaceIndexMax");
@@ -109,8 +142,7 @@ void CrossCorrelate::exec() {
                               boost::make_counting_iterator(specmax + 1));
 
   std::ostringstream mess;
-  if (nspecs == 0) // Throw if no spectra in range
-  {
+  if (nspecs == 0) {
     mess << "No Workspaces in range between" << specmin << " and " << specmax;
     throw std::runtime_error(mess.str());
   }
@@ -124,18 +156,15 @@ void CrossCorrelate::exec() {
   auto &referenceY = inputWS->y(index_ref);
   auto &referenceE = inputWS->e(index_ref);
 
-  std::vector<double> refX(maxIt - minIt);
-  std::vector<double> refY(maxIt - minIt - 1);
-  std::vector<double> refE(maxIt - minIt - 1);
+  const std::vector<double> refX(minIt, maxIt);
+  std::vector<double> refY(referenceY.cbegin() + difminIt,
+                           referenceY.cbegin() + (difmaxIt - 1));
+  std::vector<double> refE(referenceE.cbegin() + difminIt,
+                           referenceE.cbegin() + (difmaxIt - 1));
 
-  std::copy(minIt, maxIt, refX.begin());
-  mess << "min max" << refX.front() << " " << refX.back();
+  mess << "min max " << refX.front() << " " << refX.back();
   g_log.information(mess.str());
   mess.str("");
-  std::copy(referenceY.cbegin() + difminIt,
-            referenceY.cbegin() + (difmaxIt - 1), refY.begin());
-  std::copy(referenceE.cbegin() + difminIt,
-            referenceE.cbegin() + (difmaxIt - 1), refE.begin());
 
   // Now start the real stuff
   // Create a 2DWorkspace that will hold the result
@@ -145,40 +174,22 @@ void CrossCorrelate::exec() {
     throw std::runtime_error("Range is not valid");
 
   MatrixWorkspace_sptr out =
-      WorkspaceFactory::Instance().create(inputWS, nspecs, npoints, npoints);
+      create<HistoWorkspace>(*inputWS, nspecs, Points(npoints));
 
-  // Calculate the mean value of the reference spectrum and associated error
-  // squared
-  double refMean = std::accumulate(refY.cbegin(), refY.cend(), 0.0);
-  double refMeanE2 = std::accumulate(refE.cbegin(), refE.cend(), 0.0,
-                                     VectorHelper::SumSquares<double>());
-  refMean /= static_cast<double>(nY);
-  refMeanE2 /= static_cast<double>(nY * nY);
-  auto itY = refY.begin();
-  auto itE = refE.begin();
+  const auto refVar = subtractMean(refY, refE);
 
-  double refVar = 0.0, refVarE = 0.0;
-  for (; itY != refY.end(); ++itY, ++itE) {
-    (*itY) -= refMean;                    // Now the vector is (y[i]-refMean)
-    (*itE) = (*itE) * (*itE) + refMeanE2; // New error squared
-    double t = (*itY) * (*itY);           //(y[i]-refMean)^2
-    refVar += t;                          // Sum previous term
-    refVarE += 4.0 * t * (*itE);          // Error squared
-  }
-
-  double refNorm = 1.0 / sqrt(refVar);
-  double refNormE = 0.5 * pow(refNorm, 3) * sqrt(refVarE);
+  const double refNorm = 1.0 / sqrt(refVar.y);
+  double refNormE = 0.5 * pow(refNorm, 3) * sqrt(refVar.e);
 
   // Now copy the other spectra
   bool is_distrib = inputWS->isDistribution();
 
-  std::vector<double> XX(npoints);
-  for (int i = 0; i < npoints; ++i) {
-    XX[i] = static_cast<double>(i - nY + 2);
+  auto &outX = out->mutableX(0);
+  for (int i = 0; i < static_cast<int>(outX.size()); ++i) {
+    outX[i] = static_cast<double>(i - nY + 2);
   }
   // Initialise the progress reporting object
-  out->mutableX(0) = XX;
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, nspecs);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {
@@ -199,38 +210,20 @@ void CrossCorrelate::exec() {
     std::vector<double> tempE(nY);
     VectorHelper::rebin(iX.rawData(), iY.rawData(), iE.rawData(), refX, tempY,
                         tempE, is_distrib);
-    // Calculate the mean value of tempY
-    double tempMean = std::accumulate(tempY.begin(), tempY.end(), 0.0);
-    tempMean /= static_cast<double>(nY);
-    double tempMeanE2 = std::accumulate(tempE.begin(), tempE.end(), 0.0,
-                                        VectorHelper::SumSquares<double>());
-    tempMeanE2 /= static_cast<double>(nY * nY);
-    //
-    std::vector<double>::iterator itY;
-    std::vector<double>::iterator itE;
-    itY = tempY.begin();
-    itE = tempE.begin();
-    double tempVar = 0.0, tempVarE = 0.0;
-    for (; itY != tempY.end(); ++itY, ++itE) {
-      (*itY) -= tempMean;                    // Now the vector is (y[i]-refMean)
-      (*itE) = (*itE) * (*itE) + tempMeanE2; // New error squared
-      double t = (*itY) * (*itY);
-      tempVar += t;
-      tempVarE += 4.0 * t * (*itE);
-    }
+    const auto tempVar = subtractMean(tempY, tempE);
 
     // Calculate the normalisation constant
-    double tempNorm = 1.0 / sqrt(tempVar);
-    double tempNormE = 0.5 * pow(tempNorm, 3) * sqrt(tempVarE);
-    double normalisation = refNorm * tempNorm;
-    double normalisationE2 =
+    const double tempNorm = 1.0 / sqrt(tempVar.y);
+    const double tempNormE = 0.5 * pow(tempNorm, 3) * sqrt(tempVar.e);
+    const double normalisation = refNorm * tempNorm;
+    const double normalisationE2 =
         pow((refNorm * tempNormE), 2) + pow((tempNorm * refNormE), 2);
     // Get reference to the ouput spectrum
     auto &outY = out->mutableY(i);
     auto &outE = out->mutableE(i);
 
     for (int k = -nY + 2; k <= nY - 2; ++k) {
-      int kp = abs(k);
+      const int kp = abs(k);
       double val = 0, err2 = 0, x, y, xE, yE;
       for (int j = nY - 1 - kp; j >= 0; --j) {
         if (k >= 0) {

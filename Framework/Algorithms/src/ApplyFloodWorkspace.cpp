@@ -5,10 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/BinaryOperation.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 namespace {
@@ -29,6 +34,32 @@ void correctEvents(MatrixWorkspace *ws) {
       eventWS->getSpectrum(i).switchTo(EventType::WEIGHTED);
     }
   }
+}
+
+/// Make sure that the returned flood workspace match the input workspace
+/// in number and order of the spectra.
+MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input,
+                                    const MatrixWorkspace_sptr &flood) {
+  auto newFlood =
+      WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
+  auto const table = BinaryOperation::buildBinaryOperationTable(input, flood);
+  auto const floodBlocksize = flood->blocksize();
+  const ISpectrum *missingSpectrum = nullptr;
+  for (size_t i = 0; i < table->size(); ++i) {
+    auto const j = (*table)[i];
+    if (j < 0) {
+      if (missingSpectrum) {
+        newFlood->getSpectrum(i).copyDataFrom(*missingSpectrum);
+      } else {
+        newFlood->dataY(i).assign(floodBlocksize, 1.0);
+        newFlood->dataE(i).assign(floodBlocksize, 0.0);
+        missingSpectrum = &newFlood->getSpectrum(i);
+      }
+    } else {
+      newFlood->getSpectrum(i).copyDataFrom(flood->getSpectrum(j));
+    }
+  }
+  return newFlood;
 }
 } // namespace
 
@@ -58,15 +89,15 @@ const std::string ApplyFloodWorkspace::category() const {
 
 void ApplyFloodWorkspace::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::INPUT_WORKSPACE, "", Direction::Input),
                   "The workspace to correct.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::FLOOD_WORKSPACE, "", Direction::Input),
                   "The flood workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::OUTPUT_WORKSPACE, "", Direction::Output),
                   "The corrected workspace.");
 }
@@ -74,6 +105,33 @@ void ApplyFloodWorkspace::init() {
 void ApplyFloodWorkspace::exec() {
   MatrixWorkspace_sptr input = getProperty(Prop::INPUT_WORKSPACE);
   MatrixWorkspace_sptr flood = getProperty(Prop::FLOOD_WORKSPACE);
+
+  if (input->size() != flood->size()) {
+    flood = makeEqualSizes(input, flood);
+  }
+
+  auto const inputXUnitId = input->getAxis(0)->unit()->unitID();
+  bool const doConvertUnits =
+      flood->getAxis(0)->unit()->unitID() != inputXUnitId;
+  bool const doRebin = flood->blocksize() > 1;
+
+  if (doRebin) {
+    if (doConvertUnits) {
+      auto convert = createChildAlgorithm("ConvertUnits", 0, 1);
+      convert->setProperty("InputWorkspace", flood);
+      convert->setProperty("Target", inputXUnitId);
+      convert->setProperty("OutputWorkspace", "dummy");
+      convert->execute();
+      flood = convert->getProperty("OutputWorkspace");
+    }
+    auto rebin = createChildAlgorithm("RebinToWorkspace", 0, 1);
+    rebin->setProperty("WorkspaceToRebin", flood);
+    rebin->setProperty("WorkspaceToMatch", input);
+    rebin->setProperty("OutputWorkspace", "dummy");
+    rebin->execute();
+    flood = rebin->getProperty("OutputWorkspace");
+  }
+
   auto divide = createChildAlgorithm("Divide", 0, 1);
   divide->setProperty("LHSWorkspace", input);
   divide->setProperty("RHSWorkspace", flood);

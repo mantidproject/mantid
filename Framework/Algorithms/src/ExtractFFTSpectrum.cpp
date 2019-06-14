@@ -10,7 +10,7 @@
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
@@ -24,21 +24,22 @@ DECLARE_ALGORITHM(ExtractFFTSpectrum)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 void ExtractFFTSpectrum::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The input workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(make_unique<WorkspaceProperty<>>("InputImagWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputImagWorkspace",
+                                                        "", Direction::Input,
+                                                        PropertyMode::Optional),
                   "The optional input workspace for the imaginary part.");
   declareProperty("FFTPart", 2, boost::make_shared<BoundedValidator<int>>(0, 5),
                   "Spectrum number, one of the six possible spectra output by "
                   "the FFT algorithm");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The output workspace.");
 }
 
@@ -47,7 +48,7 @@ void ExtractFFTSpectrum::exec() {
   MatrixWorkspace_sptr inputImagWS = getProperty("InputImagWorkspace");
   const int fftPart = getProperty("FFTPart");
   const int numHists = static_cast<int>(inputWS->getNumberHistograms());
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
+  MatrixWorkspace_sptr outputWS = create<MatrixWorkspace>(*inputWS);
 
   Progress prog(this, 0.0, 1.0, numHists);
 

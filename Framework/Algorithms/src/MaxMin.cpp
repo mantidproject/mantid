@@ -9,7 +9,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaxMin.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -20,17 +23,19 @@ DECLARE_ALGORITHM(MaxMin)
 
 using namespace Kernel;
 using namespace API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 /** Initialisation method.
  *
  */
 void MaxMin::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<HistogramValidator>()),
                   "The name of the Workspace2D to take as input");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace in which to store the result");
 
   declareProperty("ShowMin", false,
@@ -89,9 +94,10 @@ void MaxMin::exec() {
   }
 
   // Create the 1D workspace for the output
-  MatrixWorkspace_sptr outputWorkspace =
-      API::WorkspaceFactory::Instance().create(localworkspace,
-                                               MaxSpec - MinSpec + 1, 2, 1);
+  MatrixWorkspace_sptr outputWorkspace;
+
+  outputWorkspace = create<HistoWorkspace>(*localworkspace,
+                                           MaxSpec - MinSpec + 1, BinEdges(2));
 
   Progress progress(this, 0.0, 1.0, (MaxSpec - MinSpec + 1));
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))

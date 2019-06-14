@@ -5,7 +5,7 @@
             name="GPSANS"
             valid-from="1900-01-31 23:59:59"
             valid-to="2100-01-31 23:59:59"
-		    last-modified="2016-05-10 15:38:39.813535">
+		    last-modified="2018-12-10 17:31:39.813535">
 
 
   <defaults>
@@ -61,7 +61,17 @@
 <!-- ***************************************************************** -->
 <!-- Main Detector -->
 <component type="detector1" idstart="3" idfillbyfirst="x" idstep="192" idstepbyrow="1">
-    <location z='0' />
+		<location name="detector1">
+			<parameter name="z">
+				<logfile eq="0.001*value" id="sdd"/>
+			</parameter>
+			<parameter name="x">
+				<logfile eq="0.001*value" id="detector-translation"/>
+			</parameter>
+      <parameter name="y">
+        <value val="0.0"/>
+      </parameter>
+		</location>
 </component>
 
 <!-- Detector: -->

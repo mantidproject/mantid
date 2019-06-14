@@ -33,7 +33,7 @@ const std::string TransformHKL::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void TransformHKL::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -41,8 +41,8 @@ void TransformHKL::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "Tolerance", 0.15, std::move(mustBePositive), Direction::Input),
       "Indexing Tolerance (0.15)");
 
   std::vector<double> identity_matrix(9, 0.0);
@@ -53,16 +53,16 @@ void TransformHKL::init() {
   auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("HKLTransform",
-                                                 identity_matrix, threeBythree),
+      std::make_unique<ArrayProperty<double>>(
+          "HKLTransform", std::move(identity_matrix), std::move(threeBythree)),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
       "numbers");
 
-  this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 }
@@ -106,12 +106,11 @@ void TransformHKL::exec() {
         hkl_tran_string);
   }
   if (det < 0) {
-    std::ostringstream str_stream;
-    str_stream << hkl_tran;
-    std::string hkl_tran_string = str_stream.str();
+    std::ostringstream error_stream;
+    error_stream << hkl_tran;
     throw std::runtime_error(
         "ERROR: The determinant of the matrix is negative.\n" +
-        hkl_tran_string);
+        str_stream.str());
   }
   double tolerance = this->getProperty("Tolerance");
 

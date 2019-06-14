@@ -72,12 +72,12 @@ public:
     TS_ASSERT_EQUALS(svc.retrieve("anotherOne"), one);
 
     // Can't re-add the same name
-    TS_ASSERT_THROWS(svc.add("one", one), std::runtime_error);
+    TS_ASSERT_THROWS(svc.add("one", one), const std::runtime_error &);
     // Can't add blank name
-    TS_ASSERT_THROWS(svc.add("", one), std::runtime_error);
+    TS_ASSERT_THROWS(svc.add("", one), const std::runtime_error &);
     // Can't add empty pointer
     TS_ASSERT_THROWS(svc.add("Null", boost::shared_ptr<int>()),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     svc.add("__hidden", boost::make_shared<int>(99));
     TS_ASSERT_EQUALS(notificationFlag, 3)
@@ -133,10 +133,10 @@ public:
     TS_ASSERT_EQUALS(*svc.retrieve("one"), 2);
 
     // Can't add blank names
-    TS_ASSERT_THROWS(svc.addOrReplace("", two), std::runtime_error);
+    TS_ASSERT_THROWS(svc.addOrReplace("", two), const std::runtime_error &);
     // Can't add empty pointer
     TS_ASSERT_THROWS(svc.addOrReplace("one", boost::shared_ptr<int>()),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void handleBeforeReplaceNotification(
@@ -175,7 +175,7 @@ public:
         "anotherOne"); // Note: Rename is case-insensitive on the old name
     TS_ASSERT_EQUALS(svc.size(), 2);
     TSM_ASSERT_THROWS("One should have been renamed to anotherOne",
-                      svc.retrieve("one"), Exception::NotFoundError);
+                      svc.retrieve("one"), const Exception::NotFoundError &);
     TSM_ASSERT_EQUALS("One should have been renamed to anotherOne",
                       svc.retrieve("anotherOne"), one);
 
@@ -186,7 +186,7 @@ public:
     svc.rename("Two", "anotherOne");
     TS_ASSERT_EQUALS(svc.size(), 1);
     TSM_ASSERT_THROWS("Two should have been renamed to anotherOne",
-                      svc.retrieve("two"), Exception::NotFoundError);
+                      svc.retrieve("two"), const Exception::NotFoundError &);
     TSM_ASSERT_EQUALS("Two should have been renamed to anotherOne",
                       svc.retrieve("anotherOne"), two);
     // As we are renaming to an existing workspace there should be 2
@@ -197,7 +197,7 @@ public:
     svc.notificationCenter.removeObserver(observer);
     svc.notificationCenter.removeObserver(observer2);
 
-    TS_ASSERT_THROWS(svc.rename("anotherOne", ""), std::runtime_error);
+    TS_ASSERT_THROWS(svc.rename("anotherOne", ""), const std::runtime_error &);
     TSM_ASSERT_THROWS_NOTHING("'AnotherOne' should still be there",
                               svc.retrieve("anotherOne"));
   }
@@ -232,7 +232,7 @@ public:
     TS_ASSERT_EQUALS(svc.retrieve("one"), one);
     TSM_ASSERT_EQUALS("Retrieval should be case-insensitive",
                       svc.retrieve("oNE"), one);
-    TS_ASSERT_THROWS(svc.retrieve("NOTone"), Exception::NotFoundError);
+    TS_ASSERT_THROWS(svc.retrieve("NOTone"), const Exception::NotFoundError &);
 
     TS_ASSERT(svc.doesExist("one"));
     TSM_ASSERT("doesExist should be case-insensitive", svc.doesExist("oNE"));

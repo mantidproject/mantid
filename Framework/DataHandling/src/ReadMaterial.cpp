@@ -8,8 +8,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Material.h"
 
-#include <iostream>
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -20,16 +18,39 @@ namespace DataHandling {
  * @param params A struct containing all the parameters to be set.
  * @returns A map containing the relevent failure messages, if any.
  */
-ValidationErrors ReadMaterial::validateInputs(const MaterialParameters params) {
+ValidationErrors
+ReadMaterial::validateInputs(const MaterialParameters &params) {
   ValidationErrors result;
-  if (params.chemicalSymbol.empty()) {
-    if (params.atomicNumber <= 0) {
-      result["ChemicalFormula"] = "Need to specify the material";
+  const bool chemicalSymbol{!params.chemicalSymbol.empty()};
+  const bool atomicNumber{params.atomicNumber != 0};
+  if (!chemicalSymbol && !atomicNumber) {
+    if (isEmpty(params.coherentXSection)) {
+      result["CoherentXSection"] = "The cross section must be specified when "
+                                   "no ChemicalFormula or AtomicNumber is "
+                                   "given.";
     }
-  } else {
-    if (params.atomicNumber > 0)
-      result["AtomicNumber"] =
-          "Cannot specify both ChemicalFormula and AtomicNumber";
+    if (isEmpty(params.incoherentXSection)) {
+      result["IncoherentXSection"] = "The cross section must be specified when "
+                                     "no ChemicalFormula or AtomicNumber is "
+                                     "given.";
+    }
+    if (isEmpty(params.attenuationXSection)) {
+      result["AttenuationXSection"] = "The cross section must be specified "
+                                      "when no ChemicalFormula or AtomicNumber "
+                                      "is given.";
+    }
+    if (isEmpty(params.scatteringXSection)) {
+      result["ScatteringXSection"] = "The cross section must be specified when "
+                                     "no ChemicalFormula or AtomicNumber is "
+                                     "given.";
+    }
+    if (isEmpty(params.sampleNumberDensity)) {
+      result["SampleNumberDensity"] =
+          "The number density must be specified with a use-defined material.";
+    }
+  } else if (chemicalSymbol && atomicNumber) {
+    result["AtomicNumber"] =
+        "Cannot specify both ChemicalFormula and AtomicNumber";
   }
 
   if (params.massNumber > 0 && params.atomicNumber <= 0)
@@ -42,16 +63,24 @@ ValidationErrors ReadMaterial::validateInputs(const MaterialParameters params) {
     }
     if (!isEmpty(params.sampleNumberDensity)) {
       result["ZParameter"] =
-          "Can not give ZParameter with SampleNumberDensity set";
+          "Cannot give ZParameter with SampleNumberDensity set";
     }
     if (!isEmpty(params.sampleMassDensity)) {
       result["SampleMassDensity"] =
-          "Can not give SampleMassDensity with ZParameter set";
+          "Cannot give SampleMassDensity with ZParameter set";
     }
   } else if (!isEmpty(params.sampleNumberDensity)) {
     if (!isEmpty(params.sampleMassDensity)) {
       result["SampleMassDensity"] =
-          "Can not give SampleMassDensity with SampleNumberDensity set";
+          "Cannot give SampleMassDensity with SampleNumberDensity set";
+    }
+    bool canCalculateMassDensity =
+        ((!isEmpty(params.sampleMass)) && (!isEmpty(params.sampleVolume)));
+    if (canCalculateMassDensity) {
+      result["SampleMassDensity"] =
+          "Cannot give SampleMassDensity with SampleNumberDensity set";
+      result["SampleMassDensity"] =
+          "Cannot give SampleMassDensity with SampleNumberDensity set";
     }
   }
   return result;
@@ -63,10 +92,19 @@ ValidationErrors ReadMaterial::validateInputs(const MaterialParameters params) {
  *
  * @param params A struct containing all the parameters to be set.
  */
-void ReadMaterial::setMaterialParameters(MaterialParameters params) {
+void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
   setMaterial(params.chemicalSymbol, params.atomicNumber, params.massNumber);
-  setNumberDensity(params.sampleMassDensity, params.sampleNumberDensity,
-                   params.zParameter, params.unitCellVolume);
+
+  // calculate the mass density if it wasn't provided
+  double massDensity = params.sampleMassDensity;
+  if (isEmpty(massDensity)) {
+    if (!(isEmpty(params.sampleMass) || isEmpty(params.sampleVolume)))
+      massDensity = params.sampleMass / params.sampleVolume;
+  }
+
+  setNumberDensity(massDensity, params.sampleNumberDensity,
+                   params.numberDensityUnit, params.zParameter,
+                   params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
                     params.attenuationXSection, params.scatteringXSection);
 }
@@ -83,17 +121,17 @@ std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {
 void ReadMaterial::setMaterial(const std::string chemicalSymbol,
                                const int atomicNumber, const int massNumber) {
   if (!chemicalSymbol.empty()) {
-    std::cout << "CHEM: " << chemicalSymbol << std::endl;
     builder.setFormula(chemicalSymbol);
-  } else {
+  } else if (atomicNumber != 0) {
     builder.setAtomicNumber(atomicNumber);
     builder.setMassNumber(massNumber);
   }
 }
 
-void ReadMaterial::setNumberDensity(const double rho_m, const double rho,
-                                    const double zParameter,
-                                    const double unitCellVolume) {
+void ReadMaterial::setNumberDensity(
+    const double rho_m, const double rho,
+    Kernel::MaterialBuilder::NumberDensityUnit rhoUnit, const double zParameter,
+    const double unitCellVolume) {
   if (!isEmpty(rho_m))
     builder.setMassDensity(rho_m);
   if (isEmpty(rho)) {
@@ -103,6 +141,7 @@ void ReadMaterial::setNumberDensity(const double rho_m, const double rho,
     }
   } else {
     builder.setNumberDensity(rho);
+    builder.setNumberDensityUnit(rhoUnit);
   }
 }
 

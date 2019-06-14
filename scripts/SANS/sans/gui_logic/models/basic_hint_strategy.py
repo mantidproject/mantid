@@ -4,10 +4,10 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtpython import MantidQt
+from mantidqt import hint
 
 
-class BasicHintStrategy(MantidQt.MantidWidgets.HintStrategy):
+class BasicHintStrategy(hint.HintStrategy):
     def __init__(self, hint_dict):
         super(BasicHintStrategy, self).__init__()
         self.hint_dict = hint_dict
@@ -15,7 +15,7 @@ class BasicHintStrategy(MantidQt.MantidWidgets.HintStrategy):
     def createHints(self):
         hint_list = []
         for key, item in self.hint_dict.items():
-            new_hint = MantidQt.MantidWidgets.Hint(key, item)
+            new_hint = hint.Hint(key, item)
             hint_list.append(new_hint)
         return hint_list
 

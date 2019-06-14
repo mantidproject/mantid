@@ -17,7 +17,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
@@ -298,9 +298,9 @@ private:
   MockSaveTabView *m_mockViewPtr;
 
   void setUp() override {
-    m_mockSaver = Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    m_mockSaver = std::make_unique<NiceMock<MockReflAsciiSaver>>();
     m_mockSaverPtr = m_mockSaver.get();
-    m_mockView = Mantid::Kernel::make_unique<MockSaveTabView>();
+    m_mockView = std::make_unique<MockSaveTabView>();
     m_mockViewPtr = m_mockView.get();
   }
 

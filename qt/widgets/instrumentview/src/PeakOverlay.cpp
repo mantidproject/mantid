@@ -9,8 +9,6 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
-#include "MantidKernel/make_unique.h"
-
 #include <QList>
 #include <QPainter>
 #include <algorithm>
@@ -182,8 +180,7 @@ PeakOverlay::PeakOverlay(UnwrappedSurface *surface,
                          boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws)
     : Shape2DCollection(), m_peaksWorkspace(pws), m_surface(surface),
       m_precision(6), m_showRows(true), m_showLabels(true),
-      m_peakIntensityScale(
-          Mantid::Kernel::make_unique<QualitativeIntensityScale>(pws)) {
+      m_peakIntensityScale(std::make_unique<QualitativeIntensityScale>(pws)) {
 
   if (g_defaultStyles.isEmpty()) {
     g_defaultStyles << PeakMarker2D::Style(PeakMarker2D::Circle, Qt::red);
@@ -298,8 +295,7 @@ void PeakOverlay::draw(QPainter &painter) const {
     bool overlap = false;
     // if current label overlaps with another
     // combine them substituting differing numbers with letter 'h','k', or 'l'
-    for (int i = 0; i < m_labels.size(); ++i) {
-      PeakHKL &hkl = m_labels[i];
+    for (auto &hkl : m_labels) {
       overlap = hkl.add(marker, rect);
       if (overlap)
         break;
@@ -312,8 +308,7 @@ void PeakOverlay::draw(QPainter &painter) const {
   }
 
   painter.setPen(color);
-  for (int i = 0; i < m_labels.size(); ++i) {
-    PeakHKL &hkl = m_labels[i];
+  for (auto &hkl : m_labels) {
     hkl.draw(painter, m_precision);
   }
 }
@@ -358,11 +353,10 @@ QList<PeakMarker2D *> PeakOverlay::getSelectedPeakMarkers() {
 void PeakOverlay::setShowRelativeIntensityFlag(bool yes) {
   if (yes) {
     m_peakIntensityScale =
-        Mantid::Kernel::make_unique<QualitativeIntensityScale>(
-            m_peaksWorkspace);
+        std::make_unique<QualitativeIntensityScale>(m_peaksWorkspace);
   } else {
     m_peakIntensityScale =
-        Mantid::Kernel::make_unique<DefaultIntensityScale>(m_peaksWorkspace);
+        std::make_unique<DefaultIntensityScale>(m_peaksWorkspace);
   }
 
   recreateMarkers(getCurrentStyle());

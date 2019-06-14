@@ -12,7 +12,8 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/make_unique.h"
+
+#include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
@@ -20,6 +21,8 @@
 #include <Eigen/Geometry>
 #include <H5Cpp.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
+#include <boost/regex.hpp>
 #include <numeric>
 #include <tuple>
 #include <type_traits>
@@ -32,11 +35,14 @@ using namespace H5;
 // Anonymous namespace
 namespace {
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
+const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
 const H5std_string NX_CLASS = "NX_class";
 const H5std_string NX_ENTRY = "NXentry";
 const H5std_string NX_INSTRUMENT = "NXinstrument";
 const H5std_string NX_DETECTOR = "NXdetector";
 const H5std_string NX_MONITOR = "NXmonitor";
+const H5std_string NX_SAMPLE = "NXsample";
+const H5std_string NX_SOURCE = "NXsource";
 const H5std_string DETECTOR_IDS = "detector_number";
 const H5std_string DETECTOR_ID = "detector_id";
 const H5std_string X_PIXEL_OFFSET = "x_pixel_offset";
@@ -54,7 +60,6 @@ const H5std_string ROTATION = "rotation";
 const H5std_string VECTOR = "vector";
 const H5std_string UNITS = "units";
 // Radians and degrees
-const H5std_string DEGREES = "degrees";
 const static double PI = 3.1415926535;
 const static double DEGREES_IN_SEMICIRCLE = 180;
 // Nexus shape types
@@ -70,6 +75,12 @@ struct Face {
   Eigen::Vector3d v3;
   Eigen::Vector3d v4;
 };
+
+bool isDegrees(const H5std_string &units) {
+  using boost::regex;
+  // Nexus format inexact on acceptable rotation unit definitions
+  return regex_match(units, regex("deg(rees)?", regex::icase));
+}
 
 template <typename T, typename R>
 std::vector<R> convertVector(const std::vector<T> &toConvert) {
@@ -143,24 +154,33 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   // Open data set
   DataSet data = group.openDataSet(dataset);
   auto dataType = data.getDataType();
-  auto nCharacters = dataType.getSize();
-  std::vector<char> value(nCharacters);
-  data.read(value.data(), dataType, data.getSpace());
-  return std::string(value.begin(), value.end());
+  // Use a different read method if the string is of variable length type
+  if (dataType.isVariableStr()) {
+    H5std_string buffer;
+    // Need to check for old versions of hdf5
+    if (Hdf5Version::checkVariableLengthStringSupport()) {
+      data.read(buffer, dataType, data.getSpace());
+    } else {
+      throw std::runtime_error("NexusGeometryParser::get1DStringDataset: Only "
+                               "versions 1.8.16 + of hdf5 support the variable "
+                               "string feature");
+    }
+    return buffer;
+  } else {
+    auto nCharacters = dataType.getSize();
+    std::vector<char> value(nCharacters);
+    data.read(value.data(), dataType, data.getSpace());
+    return std::string(value.begin(), value.end());
+  }
 }
 
-std::string instrumentName(const Group &root) {
-  H5std_string instrumentPath = "raw_data_1/instrument";
-  const Group instrumentGroup = root.openGroup(instrumentPath);
-
-  return get1DStringDataset("name", instrumentGroup);
-}
-
-/// Open subgroups of parent group
+/** Open subgroups of parent group
+ *   If firstEntryOnly=true, only the first match is returned as a vector of
+ *   size 1.
+ */
 std::vector<Group> openSubGroups(const Group &parentGroup,
                                  const H5std_string &CLASS_TYPE) {
   std::vector<Group> subGroups;
-
   // Iterate over children, and determine if a group
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
@@ -188,6 +208,63 @@ std::vector<Group> openSubGroups(const Group &parentGroup,
     }
   }
   return subGroups;
+}
+
+/// Find a single dataset inside parent group (returns first match). Unset for
+/// no match.
+boost::optional<DataSet> findDataset(const Group &parentGroup,
+                                     const H5std_string &name) {
+  // Iterate over children, and determine if a group
+  for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
+    if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
+      H5std_string childPath = parentGroup.getObjnameByIdx(i);
+      // Open the sub group
+      if (childPath == name) {
+        auto childDataset = parentGroup.openDataSet(childPath);
+        return boost::optional<DataSet>(childDataset);
+      }
+    }
+  }
+  return boost::optional<DataSet>{}; // Empty
+}
+/// Find a single group inside parent (returns first match). class type must
+/// match NX_class. Unset for no match.
+boost::optional<Group> findGroup(const Group &parentGroup,
+                                 const H5std_string &CLASS_TYPE) {
+  // Iterate over children, and determine if a group
+  for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
+    if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
+      H5std_string childPath = parentGroup.getObjnameByIdx(i);
+      // Open the sub group
+      auto childGroup = parentGroup.openGroup(childPath);
+      // Iterate through attributes to find NX_class
+      for (uint32_t attribute_index = 0;
+           attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
+           ++attribute_index) {
+        // Test attribute at current index for NX_class
+        Attribute attribute = childGroup.openAttribute(attribute_index);
+        if (attribute.getName() == NX_CLASS) {
+          // Get attribute data type
+          DataType dataType = attribute.getDataType();
+          // Get the NX_class type
+          H5std_string classType;
+          attribute.read(dataType, classType);
+          // If group of correct type, return the childGroup
+          if (classType == CLASS_TYPE) {
+            return boost::optional<Group>(childGroup);
+          }
+        }
+      }
+    }
+  }
+  return boost::optional<Group>{}; // Empty
+}
+
+// Get the instrument name
+std::string instrumentName(const Group &root) {
+  Group entryGroup = *findGroup(root, NX_ENTRY);
+  Group instrumentGroup = *findGroup(entryGroup, NX_INSTRUMENT);
+  return get1DStringDataset("name", instrumentGroup);
 }
 
 // Open all detector groups into a vector
@@ -362,7 +439,7 @@ getTransformations(const H5File &file, const Group &detectorGroup) {
       transforms = translation * transforms;
     } else if (transformType == ROTATION) {
       double angle = magnitude;
-      if (transformUnits == DEGREES) {
+      if (isDegrees(transformUnits)) {
         // Convert angle from degrees to radians
         angle *= PI / DEGREES_IN_SEMICIRCLE;
       }
@@ -380,7 +457,10 @@ getTransformations(const H5File &file, const Group &detectorGroup) {
 std::vector<Mantid::detid_t> getDetectorIds(const Group &detectorGroup) {
 
   std::vector<Mantid::detid_t> detIds;
-
+  if (!findDataset(detectorGroup, DETECTOR_IDS))
+    throw std::invalid_argument("Mantid requires the following named dataset "
+                                "to be present in NXDetectors: " +
+                                DETECTOR_IDS);
   for (unsigned int i = 0; i < detectorGroup.getNumObjs(); ++i) {
     H5std_string objName = detectorGroup.getObjnameByIdx(i);
     if (objName == DETECTOR_IDS) {
@@ -418,28 +498,28 @@ parseNexusCylinder(const Group &shapeGroup) {
 // Parse OFF (mesh) nexus geometry
 boost::shared_ptr<const Geometry::IObject>
 parseNexusMesh(const Group &shapeGroup) {
-  const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("faces", shapeGroup));
-  const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("winding_order", shapeGroup));
   const auto vertices = get1DDataset<float>("vertices", shapeGroup);
   return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
                                               vertices);
 }
 
-void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
-                        const std::vector<uint16_t> &windingOrder,
+void extractFacesAndIDs(const std::vector<uint32_t> &detFaces,
+                        const std::vector<uint32_t> &windingOrder,
                         const std::vector<float> &vertices,
                         const std::unordered_map<int, uint32_t> &detIdToIndex,
                         const size_t vertsPerFace,
                         std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
-                        std::vector<std::vector<uint16_t>> &detFaceIndices,
-                        std::vector<std::vector<uint16_t>> &detWindingOrder,
+                        std::vector<std::vector<uint32_t>> &detFaceIndices,
+                        std::vector<std::vector<uint32_t>> &detWindingOrder,
                         std::vector<int32_t> &detIds) {
   const size_t vertStride = 3;
   size_t detFaceIndex = 1;
   std::fill(detFaceIndices.begin(), detFaceIndices.end(),
-            std::vector<uint16_t>(1, 0));
+            std::vector<uint32_t>(1, 0));
   for (size_t i = 0; i < windingOrder.size(); i += vertsPerFace) {
     auto detFaceId = detFaces[detFaceIndex];
     // Id -> Index
@@ -452,27 +532,27 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
     for (size_t v = 0; v < vertsPerFace; ++v) {
       const auto vi = windingOrder[i + v] * vertStride;
       detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
-      detWinding.push_back(static_cast<uint16_t>(detWinding.size()));
+      detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
     }
     // Index -> Id
     detIds[detIndex] = detFaceId;
-    detIndices.push_back(static_cast<uint16_t>(detVerts.size()));
+    detIndices.push_back(static_cast<uint32_t>(detVerts.size()));
     // Detector faces is 2N detectors
     detFaceIndex += 2;
   }
 }
 
 void parseNexusMeshAndAddDetectors(
-    const std::vector<uint16_t> &detFaces,
-    const std::vector<uint16_t> &faceIndices,
-    const std::vector<uint16_t> &windingOrder,
+    const std::vector<uint32_t> &detFaces,
+    const std::vector<uint32_t> &faceIndices,
+    const std::vector<uint32_t> &windingOrder,
     const std::vector<float> &vertices, const size_t numDets,
     const std::unordered_map<int, uint32_t> &detIdToIndex,
     const std::string &name, InstrumentBuilder &builder) {
   auto vertsPerFace = windingOrder.size() / faceIndices.size();
   std::vector<std::vector<Eigen::Vector3d>> detFaceVerts(numDets);
-  std::vector<std::vector<uint16_t>> detFaceIndices(numDets);
-  std::vector<std::vector<uint16_t>> detWindingOrder(numDets);
+  std::vector<std::vector<uint32_t>> detFaceIndices(numDets);
+  std::vector<std::vector<uint32_t>> detWindingOrder(numDets);
   std::vector<int> detIds(numDets);
 
   extractFacesAndIDs(detFaces, windingOrder, vertices, detIdToIndex,
@@ -504,11 +584,11 @@ void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
                      const std::string &bankName) {
   // Load mapping between detector IDs and faces, winding order of vertices for
   // faces, and face corner vertices.
-  const std::vector<uint16_t> detFaces = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("detector_faces", shapeGroup));
-  const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("faces", shapeGroup));
-  const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("winding_order", shapeGroup));
   const auto vertices = get1DDataset<float>("vertices", shapeGroup);
 
@@ -566,9 +646,12 @@ parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
 // Parse source and add to instrument
 void parseAndAddSource(const H5File &file, const Group &root,
                        InstrumentBuilder &builder) {
-  H5std_string sourcePath = "raw_data_1/instrument/source";
-  Group sourceGroup = root.openGroup(sourcePath);
-  auto sourceName = get1DStringDataset("name", sourceGroup);
+  Group entryGroup = *findGroup(root, NX_ENTRY);
+  Group instrumentGroup = *findGroup(entryGroup, NX_INSTRUMENT);
+  Group sourceGroup = *findGroup(instrumentGroup, NX_SOURCE);
+  std::string sourceName = "Unspecfied";
+  if (findDataset(sourceGroup, "name"))
+    sourceName = get1DStringDataset("name", sourceGroup);
   auto sourceTransformations = getTransformations(file, sourceGroup);
   auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
   builder.addSource(sourceName, sourceTransformations * defaultPos);
@@ -577,11 +660,13 @@ void parseAndAddSource(const H5File &file, const Group &root,
 // Parse sample and add to instrument
 void parseAndAddSample(const H5File &file, const Group &root,
                        InstrumentBuilder &builder) {
-  std::string sampleName = "sample";
-  H5std_string samplePath = "raw_data_1/sample";
-  Group sampleGroup = root.openGroup(samplePath);
+  Group entryGroup = *findGroup(root, NX_ENTRY);
+  Group sampleGroup = *findGroup(entryGroup, NX_SAMPLE);
   auto sampleTransforms = getTransformations(file, sampleGroup);
   Eigen::Vector3d samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
+  std::string sampleName = "Unspecified";
+  if (findDataset(sampleGroup, "name"))
+    sampleName = get1DStringDataset("name", sampleGroup);
   builder.addSample(sampleName, samplePos);
 }
 
@@ -596,6 +681,8 @@ void parseMonitors(const H5File &file, const H5::Group &root,
     for (auto &inst : instrumentGroups) {
       std::vector<Group> monitorGroups = openSubGroups(inst, NX_MONITOR);
       for (auto &monitor : monitorGroups) {
+        if (!findDataset(monitor, DETECTOR_ID))
+          throw std::invalid_argument("NXmonitors must have " + DETECTOR_ID);
         auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
         bool proxy = false;
         auto monitorShape = parseNexusShape(monitor, proxy);
@@ -622,7 +709,10 @@ extractInstrument(const H5File &file, const Group &root) {
     Eigen::Vector3d bankPos = transforms * Eigen::Vector3d{0, 0, 0};
     // Absolute bank rotation
     auto bankRotation = Eigen::Quaterniond(transforms.rotation());
-    auto bankName = get1DStringDataset(BANK_NAME, detectorGroup);
+    std::string bankName;
+    if (findDataset(detectorGroup, BANK_NAME))
+      bankName = get1DStringDataset(BANK_NAME,
+                                    detectorGroup); // local_name is optional
     builder.addBank(bankName, bankPos, bankRotation);
     // Get the pixel detIds
     auto detectorIds = getDetectorIds(detectorGroup);
@@ -680,7 +770,7 @@ std::string NexusGeometryParser::getMangledName(const std::string &fileName,
   std::string mangledName = instName;
   if (!fileName.empty()) {
     std::string checksum =
-        Mantid::Kernel::ChecksumHelper::sha1FromFile(fileName, false);
+        Mantid::Kernel::ChecksumHelper::sha1FromString(fileName);
     mangledName += checksum;
   }
   return mangledName;

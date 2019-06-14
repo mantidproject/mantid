@@ -119,8 +119,7 @@ calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) {
   // find the normal
   auto xaxis = panelCorners[1] - panelCorners[0];
   auto yaxis = panelCorners[3] - panelCorners[0];
-  auto normal = xaxis.cross_prod(yaxis);
-  normal.normalize();
+  const auto normal = normalize(xaxis.cross_prod(yaxis));
   return normal;
 }
 
@@ -129,9 +128,8 @@ bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
                 const Mantid::Kernel::V3D &normal) {
   for (auto tube : tubes) {
     const auto &children = componentInfo.children(tube);
-    auto vector = componentInfo.position(children[0]) -
-                  componentInfo.position(children[1]);
-    vector.normalize();
+    const auto vector = normalize(componentInfo.position(children[0]) -
+                                  componentInfo.position(children[1]));
     if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
       g_log.warning() << "Assembly " << componentInfo.name(bankIndex)
                       << " isn't flat.\n";
@@ -245,8 +243,8 @@ void PanelsSurface::init() {
   spreadBanks();
 
   RectF surfaceRect;
-  for (int i = 0; i < m_flatBanks.size(); ++i) {
-    RectF rect(m_flatBanks[i]->polygon.boundingRect());
+  for (auto &flatBank : m_flatBanks) {
+    RectF rect(flatBank->polygon.boundingRect());
     surfaceRect.unite(rect);
   }
 
@@ -264,8 +262,9 @@ void PanelsSurface::init() {
   m_v_max = m_viewRect.y1();
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D &, double &, double &,
-                            double &, double &) const {
+void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/,
+                            double & /*v*/, double & /*uscale*/,
+                            double & /*vscale*/) const {
   throw std::runtime_error(
       "Cannot project an arbitrary point to this surface.");
 }
@@ -318,7 +317,7 @@ void PanelsSurface::addFlatBankOfDetectors(
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
 #pragma omp parallel for ordered
-  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
+  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
     auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
@@ -355,10 +354,10 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   }
 
   info->polygon = QPolygonF(verts);
-  for (int i = 0; i < static_cast<int>(columns.size()); ++i) {
-    const auto &row = componentInfo.children(columns[i]);
-    for (int j = 0; j < static_cast<int>(row.size()); ++j) {
-      addDetector(row[j], ref, index, info->rotation);
+  for (auto column : columns) {
+    const auto &row = componentInfo.children(column);
+    for (auto j : row) {
+      addDetector(j, ref, index, info->rotation);
     }
   }
 }
@@ -420,7 +419,6 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   }
 
   // Now we found all the tubes that may form a flat struture.
-  auto name = componentInfo.name(bankIndex);
   // Use two of the tubes to calculate the normal to the plain of that structure
   auto normal =
       tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
@@ -457,10 +455,10 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   vert << p0 << p1;
   info->polygon = QPolygonF(vert);
 
-  for (int i = 0; i < static_cast<int>(tubes.size()); ++i) {
-    const auto &children = componentInfo.children(tubes[i]);
+  for (auto tube : tubes) {
+    const auto &children = componentInfo.children(tube);
 #pragma omp parallel for
-    for (int j = 0; j < static_cast<int>(children.size()); ++j) {
+    for (int j = 0; j < static_cast<int>(children.size()); ++j) { // NOLINT
       addDetector(children[j], pos0, index, info->rotation);
     }
 
@@ -507,17 +505,14 @@ PanelsSurface::processUnstructured(size_t rootIndex,
     else if (child == children[1]) {
       // at first set the normal to an argbitrary vector orthogonal to
       // the line between the first two detectors
-      y = pos - pos0;
-      y.normalize();
+      y = normalize(pos - pos0);
       setupBasisAxes(y, normal, x);
     } else if (fabs(normal.scalar_prod(pos - pos0)) >
                Mantid::Kernel::Tolerance) {
       if (!normalFound) {
         // when first non-colinear detector is found set the normal
-        x = pos - pos0;
-        x.normalize();
-        normal = x.cross_prod(y);
-        normal.normalize();
+        x = normalize(pos - pos0);
+        normal = normalize(x.cross_prod(y));
         x = y.cross_prod(normal);
         normalFound = true;
       } else {
@@ -716,9 +711,9 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const {
  * Remove all found flat banks
  */
 void PanelsSurface::clearBanks() {
-  for (int i = 0; i < m_flatBanks.size(); ++i) {
-    if (m_flatBanks[i])
-      delete m_flatBanks[i];
+  for (auto &flatBank : m_flatBanks) {
+    if (flatBank)
+      delete flatBank;
   }
   m_flatBanks.clear();
 }

@@ -54,6 +54,15 @@ public:
   MuonAnalysisHelperTest() {
     FrameworkManager::Instance(); // So that framework is initialized
   }
+  void test_isNumberInt() { TS_ASSERT(isNumber(QString("12"))); }
+
+  void test_isNumberDouble() { TS_ASSERT(isNumber(QString("1.2"))); }
+  void test_isNumberNegInt() { TS_ASSERT(isNumber(QString("-12"))); }
+  void test_isNumberNegDouble() { TS_ASSERT(isNumber(QString("-1.2"))); }
+  void test_isNumberFail() { TS_ASSERT(!isNumber(QString("ABC"))); }
+  void test_isNumberFailMix() { TS_ASSERT(!isNumber(QString("1BC4"))); }
+  void test_isNumberFailRange() { TS_ASSERT(!isNumber(QString("1-4"))); }
+  void test_isNumberFailRange2() { TS_ASSERT(!isNumber(QString("1 to 4"))); }
 
   void test_getRunLabel_singleWs() {
     std::string label = getRunLabel(createWs("MUSR", 15189));
@@ -395,7 +404,7 @@ public:
     const auto currentWs = createWs("MUSR", 15189);
     const auto loadedWs = nullptr;
     TS_ASSERT_THROWS(isReloadGroupingNecessary(currentWs, loadedWs),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_isReloadGroupingNecessary_noLogs() {
@@ -746,8 +755,7 @@ private:
     TS_ASSERT_EQUALS(times.size(), values.size());
     auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
     TS_ASSERT(matrixWS);
-    auto prop =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(logName);
+    auto prop = std::make_unique<TimeSeriesProperty<double>>(logName);
     prop->addValues(times, values);
     matrixWS->mutableRun().addLogData(std::move(prop));
   }

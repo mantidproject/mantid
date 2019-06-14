@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fn.setLatticeSystem("triclinic"));
 
     TS_ASSERT_THROWS(fn.setLatticeSystem("DoesNotExist"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     fn.setLatticeSystem("Cubic");
     // a and ZeroShift

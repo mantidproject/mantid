@@ -29,29 +29,29 @@ class SANSILLIntegrationTest(unittest.TestCase):
     def test_monochromatic(self):
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
         self._check_output(mtd['iq'])
-        self.assertEquals(mtd['iq'].blocksize(), 88)
+        self.assertEqual(mtd['iq'].blocksize(), 88)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_monochromatic_with_wedges(self):
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', NumberOfWedges=2, WedgeWorkspace='wedges')
         self._check_output(mtd['iq'])
-        self.assertEquals(mtd['iq'].blocksize(), 88)
+        self.assertEqual(mtd['iq'].blocksize(), 88)
         self.assertTrue(mtd['iq'].hasDx(0))
         self.assertTrue(mtd['wedges'])
         self.assertTrue(isinstance(mtd['wedges'], WorkspaceGroup))
-        self.assertEquals(mtd['wedges'].getNumberOfEntries(), 2)
+        self.assertEqual(mtd['wedges'].getNumberOfEntries(), 2)
         for wedge in range(2):
             self._check_output(mtd['wedges'].getItem(wedge))
-            self.assertEquals(mtd['wedges'].getItem(wedge).blocksize(), 88)
+            self.assertEqual(mtd['wedges'].getItem(wedge).blocksize(), 88)
             self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_monochromatic_cake(self):
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputType='I(Phi,Q)', NumberOfWedges=36)
         self._check_output(mtd['iq'], 36)
-        self.assertEquals(mtd['iq'].blocksize(), 88)
+        self.assertEqual(mtd['iq'].blocksize(), 88)
         azimuth_axis = mtd['iq'].getAxis(1)
         self.assertTrue(azimuth_axis.isNumeric())
-        self.assertEquals(len(azimuth_axis),36)
+        self.assertEqual(len(azimuth_axis),36)
         self.assertEqual(azimuth_axis.getUnit().unitID(), "Degrees")
         for phi in range(36):
             self.assertTrue(mtd['iq'].hasDx(phi))
@@ -59,22 +59,22 @@ class SANSILLIntegrationTest(unittest.TestCase):
     def test_monochromatic_2D(self):
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputType='I(Qx,Qy)', MaxQxy=0.03, DeltaQ=0.001)
         self._check_output(mtd['iq'], 60)
-        self.assertEquals(mtd['iq'].blocksize(), 60)
+        self.assertEqual(mtd['iq'].blocksize(), 60)
         qy_axis = mtd['iq'].getAxis(1)
         self.assertTrue(qy_axis.isNumeric())
-        self.assertEquals(len(qy_axis),61)
+        self.assertEqual(len(qy_axis),61)
         self.assertEqual(qy_axis.getUnit().unitID(), "MomentumTransfer")
 
     def test_with_bin_width(self):
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=-0.1)
         self._check_output(mtd['iq'])
-        self.assertEquals(mtd['iq'].blocksize(), 51)
+        self.assertEqual(mtd['iq'].blocksize(), 51)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_with_bin_range(self):
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,0.03])
         self._check_output(mtd['iq'])
-        self.assertEquals(mtd['iq'].blocksize(), 73)
+        self.assertEqual(mtd['iq'].blocksize(), 73)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_with_bin_width_and_range(self):
@@ -86,13 +86,13 @@ class SANSILLIntegrationTest(unittest.TestCase):
         binning = [0.001,0.005,0.006,0.01,0.016]
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=binning)
         self._check_output(mtd['iq'])
-        self.assertEquals(mtd['iq'].blocksize(), 2)
+        self.assertEqual(mtd['iq'].blocksize(), 2)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_resolution_binning(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', ResolutionBasedBinning=True)
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', DefaultQBinning='ResolutionBased')
         self._check_output(mtd['iq'])
-        self.assertEquals(mtd['iq'].blocksize(), 6)
+        self.assertEqual(mtd['iq'].blocksize(), 37)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_tof(self):
@@ -101,7 +101,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         # TOF resolution is not yet implemented
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='None')
         self._check_output(mtd['iq'])
-        self.assertEquals(mtd['iq'].blocksize(), 58)
+        self.assertEqual(mtd['iq'].blocksize(), 217)
 
     def _check_output(self, ws, spectra = 1):
         self.assertTrue(ws)

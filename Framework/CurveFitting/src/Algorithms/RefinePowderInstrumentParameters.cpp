@@ -34,7 +34,6 @@
 
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -70,32 +69,32 @@ RefinePowderInstrumentParameters::RefinePowderInstrumentParameters()
 void RefinePowderInstrumentParameters::init() {
   // Input/output peaks table workspace
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
           "BraggPeakParameterWorkspace", "Anonymous", Direction::Input),
       "TableWorkspace containg all peaks' parameters.");
 
   // Input and output instrument parameters table workspace
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::TableWorkspace>>(
           "InstrumentParameterWorkspace", "AnonymousInstrument",
           Direction::InOut),
       "TableWorkspace containg instrument's parameters.");
 
   // Output workspace
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
           "OutputWorkspace", "AnonymousOut", Direction::Output),
       "Output Workspace2D for the d-TOF curves. ");
 
   // Workspace to output fitted peak parameters
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputInstrumentParameterWorkspace", "AnonymousOut2",
           Direction::Output),
       "Output TableWorkspace for the fitted peak parameters for each peak.");
 
   // Workspace to output N best MC parameters
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputBestResultsWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output TableWorkspace for the N best MC fitting results. ");
@@ -115,9 +114,9 @@ void RefinePowderInstrumentParameters::init() {
                   "Number of Monte Carlo random walk steps. ");
 
   // Parameters to fit
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
-                      "ParametersToFit"),
-                  "Names of the parameters to fit. ");
+  declareProperty(
+      std::make_unique<Kernel::ArrayProperty<std::string>>("ParametersToFit"),
+      "Names of the parameters to fit. ");
 
   // Mininum allowed peak's sigma (avoid wrong fitting peak with very narrow
   // width)
@@ -227,7 +226,8 @@ void RefinePowderInstrumentParameters::exec() {
 /** Fit instrument parameters.  It is a straight forward fitting to
  */
 void RefinePowderInstrumentParameters::fitInstrumentParameters() {
-  cout << "=========== Method [FitInstrumentParameters] ===============\n";
+  g_log.debug()
+      << "=========== Method [FitInstrumentParameters] ===============\n";
 
   // 1. Initialize the fitting function
   m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
@@ -258,14 +258,14 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
     m_Function->setParameter(parname, parvalue);
     msgss << setw(10) << parname << " = " << parvalue << '\n';
   }
-  cout << msgss.str();
+  g_log.debug() << msgss.str();
 
   // 2b. Calculate the statistic of the starting values
   double gslchi2 = calculateFunctionStatistic(m_Function, m_dataWS, 0);
   double homchi2 =
       calculateD2TOFFunction(m_Function, domain, values, rawY, rawE);
-  cout << "Fit Starting Value:  Chi^2 (GSL) = " << gslchi2
-       << ",  Chi2^2 (Home) = " << homchi2 << '\n';
+  g_log.debug() << "Fit Starting Value:  Chi^2 (GSL) = " << gslchi2
+                << ",  Chi2^2 (Home) = " << homchi2 << '\n';
 
   // 3. Fix parameters that are not listed in parameter-to-fit.  Unfix the rest
   size_t numparams = funparamnames.size();
@@ -296,7 +296,8 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   for (size_t i = 0; i < m_dataWS->x(0).size(); ++i)
     outss << m_dataWS->x(0)[i] << "\t\t" << m_dataWS->y(0)[i] << "\t\t"
           << m_dataWS->e(0)[i] << '\n';
-  cout << "Input Peak Position Workspace To Fit: \n" << outss.str() << '\n';
+  g_log.debug() << "Input Peak Position Workspace To Fit: \n"
+                << outss.str() << '\n';
 
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
@@ -319,8 +320,8 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   double chi2 = fitalg->getProperty("OutputChi2overDoF");
   std::string fitstatus = fitalg->getProperty("OutputStatus");
 
-  cout << "Fit Result (GSL):  Chi^2 = " << chi2
-       << "; Fit Status = " << fitstatus << '\n';
+  g_log.debug() << "Fit Result (GSL):  Chi^2 = " << chi2
+                << "; Fit Status = " << fitstatus << '\n';
 
   API::IFunction_sptr fitfunc = fitalg->getProperty("Function");
 
@@ -334,7 +335,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 
   double selfchi2 =
       calculateD2TOFFunction(m_Function, domain, values, rawY, rawE);
-  cout << "Homemade Chi^2 = " << selfchi2 << '\n';
+  g_log.debug() << "Homemade Chi^2 = " << selfchi2 << '\n';
 
   // 5. Update fitted parameters
   for (const auto &parname : funparamnames) {
@@ -355,7 +356,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
          << inpparvalue << "\t\tDiff = " << inpparvalue - parvalue << '\n';
   }
   dbss << "*********************************************\n";
-  cout << dbss.str();
+  g_log.debug() << dbss.str();
 
   // 7. Play with Zscore:     template<typename TYPE>
   //    std::vector<double> getZscore(const std::vector<TYPE>& data, const bool
@@ -366,16 +367,18 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   stringstream zss;
   zss << setw(20) << "d_h" << setw(20) << "Z DataY" << setw(20) << "Z ModelY"
       << setw(20) << "Z DiffY" << setw(20) << "DiffY\n";
+  const auto &X = m_dataWS->x(0);
+  const auto &Y = m_dataWS->y(2);
   for (size_t i = 0; i < z0.size(); ++i) {
-    double d_h = m_dataWS->x(0)[i];
+    double d_h = X[i];
     double zdatay = z0[i];
     double zmodely = z1[i];
     double zdiffy = z2[i];
-    double diffy = m_dataWS->y(2)[i];
+    double diffy = Y[i];
     zss << setw(20) << d_h << setw(20) << zdatay << setw(20) << zmodely
         << setw(20) << zdiffy << setw(20) << diffy << '\n';
   }
-  cout << "Zscore Survey: \b" << zss.str();
+  g_log.debug() << "Zscore Survey: \b" << zss.str();
 }
 
 /** Fit function to data
@@ -444,8 +447,8 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
   double chi2 = fitalg->getProperty("OutputChi2overDoF");
   std::string fitstatus = fitalg->getProperty("OutputStatus");
 
-  cout << "Function calculation [L.M]:  Chi^2 = " << chi2
-       << "; Fit Status = " << fitstatus << '\n';
+  g_log.debug() << "Function calculation [L.M]:  Chi^2 = " << chi2
+                << "; Fit Status = " << fitstatus << '\n';
 
   return chi2;
 }
@@ -530,20 +533,6 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     vector<string> parnames, vector<double> lowerbounds,
     vector<double> upperbounds, vector<double> stepsizes, size_t maxsteps,
     double stepsizescalefactor, bool fit2) {
-  /* Input Check
-  stringstream inpinfo;
-  inpinfo << "Input Instrument Parameter Information. Maximum Step = " <<
-  maxsteps << '\n';
-  inpinfo << setw(20) << "Name" << setw(20) << "Value" << setw(20) << "Lower
-  Boundary"
-          << setw(20) << "Upper Boundary" << setw(20) << "Step Size\n";
-  for (size_t i = 0; i < parnames.size(); ++i)
-    inpinfo << setw(20) << parnames[i] << setw(20) <<
-  m_FuncParameters[parnames[i]]
-            << setw(20) << lowerbounds[i]
-            << setw(20) << upperbounds[i] << setw(20) <<  stepsizes[i] << '\n';
-  cout << inpinfo.str();
-  ------------*/
 
   // 1. Set up starting values, esp. to m_Function
   size_t numparameters = parnames.size();
@@ -557,8 +546,8 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
 
   // Calcualte the function's initial statistic
   m_BestGSLChi2 = calculateFunctionStatistic(m_Function, m_dataWS, 0);
-  cout << "Function with starting values has Chi2 = " << m_BestGSLChi2
-       << " (GSL L.M) \n";
+  g_log.debug() << "Function with starting values has Chi2 = " << m_BestGSLChi2
+                << " (GSL L.M) \n";
 
   const auto &X = m_dataWS->x(0);
   const auto &rawY = m_dataWS->y(0);
@@ -606,11 +595,12 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // Constraint
     double lowerb = lowerbounds[i];
     double upperb = upperbounds[i];
-    auto newconstraint = Kernel::make_unique<BoundaryConstraint>(
+    auto newconstraint = std::make_unique<BoundaryConstraint>(
         func4fit.get(), parname, lowerb, upperb);
     func4fit->addConstraint(std::move(newconstraint));
   }
-  cout << "Function for fitting in MC: " << func4fit->asString() << '\n';
+  g_log.debug() << "Function for fitting in MC: " << func4fit->asString()
+                << '\n';
 
   // 4. Do MC loops
   double curchi2 =
@@ -625,9 +615,6 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // a. Determine whether to refine this parameter
     if (!refineallparams) {
       if (paramstofitset.count(parnames[paramindex]) == 0) {
-        // This parameter is not to be refined...
-        // cout << "MC Step " << istep << ":  Refine " << parnames[paramindex]
-        // << " Denied!\n";
         ++paramindex;
         if (paramindex >= parnames.size())
           paramindex = 0;
@@ -699,8 +686,6 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
           m_BestFitParameters.pop_back();
           m_BestFitChi2s.pop_back();
         }
-
-        // cout << "\tHomemade Chi^2 = " << homchi2 << '\n';
       }
     }
 
@@ -709,12 +694,6 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     double prob = exp(-(newchi2 - curchi2) / curchi2);
     double randnumber =
         static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
-
-    // cout << "MC Step " << istep << ": New Chi^2 = " << newchi2 << "; Old
-    // Chi^2 = " << curchi2
-    //      << ".  Acceptance Prob. = " << prob << "; Random = " << randnumber
-    //      << '\n';
-
     accept = randnumber < prob;
 
     // d. Adjust step size
@@ -806,16 +785,6 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(
   // 1. Check validity
   if (!func) {
     throw std::runtime_error("m_Function has not been initialized!");
-  } else {
-    /*
-    vector<string> parnames = m_Function->getParameterNames();
-    for (size_t i = 0; i < parnames.size(); ++i)
-    {
-      cout << "DBx1125  " << parnames[i] << " = " <<
-    m_Function->getParameter(parnames[i]) << '\n';
-    }
-    */
-    ;
   }
 
   if (domain.size() != values.size() || domain.size() != rawY.size() ||

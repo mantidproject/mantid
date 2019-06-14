@@ -11,7 +11,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -25,13 +26,14 @@ DECLARE_ALGORITHM(ConvertTableToMatrixWorkspace)
 using namespace Kernel;
 using namespace API;
 using namespace HistogramData;
+using namespace DataObjects;
 
 void ConvertTableToMatrixWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input TableWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output Workspace2D.");
   declareProperty("ColumnX", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
@@ -49,19 +51,18 @@ void ConvertTableToMatrixWorkspace::exec() {
   std::string columnY = getProperty("ColumnY");
   std::string columnE = getProperty("ColumnE");
 
-  size_t nrows = inputWorkspace->rowCount();
+  const size_t nrows = inputWorkspace->rowCount();
   if (nrows == 0) {
     throw std::runtime_error("The input table is empty");
   }
 
-  auto X = inputWorkspace->getColumn(columnX)->numeric_fill<>();
-  auto Y = inputWorkspace->getColumn(columnY)->numeric_fill<>();
+  const auto X = inputWorkspace->getColumn(columnX)->numeric_fill<>();
+  const auto Y = inputWorkspace->getColumn(columnY)->numeric_fill<>();
 
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, nrows, nrows);
+  MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(1, Points(nrows));
 
-  outputWorkspace->mutableX(0).assign(X.begin(), X.end());
-  outputWorkspace->mutableY(0).assign(Y.begin(), Y.end());
+  outputWorkspace->mutableX(0).assign(X.cbegin(), X.cend());
+  outputWorkspace->mutableY(0).assign(Y.cbegin(), Y.cend());
 
   if (!columnE.empty()) {
     outputWorkspace->mutableE(0) =

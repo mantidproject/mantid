@@ -27,7 +27,32 @@ functionality for accessing the data stream and processing data.
 */
 class DLLExport IKafkaStreamDecoder {
 public:
-  using CallbackFn = std::function<void()>;
+  /**
+   * Defines a thread-safe callback. A mutex is held
+   * both during assignment of a new callback function
+   * and during the call.
+   */
+  class Callback {
+  public:
+    using FnType = std::function<void()>;
+
+    Callback(Callback::FnType callback) : m_mutex(), m_callback() {
+      setFunction(std::move(callback));
+    }
+
+    inline void operator()() {
+      std::lock_guard<std::mutex> lck(m_mutex);
+      m_callback();
+    }
+    void setFunction(const Callback::FnType &callback) {
+      std::lock_guard<std::mutex> lck(m_mutex);
+      m_callback = callback;
+    }
+
+  private:
+    std::mutex m_mutex;
+    FnType m_callback;
+  };
 
 public:
   IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
@@ -57,10 +82,12 @@ public:
 
   ///@name Callbacks
   ///@{
-  virtual void registerIterationEndCb(CallbackFn cb) {
-    m_cbIterationEnd = std::move(cb);
+  virtual void registerIterationEndCb(const Callback::FnType &cb) {
+    m_cbIterationEnd.setFunction(cb);
   }
-  virtual void registerErrorCb(CallbackFn cb) { m_cbError = std::move(cb); }
+  virtual void registerErrorCb(const Callback::FnType &cb) {
+    m_cbError.setFunction(cb);
+  }
   ///@}
 
   ///@name Modifying
@@ -189,8 +216,8 @@ protected:
       bool &checkOffsets);
 
   /// Callbacks for unit tests
-  CallbackFn m_cbIterationEnd;
-  CallbackFn m_cbError;
+  Callback m_cbIterationEnd;
+  Callback m_cbError;
 
   /// Waits until a run start message with higher run number is received
   bool waitForNewRunStartMessage(RunStartStruct &runStartStructOutput);

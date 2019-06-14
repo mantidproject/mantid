@@ -7,10 +7,10 @@
 #include "MantidAlgorithms/CorrectKiKf.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -34,11 +34,11 @@ void CorrectKiKf::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("DeltaE");
 
   this->declareProperty(
-      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, wsValidator),
       "Name of the input workspace");
   this->declareProperty(
-      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "Name of the output workspace, can be the same as the input");
 
@@ -69,7 +69,7 @@ void CorrectKiKf::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   const size_t size = inputWS->blocksize();
@@ -85,8 +85,7 @@ void CorrectKiKf::exec() {
     if (emodeStr == "Direct") {
       // Check if it has been store on the run object for this workspace
       if (inputWS->run().hasProperty("Ei")) {
-        Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
-        efixedProp = boost::lexical_cast<double>(eiprop->value());
+        efixedProp = inputWS->run().getPropertyValueAsType<double>("Ei");
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
         throw std::invalid_argument(
@@ -198,8 +197,7 @@ void CorrectKiKf::execEvent() {
     if (emodeStr == "Direct") {
       // Check if it has been store on the run object for this workspace
       if (inputWS->run().hasProperty("Ei")) {
-        Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
-        efixedProp = boost::lexical_cast<double>(eiprop->value());
+        efixedProp = inputWS->run().getPropertyValueAsType<double>("Ei");
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
         throw std::invalid_argument(
@@ -238,11 +236,8 @@ void CorrectKiKf::execEvent() {
             << "Workspace Index " << i << ": cannot find detector"
             << "\n";
       }
-    }
-
-    if (emodeStr == "Indirect")
       efixed = Efi;
-    else
+    } else
       efixed = efixedProp;
 
     // Do the correction

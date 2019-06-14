@@ -27,7 +27,7 @@
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -38,7 +38,6 @@
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -138,10 +137,10 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadSpice2D::init() {
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input xml file to load");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the Output workspace");
 
@@ -192,7 +191,6 @@ void LoadSpice2D::exec() {
 
   // run load instrument
   std::string instrument = metadata["Header/Instrument"];
-  runLoadInstrument(instrument, m_workspace);
 
   // ugly hack for Biosans wing detector:
   // it tests if there is metadata tagged with the wing detector
@@ -201,15 +199,11 @@ void LoadSpice2D::exec() {
     double angle = boost::lexical_cast<double>(
         metadata["Motor_Positions/det_west_wing_rot"]);
     rotateDetector(-angle);
-    // To make the property is set and the detector rotates!
-    runLoadInstrument(instrument, m_workspace);
   }
-
   // sample_detector_distances
-  double detector_distance = detectorDistance(metadata);
-  double detector_tranlation = detectorTranslation(metadata);
-  moveDetector(detector_distance, detector_tranlation);
-
+  detectorDistance(metadata);
+  detectorTranslation(metadata);
+  runLoadInstrument(instrument, m_workspace);
   setProperty("OutputWorkspace", m_workspace);
 }
 
@@ -272,7 +266,7 @@ void LoadSpice2D::setInputPropertiesAsMemberProperties() {
 }
 
 /**
- * Gets the wavelenght and wavelength spread from the  metadata
+ * Gets the wavelength and wavelength spread from the  metadata
  * and sets them as class attributes
  */
 void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
@@ -329,7 +323,7 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 
     // Horrible hack:
     // Some old files had a: //Data/DetectorWing with dimensions:
-    // 16 x 256 = 4096. This must be igored as it is not in the IDF.
+    // 16 x 256 = 4096. This must be ignored as it is not in the IDF.
     if (detectorXpath.find("DetectorWing") != std::string::npos &&
         dims.first * dims.second <= 4096)
       break;
@@ -382,9 +376,6 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
   m_workspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("Wavelength");
   m_workspace->setYUnit("");
-  API::Workspace_sptr workspace =
-      boost::static_pointer_cast<API::Workspace>(m_workspace);
-  // setProperty("OutputWorkspace", workspace);
 
   int specID = 0;
   // Store monitor counts in the beggining
@@ -474,7 +465,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
   std::vector<double> trapDiametersInUse;
   trapDiametersInUse.reserve(trapIndexInUse.size());
   for (auto index : trapIndexInUse) {
-    trapDiametersInUse.push_back(trapDiameters[index]);
+    trapDiametersInUse.emplace_back(trapDiameters[index]);
   }
 
   g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size()
@@ -572,10 +563,10 @@ void LoadSpice2D::setMetadataAsRunProperties(
  * the file
  * Last Changes:
  * If SDD tag is available in the metadata set that as sample detector distance
- * @return : sample_detector_distance
+ * Puts a numeric series in the log with the value of sample_detector_distance
  */
-double
-LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
+void LoadSpice2D::detectorDistance(
+    std::map<std::string, std::string> &metadata) {
 
   double sample_detector_distance = 0, sample_detector_distance_offset = 0,
          sample_si_window_distance = 0;
@@ -583,17 +574,14 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
   // check if it's the new format
   if (metadata.find("Motor_Positions/sample_det_dist") != metadata.end()) {
     // Old Format
-
     from_string<double>(sample_detector_distance,
                         metadata["Motor_Positions/sample_det_dist"], std::dec);
     sample_detector_distance *= 1000.0;
     addRunProperty<double>("sample-detector-distance", sample_detector_distance,
                            "mm");
-
     sample_detector_distance_offset =
         addRunProperty<double>(metadata, "Header/tank_internal_offset",
                                "sample-detector-distance-offset", "mm");
-
     sample_si_window_distance = addRunProperty<double>(
         metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
 
@@ -602,12 +590,9 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
     from_string<double>(sample_detector_distance,
                         metadata["Motor_Positions/flange_det_dist"], std::dec);
     sample_detector_distance *= 1000.0;
-
     addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
-
     addRunProperty<double>("sample-detector-distance", sample_detector_distance,
                            "mm");
-
     sample_si_window_distance = addRunProperty<double>(
         metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
   }
@@ -637,58 +622,35 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
   addRunProperty<double>("total-sample-detector-distance",
                          total_sample_detector_distance, "mm");
 
+  // Add to the log!
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("sdd");
+  p->addValue(DateAndTime::getCurrentTime(), total_sample_detector_distance);
+  runDetails.addLogData(p);
+
   // Store sample-detector distance
   declareProperty("SampleDetectorDistance", sample_detector_distance,
                   Kernel::Direction::Output);
-
-  return sample_detector_distance;
 }
-
-double
-LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
+/**
+ * Puts a numeric series in the log with the value of detector translation
+ */
+void LoadSpice2D::detectorTranslation(
+    std::map<std::string, std::string> &metadata) {
 
   // detectorTranslations
   double detectorTranslation = 0;
   from_string<double>(detectorTranslation,
                       metadata["Motor_Positions/detector_trans"], std::dec);
-  detectorTranslation /= 1000.0; // mm to meters conversion
+  // Add to the log!
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p =
+      new Mantid::Kernel::TimeSeriesProperty<double>("detector-translation");
+  p->addValue(DateAndTime::getCurrentTime(), detectorTranslation);
+  runDetails.addLogData(p);
 
-  g_log.debug() << "Detector Translation = " << detectorTranslation
-                << " meters." << '\n';
-  return detectorTranslation;
-}
-
-/**
- * Places the detector at the right sample_detector_distance
- */
-void LoadSpice2D::moveDetector(double sample_detector_distance,
-                               double translation_distance) {
-  // Some tests fail if the detector is moved here.
-  // TODO: Move the detector here and not the SANSLoad
-  UNUSED_ARG(translation_distance);
-
-  // Move the detector to the right position
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
-
-  // Finding the name of the detector object.
-  std::string detID =
-      m_workspace->getInstrument()->getStringParameter("detector-name")[0];
-
-  g_log.information("Moving " + detID);
-  try {
-    mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
-    mover->setProperty("ComponentName", detID);
-    mover->setProperty("Z", sample_detector_distance / 1000.0);
-    // mover->setProperty("X", -translation_distance);
-    mover->execute();
-  } catch (std::invalid_argument &e) {
-    g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
-    g_log.error(e.what());
-  } catch (std::runtime_error &e) {
-    g_log.error(
-        "Unable to successfully run MoveInstrumentComponent Child Algorithm");
-    g_log.error(e.what());
-  }
+  g_log.debug() << "Detector Translation = " << detectorTranslation << " mm."
+                << '\n';
 }
 
 /** Run the Child Algorithm LoadInstrument (as for LoadRaw)

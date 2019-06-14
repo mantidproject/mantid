@@ -34,6 +34,12 @@ def _get_run_numbers_for_key(current_mode_run_numbers, key):
 
 def _get_current_mode_dictionary(run_number_string, inst_settings):
     mapping_dict = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
+    if inst_settings.mode is None:
+        ws = mantid.Load('POLARIS'+run_number_string+'.nxs')
+        mode, cropping_vals = _determine_chopper_mode(ws)
+        inst_settings.mode = mode
+        inst_settings.focused_cropping_values = cropping_vals
+        mantid.DeleteWorkspace(ws)
     # Get the current mode "Rietveld" or "PDF" run numbers
     return common.cal_map_dictionary_key_helper(mapping_dict, inst_settings.mode)
 
@@ -78,14 +84,14 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
         ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
         converted_workspaces.append(ws)
 
-    converted_group = mantid.GroupWorkspaces(",".join(ws.getName() for ws in converted_workspaces))
+    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
     mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
     mantid.DeleteWorkspace(converted_group)
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
-    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.getName(), Target="MomentumTransfer")
+    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
     if merge_banks:
         raise RuntimeError("Merging banks is currently not supported")
     pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
@@ -161,3 +167,17 @@ def _read_masking_file(masking_file_path):
     if bank_masking_list:
         all_banks_masking_list.append(bank_masking_list)
     return all_banks_masking_list
+
+
+def _determine_chopper_mode(ws):
+    if ws.getRun().hasProperty('Frequency'):
+        frequency = ws.getRun()['Frequency'].lastValue()
+        print("No chopper mode provided")
+        if frequency == 50:
+            print("automatically chose Rietveld")
+            return 'Rietveld', polaris_advanced_config.rietveld_focused_cropping_values
+        if frequency == 0:
+            print("automatically chose PDF")
+            return 'PDF', polaris_advanced_config.pdf_focused_cropping_values
+    else:
+        raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")

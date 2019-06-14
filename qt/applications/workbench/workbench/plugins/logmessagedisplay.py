@@ -14,12 +14,13 @@ import sys
 
 # 3rdparty imports
 from mantidqt.utils.writetosignal import WriteToSignal
+from mantidqt.utils.qt import toQSettings
 from mantidqt.widgets.messagedisplay import MessageDisplay
 from qtpy.QtWidgets import QHBoxLayout
 
 # local imports
-from workbench.plugins.base import PluginWidget
-from mantidqt.utils.qt import toQSettings
+from ..config.fonts import text_font
+from ..plugins.base import PluginWidget
 
 # Default logs at notice
 DEFAULT_LOG_PRIORITY = 5
@@ -33,7 +34,7 @@ class LogMessageDisplay(PluginWidget):
         super(LogMessageDisplay, self).__init__(parent)
 
         # layout
-        self.display = MessageDisplay(parent)
+        self.display = MessageDisplay(text_font(), parent)
         layout = QHBoxLayout()
         layout.addWidget(self.display)
         self.setLayout(layout)

@@ -27,18 +27,18 @@ DECLARE_ALGORITHM(AlphaCalc)
  */
 void AlphaCalc::init() {
 
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
 
   std::vector<int> forwardDefault{1};
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("ForwardSpectra", forwardDefault),
-      "The spectra numbers of the forward group (default to 1)");
+  declareProperty(std::make_unique<ArrayProperty<int>>(
+                      "ForwardSpectra", std::move(forwardDefault)),
+                  "The spectra numbers of the forward group (default to 1)");
 
   std::vector<int> backwardDefault{2};
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>("BackwardSpectra",
-                                                          backwardDefault),
+  declareProperty(std::make_unique<ArrayProperty<int>>(
+                      "BackwardSpectra", std::move(backwardDefault)),
                   "The spectra numbers of the backward group (default to 2)");
 
   declareProperty("FirstGoodValue", EMPTY_DBL(),

@@ -9,17 +9,18 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VectorHelper.h"
+
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
 #include <climits>
 #include <numeric>
 
@@ -31,34 +32,36 @@ DECLARE_ALGORITHM(CalculateFlatBackground)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 /// Enumeration for the different operating modes.
 enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
 
 void CalculateFlatBackground::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input),
       "The input workspace must either have constant width bins or is a "
       "distribution\n"
       "workspace. It is also assumed that all spectra have the same X bin "
       "boundaries");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name to use for the output workspace.");
   declareProperty("StartX", Mantid::EMPTY_DBL(),
                   "The X value at which to start the background fit. Mandatory "
                   "for the Linear Fit and Mean modes, ignored by Moving "
                   "Average.");
-  setPropertySettings("StartX", make_unique<EnabledWhenProperty>(
+  setPropertySettings("StartX", std::make_unique<EnabledWhenProperty>(
                                     "Mode", IS_NOT_EQUAL_TO, "Moving Average"));
   declareProperty("EndX", Mantid::EMPTY_DBL(),
                   "The X value at which to end the background fit. Mandatory "
                   "for the Linear Fit and Mean modes, ignored by Moving "
                   "Average.");
-  setPropertySettings("EndX", make_unique<EnabledWhenProperty>(
+  setPropertySettings("EndX", std::make_unique<EnabledWhenProperty>(
                                   "Mode", IS_NOT_EQUAL_TO, "Moving Average"));
   declareProperty(
-      make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
+      std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "Indices of the spectra that will have their background removed\n"
       "default: modify all spectra");
   std::vector<std::string> modeOptions{"Linear Fit", "Mean", "Moving Average"};
@@ -94,9 +97,9 @@ void CalculateFlatBackground::init() {
   declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(),
                   "The width of the moving average window in bins. Mandatory "
                   "for the Moving Average mode.");
-  setPropertySettings(
-      "AveragingWindowWidth",
-      make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
+  setPropertySettings("AveragingWindowWidth",
+                      std::make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO,
+                                                            "Moving Average"));
 }
 
 void CalculateFlatBackground::exec() {
@@ -162,13 +165,13 @@ void CalculateFlatBackground::exec() {
       std::string(getProperty("outputMode")) == "Subtract Background";
 
   // Initialize the progress reporting object
-  m_progress = Kernel::make_unique<Progress>(this, 0.0, 0.2, numHists);
+  m_progress = std::make_unique<Progress>(this, 0.0, 0.2, numHists);
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   // For logging purposes.
@@ -382,8 +385,7 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
 void CalculateFlatBackground::LinearFit(
     const HistogramData::Histogram &histogram, double &background,
     double &variance, const double startX, const double endX) {
-  MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create(
-      "Workspace2D", 1, histogram.x().size(), histogram.y().size());
+  MatrixWorkspace_sptr WS = create<Workspace2D>(1, histogram);
   WS->setHistogram(0, histogram);
   IAlgorithm_sptr childAlg = createChildAlgorithm("Fit");
 

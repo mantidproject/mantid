@@ -72,7 +72,7 @@ public:
   /// Set a component (and all its children) visible.
   void setComponentVisible(size_t componentIndex);
   /// Set visibilit of all components.
-  void setAllComponentsVisibility(bool);
+  void setAllComponentsVisibility(bool /*on*/);
   /// Check if any child is visible
   bool hasChildVisible() const;
   /// Get the underlying instrument
@@ -104,15 +104,15 @@ public:
   /// Get the color map.
   const ColorMap &getColorMap() const;
   /// Load a new color map from a file
-  void loadColorMap(const QString &, bool reset_colors = true);
+  void loadColorMap(const QString & /*fname*/, bool reset_colors = true);
   /// Change the colormap scale type.
-  void changeScaleType(int);
+  void changeScaleType(int /*type*/);
   /// Change the colormap power scale exponent.
-  void changeNthPower(double);
+  void changeNthPower(double /*nth_power*/);
   /// Get the file name of the current color map.
   QString getCurrentColorMap() const { return m_currentCMap; }
   /// Toggle colormap scale autoscaling.
-  void setAutoscaling(bool);
+  void setAutoscaling(bool /*on*/);
   /// extracts a mask workspace from the visualised workspace
   Mantid::API::MatrixWorkspace_sptr extractCurrentMask() const;
 
@@ -171,7 +171,7 @@ public:
   /// current integration range.
   void updateColors();
   /// Toggle display of the guide and other non-detector instrument components
-  void showGuides(bool);
+  void showGuides(bool /*on*/);
   /// Get the guide visibility status
   bool areGuidesShown() const { return m_showGuides; }
 
@@ -283,6 +283,9 @@ private:
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 } // namespace MantidWidgets

@@ -15,6 +15,8 @@ namespace IDA {
 
 class DLLExport ConvFitModel : public IndirectFittingModel {
 public:
+  using IndirectFittingModel::addWorkspace;
+
   ConvFitModel();
   ~ConvFitModel() override;
 

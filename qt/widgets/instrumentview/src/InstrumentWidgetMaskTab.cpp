@@ -44,6 +44,7 @@
 #endif
 #endif
 
+#include <Poco/Path.h>
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
@@ -534,7 +535,7 @@ void InstrumentWidgetMaskTab::clearShapes() {
   setSelectActivity();
 }
 
-void InstrumentWidgetMaskTab::showEvent(QShowEvent *) {
+void InstrumentWidgetMaskTab::showEvent(QShowEvent * /*unused*/) {
   setActivity();
   m_instrWidget->setMouseTracking(true);
   enableApplyButtons();
@@ -959,7 +960,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
     temptablews = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             outputWorkspaceName));
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
     std::cout << "TableWorkspace " << outputWorkspaceName
               << " cannot be found in ADS."
               << ".\n";
@@ -1011,9 +1012,9 @@ InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
   auto wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   int maxIndex = 0;
   const std::string baseName = "MaskWorkspace";
-  for (auto name = wsNames.begin(); name != wsNames.end(); ++name) {
-    if (name->find(baseName) == 0) {
-      int index = Mantid::Kernel::Strings::endsWithInt(*name);
+  for (auto &wsName : wsNames) {
+    if (wsName.find(baseName) == 0) {
+      int index = Mantid::Kernel::Strings::endsWithInt(wsName);
       if (index > 0 && index > maxIndex)
         maxIndex = index;
       else
@@ -1192,7 +1193,8 @@ void InstrumentWidgetMaskTab::storeMask() {
   }
 }
 
-void InstrumentWidgetMaskTab::changedIntegrationRange(double, double) {
+void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
+                                                      double /*unused*/) {
   enableApplyButtons();
 }
 
@@ -1363,15 +1365,21 @@ std::string InstrumentWidgetMaskTab::saveToProject() const {
  * @return whether a workspace was successfully saved to the project
  */
 bool InstrumentWidgetMaskTab::saveMaskViewToProject(
-    const std::string &name) const {
+    const std::string &name, const std::string &projectPath) const {
   using namespace Mantid::API;
   using namespace Mantid::Kernel;
 
-  QSettings settings;
-  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
-  auto fileName = workingDir.toStdString() + "/" + name;
-
   try {
+    QString workingDir;
+    QSettings settings;
+    if (projectPath == "") {
+      workingDir = settings.value("Project/WorkingDirectory", "").toString();
+    } else {
+      workingDir = QString::fromStdString(projectPath);
+    }
+    Poco::Path filepath(workingDir.toStdString());
+    auto fileName = filepath.append(name).toString();
+
     // get masked detector workspace from actor
     const auto &actor = m_instrWidget->getInstrumentActor();
     auto outputWS = actor.getMaskMatrixWorkspace();
@@ -1380,7 +1388,8 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
       return false; // no mask workspace was found
 
     // save mask to file inside project folder
-    auto alg = AlgorithmManager::Instance().create("SaveMask", -1);
+    auto alg = AlgorithmManager::Instance().createUnmanaged("SaveMask", -1);
+    alg->setChild(true);
     alg->setProperty("InputWorkspace",
                      boost::dynamic_pointer_cast<Workspace>(outputWS));
     alg->setPropertyValue("OutputFile", fileName);

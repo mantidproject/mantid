@@ -106,19 +106,20 @@ const std::string CreateMD::summary() const {
  */
 void CreateMD::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDEventWorkspace with new data appended.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           "DataSources",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
-  declareProperty(make_unique<ArrayProperty<double>>("EFix", Direction::Input),
-                  "datasource energy values in meV");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("EFix", Direction::Input),
+      "datasource energy values in meV");
 
   std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
@@ -127,51 +128,54 @@ void CreateMD::init() {
                   "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Alatt",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice parameters");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Angdeg",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice angles");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "u", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector parallel to neutron beam");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "v", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 
-  declareProperty(make_unique<ArrayProperty<double>>("Psi", Direction::Input),
-                  "Psi rotation in degrees. Optional or one entry per run.");
-
-  declareProperty(make_unique<ArrayProperty<double>>("Gl", Direction::Input),
-                  "gl rotation in degrees. Optional or one entry per run.");
-
-  declareProperty(make_unique<ArrayProperty<double>>("Gs", Direction::Input),
-                  "gs rotation in degrees. Optional or one entry per run.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("Psi", Direction::Input),
+      "Psi rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("InPlace", true, Direction::Input),
-      "Execute conversions to MD and Merge in one-step. Less "
-      "memory overhead.");
+      std::make_unique<ArrayProperty<double>>("Gl", Direction::Input),
+      "gl rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+      std::make_unique<ArrayProperty<double>>("Gs", Direction::Input),
+      "gs rotation in degrees. Optional or one entry per run.");
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("InPlace", true,
+                                                            Direction::Input),
+                  "Execute conversions to MD and Merge in one-step. Less "
+                  "memory overhead.");
+
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                     ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
-  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
                                       "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
@@ -272,8 +276,8 @@ void CreateMD::exec() {
   progress.report();
 
   // Clean up temporary workspaces
-  for (auto &to_merge_name : to_merge_names) {
-    AnalysisDataService::Instance().remove(to_merge_name);
+  for (const auto &name : to_merge_names) {
+    AnalysisDataService::Instance().remove(name);
   }
 
   this->setProperty("OutputWorkspace", output_workspace);

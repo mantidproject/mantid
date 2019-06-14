@@ -157,7 +157,7 @@ public:
 
     // set the first histogram to have 2 bins
     ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
-    TS_ASSERT_THROWS(ew->blocksize(), std::logic_error);
+    TS_ASSERT_THROWS(ew->blocksize(), const std::logic_error &);
     TS_ASSERT(!(ew->isCommonBins()));
     TS_ASSERT_EQUALS(ew->size(), 501);
   }
@@ -242,20 +242,20 @@ public:
     TS_ASSERT_EQUALS(el5.getNumberEvents(), 55);
 
     // Out of range
-    TS_ASSERT_THROWS(uneven->dataX(-3), std::range_error);
-    TS_ASSERT_THROWS(uneven->dataX(NUMPIXELS / 10), std::range_error);
+    TS_ASSERT_THROWS(uneven->dataX(-3), const std::range_error &);
+    TS_ASSERT_THROWS(uneven->dataX(NUMPIXELS / 10), const std::range_error &);
   }
 
   void test_data_access() {
     // Non-const access throws errors for Y & E - not for X
     TS_ASSERT_THROWS_NOTHING(ew->dataX(1));
-    TS_ASSERT_THROWS(ew->dataY(2), NotImplementedError);
-    TS_ASSERT_THROWS(ew->dataE(3), NotImplementedError);
+    TS_ASSERT_THROWS(ew->dataY(2), const NotImplementedError &);
+    TS_ASSERT_THROWS(ew->dataE(3), const NotImplementedError &);
     // Out of range
-    TS_ASSERT_THROWS(ew->dataX(-123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataX(5123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataE(5123), NotImplementedError);
-    TS_ASSERT_THROWS(ew->dataY(5123), NotImplementedError);
+    TS_ASSERT_THROWS(ew->dataX(-123), const std::range_error &);
+    TS_ASSERT_THROWS(ew->dataX(5123), const std::range_error &);
+    TS_ASSERT_THROWS(ew->dataE(5123), const NotImplementedError &);
+    TS_ASSERT_THROWS(ew->dataY(5123), const NotImplementedError &);
 
     // Can't try the const access; copy constructors are not allowed.
   }
@@ -419,7 +419,7 @@ public:
     MantidVec X, Y, E;
     TSM_ASSERT_THROWS("Number of histograms is out of range, should throw",
                       ws->generateHistogramPulseTime(nHistos + 1, X, Y, E),
-                      std::range_error);
+                      const std::range_error &);
   }
 
   void do_test_binning(EventWorkspace_sptr ws, const BinEdges &axis,
@@ -747,22 +747,30 @@ public:
   }
 
   void test_writeAccessInvalidatesCommonBinsFlagIsSet() {
-    int numEvents = 2;
-    int numHistograms = 2;
+    const int numEvents = 2;
+    const int numHistograms = 2;
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     // Calling isCommonBins() sets the flag m_isCommonBinsFlagSet
-    TS_ASSERT(ws->isCommonBins());
+    TS_ASSERT(ws->isCommonBins())
     // Calling dataX should unset the flag m_isCommonBinsFlagSet
     ws->dataX(0)[0] += 0.0;
     // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
     // dataX is still identical.
-    TS_ASSERT(ws->isCommonBins());
+    TS_ASSERT(ws->isCommonBins())
     ws->dataX(0)[0] += 0.1;
     // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
     // dataX(0) is now different from dataX(1).
-    TS_ASSERT(!ws->isCommonBins());
+    TS_ASSERT(!ws->isCommonBins())
+    const BinEdges edges{-0.5, 0.5, 1.3};
+    // Check methods not inherited from MatrixWorkspace
+    ws->setAllX(edges);
+    TS_ASSERT(ws->isCommonBins())
+    ws->dataX(0)[0] -= 0.1;
+    TS_ASSERT(!ws->isCommonBins())
+    ws->resetAllXToSingleBin();
+    TS_ASSERT(ws->isCommonBins())
   }
 
   void test_readYE() {

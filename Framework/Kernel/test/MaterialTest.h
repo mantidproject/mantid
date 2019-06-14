@@ -17,6 +17,8 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::Material;
+using Mantid::PhysicalConstants::NeutronAtom;
+using Mantid::PhysicalConstants::getNeutronAtom;
 
 class MaterialTest : public CxxTest::TestSuite {
 public:
@@ -33,20 +35,95 @@ public:
     TS_ASSERT_EQUALS(empty.absorbXSection(lambda), 0.0);
   }
 
-  void test_That_Construction_By_Known_Element_Gives_Expected_Values() {
-    Material vanBlock("vanBlock",
-                      Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
+  // common code for comparing scattering information for material made of a
+  // single atom
+  void checkMatching(const Material &material, const NeutronAtom &atom) {
+    TS_ASSERT_DELTA(material.cohScatterXSection(), atom.coh_scatt_xs, 1.e-4);
+    TS_ASSERT_DELTA(material.incohScatterXSection(), atom.inc_scatt_xs, 1.e-4);
+    TS_ASSERT_DELTA(material.totalScatterXSection(), atom.tot_scatt_xs, 1.e-4);
+    TS_ASSERT_DELTA(material.absorbXSection(), atom.abs_scatt_xs, 1.e-4);
+    TS_ASSERT_DELTA(material.cohScatterLength(), atom.coh_scatt_length, 1.e-4);
+    TS_ASSERT_DELTA(material.incohScatterLength(), atom.inc_scatt_length,
+                    1.e-4);
+    TS_ASSERT_DELTA(material.totalScatterLength(), atom.tot_scatt_length,
+                    1.e-4);
+    TS_ASSERT_DELTA(material.cohScatterLengthReal(), atom.coh_scatt_length_real,
+                    1.e-4);
+    TS_ASSERT_DELTA(material.cohScatterLengthImg(), atom.coh_scatt_length_img,
+                    1.e-4);
+    TS_ASSERT_DELTA(material.incohScatterLengthReal(),
+                    atom.inc_scatt_length_real, 1.e-4);
+    TS_ASSERT_DELTA(material.incohScatterLengthImg(), atom.inc_scatt_length_img,
+                    1.e-4);
+    const double cohReal = atom.coh_scatt_length_real;
+    const double cohImag = atom.coh_scatt_length_img;
+    TS_ASSERT_DELTA(material.cohScatterLengthSqrd(),
+                    cohReal * cohReal + cohImag * cohImag, 1.e-4);
+    const double totXS = atom.tot_scatt_xs;
+    TS_ASSERT_DELTA(material.totalScatterLengthSqrd(), 25. * totXS / M_PI,
+                    1.e-4);
+  }
 
-    TS_ASSERT_EQUALS(vanBlock.name(), "vanBlock");
-    TS_ASSERT_EQUALS(vanBlock.numberDensity(), 0.072);
-    TS_ASSERT_EQUALS(vanBlock.temperature(), 300);
-    TS_ASSERT_EQUALS(vanBlock.pressure(),
+  void test_Vanadium() {
+    const std::string name("Vanadium");
+    NeutronAtom atom = getNeutronAtom(23);
+    Material material(name, atom, 0.072);
+
+    TS_ASSERT_EQUALS(material.name(), name);
+    TS_ASSERT_EQUALS(material.numberDensity(), 0.072);
+    TS_ASSERT_EQUALS(material.temperature(), 300);
+    TS_ASSERT_EQUALS(material.pressure(),
                      Mantid::PhysicalConstants::StandardAtmosphere);
 
+    // check everything with (default) reference wavelength
+    checkMatching(material, atom);
+
+    // check everything against another wavelength, only affects absorption
     const double lambda(2.1);
-    TS_ASSERT_DELTA(vanBlock.cohScatterXSection(lambda), 0.0184, 1e-02);
-    TS_ASSERT_DELTA(vanBlock.incohScatterXSection(lambda), 5.08, 1e-02);
-    TS_ASSERT_DELTA(vanBlock.absorbXSection(lambda), 5.93, 1e-02);
+    TS_ASSERT_DELTA(material.cohScatterXSection(lambda),
+                    material.cohScatterXSection(), 1e-04);
+    TS_ASSERT_DELTA(material.incohScatterXSection(lambda),
+                    material.incohScatterXSection(), 1e-04);
+    TS_ASSERT_DELTA(material.absorbXSection(lambda), 5.93, 1e-02);
+  }
+
+  // highly absorbing material
+  void test_Gadolinium() {
+    const std::string name("Gadolinium");
+    NeutronAtom atom = getNeutronAtom(64);
+    Material material(name, atom, 0.0768); // mass density is 7.90 g/cm3
+    TS_ASSERT_EQUALS(material.name(), name);
+
+    // check everything with (default) reference wavelength
+    checkMatching(material, atom);
+    const double totLength = material.totalScatterLength();
+    TS_ASSERT_DELTA(.04 * M_PI * totLength * totLength,
+                    material.totalScatterXSection(), 1.e-4);
+  }
+
+  // "null scatterer" has only incoherent scattering
+  void test_TiZr() {
+    Material TiZr("TiZr", Material::parseChemicalFormula("Ti2.082605 Zr"),
+                  0.542);
+
+    TS_ASSERT_EQUALS(TiZr.cohScatterLengthImg(), 0.);
+    TS_ASSERT_DELTA(TiZr.cohScatterLengthReal(), 0., 1.e-5);
+    TS_ASSERT_EQUALS(
+        TiZr.cohScatterLength(),
+        TiZr.cohScatterLengthReal()); // there  is no imaginary part
+    TS_ASSERT_DELTA(TiZr.cohScatterXSection(), 0., 1.e-5);
+
+    TS_ASSERT_DELTA(TiZr.totalScatterXSection(),
+                    TiZr.cohScatterXSection() + TiZr.incohScatterXSection(),
+                    1.e-5);
+
+    const double cohReal = TiZr.cohScatterLengthReal();
+    const double cohImag = TiZr.cohScatterLengthImg();
+    TS_ASSERT_DELTA(TiZr.cohScatterLengthSqrd(),
+                    cohReal * cohReal + cohImag * cohImag, 1.e-4);
+
+    const double totXS = TiZr.totalScatterXSection();
+    TS_ASSERT_DELTA(TiZr.totalScatterLengthSqrd(), 25. * totXS / M_PI, 1.e-4);
   }
 
   /** Save then re-load from a NXS file */
@@ -157,7 +234,7 @@ public:
     TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     TS_ASSERT_THROWS(cf = Material::parseChemicalFormula("H2*O"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_EQUALS(cf.size(), 2);
     TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
     TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);

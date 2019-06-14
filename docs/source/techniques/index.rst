@@ -7,9 +7,9 @@
 
 .. _techniques contents:
 
-============
- Techniques
-============
+===========
+Techniques
+===========
 
 .. toctree::
    :hidden:

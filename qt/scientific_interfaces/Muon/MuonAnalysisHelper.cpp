@@ -157,13 +157,6 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
     end = run.getProperty("run_end")->value();
     out << end.toSimpleString();
   }
-
-  // Add the end time for the run
-  out << "\nGood frames: ";
-  if (run.hasProperty("goodfrm")) {
-    out << run.getProperty("goodfrm")->value();
-  }
-
   // Add counts to run information
   out << "\nCounts: ";
   double counts(0.0);
@@ -174,6 +167,22 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // output this number to three decimal places
   out << std::setprecision(3);
   out << counts / 1000000 << " MEv";
+  // Add the end time for the run
+  out << "\nGood frames: ";
+  if (run.hasProperty("goodfrm")) {
+    const auto goodFrames = run.getProperty("goodfrm")->value();
+    out << goodFrames;
+    // Add counts divided by good frames to run information
+    out << "\nCounts/Good frames: ";
+    out << std::setprecision(3);
+    const auto countsPerFrame = counts / std::stod(goodFrames);
+    out << countsPerFrame << " Events per frame";
+    // Add counts per detector per good frame
+    out << "\nCounts/(Good frames*number detectors): ";
+    out << std::setprecision(3);
+    out << countsPerFrame / static_cast<double>(runWs->getNumberHistograms())
+        << " Events per frame per detector";
+  }
   // Add average temperature.
   out << "\nAverage Temperature: ";
   if (run.hasProperty("Temp_Sample")) {
@@ -368,6 +377,17 @@ void WidgetAutoSaver::beginGroup(const QString &name) {
  * Ends the scope of the previous begin group.
  */
 void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
+/**
+ * Checks if a QString is a numeric value
+ * @param qstring:: QString to test
+ * @returns :: bool if it is a number
+ */
+bool isNumber(const QString &qstring) {
+  bool isNumber = false;
+  auto value = qstring.toDouble(&isNumber);
+  UNUSED_ARG(value);
+  return isNumber;
+}
 
 /**
  * Get a run label for the workspace.
@@ -645,9 +665,9 @@ void groupWorkspaces(const std::string &groupName,
 
   if (group) {
     // Exists and is a group -> add missing workspaces to it
-    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it) {
-      if (!group->contains(*it)) {
-        group->add(*it);
+    for (const auto &inputWorkspace : inputWorkspaces) {
+      if (!group->contains(inputWorkspace)) {
+        group->add(inputWorkspace);
       }
     }
   } else {
@@ -659,7 +679,6 @@ void groupWorkspaces(const std::string &groupName,
     groupingAlg->execute();
   }
 }
-
 /**
  * Replaces the named log value in the given workspace with the given value
  * @param wsName :: [input] Name of workspace
@@ -1117,11 +1136,12 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
     std::vector<std::string> params;
     if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (size_t i = 0; i < group->size(); ++i) {
-        const auto &ws = group->getItem(i);
-        if (ws->getName().find("_Parameters") != std::string::npos) {
+        const auto &wsInGroup = group->getItem(i);
+        if (wsInGroup->getName().find("_Parameters") != std::string::npos) {
           params = getKeysFromTable(
-              boost::dynamic_pointer_cast<ITableWorkspace>(ws));
-        } else if (ws->getName().find("_Workspace") != std::string::npos) {
+              boost::dynamic_pointer_cast<ITableWorkspace>(wsInGroup));
+        } else if (wsInGroup->getName().find("_Workspace") !=
+                   std::string::npos) {
           ++nRuns;
         }
       }

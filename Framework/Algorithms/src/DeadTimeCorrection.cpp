@@ -49,11 +49,11 @@ const std::string DeadTimeCorrection::summary() const {
 /** Initialize the algorithm's properties.
  */
 void DeadTimeCorrection::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
                   "An input workspace.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "GroupingPattern", "", Direction::Input),
                   "See the GroupingPattern documentation of GroupDetectors.");
 
@@ -61,8 +61,8 @@ void DeadTimeCorrection::init() {
   positive->setLower(0.);
   declareProperty("Tau", 0., positive, "The count rate coefficient.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 }
 
@@ -84,6 +84,12 @@ void DeadTimeCorrection::exec() {
     integrator->setPropertyValue("OutputWorkspace", "unused");
     integrator->executeAsChildAlg();
     integrated = integrator->getProperty("OutputWorkspace");
+    // after integration we end up with one bin
+    // however the bin edges might vary, which does not matter, we just need to
+    // group the counts, hence we need to do this before we can group the pixels
+    for (size_t index = 1; index < integrated->getNumberHistograms(); ++index) {
+      integrated->setSharedX(index, integrated->sharedX(0));
+    }
   }
   const std::string groupingPattern = getProperty("GroupingPattern");
   MatrixWorkspace_sptr grouped = integrated;

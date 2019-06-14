@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=F0401
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import mtd
 from mantid import api
-from mantid.api import Workspace, WorkspaceGroup
+from mantid.api import Workspace
 
 
 def add_directory_structure(dirs):
@@ -35,7 +41,8 @@ def add_directory_structure(dirs):
         if i == 0:
             previous_dir = directory
             continue
-        mtd[previous_dir].add(directory)
+        if not mtd[previous_dir].__contains__(directory):
+            mtd[previous_dir].add(directory)
         previous_dir = directory
 
 
@@ -56,13 +63,14 @@ class MuonWorkspaceWrapper(object):
     A basic muon workspace which is either the workspace or the name of the workspace in the ADS
     """
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, name=''):
         self._is_in_ads = False
         self._workspace = None
         self._directory_structure = ""
         self._workspace_name = ""
 
         self.workspace = workspace
+        self.name = name
 
     def __str__(self):
         return "MuonWorkspaceWrapper Object \n" \
@@ -85,6 +93,10 @@ class MuonWorkspaceWrapper(object):
         return self._directory_structure + self._workspace_name
 
     @property
+    def workspace_name(self):
+        return self._workspace_name
+
+    @property
     def workspace(self):
         """The Workspace object."""
         if not self.is_hidden:
@@ -105,24 +117,24 @@ class MuonWorkspaceWrapper(object):
             if mtd.doesExist(self._workspace_name):
                 mtd.remove(self._workspace_name)
             self._is_in_ads = False
-            self.name = ""
-            self._directory_structure = ""
-        if isinstance(value, Workspace) and not isinstance(value, WorkspaceGroup):
+        if isinstance(value, Workspace):
             self._workspace = value
         else:
             raise AttributeError("Attempting to set object of type {}, must be"
-                                 "a Mantid Workspace type")
+                                 " a Mantid Workspace type".format(type(value)))
 
-    def show(self, name):
+    def show(self, name=''):
         """
         Show the workspace in the ADS inside the WorkspaceGroup structure specified in name
         name = dirs/../dirs/workspace_name
         """
         if not self.is_hidden:
-            self.hide()
+            return
 
-        if len(name) > 0 and self.is_hidden:
+        if len(name) > 0:
             self.name = str(name)
+
+        if len(self.name) > 0 and self.is_hidden:
             # add workspace to ADS
             mtd.addOrReplace(self._workspace_name, self._workspace)
 
@@ -145,12 +157,8 @@ class MuonWorkspaceWrapper(object):
         if mtd.doesExist(self._workspace_name):
             self._workspace = mtd[self._workspace_name]
             mtd.remove(self._workspace_name)
-            self._is_in_ads = False
-            self._workspace_name = ""
-            self._directory_structure = ""
-        else:
-            raise RuntimeWarning(
-                "Cannot remove workspace from ADS with name : {}".format(self._workspace_name))
+
+        self._is_in_ads = False
 
     def add_directory_structure(self):
         """

@@ -9,10 +9,7 @@
 #include "IndirectMolDyn.h"
 #include "IndirectSassena.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
-// Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSimulation)
@@ -22,13 +19,14 @@ DECLARE_SUBWINDOW(IndirectSimulation)
 using namespace MantidQt::CustomInterfaces;
 
 IndirectSimulation::IndirectSimulation(QWidget *parent)
-    : UserSubWindow(parent),
+    : IndirectInterface(parent),
       m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
 IndirectSimulation::~IndirectSimulation() {}
 
 void IndirectSimulation::initLayout() {
   m_uiForm.setupUi(this);
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -55,10 +53,8 @@ void IndirectSimulation::initLayout() {
 
   loadSettings();
 
-  // Connect statements for the buttons shared between all tabs on the Indirect
-  // Bayes interface
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
 }
@@ -68,7 +64,7 @@ void IndirectSimulation::initLayout() {
  *
  * @param :: the detected close event
  */
-void IndirectSimulation::closeEvent(QCloseEvent *) {
+void IndirectSimulation::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -110,44 +106,6 @@ void IndirectSimulation::loadSettings() {
   settings.endGroup();
 }
 
-/**
- * Slot to run the underlying algorithm code based on the currently selected
- * tab.
- *
- * This method checks the tabs validate method is passing before calling
- * the run method.
- */
-void IndirectSimulation::runClicked() {
-  int tabIndex = m_uiForm.IndirectSimulationTabs->currentIndex();
-  m_simulationTabs[tabIndex]->runTab();
-}
-
-/**
- * Slot to open a new browser window and navigate to the help page
- * on the wiki for the currently selected tab.
- */
-void IndirectSimulation::helpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect Simulation"));
-}
-
-/**
- * Slot to show the manage user dicrectories dialog when the user clicks
- * the button on the interface.
- */
-void IndirectSimulation::manageUserDirectories() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message :: The message to display in the message box
- */
-void IndirectSimulation::showMessageBox(const QString &message) {
-  showInformationBox(message);
+std::string IndirectSimulation::documentationPage() const {
+  return "Indirect Simulation";
 }

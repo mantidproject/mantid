@@ -7,6 +7,7 @@
 #ifndef MANTID_ALGORITHMS_SORTXAXISTEST_H_
 #define MANTID_ALGORITHMS_SORTXAXISTEST_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/SortXAxis.h"
@@ -23,9 +24,9 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
 namespace {
-MatrixWorkspace_sptr createWorkspaceE(const std::vector<double> xData,
-                                      const std::vector<double> yData,
-                                      const std::vector<double> eData,
+MatrixWorkspace_sptr createWorkspaceE(const std::vector<double> &xData,
+                                      const std::vector<double> &yData,
+                                      const std::vector<double> &eData,
                                       const int nSpec = 1) {
 
   Workspace2D_sptr outputWorkspace = create<DataObjects::Workspace2D>(
@@ -39,9 +40,9 @@ MatrixWorkspace_sptr createWorkspaceE(const std::vector<double> xData,
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr createHistoWorkspaceE(const std::vector<double> xData,
-                                           const std::vector<double> yData,
-                                           const std::vector<double> eData,
+MatrixWorkspace_sptr createHistoWorkspaceE(const std::vector<double> &xData,
+                                           const std::vector<double> &yData,
+                                           const std::vector<double> &eData,
                                            const int nSpec = 1) {
 
   Workspace2D_sptr outputWorkspace = create<DataObjects::Workspace2D>(
@@ -55,9 +56,9 @@ MatrixWorkspace_sptr createHistoWorkspaceE(const std::vector<double> xData,
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr createWorkspaceDx(const std::vector<double> xData,
-                                       const std::vector<double> yData,
-                                       const std::vector<double> dxData,
+MatrixWorkspace_sptr createWorkspaceDx(const std::vector<double> &xData,
+                                       const std::vector<double> &yData,
+                                       const std::vector<double> &dxData,
                                        const int nSpec = 1) {
 
   Workspace2D_sptr outputWorkspace = create<DataObjects::Workspace2D>(
@@ -71,9 +72,9 @@ MatrixWorkspace_sptr createWorkspaceDx(const std::vector<double> xData,
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr createHistoWorkspaceDx(const std::vector<double> xData,
-                                            const std::vector<double> yData,
-                                            const std::vector<double> dxData,
+MatrixWorkspace_sptr createHistoWorkspaceDx(const std::vector<double> &xData,
+                                            const std::vector<double> &yData,
+                                            const std::vector<double> &dxData,
                                             const int nSpec = 1) {
 
   Workspace2D_sptr outputWorkspace = create<DataObjects::Workspace2D>(
@@ -87,8 +88,8 @@ MatrixWorkspace_sptr createHistoWorkspaceDx(const std::vector<double> xData,
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr createHistoWorkspace(const std::vector<double> xData,
-                                          const std::vector<double> yData,
+MatrixWorkspace_sptr createHistoWorkspace(const std::vector<double> &xData,
+                                          const std::vector<double> &yData,
                                           const int nSpec = 1) {
 
   Workspace2D_sptr outputWorkspace = create<DataObjects::Workspace2D>(
@@ -108,6 +109,8 @@ public:
   // This means the constructor isn't called when running other tests
   static SortXAxisTest *createSuite() { return new SortXAxisTest(); }
   static void destroySuite(SortXAxisTest *suite) { delete suite; }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testXAscending() {
     std::vector<double> xData = {1, 2, 3};

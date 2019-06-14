@@ -10,8 +10,8 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -34,6 +34,7 @@ DECLARE_ALGORITHM(DetectorEfficiencyCor)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 namespace {
 
@@ -93,12 +94,12 @@ void DetectorEfficiencyCor::init() {
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, val),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input, val),
                   "The workspace to correct for detector efficiency");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace in which to store the result. Each histogram "
       "from the input workspace maps to a histogram in this workspace that has "
       "just one value which indicates if there was a bad detector.");
@@ -174,8 +175,7 @@ void DetectorEfficiencyCor::retrieveProperties() {
   // If we're not given an Ei, see if one has been set.
   if (m_Ei == EMPTY_DBL()) {
     if (m_inputWS->run().hasProperty("Ei")) {
-      Kernel::Property *eiprop = m_inputWS->run().getProperty("Ei");
-      m_Ei = boost::lexical_cast<double>(eiprop->value());
+      m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
       g_log.debug() << "Using stored Ei value " << m_Ei << "\n";
     } else {
       throw std::invalid_argument(
@@ -187,7 +187,7 @@ void DetectorEfficiencyCor::retrieveProperties() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != m_inputWS) {
-    m_outputWS = WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
 }
 
@@ -214,8 +214,8 @@ void DetectorEfficiencyCor::correctForEfficiency(
   auto &yout = m_outputWS->mutableY(spectraIn);
   auto &eout = m_outputWS->mutableE(spectraIn);
   // Need the original values so this is not a reference
-  auto yValues = m_inputWS->y(spectraIn);
-  auto eValues = m_inputWS->e(spectraIn);
+  const auto yValues = m_inputWS->y(spectraIn);
+  const auto eValues = m_inputWS->e(spectraIn);
 
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
@@ -244,8 +244,7 @@ void DetectorEfficiencyCor::correctForEfficiency(
     // now get the sin of the angle, it's the magnitude of the cross product of
     // unit vector along the detector tube axis and a unit vector directed from
     // the sample to the detector centre
-    V3D vectorFromSample = det_member.getPos() - m_samplePos;
-    vectorFromSample.normalize();
+    const V3D vectorFromSample = normalize(det_member.getPos() - m_samplePos);
     Quat rot = det_member.getRotation();
     // rotate the original cylinder object axis to get the detector axis in the
     // actual instrument
@@ -376,9 +375,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
 double DetectorEfficiencyCor::distToSurface(const V3D &start,
                                             const IObject *shape) const {
   // get a vector from the point that was passed to the origin
-  V3D direction = V3D(0.0, 0.0, 0.0) - start;
-  // it needs to be a unit vector
-  direction.normalize();
+  const V3D direction = normalize(-start);
   // put the point and the vector (direction) together to get a line, here
   // called a track
   Track track(start, direction);

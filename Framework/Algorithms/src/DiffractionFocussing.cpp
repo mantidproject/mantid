@@ -8,7 +8,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Unit.h"
 
@@ -29,6 +30,8 @@ DiffractionFocussing::DiffractionFocussing()
 }
 
 using namespace Kernel;
+using namespace HistogramData;
+
 using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
@@ -38,14 +41,14 @@ using API::WorkspaceProperty;
  *
  */
 void DiffractionFocussing::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
-  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::Load, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
+                                                 FileProperty::Load, ".cal"),
                   "The name of the CalFile with grouping data");
 }
 
@@ -134,8 +137,8 @@ void DiffractionFocussing::exec() {
   // Create a new workspace that's the right size for the meaningful spectra and
   // copy them in
   int64_t newSize = tmpW->blocksize();
-  API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(
-      tmpW, resultIndeces.size(), newSize + 1, newSize);
+  API::MatrixWorkspace_sptr outputW = DataObjects::create<API::MatrixWorkspace>(
+      *tmpW, resultIndeces.size(), BinEdges(newSize + 1));
 
   std::vector<Indexing::SpectrumNumber> specNums;
   const auto &tmpIndices = tmpW->indexInfo();

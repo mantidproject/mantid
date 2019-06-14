@@ -82,12 +82,12 @@ void AnvredCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = boost::make_shared<InstrumentValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The X values for the input workspace must be in units of "
                   "wavelength or TOF");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -128,8 +128,7 @@ void AnvredCorrection::exec() {
   if (!m_onlySphericalAbsorption) {
     const API::Run &run = m_inputWS->run();
     if (run.hasProperty("LorentzCorrection")) {
-      Kernel::Property *prop = run.getProperty("LorentzCorrection");
-      bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
+      auto lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
       if (lorentzDone) {
         m_onlySphericalAbsorption = true;
         g_log.warning() << "Lorentz Correction was already done for this "

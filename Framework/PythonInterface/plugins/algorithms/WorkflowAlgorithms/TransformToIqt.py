@@ -78,6 +78,8 @@ class TransformToIqt(PythonAlgorithm):
     def PyExec(self):
         self._setup()
 
+        self._check_analysers_and_reflection()
+
         self._calculate_parameters()
 
         if not self._dry_run:
@@ -146,6 +148,8 @@ class TransformToIqt(PythonAlgorithm):
         """
         Calculates the TransformToIqt parameters and saves in a table workspace.
         """
+        from IndirectCommon import getEfixed
+
         end_prog = 0.3 if self._calculate_errors else 0.9
         workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
         workflow_prog.report('Cropping Workspace')
@@ -180,10 +184,9 @@ class TransformToIqt(PythonAlgorithm):
             workflow_prog.report('IPF resolution obtained')
         except (AttributeError, IndexError):
             workflow_prog.report('Resorting to Default')
-            resolution = 0.0175
-            logger.warning(
-                'Could not get resolution from IPF, using default value: %f' %
-                (resolution))
+            resolution = getEfixed(self._sample) * 0.01
+            logger.warning('Could not get the resolution from the IPF, using 1% of the E Fixed value for the '
+                           'resolution: {0}'.format(resolution))
 
         resolution_bins = int(round((2 * resolution) / self._e_width))
 
@@ -210,7 +213,8 @@ class TransformToIqt(PythonAlgorithm):
                             resolution, resolution_bins])
 
         workflow_prog.report('Deleting temp Workspace')
-        DeleteWorkspace('__TransformToIqt_sample_cropped')
+        if mtd.doesExist('__TransformToIqt_sample_cropped'):
+            DeleteWorkspace('__TransformToIqt_sample_cropped')
 
         self.setProperty('ParameterWorkspace', param_table)
 
@@ -230,22 +234,12 @@ class TransformToIqt(PythonAlgorithm):
         """
         Run TransformToIqt.
         """
-        from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
-
-        try:
-            CheckAnalysers(self._sample, self._resolution)
-        except ValueError:
-            # A genuine error the shows that the two runs are incompatible
-            raise
-        except BaseException:
-            # Checking could not be performed due to incomplete or no
-            # instrument
-            logger.warning(
-                'Could not check for matching analyser and reflection')
+        from IndirectCommon import CheckHistZero, CheckHistSame
 
         # Process resolution data
-        num_res_hist = CheckHistZero(self._resolution)[0]
-        if num_res_hist > 1:
+        res_number_of_histograms = CheckHistZero(self._resolution)[0]
+        sample_number_of_histograms = CheckHistZero(self._sample)[0]
+        if res_number_of_histograms > 1 and sample_number_of_histograms is not res_number_of_histograms:
             CheckHistSame(
                 self._sample,
                 'Sample',
@@ -269,6 +263,20 @@ class TransformToIqt(PythonAlgorithm):
         iqt.setYUnit('')
         iqt.setYUnitLabel('Intensity')
         return iqt
+
+    def _check_analysers_and_reflection(self):
+        from IndirectCommon import CheckAnalysersOrEFixed
+
+        try:
+            CheckAnalysersOrEFixed(self._sample, self._resolution)
+        except ValueError:
+            # A genuine error the shows that the two runs are incompatible
+            raise
+        except BaseException:
+            # Checking could not be performed due to incomplete or no
+            # instrument
+            logger.warning(
+                'Could not check for matching analyser and reflection')
 
 
 # Register algorithm with Mantid

@@ -79,10 +79,10 @@ public:
   void test_length_mismatch() {
     MultipliableTester rhs1{1, 2};
     const MultipliableTester rhs2{1, 2, 3};
-    TS_ASSERT_THROWS(rhs1 * rhs2, std::runtime_error);
-    TS_ASSERT_THROWS(rhs1 / rhs2, std::runtime_error);
-    TS_ASSERT_THROWS(rhs1 *= rhs2, std::runtime_error);
-    TS_ASSERT_THROWS(rhs1 /= rhs2, std::runtime_error);
+    TS_ASSERT_THROWS(rhs1 * rhs2, const std::runtime_error &);
+    TS_ASSERT_THROWS(rhs1 / rhs2, const std::runtime_error &);
+    TS_ASSERT_THROWS(rhs1 *= rhs2, const std::runtime_error &);
+    TS_ASSERT_THROWS(rhs1 /= rhs2, const std::runtime_error &);
   }
 
   void test_with_FixedLengthVector() {

@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.29
+Version:        1.31
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -42,7 +42,6 @@ Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
 Requires: python-qt5-devel
 Requires: python-QtPy
-Requires: python2-QtAwesome
 Requires: python-requests
 Requires: python-devel
 Requires: python-setuptools
@@ -64,6 +63,7 @@ Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: scipy
+Requires: python2-scikit-image
 Requires: sip-devel
 Requires: tbb
 Requires: tbb-devel
@@ -93,9 +93,9 @@ Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
 Requires: python-qt5-devel
 Requires: python3-QtPy
-%{?fedora:Requires: python3-QtAwesome}
 Requires: python3-numpy
 Requires: python3-scipy
+Requires: python3-scikit-image
 Requires: python3-sphinx
 Requires: python3-sphinx-bootstrap-theme
 Requires: python3-dateutil
@@ -131,6 +131,9 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Thu Apr 25 2019 Samuel Jones <samuel.jones@stfc.ac.uk>
+- Removed qtawesome
 
 * Thu Nov 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Added python-requests

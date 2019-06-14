@@ -43,13 +43,13 @@ public:
 
   void test_rangeConstructorErrorCases() {
     // min negative
-    TS_ASSERT_THROWS(IndexSetTester set(-1, 2, 3), std::logic_error);
+    TS_ASSERT_THROWS(IndexSetTester set(-1, 2, 3), const std::logic_error &);
     // min > max
-    TS_ASSERT_THROWS(IndexSetTester set(2, 1, 3), std::logic_error);
+    TS_ASSERT_THROWS(IndexSetTester set(2, 1, 3), const std::logic_error &);
     // max above count
-    TS_ASSERT_THROWS(IndexSetTester set(1, 3, 3), std::out_of_range);
+    TS_ASSERT_THROWS(IndexSetTester set(1, 3, 3), const std::out_of_range &);
     // does it still fail if both are wrong?
-    TS_ASSERT_THROWS(IndexSetTester set(3, 3, 3), std::logic_error);
+    TS_ASSERT_THROWS(IndexSetTester set(3, 3, 3), const std::logic_error &);
   }
 
   void test_indexListConstructor() {
@@ -59,7 +59,7 @@ public:
   }
 
   void test_indexListConstructorErrorCases() {
-    TS_ASSERT_THROWS(IndexSetTester set({3}, 3), std::out_of_range);
+    TS_ASSERT_THROWS(IndexSetTester set({3}, 3), const std::out_of_range &);
   }
 
   void test_size() {
@@ -136,6 +136,17 @@ public:
     TS_ASSERT_EQUALS(*it2, 1);
     TS_ASSERT_THROWS_NOTHING(--it2);
     TS_ASSERT_EQUALS(*it2, 0);
+  }
+
+  void test_isContiguous() {
+    const IndexSetTester empty{};
+    TS_ASSERT(empty.isContiguous())
+    const IndexSetTester range(3);
+    TS_ASSERT(range.isContiguous())
+    const IndexSetTester manualRange({3, 4, 5}, 6);
+    TS_ASSERT(manualRange.isContiguous())
+    IndexSetTester nonContiguous({2, 1, 3}, 4);
+    TS_ASSERT(!nonContiguous.isContiguous())
   }
 };
 

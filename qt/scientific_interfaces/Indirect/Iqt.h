@@ -24,6 +24,8 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
+  void setBrowserWorkspace() override{};
 
   bool isErrorsEnabled();
 
@@ -31,6 +33,8 @@ private:
                            std::vector<double>::const_iterator iter);
   double getXMinValue(Mantid::API::MatrixWorkspace_const_sptr workspace,
                       std::size_t const &index);
+
+  void plotResult(QString const &workspaceName);
 
   void setRunEnabled(bool enabled);
   void setPlotSpectrumEnabled(bool enabled);
@@ -51,6 +55,7 @@ private:
 
 private slots:
   void algorithmComplete(bool error);
+  void plotInput();
   void plotInput(const QString &wsname);
   void rsRangeChangedLazy(double min, double max);
   void updateRS(QtProperty *prop, double val);
@@ -63,12 +68,16 @@ private slots:
   void plotClicked();
   void errorsClicked();
   void plotTiled();
+  void updateEnergyRange(int state);
 
 private:
+  void setPreviewSpectrumMaximum(int value);
+
+  int m_maxTiledPlots = 17;
+
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;
-  int m_maxTiledPlots = 17;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

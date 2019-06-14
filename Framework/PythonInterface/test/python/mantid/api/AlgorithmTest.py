@@ -23,13 +23,13 @@ class AlgorithmTest(unittest.TestCase):
             self._load.initialize()
 
     def test_alg_attrs_are_correct(self):
-        self.assertEquals('Load', self._load.name())
-        self.assertEquals(1, self._load.version())
-        self.assertEquals('DataHandling', self._load.category())
-        self.assertEquals(1, len(self._load.categories()))
-        self.assertEquals('DataHandling', self._load.categories()[0])
-        self.assertEquals('', self._load.helpURL())
-        self.assertEquals(["LoadNexus", "LoadRaw", "LoadBBY"], self._load.seeAlso())
+        self.assertEqual('Load', self._load.name())
+        self.assertEqual(1, self._load.version())
+        self.assertEqual('DataHandling', self._load.category())
+        self.assertEqual(1, len(self._load.categories()))
+        self.assertEqual('DataHandling', self._load.categories()[0])
+        self.assertEqual('', self._load.helpURL())
+        self.assertEqual(["LoadNexus", "LoadRaw", "LoadBBY"], self._load.seeAlso())
 
     def test_get_unknown_property_raises_error(self):
         self.assertRaises(RuntimeError, self._load.getProperty, "NotAProperty")
@@ -49,22 +49,22 @@ class AlgorithmTest(unittest.TestCase):
         self.assertRaises(RuntimeError, alg.execute)
 
     def test_execute_succeeds_with_valid_props(self):
-        data = [1.0,2.0,3.0]
+        data = [1.5,2.5,3.5]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
-        self.assertEquals(alg.isExecuted(), True)
-        self.assertEquals(alg.isRunning(), False)
-        self.assertEquals(alg.getProperty('NSpec').value, 1)
-        self.assertEquals(type(alg.getProperty('NSpec').value), int)
-        self.assertEquals(alg.getProperty('NSpec').name, 'NSpec')
+        self.assertEqual(alg.isExecuted(), True)
+        self.assertEqual(alg.isRunning(), False)
+        self.assertEqual(alg.getProperty('NSpec').value, 1)
+        self.assertEqual(type(alg.getProperty('NSpec').value), int)
+        self.assertEqual(alg.getProperty('NSpec').name, 'NSpec')
         ws = alg.getProperty('OutputWorkspace').value
         self.assertTrue(ws.getMemorySize() > 0.0 )
 
         as_str = str(alg)
-        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3",'
+        self.assertEqual(as_str, '{"name":"CreateWorkspace","properties":{"DataX":[1.5,2.5,3.5],"DataY":[1.5,2.5,3.5],'
                           '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
 
     def test_execute_succeeds_with_unicode_props(self):
-        data = [1.0,2.0,3.0]
+        data = [1.5,2.5,3.5]
         kwargs = {'child':True}
         unitx = 'Wavelength'
         if six.PY2:
@@ -76,16 +76,16 @@ class AlgorithmTest(unittest.TestCase):
 
 
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,**kwargs)
-        self.assertEquals(alg.isExecuted(), True)
-        self.assertEquals(alg.isRunning(), False)
-        self.assertEquals(alg.getProperty('NSpec').value, 1)
-        self.assertEquals(type(alg.getProperty('NSpec').value), int)
-        self.assertEquals(alg.getProperty('NSpec').name, 'NSpec')
+        self.assertEqual(alg.isExecuted(), True)
+        self.assertEqual(alg.isRunning(), False)
+        self.assertEqual(alg.getProperty('NSpec').value, 1)
+        self.assertEqual(type(alg.getProperty('NSpec').value), int)
+        self.assertEqual(alg.getProperty('NSpec').name, 'NSpec')
         ws = alg.getProperty('OutputWorkspace').value
         self.assertTrue(ws.getMemorySize() > 0.0 )
 
         as_str = str(alg)
-        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3",'
+        self.assertEqual(as_str, '{"name":"CreateWorkspace","properties":{"DataX":[1.5,2.5,3.5],"DataY":[1.5,2.5,3.5],'
                           '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
 
     def test_execute_succeeds_with_unicode_kwargs(self):
@@ -94,12 +94,12 @@ class AlgorithmTest(unittest.TestCase):
 
     def test_getAlgorithmID_returns_AlgorithmID_object(self):
         alg = AlgorithmManager.createUnmanaged('Load')
-        self.assertEquals(AlgorithmID, type(alg.getAlgorithmID()))
+        self.assertEqual(AlgorithmID, type(alg.getAlgorithmID()))
 
     def test_AlgorithmID_compares_by_value(self):
         alg = AlgorithmManager.createUnmanaged('Load')
         id = alg.getAlgorithmID()
-        self.assertEquals(id, id) # equals itself
+        self.assertEqual(id, id) # equals itself
         alg2 = AlgorithmManager.createUnmanaged('Load')
         id2 = alg2.getAlgorithmID()
         self.assertNotEqual(id2, id)
@@ -107,11 +107,11 @@ class AlgorithmTest(unittest.TestCase):
     def test_cancel_does_nothing_to_executed_algorithm(self):
         data = [1.0]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
-        self.assertEquals(alg.isExecuted(), True)
-        self.assertEquals(alg.isRunning(), False)
+        self.assertEqual(alg.isExecuted(), True)
+        self.assertEqual(alg.isRunning(), False)
         alg.cancel()
-        self.assertEquals(alg.isExecuted(), True)
-        self.assertEquals(alg.isRunning(), False)
+        self.assertEqual(alg.isExecuted(), True)
+        self.assertEqual(alg.isRunning(), False)
 
     def test_createChildAlgorithm_creates_new_algorithm_that_is_set_as_child(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')

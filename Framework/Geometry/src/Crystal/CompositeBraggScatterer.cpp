@@ -116,13 +116,12 @@ void CompositeBraggScatterer::removeAllScatterers() {
 /// contributions from contained scatterers.
 StructureFactor CompositeBraggScatterer::calculateStructureFactor(
     const Kernel::V3D &hkl) const {
-  StructureFactor sum(0.0, 0.0);
-
-  for (const auto &scatterer : m_scatterers) {
-    sum += scatterer->calculateStructureFactor(hkl);
-  }
-
-  return sum;
+  return std::accumulate(
+      m_scatterers.cbegin(), m_scatterers.cend(), StructureFactor(0., 0.),
+      [&hkl](const auto &sum, const auto &scatterer) {
+        return sum + scatterer->calculateStructureFactor(hkl);
+      });
+  ;
 }
 
 /// Makes sure that space group and unit cell are propagated to all stored

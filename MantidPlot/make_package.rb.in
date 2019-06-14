@@ -47,6 +47,17 @@ def findQScintilla2(lib_dir)
     end
 end
 
+
+def findBoostPythonMT(lib_dir)
+    [lib_dir, "usr/local/opt"].each do |dir|
+        if File.file?(dir+"libboost_python-mt.dylib")
+            return "libboost_python-mt.dylib"
+        elsif File.file?(dir+"libboost_python27-mt.dylib")
+            return "libboost_python27-mt.dylib"
+        end
+    end
+end
+
 lib_dir = Pathname.new("/usr/local/lib")
 openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
 ParaView_dir = Pathname.new("@ParaView_DIR@")
@@ -54,7 +65,6 @@ ParaView_dir = Pathname.new("@ParaView_DIR@")
 #filenames with path for all shared libraries used by MantidPlot and its dependencies.
 library_filenames = ["libboost_regex-mt.dylib",
                      "libboost_date_time-mt.dylib",
-                     "libboost_python-mt.dylib",
                      "libboost_serialization-mt.dylib",
                      "libboost_filesystem-mt.dylib",
                      "libboost_system-mt.dylib",
@@ -116,6 +126,7 @@ if("@OPENMP_FOUND@" == "TRUE")
 end
 
 library_filenames << findQScintilla2(lib_dir)
+library_filenames << findBoostPythonMT(lib_dir)
 
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
@@ -226,9 +237,14 @@ search_patterns.each do |pattern|
   end
 end
 
-#We'll use macdeployqt to fix qt dependencies.
+# We'll use macdeployqt to fix qt dependencies.
+# Remove the qt5 libraries in the mantidqt package
+#`rm Contents/MacOS/mantidqt/_commonqt5.so`
+#`rm Contents/MacOS/mantidqt/widgets/instrumentview/_instrumentviewqt5.so`
 Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib "
-Qt_Executables << "-executable=Contents/MacOS/#{findQScintilla2(lib_dir)}"
+Qt_Executables << "-executable=Contents/MacOS/#{findQScintilla2(lib_dir)} "
+Qt_Executables << "-executable=Contents/MacOS/mantidqt/_commonqt4.so "
+Qt_Executables << "-executable=Contents/MacOS/mantidqt/icons/_iconsqt4.so "
 
 if( "@MAKE_VATES@" == "ON" )
   list = ["Contents/Libraries/vtkParaViewWebCorePython.so",
@@ -335,11 +351,21 @@ end
 
 #Copy over python libraries not included with OSX.
 #currently missing epics
+python_exe = `which python`
 system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
-pip_site_packages = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
+homebrew_pip_site_packages = "/usr/local/lib/python2.7/site-packages"
+if python_exe.start_with?("/usr/local")
+  pip_site_packages = homebrew_pip_site_packages
+elsif python_exe.start_with?("/usr/bin")
+  pip_site_packages = "/Library/Python/2.7/site-packages"
+else
+  p "Unknown python distribution at #{python_exe}"
+end
+
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtpy",
                "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
-               "ptyprocess","CifFile","yaml","requests"]
+               "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
+               "skimage"]
 directories.each do |directory|
   module_dir = "#{pip_site_packages}/#{directory}"
   if !File.exist?(module_dir)
@@ -359,6 +385,13 @@ if !File.exist?(mpltoolkit_init)
   `touch #{mpltoolkit_init}`
 end
 
+files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py","decorator.py","kiwisolver.so","subprocess32.py","six.py"]
+files.each do |file|
+  copyFile("#{pip_site_packages}/#{file}")
+end
+
+# mistune.so isn't present in v0.7
+copyOptionalFile("#{pip_site_packages}/mistune.so")
 
 if( "@MAKE_VATES@" == "ON" )
   addPythonLibrariesInDirectory("#{ParaView_dir}/lib/site-packages","Contents/Python/")
@@ -367,7 +400,7 @@ end
 # ---------------------------------------------
 # H5Py section
 # ---------------------------------------------
-h5py_path = "/usr/local/lib/python2.7/site-packages"
+h5py_path = homebrew_pip_site_packages
 h5py_directories = ["h5py"]
 h5py_directories.each do |directory|
   addPythonLibrary("#{h5py_path}/#{directory}","Contents/MacOS/")
@@ -396,14 +429,6 @@ h5py_patterns.each do |pattern|
     end
   end
 end
-
-files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py"]
-files.each do |file|
-  copyFile("#{pip_site_packages}/#{file}")
-end
-
-# mistune.so isn't present in v0.7
-copyOptionalFile("#{pip_site_packages}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
 `cp /usr/local/bin/ipython@PYTHON_VERSION_MAJOR@ Contents/MacOS/bin/`

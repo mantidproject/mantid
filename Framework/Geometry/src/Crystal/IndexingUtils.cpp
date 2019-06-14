@@ -132,7 +132,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     // default mid index, or use the index
     // specified by the base_peak parameter
     if (base_index < 0 || base_index >= static_cast<int>(q_vectors.size())) {
-      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude);
+      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::compareMagnitude);
     } else {
       mid_ind = base_index;
     }
@@ -146,11 +146,11 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       }
     }
   } else {
-    for (const auto &q_vector : q_vectors)
-      sorted_qs.push_back(q_vector);
+    std::copy(q_vectors.cbegin(), q_vectors.cend(),
+              std::back_inserter(sorted_qs));
   }
 
-  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude);
+  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::compareMagnitude);
 
   if (num_initial > sorted_qs.size())
     num_initial = sorted_qs.size();
@@ -329,7 +329,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     // default mid index, or use the index
     // specified by the base_peak parameter
     if (base_index < 0 || base_index >= static_cast<int>(q_vectors.size())) {
-      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude);
+      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::compareMagnitude);
     } else {
       mid_ind = base_index;
     }
@@ -343,11 +343,11 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       }
     }
   } else {
-    for (const auto &q_vector : q_vectors)
-      sorted_qs.push_back(q_vector);
+    std::copy(q_vectors.cbegin(), q_vectors.cend(),
+              std::back_inserter(sorted_qs));
   }
 
-  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude);
+  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::compareMagnitude);
 
   if (num_initial > sorted_qs.size())
     num_initial = sorted_qs.size();
@@ -366,7 +366,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
         "Find_UB(): Could not find at least three possible lattice directions");
   }
 
-  std::sort(directions.begin(), directions.end(), V3D::CompareMagnitude);
+  std::sort(directions.begin(), directions.end(), V3D::compareMagnitude);
 
   if (!FormUB_From_abc_Vectors(UB, directions, 0, min_d, max_d)) {
     throw std::runtime_error(
@@ -516,7 +516,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
         "Find_UB(): Could not find enough a,b,c vectors");
   }
 
-  std::sort(directions.begin(), directions.end(), V3D::CompareMagnitude);
+  std::sort(directions.begin(), directions.end(), V3D::compareMagnitude);
 
   double min_vol = min_d * min_d * min_d / 4.0;
 
@@ -744,6 +744,286 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
     V3D row_values(gsl_vector_get(UB_row, 0), gsl_vector_get(UB_row, 1),
                    gsl_vector_get(UB_row, 2));
     UB.setRow(row, row_values);
+
+    for (size_t i = 0; i < q_vectors.size(); i++) {
+      sum_sq_error += gsl_vector_get(residual, i) * gsl_vector_get(residual, i);
+    }
+  }
+
+  gsl_matrix_free(H_transpose);
+  gsl_vector_free(tau);
+  gsl_vector_free(UB_row);
+  gsl_vector_free(q);
+  gsl_vector_free(residual);
+
+  if (!found_UB) {
+    throw std::runtime_error(
+        "Optimize_UB(): Failed to find UB, invalid hkl or Q values");
+  }
+
+  if (!CheckUB(UB)) {
+    throw std::runtime_error("Optimize_UB(): The optimized UB is not valid");
+  }
+
+  return sum_sq_error;
+}
+
+/**
+ STATIC method Optimize_UB: Calculates the matrix that most nearly maps
+ the specified hkl_vectors to the specified q_vectors.  The calculated
+ UB minimizes the sum squared differences between UB*(h,k,l) and the
+ corresponding (qx,qy,qz) for all of the specified hkl and Q vectors.
+ The sum of the squares of the residual errors is returned.  This method is
+ used to optimize the UB matrix once an initial indexing has been found.
+
+ @param  UB           3x3 matrix that will be set to the UB matrix
+ @param  ModUB        3x3 matrix that will be set to the ModUB matrix
+ @param  hkl_vectors  std::vector of V3D objects that contains the
+ list of hkl values
+ @param  mnp_vectors  std::vector of V3D objects that contains the
+ @param  ModDim       int value from 1 to 3, defines the number of dimensions
+ of modulation.
+ @param  q_vectors    std::vector of V3D objects that contains the list of
+ q_vectors that are indexed by the corresponding hkl
+ vectors.
+ @param  sigabc       error in the crystal lattice parameter values if length
+ is at least 6. NOTE: Calculation of these errors is based
+ on
+ SCD FORTRAN code base at IPNS. Contributors to the least
+ squares application(1979) are J.Marc Overhage, G.Anderson,
+ P. C. W. Leung, R. G. Teller, and  A. J. Schultz
+ NOTE: The number of hkl_vectors and q_vectors must be the same, and must
+ be at least 3.
+ @param  sigq         error in the modulation vectors.
+
+
+ @return  This will return the sum of the squares of the residual differences
+ between the Q vectors provided and the UB*hkl values, in
+ reciprocal space.
+
+ @throws  std::invalid_argument exception if there are not at least 3
+ hkl and q vectors, or if the numbers of
+ hkl and q vectors are not the same, or if
+ the UB matrix is not a 3x3 matrix.
+
+ @throws  std::runtime_error    exception if the QR factorization fails or
+ the UB matrix can't be calculated or if
+ UB is a singular matrix.
+ */
+
+double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
+                                    const std::vector<V3D> &hkl_vectors,
+                                    const std::vector<V3D> &mnp_vectors,
+                                    const int &ModDim,
+                                    const std::vector<V3D> &q_vectors,
+                                    std::vector<double> &sigabc,
+                                    std::vector<double> &sigq) {
+
+  if (ModDim != 0 && ModDim != 1 && ModDim != 2 && ModDim != 3)
+    throw std::invalid_argument("invalid Value for Modulation Dimension");
+
+  double result = 0;
+  result =
+      Optimize_6dUB(UB, ModUB, hkl_vectors, mnp_vectors, ModDim, q_vectors);
+
+  if (sigabc.size() < static_cast<size_t>(6)) {
+    sigabc.clear();
+    return result;
+  } else
+    for (int i = 0; i < 6; i++)
+      sigabc[i] = 0.0;
+
+  size_t nDOF = 3 * (hkl_vectors.size() - 3);
+  DblMatrix HKLTHKL(3, 3);
+  for (int r = 0; r < 3; r++)
+    for (int c = 0; c < 3; c++)
+      for (const auto &hkl_vector : hkl_vectors) {
+        HKLTHKL[r][c] += hkl_vector[r] * hkl_vector[c];
+      }
+
+  HKLTHKL.Invert();
+
+  double SMALL = 1.525878906E-5;
+  Matrix<double> derivs(3, 7);
+  std::vector<double> latOrig, latNew;
+  GetLatticeParameters(UB, latOrig);
+
+  for (int r = 0; r < 3; r++) {
+    for (int c = 0; c < 3; c++) {
+
+      UB[r][c] += SMALL;
+      GetLatticeParameters(UB, latNew);
+      UB[r][c] -= SMALL;
+
+      for (size_t l = 0; l < 7; l++)
+        derivs[c][l] = (latNew[l] - latOrig[l]) / SMALL;
+    }
+
+    for (size_t l = 0;
+         l < std::min<size_t>(static_cast<size_t>(7), sigabc.size()); l++)
+      for (int m = 0; m < 3; m++)
+        for (int n = 0; n < 3; n++)
+          sigabc[l] += (derivs[m][l] * HKLTHKL[m][n] * derivs[n][l]);
+  }
+
+  double delta = result / static_cast<double>(nDOF);
+
+  for (size_t i = 0; i < std::min<size_t>(7, sigabc.size()); i++)
+    sigabc[i] = sqrt(delta * sigabc[i]);
+
+  DblMatrix UBinv = UB;
+  UBinv.Invert();
+
+  if (sigq.size() < static_cast<size_t>(3)) {
+    sigq.clear();
+    return result;
+  }
+
+  else {
+    sigq[0] = sqrt(delta) * latOrig[0];
+    sigq[1] = sqrt(delta) * latOrig[1];
+    sigq[2] = sqrt(delta) * latOrig[2];
+  }
+
+  return delta;
+}
+
+/**
+ STATIC method Optimize_6dUB: Calculates the 6-dimensional matrix that most
+ nearly maps the specified hkl_vectors and mnp_vectors to the specified
+ q_vectors.  The calculated UB minimizes the sum squared differences between
+ UB|ModUB*(h,k,l,m,n,p) and the corresponding (qx,qy,qz) for all of the
+ specified hklmnp and Q vectors. The sum of the squares of the residual errors
+ is returned.  This method is used to optimize the UB matrix and ModUB matrix
+ once an initial indexing has been found.
+
+ ModUB matrix is a 3x3 defines the modulation vectors in Q-sample. each colomn
+ corresponds to a modulation vector.
+
+
+ @param  UB           3x3 matrix that will be set to the UB matrix
+ @param  ModUB        3x3 matrix that will be set to the ModUB matrix
+ @param  hkl_vectors  std::vector of V3D objects that contains the
+ list of hkl values
+ @param  mnp_vectors  std::vector of V3D objects that contains the
+ list of mnp values
+ @param  ModDim       int value from 1 to 3, defines the number of dimensions
+ of modulation.
+ @param  q_vectors    std::vector of V3D objects that contains the list of
+ q_vectors that are indexed by the corresponding hkl
+ vectors.
+ NOTE: The number of hkl_vectors and mnp_vectors and q_vectors must be the same,
+ and must be at least 4.
+
+ @return  This will return the sum of the squares of the residual differences
+ between the Q vectors provided and the UB*hkl values, in
+ reciprocal space.
+
+ @throws  std::invalid_argument exception if there are not at least 3
+ hkl and q vectors, or if the numbers of
+ hkl and q vectors are not the same, or if
+ the UB matrix is not a 3x3 matrix.
+ or if the ModDim is not 1 or 2 or 3.
+
+ @throws  std::runtime_error    exception if the QR factorization fails or
+ the UB matrix can't be calculated or if
+ UB is a singular matrix.
+
+ Created by Shiyun Jin on 7/16/18.
+ */
+
+double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
+                                    const std::vector<V3D> &hkl_vectors,
+                                    const std::vector<V3D> &mnp_vectors,
+                                    const int &ModDim,
+                                    const std::vector<V3D> &q_vectors) {
+
+  if (UB.numRows() != 3 || UB.numCols() != 3) {
+    throw std::invalid_argument("Optimize_6dUB(): UB matrix NULL or not 3X3");
+  }
+
+  if (ModUB.numRows() != 3 || ModUB.numCols() != 3) {
+    throw std::invalid_argument(
+        "Optimize_6dUB(): ModUB matrix NULL or not 3X3");
+  }
+
+  if (hkl_vectors.size() < 3) {
+    throw std::invalid_argument(
+        "Optimize_6dUB(): Three or more indexed peaks needed to find UB");
+  }
+
+  if (hkl_vectors.size() != q_vectors.size() ||
+      hkl_vectors.size() != mnp_vectors.size()) {
+    throw std::invalid_argument("Optimize_6dUB(): Number of hkl_vectors "
+                                "doesn't match number of mnp_vectors or number "
+                                "of q_vectors");
+  }
+
+  if (ModDim != 0 && ModDim != 1 && ModDim != 2 && ModDim != 3)
+    throw std::invalid_argument("invalid Value for Modulation Dimension");
+
+  gsl_matrix *H_transpose = gsl_matrix_alloc(hkl_vectors.size(), ModDim + 3);
+  gsl_vector *tau = gsl_vector_alloc(ModDim + 3);
+
+  double sum_sq_error = 0;
+  // Make the H-transpose matrix from the
+  // hkl vectors and form QR factorization
+  for (size_t row = 0; row < hkl_vectors.size(); row++) {
+    for (size_t col = 0; col < 3; col++)
+      gsl_matrix_set(H_transpose, row, col, (hkl_vectors[row])[col]);
+    for (size_t col = 0; col < static_cast<size_t>(ModDim); col++)
+      gsl_matrix_set(H_transpose, row, col + 3, (mnp_vectors[row])[col]);
+  }
+
+  int returned_flag = gsl_linalg_QR_decomp(H_transpose, tau);
+
+  if (returned_flag != 0) {
+    gsl_matrix_free(H_transpose);
+    gsl_vector_free(tau);
+    throw std::runtime_error(
+        "Optimize_UB(): gsl QR_decomp failed, invalid hkl and mnp values");
+  }
+  // solve for each row of UB, using the
+  // QR factorization of and accumulate the
+  // sum of the squares of the residuals
+  gsl_vector *UB_row = gsl_vector_alloc(ModDim + 3);
+  gsl_vector *q = gsl_vector_alloc(q_vectors.size());
+  gsl_vector *residual = gsl_vector_alloc(q_vectors.size());
+
+  bool found_UB = true;
+
+  for (size_t row = 0; row < 3; row++) {
+    for (size_t i = 0; i < q_vectors.size(); i++) {
+      gsl_vector_set(q, i, (q_vectors[i])[row] / (2.0 * M_PI));
+    }
+
+    returned_flag =
+        gsl_linalg_QR_lssolve(H_transpose, tau, q, UB_row, residual);
+
+    if (returned_flag != 0) {
+      found_UB = false;
+    }
+
+    for (size_t i = 0; i < static_cast<size_t>(ModDim + 3); i++) {
+      double value = gsl_vector_get(UB_row, i);
+      if (!std::isfinite(value))
+        found_UB = false;
+    }
+
+    V3D hklrow_values(gsl_vector_get(UB_row, 0), gsl_vector_get(UB_row, 1),
+                      gsl_vector_get(UB_row, 2));
+    V3D mnprow_values(0, 0, 0);
+
+    if (ModDim == 1)
+      mnprow_values(gsl_vector_get(UB_row, 3), 0, 0);
+    if (ModDim == 2)
+      mnprow_values(gsl_vector_get(UB_row, 3), gsl_vector_get(UB_row, 4), 0);
+    if (ModDim == 3)
+      mnprow_values(gsl_vector_get(UB_row, 3), gsl_vector_get(UB_row, 4),
+                    gsl_vector_get(UB_row, 5));
+
+    UB.setRow(row, hklrow_values);
+    ModUB.setRow(row, mnprow_values);
 
     for (size_t i = 0; i < q_vectors.size(); i++) {
       sum_sq_error += gsl_vector_get(residual, i) * gsl_vector_get(residual, i);
@@ -1366,7 +1646,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
       temp_dirs.push_back(current_dir);
   }
 
-  std::sort(temp_dirs.begin(), temp_dirs.end(), V3D::CompareMagnitude);
+  std::sort(temp_dirs.begin(), temp_dirs.end(), V3D::compareMagnitude);
 
   // discard duplicates:
   double len_tol = 0.1; // 10% tolerance for lengths
@@ -1554,8 +1834,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
   V3D c_dir;
   bool c_found = false;
 
-  V3D perp = a_dir.cross_prod(b_dir);
-  perp.normalize();
+  const V3D perp = normalize(a_dir.cross_prod(b_dir));
   double perp_ang;
   double alpha;
   double beta;
@@ -1628,7 +1907,6 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
-  int num_indexed = 0;
   int max_indexed = 0;
   V3D a_dir(0, 0, 0);
   V3D b_dir(0, 0, 0);
@@ -1648,8 +1926,8 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
         c_temp = directions[k];
         vol = fabs(acrossb.scalar_prod(c_temp));
         if (vol > min_vol) {
-          num_indexed = NumberIndexed_3D(a_temp, b_temp, c_temp, q_vectors,
-                                         req_tolerance);
+          const auto num_indexed = NumberIndexed_3D(a_temp, b_temp, c_temp,
+                                                    q_vectors, req_tolerance);
 
           // Requiring 20% more indexed with longer edge lengths, favors
           // the smaller unit cells.
@@ -2469,8 +2747,7 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
   V3D second_vec(0, 0, 0);
   second_vec[min_index] = 1;
 
-  V3D perp_vec = second_vec.cross_prod(axis);
-  perp_vec.normalize();
+  const V3D perp_vec = normalize(second_vec.cross_prod(axis));
 
   // next get a vector that is the specified
   // number of degrees away from the axis
@@ -2599,6 +2876,46 @@ bool IndexingUtils::GetLatticeParameters(const DblMatrix &UB,
   lattice_par.push_back(o_lattice.volume()); // keep volume > 0 even if
                                              // cell is left handed
   return true;
+}
+
+int IndexingUtils::GetModulationVectors(const DblMatrix &UB,
+                                        const DblMatrix &ModUB, V3D &ModVec1,
+                                        V3D &ModVec2, V3D &ModVec3) {
+  OrientedLattice o_lattice;
+  o_lattice.setUB(UB);
+  o_lattice.setModUB(ModUB);
+
+  ModVec1 = o_lattice.getModVec(0);
+  ModVec2 = o_lattice.getModVec(1);
+  ModVec3 = o_lattice.getModVec(2);
+
+  int ModDim = 0;
+  if (o_lattice.getdh(0) != 0.0 || o_lattice.getdk(0) != 0.0 ||
+      o_lattice.getdl(0) != 0.0)
+    ModDim = 1;
+  if (o_lattice.getdh(1) != 0.0 || o_lattice.getdk(1) != 0.0 ||
+      o_lattice.getdl(1) != 0.0)
+    ModDim = 2;
+  if (o_lattice.getdh(2) != 0.0 || o_lattice.getdk(2) != 0.0 ||
+      o_lattice.getdl(2) != 0.0)
+    ModDim = 3;
+
+  return ModDim;
+}
+
+bool IndexingUtils::GetModulationVector(const DblMatrix &UB,
+                                        const DblMatrix &ModUB, V3D &ModVec,
+                                        int &j) {
+  OrientedLattice o_lattice;
+  o_lattice.setUB(UB);
+  o_lattice.setModUB(ModUB);
+
+  ModVec = o_lattice.getModVec(j);
+
+  if (ModVec[0] != 0.0 || ModVec[1] != 0.0 || ModVec[2] != 0.0)
+    return true;
+  else
+    return false;
 }
 
 /**

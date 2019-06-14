@@ -291,7 +291,7 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
   // GenericDataProcessorPresenter
   std::unique_ptr<TimeSlicingInfo> slicing;
   try {
-    slicing = Mantid::Kernel::make_unique<TimeSlicingInfo>(
+    slicing = std::make_unique<TimeSlicingInfo>(
         m_mainPresenter->getTimeSlicingType(m_group),
         m_mainPresenter->getTimeSlicingValues(m_group));
   } catch (const std::runtime_error &ex) {
@@ -402,10 +402,8 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
         // This run could not be loaded as event workspace. We need to load and
         // process the whole group as non-event data.
         for (const auto &rowNew : group) {
-          // The run number
-          auto runNo = rowNew.second->value(0);
           // Load as non-event workspace
-          loadNonEventRun(runNo);
+          loadNonEventRun(rowNew.second->value(0));
         }
         // Remove monitors which were loaded as separate workspaces
         for (const auto &run : loadedRuns) {
@@ -668,10 +666,9 @@ ReflDataProcessorPresenter::retrieveWorkspace(QString const &name) const {
 Mantid::API::IEventWorkspace_sptr
 ReflDataProcessorPresenter::retrieveWorkspaceOrCritical(
     QString const &name) const {
-  IEventWorkspace_sptr mws;
   if (workspaceExists(name)) {
     auto mws = retrieveWorkspace(name);
-    if (mws == nullptr) {
+    if (!mws) {
       if (promptUser()) {
         m_view->giveUserCritical("Workspace to slice " + name +
                                      " is not an event workspace!",
@@ -799,6 +796,12 @@ QString ReflDataProcessorPresenter::loadRun(const QString &run,
   algLoadRun->execute();
   if (!algLoadRun->isExecuted()) {
     // Run not loaded from disk
+    runFound = false;
+    return "";
+  } else if (loader == "LoadEventNexus" && !this->retrieveWorkspace(outputName)
+                                                ->run()
+                                                .hasProperty("proton_charge")) {
+    /*ISIS event nexus files require the proton_charge log to be present*/
     runFound = false;
     return "";
   }
@@ -1021,19 +1024,19 @@ bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
     // Input workspaces of type found, ask user if they wish to process
     auto foundStr = foundInputWorkspaces.join("\n");
 
-    bool process = m_view->askUserYesNo(
+    const bool doProcess = m_view->askUserYesNo(
         "Processing selected rows will replace the following workspaces:\n\n" +
             foundStr + "\n\nDo you wish to continue?",
         "Process selected rows?");
 
-    if (process) {
+    if (doProcess) {
       // Remove all found workspaces
       for (auto &wsName : foundInputWorkspaces) {
         AnalysisDataService::Instance().remove(wsName.toStdString());
       }
     }
 
-    return process;
+    return doProcess;
   }
 
   // No input workspaces of type found, proceed with reduction automatically

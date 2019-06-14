@@ -17,7 +17,7 @@ namespace {
 //----------------------------------------------------------------------------------------------
 /// @cond
 template <typename T> struct DescriptorCallback {
-  void apply(T &) {} // general one does nothing
+  void apply(T & /*unused*/) {} // general one does nothing
 };
 template <> struct DescriptorCallback<Kernel::FileDescriptor> {
   void apply(Kernel::FileDescriptor &descriptor) {

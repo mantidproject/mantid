@@ -21,7 +21,6 @@ digraph QENSFitSequential {
     PeakRadius
     EvaluationType
     LogValue
-    ParameterTable
     FitWorkspaces
     NormalisedCovarianceWorkspace
     ParameterNames
@@ -49,7 +48,7 @@ digraph QENSFitSequential {
 
   subgraph processes {
     $process_style
-    extract_members                     [label="extract_members\nExtracts the members of\nthe convolution fit, into\n their own workspace, which\n are subsequently grouped."]
+    extract_members                     [label="ExtractQENSMembers:\nExtracts the members of\nthe convolution fit, into\n their own workspace, which\n are subsequently grouped."]
   }
 
   InputWorkspace                 -> FitFunction
@@ -73,22 +72,23 @@ digraph QENSFitSequential {
   PassWSIndexToFunction          -> PlotPeakByLogValue
   EvaluationType                 -> PlotPeakByLogValue
   PlotPeakByLogValue             -> NormalisedCovarianceWorkspace
-  PlotPeakByLogValue             -> ParameterTable
+  PlotPeakByLogValue             -> OutputParameterWorkspace
   PlotPeakByLogValue             -> FitWorkspaces
   NormalisedCovarianceWorkspace  -> DeleteWorkspace                [label="Unrequired product of PlotPeakByLogValue"]
   FitType                        -> ParameterNames                 [label="Desired parameters obtained from FitType"]
-  ParameterTable                 -> ProcessIndirectFitParameters
+  OutputParameterWorkspace       -> ProcessIndirectFitParameters
   ParameterNames                 -> ProcessIndirectFitParameters
   ProcessIndirectFitParameters   -> ResultWorkspace
   InputWorkspace                 -> CopyLogs
-  ResultWorkspace                -> CopyLogs
+  ResultWorkspace                -> CopyLogs                       [label="Input workspace"]
   CopyLogs                       -> OutputWorkspace
   SampleLog                      -> CopyLogs
   FitWorkspace                   -> CopyLogs
-  ParameterTable                 -> RenameWorkspace                [label="Change name to expected name for table"]
+  OutputParameterWorkspace       -> RenameWorkspace                [label="Change name to expected name for table"]
   FitWorkspaces                  -> RenameWorkspace                [label="Renames to match input names"]
   ExtractMembers                 -> do_extract_members
-  FitWorkspaces                  -> do_extract_members
+  RenameWorkspace                -> do_extract_members
   InputWorkspace                 -> do_extract_members
   do_extract_members             -> ExtractQENSMembers             [label="Yes"]
+  ExtractQENSMembers             -> OutputWorkspaceGroup
 }

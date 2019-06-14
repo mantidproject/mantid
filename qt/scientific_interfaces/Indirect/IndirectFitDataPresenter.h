@@ -8,10 +8,12 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
 
 #include "IAddWorkspaceDialog.h"
+#include "IIndirectFitDataView.h"
 #include "IndirectDataTablePresenter.h"
-#include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 
+#include "DllConfig.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QObject>
@@ -20,23 +22,26 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/**
-  A presenter.
-*/
-class DLLExport IndirectFitDataPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
+    : public QObject,
+      public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
-                           IndirectFitDataView *view);
-
+                           IIndirectFitDataView *view);
   IndirectFitDataPresenter(
-      IndirectFittingModel *model, IndirectFitDataView *view,
+      IndirectFittingModel *model, IIndirectFitDataView *view,
       std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
+  ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
+  void setMultiInputSampleWSSuffixes();
+  void setMultiInputSampleFBSuffixes();
+  void setMultiInputResolutionWSSuffixes();
+  void setMultiInputResolutionFBSuffixes();
 
   void setStartX(double startX, std::size_t dataIndex, int spectrumIndex);
   void setEndX(double endX, std::size_t dataIndex, int spectrumIndex);
@@ -45,6 +50,9 @@ public:
 
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
+
+  void replaceHandle(const std::string &workspaceName,
+                     const Workspace_sptr &workspace) override;
 
 public slots:
   void updateSpectraInTable(std::size_t dataIndex);
@@ -55,39 +63,49 @@ protected slots:
   void setModelFromMultipleData();
   void showAddWorkspaceDialog();
 
+  virtual void closeDialog();
+
 signals:
-  void singleSampleLoaded();
   void singleResolutionLoaded();
   void dataAdded();
   void dataRemoved();
   void dataChanged();
-  void startXChanged(double, std::size_t, std::size_t);
-  void endXChanged(double, std::size_t, std::size_t);
-  void excludeRegionChanged(const std::string &, std::size_t, std::size_t);
+  void startXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
+  void endXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
+  void excludeRegionChanged(const std::string & /*_t1*/, std::size_t /*_t2*/,
+                            std::size_t /*_t3*/);
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
+  void updateAvailableFitTypes();
 
 protected:
-  IndirectFitDataView const *getView() const;
+  IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void setSingleModelData(const std::string &name);
   virtual void addModelData(const std::string &name);
   void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
-  virtual void dialogExecuted(IAddWorkspaceDialog const *dialog,
-                              QDialog::DialogCode result);
+
+private slots:
+  void addData();
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(std::size_t dataIndex);
 
+  void selectReplacedWorkspace(const QString &workspaceName);
+
+  virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);
+  virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);
+
+  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModel *m_model;
   PrivateFittingData m_singleData;
   PrivateFittingData m_multipleData;
-  IndirectFitDataView *m_view;
+  IIndirectFitDataView *m_view;
   std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
 };
 

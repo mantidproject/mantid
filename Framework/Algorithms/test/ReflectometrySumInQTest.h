@@ -92,13 +92,21 @@ public:
         TS_ASSERT_THROWS_NOTHING(
             alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
         TS_ASSERT_THROWS_NOTHING(
-            alg.setProperty("BeamCentre", static_cast<int>(i)))
+            alg.setProperty("BeamCentre", static_cast<double>(i)))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", true))
         TS_ASSERT_THROWS_NOTHING(alg.execute())
         API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
         TS_ASSERT(outputWS);
         TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+        auto &inXs = inputWS->x(i);
+        const auto binWidth =
+            (inXs.back() - inXs.front()) / static_cast<double>(inXs.size() - 1);
+        auto &outXs = outputWS->x(0);
+        for (size_t binIndex = 0; binIndex < outXs.size() - 1; ++binIndex) {
+          TS_ASSERT_DELTA(outXs[binIndex + 1] - outXs[binIndex], binWidth,
+                          1e-12)
+        }
         auto &Ys = outputWS->y(0);
         const auto totalYSummedInQ =
             std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
@@ -132,13 +140,21 @@ public:
         TS_ASSERT_THROWS_NOTHING(
             alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
         TS_ASSERT_THROWS_NOTHING(
-            alg.setProperty("BeamCentre", static_cast<int>(beamCentre)))
+            alg.setProperty("BeamCentre", static_cast<double>(beamCentre)))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", true))
         TS_ASSERT_THROWS_NOTHING(alg.execute())
         API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
         TS_ASSERT(outputWS);
         TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+        auto &inXs = inputWS->x(beamCentre);
+        const auto binWidth =
+            (inXs.back() - inXs.front()) / static_cast<double>(inXs.size() - 1);
+        auto &outXs = outputWS->x(0);
+        for (size_t binIndex = 0; binIndex < outXs.size() - 1; ++binIndex) {
+          TS_ASSERT_DELTA(outXs[binIndex + 1] - outXs[binIndex], binWidth,
+                          1e-12)
+        }
         auto &Ys = outputWS->y(0);
         const auto totalYSummedInQ =
             std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
@@ -165,7 +181,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(
             alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
         TS_ASSERT_THROWS_NOTHING(
-            alg.setProperty("BeamCentre", static_cast<int>(i)))
+            alg.setProperty("BeamCentre", static_cast<double>(i)))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", false))
         TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -212,7 +228,8 @@ public:
           alg.setPropertyValue("InputWorkspaceIndexSet", indexSetValue.str()))
       TS_ASSERT_THROWS_NOTHING(
           alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", spectrum1))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("BeamCentre", static_cast<double>(spectrum1)))
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", true))
       TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -242,7 +259,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BeamCentre", static_cast<int>(detectorIdx)))
+        alg.setProperty("BeamCentre", static_cast<double>(detectorIdx)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             e.what(),
@@ -264,7 +281,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BeamCentre", static_cast<int>(monitorIdx)))
+        alg.setProperty("BeamCentre", static_cast<double>(monitorIdx)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             e.what(),
@@ -284,7 +301,7 @@ public:
         alg.setPropertyValue("InputWorkspaceIndexSet", "0, 1"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", 2.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             e.what(),
@@ -372,7 +389,7 @@ public:
     alg.setProperty("InputWorkspace", m_workspace);
     alg.setProperty("InputWorkspaceIndexSet", m_fullIndexSet);
     alg.setPropertyValue("OutputWorkspace", "_unused_for_child");
-    alg.setProperty("BeamCentre", 49);
+    alg.setProperty("BeamCentre", 49.);
     alg.setProperty("FlatSample", true);
     for (int repetitions = 0; repetitions < 1000; ++repetitions) {
       alg.execute();

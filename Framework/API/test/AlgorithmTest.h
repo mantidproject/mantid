@@ -12,10 +12,12 @@
 #include "FakeAlgorithms.h"
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
@@ -44,35 +46,34 @@ public:
   const std::string summary() const override { return "Test summary"; }
 
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
-                                                     Direction::Input));
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
+                                                          Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
-    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace1", "",
-                                                     Direction::Output));
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace1", "", Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
 
   void exec() override {
-    boost::shared_ptr<WorkspaceTester> out1 =
-        boost::make_shared<WorkspaceTester>();
+    const std::string outName = getPropertyValue("InputWorkspace1") + "+" +
+                                getPropertyValue("InputWorkspace2") + "+" +
+                                getPropertyValue("InOutWorkspace");
+    auto out1 = boost::make_shared<WorkspaceTester>();
     out1->initialize(10, 10, 10);
-    boost::shared_ptr<WorkspaceTester> out2 =
-        boost::make_shared<WorkspaceTester>();
-    out2->initialize(10, 10, 10);
-    std::string outName = getPropertyValue("InputWorkspace1") + "+" +
-                          getPropertyValue("InputWorkspace2") + "+" +
-                          getPropertyValue("InOutWorkspace");
     out1->setTitle(outName);
-    out2->setTitle(outName);
-    double val = getProperty("Number");
-    out1->dataY(0)[0] = val;
+    out1->dataY(0)[0] = getProperty("Number");
     setProperty("OutputWorkspace1", out1);
-    setProperty("OutputWorkspace2", out2);
+    if (!getPropertyValue("OutputWorkspace2").empty()) {
+      auto out2 = boost::make_shared<WorkspaceTester>();
+      out2->initialize(10, 10, 10);
+      out2->setTitle(outName);
+      setProperty("OutputWorkspace2", out2);
+    }
   }
 };
 DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm)
@@ -89,10 +90,10 @@ public:
   const std::string category() const override { return "Cat;Leopard;Mink"; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "NonLockingInputWorkspace", "", Direction::Input,
         PropertyMode::Optional, LockMode::NoLock));
-    declareProperty(make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "NonLockingOutputWorkspace", "", Direction::Output,
         PropertyMode::Optional, LockMode::NoLock));
   }
@@ -149,8 +150,8 @@ public:
   static const std::string FAIL_MSG;
 
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                     Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                          Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 
@@ -179,9 +180,8 @@ public:
 
   void init() override {
     declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace", "");
-    declareProperty(
-        Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-            "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+        "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
     declareWorkspaceInputProperties<
         MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
         "InputWorkspace3", "");
@@ -213,6 +213,8 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithmTwo", 1);
   }
+
+  void setUp() override { AnalysisDataService::Instance().clear(); }
 
   void testAlgorithm() {
     std::string theName = alg.name();
@@ -290,7 +292,7 @@ public:
 
   void testExecute() {
     ToyAlgorithm myAlg;
-    TS_ASSERT_THROWS(myAlg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(myAlg.execute(), const std::runtime_error &);
     TS_ASSERT(!myAlg.isExecuted());
     TS_ASSERT_THROWS_NOTHING(myAlg.initialize());
     TS_ASSERT_THROWS_NOTHING(myAlg.execute());
@@ -300,7 +302,7 @@ public:
   void testSetPropertyValue() {
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("prop1", "val"))
     TS_ASSERT_THROWS(alg.setPropertyValue("prop3", "1"),
-                     Exception::NotFoundError)
+                     const Exception::NotFoundError &)
   }
 
   void testExistsProperty() {
@@ -312,7 +314,8 @@ public:
     std::string value;
     TS_ASSERT_THROWS_NOTHING(value = alg.getPropertyValue("prop2"))
     TS_ASSERT(!value.compare("1"))
-    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"), Exception::NotFoundError)
+    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"),
+                     const Exception::NotFoundError &)
   }
 
   void testGetProperties() {
@@ -363,14 +366,14 @@ public:
     alg.setPropertyValue("prop1", "value1");
     alg.setProperty("prop2", 5);
     std::string expected = "{\"name\":\"ToyAlgorithm\",\"properties\":{"
-                           "\"prop1\":\"value1\",\"prop2\":\"5\"},\"version\":"
+                           "\"prop1\":\"value1\",\"prop2\":5},\"version\":"
                            "1}\n";
     TS_ASSERT_EQUALS(alg.toString(), expected);
   }
 
   void test_From_String_With_Invalid_Input_Throws() {
     const std::string input = "()";
-    TS_ASSERT_THROWS(Algorithm::fromString(input), std::runtime_error);
+    TS_ASSERT_THROWS(Algorithm::fromString(input), const std::runtime_error &);
   }
 
   void test_Construction_Via_Valid_String_With_No_Properties() {
@@ -572,32 +575,33 @@ public:
    * @param group1 :: name of the group. Do nothing if blank.
    * @param contents1 :: comma-sep names of fake workspaces in the group
    *        Make no group if blank, just 1 workspace
+   * @return The new WorkspaceGroup object
    */
-  void makeWorkspaceGroup(std::string group1, std::string contents1) {
+  Workspace_sptr makeWorkspaceGroup(std::string group1, std::string contents1) {
+    auto &ads = AnalysisDataService::Instance();
     if (contents1.empty()) {
       if (group1.empty())
-        return;
-      boost::shared_ptr<WorkspaceTester> ws =
-          boost::make_shared<WorkspaceTester>();
-      AnalysisDataService::Instance().addOrReplace(group1, ws);
-      return;
+        return Workspace_sptr();
+      auto ws = boost::make_shared<WorkspaceTester>();
+      ads.addOrReplace(group1, ws);
+      return ws;
     }
 
     std::vector<std::string> names;
     boost::split(names, contents1,
                  boost::algorithm::detail::is_any_ofF<char>(","));
     if (names.size() >= 1) {
-      WorkspaceGroup_sptr wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
-      AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
-      std::vector<std::string>::iterator it = names.begin();
-      for (; it != names.end(); it++) {
-        boost::shared_ptr<WorkspaceTester> ws =
-            boost::make_shared<WorkspaceTester>();
+      auto wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+      ads.addOrReplace(group1, wsGroup);
+      for (const auto &name : names) {
+        auto ws = boost::make_shared<WorkspaceTester>();
         ws->initialize(10, 10, 10);
-        AnalysisDataService::Instance().addOrReplace(*it, ws);
-        wsGroup->add(*it);
+        ads.addOrReplace(name, ws);
+        wsGroup->add(name);
       }
+      return wsGroup;
     }
+    return Workspace_sptr();
   }
 
   //------------------------------------------------------------------------
@@ -650,7 +654,6 @@ public:
 
   /// All groups are the same size
   void test_processGroups_allSameSize() {
-    Mantid::API::AnalysisDataService::Instance().clear();
     WorkspaceGroup_sptr group = do_test_groups(
         "A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3", "C", "C_1,C_2,C_3");
 
@@ -762,7 +765,6 @@ public:
 
   /// Rewrite first input group
   void test_processGroups_rewriteFirstGroup() {
-    Mantid::API::AnalysisDataService::Instance().clear();
     WorkspaceGroup_sptr group =
         do_test_groups("D", "D1,D2,D3", "B", "B1,B2,B3", "C", "C1,C2,C3");
 
@@ -777,7 +779,6 @@ public:
 
   /// Rewrite second group
   void test_processGroups_rewriteSecondGroup() {
-    Mantid::API::AnalysisDataService::Instance().clear();
     WorkspaceGroup_sptr group =
         do_test_groups("A", "A1,A2,A3", "D", "D1,D2,D3", "C", "C1,C2,C3");
 
@@ -792,7 +793,6 @@ public:
 
   /// Rewrite multiple group
   void test_processGroups_rewriteMultipleGroup() {
-    Mantid::API::AnalysisDataService::Instance().clear();
     WorkspaceGroup_sptr group =
         do_test_groups("A", "A1,A2,A3", "D", "D1,D2,D3", "D", "D1,D2,D3");
 
@@ -803,6 +803,74 @@ public:
     TS_ASSERT_EQUALS(ws2->getTitle(), "A2+D2+D2");
     TS_ASSERT_EQUALS(ws3->getName(), "D3");
     TS_ASSERT_EQUALS(ws3->getTitle(), "A3+D3+D3");
+  }
+
+  void doHistoryCopyTest(const std::string &inputWSName,
+                         const std::string &outputWSName) {
+    auto inputWS = boost::make_shared<WorkspaceTester>();
+    inputWS->history().addHistory(boost::make_shared<AlgorithmHistory>(
+        "Load", 1, "b5b65a94-e656-468e-987c-644288fac655"));
+    auto &ads = AnalysisDataService::Instance();
+    ads.addOrReplace(inputWSName, inputWS);
+
+    StubbedWorkspaceAlgorithm nextStep;
+    nextStep.initialize();
+    nextStep.setPropertyValue("InputWorkspace1", inputWSName);
+    nextStep.setPropertyValue("OutputWorkspace1", outputWSName);
+    nextStep.execute();
+
+    auto outputWS = ads.retrieve(outputWSName);
+    const auto &outputHistory = outputWS->history();
+    TS_ASSERT_EQUALS(2, outputHistory.size());
+    TS_ASSERT_EQUALS("Load", outputHistory.getAlgorithmHistory(0)->name());
+    TS_ASSERT_EQUALS("StubbedWorkspaceAlgorithm",
+                     outputHistory.getAlgorithmHistory(1)->name());
+  }
+
+  void test_singleInputWorkspaceHistoryCopiedToOutputWorkspace() {
+    doHistoryCopyTest("copyHistoryIn", "copyHistoryOut");
+  }
+
+  void test_singleInputWorkspaceHistoryCopiedToReplacedOutputWorkspace() {
+    doHistoryCopyTest("copyHistoryInOut", "copyHistoryInOut");
+  }
+
+  void doHistoryCopyOnGroupsTest(const std::string &inputWSName,
+                                 const std::string &outputWSName) {
+    using Mantid::Types::Core::DateAndTime;
+    const auto group =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(makeWorkspaceGroup(
+            inputWSName, inputWSName + "_1," + inputWSName + "_2"));
+    const DateAndTime execDate{
+        Mantid::Types::Core::DateAndTime::getCurrentTime()};
+    for (auto &item : *group) {
+      item->history().addHistory(boost::make_shared<AlgorithmHistory>(
+          "Load", 1, "49ea7cb9-6172-4e5c-acf5-c3edccd0bb27", execDate));
+    }
+    auto &ads = AnalysisDataService::Instance();
+    StubbedWorkspaceAlgorithm nextStep;
+    nextStep.initialize();
+    nextStep.setPropertyValue("InputWorkspace1", inputWSName);
+    nextStep.setPropertyValue("OutputWorkspace1", outputWSName);
+    nextStep.execute();
+
+    auto outputGroup = ads.retrieveWS<WorkspaceGroup>(outputWSName);
+    TS_ASSERT(outputGroup);
+    for (auto &item : *outputGroup) {
+      const auto &outputHistory = item->history();
+      TS_ASSERT_EQUALS(2, outputHistory.size());
+      TS_ASSERT_EQUALS("Load", outputHistory.getAlgorithmHistory(0)->name());
+      TS_ASSERT_EQUALS("StubbedWorkspaceAlgorithm",
+                       outputHistory.getAlgorithmHistory(1)->name());
+    }
+  }
+
+  void test_InputWorkspaceGroupHistoryCopiedToOutputWorkspaceGroup() {
+    doHistoryCopyOnGroupsTest("copyHistoryGroupIn", "copyHistoryGroupOut");
+  }
+
+  void test_InputWorkspaceGroupHistoryCopiedToReplacedOutputWorkspaceGroup() {
+    doHistoryCopyOnGroupsTest("copyHistoryGroupInOut", "copyHistoryGroupInOut");
   }
 
   /**
@@ -920,20 +988,20 @@ public:
 
     TS_ASSERT_THROWS(
         indexAlg.getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace2"),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         (indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
             "InputWorkspace2", "wksp", IndexType::SpectrumNum, "1:5")),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testIndexingAlgorithm_failExistingIndexProperty() {
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     TS_ASSERT_THROWS(indexAlg.declareProperty(
-                         make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                         std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                              "InputWorkspace", "", Direction::Input)),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
 private:

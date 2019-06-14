@@ -18,22 +18,23 @@ Windows
 
 Install the following:
 
-* `Visual Studio 2015 Community Edition <https://go.microsoft.com/fwlink/?LinkId=532606&clcid=0x409>`_. If you are at RAL then
-  ask for the location of the locally-cached offline version.
+* `Visual Studio 2017 Community Edition <https://visualstudio.microsoft.com/downloads/>`_.
 
-  * Select a custom install and include at minimum:
+  * When asked about installation workloads choose ``Desktop development with C++``
+  * Under the "Installation details" section verify that the following are checked:
 
-    * Programming Languages -> Visual C++
-    * Universal Windows App Development Kits -> Tools and Windows 10 SDK
-    * Windows 8.1 and Windows Phone 8.0/8.1 Tools -> Tools and Windows SDKs
+    * ``Windows 8.1 SDK and UCRT SDK``
+    * The latest Windows 10 SDK
+
 
 * `Git <https://git-scm.com/>`_.
 
   * install the latest version and ensure that Git LFS is checked to be included
   * when the install has completed create a directory for storage of the LFS objects, e.g. ``C:\GitLFSStorage``
   * open up Git Bash and run ``git config --global lfs.storage C:/GitLFSStorage``
- 
-* `CMake <https://cmake.org/download/>`_
+  * run ``git lfs install`` to initialize Git LFS. (Note that if you miss this step you may get errors due to the third party libraries not checking out properly. This can be fixed later by running ``git lfs fetch`` and ``git lfs checkout`` in the ``external\src\ThirdParty`` directory.)
+
+* `CMake <https://cmake.org/download/>`_ >= 3.14
 * `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
 
   * open the MikTeX console from the start menu
@@ -67,7 +68,7 @@ Red Hat/Cent OS/Fedora
   # Enable the mantid repo from copr
   yum copr enable mantid/mantid
 
-  # Install dependencies 
+  # Install dependencies
   yum install mantid-developer
 
 Ubuntu
@@ -90,8 +91,19 @@ OSX
 ---
 The build environment on OS X is described here :ref:`BuildingOnOSX`.
 
+Docker
+------
+
+On Docker supported systems you may use the `mantid-development
+<https://github.com/mantidproject/dockerfiles/tree/master/mantid-development>`_
+images to develop Mantid without having to configure your system as a suitable
+build environment. This will give you an out of the box working build
+environment, including ParaView/VATES, Python 3 (where available) and ccache.
+
+More details and instructions can be found at the GitHub link above.
+
 Getting the Mantid code
-############################
+#######################
 We use `Git`_ as our version control system (VCS). The master copies of our repositories are located at `GitHub <http://github.com/mantidproject>`_. We have a number of repositories, of which the main one (the one containing all the source code for Mantid itself) is called simply `mantid <http://github.com/mantidproject/mantid>`_.
 
 If you are not already set up with Git, you can follow these `instructions <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_.

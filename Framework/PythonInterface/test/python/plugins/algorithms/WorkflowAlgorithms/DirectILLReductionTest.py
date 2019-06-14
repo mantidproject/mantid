@@ -10,7 +10,6 @@ import collections
 from mantid.api import mtd
 import numpy
 import numpy.testing
-from scipy import constants
 from testhelpers import illhelpers, run_algorithm
 import unittest
 
@@ -53,6 +52,7 @@ class DirectILLReductionTest(unittest.TestCase):
         mtd.clear()
 
     def testSuccessfulRun(self):
+        _add_natural_angle_step_parameter(self._TEST_WS_NAME)
         outWSName = 'outWS'
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
@@ -69,6 +69,7 @@ class DirectILLReductionTest(unittest.TestCase):
         detectorIds = list()
         for i in range(originalNDetectors):
             detectorIds.append(ws.getDetector(i).getID())
+        _add_natural_angle_step_parameter(ws)
         mtd.addOrReplace('inWS', ws)
         outWSName = 'outWS'
         algProperties = {
@@ -87,7 +88,39 @@ class DirectILLReductionTest(unittest.TestCase):
         groupIds += groupedWS.getDetector(1).getDetectorIDs()
         self.assertEqual(collections.Counter(detectorIds), collections.Counter(groupIds))
 
+    def testDetectorGroupingWithUserGivenAngleStep(self):
+        ws = illhelpers.create_poor_mans_in5_workspace(0.0, _groupingTestDetectors)
+        nhisto = ws.getNumberHistograms()
+        spectrumInfo = ws.spectrumInfo()
+        minAngle = 180.
+        maxAngle = 0.
+        for i in range(nhisto):
+            angle = numpy.rad2deg(spectrumInfo.twoTheta(i))
+            minAngle = min(minAngle, angle)
+            maxAngle = max(maxAngle, angle)
+        mtd.addOrReplace('inWS', ws)
+        outWSName = 'unused'
+        outSThetaWName = 'SofThetaW'
+        angleStep = 0.2
+        algProperties = {
+            'InputWorkspace': ws,
+            'OutputWorkspace': outWSName,
+            'GroupingAngleStep': angleStep,
+            'OutputSofThetaEnergyWorkspace': outSThetaWName,
+            'Transposing': 'Transposing OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(outSThetaWName in mtd)
+        SThetaWWS = mtd[outSThetaWName]
+        spectrumInfo = SThetaWWS.spectrumInfo()
+        firstAngleBin = int(minAngle / angleStep)
+        lastAngleBin = int(maxAngle / angleStep) + 1
+        expected = lastAngleBin - firstAngleBin
+        self.assertEqual(spectrumInfo.size(), expected)
+
     def testOutputIsDistribution(self):
+        _add_natural_angle_step_parameter(self._TEST_WS_NAME)
         outWSName = 'outWS'
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
@@ -104,6 +137,7 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(ws.isDistribution())
 
     def testERebinning(self):
+        _add_natural_angle_step_parameter(self._TEST_WS_NAME)
         outWSName = 'outWS'
         E0 = -2.
         dE = 0.13
@@ -122,7 +156,46 @@ class DirectILLReductionTest(unittest.TestCase):
         xs = ws.readX(0)
         numpy.testing.assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
 
+    def testHybridERebinningSingleUserRange(self):
+        outWSName = 'outWS'
+        E0 = -2.
+        dE = 0.13
+        E1 = E0 + 40 * dE
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'EnergyRebinning': '{},{},{}'.format(E0, dE, E1),
+            'Transposing': 'Transposing OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        xs = ws.readX(0)
+        numpy.testing.assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
+
+    def testHybridERebinningUserConstrainedAutoRange(self):
+        outWSName = 'outWS'
+        E0 = -0.23
+        E1 = 0.32
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'EnergyRebinning': '{},a,{}'.format(E0, E1),
+            'Transposing': 'Transposing OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        xs = ws.readX(0)
+        self.assertEqual(xs[0], E0)
+        self.assertEqual(xs[-1], E1)
+
     def testQRebinning(self):
+        _add_natural_angle_step_parameter(self._TEST_WS_NAME)
         outWSName = 'outWS'
         Q0 = 2.3
         dQ = 0.1
@@ -141,6 +214,7 @@ class DirectILLReductionTest(unittest.TestCase):
         numpy.testing.assert_almost_equal(xs, numpy.arange(Q0, Q1, dQ))
 
     def testQRebinningBinWidthOnly(self):
+        _add_natural_angle_step_parameter(self._TEST_WS_NAME)
         outWSName = 'outWS'
         dQ = 0.1
         algProperties = {
@@ -173,9 +247,19 @@ class DirectILLReductionTest(unittest.TestCase):
             return algName in algNames
 
 
+def _add_natural_angle_step_parameter(ws, step=1.0):
+    kwargs = {
+        'Workspace': ws,
+        'ParameterName': 'natural-angle-step',
+        'ParameterType': 'Number',
+        'Value': str(step)
+    }
+    run_algorithm('SetInstrumentParameter', **kwargs)
+
+
 def _groupingTestDetectors(ws):
     """Mask detectors for detector grouping tests."""
-    indexBegin = 63106  # Detector at L2 and at 2theta = 40.6.
+    indexBegin = 63105  # Detector at L2 and at 2theta = 40.6.
     kwargs = {
         'Workspace': ws,
         'StartWorkspaceIndex': 0,
@@ -183,20 +267,18 @@ def _groupingTestDetectors(ws):
         'child': True
     }
     run_algorithm('MaskDetectors', **kwargs)
-    referenceDetector = ws.getDetector(indexBegin)
-    reference2Theta1 = ws.detectorTwoTheta(referenceDetector)
-    referenceDetector = ws.getDetector(indexBegin + 256)
-    reference2Theta2 = ws.detectorTwoTheta(referenceDetector)
+    spectrumInfo = ws.spectrumInfo()
+    reference2Theta1 = spectrumInfo.twoTheta(indexBegin)
+    reference2Theta2 = spectrumInfo.twoTheta(indexBegin + 256)
     mask = list()
-    tolerance = numpy.deg2rad(0.01)
+    tolerance = numpy.deg2rad(0.3724)
     for i in range(indexBegin + 1, indexBegin + 10000):
-        det = ws.getDetector(i)
-        twoTheta = ws.detectorTwoTheta(det)
+        twoTheta = spectrumInfo.twoTheta(i)
         if abs(reference2Theta1 - twoTheta) >= tolerance and abs(reference2Theta2 - twoTheta) >= tolerance:
             mask.append(i)
     kwargs = {
         'Workspace': ws,
-        'DetectorList': mask,
+        'WorkspaceIndexList': mask,
         'child': True
     }
     run_algorithm('MaskDetectors', **kwargs)

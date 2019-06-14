@@ -56,9 +56,11 @@ double standardDeviation(const std::vector<double> &inputValues) {
   const auto inputSize = boost::numeric_cast<double>(inputValues.size());
   const auto mean =
       std::accumulate(inputValues.begin(), inputValues.end(), 0.0) / inputSize;
-  double sumOfXMinusMeanSquared = 0;
-  for (auto &&x : inputValues)
-    sumOfXMinusMeanSquared += (x - mean) * (x - mean);
+  const double sumOfXMinusMeanSquared =
+      std::accumulate(inputValues.cbegin(), inputValues.cend(), 0.,
+                      [mean](const auto sum, const auto x) {
+                        return sum + std::pow(x - mean, 2);
+                      });
   return sqrt(sumOfXMinusMeanSquared / (inputSize - 1));
 }
 
@@ -119,11 +121,11 @@ const std::string CalculateIqt::summary() const {
 
 void CalculateIqt::init() {
 
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The name of the sample workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("ResolutionWorkspace", "",
-                                                   Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The name of the sample workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ResolutionWorkspace",
+                                                        "", Direction::Input),
                   "The name of the resolution workspace.");
 
   declareProperty("EnergyMin", -0.5, "Minimum energy for fit. Default = -0.5.");
@@ -139,8 +141,8 @@ void CalculateIqt::init() {
       "SeedValue", DEFAULT_SEED, positiveInt,
       "Seed the random number generator for monte-carlo error calculation.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace.");
 
   declareProperty("CalculateErrors", true, "Calculate monte-carlo errors.");

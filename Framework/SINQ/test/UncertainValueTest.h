@@ -33,7 +33,7 @@ public:
     TS_ASSERT_EQUALS(noError.value(), 2.0);
     TS_ASSERT_EQUALS(noError.error(), 0.0);
 
-    TS_ASSERT_THROWS(UncertainValue(0.0, -3.0), std::domain_error);
+    TS_ASSERT_THROWS(UncertainValue(0.0, -3.0), const std::domain_error &);
   }
 
   void testPlainAddition() {
@@ -61,7 +61,7 @@ public:
     UncertainValue invalid(2.0, 0.0);
 
     TS_ASSERT_THROWS(UncertainValue::valueToErrorRatio(invalid),
-                     std::domain_error);
+                     const std::domain_error &);
   }
 
   void testErrorToValueRatio() {
@@ -73,7 +73,7 @@ public:
 
     UncertainValue invalid(0.0, 2.0);
     TS_ASSERT_THROWS(UncertainValue::errorToValueRatio(invalid),
-                     std::domain_error);
+                     const std::domain_error &);
   }
 
   void testdoubleOperator() {
@@ -108,8 +108,8 @@ public:
     TS_ASSERT_EQUALS(newerValue.value(), 4.0);
     TS_ASSERT_EQUALS(newerValue.error(), 0.8);
 
-    TS_ASSERT_THROWS(newValue / 0.0, std::domain_error);
-    TS_ASSERT_THROWS(2.0 / UncertainValue(0.0), std::domain_error);
+    TS_ASSERT_THROWS(newValue / 0.0, const std::domain_error &);
+    TS_ASSERT_THROWS(2.0 / UncertainValue(0.0), const std::domain_error &);
   }
 
   void testadditionOperator() {

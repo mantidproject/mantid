@@ -14,7 +14,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -236,6 +236,14 @@ public:
     TS_ASSERT_EQUALS(p.getHKL(), V3D(1.0, 2.0, 3.0));
   }
 
+  void test_samplePos() {
+    Peak p(inst, 10000, 2.0);
+    p.setSamplePos(1.0, 1.0, 1.0);
+    TS_ASSERT_EQUALS(p.getSamplePos(), V3D(1.0, 1.0, 1.0));
+    p.setSamplePos(V3D(2.0, 2.0, 2.0));
+    TS_ASSERT_EQUALS(p.getSamplePos(), V3D(2.0, 2.0, 2.0));
+  }
+
   void test_getBank_and_row() {
     Peak p(inst, 10000, 2.0);
     TS_ASSERT_EQUALS(p.getBankName(), "bank1")
@@ -388,7 +396,7 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
     auto extendedSpaceObj =
         ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = Mantid::Kernel::make_unique<ObjComponent>(
+    auto extendedSpace = std::make_unique<ObjComponent>(
         "extended-detector-space", extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
     sphereInst->add(extendedSpace.release());
@@ -464,7 +472,7 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
     auto extendedSpaceObj =
         ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = Mantid::Kernel::make_unique<ObjComponent>(
+    auto extendedSpace = std::make_unique<ObjComponent>(
         "extended-detector-space", extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
     sphereInst->add(extendedSpace.release());

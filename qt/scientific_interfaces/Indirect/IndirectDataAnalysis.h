@@ -6,13 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
-
-//----------------------
-// Includes
-//----------------------
-#include "IndirectTab.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectDataAnalysis.h"
+
+#include "IndirectInterface.h"
+#include "IndirectTab.h"
 
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>
@@ -42,7 +39,7 @@ class IndirectDataAnalysisTab;
  *
  * Is a friend to the IndirectDataAnalysisTab class.
  */
-class IndirectDataAnalysis : public MantidQt::API::UserSubWindow {
+class IndirectDataAnalysis : public IndirectInterface {
   Q_OBJECT
 
   /// Allow IndirectDataAnalysisTab to have access.
@@ -51,7 +48,7 @@ class IndirectDataAnalysis : public MantidQt::API::UserSubWindow {
 public:
   /// The name of the interface as registered into the factory
   static std::string name() { return "Data Analysis"; }
-  // This interface's categories.
+  /// This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
   /// Default Constructor
   explicit IndirectDataAnalysis(QWidget *parent = nullptr);
@@ -65,24 +62,26 @@ private:
   void loadSettings();
 
   /// Called upon a close event.
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
 private slots:
+  /// Sets the active workspace in the selected tab
+  void tabChanged(int index);
   /// Called when the user clicks the Py button
   void exportTabPython();
-  /// Opens a directory dialog.
-  void openDirectoryDialog();
-  /// Opens the Mantid Wiki web page of the current tab.
-  void help();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
 
 private:
+  std::string documentationPage() const override;
+
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
+
   /// UI form containing all Qt elements.
   Ui::IndirectDataAnalysis m_uiForm;
+  /// The settings group
+  QString m_settingsGroup;
   /// Integer validator
   QIntValidator *m_valInt;
   /// Double validator

@@ -44,35 +44,34 @@ Usage
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
-       OutputBeamPositionWorkspace='direct_beam_pos',  # For reflected angle calibration.
        **settings
    )
-   directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
+
+   directFgd = ReflectometryILLSumForeground(direct)
    
    # Reflected beam. Flippers set to '++'
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectBeamPositionWorkspace='direct_beam_pos',
+       DirectLineWorkspace=direct,
        **settings
    )
    
    reflectivity11 = ReflectometryILLSumForeground(
        InputWorkspace=reflected11,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectLineWorkspace=direct,
        WavelengthRange=[2, 15],
    )
    # Reload the reflected be. We will fake the '--' flipper settings
    reflected00 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectBeamPositionWorkspace='direct_beam_pos',
        **settings
    )
    
    reflectivity00 = ReflectometryILLSumForeground(
        InputWorkspace=reflected00,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectLineWorkspace=direct,
        WavelengthRange=[2, 15],
    )
    # Overwrite sample logs

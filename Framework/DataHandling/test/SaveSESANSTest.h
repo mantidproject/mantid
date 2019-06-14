@@ -49,7 +49,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("InputWorkspace", ws));
 
     // Should throw, as we can't save more than one histogram
-    TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
   }
 
   void test_exec() {
@@ -96,9 +96,9 @@ public:
 
     // Check (a small sample of) the values we wrote are correct
     TS_ASSERT_EQUALS(static_cast<int>(data->getNumberHistograms()), 1);
-    auto xValues = data->x(0);
-    auto yValues = data->y(0);
-    auto eValues = data->e(0);
+    const auto &xValues = data->x(0);
+    const auto &yValues = data->y(0);
+    const auto &eValues = data->e(0);
 
     TS_ASSERT_EQUALS(static_cast<int>(xValues.size()), 10);
     TS_ASSERT_EQUALS(static_cast<int>(yValues.size()), 10);

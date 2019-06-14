@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include <MantidKernel/System.h>
 #include <vector>
 
 #ifndef INTERFACES_MANTID_EV_WORKER_H
@@ -45,14 +45,12 @@ public:
   bool isEventWorkspace(const std::string &event_ws_name);
 
   /// Load and event file and convert to MD workspace
-  bool loadAndConvertToMD(const std::string &file_name,
-                          const std::string &ev_ws_name,
-                          const std::string &md_ws_name, const double modQ,
-                          const double minQ, const double maxQ,
-                          const bool do_lorentz_corr, const bool load_data,
-                          const bool load_det_cal,
-                          const std::string &det_cal_file,
-                          const std::string &det_cal_file2);
+  bool loadAndConvertToMD(
+      const std::string &file_name, const std::string &ev_ws_name,
+      const std::string &md_ws_name, const double modQ, const double minQ,
+      const double maxQ, const bool do_lorentz_corr, const bool load_data,
+      const bool load_det_cal, const std::string &det_cal_file,
+      const std::string &det_cal_file2, const std::string &axisCORELLI);
   bool convertToHKL(const std::string &ev_ws_name,
                     const std::string &md_ws_name, const double minQ,
                     const double maxQ);
@@ -61,7 +59,7 @@ public:
   bool findPeaks(const std::string &ev_ws_name, const std::string &md_ws_name,
                  const std::string &peaks_ws_name, double max_abc,
                  size_t num_to_find, double min_intensity, double minQPeaks,
-                 double maxQPeaks);
+                 double maxQPeaks, const std::string &file_name);
 
   /// Predict peaks and overwrite the peaks workspace
   bool predictPeaks(const std::string &peaks_ws_name, double min_pred_wl,

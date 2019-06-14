@@ -150,7 +150,8 @@ public:
     double minE;
     double maxE;
     ws->getXMinMax(minE, maxE);
-    const auto minmaxQ = s.qBinHints(*ws, minE, maxE);
+    std::pair<double, double> minmaxQ;
+    TS_ASSERT_THROWS_NOTHING(minmaxQ = s.qBinHints(*ws, minE, maxE))
     TS_ASSERT(minmaxQ.first < minmaxQ.second)
     TS_ASSERT_EQUALS(minmaxQ.first, minQ)
     TS_ASSERT_DELTA(minmaxQ.second, maxQ, 1e-12)

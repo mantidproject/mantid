@@ -4,6 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -22,7 +23,6 @@ using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::TableRow;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
-
 namespace {
 
 /**
@@ -91,7 +91,6 @@ MuonAnalysisResultTableCreator::MuonAnalysisResultTableCreator(
         "Log values passed in to result table creator are null!");
   }
 }
-
 /**
  * Create a results table with the given options
  * @returns :: results table workspace
@@ -129,9 +128,13 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   for (const auto &log : m_logs) {
 
     auto val = valMap[log];
-    // multiple files use strings due to x-y format
-    if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+    auto dashIndex = val.toString().indexOf("-");
 
+    // multiple files use strings due to x-y format
+    if (dashIndex != 0 && dashIndex != -1) {
+      addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
+               !log.endsWith(" (text)")) {
       addColumnToResultsTable(table, wsParamsByLabel, log); //
 
     } else {
@@ -231,11 +234,14 @@ MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
   if (const auto &wsGroup =
           AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
               "MuonSimulFit_" + label)) {
-    for (const auto &name : wsGroup->getNames()) {
-      if (name.find("_Parameters") != std::string::npos) {
-        return boost::dynamic_pointer_cast<ITableWorkspace>(
-            wsGroup->getItem(name));
-      }
+    const auto wsNames = wsGroup->getNames();
+    const auto found =
+        std::find_if(wsNames.cbegin(), wsNames.cend(), [](const auto &name) {
+          return name.find("_Parameters") != std::string::npos;
+        });
+    if (found != wsNames.cend()) {
+      return boost::dynamic_pointer_cast<ITableWorkspace>(
+          wsGroup->getItem(*found));
     }
     throw std::runtime_error("Could not retrieve parameters table for label " +
                              label);
@@ -252,8 +258,9 @@ MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
  */
 void MuonAnalysisResultTableCreator::checkSameFitModel() const {
   std::vector<ITableWorkspace_sptr> paramTables;
+  paramTables.reserve(static_cast<size_t>(m_items.size()));
   for (const auto &item : m_items) {
-    paramTables.push_back(getFitParametersTable(item));
+    paramTables.emplace_back(getFitParametersTable(item));
   }
   if (!haveSameParameters(paramTables)) {
     throw std::runtime_error(
@@ -498,13 +505,15 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
-      } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+      } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
+                 !log.endsWith(" (text)")) {
         valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
       }
 
-      if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+      if (MuonAnalysisHelper::isNumber(val.toString()) &&
+          !log.endsWith(" (text)")) {
         row << valueToWrite.toDouble();
       } else {
         row << valueToWrite.toStdString();
@@ -541,13 +550,13 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
   for (const auto &wsName : paramsByLabel[labelName].keys()) {
     const auto &logValues = m_logValues->value(wsName);
     const auto &val = logValues[log];
-
     // Special case: if log is time in sec, subtract the first start time
     if (log.endsWith(" (s)")) {
       auto seconds =
           val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
       valuesPerWorkspace.append(QString::number(seconds));
-    } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+    } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
+               !log.endsWith(" (text)")) {
 
       valuesPerWorkspace.append(QString::number(val.toDouble()));
 
@@ -556,6 +565,13 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
     }
   }
   valuesPerWorkspace.sort();
+
+  auto dashIndex = valuesPerWorkspace.front().toStdString().find_first_of("-");
+  if (dashIndex != std::string::npos && dashIndex != 0) {
+
+    addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    return;
+  }
   const auto &min = valuesPerWorkspace.front().toDouble();
   const auto &max = valuesPerWorkspace.back().toDouble();
   if (min == max) {
@@ -594,12 +610,16 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
         const auto &logValues = m_logValues->value(wsName);
         const auto &val = logValues[log];
 
+        auto dashIndex = val.toString().indexOf("-");
         // Special case: if log is time in sec, subtract the first start time
         if (log.endsWith(" (s)")) {
           auto seconds =
               val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
-        } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+        } else if (dashIndex != 0 && dashIndex != -1) {
+          valuesPerWorkspace.append(logValues[log].toString());
+        } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
+                   !log.endsWith(" (text)")) {
 
           valuesPerWorkspace.append(QString::number(val.toDouble()));
 
@@ -612,15 +632,42 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       // Why not use std::minmax_element? To avoid MSVC warning: QT bug 41092
       // (https://bugreports.qt.io/browse/QTBUG-41092)
       valuesPerWorkspace.sort();
-      const auto &min = valuesPerWorkspace.front().toDouble();
-      const auto &max = valuesPerWorkspace.back().toDouble();
-      if (min == max) {
-        row << min;
-      } else {
+
+      auto dashIndex =
+          valuesPerWorkspace.front().toStdString().find_first_of("-");
+      if (dashIndex != std::string::npos && dashIndex != 0) {
         std::ostringstream oss;
-        oss << valuesPerWorkspace.front().toStdString() << "-"
-            << valuesPerWorkspace.back().toStdString();
+        auto dad = valuesPerWorkspace.front().toStdString();
+        oss << valuesPerWorkspace.front().toStdString();
         row << oss.str();
+
+      } else {
+        if (MuonAnalysisHelper::isNumber(valuesPerWorkspace.front())) {
+          const auto &min = valuesPerWorkspace.front().toDouble();
+          const auto &max = valuesPerWorkspace.back().toDouble();
+          if (min == max) {
+            row << min;
+          } else {
+            std::ostringstream oss;
+            oss << valuesPerWorkspace.front().toStdString() << "-"
+                << valuesPerWorkspace.back().toStdString();
+            row << oss.str();
+          }
+        } else {
+          const auto &front = valuesPerWorkspace.front().toStdString();
+          const auto &back = valuesPerWorkspace.back().toStdString();
+          if (front == back) {
+            row << front;
+          } else {
+            std::ostringstream oss;
+            oss << valuesPerWorkspace[0].toStdString();
+
+            for (int k = 1; k < valuesPerWorkspace.size(); k++) {
+              oss << ", " << valuesPerWorkspace[k].toStdString();
+              row << oss.str();
+            }
+          }
+        }
       }
       columnIndex++;
     }

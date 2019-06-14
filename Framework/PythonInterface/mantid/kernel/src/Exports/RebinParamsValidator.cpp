@@ -26,5 +26,7 @@ void export_RebinParamsValidator() {
       .def("__init__",
            make_constructor(
                &createRebinParamsValidator, default_call_policies(),
-               (arg("AllowEmpty") = false, arg("AllowRange") = false)));
+               (arg("AllowEmpty") = false, arg("AllowRange") = false)),
+           "Constructs a validator verifying that the given float array is "
+           "valid sequence of rebinning parameters.");
 }

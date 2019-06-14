@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffMultiRunFittingQtWidget.h"
 
-#include "MantidKernel/make_unique.h"
-
 namespace {
 
 MantidQt::CustomInterfaces::RunLabel
@@ -18,7 +16,7 @@ parseListWidgetItem(const QString &listWidgetItem) {
         "Unexpected run label: \"" + listWidgetItem.toStdString() +
         "\". Please contact the development team with this message");
   }
-  return MantidQt::CustomInterfaces::RunLabel(pieces[0].toInt(),
+  return MantidQt::CustomInterfaces::RunLabel(pieces[0].toStdString(),
                                               pieces[1].toUInt());
 }
 
@@ -32,7 +30,7 @@ EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
     : m_pythonRunner(pythonRunner) {
   setupUI();
 
-  m_zoomTool = Mantid::Kernel::make_unique<QwtPlotZoomer>(
+  m_zoomTool = std::make_unique<QwtPlotZoomer>(
       QwtPlot::xBottom, QwtPlot::yLeft,
       QwtPicker::DragSelection | QwtPicker::CornerToCorner,
       QwtPicker::AlwaysOff, m_ui.plotArea->canvas());
@@ -85,7 +83,7 @@ void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFittedPeaks(
     const RunLabel &runLabel) {
   userError("Invalid fitted peaks identifier",
             "Tried to plot invalid fitted peaks, run number " +
-                std::to_string(runLabel.runNumber) + " and bank ID " +
+                runLabel.runNumber + " and bank ID " +
                 std::to_string(runLabel.bank) +
                 ". Please contact the development team with this message");
 }
@@ -94,7 +92,7 @@ void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFocusedRun(
     const RunLabel &runLabel) {
   userError("Invalid focused run identifier",
             "Tried to plot invalid focused run, run number " +
-                std::to_string(runLabel.runNumber) + " and bank ID " +
+                runLabel.runNumber + " and bank ID " +
                 std::to_string(runLabel.bank) +
                 ". Please contact the development team with this message");
 }
@@ -111,7 +109,7 @@ void EnggDiffMultiRunFittingQtWidget::plotFittedPeaksStateChanged() {
 void EnggDiffMultiRunFittingQtWidget::plotFittedPeaks(
     const std::vector<boost::shared_ptr<QwtData>> &curves) {
   for (const auto &curve : curves) {
-    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
+    auto plotCurve = std::make_unique<QwtPlotCurve>();
 
     plotCurve->setPen(QColor(Qt::red));
     plotCurve->setData(*curve);
@@ -131,7 +129,7 @@ void EnggDiffMultiRunFittingQtWidget::processPlotToSeparateWindow() {
 void EnggDiffMultiRunFittingQtWidget::plotFocusedRun(
     const std::vector<boost::shared_ptr<QwtData>> &curves) {
   for (const auto &curve : curves) {
-    auto plotCurve = Mantid::Kernel::make_unique<QwtPlotCurve>();
+    auto plotCurve = std::make_unique<QwtPlotCurve>();
 
     plotCurve->setData(*curve);
     plotCurve->attach(m_ui.plotArea);
@@ -240,7 +238,7 @@ void EnggDiffMultiRunFittingQtWidget::updateRunList(
     const std::vector<RunLabel> &runLabels) {
   m_ui.listWidget_runLabels->clear();
   for (const auto &runLabel : runLabels) {
-    const auto labelStr = QString::number(runLabel.runNumber) + tr("_") +
+    const auto labelStr = QString(runLabel.runNumber.c_str()) + tr("_") +
                           QString::number(runLabel.bank);
     m_ui.listWidget_runLabels->addItem(labelStr);
   }

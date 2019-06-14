@@ -48,16 +48,16 @@ class ConfigServiceTest(unittest.TestCase):
         facilities = config.getFacilities()
         names = config.getFacilityNames()
 
-        self.assertTrue(len(names)>0)
-        self.assertEquals(len(names),len(facilities))
+        self.assertGreater(len(names), 0)
+        self.assertEqual(len(names),len(facilities))
         for i in range(len(names)):
-            self.assertEquals(names[i],facilities[i].name())
+            self.assertEqual(names[i],facilities[i].name())
 
     def test_update_and_set_facility(self):
         self.assertFalse("TEST" in config.getFacilityNames())
         ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"unit_testing/UnitTestFacilities.xml"))
         ConfigService.setFacility("TEST")
-        self.assertEquals(config.getFacility().name(), "TEST")
+        self.assertEqual(config.getFacility().name(), "TEST")
         self.assertRaises(RuntimeError, config.getFacility, "SNS")
 
     def test_getInstrumentReturns_A_InstrumentInfo_Object(self):
@@ -69,14 +69,14 @@ class ConfigServiceTest(unittest.TestCase):
         self.assertTrue(config.hasProperty(test_prop))
         dictcall = config[test_prop]
         fncall = config.getString(test_prop)
-        self.assertEquals(dictcall, fncall)
+        self.assertEqual(dictcall, fncall)
         self.assertNotEqual(config[test_prop], "")
 
         old_value = fncall
         config.setString(test_prop, "1")
-        self.assertEquals(config.getString(test_prop), "1")
+        self.assertEqual(config.getString(test_prop), "1")
         config[test_prop] =  "2"
-        self.assertEquals(config.getString(test_prop), "2")
+        self.assertEqual(config.getString(test_prop), "2")
 
         config.setString(test_prop, old_value)
 
@@ -84,7 +84,7 @@ class ConfigServiceTest(unittest.TestCase):
         """Retrieve the search paths
         """
         paths = config.getDataSearchDirs()
-        self.assertEquals(type(paths), std_vector_str)
+        self.assertEqual(type(paths), std_vector_str)
         self.assert_(len(paths) > 0)
 
     def test_setting_paths(self):
@@ -139,7 +139,6 @@ class ConfigServiceTest(unittest.TestCase):
                            'UpdateInstrumentDefinitions.URL', # shouldn't be changed by users
                            'docs.html.root', # shouldn't be changed by users
                            'errorreports.rooturl', # shouldn't be changed by users
-                           'openclKernelFiles.directory', # only available if OPENCL_BUILD is enabled
                            'usagereports.rooturl', # shouldn't be changed by users
                            'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
                            'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu
@@ -160,7 +159,7 @@ class ConfigServiceTest(unittest.TestCase):
                            'usersearch.directories',
 
                            ########## TODO should these be documented?
-                           'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance',
+                           'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',
                            'logging.channels.consoleChannel.class', 'logging.channels.consoleChannel.formatter', 'logging.formatters.f1.class', 'logging.formatters.f1.pattern', 'logging.formatters.f1.times', 'logging.loggers.root.channel.channel1', 'logging.loggers.root.channel.class',
                            'MantidOptions.ReusePlotInstances',
                            'mantidqt.python_interfaces', 'mantidqt.python_interfaces_directory',

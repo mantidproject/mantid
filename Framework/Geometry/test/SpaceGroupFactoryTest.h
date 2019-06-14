@@ -49,7 +49,7 @@ public:
 
     // subscribing twice does not work
     TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // but having a different symbol for the same number is ok.
     TS_ASSERT_THROWS_NOTHING(
@@ -58,11 +58,11 @@ public:
     // neither does with a tabulated space group
     TS_ASSERT_THROWS(
         factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // Different number with same symbol - does not work
     TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(3, "P-1", "-x,-y,-z"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // invalid generators are caught before anything is done
     TS_ASSERT_THROWS_ANYTHING(
@@ -87,7 +87,7 @@ public:
     // subscribing twice does not work
     TS_ASSERT_THROWS(
         factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // but having a different symbol for the same number is ok.
     TS_ASSERT_THROWS_NOTHING(
@@ -95,11 +95,11 @@ public:
 
     // neither does with a generated space group
     TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // Different number with same symbol - does not work
     TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(3, "P-1", "-x,-y,-z"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // invalid generators are caught before anything is done
     TS_ASSERT_THROWS_ANYTHING(
@@ -209,7 +209,7 @@ public:
     TestableSpaceGroupFactory factory;
 
     TS_ASSERT_THROWS(factory.unsubscribeSpaceGroup("P-1"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(
         factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
@@ -285,7 +285,7 @@ public:
     TransformationSpaceGroupGenerator generator(1, "fake symbol",
                                                 "Fake base symbol | -x+z,y,-x");
 
-    TS_ASSERT_THROWS(generator.getPrototype(), std::invalid_argument);
+    TS_ASSERT_THROWS(generator.getPrototype(), const std::invalid_argument &);
   }
 
   void testTransformationSpaceGroupGenerator_succeeds_with_registered_base() {
@@ -326,7 +326,7 @@ public:
   void test_OperatorSymOpString_too_short() {
     std::vector<std::string> strings{"a", "b"};
     TS_ASSERT_THROWS(SymmetryOperation("x,y,z") * strings,
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_OperatorSymOpString_correctness() {

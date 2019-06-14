@@ -13,8 +13,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
@@ -26,6 +26,7 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace Mantid::DataObjects;
 using namespace Kernel;
 using API::Progress;
 using std::size_t;
@@ -37,29 +38,32 @@ DECLARE_ALGORITHM(EstimateMuonAsymmetryFromCounts)
  *
  */
 void EstimateMuonAsymmetryFromCounts::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "The name of the input 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "The name of the input 2D workspace.");
   declareProperty("WorkspaceName", "",
                   "The name used in the normalization "
                   "table. If this is blank the "
                   "InputWorkspace's name will be used.");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output 2D workspace.");
   declareProperty(
       "OutputUnNormData", false,
       "If to output the data with just the exponential decay removed.");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputUnNormWorkspace", "unNormalisedData",
-                      Direction::Output, API::PropertyMode::Optional),
-                  "The name of the output unnormalized workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputUnNormWorkspace", "unNormalisedData", Direction::Output,
+          API::PropertyMode::Optional),
+      "The name of the output unnormalized workspace.");
 
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
+      std::make_unique<Kernel::ArrayProperty<int>>("Spectra", std::move(empty)),
       "The workspace indices to remove the exponential decay from.");
   declareProperty(
       "StartX", 0.1,
@@ -73,7 +77,7 @@ void EstimateMuonAsymmetryFromCounts::init() {
                   "instead of being estimated.");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "NormalizationTable", "", Direction::InOut,
           API::PropertyMode::Optional),
       "Name of the table containing the normalizations for the asymmetries.");
@@ -120,11 +124,10 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   // Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS != outputWS) {
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<API::MatrixWorkspace>(*inputWS);
   }
   bool extraData = getProperty("OutputUnNormData");
-  API::MatrixWorkspace_sptr unnormWS =
-      API::WorkspaceFactory::Instance().create(outputWS);
+  API::MatrixWorkspace_sptr unnormWS = create<API::MatrixWorkspace>(*outputWS);
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
   const Mantid::API::Run &run = inputWS->run();
@@ -196,7 +199,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->setHistogram(
         specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     if (extraData) {
-      unnormWS->mutableX(specNum) = outputWS->x(specNum);
+      unnormWS->setSharedX(specNum, outputWS->sharedX(specNum));
       unnormWS->mutableY(specNum) = outputWS->y(specNum);
       unnormWS->mutableE(specNum) = outputWS->e(specNum);
     }

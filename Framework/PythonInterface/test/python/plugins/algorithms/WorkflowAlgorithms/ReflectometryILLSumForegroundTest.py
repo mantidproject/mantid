@@ -21,8 +21,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
     def testDirectBeamSummationExecutes(self):
         ws = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(ws, 1.2)
-        beamPosWS = illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 1.2, 128)
-        ws = illhelpers.refl_preprocess('ws', ws, beamPosWS)
+        ws = illhelpers.refl_add_line_position(ws, 128.0)
+        ws = illhelpers.refl_add_two_theta(ws, 5.5)
+        ws = illhelpers.refl_preprocess('ws', ws)
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': 'foreground',
@@ -37,8 +38,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.add_chopper_configuration_D17(dirWS)
         illhelpers.add_slit_configuration_D17(dirWS, 0.03, 0.02)
-        dirBeamPosWS = illhelpers.refl_create_beam_position_ws('dirBeamPosWS', dirWS, 0., 128)
-        dirWS = illhelpers.refl_preprocess('dirWS', dirWS, dirBeamPosWS)
+        dirWS = illhelpers.refl_add_line_position(dirWS, 128.0)
+        dirWS = illhelpers.refl_add_two_theta(dirWS, 6.7)
+        dirWS = illhelpers.refl_preprocess('dirWS', dirWS)
         args = {
             'InputWorkspace': dirWS,
             'OutputWorkspace': 'dirForeground',
@@ -53,14 +55,15 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         illhelpers.refl_rotate_detector(reflWS, 1.2)
         illhelpers.add_chopper_configuration_D17(reflWS)
         illhelpers.add_slit_configuration_D17(reflWS, 0.03, 0.02)
-        reflBeamPosWS = illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.2, 128)
-        reflWS = illhelpers.refl_preprocess('refWS', reflWS, reflBeamPosWS)
+        reflWS = illhelpers.refl_add_line_position(reflWS, 128.0)
+        reflWS = illhelpers.refl_add_two_theta(reflWS, 6.7)
+        reflWS = illhelpers.refl_preprocess('refWS', reflWS)
         args = {
             'InputWorkspace': reflWS,
             'OutputWorkspace': 'foreground',
             'DirectForegroundWorkspace': dirForeground,
             'SummationType': 'SumInLambda',
-            'DirectBeamWorkspace': dirWS,
+            'DirectLineWorkspace': dirWS,
             'rethrow': True,
             'child': True
         }
@@ -72,8 +75,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.add_chopper_configuration_D17(dirWS)
         illhelpers.add_slit_configuration_D17(dirWS, 0.02, 0.03)
-        dirBeamPosWS = illhelpers.refl_create_beam_position_ws('dirBeamPosWS', dirWS, 0., 128)
-        dirWS = illhelpers.refl_preprocess('dirWS', dirWS, dirBeamPosWS)
+        dirWS = illhelpers.refl_add_line_position(dirWS, 128.0)
+        dirWS = illhelpers.refl_add_two_theta(dirWS, 5.5)
+        dirWS = illhelpers.refl_preprocess('dirWS', dirWS)
         args = {
             'InputWorkspace': dirWS,
             'OutputWorkspace': 'dirForeground',
@@ -88,14 +92,15 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         illhelpers.refl_rotate_detector(reflWS, 1.2)
         illhelpers.add_chopper_configuration_D17(reflWS)
         illhelpers.add_slit_configuration_D17(reflWS, 0.02, 0.03)
-        reflBeamPosWS = illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.2, 128)
-        reflWS = illhelpers.refl_preprocess('refWS', reflWS, reflBeamPosWS)
+        reflWS = illhelpers.refl_add_line_position(reflWS, 128.0)
+        reflWS = illhelpers.refl_add_two_theta(reflWS, 6.7)
+        reflWS = illhelpers.refl_preprocess('refWS', reflWS)
         args = {
             'InputWorkspace': reflWS,
             'OutputWorkspace': 'foreground',
             'DirectForegroundWorkspace': dirForeground,
             'SummationType': 'SumInQ',
-            'DirectBeamWorkspace': dirWS,
+            'DirectLineWorkspace': dirWS,
             'rethrow': True,
             'child': True
         }
@@ -133,7 +138,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
             'InputWorkspace': 'reflected',
             'OutputWorkspace': 'reflected-fgd',
             'DirectForegroundWorkspace': 'direct-fgd',
-            'DirectBeamWorkspace': 'direct'
+            'DirectLineWorkspace': 'direct'
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
@@ -142,8 +147,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
     def testWavelengthRange(self):
         ws = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(ws, 1.2)
-        beamPosWS = illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 1.2, 128)
-        ws = illhelpers.refl_preprocess('ws', ws, beamPosWS)
+        ws = illhelpers.refl_add_line_position(ws, 128.0)
+        ws = illhelpers.refl_add_two_theta(ws, 5.5)
+        ws = illhelpers.refl_preprocess('ws', ws)
         xMin = 2.3
         xMax = 4.2
         args = {
@@ -156,7 +162,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
         out = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(out.getNumberHistograms(), 1)
+        self.assertEqual(out.getNumberHistograms(), 1)
         Xs = out.readX(0)
         self.assertGreater(len(Xs), 1)
         self.assertGreater(Xs[0], xMin)
@@ -165,8 +171,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
     def testWavelengthRangeDefault(self):
         ws = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(ws, 1.2)
-        beamPosWS = illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 1.2, 128)
-        ws = illhelpers.refl_preprocess('ws', ws, beamPosWS)
+        ws = illhelpers.refl_add_line_position(ws, 128.0)
+        ws = illhelpers.refl_add_two_theta(ws, 5.5)
+        ws = illhelpers.refl_preprocess('ws', ws)
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': 'foreground',
@@ -176,7 +183,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
         out = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(out.getNumberHistograms(), 1)
+        self.assertEqual(out.getNumberHistograms(), 1)
         Xs = out.readX(0)
         self.assertGreater(len(Xs), 1)
         self.assertGreater(Xs[0], 0.)
@@ -185,8 +192,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
     def testNoDirectForegroundAndSumInQRaises(self):
         ws = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(ws, 1.2)
-        beamPosWS = illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 1.2, 128)
-        ws = illhelpers.refl_preprocess('ws', ws, beamPosWS)
+        ws = illhelpers.refl_add_line_position(ws, 128.0)
+        ws = illhelpers.refl_add_two_theta(ws, 5.5)
+        ws = illhelpers.refl_preprocess('ws', ws)
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': 'foreground',
@@ -201,8 +209,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
     def testNotSummedDirectForegroundRaises(self):
         ws = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(ws, 1.2)
-        beamPosWS = illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 1.2, 128)
-        ws = illhelpers.refl_preprocess('ws', ws, beamPosWS)
+        ws = illhelpers.refl_add_line_position(ws, 128.0)
+        ws = illhelpers.refl_add_two_theta(ws, 5.5)
+        ws = illhelpers.refl_preprocess('ws', ws)
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': 'foreground',

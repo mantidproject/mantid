@@ -9,9 +9,14 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace {
 const std::array<std::string, 2> phaseNames = {{"phase", "phi"}};
@@ -49,18 +54,20 @@ DECLARE_ALGORITHM(PhaseQuadMuon)
  *
  */
 void PhaseQuadMuon::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "Name of the input workspace containing the spectra");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "Name of the input workspace containing the spectra");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "PhaseTable", "", Direction::Input),
       "Name of the table containing the detector phases and asymmetries");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Name of the output workspace");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "Name of the output workspace");
 }
 
 /** Executes the algorithm
@@ -125,16 +132,12 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   int phaseCount = 0;
   int asymmetryCount = 0;
   for (const std::string &name : names) {
-    for (const std::string &goodName : phaseNames) {
-      if (name == goodName) {
-        phaseCount += 1;
-      }
-    }
-    for (const std::string &goodName : asymmNames) {
-      if (name == goodName) {
-        asymmetryCount += 1;
-      }
-    }
+    phaseCount += static_cast<int>(std::count_if(
+        phaseNames.cbegin(), phaseNames.cend(),
+        [&name](const auto &goodName) { return goodName == name; }));
+    asymmetryCount += static_cast<int>(std::count_if(
+        asymmNames.cbegin(), asymmNames.cend(),
+        [&name](const auto &goodName) { return goodName == name; }));
   }
   if (phaseCount == 0) {
     result["PhaseTable"] = "PhaseTable needs phases column";
@@ -257,7 +260,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     for (size_t h = 0; h < nspec; h++) {
       emptySpectrum.push_back(
           std::all_of(ws->y(h).begin(), ws->y(h).end(),
-                      [](double value) { return value == 0.; }));
+                      [](double value) { return value == 0.; }) ||
+          phase->Double(h, asymmetryIndex) == ASYMM_ERROR);
       if (!emptySpectrum[h]) {
         const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
         const double phi = phase->Double(h, phaseIndex);
@@ -291,7 +295,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   const size_t npoints = ws->blocksize();
   // Create and populate output workspace
   API::MatrixWorkspace_sptr ows =
-      API::WorkspaceFactory::Instance().create(ws, 2, npoints + 1, npoints);
+      create<API::MatrixWorkspace>(*ws, 2, BinEdges(npoints + 1));
 
   // X
   ows->setSharedX(0, ws->sharedX(0));

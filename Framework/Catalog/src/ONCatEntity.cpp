@@ -8,7 +8,6 @@
 #include "MantidCatalog/Exception.h"
 #include "MantidKernel/StringTokenizer.h"
 
-#include <iostream>
 #include <sstream>
 
 namespace Mantid {
@@ -17,7 +16,6 @@ namespace ONCat {
 
 using Mantid::Catalog::Exception::MalformedRepresentationError;
 using Mantid::Kernel::StringTokenizer;
-using Mantid::Kernel::make_unique;
 
 ONCatEntity::ONCatEntity(const std::string &id, const std::string &type,
                          Content_uptr content)
@@ -25,7 +23,7 @@ ONCatEntity::ONCatEntity(const std::string &id, const std::string &type,
 
 ONCatEntity::ONCatEntity(const ONCatEntity &other)
     : m_id(other.m_id), m_type(other.m_type),
-      m_content(make_unique<Content>(*other.m_content)) {}
+      m_content(std::make_unique<Content>(*other.m_content)) {}
 
 ONCatEntity::~ONCatEntity() {}
 
@@ -38,7 +36,7 @@ std::string ONCatEntity::toString() const {
 }
 
 ONCatEntity ONCatEntity::fromJSONStream(std::istream &streamContent) {
-  auto content = make_unique<Content>();
+  auto content = std::make_unique<Content>();
 
   try {
     streamContent >> *content;
@@ -60,7 +58,7 @@ ONCatEntity ONCatEntity::fromJSONStream(std::istream &streamContent) {
 
 std::vector<ONCatEntity>
 ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
-  auto content = make_unique<Content>();
+  auto content = std::make_unique<Content>();
 
   try {
     streamContent >> *content;
@@ -85,7 +83,8 @@ ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
           "were not found.");
     }
 
-    entities.push_back(ONCatEntity(id, type, make_unique<Content>(subContent)));
+    entities.push_back(
+        ONCatEntity(id, type, std::make_unique<Content>(subContent)));
   }
 
   return entities;
@@ -126,12 +125,11 @@ Content ONCatEntity::getNestedContent(const Content &content,
   auto currentNode = content;
 
   // Use the path tokens to drill down through the JSON nodes.
-  for (auto pathToken = pathTokens.cbegin(); pathToken != pathTokens.cend();
-       ++pathToken) {
-    if (!currentNode.isMember(*pathToken)) {
+  for (const auto &pathToken : pathTokens) {
+    if (!currentNode.isMember(pathToken)) {
       throw ContentError("");
     }
-    currentNode = currentNode[*pathToken];
+    currentNode = currentNode[pathToken];
   }
 
   return currentNode;

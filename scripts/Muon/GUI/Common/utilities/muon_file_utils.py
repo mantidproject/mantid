@@ -1,8 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
-
-allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
+from qtpy import PYQT4, QtWidgets
+allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS"]
 allowed_extensions = ["nxs"]
 FILE_SEP = os.sep
 
@@ -20,11 +26,9 @@ def get_instrument_directory(instrument):
     """
     if instrument in allowed_instruments:
         instrument_directory = instrument
-        if instrument == "CHRONUS":
-            instrument_directory = "NDW1030"
         return instrument_directory
     else:
-        return None
+        raise RuntimeError('Instrument {} not in list of allowed instruments'.format(instrument))
 
 
 def check_file_exists(filename):
@@ -41,7 +45,7 @@ def get_current_run_filename(instrument):
     if instrument_directory is None:
         return ""
 
-    autosave_file_name = _instrument_data_directory(instrument) + FILE_SEP + "autosave.run"
+    autosave_file_name = _instrument_data_directory(instrument_directory) + FILE_SEP + "autosave.run"
     autosave_points_to = ""
     if not check_file_exists(autosave_file_name):
         raise ValueError("Cannot find file : " + autosave_file_name)
@@ -51,10 +55,10 @@ def get_current_run_filename(instrument):
                 autosave_points_to = line
     if autosave_points_to == "":
         # Default to auto_A (replicates MuonAnalysis 1.0 behaviour)
-        current_run_filename = FILE_SEP + FILE_SEP + instrument_directory + FILE_SEP + "data" \
+        current_run_filename = _instrument_data_directory(instrument_directory) \
                                + FILE_SEP + instrument_directory + "auto_A.tmp"
     else:
-        current_run_filename = FILE_SEP + FILE_SEP + instrument_directory + FILE_SEP + "data" \
+        current_run_filename = _instrument_data_directory(instrument_directory) \
                                + FILE_SEP + autosave_points_to
     return current_run_filename
 
@@ -63,14 +67,15 @@ def format_run_for_file(run):
     return "{0:08d}".format(run)
 
 
-def _instrument_data_directory(instrument):
+def _instrument_data_directory(instrument_directory):
     """The directory which stores the data for a particular instrument"""
-    return FILE_SEP + FILE_SEP + get_instrument_directory(instrument) + FILE_SEP + "data"
+    return FILE_SEP + FILE_SEP + instrument_directory + FILE_SEP + "data"
 
 
 def file_path_for_instrument_and_run(instrument, run):
     """Returns the path to the data file for a given instrument/run"""
-    base_dir = _instrument_data_directory(instrument)
+    instrument_directory = get_instrument_directory(instrument)
+    base_dir = _instrument_data_directory(instrument_directory)
     file_name = instrument + format_run_for_file(run) + ".nxs"
     return base_dir.lower() + FILE_SEP + file_name
 
@@ -110,3 +115,24 @@ def parse_user_input_to_files(input_text, extensions=allowed_extensions):
         if os.path.splitext(text)[-1].lower() in ["." + ext for ext in extensions]:
             filenames += [text]
     return filenames
+
+
+def show_file_browser_and_return_selection(
+        parent, file_filter, search_directories, multiple_files=False):
+    default_directory = search_directories[0]
+    if multiple_files:
+        if PYQT4:
+            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(
+                parent, "Select files", default_directory, file_filter)
+        else:
+            chosen_files, _filter = QtWidgets.QFileDialog.getOpenFileNames(
+                parent, "Select files", default_directory, file_filter)
+        return [str(chosen_file) for chosen_file in chosen_files]
+    else:
+        if PYQT4:
+            chosen_file = QtWidgets.QFileDialog.getOpenFileName(
+                parent, "Select file", default_directory, file_filter)
+        else:
+            chosen_file, _filter = QtWidgets.QFileDialog.getOpenFileName(
+                parent, "Select file", default_directory, file_filter)
+        return [str(chosen_file)]

@@ -23,8 +23,35 @@ using PhysicalConstants::NeutronAtom;
 using PhysicalConstants::getAtom;
 
 namespace {
-const double INV_FOUR_PI = 1. / (4. * M_PI);
+constexpr double INV_FOUR_PI = 1. / (4. * M_PI);
+
+inline double scatteringLength(const double real, const double imag) {
+  double length;
+  if (imag == 0.) {
+    length = std::abs(real);
+  } else if (real == 0.) {
+    length = std::abs(imag);
+  } else {
+    length = std::hypot(real, imag);
+  }
+
+  if (!std::isnormal(length)) {
+    return 0.;
+  } else {
+    return length;
+  }
 }
+
+inline double scatteringXS(const double realLength, const double imagLength) {
+  double lengthSqrd = (realLength * realLength) + (imagLength * imagLength);
+
+  if (!std::isnormal(lengthSqrd)) {
+    return 0.;
+  } else {
+    return .04 * M_PI * lengthSqrd;
+  }
+}
+} // namespace
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
     const boost::shared_ptr<PhysicalConstants::Atom> &atom,
@@ -77,12 +104,13 @@ Material::Material(const std::string &name,
       m_pressure(pressure) {
   if (atom.z_number == 0) { // user specified atom
     m_chemicalFormula.emplace_back(atom, 1.);
-  } else if (atom.z_number > 0) { // single isotope
+  } else if (atom.a_number > 0) { // single isotope
     m_chemicalFormula.emplace_back(getAtom(atom.z_number, atom.a_number), 1.);
   } else { // isotopic average
     m_chemicalFormula.emplace_back(atom, 1.);
   }
 }
+
 // update the total atom count
 void Material::countAtoms() {
   m_atomTotal = std::accumulate(std::begin(m_chemicalFormula),
@@ -121,8 +149,8 @@ double Material::temperature() const { return m_temperature; }
 double Material::pressure() const { return m_pressure; }
 
 /**
- * Get the coherent scattering cross section for a given wavelength.
- * CURRENTLY this simply returns the value for the underlying element
+ * Get the coherent scattering cross section according to Sears eqn 7.
+ *
  * @param lambda :: The wavelength to evaluate the cross section
  * @returns The value of the coherent scattering cross section at
  * the given wavelength
@@ -130,25 +158,15 @@ double Material::pressure() const { return m_pressure; }
 double Material::cohScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
 
-  const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal + right.atom->neutron.coh_scatt_xs *
-                                              right.multiplicity;
-                      }) /
-      m_atomTotal;
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.coh_scatt_xs;
 
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
+  return scatteringXS(cohScatterLengthReal(), cohScatterLengthImg());
 }
 
 /**
- * Get the incoherent scattering cross section for a given wavelength
- * CURRENTLY this simply returns the value for the underlying element
+ * Get the incoherent scattering cross section according to Sears eqn 16
+ *
  * @param lambda :: The wavelength to evaluate the cross section
  * @returns The value of the coherent scattering cross section at
  * the given wavelength
@@ -156,32 +174,24 @@ double Material::cohScatterXSection(const double lambda) const {
 double Material::incohScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
 
-  const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal + right.atom->neutron.inc_scatt_xs *
-                                              right.multiplicity;
-                      }) /
-      m_atomTotal;
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.inc_scatt_xs;
 
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
+  return totalScatterXSection() - cohScatterXSection();
 }
 
 /**
- * Get the total scattering cross section for a given wavelength
- * CURRENTLY this simply returns the value for sum of the incoherent
- * and coherent scattering cross sections.
+ * Get the total scattering cross section following Sears eqn 13.
+ *
  * @param lambda :: The wavelength to evaluate the cross section
  * @returns The value of the total scattering cross section at
  * the given wavelength
  */
 double Material::totalScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
+
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.tot_scatt_xs;
 
   const double weightedTotal =
       std::accumulate(std::begin(m_chemicalFormula),
@@ -200,23 +210,31 @@ double Material::totalScatterXSection(const double lambda) const {
 }
 
 /**
- * Get the absorption cross section for a given wavelength.
+ * Get the absorption cross section for a given wavelength
+ * according to Sears eqn 14
+ *
  * CURRENTLY This assumes a linear dependence on the wavelength with the
- * reference
- * wavelength = NeutronAtom::ReferenceLambda angstroms.
+ * reference wavelength = NeutronAtom::ReferenceLambda angstroms.
+ *
  * @param lambda :: The wavelength to evaluate the cross section
  * @returns The value of the absoprtion cross section at
  * the given wavelength
  */
 double Material::absorbXSection(const double lambda) const {
-  const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal + right.atom->neutron.abs_scatt_xs *
-                                              right.multiplicity;
-                      }) /
-      m_atomTotal;
+  double weightedTotal;
+
+  if (m_chemicalFormula.size() == 1) {
+    weightedTotal = m_chemicalFormula.front().atom->neutron.abs_scatt_xs;
+  } else {
+    weightedTotal =
+        std::accumulate(std::begin(m_chemicalFormula),
+                        std::end(m_chemicalFormula), 0.,
+                        [](double subtotal, const FormulaUnit &right) {
+                          return subtotal + right.atom->neutron.abs_scatt_xs *
+                                                right.multiplicity;
+                        }) /
+        m_atomTotal;
+  }
 
   if (!std::isnormal(weightedTotal)) {
     return 0.;
@@ -225,46 +243,57 @@ double Material::absorbXSection(const double lambda) const {
   }
 }
 
+// NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
+// will cancel for mu to give units: cm^-1
+double Material::linearAbsorpCoef(const double lambda) const {
+  return absorbXSection(NeutronAtom::ReferenceLambda) * 100. * numberDensity() *
+         lambda / NeutronAtom::ReferenceLambda;
+}
+
+// This must match the values that come from the scalar version
+std::vector<double> Material::linearAbsorpCoef(
+    std::vector<double>::const_iterator lambdaBegin,
+    std::vector<double>::const_iterator lambdaEnd) const {
+  const double linearCoefByWL =
+      absorbXSection(PhysicalConstants::NeutronAtom::ReferenceLambda) * 100. *
+      numberDensity() / PhysicalConstants::NeutronAtom::ReferenceLambda;
+
+  std::vector<double> linearCoef(std::distance(lambdaBegin, lambdaEnd));
+
+  std::transform(lambdaBegin, lambdaEnd, linearCoef.begin(),
+                 [linearCoefByWL](const double lambda) {
+                   return linearCoefByWL * lambda;
+                 });
+
+  return linearCoef;
+}
+
+/// According to Sears eqn 12
 double Material::cohScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
-  const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal + right.atom->neutron.coh_scatt_length *
-                                              right.multiplicity;
-                      }) /
-      m_atomTotal;
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.coh_scatt_length;
 
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
+  // these have already accounted for single atom case
+  return scatteringLength(cohScatterLengthReal(), cohScatterLengthImg());
 }
 
+/// According to Sears eqn 7
 double Material::incohScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
-  const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal + right.atom->neutron.inc_scatt_length *
-                                              right.multiplicity;
-                      }) /
-      m_atomTotal;
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.inc_scatt_length;
 
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
+  return scatteringLength(incohScatterLengthReal(), incohScatterLengthImg());
 }
 
+/// Sears eqn 12
 double Material::cohScatterLengthReal(const double lambda) const {
   UNUSED_ARG(lambda);
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.coh_scatt_length_real;
 
   const double weightedTotal =
       std::accumulate(
@@ -282,8 +311,12 @@ double Material::cohScatterLengthReal(const double lambda) const {
   }
 }
 
+/// Sears eqn 12
 double Material::cohScatterLengthImg(const double lambda) const {
   UNUSED_ARG(lambda);
+
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.coh_scatt_length_img;
 
   const double weightedTotal =
       std::accumulate(
@@ -301,8 +334,12 @@ double Material::cohScatterLengthImg(const double lambda) const {
   }
 }
 
+/// Not explicitly in Sears, but following eqn 12
 double Material::incohScatterLengthReal(const double lambda) const {
   UNUSED_ARG(lambda);
+
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.inc_scatt_length_real;
 
   const double weightedTotal =
       std::accumulate(
@@ -320,8 +357,12 @@ double Material::incohScatterLengthReal(const double lambda) const {
   }
 }
 
+/// Not explicitly in Sears, but following eqn 12
 double Material::incohScatterLengthImg(const double lambda) const {
   UNUSED_ARG(lambda);
+
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.inc_scatt_length_img;
 
   const double weightedTotal =
       std::accumulate(
@@ -339,52 +380,55 @@ double Material::incohScatterLengthImg(const double lambda) const {
   }
 }
 
+/// Sears eqn 13
 double Material::totalScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
-  const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal + right.atom->neutron.tot_scatt_length *
-                                              right.multiplicity;
-                      }) /
-      m_atomTotal;
+  if (m_chemicalFormula.size() == 1)
+    return m_chemicalFormula.front().atom->neutron.tot_scatt_length;
 
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
+  const double crossSection = totalScatterXSection();
+  return 10. * std::sqrt(crossSection) * INV_FOUR_PI;
 }
 
 double Material::cohScatterLengthSqrd(const double lambda) const {
-  const double weightedTotalReal = this->cohScatterLengthReal(lambda);
-  const double weightedTotalImg = this->cohScatterLengthImg();
+  UNUSED_ARG(lambda);
 
-  if (!std::isnormal(weightedTotalReal)) {
+  // these have already acconted for single atom case
+  const double real = this->cohScatterLengthReal();
+  const double imag = this->cohScatterLengthImg();
+
+  double lengthSqrd;
+  if (imag == 0.) {
+    lengthSqrd = real * real;
+  } else if (real == 0.) {
+    lengthSqrd = imag * imag;
+  } else {
+    lengthSqrd = real * real + imag * imag;
+  }
+
+  if (!std::isnormal(lengthSqrd)) {
     return 0.;
   } else {
-    return (weightedTotalReal * weightedTotalReal) +
-           (weightedTotalImg * weightedTotalImg);
+    return lengthSqrd;
   }
 }
 
 double Material::incohScatterLengthSqrd(const double lambda) const {
-  const double weightedTotalReal = this->incohScatterLengthReal(lambda);
-  const double weightedTotalImg = this->incohScatterLengthImg(lambda);
+  UNUSED_ARG(lambda);
 
-  if (!std::isnormal(weightedTotalReal)) {
-    return 0.;
-  } else {
-    return (weightedTotalReal * weightedTotalReal) +
-           (weightedTotalImg * weightedTotalImg);
-  }
+  // cross section has this properly averaged already
+  const double crossSection = incohScatterXSection();
+
+  // 1 barn = 100 fm^2
+  return 100. * crossSection * INV_FOUR_PI;
 }
 
 double Material::totalScatterLengthSqrd(const double lambda) const {
+  UNUSED_ARG(lambda);
+
   // cross section has this properly averaged already
-  double crossSection = totalScatterXSection(lambda);
+  const double crossSection = totalScatterXSection();
 
   // 1 barn = 100 fm^2
   return 100. * crossSection * INV_FOUR_PI;

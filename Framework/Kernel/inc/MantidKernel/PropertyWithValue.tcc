@@ -5,22 +5,25 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/PropertyHelper.h"
+
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyHelper.h"
+#include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/Strings.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/make_shared.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/make_shared.hpp>
 #endif
 
+#include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
 #include "MantidKernel/IPropertySettings.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <type_traits>
 #include <vector>
 
@@ -39,12 +42,12 @@ namespace Kernel {
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
-                                           const TYPE &defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
                                            IValidator_sptr validator,
-                                           const unsigned int direction)
-    : Property(name, typeid(TYPE), direction), m_value(defaultValue),
-      m_initialValue(defaultValue), m_validator(validator) {}
+                                           unsigned int direction)
+    : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
+      m_initialValue(std::move(defaultValue)),
+      m_validator(std::move(validator)) {}
 
 /** Constructor
  *  @param name :: The name to assign to the property
@@ -53,11 +56,10 @@ PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
-                                           const TYPE &defaultValue,
-                                           const unsigned int direction)
-    : Property(name, typeid(TYPE), direction), m_value(defaultValue),
-      m_initialValue(defaultValue),
+PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
+                                           unsigned int direction)
+    : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
+      m_initialValue(std::move(defaultValue)),
       m_validator(boost::make_shared<NullValidator>()) {}
 
 /*
@@ -65,34 +67,32 @@ PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
   so they can be remembered when the algorithm dialog is reloaded.
 */
 /**Constructor
-  *  @param name :: The name to assign to the property.
-  *  @param defaultValue :: A vector of numerical type, empty to comply with
+ *  @param name :: The name to assign to the property.
+ *  @param defaultValue :: A vector of numerical type, empty to comply with
  * other definitions.
-  *  @param defaultValueStr :: The numerical values you wish to assign to the
+ *  @param defaultValueStr :: The numerical values you wish to assign to the
  * property
-  *  @param validator :: The validator to use for this property
-  *  @param direction :: Whether this is a Direction::Input, Direction::Output
-  * or Direction::InOut (Input & Output) property
-  */
+ *  @param validator :: The validator to use for this property
+ *  @param direction :: Whether this is a Direction::Input, Direction::Output
+ * or Direction::InOut (Input & Output) property
+ */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
-                                           const TYPE &defaultValue,
-                                           const std::string defaultValueStr,
+PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
+                                           const std::string &defaultValueStr,
                                            IValidator_sptr validator,
-                                           const unsigned int direction)
-    : Property(name, typeid(TYPE), direction),
+                                           unsigned int direction)
+    : Property(std::move(name), typeid(TYPE), direction),
       m_value(extractToValueVector<TYPE>(defaultValueStr)),
-      m_initialValue(extractToValueVector<TYPE>(defaultValueStr)),
-      m_validator(validator) {
+      m_initialValue(m_value), m_validator(std::move(validator)) {
   UNUSED_ARG(defaultValue);
 }
 
 /**Copy constructor
-*  Note the default value of the copied object is the initial value of
-* original
-*/
+ *  Note the default value of the copied object is the initial value of
+ * original
+ */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const PropertyWithValue &right)
+PropertyWithValue<TYPE>::PropertyWithValue(const PropertyWithValue<TYPE> &right)
     : Property(right), m_value(right.m_value),
       m_initialValue(right.m_initialValue), // the default is the initial
                                             // value of the original object
@@ -124,8 +124,10 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::value() const {
 /** Get the value of the property as a string
  *  @return The property's value
  */
-template <typename TYPE> std::string PropertyWithValue<TYPE>::valueAsPrettyStr(
-    const size_t maxLength, const bool collapseLists) const {
+template <typename TYPE>
+std::string
+PropertyWithValue<TYPE>::valueAsPrettyStr(const size_t maxLength,
+                                          const bool collapseLists) const {
   std::string retVal;
   try {
     retVal = toPrettyString(m_value, maxLength, collapseLists);
@@ -134,6 +136,15 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::valueAsPrettyStr(
     retVal = Strings::shorten(value(), maxLength);
   }
   return retVal;
+}
+
+/**
+ * Attempt to construct a Json::Value object from the plain value
+ * @return A new Json::Value object
+ */
+template <typename TYPE>
+Json::Value PropertyWithValue<TYPE>::valueAsJson() const {
+  return encodeAsJson((*this)());
 }
 
 /**
@@ -161,7 +172,7 @@ operator!=(const PropertyWithValue<TYPE> &rhs) const {
 }
 
 /** Get the size of the property.
-*/
+ */
 template <typename TYPE> int PropertyWithValue<TYPE>::size() const {
   return findSize(m_value);
 }
@@ -207,6 +218,27 @@ std::string PropertyWithValue<TYPE>::setValue(const std::string &value) {
 }
 
 /**
+ * Set the value of the property from a Json representation.
+ * @param value :: The value to assign to the property
+ * @return Returns "" if the assignment was successful or a user level
+ * description of the problem
+ */
+template <typename TYPE>
+std::string
+PropertyWithValue<TYPE>::setValueFromJson(const Json::Value &value) {
+  if (value.type() != Json::stringValue) {
+    try {
+      *this = decode<TYPE>(value);
+    } catch (std::invalid_argument &exc) {
+      return exc.what();
+    }
+    return "";
+  } else {
+    return setValue(value.asString());
+  }
+}
+
+/**
  * Set a property value via a DataItem
  * @param data :: A shared pointer to a data item
  * @return "" if the assignment was successful or a user level description of
@@ -219,7 +251,7 @@ PropertyWithValue<TYPE>::setDataItem(const boost::shared_ptr<DataItem> data) {
   // the TYPE of the PropertyWithValue can be converted to a
   // shared_ptr<DataItem>
   return setTypedValue(
-      data, boost::is_convertible<TYPE, boost::shared_ptr<DataItem>>());
+      data, std::is_convertible<TYPE, boost::shared_ptr<DataItem>>());
 }
 
 /// Copy assignment operator assigns only the value and the validator not the
@@ -236,9 +268,9 @@ operator=(const PropertyWithValue &right) {
 
 //--------------------------------------------------------------------------------------
 /** Add the value of another property
-* @param right the property to add
-* @return the sum
-*/
+ * @param right the property to add
+ * @return the sum
+ */
 template <typename TYPE>
 PropertyWithValue<TYPE> &PropertyWithValue<TYPE>::
 operator+=(Property const *right) {
@@ -284,7 +316,8 @@ PropertyWithValue<TYPE> &PropertyWithValue<TYPE>::operator=(const TYPE &value) {
     return *this;
   } else {
     m_value = oldValue;
-    throw std::invalid_argument("When setting value of property \"" + this->name() + "\": " + problem);
+    throw std::invalid_argument("When setting value of property \"" +
+                                this->name() + "\": " + problem);
   }
 }
 
@@ -318,11 +351,11 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::isValid() const {
 }
 
 /** Indicates if the property's value is the same as it was when it was set
-*  N.B. Uses an unsafe comparison in the case of doubles, consider overriding
-* if the value is a pointer or floating point type
-*  @return true if the value is the same as the initial value or false
-* otherwise
-*/
+ *  N.B. Uses an unsafe comparison in the case of doubles, consider overriding
+ * if the value is a pointer or floating point type
+ *  @return true if the value is the same as the initial value or false
+ * otherwise
+ */
 template <typename TYPE> bool PropertyWithValue<TYPE>::isDefault() const {
   return m_initialValue == m_value;
 }
@@ -338,10 +371,10 @@ std::vector<std::string> PropertyWithValue<TYPE>::allowedValues() const {
 }
 
 /** Returns the set of valid values for this property, if such a set exists.
-*  If not, it returns an empty vector.
-*  @return Returns the set of valid values for this property, or it returns
-* an empty vector.
-*/
+ *  If not, it returns an empty vector.
+ *  @return Returns the set of valid values for this property, or it returns
+ * an empty vector.
+ */
 template <typename TYPE>
 bool PropertyWithValue<TYPE>::isMultipleSelectionAllowed() {
   return m_validator->isMultipleSelectionAllowed();
@@ -366,12 +399,13 @@ void PropertyWithValue<TYPE>::replaceValidator(IValidator_sptr newValidator) {
 template <typename TYPE>
 std::string
 PropertyWithValue<TYPE>::setValueFromProperty(const Property &right) {
-  auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right);
-  if (!prop) {
-    return "Could not set value: properties have different type.";
+
+  if (auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right)) {
+    m_value = prop->m_value;
+    return "";
+  } else {
+    return setValue(right.value());
   }
-  m_value = prop->m_value;
-  return "";
 }
 
 /**
@@ -384,7 +418,7 @@ PropertyWithValue<TYPE>::setValueFromProperty(const Property &right) {
 template <typename TYPE>
 template <typename U>
 std::string PropertyWithValue<TYPE>::setTypedValue(const U &value,
-                                                   const boost::true_type &) {
+                                                   const std::true_type &) {
   TYPE data = boost::dynamic_pointer_cast<typename TYPE::element_type>(value);
   std::string msg;
   if (data) {
@@ -412,7 +446,7 @@ std::string PropertyWithValue<TYPE>::setTypedValue(const U &value,
 template <typename TYPE>
 template <typename U>
 std::string PropertyWithValue<TYPE>::setTypedValue(const U &value,
-                                                   const boost::false_type &) {
+                                                   const std::false_type &) {
   UNUSED_ARG(value);
   return "Attempt to assign object of type DataItem to property (" + name() +
          ") of incorrect type";
@@ -440,5 +474,6 @@ template <typename TYPE>
 IValidator_sptr PropertyWithValue<TYPE>::getValidator() const {
   return m_validator;
 }
+
 } // namespace Kernel
 } // namespace Mantid

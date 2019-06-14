@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import Load
-from mantid.api import WorkspaceGroup, AlgorithmManager
+from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
 import os
@@ -83,14 +83,15 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
     chopped_data = False
 
     for file_group in file_groups:
-        created_workspaces, chopped_data = load_files(file_group, ipf_filename, spec_min,
-                                                      spec_max, sum_files, load_logs, load_opts)
+        created_workspaces, chopped_data, _ = load_files(file_group, ipf_filename, spec_min,
+                                                         spec_max, sum_files, load_logs, load_opts)
         workspace_names.extend(created_workspaces)
 
     return workspace_names, chopped_data
 
 
-def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
+def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None,
+               find_masked_detectors=False):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
@@ -101,10 +102,13 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     @param sum_files Sum loaded files
     @param load_logs Load log files when loading runs
     @param load_opts Additional options to be passed to load algorithm
+    @param find_masked_detectors True if you want to find the masked detectors for the data files (summed)
 
     @return List of loaded workspace names and flag indicating chopped data
     """
     workspace_names, chopped_data = _load_files(data_files, ipf_filename, spec_min, spec_max, load_logs, load_opts)
+
+    masked_detectors = get_detectors_to_mask_from_groups(workspace_names) if find_masked_detectors else None
 
     # Sum files if needed
     if sum_files and len(data_files) > 1:
@@ -115,7 +119,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     logger.information('Summed workspace names: %s' % (str(workspace_names)))
 
-    return workspace_names, chopped_data
+    return workspace_names, chopped_data, masked_detectors
 
 
 def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=True, load_opts=None):
@@ -220,7 +224,7 @@ def chop_workspace(workspace, monitor_index):
     """
     from mantid.simpleapi import ChopData
 
-    workspace_name = workspace.getName()
+    workspace_name = workspace.name()
 
     # Chop data if required
     try:
@@ -389,6 +393,34 @@ def sum_chopped_runs(workspace_names):
 
 
 # -------------------------------------------------------------------------------
+
+
+def add_workspace_names(workspace_names, workspace):
+    if isinstance(workspace, WorkspaceGroup):
+        workspace_names.extend(workspace.getNames())
+    else:
+        workspace_names.append(workspace.name())
+    return workspace_names
+
+
+def get_all_workspace_names(group_names):
+    workspace_names = []
+    for group_name in group_names:
+        workspace_names = add_workspace_names(workspace_names, AnalysisDataService.retrieve(group_name))
+    return workspace_names
+
+
+def get_detectors_to_mask_from_groups(group_names):
+    return get_detectors_to_mask(get_all_workspace_names(group_names))
+
+
+def get_detectors_to_mask(workspace_names):
+    masked_detectors = []
+    for workspace_name in workspace_names:
+        bad_detectors = [detector for detector in identify_bad_detectors(workspace_name) if detector not in masked_detectors]
+        masked_detectors.extend(bad_detectors)
+
+    return sorted(masked_detectors)
 
 
 def identify_bad_detectors(workspace_name):
@@ -593,7 +625,7 @@ def get_group_from_string(grouping_string):
 
 
 def create_group_from_string(group_detectors, grouping_string):
-    group_detectors.setProperty("WorkspaceIndexList", get_group_from_string(grouping_string))
+    group_detectors.setProperty("SpectraList", get_group_from_string(grouping_string))
     group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
     return group_detectors.getProperty("OutputWorkspace").value
@@ -662,7 +694,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         # Otherwise use the value of GroupingPolicy
         grouping_method = method
 
-    logger.information('Grouping method for workspace %s is %s' % (workspace.getName(), grouping_method))
+    logger.information('Grouping method for workspace %s is %s' % (workspace.name(), grouping_method))
 
     if grouping_method == 'Individual':
         # Nothing to do here
@@ -712,7 +744,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         return group_on_string(group_detectors, group_string)
 
     else:
-        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
+        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.name()))
 
     group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
@@ -971,7 +1003,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     @param multi_frame_rebin_string Rebin string for multiple frame rebinning
     @param num_bins Max number of bins in input frames
     """
-    from mantid.simpleapi import (Rebin, SortXAxis)
+    from mantid.simpleapi import (Rebin, SortXAxis, RemoveSpectra)
 
     if rebin_string is not None:
         if multi_frame_rebin_string is not None and num_bins is not None:
@@ -986,6 +1018,9 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
                       Params=multi_frame_rebin_string)
         else:
             # Regular data
+            RemoveSpectra(InputWorkspace=workspace_name,
+                          OutputWorkspace=workspace_name,
+                          RemoveSpectraWithNoDetector=True)
             SortXAxis(InputWorkspace=workspace_name,
                       OutputWorkspace=workspace_name)
             Rebin(InputWorkspace=workspace_name,

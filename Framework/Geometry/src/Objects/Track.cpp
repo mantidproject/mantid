@@ -21,7 +21,7 @@ using Kernel::V3D;
 /**
  * Default constructor
  */
-Track::Track() : m_startPoint(), m_unitVector() {}
+Track::Track() : m_line(V3D(), V3D(0., 0., 1.)) {}
 
 /**
  * Constructor
@@ -29,7 +29,12 @@ Track::Track() : m_startPoint(), m_unitVector() {}
  * @param unitVector :: Directional vector. It must be unit vector.
  */
 Track::Track(const V3D &startPt, const V3D &unitVector)
-    : m_startPoint(startPt), m_unitVector(unitVector) {}
+    : m_line(startPt, unitVector) {
+  if (!unitVector.unitVector()) {
+    throw std::invalid_argument(
+        "Failed to construct track: direction is not a unit vector.");
+  }
+}
 
 /**
  * Resets the track starting point and direction.
@@ -37,8 +42,11 @@ Track::Track(const V3D &startPt, const V3D &unitVector)
  * @param direction :: The new direction. Must be a unit vector!
  */
 void Track::reset(const V3D &startPoint, const V3D &direction) {
-  m_startPoint = startPoint;
-  m_unitVector = direction;
+  if (!direction.unitVector()) {
+    throw std::invalid_argument(
+        "Failed to reset track: direction is not a unit vector.");
+  }
+  m_line.setLine(startPoint, direction);
 }
 
 /**
@@ -59,7 +67,7 @@ int Track::nonComplete() const {
     return 0;
   }
   auto ac = m_links.cbegin();
-  if (m_startPoint.distance(ac->entryPoint) > Tolerance) {
+  if (m_line.getOrigin().distance(ac->entryPoint) > Tolerance) {
     return 1;
   }
   auto bc = ac;
@@ -107,17 +115,17 @@ void Track::removeCojoins() {
  * Objective is to merge in partial information about the beginning and end of
  * the tracks.
  * The points are kept in order
- * @param directionFlag :: A flag indicating if the direction of travel is
+ * @param direction :: A flag indicating if the direction of travel is
  * entering/leaving
  * an object. +1 is entering, -1 is leaving.
  * @param endPoint :: Point of intersection
  * @param obj :: A reference to the object that was intersected
  * @param compID :: ID of the component that this link is about (Default=NULL)
  */
-void Track::addPoint(const int directionFlag, const V3D &endPoint,
+void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
                      const IObject &obj, const ComponentID compID) {
-  IntersectionPoint newPoint(directionFlag, endPoint,
-                             endPoint.distance(m_startPoint), obj, compID);
+  IntersectionPoint newPoint(
+      direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compID);
   auto lowestPtr =
       std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
   m_surfPoints.insert(lowestPtr, newPoint);
@@ -166,16 +174,14 @@ void Track::buildLink() {
   auto ac = m_surfPoints.cbegin();
   auto bc = ac;
   ++bc;
-  V3D workPt = m_startPoint; // last good point
   // First point is not necessarily in an object
   // Process first point:
   while (ac != m_surfPoints.end() &&
-         ac->directionFlag != 1) // stepping from an object.
+         ac->direction != TrackDirection::ENTERING) // stepping from an object.
   {
-    if (ac->directionFlag == -1) {
-      addLink(m_startPoint, ac->endPoint, ac->distFromStart, *ac->object,
+    if (ac->direction == TrackDirection::LEAVING) {
+      addLink(m_line.getOrigin(), ac->endPoint, ac->distFromStart, *ac->object,
               ac->componentID); // from the void
-      workPt = ac->endPoint;
     }
     ++ac;
     if (bc != m_surfPoints.end()) {
@@ -191,10 +197,11 @@ void Track::buildLink() {
     return;
   }
 
-  workPt = ac->endPoint;
+  V3D workPt = ac->endPoint;       // last good point
   while (bc != m_surfPoints.end()) // Since bc > ac
   {
-    if (ac->directionFlag == 1 && bc->directionFlag == -1) {
+    if (ac->direction == TrackDirection::ENTERING &&
+        bc->direction == TrackDirection::LEAVING) {
       // Touching surface / identical surface
       if (fabs(ac->distFromStart - bc->distFromStart) > Tolerance) {
         // track leave ac into bc.
@@ -223,6 +230,23 @@ void Track::buildLink() {
   }
 
   m_surfPoints.clear();
+}
+
+std::ostream &operator<<(std::ostream &os, TrackDirection direction) {
+  switch (direction) {
+  case TrackDirection::ENTERING:
+    os << "ENTERING";
+    break;
+  case TrackDirection::LEAVING:
+    os << "LEAVING";
+    break;
+  case TrackDirection::INVALID:
+    os << "INVALID";
+    break;
+  default:
+    os.setstate(std::ios_base::failbit);
+  }
+  return os;
 }
 
 } // NAMESPACE Geometry

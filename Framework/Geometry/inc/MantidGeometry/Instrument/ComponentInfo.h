@@ -9,6 +9,7 @@
 
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/DateAndTime.h"
 #include <boost/shared_ptr.hpp>
@@ -140,8 +141,17 @@ public:
                                        Types::Core::DateAndTime> &interval);
   size_t scanCount() const;
   void merge(const ComponentInfo &other);
+
+  ComponentInfoIterator<ComponentInfo> begin();
+  ComponentInfoIterator<ComponentInfo> end();
+  const ComponentInfoIterator<const ComponentInfo> cbegin();
+  const ComponentInfoIterator<const ComponentInfo> cend();
+
   friend class Instrument;
 };
+
+using ComponentInfoIt = ComponentInfoIterator<ComponentInfo>;
+using ComponentInfoConstIt = ComponentInfoIterator<const ComponentInfo>;
 
 } // namespace Geometry
 } // namespace Mantid

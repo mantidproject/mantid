@@ -5,27 +5,27 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
-#include <MantidGeometry/Instrument.h>
-#include <MantidKernel/make_unique.h>
-#include <MantidQtWidgets/Common/AlgorithmDialog.h>
-#include <MantidQtWidgets/Common/AlgorithmInputHistory.h>
-#include <MantidQtWidgets/Common/FlowLayout.h>
-#include <MantidQtWidgets/Common/InterfaceManager.h>
-#include <MantidQtWidgets/Common/LineEditWithClear.h>
-#include <MantidQtWidgets/Common/MantidDisplayBase.h>
-#include <MantidQtWidgets/Common/MantidTreeWidget.h>
-#include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
-#include <MantidQtWidgets/Common/WorkspaceIcons.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h>
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidGeometry/Instrument.h"
 
-#include <MantidAPI/FileProperty.h>
-#include <MantidAPI/IMDEventWorkspace.h>
-#include <MantidAPI/IMDWorkspace.h>
-#include <MantidAPI/IPeaksWorkspace.h>
-#include <MantidAPI/MatrixWorkspace.h>
-#include <MantidAPI/WorkspaceGroup.h>
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/FlowLayout.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/LineEditWithClear.h"
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
+#include "MantidQtWidgets/Common/WorkspaceIcons.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
+
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <Poco/Path.h>
 
@@ -51,10 +51,10 @@ WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
+WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly,
                                          QWidget *parent)
-    : QWidget(parent), m_mantidDisplayModel(mdb), m_updateCount(0),
-      m_treeUpdating(false), m_promptDelete(false),
+    : QWidget(parent), m_mantidDisplayModel(mdb), m_viewOnly(viewOnly),
+      m_updateCount(0), m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
       m_sortDirection(SortDirection::Ascending), m_mutex(QMutex::Recursive) {
   setObjectName(
@@ -62,6 +62,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   m_saveMenu = new QMenu(this);
 
   setupWidgetLayout();
+
   setupLoadButtonMenu();
 
   // Dialog box used for user to specify folder to save multiple workspaces into
@@ -87,6 +88,9 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   auto presenter = boost::make_shared<WorkspacePresenter>(this);
   m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
   presenter->init();
+
+  if (m_viewOnly)
+    hideButtonToolbar();
 }
 
 WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
@@ -192,9 +196,9 @@ WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
 StringList WorkspaceTreeWidget::getSelectedWorkspaceNames() const {
   auto items = m_tree->selectedItems();
   StringList names;
-
+  names.reserve(static_cast<size_t>(items.size()));
   for (auto &item : items)
-    names.push_back(item->text(0).toStdString());
+    names.emplace_back(item->text(0).toStdString());
 
   return names;
 }
@@ -416,7 +420,12 @@ WorkspaceTreeWidget::SaveFileType WorkspaceTreeWidget::getSaveFileType() const {
   return m_saveFileType;
 }
 
-void WorkspaceTreeWidget::saveWorkspace(SaveFileType type) {
+void WorkspaceTreeWidget::saveWorkspace(const std::string &wsName,
+                                        SaveFileType type) {
+  QHash<QString, QString> presets;
+  if (!wsName.empty()) {
+    presets["InputWorkspace"] = QString::fromStdString(wsName);
+  }
   int version = -1;
   std::string algorithmName;
 
@@ -432,7 +441,7 @@ void WorkspaceTreeWidget::saveWorkspace(SaveFileType type) {
   }
 
   m_mantidDisplayModel->showAlgorithmDialog(
-      QString::fromStdString(algorithmName), version);
+      QString::fromStdString(algorithmName), presets, nullptr, version);
 }
 
 void WorkspaceTreeWidget::saveWorkspaces(const StringList &wsNames) {
@@ -472,10 +481,10 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
   QRegExp filterRegEx(text, Qt::CaseInsensitive);
 
   // show all items
-  QTreeWidgetItemIterator it(m_tree);
-  while (*it) {
-    (*it)->setHidden(false);
-    ++it;
+  QTreeWidgetItemIterator unhideIter(m_tree);
+  while (*unhideIter) {
+    (*unhideIter)->setHidden(false);
+    ++unhideIter;
   }
 
   int hiddenCount = 0;
@@ -542,9 +551,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
     }
 
     // make children of visible groups visible
-    for (auto itGroup = visibleGroups.begin(); itGroup != visibleGroups.end();
-         ++itGroup) {
-      QTreeWidgetItem *group = (*itGroup);
+    for (auto group : visibleGroups) {
       for (int i = 0; i < group->childCount(); i++) {
         QTreeWidgetItem *child = group->child(i);
         if (child->isHidden()) {
@@ -1138,7 +1145,8 @@ void WorkspaceTreeWidget::onClickDeleteWorkspaces() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 }
 
-void WorkspaceTreeWidget::clickedWorkspace(QTreeWidgetItem *item, int) {
+void WorkspaceTreeWidget::clickedWorkspace(QTreeWidgetItem *item,
+                                           int /*unused*/) {
   Q_UNUSED(item);
 }
 
@@ -1234,9 +1242,11 @@ void WorkspaceTreeWidget::handleClearView() {
 
 /// Handles display of the workspace context menu.
 void WorkspaceTreeWidget::popupMenu(const QPoint &pos) {
-  m_menuPosition = pos;
-  m_presenter->notifyFromView(
-      ViewNotifiable::Flag::PopulateAndShowWorkspaceContextMenu);
+  if (!m_viewOnly) {
+    m_menuPosition = pos;
+    m_presenter->notifyFromView(
+        ViewNotifiable::Flag::PopulateAndShowWorkspaceContextMenu);
+  }
 }
 
 void WorkspaceTreeWidget::popupContextMenu() {
@@ -1385,12 +1395,12 @@ void WorkspaceTreeWidget::saveToProgram() {
       (Mantid::Kernel::ConfigService::Instance().getKeys(
           ("workspace.sendto." + programKeysAndDetails.find("name")->second)));
 
-  for (size_t i = 0; i < programKeys.size(); i++) {
+  for (const auto &programKey : programKeys) {
     // Assign a key to its value using the map
-    programKeysAndDetails[programKeys[i]] =
+    programKeysAndDetails[programKey] =
         (Mantid::Kernel::ConfigService::Instance().getString(
             ("workspace.sendto." + programKeysAndDetails.find("name")->second +
-             "." + programKeys[i])));
+             "." + programKey)));
   }
 
   // Check to see if mandatory information is included
@@ -1742,6 +1752,14 @@ void WorkspaceTreeWidget::onClickClearUB() {
 bool WorkspaceTreeWidget::executeAlgorithmAsync(
     Mantid::API::IAlgorithm_sptr alg, const bool wait) {
   return m_mantidDisplayModel->executeAlgorithmAsync(alg, wait);
+}
+
+void WorkspaceTreeWidget::hideButtonToolbar() {
+  m_loadButton->hide();
+  m_saveButton->hide();
+  m_deleteButton->hide();
+  m_groupButton->hide();
+  m_sortButton->hide();
 }
 
 } // namespace MantidWidgets

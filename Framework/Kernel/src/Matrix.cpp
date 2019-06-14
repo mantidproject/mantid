@@ -10,7 +10,6 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <memory>
@@ -615,11 +614,11 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
   // array so we can expose the memory to Python APIs via numpy which expects
   // this
   // style of memory layout.
-  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRows * m_numColumns));
+  auto allocatedMemory = std::make_unique<T[]>((m_numRows * m_numColumns));
 
   // Next allocate an array of pointers for the rows (X). This partitions
   // the 1D array into a 2D array for callers.
-  auto rowPtrs = Kernel::make_unique<T *[]>(m_numRows);
+  auto rowPtrs = std::make_unique<T *[]>(m_numRows);
 
   for (size_t i = 0; i < m_numRows; i++) {
     // Calculate offsets into the allocated memory array (Y)
@@ -840,8 +839,8 @@ Has a in place transpose for a square matrix case.
   // irregular matrix
   // get some memory
 
-  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRows * m_numColumns));
-  auto transposePtrs = Kernel::make_unique<T *[]>(m_numRows);
+  auto allocatedMemory = std::make_unique<T[]>((m_numRows * m_numColumns));
+  auto transposePtrs = std::make_unique<T *[]>(m_numRows);
 
   for (size_t i = 0; i < m_numColumns; i++) {
     // Notice how this partitions using Rows (X) instead of Cols(Y)

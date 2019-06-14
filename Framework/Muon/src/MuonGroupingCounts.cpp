@@ -40,7 +40,7 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
   if (wsIndices.size() != detectorIDs.size()) {
     std::string errorMsg =
         str(boost::format("The number of detectors"
-                          "requested does not equalthe number of detectors "
+                          " requested does not equal the number of detectors "
                           "provided %1% != %2% ") %
             wsIndices.size() % detectorIDs.size());
     throw std::invalid_argument(errorMsg);
@@ -72,14 +72,13 @@ void MuonGroupingCounts::init() {
   std::string emptyString("");
   std::vector<int> defaultGrouping = {1};
 
-  declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "InputWorkspace", emptyString, Direction::Input,
-          PropertyMode::Mandatory),
-      "Input workspace containing data from detectors which are to "
-      "be grouped.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "InputWorkspace", emptyString, Direction::Input,
+                      PropertyMode::Mandatory),
+                  "Input workspace containing data from detectors which are to "
+                  "be grouped.");
 
-  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", emptyString, Direction::Output),
                   "Output workspace which will hold the grouped data.");
 
@@ -87,19 +86,19 @@ void MuonGroupingCounts::init() {
                   "The name of the group. Must contain at least one "
                   "alphanumeric character.",
                   Direction::Input);
-  declareProperty(make_unique<ArrayProperty<int>>(
-                      "Grouping", defaultGrouping,
+  declareProperty(std::make_unique<ArrayProperty<int>>(
+                      "Grouping", std::move(defaultGrouping),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
                   "IDs or hyphenated ranges of IDs.");
 
-  declareProperty(make_unique<ArrayProperty<int>>(
-                      "SummedPeriods", defaultGrouping,
+  declareProperty(std::make_unique<ArrayProperty<int>>(
+                      "SummedPeriods", std::vector<int>(1, 1),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "A list of periods to sum in multiperiod data.");
-  declareProperty(
-      make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
-      "A list of periods to subtract in multiperiod data.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SubtractedPeriods",
+                                                       Direction::Input),
+                  "A list of periods to subtract in multiperiod data.");
 
   // Perform Group Associations.
 

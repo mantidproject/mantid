@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from PyQt4 import QtGui, QtCore
 
 from six import iteritems
@@ -54,6 +56,9 @@ class PeakSelectorView(QtGui.QListWidget):
     def closeEvent(self, event):
         self.finish_selection()
         event.accept()
+
+    def get_checked(self):
+        return self.new_data
 
     def update_new_data(self, data):
         for el, values in iteritems(data):

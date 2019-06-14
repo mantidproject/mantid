@@ -7,10 +7,6 @@
 
 .. _contents:
 
-====================
-Mantid Documentation
-====================
-
 .. toctree::
    :hidden:
    :glob:
@@ -29,31 +25,46 @@ Mantid Documentation
    api/index
    plotting/index
    release/index
+   workbench/index
 
 
-This is the documentation for Mantid |release|.
+======
+Mantid
+======
 
-**Sections:**
+The Mantid Framework has been created to visualise, manipulate and analyse neutron and muon scattering data. Mantid can be used though several Graphical User Interfaces (GUI) and programming languages, including:
+
+* `MantidPlot <https://www.mantidproject.org/MantidPlot:_Help>`_, the original interface supporting a wide range of techniques and visualisation approaches.
+* :ref:`MantidWorkbench <workbench>`, A modern interface with growing supports for a list of techniques.
+* Autoreduction services at specific facilities, including ISIS and the `SNS <https://monitor.sns.gov>`_.
+* API's for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
+
+Documentation
+=============
 
 .. image:: images/mantid.png
    :alt: A preying mantis with arms upraised
    :width: 200px
    :align: right
 
-* :ref:`Algorithms List`
-* :ref:`training`
-    - :ref:`mantid_basic_course`
-    - `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
-    - `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
-    - `Extending Mantid With Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
-* :ref:`concepts contents`
-* :ref:`interfaces contents`
-* :ref:`fitting contents`
-    - :ref:`Fit Functions List`
-    - :ref:`fitminimizers`
-* :ref:`techniques contents`
-* :ref:`api`
-    - :ref:`Python <pythonapi>`
-    - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
-* :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`
-* :ref:`release_notes`
+This is the documentation for Mantid |release|.
+
+**Getting Started:**
+  * :ref:`mantid_basic_course`, takes you through installing and basic use of Mantid through Mantidplot, including loading, visualising and fitting data.
+  * :ref:`training`, links to further self paced courses and learning resources.
+  * :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`, details of how to make pretty plots and manioukate them via Python.
+
+**Reference Documentation:**
+  * :ref:`Algorithms List`, specific details for all of our algorithms including descriptions of all inputs and parameters .
+  * :ref:`workbench` provides details on the new graphical user interface with matplotlib-based plotting.
+  * :ref:`concepts contents`, deeper background information on the fundamental concepts within Mantid.
+  * :ref:`interfaces contents`, descriptions of the bespoke technique interfaces available.
+  * :ref:`fitting contents`, details of all the supported fitting functions and minimization approaches.
+  * :ref:`techniques contents`, with further information relevant to some of the specific scientific techniques.
+  * API's for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
+  * :ref:`release_notes`, a catalog of all of the release notes since v3.5.2.
+
+**Other Help and Documentation:**
+    * A `forum <http://forum.mantidproject.org/>`_, to ask for help, report issues, and discuss with other Mantid users.
+    * A built in error-reporter. We really encourage you to use this, as it helps us to make Mantid more stable in future.
+    * `Developer Documentation <http://developer.mantidproject.org/>`_

@@ -17,7 +17,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
-#include <boost/lexical_cast.hpp>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_version.h>
 
@@ -54,13 +53,13 @@ LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
 }
 
 void LevenbergMarquardtMinimizer::initialize(
-    API::ICostFunction_sptr costFunction, size_t) {
+    API::ICostFunction_sptr costFunction, size_t /*maxIterations*/) {
   // set-up GSL container to be used with GSL simplex algorithm
   auto leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           costFunction);
   if (leastSquares) {
-    m_data = new GSL_FitData(leastSquares);
+    m_data = std::make_unique<GSL_FitData>(leastSquares);
   } else {
     throw std::runtime_error("LevenbergMarquardt can only be used with Least "
                              "squares cost function.");
@@ -73,9 +72,10 @@ void LevenbergMarquardtMinimizer::initialize(
   gslContainer.f = &gsl_f;
   gslContainer.df = &gsl_df;
   gslContainer.fdf = &gsl_fdf;
+
   gslContainer.n = m_data->n;
   gslContainer.p = m_data->p;
-  gslContainer.params = m_data;
+  gslContainer.params = m_data.get();
 
   // setup GSL solver
   m_gslSolver = gsl_multifit_fdfsolver_alloc(T, m_data->n, m_data->p);
@@ -92,15 +92,12 @@ void LevenbergMarquardtMinimizer::initialize(
 }
 
 LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer() {
-  if (m_data) {
-    delete m_data;
-  }
   if (m_gslSolver) {
     gsl_multifit_fdfsolver_free(m_gslSolver);
   }
 }
 
-bool LevenbergMarquardtMinimizer::iterate(size_t) {
+bool LevenbergMarquardtMinimizer::iterate(size_t /*iteration*/) {
   m_absError = getProperty("AbsError");
   m_relError = getProperty("RelError");
 

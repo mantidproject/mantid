@@ -12,7 +12,7 @@
 //--------------------------------------
 #include "InstrumentTreeModel.h"
 #include "MantidGeometry/IComponent.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
+#include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include <QTreeView>
 
 namespace MantidQt {
@@ -40,9 +40,9 @@ public:
   QStringList
   findExpandedComponents(const QModelIndex &parent = QModelIndex()) const;
 public slots:
-  void sendComponentSelectedSignal(const QModelIndex);
+  void sendComponentSelectedSignal(const QModelIndex /*index*/);
 signals:
-  void componentSelected(size_t);
+  void componentSelected(size_t /*_t1*/);
 
 private:
   InstrumentWidget *m_instrWidget;

@@ -30,7 +30,7 @@ public:
     TS_ASSERT_THROWS(
         alg.setProperty("InputWorkspace",
                         WorkspaceCreationHelper::create2DWorkspace(1, 1)),
-        std::invalid_argument);
+        const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 

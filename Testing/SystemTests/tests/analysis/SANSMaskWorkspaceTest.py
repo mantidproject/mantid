@@ -17,6 +17,7 @@ from sans.common.enums import SANSFacility
 from sans.test_helper.test_director import TestDirector
 from sans.state.data import get_data_builder
 from sans.state.mask import get_mask_builder
+from sans.state.move import get_move_builder
 from sans.common.file_information import SANSFileInformationFactory
 
 
@@ -50,7 +51,7 @@ def elements_in_range(range_start, range_stop, collection):
 # Tests for the SANSLoad algorithm
 # -----------------------------------------------
 class SANSMaskWorkspaceTest(unittest.TestCase):
-    def _load_workspace(self, state, move_workspace=True):
+    def _load_workspace(self, state):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
         load_alg.setChild(True)
         load_alg.initialize()
@@ -59,7 +60,6 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("MoveWorkspace", move_workspace)
         load_alg.setProperty("SampleScatterWorkspace", "dummy")
         load_alg.setProperty("SampleScatterMonitorWorkspace", "dummy")
 
@@ -87,18 +87,20 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         expected_spectra = list(set(expected_spectra))
         masked_spectra = list(get_masked_spectrum_numbers(workspace))
 
-        self.assertTrue(len(expected_spectra) == len(masked_spectra))
+        self.assertEqual(len(expected_spectra), len(masked_spectra),
+                         "{} does not equal {}".format(len(expected_spectra), len(masked_spectra)))
         for expected, actual in zip(sorted(expected_spectra), sorted(masked_spectra)):
-            self.assertTrue(expected == actual)
+            self.assertEqual(expected,  actual, "{} does not equal {}".format(expected, actual))
 
     def _do_assert_non_masked(self, workspace, expected_spectra):
         # Remove duplicate masks from expected
         expected_spectra = list(set(expected_spectra))
 
         non_masked_spectra = list(get_non_masked_spectrum_numbers(workspace))
-        self.assertTrue(len(expected_spectra) == len(non_masked_spectra))
+        self.assertEqual(len(expected_spectra), len(non_masked_spectra),
+                         "Expected length {}, got length {}".format(len(expected_spectra), len(non_masked_spectra)))
         for expected, actual in zip(sorted(expected_spectra), sorted(non_masked_spectra)):
-            self.assertTrue(expected == actual)
+            self.assertEqual(expected,  actual)
 
     def test_that_spectra_masking_is_applied(self):
         # Arrange
@@ -294,7 +296,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
@@ -331,7 +333,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         tof_spectra_10_original = workspace.getSpectrum(10).getTofs()
         tof_spectra_11_original = workspace.getSpectrum(11).getTofs()
@@ -345,9 +347,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         tof_spectra_11_masked = workspace.getSpectrum(11).getTofs()
         # Spectrum 10
         # Three events should have been removed
-        self.assertTrue(len(tof_spectra_10_masked) == len(tof_spectra_10_original) - 3)
+        self.assertEqual(len(tof_spectra_10_masked),  len(tof_spectra_10_original) - 3)
         # One event should have been removed
-        self.assertTrue(len(tof_spectra_11_masked) == len(tof_spectra_11_original) - 1)
+        self.assertEqual(len(tof_spectra_11_masked),  len(tof_spectra_11_original) - 1)
 
         # Make sure that there are no elements
         for start, stop in zip(bin_mask_general_start, bin_mask_general_stop):
@@ -376,7 +378,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Is part of LAB
         tof_spectra_23813_original = workspace.getSpectrum(23813).getTofs()
@@ -390,7 +392,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
         # Spectrum 23813
         # Five events should have been removed
-        self.assertTrue(len(tof_spectra_23813_masked) == len(tof_spectra_23813_original) - 5)
+        self.assertEqual(len(tof_spectra_23813_masked),  len(tof_spectra_23813_original) - 5)
 
         # Make sure that there are no elements
         for start, stop in zip(bin_mask_start, bin_mask_stop):
@@ -423,10 +425,11 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         expected_spectra = []
         # The strange double pattern arises from the offset of the SANS2D tube geometry (see InstrumentView)
         for y in range(60, 120):
-            if y % 2:
-                expected_spectra.extend(((y * 512 + 9) + x for x in range(0, 257)))
+            if y % 2 == 0:
+                expected_spectra.extend(((y * 512) + 9 + x for x in range(0, 255)))
             else:
-                expected_spectra.extend(((y * 512 + 9) + x for x in range(0, 255)))
+                expected_spectra.extend(((y * 512) + 9 + x for x in range(0, 257)))
+        expected_spectra.extend((x for x in range(92169, 122889)))  # HAB
 
         mask_builder.set_use_mask_phi_mirror(phi_mirror)
         mask_builder.set_phi_min(phi_min)
@@ -438,7 +441,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
@@ -476,7 +479,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
@@ -510,11 +513,15 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
         mask_info = mask_builder.build()
 
+        move_builder = get_move_builder(data_info)
+        move_builder.set_center_position(0.)
+        move_info = move_builder.build()
+
         test_director = TestDirector()
-        test_director.set_states(data_state=data_info, mask_state=mask_info)
+        test_director.set_states(data_state=data_info, mask_state=mask_info, move_state=move_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
@@ -547,7 +554,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")

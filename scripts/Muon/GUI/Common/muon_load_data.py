@@ -35,20 +35,18 @@ class MuonLoadData:
         can then be used as a keyword into any of the methods of the class. Use singular
         nouns.
         """
-        self.params = {"run": [], "workspace": [], "filename": []}
-        self.defaults = {"run": 0, "workspace": [], "filename": ""}
-        if self.params.keys() != self.defaults.keys():
-            raise AttributeError("params and defaults dictionaries do not have the same keys.")
+        self.params = []
+        self.defaults = {"run": [0], "workspace": [], "filename": "", 'instrument': ''}
 
     def __iter__(self):
         self._n = -1
-        self._max = len(self.params["run"])
+        self._max = len(self.params)
         return self
 
     def __next__(self):
         if self._n < self._max - 1:
             self._n += 1
-            return {key: val[self._n] for key, val in self.params.items()}
+            return self.params[self._n]
         else:
             raise StopIteration
 
@@ -59,33 +57,32 @@ class MuonLoadData:
 
     def num_items(self):
         """Total number of entries"""
-        return len(next(iter(self.params.values())))
+        return len(self.params)
 
     def get_parameter(self, param_name):
         """Get list of entries for a given parameter"""
-        return self.params.get(param_name, None)
+        return [x.get(param_name) for x in self.params]
 
     # Adding/removing data
 
     def add_data(self, **kwargs):
-        for key, value_list in self.params.items():
-            # if keyword not supplied, use default defined in __init__
-            value_list += [kwargs.get(key, self.defaults[key])]
+        new_entry = {}
+        for key, value in self.defaults.items():
+            new_entry[key] = kwargs.get(key, self.defaults[key])
+        self.params.append(new_entry)
 
     def remove_data(self, **kwargs):
         indices = [i for i, j in enumerate(self._matches(**kwargs)) if not j]
-        for key, vals in self.params.items():
-            self.params[key] = [vals[i] for i in indices]
+        self.params = [self.params[i] for i in indices]
 
     def clear(self):
-        self.params = {key: [] for key, _ in self.params.items()}
+        self.params = []
 
     def remove_nth_last_entry(self, n):
         """Remove the nth last entry given to the instance by add_data, n=1 refers to the most
         recently added."""
         keep_indices = [i for i in range(self.num_items()) if i != self.num_items() - n]
-        for key, vals in self.params.items():
-            self.params[key] = [vals[i] for i in keep_indices]
+        self.params = [self.params[i] for i in keep_indices]
 
     def remove_current_data(self):
         """Remove the most recently added data item"""
@@ -98,14 +95,16 @@ class MuonLoadData:
     # Searching
 
     def _matches(self, **kwargs):
-        checks = [kwargs.get(key, None) for key in self.params.keys()]
-        data_values_zip = zip(*self.params.values())
+        matches = []
 
-        return [True if
-                sum([data_value == search_value for (data_value, search_value) in zip(list(data_values), checks)]) > 0
-                else False
-                for data_values in
-                data_values_zip]
+        for entries in self.params:
+            matching_parameters = [entries.get(key) == kwargs.get(key) for key in entries]
+            if sum(matching_parameters) >= len(kwargs):
+                matches.append(True)
+            else:
+                matches.append(False)
+
+        return matches
 
     def contains_n(self, **kwargs):
         """Counts the number of matching entries where at least one of kwargs matches"""
@@ -123,12 +122,18 @@ class MuonLoadData:
         if self.contains_n(**kwargs) == 1:
             indices = [i for i, val in enumerate(self._matches(**kwargs)) if val is True]
             index = indices[0]
-            return {key: val[index] for key, val in self.params.items()}
+            return self.params[index]
 
     def get_latest_data(self):
         if self.num_items() > 0:
-            return {key: val[-1] for key, val in self.params.items()}
+            return self.params[-1]
         else:
-            ret = {key: None for key in self.params.keys()}
+            ret = self.defaults
             ret["workspace"] = load_utils.empty_loaded_data()
             return ret
+
+    def get_main_field_direction(self, **kwargs):
+        if self.get_data(**kwargs):
+            return self.get_data(**kwargs)['workspace']['MainFieldDirection']
+        else:
+            return None

@@ -9,8 +9,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -27,12 +27,13 @@ DECLARE_ALGORITHM(FindCenterOfMassPosition)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 void FindCenterOfMassPosition::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty("Output", "",
                   "If not empty, a table workspace of that "
@@ -208,14 +209,14 @@ void FindCenterOfMassPosition::exec() {
   // otherwise use an ArrayProperty
   if (!output.empty()) {
     // Store the result in a table workspace
-    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
         "OutputWorkspace", "", Direction::Output));
 
     // Set the name of the new workspace
     setPropertyValue("OutputWorkspace", output);
 
     Mantid::API::ITableWorkspace_sptr m_result =
-        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+        boost::make_shared<TableWorkspace>();
     m_result->addColumn("str", "Name");
     m_result->addColumn("double", "Value");
 
@@ -227,7 +228,7 @@ void FindCenterOfMassPosition::exec() {
     setProperty("OutputWorkspace", m_result);
   } else {
     // Store the results using an ArrayProperty
-    declareProperty(make_unique<ArrayProperty<double>>(
+    declareProperty(std::make_unique<ArrayProperty<double>>(
         "CenterOfMass", boost::make_shared<NullValidator>(),
         Direction::Output));
     std::vector<double> center_of_mass;

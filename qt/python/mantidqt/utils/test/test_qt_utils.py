@@ -14,13 +14,15 @@ import unittest
 
 from qtpy.QtCore import QObject, Qt, Slot
 from qtpy.QtWidgets import QAction, QMenu, QToolBar
+
 try:
     from qtpy.QtCore import SIGNAL
+
     NEW_STYLE_SIGNAL = False
 except ImportError:
     NEW_STYLE_SIGNAL = True
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.qt import add_actions, create_action
 
 
@@ -29,21 +31,23 @@ class CreateActionTest(GuiTest):
     def test_parent_and_name_only_required(self):
         class Parent(QObject):
             pass
+
         parent = Parent()
         action = create_action(parent, "Test Action")
         self.assertTrue(isinstance(action, QAction))
-        self.assertEquals(parent, action.parent())
+        self.assertEqual(parent, action.parent())
 
     def test_parent_can_be_none(self):
         action = create_action(None, "Test Action")
         self.assertTrue(isinstance(action, QAction))
-        self.assertTrue(action.parent() is None)
+        self.assertEqual(action.parent(), None)
 
     def test_supplied_triggered_callback_attaches_to_triggered_signal(self):
         class Receiver(QObject):
             @Slot()
             def test_slot(self):
                 pass
+
         recv = Receiver()
         action = create_action(None, "Test Action", on_triggered=recv.test_slot)
         if NEW_STYLE_SIGNAL:
@@ -54,6 +58,12 @@ class CreateActionTest(GuiTest):
     def test_shortcut_is_set_if_given(self):
         action = create_action(None, "Test Action", shortcut="Ctrl+S")
         self.assertEqual("Ctrl+S", action.shortcut())
+
+    def test_multiple_shortcuts_are_set_if_given(self):
+        expected_shortcuts = ("Ctrl+S", "Ctrl+W")
+        action = create_action(None, "Test Action", shortcut=expected_shortcuts)
+        for expected, actual in zip(expected_shortcuts, action.shortcuts()):
+            self.assertEqual(expected, actual.toString())
 
     def test_shortcut_context_used_if_shortcut_given(self):
         action = create_action(None, "Test Action", shortcut="Ctrl+S",
@@ -82,7 +92,7 @@ class AddActionsTest(GuiTest):
         # so check the number of children increases by 2
         nchildren_before = len(test_toolbar.children())
         add_actions(test_toolbar, [test_act_1, test_act_2])
-        self.assertEquals(nchildren_before + 2, len(test_toolbar.children()))
+        self.assertEqual(nchildren_before + 2, len(test_toolbar.children()))
 
     def test_add_actions_with_bad_target_raises_attribute_error(self):
         test_act_1 = create_action(None, "Test Action 1")

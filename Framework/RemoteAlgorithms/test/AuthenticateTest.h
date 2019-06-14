@@ -56,16 +56,16 @@ public:
 
   // TODO: when we have a RemoteJobManager capable of creating
   // algorithms for different types of compute resources (example:
-  // Fermi@SNS and SCARF@STFC), create different algorithms for them
+  // Fermi@SNS), create different algorithms for them
   void test_propertiesMissing() {
     Authenticate alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // password missing
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("UserName", "john_missing"));
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     Authenticate alg2;
@@ -73,9 +73,9 @@ public:
     // username missing
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Password", "LogIn"));
     TS_ASSERT_THROWS(alg2.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
 
     Authenticate alg3;
@@ -84,7 +84,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("UserName", "john_missing"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("Password", "LogIn"));
 
-    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg3.execute(), const std::runtime_error &);
     TS_ASSERT(!alg3.isExecuted());
   }
 
@@ -92,16 +92,15 @@ public:
     Authenticate auth;
     TS_ASSERT_THROWS_NOTHING(auth.initialize());
     TS_ASSERT_THROWS(auth.setPropertyValue("usernam", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(auth.setPropertyValue("sername", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(auth.setPropertyValue("Passwo", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_propertiesOK() {
     testFacilities.emplace_back("SNS", "Fermi");
-    testFacilities.emplace_back("ISIS", "SCARF@STFC");
 
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();

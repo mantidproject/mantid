@@ -11,15 +11,17 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -28,7 +30,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <cassert>
@@ -40,6 +41,8 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::API::FileProperty;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
@@ -163,22 +166,22 @@ const std::string PDCalibration::summary() const {
 /** Initialize the algorithm's properties.
  */
 void PDCalibration::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::InOut),
                   "Input signal workspace");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "TofBinning", boost::make_shared<RebinParamsValidator>()),
                   "Min, Step, and Max of time-of-flight bins. "
                   "Logarithmic binning is used if Step is negative.");
 
   const std::vector<std::string> exts2{".h5", ".cal"};
+  declareProperty(std::make_unique<FileProperty>("PreviousCalibrationFile", "",
+                                                 FileProperty::OptionalLoad,
+                                                 exts2),
+                  "Previous calibration file");
   declareProperty(
-      Kernel::make_unique<FileProperty>("PreviousCalibrationFile", "",
-                                        FileProperty::OptionalLoad, exts2),
-      "Previous calibration file");
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
           "PreviousCalibrationTable", "", Direction::Input,
           API::PropertyMode::Optional),
       "Previous calibration table. This overrides results from previous file.");
@@ -200,9 +203,9 @@ void PDCalibration::init() {
   peaksValidator->add(mustBePosArr);
   peaksValidator->add(
       boost::make_shared<MandatoryValidator<std::vector<double>>>());
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakPositions",
-                                                             peaksValidator),
-                  "Comma delimited d-space positions of reference peaks.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
+      "Comma delimited d-space positions of reference peaks.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -238,16 +241,16 @@ void PDCalibration::init() {
                   "Select calibration parameters to fit.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("TZEROrange"),
+      std::make_unique<ArrayProperty<double>>("TZEROrange"),
       "Range for allowable TZERO from calibration (default is all)");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DIFArange"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("DIFArange"),
                   "Range for allowable DIFA from calibration (default is all)");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
                   "An output workspace containing the Calibration Table");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
                       "DiagnosticWorkspaces", "", Direction::Output),
                   "Workspaces to promote understanding of calibration results");
 
@@ -404,7 +407,7 @@ void PDCalibration::exec() {
 
   std::string maskWSName = getPropertyValue("OutputCalibrationTable");
   maskWSName += "_mask";
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "MaskWorkspace", maskWSName, Direction::Output),
                   "An output workspace containing the mask");
 
@@ -1198,11 +1201,10 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
   // create workspaces
   size_t numspec = dataws->getNumberHistograms();
   size_t numpeaks = m_peaksInDspacing.size();
-  MatrixWorkspace_sptr peak_pos_ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", numspec, numpeaks, numpeaks);
+  MatrixWorkspace_sptr peak_pos_ws =
+      create<Workspace2D>(numspec, Points(numpeaks));
   MatrixWorkspace_sptr peak_window_ws =
-      API::WorkspaceFactory::Instance().create("Workspace2D", numspec,
-                                               numpeaks * 2, numpeaks * 2);
+      create<Workspace2D>(numspec, Points(numpeaks * 2));
 
   const int64_t NUM_HIST = static_cast<int64_t>(dataws->getNumberHistograms());
   API::Progress prog(this, 0., .2, NUM_HIST);

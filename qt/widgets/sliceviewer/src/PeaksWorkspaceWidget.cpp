@@ -133,8 +133,8 @@ void PeaksWorkspaceWidget::createTableMVC() {
   ui.tblPeaks->setModel(m_tableModel);
 
   const std::vector<int> hideCols = model->defaultHideCols();
-  for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
-    ui.tblPeaks->setColumnHidden(*it, true);
+  for (auto &hideCol : hideCols)
+    ui.tblPeaks->setColumnHidden(hideCol, true);
   ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::Interactive);
   ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
   m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
@@ -359,7 +359,8 @@ void PeaksWorkspaceWidget::workspaceUpdate(
  * @brief PeaksWorkspaceWidget::onCurrentChanged
  * @param index : Index of the table newly selected
  */
-void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index, QModelIndex) {
+void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index,
+                                            QModelIndex /*unused*/) {
   if (index.isValid()) {
     index = m_tableModel->mapToSource(index);
     emit zoomToPeak(this->m_ws, index.row());
@@ -386,13 +387,13 @@ void PeaksWorkspaceWidget::onAddPeaksToggled(bool on) {
 }
 
 void PeaksWorkspaceWidget::exitClearPeaksMode() {
-  SignalBlocker<QPushButton> scopedBlocker(ui.btnRemovePeak);
-  scopedBlocker->setChecked(false);
+  SignalBlocker scopedBlocker(ui.btnRemovePeak);
+  ui.btnRemovePeak->setChecked(false);
 }
 
 void PeaksWorkspaceWidget::exitAddPeaksMode() {
-  SignalBlocker<QPushButton> scopedBlocker(ui.btnAddPeak);
-  scopedBlocker->setChecked(false);
+  SignalBlocker scopedBlocker(ui.btnAddPeak);
+  ui.btnAddPeak->setChecked(false);
 }
 
 void PeaksWorkspaceWidget::onForegroundColorCrossClicked() {

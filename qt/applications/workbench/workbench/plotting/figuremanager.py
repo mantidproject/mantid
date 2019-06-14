@@ -8,21 +8,123 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
+from __future__ import  (absolute_import, unicode_literals)
+
+from functools import wraps
+import sys
 
 # 3rdparty imports
+from mantid.api import AnalysisDataServiceObserver
+from mantid.plots import MantidAxes
+from mantid.py3compat import text_type
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 import matplotlib
-from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
-from qtpy.QtCore import Qt, QObject
+from matplotlib.backend_bases import FigureManagerBase
+from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
+from matplotlib.axes import Axes
+from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
-from six import text_type
 
 # local imports
-from workbench.plotting.figurewindow import FigureWindow
-from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.toolbar import WorkbenchNavigationToolbar
-from workbench.plotting.qappthreadcall import QAppThreadCall
+from .figureinteraction import FigureInteraction
+from .figurewindow import FigureWindow
+from .qappthreadcall import QAppThreadCall
+from .toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
+
+
+def _catch_exceptions(func):
+    """
+    Catch all exceptions in method and print a traceback to stderr
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception:
+            sys.stderr.write("Error occurred in handler:\n")
+            import traceback
+            traceback.print_exc()
+
+    return wrapper
+
+
+class FigureManagerADSObserver(AnalysisDataServiceObserver):
+
+    def __init__(self, manager):
+        super(FigureManagerADSObserver, self).__init__()
+        self.window = manager.window
+        self.canvas = manager.canvas
+
+        self.observeClear(True)
+        self.observeDelete(True)
+        self.observeReplace(True)
+
+    @_catch_exceptions
+    def clearHandle(self):
+        """
+        Called when the ADS is deleted all of its workspaces
+        """
+        self.window.emit_close()
+
+    @_catch_exceptions
+    def deleteHandle(self, _, workspace):
+        """
+        Called when the ADS has deleted a workspace. Checks the
+        attached axes for any hold a plot from this workspace. If removing
+        this leaves empty axes then the parent window is triggered for
+        closer
+        :param _: The name of the workspace. Unused
+        :param workspace: A pointer to the workspace
+        """
+        # Find the axes with this workspace reference
+        all_axes = self.canvas.figure.axes
+        if not all_axes:
+            return
+
+        # Here we wish to delete any curves linked to the workspace being
+        # deleted and if a figure is now empty, close it. We must avoid closing
+        # any figures that were created via the script window that are not
+        # managed via a workspace.
+        # See https://github.com/mantidproject/mantid/issues/25135.
+        empty_axes = []
+        for ax in all_axes:
+            if isinstance(ax, MantidAxes):
+                ax.remove_workspace_artists(workspace)
+            # We check for axes type below as a pseudo check for an axes being
+            # a colorbar. Creating a colorfill plot creates 2 axes: one linked
+            # to a workspace, the other a colorbar. Deleting the workspace
+            # deletes the colorfill, but the plot remains open due to the
+            # non-empty colorbar. This solution seems to work for the majority
+            # of cases but could lead to unmanaged figures only containing an
+            # Axes object being closed.
+            if type(ax) is not Axes:
+                empty_axes.append(MantidAxes.is_empty(ax))
+
+        if all(empty_axes):
+            self.window.emit_close()
+        else:
+            self.canvas.draw_idle()
+
+    @_catch_exceptions
+    def replaceHandle(self, _, workspace):
+        """
+        Called when the ADS has replaced a workspace with one of the same name.
+        If this workspace is attached to this figure then its data is updated
+        :param _: The name of the workspace. Unused
+        :param workspace: A reference to the new workspace
+        """
+        redraw = False
+        for ax in self.canvas.figure.axes:
+            if isinstance(ax, MantidAxes):
+                redraw_this = ax.replace_workspace_artists(workspace)
+            else:
+                continue
+            redraw = redraw | redraw_this
+        if redraw:
+            self.canvas.draw_idle()
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -39,7 +141,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
-
     def __init__(self, canvas, num):
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
@@ -50,8 +151,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.show = QAppThreadCall(self._show_orig)
         self._window_activated_orig = self._window_activated
         self._window_activated = QAppThreadCall(self._window_activated_orig)
-        self._widgetclosed_orig = self._widgetclosed
-        self._widgetclosed = QAppThreadCall(self._widgetclosed_orig)
         self.set_window_title_orig = self.set_window_title
         self.set_window_title = QAppThreadCall(self.set_window_title_orig)
         self.fig_visibility_changed_orig = self.fig_visibility_changed
@@ -60,7 +159,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window = FigureWindow(canvas)
         self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
-        self.window.closing.connect(self._widgetclosed)
+        self.window.closing.connect(self.destroy)
         self.window.visibility_changed.connect(self.fig_visibility_changed)
 
         self.window.setWindowTitle("Figure %d" % num)
@@ -87,6 +186,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
+            self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
             tbs_height = 0
@@ -99,7 +200,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
+        self.fit_browser = FitPropertyBrowser(canvas,
+                                              ToolbarStateManager(self.toolbar))
+        self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
+        self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
+        self.fit_browser.hide()
 
         if matplotlib.is_interactive():
             self.window.show()
@@ -112,8 +218,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
-        self._cids = []
-        self._cids.append(self.canvas.mpl_connect('button_press_event', self.on_button_press))
+        self._fig_interaction = FigureInteraction(self)
+        self._ads_observer = FigureManagerADSObserver(self)
 
         self.window.raise_()
 
@@ -126,22 +232,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def _window_activated(self):
         Gcf.set_active(self)
 
-    def _widgetclosed(self):
-        if self.window._destroying:
-            return
-        self.window._destroying = True
-        for id in self._cids:
-            self.canvas.mpl_disconnect(id)
-        try:
-            Gcf.destroy(self.num)
-        except AttributeError:
-            pass
-            # It seems that when the python session is killed,
-            # Gcf can get destroyed before the Gcf.destroy
-            # line is run, leading to a useless AttributeError.
-
     def _get_toolbar(self, canvas, parent):
-            return WorkbenchNavigationToolbar(canvas, parent, False)
+        return WorkbenchNavigationToolbar(canvas, parent, False)
 
     def resize(self, width, height):
         'set the canvas size in pixels'
@@ -164,18 +256,32 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
+        if figure_type(self.canvas.figure) != FigureType.Line:
+            self._set_fit_enabled(False)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
         if QApplication.instance() is None:
             return
+
         if self.window._destroying:
             return
         self.window._destroying = True
-        self.window.destroyed.connect(self._widgetclosed)
+
         if self.toolbar:
             self.toolbar.destroy()
+        self._ads_observer.observeAll(False)
+        del self._ads_observer
+        self._fig_interaction.disconnect()
         self.window.close()
+
+        try:
+            Gcf.destroy(self.num)
+        except AttributeError:
+            pass
+            # It seems that when the python session is killed,
+            # Gcf can get destroyed before the Gcf.destroy
+            # line is run, leading to a useless AttributeError.
 
     def grid_toggle(self):
         """
@@ -186,6 +292,21 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for ax in axes:
             ax.grid()
         canvas.draw_idle()
+
+    def fit_toggle(self):
+        """
+        Toggle fit browser and tool on/off
+        """
+        if self.fit_browser.isVisible():
+            self.fit_browser.hide()
+        else:
+            self.fit_browser.show()
+
+    def handle_fit_browser_close(self):
+        """
+        Respond to a signal that user closed self.fit_browser by clicking the [x] button.
+        """
+        self.toolbar.trigger_fit_toggle_action()
 
     def hold(self):
         """
@@ -215,32 +336,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         Gcf.figure_visibility_changed(self.num)
 
-    # ------------------------ Interaction events --------------------
-    def on_button_press(self, event):
-        if not event.dblclick:
-            # shortcut
-            return
-        # We assume this is used for editing axis information e.g. labels
-        # which are outside of the axes so event.inaxes is no use.
-        canvas = self.canvas
-        figure = canvas.figure
-        axes = figure.get_axes()
-
-        def move_and_show(editor):
-            editor.move(event.x, figure.bbox.height - event.y + self.window.y())
-            editor.exec_()
-
-        for ax in axes:
-            if ax.title.contains(event)[0]:
-                move_and_show(LabelEditor(canvas, ax.title))
-            elif ax.xaxis.label.contains(event)[0]:
-                move_and_show(LabelEditor(canvas, ax.xaxis.label))
-            elif ax.yaxis.label.contains(event)[0]:
-                move_and_show(LabelEditor(canvas, ax.yaxis.label))
-            elif ax.xaxis.contains(event)[0]:
-                move_and_show(XAxisEditor(canvas, ax))
-            elif ax.yaxis.contains(event)[0]:
-                move_and_show(YAxisEditor(canvas, ax))
+    def _set_fit_enabled(self, on):
+        action = self.toolbar._actions['toggle_fit']
+        action.setEnabled(on)
+        action.setVisible(on)
 
 
 # -----------------------------------------------------------------------------
@@ -269,18 +368,19 @@ def new_figure_manager_given_figure(num, figure):
 if __name__ == '__main__':
     # testing code
     import numpy as np
+
     qapp = QApplication([' '])
     qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
     if hasattr(Qt, 'AA_EnableHighDpiScaling'):
         qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
-    x = np.linspace(0, 10*np.pi, 1000)
+    x = np.linspace(0, 10 * np.pi, 1000)
     cx, sx = np.cos(x), np.sin(x)
     fig_mgr_1 = new_figure_manager(1)
     fig1 = fig_mgr_1.canvas.figure
     ax = fig1.add_subplot(111)
     ax.set_title("Test title")
-    ax.set_xlabel("$\mu s$")
+    ax.set_xlabel(r"$\mu s$")
     ax.set_ylabel("Counts")
 
     ax.plot(x, cx)

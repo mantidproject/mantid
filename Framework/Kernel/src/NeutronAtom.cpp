@@ -26,19 +26,19 @@ namespace {
 const double INV_FOUR_PI = 1. / (4. * M_PI);
 }
 
-void calculateScatteringLengths(NeutronAtom *atom) {
+void calculateScatteringLengths(NeutronAtom &atom) {
   // 1 barn = 100 fm
-  atom->tot_scatt_length = 10. * std::sqrt(atom->tot_scatt_xs * INV_FOUR_PI);
+  atom.tot_scatt_length = 10. * std::sqrt(atom.tot_scatt_xs * INV_FOUR_PI);
 
-  if (atom->coh_scatt_length_img == 0.)
-    atom->coh_scatt_length = fabs(atom->coh_scatt_length_real);
+  if (atom.coh_scatt_length_img == 0.)
+    atom.coh_scatt_length = std::abs(atom.coh_scatt_length_real);
   else
-    atom->coh_scatt_length = 10. * std::sqrt(atom->coh_scatt_xs * INV_FOUR_PI);
+    atom.coh_scatt_length = 10. * std::sqrt(atom.coh_scatt_xs * INV_FOUR_PI);
 
-  if (atom->inc_scatt_length_img == 0.)
-    atom->inc_scatt_length = fabs(atom->inc_scatt_length_real);
+  if (atom.inc_scatt_length_img == 0.)
+    atom.inc_scatt_length = std::abs(atom.inc_scatt_length_real);
   else
-    atom->inc_scatt_length = 10. * std::sqrt(atom->inc_scatt_xs * INV_FOUR_PI);
+    atom.inc_scatt_length = 10. * std::sqrt(atom.inc_scatt_xs * INV_FOUR_PI);
 }
 
 /**
@@ -59,7 +59,7 @@ NeutronAtom::NeutronAtom(const uint16_t z, const double coh_b_real,
       coh_scatt_length_img(0.), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(0.), coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
       tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
-  calculateScatteringLengths(this);
+  calculateScatteringLengths(*this);
 }
 /**
  * Atom constructor
@@ -80,7 +80,7 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
       coh_scatt_length_img(0.), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(0.), coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
       tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
-  calculateScatteringLengths(this);
+  calculateScatteringLengths(*this);
 }
 /**
  * Atom constructor
@@ -104,7 +104,7 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
       coh_scatt_length_img(coh_b_img), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(inc_b_img), coh_scatt_xs(coh_xs),
       inc_scatt_xs(inc_xs), tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
-  calculateScatteringLengths(this);
+  calculateScatteringLengths(*this);
 }
 
 NeutronAtom::NeutronAtom(const NeutronAtom &other)
@@ -115,7 +115,7 @@ NeutronAtom::NeutronAtom(const NeutronAtom &other)
       inc_scatt_length_img(other.inc_scatt_length_img),
       coh_scatt_xs(other.coh_scatt_xs), inc_scatt_xs(other.inc_scatt_xs),
       tot_scatt_xs(other.tot_scatt_xs), abs_scatt_xs(other.abs_scatt_xs) {
-  calculateScatteringLengths(this);
+  calculateScatteringLengths(*this);
 }
 
 NeutronAtom &NeutronAtom::operator=(const NeutronAtom &other) {
@@ -133,7 +133,7 @@ NeutronAtom &NeutronAtom::operator=(const NeutronAtom &other) {
   tot_scatt_xs = other.tot_scatt_xs;
   abs_scatt_xs = other.abs_scatt_xs;
 
-  calculateScatteringLengths(this);
+  calculateScatteringLengths(*this);
 
   return *this;
 }
@@ -144,11 +144,18 @@ NeutronAtom &NeutronAtom::operator=(const NeutronAtom &other) {
  * initialize them.
  */
 NeutronAtom::NeutronAtom()
-    : z_number(0), a_number(0), coh_scatt_length_real(NAN),
-      coh_scatt_length_img(NAN), inc_scatt_length_real(NAN),
-      inc_scatt_length_img(NAN), coh_scatt_xs(NAN), inc_scatt_xs(NAN),
-      tot_scatt_xs(NAN), abs_scatt_xs(NAN), tot_scatt_length(NAN),
-      coh_scatt_length(NAN), inc_scatt_length(NAN) {}
+    : z_number(0), a_number(0),
+      coh_scatt_length_real(std::numeric_limits<double>::quiet_NaN()),
+      coh_scatt_length_img(std::numeric_limits<double>::quiet_NaN()),
+      inc_scatt_length_real(std::numeric_limits<double>::quiet_NaN()),
+      inc_scatt_length_img(std::numeric_limits<double>::quiet_NaN()),
+      coh_scatt_xs(std::numeric_limits<double>::quiet_NaN()),
+      inc_scatt_xs(std::numeric_limits<double>::quiet_NaN()),
+      tot_scatt_xs(std::numeric_limits<double>::quiet_NaN()),
+      abs_scatt_xs(std::numeric_limits<double>::quiet_NaN()),
+      tot_scatt_length(std::numeric_limits<double>::quiet_NaN()),
+      coh_scatt_length(std::numeric_limits<double>::quiet_NaN()),
+      inc_scatt_length(std::numeric_limits<double>::quiet_NaN()) {}
 
 /// @cond
 static const NeutronAtom H(1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);

@@ -267,7 +267,7 @@ private:
         << "12346"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -287,7 +287,7 @@ private:
         << "24682"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -315,7 +315,7 @@ private:
         << "12346"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -335,7 +335,7 @@ private:
         << "24682"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -355,7 +355,7 @@ private:
         << "30001"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -383,7 +383,7 @@ private:
         << "12346"
         << "1.5"
         << "11116"
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -405,7 +405,7 @@ private:
         << "24682"
         << "1.5"
         << "22222"
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -415,7 +415,7 @@ private:
   }
 
   std::unique_ptr<GenericDataProcessorPresenterFriend> makeDefaultPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenterFriend>(
+    return std::make_unique<GenericDataProcessorPresenterFriend>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         DEFAULT_GROUP_NUMBER);
@@ -423,7 +423,7 @@ private:
 
   std::unique_ptr<GenericDataProcessorPresenterNoThread>
   makeDefaultPresenterNoThread() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenterNoThread>(
+    return std::make_unique<GenericDataProcessorPresenterNoThread>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         DEFAULT_GROUP_NUMBER);
@@ -1658,7 +1658,7 @@ public:
         << "dataB"
         << "2.3"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -1707,7 +1707,7 @@ public:
   }
 
   std::unique_ptr<GenericDataProcessorPresenter> makeNonPostProcessPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+    return std::make_unique<GenericDataProcessorPresenter>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), DEFAULT_GROUP_NUMBER);
   }
@@ -2421,7 +2421,7 @@ public:
     rowlist[0].insert(1);
 
     const auto expected = QString(
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
+        "0\t12346\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2471,9 +2471,9 @@ public:
 
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "0\t12346\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
         "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
-        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
+        "1\t24682\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2501,7 +2501,7 @@ public:
     rowlist[0].insert(1);
 
     const auto expected = QString(
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
+        "0\t12346\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2543,7 +2543,7 @@ public:
 
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "0\t12346\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
         "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
@@ -3155,7 +3155,7 @@ public:
   void testPlotRowPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto mockTreeManager = std::make_unique<MockTreeManager>();
     auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -3200,7 +3200,7 @@ public:
   void testPlotGroupPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto mockTreeManager = std::make_unique<MockTreeManager>();
     auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -3304,16 +3304,16 @@ public:
             "IvsQ_TOF_12345_TOF_12346");
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[0], 0.01108, 1e-5);
+        out->x(0)[0], 0.13860, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[1], 0.01153, 1e-5);
+        out->x(0)[1], 0.14415, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[2], 0.01199, 1e-5);
+        out->x(0)[2], 0.14991, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[3], 0.01247, 1e-5);
+        out->x(0)[3], 0.15591, 1e-5);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspacesNoPrefix);

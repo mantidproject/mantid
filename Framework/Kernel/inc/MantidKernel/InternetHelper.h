@@ -12,6 +12,7 @@
 
 #include <ios>
 #include <map>
+#include <memory>
 #include <string>
 
 namespace Poco {
@@ -157,8 +158,8 @@ protected:
   std::string m_contentType;
   std::string m_body;
   StringToStringMap m_headers;
-  Poco::Net::HTTPRequest *m_request;
-  Poco::Net::HTTPResponse *m_response;
+  std::unique_ptr<Poco::Net::HTTPRequest> m_request;
+  std::unique_ptr<Poco::Net::HTTPResponse> m_response;
 };
 
 } // namespace Kernel

@@ -8,6 +8,8 @@
 #define DATAHANDLING_LOAD_SHAPE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/LoadShape.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -36,7 +38,8 @@ public:
   int version() const override { return 1; };
   /// Related algorithms
   const std::vector<std::string> seeAlso() const override {
-    return {"CreateSampleShape", "CopySample", "SetSampleMaterial"};
+    return {"CreateSampleShape", "CopySample", "SetSampleMaterial",
+            "LoadSampleEnvironment"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
@@ -48,8 +51,11 @@ private:
   void init() override;
   void exec() override;
 };
+void DLLExport rotate(Geometry::MeshObject &sampleMesh,
+                      API::MatrixWorkspace_const_sptr inputWS);
+boost::shared_ptr<Geometry::MeshObject> DLLExport loadStl(std::string filename,
+                                                          ScaleUnits scaleType);
 
-} // end namespace DataHandling
+} // namespace DataHandling
 } // namespace Mantid
-
 #endif /* DATAHANDLING_LOAD_SHAPE_H_ */

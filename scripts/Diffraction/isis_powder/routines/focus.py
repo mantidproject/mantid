@@ -59,6 +59,11 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
                                        CalibrationFile=run_details.offset_file_path)
 
+    solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
+    if solid_angle:
+        aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
+        mantid.DeleteWorkspace(solid_angle)
+
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)

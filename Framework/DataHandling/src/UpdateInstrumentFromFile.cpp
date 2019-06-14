@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -47,10 +47,10 @@ void UpdateInstrumentFromFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
-                                                      Direction::InOut),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "Workspace", "Anonymous", Direction::InOut),
       "The name of the workspace in which to store the imported instrument");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load,
                       std::vector<std::string>{".raw", ".nxs", ".s*"}),
                   "The filename of the input file.\n"
@@ -271,13 +271,14 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     std::vector<size_t> indices;
     if (isSpectrum) {
       if (auto group = dynamic_cast<const Geometry::DetectorGroup *>(det)) {
+        const auto detIDs = group->getDetectorIDs();
         for (const auto detID : group->getDetectorIDs())
-          indices.push_back(detectorInfo.indexOf(detID));
+          indices.emplace_back(detectorInfo.indexOf(detID));
       } else {
-        indices.push_back(detectorInfo.indexOf(det->getID()));
+        indices.emplace_back(detectorInfo.indexOf(det->getID()));
       }
     } else {
-      indices.push_back(index);
+      indices.emplace_back(index);
     }
 
     // Special cases for detector r,t,p. Everything else is
@@ -301,8 +302,8 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
       else if (i == header.phiColIdx)
         phi = value;
       else if (header.detParCols.count(i) == 1) {
-        for (const auto index : indices) {
-          auto id = detectorInfo.detector(index).getComponentID();
+        for (const auto detIndex : indices) {
+          auto id = detectorInfo.detector(detIndex).getComponentID();
           pmap.addDouble(id, header.colToName[i], value);
         }
       }
@@ -329,8 +330,8 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     if (header.phiColIdx == 0 || m_ignorePhi)
       phi = p;
 
-    for (const auto index : indices)
-      setDetectorPosition(detectorInfo, index, static_cast<float>(R),
+    for (const auto detIndex : indices)
+      setDetectorPosition(detectorInfo, detIndex, static_cast<float>(R),
                           static_cast<float>(theta), static_cast<float>(phi));
   }
 }

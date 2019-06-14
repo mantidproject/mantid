@@ -34,12 +34,12 @@ DECLARE_ALGORITHM(SaveDetectorsGrouping)
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
   declareProperty(
-      make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "GroupingWorkspace to output to XML file (GroupingWorkspace)");
-  declareProperty(
-      make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
-      "File to save the detectors mask in XML format");
+  declareProperty(std::make_unique<FileProperty>("OutputFile", "",
+                                                 FileProperty::Save, ".xml"),
+                  "File to save the detectors mask in XML format");
 }
 
 /// Main body to execute algorithm
@@ -192,7 +192,6 @@ void SaveDetectorsGrouping::printToXML(
     for (size_t i = 0; i < groupdetidrange.second.size() / 2; i++) {
       // i. Generate text value
 
-      bool writedata = true;
       detid_t ist = groupdetidrange.second[i * 2];
       detid_t ied = groupdetidrange.second[i * 2 + 1];
       // "a-b" or "a"
@@ -201,12 +200,10 @@ void SaveDetectorsGrouping::printToXML(
       } else if (ist == ied) {
         ss << ist;
       } else {
-        writedata = false;
-        g_log.error() << "Impossible to have this situation!\n";
         throw std::invalid_argument("Impossible to have this sitaution!");
       }
       // add ","
-      if (writedata && i < groupdetidrange.second.size() / 2 - 1) {
+      if (i < groupdetidrange.second.size() / 2 - 1) {
         ss << ",";
       }
 

@@ -8,7 +8,7 @@
 #include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
 #include "MantidKernel/make_cow.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -32,8 +32,7 @@ IndexInfo::IndexInfo(const size_t globalSize,
                      const Parallel::StorageMode storageMode,
                      const Parallel::Communicator &communicator)
     : m_storageMode(storageMode),
-      m_communicator(
-          Kernel::make_unique<Parallel::Communicator>(communicator)) {
+      m_communicator(std::make_unique<Parallel::Communicator>(communicator)) {
   // Default to spectrum numbers 1...globalSize
   std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
@@ -53,8 +52,7 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
                      const Parallel::StorageMode storageMode,
                      const Parallel::Communicator &communicator)
     : m_storageMode(storageMode),
-      m_communicator(
-          Kernel::make_unique<Parallel::Communicator>(communicator)) {
+      m_communicator(std::make_unique<Parallel::Communicator>(communicator)) {
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
 }
 
@@ -71,12 +69,17 @@ template <class IndexType>
 IndexInfo::IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent)
     : m_storageMode(parent.m_storageMode),
       m_communicator(
-          Kernel::make_unique<Parallel::Communicator>(*parent.m_communicator)) {
+          std::make_unique<Parallel::Communicator>(*parent.m_communicator)) {
   if (const auto parentSpectrumDefinitions = parent.spectrumDefinitions()) {
     m_spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>();
+    const auto &indexSet = parent.makeIndexSet(indices);
     auto &specDefs = m_spectrumDefinitions.access();
-    for (const auto i : parent.makeIndexSet(indices))
-      specDefs.push_back(parentSpectrumDefinitions->operator[](i));
+    specDefs.reserve(specDefs.size() + indexSet.size());
+    std::transform(indexSet.begin(), indexSet.end(),
+                   std::back_inserter(specDefs),
+                   [&parentSpectrumDefinitions](const auto index) {
+                     return (*parentSpectrumDefinitions)[index];
+                   });
   }
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
       std::move(indices), *parent.m_spectrumNumberTranslator);
@@ -85,7 +88,7 @@ IndexInfo::IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent)
 IndexInfo::IndexInfo(const IndexInfo &other)
     : m_storageMode(other.m_storageMode),
       m_communicator(
-          Kernel::make_unique<Parallel::Communicator>(*other.m_communicator)),
+          std::make_unique<Parallel::Communicator>(*other.m_communicator)),
       m_spectrumDefinitions(other.m_spectrumDefinitions),
       m_spectrumNumberTranslator(other.m_spectrumNumberTranslator) {}
 
@@ -406,7 +409,7 @@ void IndexInfo::makeSpectrumNumberTranslator(
     throw std::runtime_error("IndexInfo: unknown storage mode " +
                              Parallel::toString(m_storageMode));
   }
-  auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
+  auto partitioner = std::make_unique<RoundRobinPartitioner>(
       numberOfPartitions, partition,
       Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(

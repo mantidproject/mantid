@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindEPP.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include <cmath>
 #include <sstream>
@@ -17,6 +16,7 @@ namespace Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindEPP)
@@ -44,10 +44,10 @@ const std::string FindEPP::summary() const {
 /** Initialize the algorithm's properties.
  */
 void FindEPP::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -189,7 +189,7 @@ void FindEPP::fitGaussian(int64_t index) {
  */
 void FindEPP::initWorkspace() {
 
-  m_outWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_outWS = boost::make_shared<TableWorkspace>();
 
   const std::vector<std::string> columns = {
       "PeakCentre", "PeakCentreError", "Sigma", "SigmaError",
@@ -203,11 +203,9 @@ void FindEPP::initWorkspace() {
   m_outWS->addColumn("str", "FitStatus");
 
   const size_t numberSpectra = m_inWS->getNumberHistograms();
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, numberSpectra);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numberSpectra);
 
-  for (size_t i = 0; i < numberSpectra; ++i) {
-    m_outWS->appendRow();
-  }
+  m_outWS->setRowCount(numberSpectra);
 }
 
 } // namespace Algorithms

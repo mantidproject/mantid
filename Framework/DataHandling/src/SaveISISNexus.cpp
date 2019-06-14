@@ -17,7 +17,6 @@
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -54,15 +53,15 @@ SaveISISNexus::SaveISISNexus()
 void SaveISISNexus::init() {
   const std::vector<std::string> inputExts{".raw", ".s*", ".add"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
-                                        inputExts),
+      std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
+                                     inputExts),
       "The name of the RAW file to read, including its full or relative\n"
       "path. (N.B. case sensitive if running on Linux).");
 
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
   // workspace
   const std::vector<std::string> outputExts{".nxs", ".nx5", ".xml"};
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "OutputFilename", "", FileProperty::Save, outputExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
@@ -227,7 +226,7 @@ void SaveISISNexus::exec() {
   selog();
 
   NXclosegroup(handle); // raw_data_1
-  status = NXclose(&handle);
+  NXclose(&handle);
 
   delete m_isisRaw;
 }

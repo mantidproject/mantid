@@ -7,10 +7,10 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 #define MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <MantidAPI/AnalysisDataService.h>
-#include <MantidAPI/MatrixWorkspace_fwd.h>
-#include <MantidQtWidgets/Common/MantidWSIndexDialog.h>
+#include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 
 #include <QTreeWidget>
 #include <boost/shared_ptr.hpp>
@@ -36,11 +36,11 @@ public:
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
                              bool showPlotAll = true, bool showTiledOpt = true,
                              bool isAdvanced = false) const;
-  void setSortScheme(MantidItemSortScheme);
-  void setSortOrder(Qt::SortOrder);
+  void setSortScheme(MantidItemSortScheme /*sortScheme*/);
+  void setSortOrder(Qt::SortOrder /*sortOrder*/);
   MantidItemSortScheme getSortScheme() const;
   Qt::SortOrder getSortOrder() const;
-  void logWarningMessage(const std::string &);
+  void logWarningMessage(const std::string & /*msg*/);
   void disableNodes(bool);
   void sort();
   void dropEvent(QDropEvent *de) override;

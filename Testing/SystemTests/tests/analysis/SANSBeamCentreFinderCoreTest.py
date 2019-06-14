@@ -35,7 +35,6 @@ class SANSBeamCentreFinderCoreTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("MoveWorkspace", False)
         load_alg.setProperty("SampleScatterWorkspace", EMPTY_NAME)
         load_alg.setProperty("SampleScatterMonitorWorkspace", EMPTY_NAME)
         if state.data.sample_transmission:

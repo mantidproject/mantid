@@ -58,11 +58,11 @@ int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadMcStasNexus::init() {
   const std::vector<std::string> exts{".h5", ".nxs"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the Nexus file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -155,7 +155,7 @@ void LoadMcStasNexus::exec() {
       ws->setYUnit(axis2Name);
       ws->replaceAxis(1, axis2);
 
-      ws->mutableX(0) = axis1Values;
+      ws->mutableX(0) = std::move(axis1Values);
 
       for (size_t wsIndex = 0; wsIndex < axis2Length; ++wsIndex) {
         auto &dataY = ws->mutableY(wsIndex);

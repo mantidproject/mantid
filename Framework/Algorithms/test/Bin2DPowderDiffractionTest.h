@@ -9,20 +9,20 @@
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/Bin2DPowderDiffraction.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <iostream>
-
-#include "MantidAlgorithms/Bin2DPowderDiffraction.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,6 +30,10 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::Algorithms::Bin2DPowderDiffraction;
 using Mantid::Types::Event::TofEvent;
+
+namespace {
+Logger logger("Bin2DPowder");
+}
 
 class Bin2DPowderDiffractionTest : public CxxTest::TestSuite {
 public:
@@ -225,7 +229,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "0"));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -243,7 +247,7 @@ private:
     const auto &xVals = eventWS->x(0);
     const size_t xSize = xVals.size();
     auto ax0 = new NumericAxis(xSize);
-    std::cout << "xSize = " << xSize << std::endl;
+    logger.information() << "xSize = " << xSize << std::endl;
     // X-axis is 1 <= wavelength <= 6 Angstrom with step of 0.05
     ax0->setUnit("Wavelength");
     for (size_t i = 0; i < xSize; i++) {
@@ -274,7 +278,8 @@ private:
       }
       events.addDetectorID(Mantid::detid_t(i));
     }
-    std::cout << "Number of events: " << numbins * numSpectra << std::endl;
+    logger.information() << "Number of events: " << numbins * numSpectra
+                         << std::endl;
 
     return eventWS;
   }

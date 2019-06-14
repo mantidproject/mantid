@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace Kernel {
 /// Standard tolerance value
-static const double Tolerance = 1.0e-06;
+constexpr double Tolerance = 1.0e-06;
 
 } // namespace Kernel
 } // namespace Mantid

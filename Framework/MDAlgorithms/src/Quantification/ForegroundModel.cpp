@@ -44,7 +44,7 @@ ForegroundModel::ForegroundModel(const API::IFunction &fittingFunction)
 
 /**
  */
-ForegroundModel::~ForegroundModel() { delete m_formFactorTable; }
+ForegroundModel::~ForegroundModel() = default;
 
 /**
  * Set a reference to the convolved fitting function. Required as we need a
@@ -135,16 +135,14 @@ const API::IFunction &ForegroundModel::functionUnderMinimization() const {
 void ForegroundModel::setFormFactorIon(const std::string &ionType) {
   // "0" indicates off
   if (ionType == "0") {
-    delete m_formFactorTable;
-    m_formFactorTable = nullptr;
+    m_formFactorTable.reset(nullptr);
   } else {
     using namespace PhysicalConstants;
     if (m_MagIonName != ionType) {
       if (m_formFactorTable) {
-        delete m_formFactorTable;
       }
-      m_formFactorTable = new MagneticFormFactorTable(FORM_FACTOR_TABLE_LENGTH,
-                                                      getMagneticIon(ionType));
+      m_formFactorTable = std::make_unique<MagneticFormFactorTable>(
+          FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
       m_MagIonName = ionType;
     }
   }

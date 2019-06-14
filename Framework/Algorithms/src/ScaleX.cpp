@@ -36,18 +36,13 @@ ScaleX::ScaleX()
       m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1) {}
 
 /**
- * Destructor
- */
-ScaleX::~ScaleX() { delete m_progress; }
-
-/**
  * Initialisation method. Declares properties to be used in algorithm.
  */
 void ScaleX::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
   auto isDouble = boost::make_shared<BoundedValidator<double>>();
@@ -99,7 +94,7 @@ void ScaleX::exec() {
   API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
   // Get number of histograms
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
-  m_progress = new API::Progress(this, 0.0, 1.0, histnumber + 1);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, histnumber + 1);
   m_progress->report("Scaling X");
   m_wi_min = 0;
   m_wi_max = histnumber - 1;

@@ -47,6 +47,7 @@ public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
+  virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(std::size_t index) const;
   Spectra getSpectra(std::size_t index) const;
@@ -79,17 +80,17 @@ public:
                          std::size_t spectrum);
   virtual void setEndX(double endX, std::size_t dataIndex,
                        std::size_t spectrum);
-  void setExcludeRegion(const std::string &exclude, std::size_t dataIndex,
-                        std::size_t spectrum);
+  virtual void setExcludeRegion(const std::string &exclude,
+                                std::size_t dataIndex, std::size_t spectrum);
 
-  void addWorkspace(const std::string &workspaceName);
+  virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
   void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
   virtual void removeWorkspace(std::size_t index);
-  PrivateFittingData clearWorkspaces();
+  virtual PrivateFittingData clearWorkspaces();
   void setFittingMode(FittingMode mode);
   virtual void setFitFunction(Mantid::API::IFunction_sptr function);
   virtual void setDefaultParameterValue(const std::string &name, double value,
@@ -115,8 +116,8 @@ public:
   virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
   Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
                                             std::size_t spectrum) const;
+  std::string getOutputBasename() const;
 
-  void saveResult() const;
   void cleanFailedRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm);
   void cleanFailedSingleRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm,
                             std::size_t index);
@@ -140,6 +141,8 @@ protected:
   void removeFittingData(std::size_t index);
 
 private:
+  std::vector<std::string> getWorkspaceNames() const;
+
   void removeWorkspaceFromFittingData(std::size_t const &index);
 
   Mantid::API::IAlgorithm_sptr
@@ -209,7 +212,8 @@ private:
 template <typename F>
 void IndirectFittingModel::applySpectra(std::size_t index,
                                         const F &functor) const {
-  m_fittingData[index]->applySpectra(functor);
+  if (m_fittingData.size() > 0)
+    m_fittingData[index]->applySpectra(functor);
 }
 
 } // namespace IDA

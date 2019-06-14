@@ -137,90 +137,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="gbOutput">
-            <property name="title">
-             <string>Output</string>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
-             <item>
-              <widget class="QLabel" name="lbPlotType">
-               <property name="text">
-                <string>Plot Output:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="cbPlotType">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <item>
-                <property name="text">
-                 <string>All</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Amplitude</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>FWHM</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pbPlot">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Plot</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_1">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pbSave">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Save Result</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+           <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitOutputOptionsView" name="ovOutputOptionsView" native="true"/>
           </item>
          </layout>
         </widget>
@@ -254,6 +171,12 @@
    <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataView</class>
    <extends>QWidget</extends>
    <header>IndirectFitDataView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitOutputOptionsView</class>
+   <extends>QWidget</extends>
+   <header>IndirectFitOutputOptionsView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

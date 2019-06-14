@@ -77,6 +77,8 @@ public:
   bool isInGroup(const Workspace &workspaceToCheck, size_t level = 0) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
+  /// Throws an out_of_range error for an invalid index
+  void throwIndexOutOfRangeError(int index) const;
 
   /// Returns a non-const iterator pointing at the first element in the
   /// workspace group

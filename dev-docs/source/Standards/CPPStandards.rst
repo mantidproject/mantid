@@ -280,20 +280,16 @@ Expressions and Statements
       with side effects as the right-operand of ``&&`` or ``||``. Any such
       instances must be commented in detail to alert other developers to
       the fact that the function is not always called.
-4. ``for`` and ``while`` loops should not use ``break`` and
-   ``continue`` where they can be avoided. Where they are required,
-   comments should draw attention to them as an alternative exit point
-   from the loop.
-5. A ``for`` loop should only have one control variable, and should
+4. A ``for`` loop should only have one control variable, and should
    not modify it in the body.
-6. ``switch`` statements must include a ``default`` clause, even if
+5. ``switch`` statements must include a ``default`` clause, even if
    only to catch errors.
-7. Each ``case`` of a ``switch`` statement must either end with a
+6. Each ``case`` of a ``switch`` statement must either end with a
    ``break``/``return``, or contain a clear comment to alert other
    developers to the fact that execution will fall through to the next
    case. Multiple ``case`` labels (with no code between them) are,
    however, permitted for the same block of code.
-8. ``goto`` must be avoided. When there is a need to break out of two
+7. ``goto`` must be avoided. When there is a need to break out of two
    or more nested loops in one go, the loops should be moved to a
    separate function where 'return' can be used instead.
 

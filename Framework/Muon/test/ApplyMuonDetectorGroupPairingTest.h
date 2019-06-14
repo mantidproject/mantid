@@ -122,7 +122,7 @@ public:
                                              ",", ";", ":"};
     for (auto badName : badPairNames) {
       alg.setProperty("PairName", badName);
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
       TS_ASSERT(!alg.isExecuted());
     }
   }
@@ -139,7 +139,7 @@ public:
     std::vector<double> badAlphas = {0.0, -1.0};
     for (auto badAlpha : badAlphas) {
       alg.setProperty("Alpha", badAlpha);
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
       TS_ASSERT(!alg.isExecuted());
     }
   }
@@ -159,7 +159,7 @@ public:
     for (size_t i = 0; i < badGroup1.size(); i++) {
       alg.setProperty("Group1", badGroup1[i]);
       alg.setProperty("Group2", badGroup2[i]);
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
       TS_ASSERT(!alg.isExecuted());
     }
   }
@@ -175,7 +175,7 @@ public:
 
     alg.setProperty("TimeMin", 10.0);
     alg.setProperty("TimeMax", 5.0);
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -198,14 +198,14 @@ public:
     for (auto &&badPeriod : badPeriods) {
       alg.setProperty("SummedPeriods", badPeriod);
       // This throw comes from MuonProcess
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
       TS_ASSERT(!alg.isExecuted());
     }
 
     for (auto &&badPeriod : badPeriods) {
       alg.setProperty("SubtractedPeriods", badPeriod);
       // This throw comes from MuonProcess
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
       TS_ASSERT(!alg.isExecuted());
     }
   }
@@ -299,7 +299,7 @@ public:
     // Expects 10 IDs
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_summingPeriodsGivesCorrectAsymmetryValues() {
@@ -465,7 +465,7 @@ public:
     alg.setProperty("InputWorkspace1", groupWS1Name);
     alg.setProperty("InputWorkspace2", groupWS2Name);
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_inputWorkspaceWithDifferentTimeAxisFails() {
@@ -493,7 +493,7 @@ public:
     alg.setProperty("InputWorkspace1", groupWS1Name);
     alg.setProperty("InputWorkspace2", groupWS2Name);
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
 

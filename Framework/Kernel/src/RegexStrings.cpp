@@ -5,15 +5,19 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
 namespace Strings {
+
+namespace {
+Logger logger("Regex");
+}
 
 /**
   Find the match in regular expression and places number in Aout
@@ -49,19 +53,6 @@ template <typename T>
 int StrComp(const char *Text, const boost::regex &Re, T &Aout,
             const int compNum) {
   return StrComp(std::string(Text), Re, Aout, compNum);
-}
-
-/**
-  Find the match in regular expression and return 1 if good match
-  @param Sx :: string to match
-  @param Re :: regular expression to use
-  @return 0 on failure and 1 on success
-*/
-int StrLook(const char *Sx, const boost::regex &Re) {
-  boost::cmatch ans;
-  if (boost::regex_search(Sx, ans, Re, boost::match_default))
-    return 1;
-  return 0;
 }
 
 /**
@@ -144,7 +135,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
   if (m1 == empty)
     return 0;
 
-  std::cerr << "SFC :: \n";
+  logger.information() << "SFC :: \n";
   Aout.clear();
   unsigned int zero = 0; // Needed for boost 1.40
   const size_t M0 = m1->position(zero);
@@ -158,7 +149,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
     }
     ML = m1->position(zero) + (*m1)[0].str().length();
   }
-  std::cerr << "SFC :: " << M0 << " " << ML << '\n';
+  logger.information() << "SFC :: " << M0 << " " << ML << '\n';
   // Found object
   Text.erase(M0, ML);
   return 1;
@@ -193,33 +184,10 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
     for (unsigned int index = 1; index < m1->size(); index++)
       Aout.push_back((*m1)[index].str());
   }
-  std::cerr << "SFC :: " << M0 << " " << ML << '\n';
+  logger.information() << "SFC :: " << M0 << " " << ML << '\n';
   // Found object
   Text.erase(M0, ML);
   return 1;
-}
-
-/**
-  Find the match, return the string - the bit
-  @param Sdx :: string to split, is returned with the string after
-  the find (if successful).
-  @param Extract :: Full piece extracted
-  @param Re :: regular expression to use.
-  @retval 0 :: failed to match the string or there were no parts to match.
-  @retval 1 :: succes
-*/
-int StrRemove(std::string &Sdx, std::string &Extract, const boost::regex &Re) {
-  boost::sregex_token_iterator empty;
-
-  boost::cmatch ans;
-  if (boost::regex_search(Sdx.c_str(), ans, Re, boost::match_default)) {
-    if (!ans[0].matched) // no match
-      return 0;
-    Extract = std::string(ans[0].first, ans[0].second);
-    Sdx = std::string(Sdx.c_str(), ans[0].first) + std::string(ans[0].second);
-    return 1;
-  }
-  return 0;
 }
 
 /**

@@ -10,6 +10,8 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "ReflectometryWorkflowBase2.h"
 
+#include <boost/optional.hpp>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -35,9 +37,43 @@ public:
   bool processGroups() override;
 
 private:
+  // Utility class to store output workspace names
+  struct WorkspaceNames {
+    std::string iVsQ;
+    std::string iVsQBinned;
+    std::string iVsLam;
+  };
+
+  class RebinParams {
+  public:
+    RebinParams(const double qMin, const bool qMinIsDefault, const double qMax,
+                const bool qMaxIsDefault, const boost::optional<double> qStep)
+        : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax),
+          m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep){};
+
+    double qMin() const { return m_qMin; };
+    bool qMinIsDefault() const { return m_qMinIsDefault; }
+    double qMax() const { return m_qMax; };
+    bool qMaxIsDefault() const { return m_qMaxIsDefault; }
+    double qStep() const { return *m_qStep; };
+    bool hasQStep() const { return m_qStep.is_initialized(); }
+    std::vector<double> asVector() const {
+      return std::vector<double>{qMin(), qStep(), qMax()};
+    };
+
+  private:
+    double m_qMin;
+    bool m_qMinIsDefault;
+    double m_qMax;
+    bool m_qMaxIsDefault;
+    boost::optional<double> m_qStep;
+  };
+
   void init() override;
   void exec() override;
-  // Set default names for output workspaces
+  std::string
+  getRunNumberForWorkspaceGroup(WorkspaceGroup_const_sptr workspace);
+  WorkspaceNames getOutputWorkspaceNames();
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
@@ -48,10 +84,17 @@ private:
                            const double twoTheta);
   /// Calculate theta
   double calculateTheta(Mantid::API::MatrixWorkspace_sptr inputWS);
+  /// Find cropping and binning parameters
+  RebinParams getRebinParams(MatrixWorkspace_sptr inputWS, const double theta);
+  boost::optional<double> getQStep(MatrixWorkspace_sptr inputWS,
+                                   const double theta);
   /// Rebin and scale a workspace in Q
   Mantid::API::MatrixWorkspace_sptr
-  rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS, double theta,
-                std::vector<double> &params);
+  rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS,
+                RebinParams const &params);
+  /// Crop a workspace in Q
+  MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS,
+                             RebinParams const &params);
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(
       Mantid::API::IAlgorithm_sptr alg,
@@ -65,13 +108,11 @@ private:
                             const std::string &propertyName);
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
-                              const double defaultValue);
-  void setOutputWorkspaces(std::vector<std::string> &IvsLamGroup,
-                           std::string const &outputIvsLam,
-                           std::vector<std::string> &IvsQGroup,
-                           std::string const &outputIvsQBinned,
-                           std::vector<std::string> &IvsQUnbinnedGroup,
-                           std::string const &outputIvsQ);
+                              const double defaultValue, bool &isDefault);
+  void setOutputWorkspaces(WorkspaceNames const &outputGroupNames,
+                           std::vector<std::string> &IvsLamGroup,
+                           std::vector<std::string> &IvsQBinnedGroup,
+                           std::vector<std::string> &IvsQGroup);
 };
 
 } // namespace Algorithms

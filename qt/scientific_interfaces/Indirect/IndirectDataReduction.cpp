@@ -24,35 +24,24 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 #include <QDir>
 #include <QMessageBox>
 
-// Add this class to the list of specialised dialogs in this namespace
-namespace MantidQt {
-namespace CustomInterfaces {
-DECLARE_SUBWINDOW(IndirectDataReduction)
-}
-} // namespace MantidQt
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+using namespace MantidQt;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReduction");
 }
 
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt;
+namespace MantidQt {
+namespace CustomInterfaces {
+DECLARE_SUBWINDOW(IndirectDataReduction)
 
-/**
- * Default constructor for class. Initialises interface pointers to NULL values.
- * @param parent :: This is a pointer to the "parent" object in Qt, most likely
- * the main MantidPlot window.
- */
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
-    : UserSubWindow(parent), m_instrument(""),
+    : IndirectInterface(parent),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {
@@ -63,9 +52,6 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent)
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 }
 
-/**
- * Destructor
- */
 IndirectDataReduction::~IndirectDataReduction() {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 
@@ -75,14 +61,8 @@ IndirectDataReduction::~IndirectDataReduction() {
   saveSettings();
 }
 
-/**
- * On user clicking the "help" button on the interface, directs their request to
- * the relevant
- * interface's helpClicked() function.
- */
-void IndirectDataReduction::helpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect Data Reduction"));
+std::string IndirectDataReduction::documentationPage() const {
+  return "Indirect Data Reduction";
 }
 
 /**
@@ -100,10 +80,6 @@ void IndirectDataReduction::exportTabPython() {
 void IndirectDataReduction::initLayout() {
   m_uiForm.setupUi(this);
 
-  // Do not allow running until setup  and instrument loading are done
-  emitUpdateRunButton(false, "disable", "Loading UI...",
-                      "Initialising user interface components...");
-
   // Create the tabs
   addTab<ISISEnergyTransfer>("ISIS Energy Transfer");
   addTab<ISISCalibration>("ISIS Calibration");
@@ -114,18 +90,15 @@ void IndirectDataReduction::initLayout() {
   addTab<IndirectMoments>("Moments");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   // Connect "?" (Help) Button
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   // Connect the Python export buton
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
   // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this,
-          SLOT(openDirectoryDialog()));
-
-  // Reset the Run button state when the tab is changed
-  connect(m_uiForm.twIDRTabs, SIGNAL(currentChanged(int)), this,
-          SLOT(emitUpdateRunButton()));
+          SLOT(manageUserDirectories()));
 
   // Handle instrument configuration changes
   connect(m_uiForm.iicInstrumentConfiguration,
@@ -141,6 +114,17 @@ void IndirectDataReduction::initLayout() {
   auto facility = Mantid::Kernel::ConfigService::Instance().getFacility();
   filterUiForFacility(QString::fromStdString(facility.name()));
   emit newInstrumentConfiguration();
+
+  // Needed to initially apply the settings loaded on the settings GUI
+  applySettings(getInterfaceSettings());
+}
+
+void IndirectDataReduction::applySettings(
+    std::map<std::string, QVariant> const &settings) {
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
+    tab->second->filterInputData(settings.at("RestrictInput").toBool());
+    tab->second->setPlotErrorBars(settings.at("ErrorBars").toBool());
+  }
 }
 
 /**
@@ -190,18 +174,18 @@ void IndirectDataReduction::instrumentSetupChanged(
  * @returns Pointer to instrument workspace
  */
 Mantid::API::MatrixWorkspace_sptr
-IndirectDataReduction::loadInstrumentIfNotExist(std::string instrumentName,
-                                                std::string analyser,
-                                                std::string reflection) {
+IndirectDataReduction::loadInstrumentIfNotExist(
+    const std::string &instrumentName, const std::string &analyser,
+    const std::string &reflection) {
   std::string idfDirectory =
       Mantid::Kernel::ConfigService::Instance().getString(
           "instrumentDefinition.directory");
 
   try {
+    auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
     std::string parameterFilename =
-        idfDirectory + instrumentName + "_Definition.xml";
-    IAlgorithm_sptr loadAlg =
-        AlgorithmManager::Instance().create("LoadEmptyInstrument");
+        idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
+    auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->setChild(true);
     loadAlg->setLogging(false);
     loadAlg->initialize();
@@ -283,9 +267,9 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
   auto component = instrument->getComponentByName(analyser);
 
   // For each parameter we want to get
-  for (auto it = ipfElements.begin(); it != ipfElements.end(); ++it) {
+  for (auto &ipfElement : ipfElements) {
     try {
-      std::string key = *it;
+      std::string key = ipfElement;
 
       QString value = getInstrumentParameterFrom(instrument, key);
 
@@ -297,8 +281,8 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
     // In the case that the parameter does not exist
     catch (Mantid::Kernel::Exception::NotFoundError &nfe) {
       UNUSED_ARG(nfe);
-      g_log.warning() << "Could not find parameter " << *it << " in instrument "
-                      << instrumentName << '\n';
+      g_log.warning() << "Could not find parameter " << ipfElement
+                      << " in instrument " << instrumentName << '\n';
     }
   }
 
@@ -495,15 +479,15 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
   }
 
   // Add the required tabs
-  for (auto it = enabledTabs.begin(); it != enabledTabs.end(); ++it) {
+  for (auto &enabledTab : enabledTabs) {
     // Connect the insturment changed signal
-    connect(this, SIGNAL(newInstrumentConfiguration()), m_tabs[*it].second,
-            SIGNAL(newInstrumentConfiguration()));
+    connect(this, SIGNAL(newInstrumentConfiguration()),
+            m_tabs[enabledTab].second, SIGNAL(newInstrumentConfiguration()));
 
     // Add the tab
-    m_uiForm.twIDRTabs->addTab(m_tabs[*it].first, *it);
+    m_uiForm.twIDRTabs->addTab(m_tabs[enabledTab].first, enabledTab);
 
-    g_log.debug() << "Adding tab " << (*it).toStdString() << '\n';
+    g_log.debug() << "Adding tab " << enabledTab.toStdString() << '\n';
   }
 
   // Disable instruments as required
@@ -511,34 +495,5 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
       disabledInstruments);
 }
 
-/**
- * Handles showing the manage directory dialog box.
- */
-void IndirectDataReduction::openDirectoryDialog() {
-  auto ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message The message to display in the message box
- */
-void IndirectDataReduction::showMessageBox(const QString &message) {
-  showInformationBox(message);
-}
-
-/**
- * Slot to allow setting the state of the Run button.
- *
- * @param enabled If the button is clickable
- * @param message Message shown on the button
- * @param tooltip Tooltip shown when hovering over button
- */
-void IndirectDataReduction::emitUpdateRunButton(
-    bool enabled, std::string const &enableOutputButtons, QString message,
-    QString tooltip) {
-  emit updateRunButton(enabled, enableOutputButtons, message, tooltip);
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

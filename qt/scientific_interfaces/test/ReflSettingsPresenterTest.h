@@ -547,6 +547,7 @@ public:
     EXPECT_CALL(mockView, getCAp()).Times(Exactly(0));
     EXPECT_CALL(mockView, getCPp()).Times(Exactly(0));
     EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getFloodCorrection()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getPerAngleOptions()).Times(Exactly(2));

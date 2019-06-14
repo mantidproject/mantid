@@ -363,6 +363,42 @@ public:
     TS_ASSERT_DELTA(outLam->x(0)[3], 2.0924, 0.0001);
   }
 
+  void test_two_transmission_runs_stitch_ScaleRHSWorkspace() {
+
+    auto lhsWS = m_multiDetectorWS;
+    auto rhsWS = m_multiDetectorWS;
+
+    // Modify counts for rhsWS (only for this test)
+    auto &Y = rhsWS->mutableY(1);
+    std::fill(Y.begin(), Y.end(), 3.0);
+
+    CreateTransmissionWorkspace2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", lhsWS);
+    alg.setProperty("SecondTransmissionRun", rhsWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ScaleRHSWorkspace", false);
+    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
+    TS_ASSERT(outLam->x(0)[0] >= 1.5);
+    TS_ASSERT(outLam->x(0)[14] <= 15.0);
+
+    // No monitors considered because MonitorBackgroundWavelengthMin
+    // and MonitorBackgroundWavelengthMax were not set
+    // Y counts must be all 3.0000
+    const auto &y_counts = outLam->counts(0);
+    for (auto itr = y_counts.begin(); itr != y_counts.end(); ++itr) {
+      TS_ASSERT_DELTA(3.0, *itr, 0.000001);
+    }
+  }
+
   void test_one_run_store_in_ADS() {
     AnalysisDataService::Instance().clear();
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());

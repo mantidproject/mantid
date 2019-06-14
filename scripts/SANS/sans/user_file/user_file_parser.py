@@ -60,7 +60,8 @@ def extract_int_range(to_extract):
 def extract_list(to_extract, separator, converter):
     to_extract = to_extract.strip()
     to_extract = ' '.join(to_extract.split())
-    string_list = [element.replace(" ", "") for element in to_extract.split(separator)]
+    string_list = [element.replace(" ", "") for element in re.split(separator, to_extract)]
+    string_list = [element for element in string_list if element != ""]
     return [converter(element) for element in string_list]
 
 
@@ -75,7 +76,8 @@ def extract_string_list(to_extract, separator=","):
 def extract_float_range_midpoint_and_steps(to_extract, separator):
     to_extract = ' '.join(to_extract.split())
 
-    entries_string = to_extract.split(separator)
+    entries_string = re.split(separator, to_extract)
+    entries_string = [element for element in entries_string if element != ""]
     number_of_entries = len(entries_string)
     if number_of_entries != 5:
         raise RuntimeError("Expected a range defined by 5 numbers,"
@@ -113,6 +115,7 @@ start_string = "^\\s*"
 end_string = "\\s*$"
 space_string = "\\s+"
 rebin_string = "(\\s*[-+]?\\d+(\\.\\d+)?)(\\s*,\\s*[-+]?\\d+(\\.\\d+)?)*"
+rebin_string_no_comma = "(\\s*[-+]?\\d+(\\.\\d+)?)(\\s*\\s*[-+]?\\d+(\\.\\d+)?)*"
 
 
 # ----------------------------------------------------------------
@@ -262,20 +265,20 @@ class InstrParser(object):
     Type = "INSTR"
     _INSTRUMENTS = ["LOQ", "LARMOR", "SANS2D", "ZOOM", "NOINSTRUMENT"]
 
+    INSTRUMENTS_DICT = {"LOQ": SANSInstrument.LOQ,
+                        "LARMOR": SANSInstrument.LARMOR,
+                        "SANS2D": SANSInstrument.SANS2D,
+                        "ZOOM": SANSInstrument.ZOOM}
+
     @staticmethod
     def parse_line(line):
-        if line == "LOQ":
-            ret_val = SANSInstrument.LOQ
-        elif line == "LARMOR":
-            ret_val = SANSInstrument.LARMOR
-        elif line == "SANS2D":
-            ret_val = SANSInstrument.SANS2D
-        elif line == "ZOOM":
-            ret_val = SANSInstrument.ZOOM
-        else:
+        try:
+            ret_val = InstrParser.INSTRUMENTS_DICT[line]
+        except KeyError:
             raise RuntimeError("InstrParser: Unknown command for INSTR: {0}".format(line))
-
-        return {DetectorId.instrument: ret_val}
+        else:
+            # If no exception raised
+            return {DetectorId.instrument: ret_val}
 
     @staticmethod
     def get_type():
@@ -508,21 +511,25 @@ class LimitParser(UserFileComponentParser):
         L/PHI[/NOMIRROR] d1 d2
 
         L/Q/ q1 q2 [dq[/LIN]]  or  L/Q q1 q2 [dq[/LOG]]
-        L/Q q1,dq1,q3,dq2,q2 [/LIN]]  or  L/Q q1,dq1,q3,dq2,q2 [/LOG]]
-        but apparently also L/Q q1, dq1, q2, dq2, q3, dq3, ... [/LOG | /LIN] is allowed
+        L/Q q1 dq1 q2 dq2 q3 [/LIN]]  or  L/Q q1 dq1 q2 dq2 q3 [/LOG]]
+        but apparently also L/Q q1 dq1 q2 dq2 q3 dq3 ... [/LOG | /LIN] is allowed
 
         L/Q/RCut c
         L/Q/WCut c
 
         L/QXY qxy1 qxy2 [dqxy[/LIN]]  or  L/QXY qxy1 qxy2 [dqxy[/LOG]]
-        L/QXY qxy1,dqxy1,qxy3,dqxy2,qxy2 [/LIN]]  or  L/QXY qxy1,dqxy1,qxy3,dqxy2,qxy2 [/LOG]]
+        L/QXY qxy1 dqxy1 qxy3 dqxy2 qxy2 [/LIN]]  or  L/QXY qxy1 dqxy1 qxy3 dqxy2 qxy2 [/LOG]]
 
         L/R r1 r2  or undocumented L/R  r1 r2 step where step is actually ignored
 
         L/WAV l1 l2 [dl[/LIN]  or  L/WAV l1 l2 [dl[/LOG]
-        L/WAV l1,dl1,l3,dl2,l2 [/LIN]  or  L/WAV l1,dl1,l3,dl2,l2 [/LOG]
+        L/WAV l1 dl1 l3 dl2 l2 [/LIN]  or  L/WAV l1 dl1 l3 dl2 l2 [/LOG]
 
         L/EVENTSTIME rebin_str
+
+    Note that the docs state that all limit strings should be space-separated, however complex ranges
+    used to be comma-separated ONLY. They remain as such so existing user files are not broken.
+    We replace commas present in a string with spaces so that all inputs are effectively space-separated.
     """
     Type = "L"
 
@@ -538,12 +545,12 @@ class LimitParser(UserFileComponentParser):
         self._simple_range = "\\s*" + self._range + self._simple_step
 
         self._comma = "\\s*,\\s*"
-        self._complex_range = "\\s*" + float_number + self._comma + float_number + self._comma + float_number + \
-                              self._comma + float_number + self._comma + float_number +\
+        self._complex_range = "\\s*" + float_number + space_string + float_number + space_string + float_number + \
+                              space_string + float_number + space_string + float_number +\
                               "(\\s*" + self._lin_or_log + ")?"
         # The complex pattern is normally a rebin string, such as
 
-        self._complex_range_2 = "\\s*" + float_number + "(" + self._comma + float_number + ")*\\s*" +\
+        self._complex_range_2 = "\\s*" + float_number + "(" + space_string + float_number + ")*\\s*" +\
                                 "(\\s*" + self._lin_or_log + ")?"
 
         # Angle limits
@@ -556,7 +563,7 @@ class LimitParser(UserFileComponentParser):
         # Event time limits
         self._events_time = "\\s*EVENTSTIME\\s*"
         self._events_time_pattern = re.compile(start_string + self._events_time +
-                                               space_string + rebin_string + end_string)
+                                               space_string + rebin_string_no_comma + end_string)
 
         self._events_time_pattern_simple_pattern = re.compile(start_string + self._events_time +
                                                               space_string + self._simple_range + end_string)
@@ -565,6 +572,7 @@ class LimitParser(UserFileComponentParser):
         self._q = "\\s*Q\\s*"
         self._q_simple_pattern = re.compile(start_string + self._q + space_string +
                                             self._simple_range + end_string)
+
         self._q_complex_pattern = re.compile(start_string + self._q + space_string + self._complex_range + end_string)
         self._q_complex_pattern_2 = re.compile(start_string + self._q + space_string + self._complex_range_2 +
                                                end_string)
@@ -600,7 +608,7 @@ class LimitParser(UserFileComponentParser):
     def parse_line(self, line):
         # Get the settings, ie remove command
         setting = UserFileComponentParser.get_settings(line, LimitParser.get_type_pattern())
-
+        setting = setting.replace(",", " ")
         # Determine the qualifier and extract the user setting
         if self._is_angle_limit(setting):
             output = self._extract_angle_limit(setting)
@@ -651,7 +659,7 @@ class LimitParser(UserFileComponentParser):
             # We have to make sure that there is an odd number of elements
             range_with_steps_string = re.sub(self._q, "", line)
             range_with_steps_string = re.sub(self._lin_or_log, "", range_with_steps_string)
-            range_with_steps = extract_float_list(range_with_steps_string, ",")
+            range_with_steps = extract_float_list(range_with_steps_string, " ")
             pattern_matches = len(range_with_steps) > 5 and (len(range_with_steps) % 2 == 1)
         return pattern_matches
 
@@ -663,15 +671,16 @@ class LimitParser(UserFileComponentParser):
 
     def _extract_event_binning(self, line):
         event_binning = re.sub(self._events_time, "", line)
-        if does_pattern_match(self._events_time_pattern_simple_pattern, line):
+        if does_pattern_match(self._events_time_pattern, line):
+            rebin_values = extract_float_list(event_binning, separator=" ")
+            binning_string = ",".join([str(val) for val in rebin_values])
+        else:
             simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.events_binning)
             rebin_values = simple_pattern[LimitsId.events_binning]
             prefix = -1. if rebin_values.step_type is RangeStepType.Log else 1.
             binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + \
                              str(rebin_values.stop)  # noqa
-        else:
-            rebin_values = extract_float_list(event_binning)
-            binning_string = ",".join([str(val) for val in rebin_values])
+
         output = {LimitsId.events_binning: binning_string}
         return output
 
@@ -720,7 +729,10 @@ class LimitParser(UserFileComponentParser):
         if does_pattern_match(self._qxy_simple_pattern, line):
             output = self._extract_simple_pattern(qxy_range, LimitsId.qxy)
         else:
-            output = self._extract_complex_pattern(qxy_range, LimitsId.qxy)
+            # v2 GUI cannot currently support complex QXY ranges
+            #output = self._extract_complex_pattern(qxy_range, LimitsId.qxy)
+            raise ValueError("QXY Limits: The expression {0} is currently not supported."
+                             " Use a simple pattern".format(line))
         return output
 
     def _extract_wavelength_limit(self, line):
@@ -767,7 +779,8 @@ class LimitParser(UserFileComponentParser):
 
         # Remove the step type
         range_with_steps_string = re.sub(self._lin_or_log, "", complex_range_input)
-        range_with_steps = extract_float_range_midpoint_and_steps(range_with_steps_string, ",")
+        range_with_steps = extract_float_range_midpoint_and_steps(range_with_steps_string,
+                                                                  " ")
 
         # Check if there is a sign on the individual steps, this shows if something had been marked as linear or log.
         # If there is an explicit LOG/LIN command, then this overwrites the sign
@@ -791,7 +804,7 @@ class LimitParser(UserFileComponentParser):
 
         # Remove the step type
         range_with_steps_string = re.sub(self._lin_or_log, "", complex_range_input)
-        range_with_steps = extract_float_list(range_with_steps_string, ",")
+        range_with_steps = extract_float_list(range_with_steps_string, " ")
 
         if step_type is not None:
             prefix = -1.0 if step_type is RangeStepType.Log else 1.0

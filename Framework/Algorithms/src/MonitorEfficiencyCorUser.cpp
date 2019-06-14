@@ -9,9 +9,12 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
@@ -22,6 +25,8 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
+using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
@@ -30,12 +35,12 @@ DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
  */
 
 void MonitorEfficiencyCorUser::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace to correct for monitor efficiency");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace in which to store the result.");
 }
 
@@ -47,7 +52,7 @@ void MonitorEfficiencyCorUser::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
   m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
 

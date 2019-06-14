@@ -219,8 +219,12 @@ class LoadRun(object):
                                                          monitor_appendix=appendix)
 
         loader_name = ''
+        if isinstance(outWs, WorkspaceGroup):
+            historyWs = outWs[0]
+        else:
+            historyWs = outWs
         try:
-            last_algorithm = outWs.getHistory().lastAlgorithm()
+            last_algorithm = historyWs.getHistory().lastAlgorithm()
             loader_name = last_algorithm.getProperty('LoaderName').value
         except RuntimeError as details:
             sanslog.warning(
@@ -358,7 +362,7 @@ class LoadRun(object):
             logger.warning("Invalid request for getting single period in a non group workspace")
             return workspace
         if len(groupW) < period:
-            raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
+            raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.name())
         ws_name = groupW[period - 1].name()
 
         # If we are dealing with event data, then we also want to extract and rename the according monitor data set

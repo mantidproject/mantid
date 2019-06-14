@@ -7,7 +7,7 @@
 #include "ALCPeakFittingView.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
+#include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 
 #include <QMessageBox>
 
@@ -121,7 +121,7 @@ void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
 
 void ALCPeakFittingView::setParameter(const QString &funcIndex,
                                       const QString &paramName, double value) {
-  m_ui.peaks->setParameter(funcIndex, paramName, value);
+  m_ui.peaks->setParameter(funcIndex + paramName, value);
 }
 
 void ALCPeakFittingView::setPeakPickerEnabled(bool enabled) {

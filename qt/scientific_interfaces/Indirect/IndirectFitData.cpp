@@ -31,10 +31,10 @@ template <template <typename...> class Vector, typename T, typename... Ts>
 std::vector<T> outOfRange(const Vector<T, Ts...> &values, const T &minimum,
                           const T &maximum) {
   std::vector<T> result;
-  for (auto &&value : values) {
-    if (value < minimum || value > maximum)
-      result.emplace_back(value);
-  }
+  std::copy_if(values.begin(), values.end(), std::back_inserter(result),
+               [&minimum, &maximum](const auto &value) {
+                 return value < minimum || value > maximum;
+               });
   return result;
 }
 
@@ -61,7 +61,8 @@ private:
 };
 
 struct CheckZeroSpectrum : boost::static_visitor<bool> {
-  bool operator()(const std::pair<std::size_t, std::size_t> &) const {
+  bool
+  operator()(const std::pair<std::size_t, std::size_t> & /*unused*/) const {
     return false;
   }
   bool operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
@@ -103,21 +104,28 @@ std::string constructSpectraString(std::vector<int> const &spectras) {
   return joinCompress(spectras.begin(), spectras.end());
 }
 
+template <typename T, typename Predicate>
+void removeElementsIf(T &iterable, Predicate const &filter) {
+  auto const iter = std::remove_if(iterable.begin(), iterable.end(), filter);
+  if (iter != iterable.end())
+    iterable.erase(iter, iterable.end());
+}
+
 std::vector<std::string> splitStringBy(std::string const &str,
                                        std::string const &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
-  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
-                                  [](std::string const &subString) {
-                                    return subString.empty();
-                                  }),
-                   subStrings.end());
+  removeElementsIf(subStrings, [](std::string const &subString) {
+    return subString.empty();
+  });
   return subStrings;
 }
 
 std::string getSpectraRange(std::string const &string) {
-  auto bounds = splitStringBy(string, "-");
-  return bounds[0] > bounds[1] ? bounds[1] + "-" + bounds[0] : string;
+  auto const bounds = splitStringBy(string, "-");
+  return std::stoull(bounds[0]) > std::stoull(bounds[1])
+             ? bounds[1] + "-" + bounds[0]
+             : string;
 }
 
 std::string rearrangeSpectraSubString(std::string const &string) {
@@ -137,8 +145,7 @@ std::string rearrangeSpectraRangeStrings(std::string const &string) {
 }
 
 std::string createSpectraString(std::string string) {
-  string.erase(std::remove_if(string.begin(), string.end(), isspace),
-               string.end());
+  removeElementsIf(string, isspace);
   std::vector<int> spectras = parseRange(rearrangeSpectraRangeStrings(string));
   std::sort(spectras.begin(), spectras.end());
   // Remove duplicate entries
@@ -224,14 +231,14 @@ std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
 }
 
 double convertBoundToDoubleAndFormat(std::string const &str) {
-  return std::round(std::stod(str) * 10) / 10;
+  return std::round(std::stod(str) * 1000) / 1000;
 }
 
 std::string constructExcludeRegionString(std::vector<double> const &bounds) {
   std::string excludeRegion;
   for (auto it = bounds.begin(); it < bounds.end(); ++it) {
-    auto splitDouble = splitStringBy(std::to_string(*it), ".");
-    excludeRegion += splitDouble[0] + "." + splitDouble[1].front();
+    auto const splitDouble = splitStringBy(std::to_string(*it), ".");
+    excludeRegion += splitDouble[0] + "." + splitDouble[1].substr(0, 3);
     excludeRegion += it == bounds.end() - 1 ? "" : ",";
   }
   return excludeRegion;
@@ -254,9 +261,7 @@ getBoundsAsDoubleVector(std::vector<std::string> const &boundStrings) {
 }
 
 std::string createExcludeRegionString(std::string regionString) {
-  regionString.erase(
-      std::remove_if(regionString.begin(), regionString.end(), isspace),
-      regionString.end());
+  removeElementsIf(regionString, isspace);
   auto bounds = getBoundsAsDoubleVector(splitStringBy(regionString, ","));
   return orderExcludeRegionString(bounds);
 }
@@ -276,7 +281,7 @@ IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
 std::string
 IndirectFitData::displayName(const std::string &formatString,
                              const std::string &rangeDelimiter) const {
-  const auto workspaceName = cutLastOf(workspace()->getName(), "_red");
+  const auto workspaceName = getBasename();
   const auto spectraString =
       boost::apply_visitor(SpectraToString(rangeDelimiter), m_spectra);
 
@@ -291,12 +296,16 @@ IndirectFitData::displayName(const std::string &formatString,
 
 std::string IndirectFitData::displayName(const std::string &formatString,
                                          std::size_t spectrum) const {
-  const auto workspaceName = cutLastOf(workspace()->getName(), "_red");
+  const auto workspaceName = getBasename();
 
   auto formatted = boost::format(formatString);
   formatted = tryPassFormatArgument(formatted, workspaceName);
   formatted = tryPassFormatArgument(formatted, std::to_string(spectrum));
   return formatted.str();
+}
+
+std::string IndirectFitData::getBasename() const {
+  return cutLastOf(workspace()->getName(), "_red");
 }
 
 Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const {

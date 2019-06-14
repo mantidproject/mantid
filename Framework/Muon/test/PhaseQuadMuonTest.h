@@ -258,23 +258,23 @@ public:
   void testNoPhase() {
     std::vector<std::string> names = {"ID", "Asym", "dummy"};
     IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
-    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(phaseQuad->execute(), const std::runtime_error &);
   }
   void testNoAsymm() {
     std::vector<std::string> names = {"ID", "AsYMg", "phase"};
     MatrixWorkspace_sptr m_loadedData = loadMuonDataset();
     IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
-    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(phaseQuad->execute(), const std::runtime_error &);
   }
   void testTwoPhases() {
     std::vector<std::string> names = {"ID", "Phase", "phi"};
     IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
-    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(phaseQuad->execute(), const std::runtime_error &);
   }
   void testTwoAsymm() {
     std::vector<std::string> names = {"ID", "Asym", "Asymm"};
     IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
-    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(phaseQuad->execute(), const std::runtime_error &);
   }
   void testSwapOrder() {
     std::vector<std::string> names = {"ID", "phase", "Asymm"};

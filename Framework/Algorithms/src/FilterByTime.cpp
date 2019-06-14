@@ -30,11 +30,11 @@ void FilterByTime::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "
                          "start/stop times, not both.");
 
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 

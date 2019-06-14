@@ -60,9 +60,12 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
-// Overloads for binIndexOf function which has 1 optional argument
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
-                                       MatrixWorkspace::binIndexOf, 1, 2)
+// Overloads for yIndexOfX function which has 2 optional argument
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
+                                       MatrixWorkspace::yIndexOfX, 1, 3)
+// Overloads for YUnitLabel which has 1 optional argument
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_YUnitLabelOverloads,
+                                       YUnitLabel, 0, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -187,6 +190,33 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
 }
 
 /**
+ * Adds a deprecation warning to the binIndexOf call to warn about using
+ * yIndexOfX instead
+ * @param self A reference to the calling object
+ * @param xValue The x value to find the index for
+ * @param index The index within the workspace to search within (default = 0)
+ * @param tolerance The tolerance to accept between the passed xValue and the
+ *                  stored value (default = 0.0)
+ * @returns The yIndexOfX(xValue, index, tolerance)
+ */
+std::size_t binIndexOfDeprecated(MatrixWorkspace &self, const double xValue,
+                                 const std::size_t index = 0) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "``binIndexOf`` is deprecated, use ``yIndexOfX`` instead.");
+  return self.yIndexOfX(xValue, index);
+}
+
+GNU_DIAG_OFF("unused-local-typedef")
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+// Overloads for binIndexOfDeprecated function which has 1 optional argument
+BOOST_PYTHON_FUNCTION_OVERLOADS(binIndexOfDeprecatedOverloads,
+                                binIndexOfDeprecated, 2, 3)
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
+
+/**
  * This is an anonymous wrapper around the homonym method of MatrixWorkspace.
  * This takes int as argument since python does not speak unsigned.
  * @param self
@@ -212,11 +242,13 @@ void export_MatrixWorkspace() {
            "Returns size of the Y data array")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms,
            arg("self"), "Returns the number of spectra in the workspace")
-      .def("binIndexOf", &MatrixWorkspace::binIndexOf,
-           MatrixWorkspace_binIndexOfOverloads(
-               (arg("self"), arg("xvalue"), arg("workspaceIndex")),
-               "Returns the index of the bin containing the given xvalue. The "
-               "workspace_index is optional [default=0]"))
+      .def("yIndexOfX", &MatrixWorkspace::yIndexOfX,
+           MatrixWorkspace_yIndexOfXOverloads(
+               (arg("self"), arg("xvalue"), arg("workspaceIndex"),
+                arg("tolerance")),
+               "Returns the y index which corresponds to the X Value provided. "
+               "The workspace_index [default=0] and tolerance [default=0.0] is "
+               "optional."))
       .def("detectorTwoTheta", &MatrixWorkspace::detectorTwoTheta,
            (arg("self"), arg("det")),
            "Returns the two theta value for a given detector")
@@ -255,8 +287,10 @@ void export_MatrixWorkspace() {
            arg("self"), "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
-      .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
-           "Returns the caption for the Y axis")
+      .def("YUnitLabel", &MatrixWorkspace::YUnitLabel,
+           MatrixWorkspace_YUnitLabelOverloads(
+               (arg("self"), arg("useLatex"), arg("plotAsDistribution")),
+               "Returns the caption for the Y axis"))
       .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
            (arg("self"), arg("workspaceIndex")),
            "Returns true if this spectrum contains any masked bins")
@@ -277,6 +311,12 @@ void export_MatrixWorkspace() {
            "Return the Run object for this workspace (deprecated, use "
            ":class:`~mantid.api.MatrixWorkspace.getRun` "
            "instead)")
+      .def("binIndexOf", &binIndexOfDeprecated,
+           binIndexOfDeprecatedOverloads(
+               (arg("self"), arg("xvalue"), arg("workspaceIndex")),
+               "Returns the index of the bin containing the given xvalue "
+               "(deprecated, use "
+               ":class:`~mantid.api.MatrixWorkspace.yIndexOfX` instead)"))
 
       //--------------------------------------- Setters
       //------------------------------------
@@ -394,7 +434,9 @@ void export_MatrixWorkspace() {
       .def("clearMonitorWorkspace", &clearMonitorWorkspace, args("self"),
            "Forget about monitor workspace, attached to the current workspace")
       .def("isCommonBins", &MatrixWorkspace::isCommonBins,
-           "Returns true if the workspace has common X bins.");
+           "Returns true if the workspace has common X bins.")
+      .def("isCommonLogBins", &MatrixWorkspace::isCommonLogBins,
+           "Returns true if the workspace has common X bins with log spacing.");
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

@@ -73,7 +73,8 @@
 #include "LineDialog.h"
 #include "LogisticFit.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
+#include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
 #include "MatrixCommand.h"
 #include "MatrixDialog.h"
 #include "MatrixModel.h"
@@ -114,7 +115,6 @@
 #include "TextEditor.h"
 #include "TiledWindow.h"
 #include "importOPJ.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
 
 // TODO: move tool-specific code to an extension manager
 #include "ContourLinesEditor.h"
@@ -134,7 +134,6 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
-#include <iostream>
 
 #include <QAction>
 #include <QActionGroup>
@@ -509,8 +508,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
         qMakePair(userSubWindowName, userSubWindowName));
 
     const QSet<QString> categories =
-        UserSubWindowFactory::Instance().getInterfaceCategories(
-            userSubWindowName);
+        UserSubWindowFactory::Instance().categories(userSubWindowName);
 
     m_interfaceCategories[userSubWindowName] = categories;
     m_allCategories += categories;
@@ -901,7 +899,7 @@ QMenuBar *ApplicationWindow::myMenuBar() {
 
 void ApplicationWindow::initToolBars() {
   initPlot3DToolBar();
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
   QPixmap openIcon, saveIcon;
 
   standardTools = new QToolBar(tr("Standard Tools"), this);
@@ -11647,7 +11645,11 @@ void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
 
 bool ApplicationWindow::isUnityDesktop() const {
   return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity" ||
-         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity";
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity" ||
+         QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) ==
+             "ubuntu:GNOME" ||
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) ==
+             "ubuntu:GNOME";
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
@@ -13834,7 +13836,7 @@ void ApplicationWindow::disregardCol() {
 }
 
 void ApplicationWindow::showHomePage() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
+  MantidDesktopServices::openUrl(QUrl("https://www.mantidproject.org"));
 }
 void ApplicationWindow::showMantidConcepts() { HelpWindow::showConcept(this); }
 void ApplicationWindow::showalgorithmDescriptions() {
@@ -13854,7 +13856,7 @@ void ApplicationWindow::showFirstTimeSetup() {
 void ApplicationWindow::showmantidplotHelp() { HelpWindow::showPage(this); }
 
 void ApplicationWindow::showBugTracker() {
-  MantidDesktopServices::openUrl(QUrl("http://forum.mantidproject.org/"));
+  MantidDesktopServices::openUrl(QUrl("https://forum.mantidproject.org/"));
 }
 
 /*
@@ -16834,10 +16836,7 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
 void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
 
-  m_projectRecovery.removeOlderCheckpoints();
-
-  // Mantid crashed during writing to this checkpoint so remove it
-  m_projectRecovery.removeLockedCheckpoints();
+  m_projectRecovery.repairCheckpointDirectory();
 
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();

@@ -17,7 +17,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
@@ -37,44 +36,44 @@ using namespace API;
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveReflectometryAscii)
 
-auto visibleWhenFileExtension(const std::string s) {
-  return make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, s);
-}
-
 /// Initialise the algorithm
 void SaveReflectometryAscii::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                      Direction::Input),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                           Direction::Input),
       "The name of the workspace containing the data you want to save.");
-  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
-                  "The output filename");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+      "The output filename");
   std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
   declareProperty("FileExtension", ".mft",
                   boost::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
-  auto mft = visibleWhenFileExtension(".mft");
-  auto cus = visibleWhenFileExtension("custom");
-  auto vis1 =
-      make_unique<VisibleWhenProperty>(std::move(mft), std::move(cus), OR);
-  auto vis2 = visibleWhenFileExtension("custom");
-  auto vis3 = visibleWhenFileExtension("custom");
-  auto vis4 = visibleWhenFileExtension("custom");
-  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
+  auto mft = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
+                                                   "mft");
+  auto cus = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
+                                                   "custom");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
-  setPropertySettings("LogList", std::move(vis1));
+  setPropertySettings("LogList", std::make_unique<VisibleWhenProperty>(
+                                     std::move(mft), std::move(cus), OR));
   declareProperty("WriteHeader", false, "Whether to write header lines.");
-  setPropertySettings("WriteHeader", std::move(vis2));
+  setPropertySettings("WriteHeader",
+                      std::make_unique<VisibleWhenProperty>(
+                          "FileExtension", IS_EQUAL_TO, "custom"));
   std::vector<std::string> separator = {"comma", "space", "tab"};
   declareProperty(
       "WriteResolution", true,
       "Whether to compute resolution values and write them as fourth "
       "data column.");
-  setPropertySettings("WriteResolution", std::move(vis3));
+  setPropertySettings("WriteResolution",
+                      std::make_unique<VisibleWhenProperty>(
+                          "FileExtension", IS_EQUAL_TO, "custom"));
   declareProperty("Separator", "tab",
                   boost::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");
-  setPropertySettings("Separator", std::move(vis4));
+  setPropertySettings("Separator", std::make_unique<VisibleWhenProperty>(
+                                       "FileExtension", IS_EQUAL_TO, "custom"));
 }
 
 /// Input validation for single MatrixWorkspace
@@ -177,58 +176,72 @@ void SaveReflectometryAscii::outputval(std::string val) {
   m_file << std::setw(28) << val;
 }
 
-/// Retrieve sample log information
-std::string SaveReflectometryAscii::sampleInfo(const std::string &logName) {
+/// Retrieve sample log value
+std::string SaveReflectometryAscii::sampleLogValue(const std::string &logName) {
   auto run = m_ws->run();
   try {
     return boost::lexical_cast<std::string>(run.getLogData(logName)->value());
   } catch (Exception::NotFoundError &) {
+    return "Not defined";
   }
-  return "Not defined";
 }
 
-/// Write one header line
+/// Retrieve sample log unit
+std::string SaveReflectometryAscii::sampleLogUnit(const std::string &logName) {
+  auto run = m_ws->run();
+  try {
+    return " " +
+           boost::lexical_cast<std::string>(run.getLogData(logName)->units());
+  } catch (Exception::NotFoundError &) {
+    return "";
+  }
+}
+
+/** Write one header line
+ *  @param logName :: the name of a SampleLog entry to get its value from
+ *  @param logNameFixed :: the name of the SampleLog entry defined by the header
+ */
 void SaveReflectometryAscii::writeInfo(const std::string logName,
-                                       const std::string logValue) {
-  if (!logValue.empty())
-    m_file << logName << " : " << sampleInfo(logValue) << '\n';
-  else
-    m_file << logName << " : " << sampleInfo(logName) << '\n';
+                                       const std::string logNameFixed) {
+  const std::string logValue = sampleLogValue(logName);
+  const std::string logUnit = sampleLogUnit(logName);
+  if (!logNameFixed.empty()) {
+    // The logName corresponds to an existing header line of given name
+    m_file << logNameFixed;
+  } else {
+    // The user provided a log name which is not part of the defined header
+    m_file << logName;
+  }
+  m_file << " : " << logValue << logUnit << '\n';
 }
 
 /// Write header lines
 void SaveReflectometryAscii::header() {
   m_file << std::setfill(' ');
   m_file << "MFT\n";
-  std::map<std::string, std::string> logs;
-  logs["Instrument"] = "instrument.name";
-  logs["User-local contact"] = "user.namelocalcontact";
-  logs["Title"] = "title";
-  logs["Subtitle"] = "";
-  logs["Start date + time"] = "start_time";
-  logs["End date + time"] = "end_time";
-  logs["Theta 1 + dir + ref numbers"] = "";
-  logs["Theta 2 + dir + ref numbers"] = "";
-  logs["Theta 3 + dir + ref numbers"] = "";
-  writeInfo("Instrument", "instrument.name");
-  writeInfo("User-local contact", "user.namelocalcontact");
-  writeInfo("Title", "title");
-  writeInfo("Subtitle", "");
-  writeInfo("Start date + time", "start_time");
-  writeInfo("End date + time", "end_time");
-  writeInfo("Theta 1 + dir + ref numbers", "");
-  writeInfo("Theta 2 + dir + ref numbers", "");
-  writeInfo("Theta 3 + dir + ref numbers", "");
+  std::vector<std::string> logs{"instrument.name", "user.namelocalcontact",
+                                "title", "start_time", "end_time"};
+  writeInfo("instrument.name", "Instrument");
+  writeInfo("user.namelocalcontact", "User-local contact");
+  writeInfo("title", "Title");
+  writeInfo("", "Subtitle");
+  writeInfo("start_time", "Start date + time");
+  writeInfo("end_time", "End date + time");
+  writeInfo("", "Theta 1 + dir + ref numbers");
+  writeInfo("", "Theta 2 + dir + ref numbers");
+  writeInfo("", "Theta 3 + dir + ref numbers");
   const std::vector<std::string> logList = getProperty("LogList");
-  int nlogs = 0;
+  int nLogs = 0;
   for (const auto &log : logList) {
-    if (logs.find(log) == logs.end()) {
+    if (find(logs.cbegin(), logs.cend(), log) ==
+        logs.end()) { // do not repeat a log
       writeInfo(log);
-      ++nlogs;
+      ++nLogs;
     }
   }
-  for (auto i = nlogs + 1; i < 10; ++i)
-    writeInfo("Parameter ");
+  // Write "Parameter : Not defined" 9 times minus the number of new user logs
+  for (auto i = nLogs; i < 9; ++i)
+    writeInfo("", "Parameter ");
   m_file << "Number of file format : "
          << "40\n";
   m_file << "Number of data points : " << m_ws->y(0).size() << '\n';

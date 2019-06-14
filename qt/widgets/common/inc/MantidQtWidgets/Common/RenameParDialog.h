@@ -29,8 +29,8 @@ public:
                   QWidget *parent = nullptr);
   std::vector<std::string> setOutput() const;
 protected slots:
-  void uniqueIndexedNames(bool);
-  void doNotRename(bool);
+  void uniqueIndexedNames(bool /*ok*/);
+  void doNotRename(bool /*ok*/);
 
 protected:
   bool isUnique(const QString &name) const;

@@ -109,6 +109,9 @@ class DLLExport TimeSeriesProperty : public Property,
 public:
   /// Constructor
   explicit TimeSeriesProperty(const std::string &name);
+  TimeSeriesProperty(const std::string &name,
+                     const std::vector<Types::Core::DateAndTime> &times,
+                     const std::vector<TYPE> &values);
 
   /// Virtual destructor
   ~TimeSeriesProperty() override;
@@ -120,6 +123,7 @@ public:
   std::unique_ptr<TimeSeriesProperty<double>> getDerivative() const;
 
   void saveProperty(::NeXus::File *file) override;
+  Json::Value valueAsJson() const override;
 
   /// "Virtual" copy constructor with a time shift in seconds
   Property *cloneWithTimeShift(const double timeShift) const override;
@@ -141,7 +145,7 @@ public:
   virtual bool operator!=(const Property &right) const;
 
   /// Set name of property
-  void setName(const std::string name);
+  void setName(const std::string &name);
 
   /// Filter out a run by time.
   void filterByTime(const Types::Core::DateAndTime &start,
@@ -243,6 +247,8 @@ public:
 
   /// Set a property from a string
   std::string setValue(const std::string &) override;
+  /// Set a property from a string
+  std::string setValueFromJson(const Json::Value &) override;
   /// Set a property from a DataItem
   std::string setDataItem(const boost::shared_ptr<DataItem>) override;
 

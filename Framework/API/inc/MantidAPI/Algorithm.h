@@ -54,6 +54,7 @@ namespace API {
 //----------------------------------------------------------------------
 class AlgorithmProxy;
 class AlgorithmHistory;
+class WorkspaceHistory;
 
 /**
 Base class from which all concrete algorithm classes should be derived.
@@ -216,7 +217,7 @@ public:
 
   /** @name IAlgorithm methods */
   void initialize() override;
-  bool execute() override;
+  bool execute() override final;
   void executeAsChildAlg() override;
   std::map<std::string, std::string> validateInputs() override;
   bool isInitialized() const override;
@@ -270,9 +271,11 @@ public:
   /// Serialize an object to a string
   std::string toString() const override;
   /// Serialize an object to a json object
-  ::Json::Value toJson() const;
+  ::Json::Value toJson() const override;
   /// De-serialize an object from a string
   static IAlgorithm_sptr fromString(const std::string &input);
+  /// De-serialize an object from a Json
+  static IAlgorithm_sptr fromJson(const Json::Value &input);
   /// Construct an object from a history entry
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory &history);
   //@}
@@ -292,8 +295,8 @@ public:
 
   using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
 
-  void findWorkspaceProperties(WorkspaceVector &inputWorkspaces,
-                               WorkspaceVector &outputWorkspaces) const;
+  void findWorkspaces(WorkspaceVector &workspaces, unsigned int direction,
+                      bool checkADS = false) const;
 
   // ------------------ For WorkspaceGroups ------------------------------------
   virtual bool checkGroups();
@@ -323,6 +326,7 @@ protected:
   virtual const std::string workspaceMethodOnTypes() const { return ""; }
 
   void cacheWorkspaceProperties();
+  void cacheInputWorkspaceHistories();
 
   friend class AlgorithmProxy;
   void initializeFromProxy(const AlgorithmProxy &);
@@ -388,8 +392,9 @@ protected:
   /// Pointer to the parent history object (if set)
   boost::shared_ptr<AlgorithmHistory> m_parentHistory;
 
-  /// One vector of workspaces for each input workspace property
-  std::vector<WorkspaceVector> m_groups;
+  /// One vector of workspaces for each input workspace property. A group is
+  /// unrolled to its constituent members
+  std::vector<WorkspaceVector> m_unrolledInputWorkspaces;
   /// Size of the group(s) being processed
   size_t m_groupSize;
   /// distinguish between base processGroups() and overriden/algorithm specific
@@ -415,9 +420,13 @@ private:
 
   void logAlgorithmInfo() const;
 
+  bool executeInternal();
+
   bool executeAsyncImpl(const Poco::Void &i);
 
   bool doCallProcessGroups(Mantid::Types::Core::DateAndTime &start_time);
+
+  void fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces);
 
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,
@@ -432,24 +441,19 @@ private:
 
   bool isCompoundProperty(const std::string &name) const;
 
-  bool hasAnADSValidator(const Mantid::Kernel::IValidator_sptr propProp) const;
-
-  void constructWorkspaceVectorForHistoryHelper(
-      std::vector<Workspace_sptr> &inputWorkspaces,
-      std::vector<Workspace_sptr> &outputWorkspaces,
-      const unsigned int direction, std::string &currentWS) const;
-
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
-  Poco::ActiveMethod<bool, Poco::Void, Algorithm,
-                     Poco::ActiveStarter<Algorithm>> *m_executeAsync;
+  std::unique_ptr<Poco::ActiveMethod<bool, Poco::Void, Algorithm,
+                                     Poco::ActiveStarter<Algorithm>>>
+      m_executeAsync;
 
   /// Sends notifications to observers. Observers can subscribe to
   /// notificationCenter
   /// using Poco::NotificationCenter::addObserver(...);
-  mutable Poco::NotificationCenter *m_notificationCenter;
+  mutable std::unique_ptr<Poco::NotificationCenter> m_notificationCenter;
   /// Child algorithm progress observer
-  mutable Poco::NObserver<Algorithm, ProgressNotification> *m_progressObserver;
+  mutable std::unique_ptr<Poco::NObserver<Algorithm, ProgressNotification>>
+      m_progressObserver;
 
   bool m_isInitialized;         ///< Algorithm has been initialized flag
   bool m_isExecuted;            ///< Algorithm is executed flag
@@ -490,7 +494,11 @@ private:
   int m_singleGroup;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
+  /// Store a pointer to the input workspace histories so they can be copied to
+  /// the outputs to avoid anything being overwritten
+  std::vector<Workspace_sptr> m_inputWorkspaceHistories;
 
+  /// Reserved property names
   std::vector<std::string> m_reservedList;
 
   /// (MPI) communicator used when executing the algorithm.

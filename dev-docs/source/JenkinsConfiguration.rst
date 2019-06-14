@@ -43,8 +43,9 @@ Set up a local ``builder`` account that will be used by the slave.
 Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS.
 
 .. note::
-   For Windows the `Command line Visual C++ build tools <http://landinghub.visualstudio.com/visual-cpp-build-tools>`__
-   may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`).
+   For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__
+   may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`). The same
+   options should be used as for the full install.
 
 Windows
 -------

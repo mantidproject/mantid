@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
+import sys
 import traceback
 import unittest
 
@@ -17,7 +18,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 
@@ -72,11 +73,37 @@ class PythonCodeExecutionTest(GuiTest):
         user_globals = self._verify_async_execution_successful(code)
         self.assertEqual(100, user_globals['_local'])
 
+    def test_filename_sets__file__attr(self):
+        executor = PythonCodeExecution()
+        test_filename = 'script.py'
+        executor.execute('x=1', filename=test_filename)
+        self.assertTrue('__file__' in executor.globals_ns)
+        self.assertEqual(test_filename, executor.globals_ns['__file__'])
+
+    def test_empty_filename_does_not_set__file__attr(self):
+        executor = PythonCodeExecution()
+        executor.execute('x=1')
+        self.assertTrue('__file__' not in executor.globals_ns)
+
     def test_execute_async_calls_success_signal_on_completion(self):
         code = "x=1+2"
         executor, recv = self._run_async_code(code)
         self.assertTrue(recv.success_cb_called)
         self.assertFalse(recv.error_cb_called)
+
+    def test_script_dir_added_to_path_on_execution(self):
+        code = "import sys; syspath = sys.path"
+        test_filename = '/path/to/script/called/script.py'
+        executor = PythonCodeExecution()
+        executor.execute(code, filename=test_filename)
+        self.assertIn('/path/to/script/called', executor.globals_ns['syspath'])
+
+    def test_script_dir_removed_from_path_after_execution(self):
+        code = "import sys; syspath = sys.path"
+        test_filename = '/path/to/script/called/script.py'
+        executor = PythonCodeExecution()
+        executor.execute(code, filename=test_filename)
+        self.assertNotIn('/path/to/script/called', sys.path)
 
     # ---------------------------------------------------------------------------
     # Error execution tests

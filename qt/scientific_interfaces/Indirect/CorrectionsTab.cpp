@@ -38,6 +38,24 @@ void CorrectionsTab::loadTabSettings(const QSettings &settings) {
 }
 
 /**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void CorrectionsTab::filterInputData(bool filter) {
+  setFileExtensionsByName(filter);
+}
+
+/**
+ * Allows the user to turn the plotting of error bars off and on
+ *
+ * @param errorBars :: true if you want output plots to have error bars
+ */
+void CorrectionsTab::setPlotErrorBars(bool errorBars) {
+  IndirectTab::setPlotErrorBars(errorBars);
+}
+
+/**
  * Slot that can be called when a user edits an input.
  */
 void CorrectionsTab::inputChanged() { validate(); }
@@ -54,8 +72,8 @@ bool CorrectionsTab::checkWorkspaceBinningMatches(
     MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right) {
   if (left && right) // check the workspaces actually point to something first
   {
-    const auto leftX = left->x(0);
-    const auto rightX = right->x(0);
+    const auto &leftX = left->x(0);
+    const auto &rightX = right->x(0);
     return leftX.size() == rightX.size() &&
            std::equal(leftX.begin(), leftX.end(), rightX.begin());
   } else {

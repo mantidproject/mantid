@@ -10,8 +10,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -30,7 +32,8 @@ DECLARE_ALGORITHM(ConvertSpectrumAxis)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-
+using namespace DataObjects;
+using namespace HistogramData;
 namespace {
 constexpr double rad2deg = 180. / M_PI;
 }
@@ -41,11 +44,11 @@ void ConvertSpectrumAxis::init() {
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, wsVal),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsVal),
                   "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace.");
   std::vector<std::string> targetOptions =
       Mantid::Kernel::UnitFactory::Instance().getKeys();
@@ -151,8 +154,12 @@ void ConvertSpectrumAxis::exec() {
   }
   // Create the output workspace. Can't re-use the input one because we'll be
   // re-ordering the spectra.
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
-      inputWS, indexMap.size(), nxBins, nBins);
+  HistogramBuilder builder;
+  builder.setX(nxBins);
+  builder.setY(nBins);
+  builder.setDistribution(inputWS->isDistribution());
+  MatrixWorkspace_sptr outputWS =
+      create<MatrixWorkspace>(*inputWS, indexMap.size(), builder.build());
   // Now set up a new, numeric axis holding the theta values corresponding to
   // each spectrum
   auto const newAxis = new NumericAxis(indexMap.size());

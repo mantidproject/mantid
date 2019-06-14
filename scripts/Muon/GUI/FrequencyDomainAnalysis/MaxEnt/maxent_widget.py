@@ -10,10 +10,10 @@ from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_view import MaxEntView
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter import MaxEntPresenter
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_model import MaxEntModel, MaxEntWrapper
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 
-class MaxEntWidget(QtGui.QWidget):
+class MaxEntWidget(QtWidgets.QWidget):
 
     def __init__(self, load, parent=None):
         super(MaxEntWidget, self).__init__(parent)
@@ -30,6 +30,12 @@ class MaxEntWidget(QtGui.QWidget):
     @property
     def widget(self):
         return self._presenter.widget
+
+    def clear(self):
+        self._presenter.clear()
+
+    def runChanged(self):
+        self._presenter.runChanged()
 
     def closeEvent(self, event):
         self._presenter.cancel()

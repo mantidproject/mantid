@@ -202,7 +202,7 @@ public:
 
     // Check setting of invalid property value causes failure
     TS_ASSERT_THROWS(alg2.setPropertyValue("StartWorkspaceIndex", "-1"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
     TS_ASSERT(alg2.isExecuted());
@@ -270,12 +270,12 @@ public:
   void testExecEvent_going_too_far() {
     TS_ASSERT_THROWS(
         dotestExecEvent("testEvent", "testEvent2", "5,10-15, 500-600"),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testExecEvent_negative_indices() {
     TS_ASSERT_THROWS(dotestExecEvent("testEvent", "testEvent2", "5-10,-10"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void dotestExecEvent(std::string inName, std::string outName,
@@ -622,7 +622,7 @@ public:
     Workspace2D_const_sptr output2D =
         boost::dynamic_pointer_cast<const Workspace2D>(output);
 
-    auto outYVals = output2D->y(0);
+    const auto &outYVals = output2D->y(0);
     // We expect one less because of inf and NaN
     TS_ASSERT_EQUALS(outYVals[0], 2.);
     TS_ASSERT_EQUALS(outYVals[1], 2.);
@@ -659,7 +659,7 @@ public:
     Workspace2D_const_sptr output2D =
         boost::dynamic_pointer_cast<const Workspace2D>(output);
 
-    auto outYVals = output2D->y(0);
+    const auto &outYVals = output2D->y(0);
     // We expect a NaN and an Inf to propagate here
     TS_ASSERT_EQUALS(std::isnormal(outYVals[0]), false);
     TS_ASSERT_EQUALS(std::isnormal(outYVals[1]), false);

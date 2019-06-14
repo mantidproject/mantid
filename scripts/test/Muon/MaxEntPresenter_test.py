@@ -6,19 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import sys
-
-from  Muon.GUI.Common.utilities import load_utils
-from  Muon.GUI.Common import thread_model
-from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
-from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
-from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
-
 import unittest
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+
+from mantid.py3compat import mock
+from Muon.GUI.Common.utilities import load_utils
+from Muon.GUI.Common import thread_model
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
+
+
+def test(inputs):
+    inputs["OutputPhaseTable"] = "test"
 
 
 class MaxEntPresenterTest(unittest.TestCase):
@@ -87,6 +86,63 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.presenter.deactivate()
         assert(self.view.deactivateCalculateButton.call_count==1)
 
+    def test_updatePhaseOptions(self):
+        self.view.addOutputPhases = mock.MagicMock(side_effect = test)
+        self.view.addPhaseTableToGUI = mock.MagicMock()
+        self.presenter.thread = mock.MagicMock()
+        self.presenter.phaseTableAdded = mock.Mock(return_value = True)
+        self.view.getPhaseTableIndex = mock.Mock(return_value = 2)
+        self.view.setPhaseTableIndex = mock.Mock()
+        self.view.getPhaseTableOptions = mock.Mock(return_value = [])
+
+        inputs = {}
+        self.view.addOutputPhases(inputs)
+        self.presenter.handleFinished()
+
+        self.assertEqual(inputs["OutputPhaseTable"],"test")
+        self.assertEqual(self.view.getPhaseTableOptions.call_count, 1)
+        self.assertEqual(self.view.getPhaseTableIndex.call_count, 1)
+        self.assertEqual(self.view.addPhaseTableToGUI.call_count, 1)
+        self.assertEqual(self.view.setPhaseTableIndex.call_count, 1)
+        self.view.setPhaseTableIndex.assert_called_with(2)
+
+    def test_phaseOptionAlreadyExists(self):
+        self.view.addOutputPhases = mock.MagicMock(side_effect = test)
+        self.view.addPhaseTableToGUI = mock.MagicMock()
+        self.presenter.thread = mock.MagicMock()
+        self.presenter.phaseTableAdded = mock.Mock(return_value = True)
+        self.view.getPhaseTableIndex = mock.Mock(return_value = 2)
+        self.view.setPhaseTableIndex = mock.Mock()
+        self.view.getPhaseTableOptions = mock.Mock(return_value = ["test"])
+
+        inputs = {}
+        self.view.addOutputPhases(inputs)
+        self.presenter.handleFinished()
+
+        self.assertEqual(inputs["OutputPhaseTable"],"test")
+        self.assertEqual(self.view.getPhaseTableOptions.call_count, 1)
+        self.assertEqual(self.view.getPhaseTableIndex.call_count, 0)
+        self.assertEqual(self.view.addPhaseTableToGUI.call_count, 0)
+        self.assertEqual(self.view.setPhaseTableIndex.call_count, 0)
+
+    def test_noUpdatePhaseOptions(self):
+        self.view.addOutputPhases = mock.MagicMock(side_effect = test)
+        self.view.addPhaseTableToGUI = mock.MagicMock()
+        self.presenter.thread = mock.MagicMock()
+        self.presenter.phaseTableAdded = mock.Mock(return_value = False)
+        self.view.getPhaseTableIndex = mock.Mock(return_value = 2)
+        self.view.setPhaseTableIndex = mock.Mock()
+        self.view.getPhaseTableOptions = mock.Mock(return_value = [])
+
+        inputs = {}
+        self.view.addOutputPhases(inputs)
+        self.presenter.handleFinished()
+
+        self.assertEqual(inputs["OutputPhaseTable"],"test")
+        self.assertEqual(self.view.getPhaseTableOptions.call_count, 1)
+        self.assertEqual(self.view.getPhaseTableIndex.call_count, 0)
+        self.assertEqual(self.view.addPhaseTableToGUI.call_count, 0)
+        self.assertEqual(self.view.setPhaseTableIndex.call_count, 0)
 
 if __name__ == '__main__':
     unittest.main()

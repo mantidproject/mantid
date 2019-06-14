@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -27,8 +28,9 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQW)
 
-using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
+using namespace Kernel;
 
 /**
  * @return A summary of the algorithm
@@ -73,16 +75,16 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  alg.declareProperty(make_unique<WorkspaceProperty<>>(
+  alg.declareProperty(std::make_unique<WorkspaceProperty<>>(
                           "InputWorkspace", "", Direction::Input, wsValidator),
                       "Reduced data in units of energy transfer DeltaE.\nThe "
                       "workspace must contain histogram data and have common "
                       "bins across all spectra.");
-  alg.declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                       Direction::Output),
+  alg.declareProperty(std::make_unique<WorkspaceProperty<>>(
+                          "OutputWorkspace", "", Direction::Output),
                       "The name to use for the q-omega workspace.");
   alg.declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "QAxisBinning", boost::make_shared<RebinParamsValidator>()),
       "The bin parameters to use for the q axis (in the format used by the "
       ":ref:`algm-Rebin` algorithm).");
@@ -102,10 +104,17 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "replaced using the ReplaceSpecialValues algorithm.",
                       Direction::Input);
   alg.declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "EAxisBinning", boost::make_shared<RebinParamsValidator>(true)),
       "The bin parameters to use for the E axis (optional, in the format "
       "used by the :ref:`algm-Rebin` algorithm).");
+  alg.declareProperty(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DetectorTwoThetaRanges", "", Direction::Input,
+          PropertyMode::Optional),
+      "A table workspace use by SofQWNormalisedPolygon containing a 'Detector "
+      "ID' column as well as 'Min two theta' and 'Max two theta' columns "
+      "listing the detector's min and max scattering angles in radians.");
 }
 
 void SofQW::exec() {
@@ -128,7 +137,7 @@ void SofQW::exec() {
   // Progress reports & cancellation
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   const size_t nHistos = inputWorkspace->getNumberHistograms();
-  auto m_progress = make_unique<Progress>(this, 0.0, 1.0, nHistos);
+  auto m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nHistos);
   m_progress->report("Creating output workspace");
 }
 

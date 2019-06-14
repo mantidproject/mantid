@@ -332,19 +332,19 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             "cncs1");)
     log = dynamic_cast<TimeSeriesProperty<double> *>(
-        output->mutableRun().getProperty("proton_charge"));
+        output->run().getProperty("proton_charge"));
     log1 = log->realSize();
     nev1 = output->getNumberEvents();
-    pc1 = output->mutableRun().getProtonCharge();
+    pc1 = output->run().getProtonCharge();
 
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             "cncs2");)
     log = dynamic_cast<TimeSeriesProperty<double> *>(
-        output->mutableRun().getProperty("proton_charge"));
+        output->run().getProperty("proton_charge"));
     log2 = log->realSize();
     nev2 = output->getNumberEvents();
-    pc2 = output->mutableRun().getProtonCharge();
+    pc2 = output->run().getProtonCharge();
 
     TS_ASSERT_THROWS_NOTHING(
         output =
@@ -355,10 +355,10 @@ public:
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 51200);
 
     log = dynamic_cast<TimeSeriesProperty<double> *>(
-        output->mutableRun().getProperty("proton_charge"));
+        output->run().getProperty("proton_charge"));
     logTot = log->realSize();
     nevTot = output->getNumberEvents();
-    pcTot = output->mutableRun().getProtonCharge();
+    pcTot = output->run().getProtonCharge();
 
     // Total # of log entries
     TS_ASSERT_EQUALS(logTot, log1 + log2);
@@ -778,7 +778,7 @@ public:
     MergeRuns merge2;
     TS_ASSERT_THROWS_NOTHING(merge2.initialize());
     TS_ASSERT_THROWS_NOTHING(merge.setPropertyValue("OutputWorkspace", "null"));
-    TS_ASSERT_THROWS(merge2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(merge2.execute(), const std::runtime_error &);
     TS_ASSERT(!merge2.isExecuted());
     MatrixWorkspace_sptr badIn =
         WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
@@ -1013,7 +1013,7 @@ public:
     if (noOutput) {
       TS_ASSERT_THROWS(
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"),
-          Mantid::Kernel::Exception::NotFoundError);
+          const Mantid::Kernel::Exception::NotFoundError &);
       return;
     } else {
       TS_ASSERT_THROWS_NOTHING(
@@ -1230,7 +1230,7 @@ public:
     // should get stuck when trying to get "prop1" as a time series
     TS_ASSERT_THROWS(do_test_mergeSampleLogs(ws, "prop1", mergeType,
                                              "2013-Jun-25 10:59:15  1\n", 2),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_mergeSampleLogs_with_additional_time_series_property() {

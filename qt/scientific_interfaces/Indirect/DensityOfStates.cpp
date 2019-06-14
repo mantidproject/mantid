@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DensityOfStates.h"
 
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -28,9 +28,10 @@ DensityOfStates::DensityOfStates(QWidget *parent)
 
   connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this,
           SLOT(handleFileChange()));
-  // Handle plot and save
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
@@ -68,8 +69,10 @@ bool DensityOfStates::validate() {
  * Configures and executes the DensityOfStates algorithm.
  */
 void DensityOfStates::run() {
+  setRunIsRunning(true);
+
   // Get the SimulatedDensityOfStates algorithm
-  IAlgorithm_sptr dosAlgo =
+  auto dosAlgo =
       AlgorithmManager::Instance().create("SimulatedDensityOfStates");
 
   const auto filename = m_uiForm.mwInputFile->getFirstFilename();
@@ -125,8 +128,8 @@ void DensityOfStates::run() {
 
     std::vector<std::string> selectedIons;
     auto items = m_uiForm.lwIons->selectedItems();
-    for (auto it = items.begin(); it != items.end(); ++it)
-      selectedIons.push_back((*it)->text().toStdString());
+    for (auto &item : items)
+      selectedIons.push_back(item->text().toStdString());
     dosAlgo->setProperty("Ions", selectedIons);
   } else if (specType == "IR") {
     dosAlgo->setProperty("SpectrumType", "IR_Active");
@@ -153,8 +156,11 @@ void DensityOfStates::dosAlgoComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(dosAlgoComplete(bool)));
 
-  if (error)
-    return;
+  setRunIsRunning(false);
+  if (error) {
+    setPlotEnabled(false);
+    setSaveEnabled(false);
+  }
 }
 
 /**
@@ -168,11 +174,8 @@ void DensityOfStates::handleFileChange() {
   bool isPhononFile = fileInfo.suffix() == "phonon";
 
   std::string filePropName("CASTEPFile");
-  if (isPhononFile)
-    filePropName = "PHONONFile";
-
-  // Need a .phonon file for ion contributions
   if (isPhononFile) {
+    filePropName = "PHONONFile";
     // Load the ion table to populate the list of ions
     IAlgorithm_sptr ionTableAlgo =
         AlgorithmManager::Instance().create("SimulatedDensityOfStates");
@@ -212,7 +215,7 @@ void DensityOfStates::ionLoadComplete(bool error) {
     g_log.error("Could not get a list of ions from .phonon file");
 
   // Get the list of ions from algorithm
-  ITableWorkspace_sptr ionTable =
+  auto ionTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
   Column_sptr ionColumn = ionTable->getColumn("Species");
   size_t numIons = ionColumn->size();
@@ -232,9 +235,6 @@ void DensityOfStates::ionLoadComplete(bool error) {
 
   // Select all ions by default
   m_uiForm.lwIons->selectAll();
-  // Enable plot and save
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
@@ -247,12 +247,16 @@ void DensityOfStates::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
 }
 
+void DensityOfStates::runClicked() { runTab(); }
+
 /**
  * Handle mantid plotting of workspace
  */
 void DensityOfStates::plotClicked() {
+  setPlotIsPlotting(true);
   if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), true))
     plotSpectrum(m_outputWsName);
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -262,6 +266,34 @@ void DensityOfStates::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), false))
     addSaveWorkspaceToQueue(m_outputWsName);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void DensityOfStates::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void DensityOfStates::setPlotIsPlotting(bool running) {
+  m_uiForm.pbPlot->setText(running ? "Plotting..." : "Plot Result");
+  setButtonsEnabled(!running);
+}
+
+void DensityOfStates::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotEnabled(enabled);
+  setSaveEnabled(enabled);
+}
+
+void DensityOfStates::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void DensityOfStates::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+
+void DensityOfStates::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
 }
 
 } // namespace CustomInterfaces

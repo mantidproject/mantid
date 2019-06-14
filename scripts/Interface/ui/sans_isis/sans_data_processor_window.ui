@@ -106,19 +106,13 @@ QGroupBox::title {
               <property name="verticalSpacing">
                <number>6</number>
               </property>
-              <item row="1" column="1">
-               <widget class="QLabel" name="user_file_label">
+              <item row="2" column="1">
+               <widget class="QLabel" name="batch_label">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;a href=&quot;https://www.mantidproject.org/SANS_User_File_Commands&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::NoFrame</enum>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_batch_file_format&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>&amp;User File:</string>
-                </property>
-                <property name="buddy">
-                 <cstring>masking_table</cstring>
+                 <string>Batch File:</string>
                 </property>
                </widget>
               </item>
@@ -149,34 +143,7 @@ QGroupBox::title {
               <item row="1" column="4">
                <widget class="QLineEdit" name="user_file_line_edit">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;a href=&quot;https://www.mantidproject.org/SANS_User_File_Commands&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="5">
-               <widget class="QPushButton" name="batch_button">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Load Batch File</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="4">
-               <widget class="QLineEdit" name="batch_line_edit">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QLabel" name="batch_label">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Batch File:</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_User_File_Commands&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -187,34 +154,13 @@ QGroupBox::title {
                 </property>
                </widget>
               </item>
-              <item row="3" column="5">
-               <widget class="QPushButton" name="process_button">
-                <property name="text">
-                 <string>Process</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="5">
-               <widget class="QPushButton" name="user_file_button">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;a href=&quot;https://www.mantidproject.org/SANS_User_File_Commands&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Load User File</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="5">
+              <item row="0" column="6">
                <widget class="QPushButton" name="manage_directories_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add directories to search for data, set your output directory, and manage data archive searching.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Manage Directories</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QLabel" name="output_directory_label">
-                <property name="text">
-                 <string>Save Directory: </string>
                 </property>
                </widget>
               </item>
@@ -225,8 +171,81 @@ QGroupBox::title {
                 </property>
                </widget>
               </item>
-              <item row="4" column="5">
-               <widget class="QPushButton" name="load_botton">
+              <item row="2" column="4">
+               <widget class="QLineEdit" name="batch_line_edit">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_batch_file_format&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLabel" name="output_directory_label">
+                <property name="text">
+                 <string>Save Directory: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="6">
+               <widget class="QPushButton" name="process_selected_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Process selected rows only.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Process Selected</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="6">
+               <widget class="QPushButton" name="user_file_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_User_File_Commands&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Load User File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="6">
+               <widget class="QPushButton" name="process_all_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Process all rows, regardless of selection.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Process All</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLabel" name="user_file_label">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_User_File_Commands&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="text">
+                 <string>&amp;User File:</string>
+                </property>
+                <property name="buddy">
+                 <cstring>masking_table</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="6">
+               <widget class="QPushButton" name="batch_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_batch_file_format&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Load Batch File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="6">
+               <widget class="QPushButton" name="load_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load data without processing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Load</string>
                 </property>
@@ -255,7 +274,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="delete_row_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;delete selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delete selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -278,7 +297,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="copy_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;copy selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copy selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -294,7 +313,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="cut_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cut selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cut selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -310,7 +329,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="paste_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;paste rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Paste rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -326,7 +345,30 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="erase_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;erase contents of selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase contents of selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_7">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="export_table_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export the current table as a csv file. This can then be re-loaded at a later date.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -459,6 +501,9 @@ QGroupBox::title {
                      </item>
                      <item>
                       <widget class="QCheckBox" name="save_can_checkBox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, save the unsubtracted Can and Sam workspaces separately.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
                        <property name="text">
                         <string>Save Can</string>
                        </property>
@@ -538,7 +583,7 @@ QGroupBox::title {
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled it will replace all entries with zero-valued errors with errors of magnitude 1e6. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                        <property name="text">
-                        <string>zero error free</string>
+                        <string>Zero Error Free</string>
                        </property>
                        <property name="checked">
                         <bool>true</bool>
@@ -547,6 +592,9 @@ QGroupBox::title {
                      </item>
                      <item row="2" column="0">
                       <widget class="QCheckBox" name="plot_results_checkbox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the 0th spectrum of each reduced workspace will be plotted as it is reduced.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
                        <property name="text">
                         <string>Plot Results</string>
                        </property>
@@ -576,6 +624,16 @@ QGroupBox::title {
                <widget class="QCheckBox" name="sample_geometry_checkbox">
                 <property name="text">
                  <string>Sample Geometry</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="save_other_pushButton">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save a workspace as a CanSAS, NxCanSAS, or RKH file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Save Other</string>
                 </property>
                </widget>
               </item>
@@ -804,7 +862,11 @@ QGroupBox::title {
                         </widget>
                        </item>
                        <item row="0" column="1">
-                        <widget class="QLineEdit" name="slice_event_line_edit"/>
+                        <widget class="QLineEdit" name="slice_event_line_edit">
+                         <property name="enabled">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
                        </item>
                       </layout>
                      </item>
@@ -817,7 +879,7 @@ QGroupBox::title {
                      <bool>true</bool>
                     </property>
                     <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the data reduction will run in the compatibility mode. This means that the reduction workflow is equivalent to the previous legacy reduction workflow. &lt;/p&gt;&lt;p&gt;ONLY UNCHECK THIS IF NOT PERFORMING BIN MASKING&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the data reduction will run in the compatibility mode. This means that the reduction workflow is equivalent to the previous legacy reduction workflow. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
                      <string>&amp;Use compatibility mode</string>
@@ -831,9 +893,6 @@ QGroupBox::title {
                     <layout class="QGridLayout" name="gridLayout_16">
                      <item row="0" column="0">
                       <widget class="QLabel" name="event_binning_label">
-                       <property name="enabled">
-                        <bool>true</bool>
-                       </property>
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rebin string for the initial time-of-flight workspace. This is only needed when using the compaptibility mode (ie when following the old reduction model). Note that this will only have an effect on event workspaces.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
@@ -844,11 +903,8 @@ QGroupBox::title {
                      </item>
                      <item row="0" column="1">
                       <widget class="QLineEdit" name="event_binning_line_edit">
-                       <property name="enabled">
-                        <bool>true</bool>
-                       </property>
                        <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rebin string for the initial time-of-flight workspace. This is only needed when using the compaptibility mode (ie when following the old reduction model). Note that this will only have an effect on event workspaces.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rebin string for the initial time-of-flight workspace. This is only needed when using the compatibility mode (ie when following the old reduction model). Note that this will only have an effect on event workspaces.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                       </widget>
                      </item>
@@ -1006,7 +1062,7 @@ QGroupBox::title {
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for the monitor normalization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
-                     <string>Monitor Normalization</string>
+                     <string>Scattering</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_8">
                      <item row="0" column="0">
@@ -1400,13 +1456,6 @@ QGroupBox::title {
                           </property>
                          </widget>
                         </item>
-                        <item row="2" column="0">
-                         <widget class="QCheckBox" name="show_transmission_view">
-                          <property name="text">
-                           <string>Show Transmission</string>
-                          </property>
-                         </widget>
-                        </item>
                        </layout>
                       </widget>
                      </item>
@@ -1482,7 +1531,7 @@ QGroupBox::title {
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The wavelength adjustment files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
-                     <string>Wavelength adjustment files</string>
+                     <string>Wavelength efficiency files</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_11">
                      <item row="0" column="1">
@@ -1829,28 +1878,28 @@ QGroupBox::title {
                    <string>Q limits</string>
                   </property>
                   <layout class="QGridLayout" name="gridLayout_15">
-                   <item row="1" column="1">
+                   <item row="1" column="2">
                     <widget class="QLineEdit" name="q_1d_min_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The lower bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="4">
+                   <item row="0" column="5">
                     <widget class="QLabel" name="q_step_type_label">
                      <property name="text">
                       <string>Step type</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="3">
+                   <item row="0" column="4">
                     <widget class="QLabel" name="q_step_label">
                      <property name="text">
                       <string>Step [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="2">
+                   <item row="3" column="3">
                     <widget class="QLineEdit" name="q_xy_max_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1877,64 +1926,64 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="1">
+                   <item row="0" column="2">
                     <widget class="QLabel" name="q_min_label">
                      <property name="text">
                       <string>Min [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="3">
+                   <item row="3" column="4">
                     <widget class="QLineEdit" name="q_xy_step_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="4">
+                   <item row="1" column="5">
                     <widget class="QComboBox" name="q_1d_step_type_combo_box">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step type of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="4">
+                   <item row="3" column="5">
                     <widget class="QComboBox" name="q_xy_step_type_combo_box">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step type of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="3">
+                   <item row="1" column="4">
                     <widget class="QLineEdit" name="q_1d_step_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2">
+                   <item row="1" column="3">
                     <widget class="QLineEdit" name="q_1d_max_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="2">
+                   <item row="0" column="3">
                     <widget class="QLabel" name="q_max_label">
                      <property name="text">
                       <string>Max [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="2">
-                    <widget class="QLabel" name="label_8">
+                   <item row="2" column="3">
+                    <widget class="QLabel" name="q_xy_max_label">
                      <property name="text">
                       <string>Max [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="3">
-                    <widget class="QLabel" name="label_9">
+                   <item row="2" column="4">
+                    <widget class="QLabel" name="q_xy_step_label">
                      <property name="text">
                       <string>Step [Å^-1]</string>
                      </property>
@@ -2235,7 +2284,6 @@ QGroupBox::title {
   <tabstop>manage_directories_button</tabstop>
   <tabstop>user_file_button</tabstop>
   <tabstop>batch_button</tabstop>
-  <tabstop>process_button</tabstop>
   <tabstop>multi_period_check_box</tabstop>
   <tabstop>reduction_dimensionality_1D</tabstop>
   <tabstop>reduction_dimensionality_2D</tabstop>
@@ -2286,7 +2334,6 @@ QGroupBox::title {
   <tabstop>fit_sample_wavelength_combo_box</tabstop>
   <tabstop>fit_sample_wavelength_min_line_edit</tabstop>
   <tabstop>fit_sample_wavelength_max_line_edit</tabstop>
-  <tabstop>show_transmission_view</tabstop>
   <tabstop>fit_can_use_fit_check_box</tabstop>
   <tabstop>fit_can_fit_type_combo_box</tabstop>
   <tabstop>fit_can_polynomial_order_spin_box</tabstop>

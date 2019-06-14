@@ -11,7 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 from inspect import isclass
 from functools import partial
-from six import PY3
+from six import PY2
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -62,12 +62,20 @@ def string_convertible(cls):
         raise RuntimeError("Could not convert {0} to string. Unknown value.".format(convert_to_string))
 
     def from_string(elements, convert_from_string):
-        if PY3 and isinstance(convert_from_string, bytes):
+        if not PY2 and isinstance(convert_from_string, bytes):
             convert_from_string = convert_from_string.decode()
         for key, value in list(elements.items()):
             if convert_from_string == key:
                 return value
         raise RuntimeError("Could not convert {0} from string. Unknown value.".format(convert_from_string))
+
+    def has_member(elements, convert):
+        if not PY2 and isinstance(convert, bytes):
+            convert = convert.decode()
+        for key, value in list(elements.items()):
+            if convert == key or convert == value:
+                return True
+        return False
 
     # First get all enum/sub-class elements
     convertible_elements = {}
@@ -78,8 +86,10 @@ def string_convertible(cls):
     # Add the new static methods to the class
     partial_to_string = partial(to_string, convertible_elements)
     partial_from_string = partial(from_string, convertible_elements)
+    partial_has_member = partial(has_member, convertible_elements)
     setattr(cls, "to_string", staticmethod(partial_to_string))
     setattr(cls, "from_string", staticmethod(partial_from_string))
+    setattr(cls, "has_member", staticmethod(partial_has_member))
     return cls
 
 
@@ -265,7 +275,7 @@ class RebinType(object):
 #  SaveType
 # --------------------------
 @string_convertible
-@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus")
+@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus", "NoType")
 class SaveType(object):
     """
     Defines the save types available
@@ -390,3 +400,14 @@ class RowState(object):
     Defines the entries of a batch reduction file.
     """
     pass
+
+
+# ------------------------------
+# Binning Types for AddRuns
+# -------------------------------
+@string_convertible
+@serializable_enum("SaveAsEventData", "Custom", "FromMonitors")
+class BinningType(object):
+    """
+    Defines the types of binning when adding runs together
+    """

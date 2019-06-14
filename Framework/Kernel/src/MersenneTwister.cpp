@@ -8,7 +8,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidKernel/uniform_int_distribution.h"
 
 #include <Poco/Timestamp.h>
@@ -60,7 +60,7 @@ MersenneTwister::MersenneTwister(const size_t seedValue, const double start,
 void MersenneTwister::setSeed(const size_t seedValue) {
   m_seed = static_cast<std::mt19937::result_type>(seedValue);
   m_engine.seed(m_seed);
-  m_savedEngine = Kernel::make_unique<std::mt19937>(m_engine);
+  m_savedEngine = std::make_unique<std::mt19937>(m_engine);
 }
 
 /**
@@ -102,7 +102,7 @@ void MersenneTwister::restart() { setSeed(m_seed); }
 
 /// Saves the current state of the generator
 void MersenneTwister::save() {
-  m_savedEngine = Kernel::make_unique<std::mt19937>(m_engine);
+  m_savedEngine = std::make_unique<std::mt19937>(m_engine);
 }
 
 /// Restores the generator to the last saved point, or the beginning if nothing

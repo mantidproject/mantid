@@ -56,8 +56,11 @@ public:
                                QWebEnginePage::NavigationType type,
                                bool) override {
     if (type == QWebEnginePage::NavigationTypeLinkClicked) {
-
       emit linkClicked(url);
+      if (url.scheme().startsWith("http") || url.toString().endsWith(".png")) {
+        // We don't want to open web links or image hex within the help window
+        return false;
+      }
     }
     return true;
   }
@@ -68,7 +71,7 @@ signals:
 
 #endif
 
-/// pqHelpWindow provides a assistant-like window  for showing help provided by
+/// pqHelpWindow provides an assistant-like window for showing help provided by
 /// a QHelpEngine.
 class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
   Q_OBJECT
@@ -81,8 +84,10 @@ public:
 public slots:
   /// Requests showing of a particular page. The url must begin with "qthelp:"
   /// scheme when referring to pages from the help files.
-  virtual void showPage(const QString &url);
-  virtual void showPage(const QUrl &url);
+  virtual void showPage(const QString &url, bool linkClicked = false);
+  virtual void showPage(const QUrl &url, bool linkClicked = false);
+  /// Show a page linked to by another page in the help window
+  virtual void showLinkedPage(const QUrl &url);
 
   /// Tries to locate a file name index.html in the given namespace and then
   /// shows that page.
@@ -94,7 +99,7 @@ public slots:
 
 signals:
   /// fired to relay warning messages from the help system.
-  void helpWarnings(const QString &);
+  void helpWarnings(const QString & /*_t1*/);
 
 protected slots:
   void search();

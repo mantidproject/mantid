@@ -110,8 +110,8 @@ public:
     algorithm->execute();
     MatrixWorkspace_sptr outWorkspace =
         algorithm->getProperty("OutputWorkspace");
-    auto yValues = outWorkspace->y(0);
-    auto eValues = outWorkspace->e(0);
+    const auto &yValues = outWorkspace->y(0);
+    const auto &eValues = outWorkspace->e(0);
     TS_ASSERT_DELTA(yValues[0], 1, 0.0001);
     TS_ASSERT_DELTA(yValues[1], 0, 0.0001);
     TS_ASSERT_DELTA(yValues[4], 0.4831171, 0.0001);
@@ -123,7 +123,7 @@ public:
     auto energyMax = -1; // invalid - less than energyMin
     auto algorithm = calculateIqtAlgorithm(
         m_sampleWorkspace, m_resolutionWorkspace, energyMin, energyMax);
-    TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algorithm->execute(), const std::runtime_error &);
     TS_ASSERT(!algorithm->isExecuted());
   }
 
@@ -132,7 +132,7 @@ public:
     TS_ASSERT_THROWS(calculateIqtAlgorithm(m_sampleWorkspace,
                                            m_resolutionWorkspace, -0.5, 0.5,
                                            0.1, nIterations),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_throws_if_number_of_iterations_is_zero() {
@@ -140,7 +140,7 @@ public:
     TS_ASSERT_THROWS(calculateIqtAlgorithm(m_sampleWorkspace,
                                            m_resolutionWorkspace, -0.5, 0.5,
                                            0.1, nIterations),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   // void test_throws_if_number_of_iterations_is_not_an_integer() {
@@ -148,7 +148,7 @@ public:
   //  TS_ASSERT_THROWS(calculateIqtAlgorithm(m_sampleWorkspace,
   //                                         m_resolutionWorkspace, -0.5, 0.5,
   //                                         0.1, nIterations),
-  //                   std::invalid_argument);
+  //                   const std::invalid_argument &);
   //}
 };
 #endif

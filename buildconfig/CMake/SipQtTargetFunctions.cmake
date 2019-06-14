@@ -109,7 +109,7 @@ function ( mtd_add_sip_module )
     endif ()
   endif ()
 
-  if ( PARSED_INSTALL_DIR AND PACKAGE_WORKBENCH)
+  if ( PARSED_INSTALL_DIR AND ENABLE_WORKBENCH)
     mtd_install_qt_library ( ${PARSED_PYQT_VERSION} ${PARSED_TARGET_NAME} "" ${PARSED_INSTALL_DIR} )
   endif ()
 

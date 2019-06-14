@@ -31,11 +31,11 @@ class GeometryHandler;
 class MANTID_GEOMETRY_DLL MeshObject2D : public IObject {
 public:
   /// Constructor
-  MeshObject2D(const std::vector<uint16_t> &faces,
+  MeshObject2D(const std::vector<uint32_t> &faces,
                const std::vector<Kernel::V3D> &vertices,
                const Kernel::Material &material);
   /// Constructor
-  MeshObject2D(std::vector<uint16_t> &&faces,
+  MeshObject2D(std::vector<uint32_t> &&faces,
                std::vector<Kernel::V3D> &&vertices,
                const Kernel::Material &&material);
 
@@ -68,12 +68,14 @@ public:
   Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                     const BoundingBox &activeRegion,
                                     const size_t) const override;
+  detail::ShapeInfo::GeometryShape shape() const override;
+  const detail::ShapeInfo &shapeInfo() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &myradius,
-                     double &myheight) const override;
+                     std::vector<Kernel::V3D> &vectors, double &innerRadius,
+                     double &radius, double &height) const override;
   void draw() const override;
   void initDraw() const override;
-  const Kernel::Material material() const override;
+  const Kernel::Material &material() const override;
   const std::string &id() const override;
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Id as static
@@ -97,7 +99,7 @@ private:
   void initialize();
   /// Triangles are specified by indices into a list of vertices. Offset is
   /// always 3.
-  std::vector<uint16_t> m_triangles;
+  std::vector<uint32_t> m_triangles;
   /// Vertices
   std::vector<Kernel::V3D> m_vertices;
   /// Material composition

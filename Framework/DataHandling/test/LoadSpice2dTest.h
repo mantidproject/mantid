@@ -52,7 +52,7 @@ public:
       spice2d.initialize();
 
     // No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(spice2d.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(spice2d.execute(), const std::runtime_error &);
 
     // Set the file name
     spice2d.setPropertyValue("Filename", inputFile);
@@ -173,7 +173,7 @@ public:
     TS_ASSERT_EQUALS(*np, 4);
 
     // Check detector position
-    prop = ws2d->run().getProperty("sample-detector-distance");
+    prop = ws2d->run().getProperty("total-sample-detector-distance");
     Mantid::Kernel::PropertyWithValue<double> *tsdd =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     TS_ASSERT_EQUALS(i->getComponentByName("detector1")->getPos().Z(),
@@ -188,7 +188,7 @@ public:
       spice2d.initialize();
 
     // No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(spice2d.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(spice2d.execute(), const std::runtime_error &);
 
     // Set the file name
     spice2d.setPropertyValue("Filename", inputFile);

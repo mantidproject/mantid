@@ -41,11 +41,11 @@ void Rebin2D::init() {
   using Kernel::Direction;
   using Kernel::PropertyWithValue;
   using Kernel::RebinParamsValidator;
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
   const std::string docString =
       "A comma separated list of first bin boundary, width, last bin boundary. "
@@ -54,21 +54,20 @@ void Rebin2D::init() {
       "pairs. "
       "Negative width values indicate logarithmic binning.";
   auto rebinValidator = boost::make_shared<RebinParamsValidator>();
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Axis1Binning",
-                                                             rebinValidator),
-                  docString);
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Axis2Binning",
-                                                             rebinValidator),
-                  docString);
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("UseFractionalArea", false,
-                                                   Direction::Input),
+      std::make_unique<ArrayProperty<double>>("Axis1Binning", rebinValidator),
+      docString);
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("Axis2Binning", rebinValidator),
+      docString);
+  declareProperty(
+      std::make_unique<PropertyWithValue<bool>>("UseFractionalArea", false,
+                                                Direction::Input),
       "Flag to turn on the using the fractional area tracking RebinnedOutput "
       "workspace\n."
       "Default is false.");
-  declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("Transpose", false),
-      "Run the Transpose algorithm on the resulting matrix.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Transpose", false),
+                  "Run the Transpose algorithm on the resulting matrix.");
 }
 
 /**
@@ -77,7 +76,8 @@ void Rebin2D::init() {
 void Rebin2D::exec() {
   // Information to form input grid
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
+  const NumericAxis *oldAxis2 =
+      dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
   if (!oldAxis2) {
     throw std::invalid_argument(
         "Vertical axis is not a numeric axis, cannot rebin. "
@@ -87,16 +87,9 @@ void Rebin2D::exec() {
   const auto &oldXEdges = inputWS->x(0);
   const size_t numXBins = inputWS->blocksize();
   const size_t numYBins = inputWS->getNumberHistograms();
-  std::vector<double> oldYEdges;
-  if (numYBins == oldAxis2->length()) {
-    // Pt data on axis 2, create bins
-    oldYEdges = oldAxis2->createBinBoundaries();
-  } else {
-    oldYEdges.resize(oldAxis2->length());
-    for (size_t i = 0; i < oldAxis2->length(); ++i) {
-      oldYEdges[i] = (*oldAxis2)(i);
-    }
-  }
+  // This will convert plain NumericAxis to bin edges while
+  // BinEdgeAxis will just return its edges.
+  const std::vector<double> oldYEdges = oldAxis2->createBinBoundaries();
 
   // Output grid and workspace. Fills in the new X and Y bin vectors
   // MantidVecPtr newXBins;
@@ -112,10 +105,11 @@ void Rebin2D::exec() {
   auto inputHasFA = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   // For MatrixWorkspace, only UseFractionalArea=False makes sense.
   if (useFractionalArea && !inputHasFA) {
-    g_log.warning("Fractional area tracking requires the input workspace to "
-                  "contain calculated bin fractions from a parallelpiped rebin "
-                  "like SofQW. Continuing without fractional area tracking");
-    useFractionalArea = false;
+    g_log.warning(
+        "Fractional area tracking was requested but input workspace does "
+        "not have calculated bin fractions. Assuming bins are exact "
+        "(fractions are unity). The results may not be accurate if this "
+        "workspace was previously rebinned.");
   }
   // For RebinnedOutput, should always use useFractionalArea to get the
   // correct signal and errors (so that weights of input ws is accounted for).
@@ -126,19 +120,16 @@ void Rebin2D::exec() {
     useFractionalArea = true;
   }
 
-  MatrixWorkspace_sptr outputWS =
+  auto outputWS =
       createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
   auto outputRB = boost::dynamic_pointer_cast<RebinnedOutput>(outputWS);
 
   // Progress reports & cancellation
   const size_t nreports(static_cast<size_t>(numYBins));
-  m_progress = boost::shared_ptr<API::Progress>(
-      new API::Progress(this, 0.0, 1.0, nreports));
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (int64_t i = 0; i < static_cast<int64_t>(numYBins);
-       ++i) // signed for openmp
-  {
+  for (int64_t i = 0; i < static_cast<int64_t>(numYBins); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     m_progress->report("Computing polygon intersections");
@@ -149,13 +140,14 @@ void Rebin2D::exec() {
       // the output grid and assign the appropriate weights of Y/E
       const double x_j = oldXEdges[j];
       const double x_jp1 = oldXEdges[j + 1];
-      Quadrilateral inputQ = Quadrilateral(x_j, x_jp1, vlo, vhi);
+      Quadrilateral inputQ(x_j, x_jp1, vlo, vhi);
       if (!useFractionalArea) {
-        FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j, *outputWS,
-                                           newYBins.rawData());
+        FractionalRebinning::rebinToOutput(std::move(inputQ), inputWS, i, j,
+                                           *outputWS, newYBins.rawData());
       } else {
         FractionalRebinning::rebinToFractionalOutput(
-            inputQ, inputWS, i, j, *outputRB, newYBins.rawData(), inputHasFA);
+            std::move(inputQ), inputWS, i, j, *outputRB, newYBins.rawData(),
+            inputHasFA);
       }
     }
 
@@ -166,7 +158,7 @@ void Rebin2D::exec() {
     outputRB->finalize(true, true);
   }
 
-  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
+  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 
   bool Transpose = this->getProperty("Transpose");
   if (Transpose) {

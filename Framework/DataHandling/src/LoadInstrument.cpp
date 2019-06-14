@@ -42,22 +42,22 @@ enum class LoaderType { Xml = 1, Idf = 2, Nxs = 3 };
 void LoadInstrument::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace to load the instrument definition "
                   "into. Any existing instrument will be replaced.");
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                LoadGeometry::validExtensions()),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
+                                     LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "
       ".nxs for usage with NeXus Geometry files. Note Filename or "
       "InstrumentName must be specified but not both.");
-  declareProperty(
-      make_unique<ArrayProperty<detid_t>>("MonitorList", Direction::Output),
-      "Will be filled with a list of the detector ids of any "
-      "monitors loaded in to the workspace.");
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("MonitorList",
+                                                           Direction::Output),
+                  "Will be filled with a list of the detector ids of any "
+                  "monitors loaded in to the workspace.");
   declareProperty(
       "InstrumentName", "",
       "Name of instrument. Can be used instead of Filename to specify an"
@@ -65,7 +65,7 @@ void LoadInstrument::init() {
   declareProperty("InstrumentXML", "",
                   "The full XML instrument definition as a string.");
   declareProperty(
-      make_unique<PropertyWithValue<OptionalBool>>(
+      std::make_unique<PropertyWithValue<OptionalBool>>(
           "RewriteSpectraMap", OptionalBool::Unset,
           boost::make_shared<MandatoryValidator<OptionalBool>>()),
       "If set to True then a 1:1 map between the spectrum numbers and "
@@ -258,10 +258,10 @@ void LoadInstrument::runLoadParameterFile(
     std::vector<std::string> directoryNames =
         configService.getInstrumentDirectories();
 
-    for (const auto &directoryName : directoryNames) {
+    for (const auto &name : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first beat file
-      fullPathParamIDF = getFullPathParamIDF(directoryName, filename);
+      fullPathParamIDF = getFullPathParamIDF(name, filename);
       // stop when you find the first one
       if (!fullPathParamIDF.empty())
         break;

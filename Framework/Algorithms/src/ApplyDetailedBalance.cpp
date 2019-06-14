@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -20,6 +20,7 @@
 using std::string;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace Algorithms {
@@ -32,15 +33,15 @@ DECLARE_ALGORITHM(ApplyDetailedBalance)
 void ApplyDetailedBalance::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("DeltaE");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
   declareProperty(
-      make_unique<PropertyWithValue<string>>("Temperature", "",
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<string>>("Temperature", "",
+                                                  Direction::Input),
       "SampleLog variable name that contains the temperature, or a number");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
   std::vector<std::string> unitOptions{"Energy", "Frequency"};
   declareProperty(
@@ -57,7 +58,7 @@ void ApplyDetailedBalance::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   std::string Tstring = getProperty("Temperature");

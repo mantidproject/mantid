@@ -5,30 +5,37 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectBayesTab.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
 IndirectBayesTab::IndirectBayesTab(QWidget *parent)
     : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  // Connect double maneger signals
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 IndirectBayesTab::~IndirectBayesTab() {}
+
+/**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void IndirectBayesTab::filterInputData(bool filter) {
+  setFileExtensionsByName(filter);
+}
+
+/**
+ * Allows the user to turn the plotting of error bars off and on
+ *
+ * @param errorBars :: true if you want output plots to have error bars
+ */
+void IndirectBayesTab::setPlotErrorBars(bool errorBars) {
+  IndirectTab::setPlotErrorBars(errorBars);
+}
 
 /**
  * Emits a signal to run a python script using the method in the parent
@@ -39,5 +46,22 @@ IndirectBayesTab::~IndirectBayesTab() {}
 void IndirectBayesTab::runPythonScript(const QString &pyInput) {
   emit runAsPythonScript(pyInput, true);
 }
+
+/**
+ * Format the tree widget so its easier to read the contents. It changes the
+ * background colour and item indentation.
+ *
+ * @param treeWidget :: The tree widget to format
+ * @param properties :: The properties within the tree widget
+ */
+void IndirectBayesTab::formatTreeWidget(
+    QtTreePropertyBrowser *treeWidget,
+    QMap<QString, QtProperty *> const &properties) const {
+  treeWidget->setIndentation(0);
+  for (auto const &item : properties)
+    treeWidget->setBackgroundColor(treeWidget->topLevelItem(item),
+                                   QColor(246, 246, 246));
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

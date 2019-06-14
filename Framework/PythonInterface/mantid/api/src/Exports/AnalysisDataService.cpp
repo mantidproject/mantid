@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Converters/ToPyList.h"
 #include "MantidPythonInterface/kernel/DataServiceExporter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 
@@ -77,5 +77,11 @@ void export_AnalysisDataService() {
       .def("retrieveWorkspaces", retrieveWorkspaces,
            AdsRetrieveWorkspacesOverloads(
                "Retrieve a list of workspaces by name",
-               (arg("self"), arg("names"), arg("unrollGroups") = false)));
+               (arg("self"), arg("names"), arg("unrollGroups") = false)))
+      .def("addToGroup", &AnalysisDataServiceImpl::addToGroup,
+           (arg("groupName"), arg("wsName")),
+           "Add a workspace in the ADS to a group in the ADS")
+      .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup,
+           (arg("groupName"), arg("wsName")),
+           "Remove a workspace from a group in the ADS");
 }

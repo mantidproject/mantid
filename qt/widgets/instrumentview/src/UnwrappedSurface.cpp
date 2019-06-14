@@ -320,8 +320,7 @@ void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &detIndices) {
   }
 
   // select detectors with u,v within the allowed boundaries
-  for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
-    UnwrappedDetector &udet = m_unwrappedDetectors[i];
+  for (auto &udet : m_unwrappedDetectors) {
     if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom &&
         udet.v <= vtop) {
       detIndices.push_back(udet.detIndex);
@@ -334,17 +333,15 @@ void UnwrappedSurface::getMaskedDetectors(
   detIndices.clear();
   if (m_maskShapes.isEmpty())
     return;
-  for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
-    const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (m_maskShapes.isMasked(udet.u, udet.v)) {
+  for (const auto &udet : m_unwrappedDetectors) {
+    if (!udet.empty() && m_maskShapes.isMasked(udet.u, udet.v)) {
       detIndices.push_back(udet.detIndex);
     }
   }
 }
 
 void UnwrappedSurface::changeColorMap() {
-  for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
-    UnwrappedDetector &udet = m_unwrappedDetectors[i];
+  for (auto &udet : m_unwrappedDetectors) {
     udet.color = m_instrActor->getColor(udet.detIndex);
   }
 }
@@ -597,9 +594,9 @@ void UnwrappedSurface::calcUV(UnwrappedDetector &udet,
  */
 void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   // U is the horizontal axis on the screen
-  const Mantid::Kernel::V3D U(-1, 0, 0);
+  constexpr Mantid::Kernel::V3D U(-1, 0, 0);
   // V is the vertical axis on the screen
-  const Mantid::Kernel::V3D V(0, 1, 0);
+  constexpr Mantid::Kernel::V3D V(0, 1, 0);
 
   // find the detector's rotation
   Mantid::Kernel::Quat R;
@@ -702,7 +699,7 @@ UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
 
   try {
     ws = AnalysisDataService::Instance().retrieve(name);
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // couldn't find the workspace in the ADS for some reason
     // just fail silently. There's nothing more we can do.
     return nullptr;

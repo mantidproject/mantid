@@ -566,15 +566,24 @@ bool CatalogSearch::validateDates() {
   // If startDate > endDate we want to throw an error and inform the user (red
   // star(*)).
   if (ret) {
-    m_icatUiForm.StartDate_err->setToolTip(
-        QString::fromStdString("<span style=\"color: white;\">Start date "
-                               "cannot be greater than end date.</span>"));
+    correctedToolTip("Start date cannot be greater than end date.",
+                     m_icatUiForm.StartDate_err);
     m_icatUiForm.StartDate_err->show();
   } else {
     m_icatUiForm.StartDate_err->hide();
   }
 
   return ret;
+}
+
+void CatalogSearch::correctedToolTip(std::string text, QLabel *label) {
+#ifdef Q_OS_WIN
+  label->setToolTip(QString::fromStdString("<span style=\"color: black;\">" +
+                                           text + "</span>"));
+#else
+  label->setToolTip(QString::fromStdString("<span style=\"color: white;\">" +
+                                           text + "</span>"));
+#endif
 }
 
 /**
@@ -693,14 +702,13 @@ void CatalogSearch::searchClicked() {
  */
 void CatalogSearch::showErrorLabels(
     std::map<std::string, std::string> &errors) {
-  for (auto iter = errors.begin(); iter != errors.end(); ++iter) {
+  for (auto &error : errors) {
     QLabel *label = m_icatUiForm.searchFrame->findChild<QLabel *>(
-        QString::fromStdString(iter->first));
+        QString::fromStdString(error.first));
 
     if (label) {
       // Update the tooltip of the element and then show it.
-      label->setToolTip(QString::fromStdString(
-          "<span style=\"color: white;\">" + iter->second + "</span>"));
+      correctedToolTip(error.second, label);
       label->show();
     }
   }
@@ -1254,15 +1262,15 @@ void CatalogSearch::loadDataFiles() {
   loadAlgorithm->initialize();
 
   // For all the files downloaded (or in archive) we want to load them.
-  for (unsigned i = 0; i < filePaths.size(); i++) {
-    if (filePaths.at(i).empty())
+  for (auto &filePath : filePaths) {
+    if (filePath.empty())
       return;
     // Set the filename (path) of the algorithm to load from.
-    loadAlgorithm->setPropertyValue("Filename", filePaths.at(i));
+    loadAlgorithm->setPropertyValue("Filename", filePath);
     // Sets the output workspace to be the name of the file.
     loadAlgorithm->setPropertyValue(
         "OutputWorkspace",
-        Poco::Path(Poco::Path(filePaths.at(i)).getFileName()).getBaseName());
+        Poco::Path(Poco::Path(filePath).getFileName()).getBaseName());
 
     Poco::ActiveResult<bool> result(loadAlgorithm->executeAsync());
     while (!result.available()) {

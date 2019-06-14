@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -9,20 +9,11 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
 import unittest
 
-# 3rd party imports
-import six
-
-# local imports
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
-from mantidqt.utils.qt.test import GuiTest
-
-if six.PY2:
-    import mock
-else:
-    from unittest import mock
 
 
 class PythonFileInterpreterTest(GuiTest):
@@ -51,6 +42,20 @@ class PythonFileInterpreterTest(GuiTest):
         w.editor.setText("x = 1 + 2")
         w.execute_async()
         self.assertTrue("Status: Idle", w.status.currentMessage())
+
+    def test_clear_key_binding(self):
+        test_cases = {'Ctrl+A': None, 'Shift+A': ValueError,
+                      'Ctrl+AAA': ValueError, 'Ctrl+Shift+A': ValueError}
+        w = PythonFileInterpreter()
+        for key_combo, expected_result in test_cases.items():
+            fail_msg = ("Failed on case '{}' with expected result '{}'"
+                        "".format(key_combo, expected_result))
+            if expected_result is ValueError:
+                with self.assertRaises(expected_result, msg=fail_msg):
+                    w.clear_key_binding(key_combo)
+            else:
+                self.assertEqual(w.clear_key_binding(key_combo), None,
+                                 msg=fail_msg)
 
 
 if __name__ == '__main__':

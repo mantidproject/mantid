@@ -90,25 +90,25 @@ const std::string LoadSpiceAscii::summary() const {
 /** Declaration of properties
  */
 void LoadSpiceAscii::init() {
-  declareProperty(make_unique<FileProperty>("Filename", "",
-                                            API::FileProperty::Load, ".dat"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".dat"),
                   "Name of SPICE data file.");
 
   // Logs to be float type sample log
-  auto floatspckeyprop = make_unique<ArrayProperty<std::string>>(
+  auto floatspckeyprop = std::make_unique<ArrayProperty<std::string>>(
       "FloatSampleLogNames", Direction::Input);
   declareProperty(std::move(floatspckeyprop),
                   "List of log names that will be imported as float property.");
 
   // Logs to be integer type sample log
-  auto intspckeyprop = make_unique<ArrayProperty<std::string>>(
+  auto intspckeyprop = std::make_unique<ArrayProperty<std::string>>(
       "IntegerSampleLogNames", Direction::Input);
   declareProperty(
       std::move(intspckeyprop),
       "List of log names that will be imported as integer property.");
 
   // Logs to be string type sample log
-  auto strspckeyprop = make_unique<ArrayProperty<std::string>>(
+  auto strspckeyprop = std::make_unique<ArrayProperty<std::string>>(
       "StringSampleLogNames", Direction::Input);
   declareProperty(
       std::move(strspckeyprop),
@@ -127,18 +127,18 @@ void LoadSpiceAscii::init() {
   defaultlogformat[1] = "MM/DD/YYYY";
   defaultlogformat[2] = "time";
   defaultlogformat[3] = "HH:MM:SS AM";
-  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
-                      "DateAndTimeLog", defaultlogformat),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      "DateAndTimeLog", std::move(defaultlogformat)),
                   "Name and format for date and time");
 
   // Output
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of TableWorkspace containing experimental data.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("RunInfoWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "RunInfoWorkspace", "", Direction::Output),
       "Name of TableWorkspace containing experimental information.");
 }
 

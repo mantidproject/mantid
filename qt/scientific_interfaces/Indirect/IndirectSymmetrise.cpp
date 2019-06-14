@@ -17,6 +17,7 @@ Mantid::Kernel::Logger g_log("IndirectSymmetrise");
 using namespace Mantid::API;
 
 namespace MantidQt {
+using MantidWidgets::AxisID;
 namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -155,8 +156,12 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
 
   // Set default x axis range
   QPair<double, double> defaultRange(-1.0, 1.0);
-  m_uiForm.ppRawPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
-  m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
+  m_uiForm.ppRawPlot->setAxisRange(defaultRange, AxisID::XBottom);
+  m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, AxisID::XBottom);
+
+  // Disable run until preview is clicked
+  m_uiForm.pbRun->setEnabled(false);
+  m_uiForm.pbPreview->setEnabled(false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -256,6 +261,8 @@ void IndirectSymmetrise::plotRawInput(const QString &workspaceName) {
   // Set some default (and valid) values for E range
   m_dblManager->setValue(m_properties["EMax"], axisRange.second);
   m_dblManager->setValue(m_properties["EMin"], axisRange.second / 10);
+  m_originalMax = axisRange.second;
+  m_originalMin = axisRange.second / 10;
 
   updateMiniPlots();
 }
@@ -283,7 +290,7 @@ void IndirectSymmetrise::updateMiniPlots() {
 
   // Match X axis range on preview plot
   m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange("Raw"),
-                                       QwtPlot::xBottom);
+                                       AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
 }
 
@@ -317,11 +324,9 @@ void IndirectSymmetrise::replotNewSpectrum(QtProperty *prop, double value) {
       m_dblManager->setValue(m_properties["PreviewSpec"], maxSpectrumRange);
       return;
     }
-  }
-
-  // If we get this far then properties are valid so update mini plots
-  if (prop == m_properties["PreviewSpec"])
+    // If we get this far then properties are valid so update mini plots
     updateMiniPlots();
+  }
 }
 
 /**
@@ -388,6 +393,14 @@ void IndirectSymmetrise::preview() {
 
   double e_min = m_dblManager->value(m_properties["EMin"]);
   double e_max = m_dblManager->value(m_properties["EMax"]);
+
+  if (e_min == m_originalMin && e_max == m_originalMax) {
+    g_log.error("Preview has been called, but the max and min are still "
+                "default. Please update the min "
+                "and max lines on the top graph.");
+    return;
+  }
+
   long spectrumNumber =
       static_cast<long>(m_dblManager->value(m_properties["PreviewSpec"]));
   std::vector<long> spectraRange(2, spectrumNumber);
@@ -404,6 +417,9 @@ void IndirectSymmetrise::preview() {
   symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
 
   runAlgorithm(symmetriseAlg);
+
+  // Now enable the run function
+  m_uiForm.pbRun->setEnabled(true);
 }
 
 /**
@@ -508,6 +524,7 @@ void IndirectSymmetrise::xRangeMinChanged(double value) {
   } else if (from == negativeERaw) {
     m_dblManager->setValue(m_properties["EMax"], std::abs(value));
   }
+  m_uiForm.pbPreview->setEnabled(true);
 }
 
 /**
@@ -527,6 +544,16 @@ void IndirectSymmetrise::xRangeMaxChanged(double value) {
   } else if (from == negativeERaw) {
     m_dblManager->setValue(m_properties["EMin"], std::abs(value));
   }
+  m_uiForm.pbPreview->setEnabled(true);
+}
+
+void IndirectSymmetrise::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Symmetrise");
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                         : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                         : noSuffixes);
 }
 
 /**

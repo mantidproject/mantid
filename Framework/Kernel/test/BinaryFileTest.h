@@ -62,13 +62,14 @@ public:
   BinaryFileTest() { dummy_file = "dummy.bin"; }
 
   void testFileNotFound() {
-    TS_ASSERT_THROWS(file.open("nonexistentfile.dat"), std::invalid_argument);
+    TS_ASSERT_THROWS(file.open("nonexistentfile.dat"),
+                     const std::invalid_argument &);
   }
 
   void testFileWrongSize() {
 
     MakeDummyFile(dummy_file, 3);
-    TS_ASSERT_THROWS(file.open(dummy_file), std::runtime_error);
+    TS_ASSERT_THROWS(file.open(dummy_file), const std::runtime_error &);
     file.close();
     Poco::File(dummy_file).remove();
   }
@@ -126,7 +127,7 @@ public:
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
     size_t block_size = 10;
-    auto data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    auto data = std::make_unique<DasEvent[]>(block_size);
     size_t loaded_size = file.loadBlock(data.get(), block_size);
     // Yes, we loaded that amount
     TS_ASSERT_EQUALS(loaded_size, block_size);
@@ -137,7 +138,7 @@ public:
 
     // Now try to load a lot more - going past the end
     block_size = 10;
-    data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    data = std::make_unique<DasEvent[]>(block_size);
     loaded_size = file.loadBlock(data.get(), block_size);
     TS_ASSERT_EQUALS(loaded_size, 10);
 
@@ -157,7 +158,7 @@ public:
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
     size_t block_size = 10;
-    auto data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    auto data = std::make_unique<DasEvent[]>(block_size);
     size_t loaded_size = file.loadBlockAt(data.get(), 5, block_size);
     // Yes, we loaded that amount
     TS_ASSERT_EQUALS(loaded_size, block_size);
@@ -168,7 +169,7 @@ public:
 
     // Now try to load a lot more - going past the end
     block_size = 10;
-    data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    data = std::make_unique<DasEvent[]>(block_size);
     loaded_size = file.loadBlock(data.get(), block_size);
     TS_ASSERT_EQUALS(loaded_size, 5);
     file.close();
@@ -184,9 +185,10 @@ public:
     std::vector<DasEvent> data;
     DasEvent *buffer = nullptr;
     TS_ASSERT_EQUALS(file2.getNumElements(), 0);
-    TS_ASSERT_THROWS(file2.loadAll(), std::runtime_error);
-    TS_ASSERT_THROWS(data = file2.loadAllIntoVector(), std::runtime_error);
-    TS_ASSERT_THROWS(file2.loadBlock(buffer, 10), std::runtime_error);
+    TS_ASSERT_THROWS(file2.loadAll(), const std::runtime_error &);
+    TS_ASSERT_THROWS(data = file2.loadAllIntoVector(),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(file2.loadBlock(buffer, 10), const std::runtime_error &);
   }
 };
 

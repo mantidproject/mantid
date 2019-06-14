@@ -31,7 +31,7 @@ DECLARE_ALGORITHM(GetQsInQENSData)
 
 // Initializes the Algorithm
 void GetQsInQENSData::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input QENS data as MatrixWorkspace");
 
@@ -41,7 +41,7 @@ void GetQsInQENSData::init() {
                   "desired.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("Qvalues", Direction::Output));
+      std::make_unique<ArrayProperty<double>>("Qvalues", Direction::Output));
 }
 
 /*

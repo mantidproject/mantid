@@ -48,14 +48,6 @@
 #include "stl_emulation.h"
 
 /// @cond FLATBUFFERS_INTERNAL
-#if __cplusplus <= 199711L && \
-    (!defined(_MSC_VER) || _MSC_VER < 1600) && \
-    (!defined(__GNUC__) || \
-      (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__ < 40400))
-  #error A C++11 compatible compiler with support for the auto typing is \
-         required for FlatBuffers.
-  #error __cplusplus _MSC_VER __GNUC__  __GNUC_MINOR__  __GNUC_PATCHLEVEL__
-#endif
 
 #if !defined(__clang__) && \
     defined(__GNUC__) && \

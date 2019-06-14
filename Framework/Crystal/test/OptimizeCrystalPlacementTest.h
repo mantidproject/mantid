@@ -187,9 +187,10 @@ public:
 
   void test_SamplePosition() {
     auto modPeaksNoFix = calculateBasicPlacement();
-    const auto &peak = modPeaksNoFix->getPeak(0);
+    auto peak = modPeaksNoFix->getPeak(0);
     auto inst = peak.getInstrument();
     const V3D sampPos(.0003, -.00025, .00015);
+    peak.setSamplePos(sampPos);
 
     auto pmap = inst->getParameterMap();
     auto sample = inst->getSample();
@@ -208,9 +209,9 @@ public:
         modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637, 5638"},
                         {"AdjustSampleOffsets", "1"}});
     const auto table = resultsSamplePos.second;
-    TS_ASSERT_DELTA(table->Double(0, 1), 0, .0004);
-    TS_ASSERT_DELTA(table->Double(1, 1), 0, .00024);
-    TS_ASSERT_DELTA(table->Double(2, 1), 0, .0003);
+    TS_ASSERT_DELTA(table->Double(0, 1), -0.0003377231, 1.e-4);
+    TS_ASSERT_DELTA(table->Double(1, 1), 0.0000897573, 1.e-4);
+    TS_ASSERT_DELTA(table->Double(2, 1), -0.0002679569, 1.e-4);
   }
 
 private:

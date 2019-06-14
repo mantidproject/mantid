@@ -174,7 +174,7 @@ size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
   R = std::sqrt(R);
 
   const double WMin = l_WCutOver * (l_RCut - R);
-  auto Xs = dataWS->x(wsInd);
+  const auto &Xs = dataWS->x(wsInd);
   return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
 }
 
@@ -193,7 +193,7 @@ void Qhelper::outputParts(API::Algorithm *alg,
   std::string baseName = alg->getPropertyValue("OutputWorkspace");
 
   alg->declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "SumOfCounts", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of counts");
   alg->setPropertyValue("SumOfCounts", baseName + "_sumOfCounts");
@@ -201,7 +201,7 @@ void Qhelper::outputParts(API::Algorithm *alg,
   alg->setProperty("SumOfCounts", sumOfCounts);
 
   alg->declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "sumOfNormFactors", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of normalising factors");
   alg->setPropertyValue("sumOfNormFactors", baseName + "_sumOfNormFactors");

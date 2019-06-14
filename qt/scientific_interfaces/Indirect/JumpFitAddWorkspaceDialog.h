@@ -20,6 +20,7 @@ public:
   explicit JumpFitAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
+  std::string parameterType() const;
   int parameterNameIndex() const;
 
   void setParameterTypes(const std::vector<std::string> &types);
@@ -30,14 +31,17 @@ public:
   void enableParameterSelection();
   void disableParameterSelection();
 
+  void updateSelectedSpectra() override{};
+
 public slots:
   void emitWorkspaceChanged(const QString &name);
-  void emitParameterTypeChanged(int index);
+  void emitParameterTypeChanged(const QString &index);
 
 signals:
   void workspaceChanged(JumpFitAddWorkspaceDialog *dialog,
                         const std::string &workspace);
-  void parameterTypeChanged(JumpFitAddWorkspaceDialog *dialog, int type);
+  void parameterTypeChanged(JumpFitAddWorkspaceDialog *dialog,
+                            const std::string &type);
 
 private:
   Ui::JumpFitAddWorkspaceDialog m_uiForm;

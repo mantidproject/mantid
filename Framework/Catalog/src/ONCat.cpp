@@ -11,10 +11,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 
 #include <boost/algorithm/string/join.hpp>
@@ -91,8 +89,8 @@ static const std::string DEFAULT_CLIENT_ID =
  */
 ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
   if (!authenticate) {
-    return Mantid::Kernel::make_unique<ONCat>(
-        DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE, boost::none, boost::none);
+    return std::make_unique<ONCat>(DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE,
+                                   boost::none, boost::none);
   }
 
   auto &config = Mantid::Kernel::ConfigService::Instance();
@@ -110,8 +108,8 @@ ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
         << "Falling back to default -- user login required." << std::endl;
   }
 
-  return Mantid::Kernel::make_unique<ONCat>(
-      DEFAULT_ONCAT_URL, Mantid::Kernel::make_unique<ConfigServiceTokenStore>(),
+  return std::make_unique<ONCat>(
+      DEFAULT_ONCAT_URL, std::make_unique<ConfigServiceTokenStore>(),
       hasClientCredentials ? OAuthFlow::CLIENT_CREDENTIALS
                            : OAuthFlow::RESOURCE_OWNER_CREDENTIALS,
       hasClientCredentials ? client_id : DEFAULT_CLIENT_ID,

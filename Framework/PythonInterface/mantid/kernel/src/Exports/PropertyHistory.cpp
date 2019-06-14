@@ -21,7 +21,10 @@ GET_POINTER_SPECIALIZATION(PropertyHistory)
 void export_PropertyHistory() {
   register_ptr_to_python<Mantid::Kernel::PropertyHistory_sptr>();
 
-  class_<PropertyHistory>("PropertyHistory", no_init)
+  class_<PropertyHistory>(
+      "PropertyHistory",
+      init<const std::string &, const std::string &, const std::string &,
+           const bool, const unsigned int>())
 
       .def("name", &PropertyHistory::name, arg("self"),
            return_value_policy<copy_const_reference>(),

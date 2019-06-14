@@ -11,18 +11,18 @@ set( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 set( CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}" )
 set( CPACK_NSIS_INSTALL_ROOT "C:")
 
-set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "MantidPlot_Icon_32offset" )
+set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "mantidplot" )
 set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "mantid_workbench" )
 set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook")
 
 # Choose the proper suffix for the build.
 # if the string is not empty, capitalise the first letter
 if (NOT CPACK_PACKAGE_SUFFIX STREQUAL "" )
-  # change the icon if this is not a release build - the icons have _<suffix> appended, e.g. _nightly and _unstable
+  # change the icon if this is not a release build - the icons have <suffix> appended, e.g. nightly and unstable
   # this is done before the capitalisation of the first letter
-  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}" )
-  set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}")
-  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}" )
+  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}${CPACK_PACKAGE_SUFFIX}" )
+  set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}${CPACK_PACKAGE_SUFFIX}")
+  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}${CPACK_PACKAGE_SUFFIX}" )
 
   string(LENGTH ${CPACK_PACKAGE_SUFFIX} WINDOWS_NSIS_SUFFIX_LENGTH)
   # get only first letter
@@ -84,6 +84,7 @@ set ( BOOST_DIST_DLLS
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
     PocoFoundation64.dll
+    PocoJSON64.dll
     PocoNet64.dll
     PocoNetSSL64.dll
     PocoUtil64.dll
@@ -151,7 +152,7 @@ install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin R
 # correct Python from Mantid's installation directory
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_workbench.pyw DESTINATION bin )
 
-if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
+if ( ENABLE_WORKBENCH )
   find_program(_powershell_available NAMES "powershell")
   # Name of the workbench executable without any extensions
   set(_workbench_base_name launch_workbench)
@@ -166,7 +167,7 @@ if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
     execute_process(COMMAND powershell.exe -version 2.0 -noprofile -windowstyle hidden -ExecutionPolicy Bypass ${THIRD_PARTY_DIR}/bin/ps2exe.ps1 -inputFile ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 -outputFile ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} -x64 -runtime2 -noconsole RESULT_VARIABLE _workbench_powershell_return_code OUTPUT_VARIABLE _workbench_powershell_output)
 
     # If the EXE generation failed then display an error and stop the CMAKE generation
-    if ( _workbench_powershell_return_code GREATER 0 )
+    if ( NOT _workbench_powershell_return_code EQUAL 0 )
       message(STATUS ${_workbench_powershell_output})
       message(FATAL_ERROR "Generating the Workbench executable encountered an error.")
     endif ()
@@ -225,7 +226,7 @@ set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
 
 # if the workbench is being packaged we want to add the shortcut commands for the installation
 # this is done via appending the relevant commands to the already declared variables
-if ( PACKAGE_WORKBENCH )
+if ( ENABLE_WORKBENCH )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
   set ( MANTIDWORKBENCH_LINK_NAME "MantidWorkbench${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
   message(STATUS "Adding icons for Workbench as it is being packaged in the installation.")

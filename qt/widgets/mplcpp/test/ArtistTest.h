@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Widgets::MplCpp;
+using namespace MantidQt::Widgets::Common;
 
 class ArtistTest : public CxxTest::TestSuite {
 public:
@@ -41,13 +42,13 @@ public:
     using Mantid::PythonInterface::PythonException;
     auto textModule(Python::NewRef(PyImport_ImportModule("matplotlib.text")));
     Artist label(textModule.attr("Text")());
-    TS_ASSERT_THROWS(label.remove(), PythonException);
+    TS_ASSERT_THROWS(label.remove(), const PythonException &);
   }
   // ----------------- failure tests ---------------------
 
   void testConstructWithNonArtistThrowsInvalidArgument() {
     Python::Object none;
-    TS_ASSERT_THROWS(Artist artist(none), std::invalid_argument);
+    TS_ASSERT_THROWS(Artist artist(none), const std::invalid_argument &);
   }
 };
 

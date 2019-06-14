@@ -54,7 +54,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     // Error: Input workspaces are missing. Either a workspace group or a list
     // of workspace names must be given
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
   void test_input_ws_default_group() {
     PolarizationEfficiencyCor alg;
@@ -103,7 +103,7 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     // Error: Some invalid Properties found
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
   void test_input_ws_fredrikze_wrong_input_size() {
     PolarizationEfficiencyCor alg;
@@ -114,7 +114,7 @@ public:
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     // Error: For PA analysis, input group must have 4 periods
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
   void test_input_ws_wildes_list() {
     PolarizationEfficiencyCor alg;
@@ -138,7 +138,7 @@ public:
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     // Error: Input workspaces are required to be in a workspace group
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
   void test_input_ws_cannot_be_both() {
     PolarizationEfficiencyCor alg;
@@ -150,7 +150,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     // Error: Input workspaces must be given either as a workspace group or a
     // list of names
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
   void test_input_ws_wildes_wrong_size() {
     PolarizationEfficiencyCor alg;
@@ -161,7 +161,7 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     // Error: Some invalid Properties found
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_efficiencies_fredrikze_wrong_efficiencies() {
@@ -173,7 +173,7 @@ public:
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     // Error: Efficiencey property not found: Rho;
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
   void test_efficiencies_wildes_wrong_efficiencies() {
     PolarizationEfficiencyCor alg;
@@ -184,7 +184,7 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     // Error: Some invalid Properties found
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
   void test_flippers_full() {
     PolarizationEfficiencyCor alg;
@@ -280,7 +280,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 10, 11");
     // Error: Some invalid Properties found
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
   void test_flippers_wildes_no_pnr() {
     PolarizationEfficiencyCor alg;
@@ -293,7 +293,7 @@ public:
     alg.setProperty("PolarizationAnalysis", "PNR");
     // Error: Property PolarizationAnalysis canot be used with the Wildes
     // method
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
   void test_flippers_wildes_no_pa() {
     PolarizationEfficiencyCor alg;
@@ -306,7 +306,7 @@ public:
     alg.setProperty("PolarizationAnalysis", "PA");
     // Error: Property PolarizationAnalysis canot be used with the Wildes
     // method
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
   void test_polarization_analysis_pnr() {
     PolarizationEfficiencyCor alg;
@@ -346,7 +346,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.setProperty("PolarizationAnalysis", "PNR");
     // Error: For PNR analysis, input group must have 2 periods
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
   void test_polarization_analysis_no_flippers() {
     PolarizationEfficiencyCor alg;
@@ -358,7 +358,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.setProperty("Flippers", "00, 01, 10, 11");
     // Error: Property Flippers canot be used with the Fredrikze method
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_histo() {

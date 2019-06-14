@@ -40,10 +40,10 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "The name of the NeXus file to load");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "The name of the NeXus file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace2D to create.");
   declareProperty("Signal", 1,
@@ -55,12 +55,12 @@ void LoadTOFRawNexus::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
-      make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
-                                                mustBePositive),
+      std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
+                                                     mustBePositive),
       "The index number of the first spectrum to read.  Only used if\n"
       "spectrum_max is set.");
   declareProperty(
-      make_unique<PropertyWithValue<specnum_t>>(
+      std::make_unique<PropertyWithValue<specnum_t>>(
           "SpectrumMax", Mantid::EMPTY_INT(), mustBePositive),
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
@@ -127,17 +127,17 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 
         // -------------- Find the data field name ----------------------------
         if (m_dataField.empty()) {
-          std::map<std::string, std::string> entries = file->getEntries();
-          std::map<std::string, std::string>::iterator it;
-          for (it = entries.begin(); it != entries.end(); ++it) {
-            if (it->second == "SDS") {
-              file->openData(it->first);
+          std::map<std::string, std::string> dataEntries = file->getEntries();
+          for (auto dataEntryIt = dataEntries.begin();
+               dataEntryIt != dataEntries.end(); ++dataEntryIt) {
+            if (dataEntryIt->second == "SDS") {
+              file->openData(dataEntryIt->first);
               if (file->hasAttr("signal")) {
                 int signal = 0;
                 file->getAttr("signal", signal);
                 if (signal == m_signalNo) {
                   // That's the right signal!
-                  m_dataField = it->first;
+                  m_dataField = dataEntryIt->first;
                   // Find the corresponding X axis
                   std::string axes;
                   m_assumeOldFile = false;
@@ -199,9 +199,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
       if (name.substr(0, 4) == "bank") {
         // OK, this is some bank data
         file->openGroup(name, it->second);
-        std::map<std::string, std::string> entries = file->getEntries();
+        const auto bankEntries = file->getEntries();
 
-        if (entries.find("pixel_id") != entries.end()) {
+        if (bankEntries.find("pixel_id") != bankEntries.end()) {
           bankNames.push_back(name);
 
           // Count how many pixels in the bank
@@ -210,9 +210,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
           file->closeData();
 
           if (!dims.empty()) {
-            size_t newPixels = 1;
-            for (auto dim : dims)
-              newPixels *= dim;
+            const size_t newPixels = std::accumulate(
+                dims.cbegin(), dims.cend(), static_cast<size_t>(1),
+                [](size_t product, auto dim) { return product * dim; });
             m_numPixels += newPixels;
           }
         } else {
@@ -232,7 +232,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
           }
         }
 
-        if (entries.find(m_axisField) != entries.end()) {
+        if (bankEntries.find(m_axisField) != bankEntries.end()) {
           // Get the size of the X vector
           file->openData(m_axisField);
           std::vector<int64_t> dims = file->getInfo().dims;
@@ -488,7 +488,7 @@ void LoadTOFRawNexus::exec() {
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
 
   // Count pixels and other setup
-  auto prog = make_unique<Progress>(this, 0.0, 1.0, 10);
+  auto prog = std::make_unique<Progress>(this, 0.0, 1.0, 10);
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
@@ -508,7 +508,7 @@ void LoadTOFRawNexus::exec() {
 
   int nPeriods = 1; // Unused
   auto periodLog =
-      make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
+      std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(
       filename, WS, *this, false, nPeriods, periodLog);
 

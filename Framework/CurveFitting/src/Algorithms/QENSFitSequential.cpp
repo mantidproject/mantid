@@ -29,6 +29,16 @@ namespace {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+WorkspaceGroup_sptr getADSGroupWorkspace(const std::string &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(const std::string &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
 MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
                                          const std::string &outputName) {
   auto convSpec = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
@@ -40,8 +50,7 @@ MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
   convSpec->execute();
   // Attempting to use getProperty("OutputWorkspace") on algorithm results in a
   // nullptr being returned
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      outputName);
+  return getADSMatrixWorkspace(outputName);
 }
 
 MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWorkspace,
@@ -150,8 +159,7 @@ std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
   std::vector<MatrixWorkspace_sptr> workspaces;
 
   auto extractWorkspace = [&](const std::string &name) {
-    workspaces.emplace_back(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
+    workspaces.emplace_back(getADSMatrixWorkspace(name));
   };
 
   boost::regex reg("([^,;]+),");
@@ -211,11 +219,9 @@ std::string shortParameterName(const std::string &longName) {
 
 bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   const auto &first = workspaces.front();
-  for (const auto &workspace : workspaces) {
-    if (workspace != first)
-      return true;
-  }
-  return false;
+  return std::any_of(
+      workspaces.cbegin(), workspaces.cend(),
+      [&first](const auto &workspace) { return workspace != first; });
 }
 
 template <typename F, typename Renamer>
@@ -302,6 +308,7 @@ runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
   }
   return createGroup(results);
 }
+
 } // namespace
 
 namespace Mantid {
@@ -339,8 +346,8 @@ const std::vector<std::string> QENSFitSequential::seeAlso() const {
 
 void QENSFitSequential::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "The input workspace for the fit. This property will be ignored if "
       "'Input' is provided.");
 
@@ -376,20 +383,20 @@ void QENSFitSequential::init() {
                   "The unit to assign to the X Axis of the result workspace, "
                   "defaults to MomentumTransfer");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output result workspace(s)");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputParameterWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "The output parameter workspace");
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspaceGroup", "", Direction::Output,
                       PropertyMode::Optional),
                   "The output group workspace");
 
   declareProperty(
-      make_unique<FunctionProperty>("Function", Direction::InOut),
+      std::make_unique<FunctionProperty>("Function", Direction::InOut),
       "The fitting function, common for all workspaces in the input.");
   declareProperty("LogValue", "",
                   "Name of the log value to plot the "
@@ -443,11 +450,11 @@ void QENSFitSequential::init() {
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
 
-  declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and OutputCompositeMembers is true members of any "
-      "Convolution are output convolved\n"
-      "with corresponding resolution");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "ConvolveMembers", false),
+                  "If true and OutputCompositeMembers is true members of any "
+                  "Convolution are output convolved\n"
+                  "with corresponding resolution");
 
   const std::array<std::string, 2> evaluationTypes = {
       {"CentrePoint", "Histogram"}};
@@ -458,7 +465,7 @@ void QENSFitSequential::init() {
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
 
-  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
 
@@ -511,9 +518,7 @@ void QENSFitSequential::exec() {
       processParameterTable(performFit(inputString, outputBaseName));
   const auto resultWs =
       processIndirectFitParameters(parameterWs, getDatasetGrouping(workspaces));
-  const auto groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          outputBaseName + "_Workspaces");
+  const auto groupWs = getADSGroupWorkspace(outputBaseName + "_Workspaces");
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
@@ -522,6 +527,7 @@ void QENSFitSequential::exec() {
                      inputWorkspaces);
   else
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
@@ -538,7 +544,12 @@ void QENSFitSequential::exec() {
 
   setProperty("OutputWorkspace", resultWs);
   setProperty("OutputParameterWorkspace", parameterWs);
-  setProperty("OutputWorkspaceGroup", groupWs);
+  // Copy the group to prevent the ADS having two entries for one workspace
+  auto outGroupWs = WorkspaceGroup_sptr(new WorkspaceGroup);
+  for (auto item : groupWs->getAllItems()) {
+    outGroupWs->addWorkspace(item);
+  }
+  setProperty("OutputWorkspaceGroup", outGroupWs);
 }
 
 std::map<std::string, std::string>
@@ -600,7 +611,7 @@ std::string QENSFitSequential::getOutputBaseName() const {
 
 bool QENSFitSequential::throwIfElasticQConversionFails() const { return false; }
 
-bool QENSFitSequential::isFitParameter(const std::string &) const {
+bool QENSFitSequential::isFitParameter(const std::string & /*unused*/) const {
   return true;
 }
 
@@ -657,6 +668,7 @@ WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
   pifp->setProperty("ColumnX", "axis-1");
   pifp->setProperty("XAxisUnit", xAxisUnit);
   pifp->setProperty("ParameterNames", getFitParameterNames());
+  pifp->setProperty("IncludeChiSquared", true);
   return runParameterProcessingWithGrouping(*pifp, grouping);
 }
 
@@ -690,9 +702,9 @@ void QENSFitSequential::renameGroupWorkspace(
     std::string const &currentName, std::vector<std::string> const &spectra,
     std::string const &outputBaseName, std::string const &endOfSuffix) {
   if (AnalysisDataService::Instance().doesExist(currentName)) {
-    auto const pdfGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(currentName);
-    renameWorkspaces(pdfGroup, spectra, outputBaseName, endOfSuffix);
+    auto const group = getADSGroupWorkspace(currentName);
+    if (group)
+      renameWorkspaces(group, spectra, outputBaseName, endOfSuffix);
   }
 }
 

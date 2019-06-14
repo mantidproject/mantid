@@ -108,14 +108,7 @@ InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-InternetHelper::~InternetHelper() {
-  if (m_request != nullptr) {
-    delete m_request;
-  }
-  if (m_response != nullptr) {
-    delete m_response;
-  }
-}
+InternetHelper::~InternetHelper() = default;
 
 void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
                                          const std::string &proxyUrl) {
@@ -127,17 +120,9 @@ void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
 }
 
 void InternetHelper::createRequest(Poco::URI &uri) {
-  if (m_request != nullptr) {
-    delete m_request;
-  }
-  if (m_response != nullptr) {
-    delete m_response;
-  }
-
-  m_request =
-      new HTTPRequest(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
-
-  m_response = new HTTPResponse();
+  m_request = std::make_unique<HTTPRequest>(m_method, uri.getPathAndQuery(),
+                                            HTTPMessage::HTTP_1_1);
+  m_response = std::make_unique<HTTPResponse>();
   if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);
   }
@@ -175,7 +160,10 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
   if (retStatus == HTTP_OK ||
       (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
-    processResponseHeaders(*m_response);
+    if (m_response)
+      processResponseHeaders(*m_response);
+    else
+      g_log.warning("Response is null pointer");
     return retStatus;
   } else if (isRelocated(retStatus)) {
     return this->processRelocation(*m_response, responseStream);
@@ -189,7 +177,7 @@ int InternetHelper::processRelocation(const HTTPResponse &response,
                                       std::ostream &responseStream) {
   std::string newLocation = response.get("location", "");
   if (!newLocation.empty()) {
-    g_log.information() << "url relocated to " << newLocation;
+    g_log.information() << "url relocated to " << newLocation << "\n";
     return this->sendRequest(newLocation, responseStream);
   } else {
     g_log.warning("Apparent relocation did not give new location\n");
@@ -335,7 +323,8 @@ void InternetHelper::setProxy(const Kernel::ProxyInfo &proxy) {
 /** Process any headers from the response stream
 Basic implementation does nothing.
 */
-void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse &) {}
+void InternetHelper::processResponseHeaders(
+    const Poco::Net::HTTPResponse & /*unused*/) {}
 
 /** Process any HTTP errors states.
 
@@ -428,8 +417,8 @@ behaviour.
 int InternetHelper::downloadFile(const std::string &urlFile,
                                  const std::string &localFilePath) {
   int retStatus = 0;
-  g_log.debug() << "DownloadFile : " << urlFile << " to file: " << localFilePath
-                << '\n';
+  g_log.debug() << "DownloadFile from \"" << urlFile << "\" to file: \""
+                << localFilePath << "\"\n";
 
   Poco::TemporaryFile tempFile;
   Poco::FileStream tempFileStream(tempFile.path());

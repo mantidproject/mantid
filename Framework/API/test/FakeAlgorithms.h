@@ -68,12 +68,10 @@ public:
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
     declareProperty("prop3", 10.5);
-    std::vector<double> binning;
-    binning.push_back(1.0);
-    binning.push_back(0.1);
-    binning.push_back(2.0);
-    declareProperty(Mantid::Kernel::make_unique<ArrayProperty<double>>(
-        "Binning", binning, boost::make_shared<RebinParamsValidator>()));
+    std::vector<double> binning{1.0, 0.1, 2.0};
+    declareProperty(std::make_unique<ArrayProperty<double>>(
+        "Binning", std::move(binning),
+        boost::make_shared<RebinParamsValidator>()));
   }
   void exec() override {}
 };

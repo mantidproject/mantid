@@ -51,6 +51,29 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
 }
 
 /**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void IndirectDataAnalysisTab::filterInputData(bool filter) {
+  setFileExtensionsByName(filter);
+}
+
+/**
+ * Allows the user to turn the plotting of error bars off and on
+ *
+ * @param errorBars :: true if you want output plots to have error bars
+ */
+void IndirectDataAnalysisTab::setPlotErrorBars(bool errorBars) {
+  IndirectTab::setPlotErrorBars(errorBars);
+}
+
+/**
+ * Sets the active browser workspace when the tab is changed
+ */
+void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }
+
+/**
  * Slot that can be called when a user edits an input.
  */
 void IndirectDataAnalysisTab::inputChanged() { validate(); }
@@ -61,7 +84,7 @@ void IndirectDataAnalysisTab::inputChanged() { validate(); }
  * @return  The input workspace to be used in data analysis.
  */
 MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
-  return m_inputWorkspace.lock();
+  return m_inputWorkspace;
 }
 
 /**

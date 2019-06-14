@@ -30,14 +30,17 @@ TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
     MatrixWorkspace_const_sptr ws, double ei)
     : m_constShift(0) {
 
+  // A constant among all spectra
+  constexpr double TWO_MEV_OVER_MASS =
+      2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
+
   // Get L1
-  V3D samplepos = ws->getInstrument()->getSample()->getPos();
-  V3D sourcepos = ws->getInstrument()->getSource()->getPos();
+  const auto &samplepos = ws->getInstrument()->getSample()->getPos();
+  const auto &sourcepos = ws->getInstrument()->getSource()->getPos();
   double l1 = samplepos.distance(sourcepos);
 
   // Calculate constant (to all spectra) shift
-  m_constShift = l1 / std::sqrt(ei * 2. * PhysicalConstants::meV /
-                                PhysicalConstants::NeutronMass);
+  m_constShift = l1 / std::sqrt(ei * TWO_MEV_OVER_MASS);
 }
 
 /**
@@ -45,12 +48,11 @@ TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
  * @return Correction struct
  */
 Correction Mantid::Algorithms::TimeAtSampleStrategyDirect::calculate(
-    const size_t &) const {
+    const size_t & /*workspace_index*/) const {
 
   // Correction is L1 and Ei dependent only. Detector positions are not
   // required.
   return Correction(0, m_constShift);
 }
-
 } // namespace Algorithms
 } // namespace Mantid

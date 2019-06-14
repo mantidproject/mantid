@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
@@ -67,6 +67,8 @@ void export_IPeak() {
            "cache values related to it.")
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"),
            "Return the run number this peak was measured at")
+      .def("getIntMNP", &IPeak::getIntMNP, arg("self"),
+           "Return the modulated scructure for this peak")
       .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"),
            "Return the peak number for this peak")
       .def("getBankName", &IPeak::getBankName, arg("self"),
@@ -74,6 +76,9 @@ void export_IPeak() {
       .def("setRunNumber", &IPeak::setRunNumber,
            (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
+      .def("setIntMNP", &IPeak::setIntMNP,
+           (arg("self"), arg("modulated_structure")),
+           "Set the modulated structure for this peak")
       .def("setPeakNumber", &IPeak::setPeakNumber,
            (arg("self"), arg("peak_number")),
            "Set the peak number for this peak")
@@ -87,9 +92,25 @@ void export_IPeak() {
       .def("getL", &IPeak::getL, arg("self"), "Get the L index of the peak")
       .def("getHKL", &IPeak::getHKL, arg("self"),
            "Get HKL as a :class:`~mantid.kernel.V3D` object")
+      .def("getIntHKL", &IPeak::getIntHKL, arg("self"),
+           "Get HKL as a :class:`~mantid.kernel.V3D` object")
+      .def("setIntHKL", &IPeak::setIntHKL, (arg("self"), arg("hkl")),
+           "Set the integer HKL for this peak")
+      .def("getSamplePos", &IPeak::getSamplePos, arg("self"),
+           "Get the cached samplePos as a :class:`~mantid.kernel.V3D` object")
       .def("setHKL", (void (IPeak::*)(double, double, double)) & IPeak::setHKL,
            (arg("self"), arg("h"), arg("k"), arg("l")),
            "Set the HKL values of this peak")
+      .def("setSamplePos",
+           (void (IPeak::*)(double, double, double)) & IPeak::setSamplePos,
+           (arg("self"), arg("samX"), arg("samY"), arg("samZ")),
+           "Set the samplePos value of this peak.  It does not set the "
+           "instrument sample position.")
+      .def("setSamplePos",
+           (void (IPeak::*)(const Mantid::Kernel::V3D &)) & IPeak::setSamplePos,
+           (arg("self"), arg("newPos")),
+           "Set the samplePos value of this peak.  It does not set the "
+           "instrument sample position.")
       .def("setH", &IPeak::setH, (arg("self"), arg("h")),
            "Get the H index of the peak")
       .def("setK", &IPeak::setK, (arg("self"), arg("k")),

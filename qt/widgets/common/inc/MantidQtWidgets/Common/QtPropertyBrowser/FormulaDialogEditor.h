@@ -34,7 +34,7 @@ public:
       : StringDialogEditorFactory(parent) {}
 
 protected:
-  QWidget *createEditorForManager(QtStringPropertyManager *,
+  QWidget *createEditorForManager(QtStringPropertyManager * /*manager*/,
                                   QtProperty *property,
                                   QWidget *parent) override {
     return new FormulaDialogEditor(property, parent);

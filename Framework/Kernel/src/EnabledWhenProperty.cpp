@@ -207,7 +207,7 @@ bool EnabledWhenProperty::isVisible(const IPropertyManager *algo) const {
 }
 
 /// Does nothing in this case and put here to satisfy the interface.
-void EnabledWhenProperty::modify_allowed_values(Property *const) {}
+void EnabledWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
 
 /**
  * Clones the current EnabledWhenProperty object and returns

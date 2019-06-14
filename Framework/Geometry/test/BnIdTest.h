@@ -158,7 +158,7 @@ public:
     TS_ASSERT_EQUALS(extractString(C), "11110000(4:0)");
     std::pair<int, BnId> result = A.makeCombination(B);
     TS_ASSERT_EQUALS(result.first, 0);
-    TS_ASSERT_EQUALS(result.second == BnId(), 1);
+    TS_ASSERT(result.second == BnId());
     result = A.makeCombination(C);
     TS_ASSERT_EQUALS(result.first, 1);
     TS_ASSERT_EQUALS(extractString(result.second), "111-0000(3:1)");
@@ -166,12 +166,12 @@ public:
     TS_ASSERT_EQUALS(extractString(D), "10011110(5:0)");
     result = A.makeCombination(D);
     TS_ASSERT_EQUALS(result.first, -1);
-    TS_ASSERT_EQUALS(result.second == BnId(), 1);
+    TS_ASSERT(result.second == BnId());
     BnId E(9, 240);
     TS_ASSERT_EQUALS(extractString(E), "011110000(4:0)");
     result = A.makeCombination(E);
     TS_ASSERT_EQUALS(result.first, -1);
-    TS_ASSERT_EQUALS(result.second == BnId(), 1);
+    TS_ASSERT(result.second == BnId());
   }
 
   void testMapState() {

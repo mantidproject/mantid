@@ -37,7 +37,7 @@ Required Properties:
 class DLLExport SaveNexusProcessed : public API::SerialAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "SaveNexusProcessed"; };
+  const std::string name() const override { return "SaveNexusProcessed"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "The SaveNexusProcessed algorithm will write the given Mantid "
@@ -46,16 +46,21 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  int version() const override { return 1; };
+  int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
     return {"SaveISISNexus", "SaveNexus", "LoadNexusProcessed"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
-  void saveSpectraMapNexus(
+  void saveSpectraDetectorMapNexus(
       const API::MatrixWorkspace &ws, ::NeXus::File *file,
-      const std::vector<int> &spec,
+      const std::vector<int> &wsIndices,
+      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+
+  void saveSpectrumNumbersNexus(
+      const API::MatrixWorkspace &ws, ::NeXus::File *file,
+      const std::vector<int> &wsIndices,
       const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
 protected:
@@ -68,8 +73,8 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
 
-  void getSpectrumList(std::vector<int> &spec,
-                       Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
+  void getWSIndexList(std::vector<int> &indices,
+                      Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
 
   template <class T>
   static void appendEventListData(const std::vector<T> &events, size_t offset,
@@ -88,12 +93,6 @@ private:
               const bool keepFile = false,
               boost::optional<size_t> entryNumber = boost::optional<size_t>());
 
-  /// The name and path of the input file
-  std::string m_filename;
-  /// The name and path of the input file
-  std::string m_entryname;
-  /// The title of the processed data section
-  std::string m_title;
   /// Pointer to the local workspace
   API::MatrixWorkspace_const_sptr m_inputWorkspace;
   /// Pointer to the local workspace, cast to EventWorkspace

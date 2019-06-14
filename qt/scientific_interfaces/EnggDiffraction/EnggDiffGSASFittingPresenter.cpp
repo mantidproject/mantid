@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffGSASFittingPresenter.h"
 #include "EnggDiffGSASRefinementMethod.h"
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 
 namespace {
 
@@ -14,8 +14,7 @@ std::string addRunNumberToGSASIIProjectFile(
     const std::string &filename,
     const MantidQt::CustomInterfaces::RunLabel &runLabel) {
   const auto dotPosition = filename.find_last_of(".");
-  return filename.substr(0, dotPosition) + "_" +
-         std::to_string(runLabel.runNumber) + "_" +
+  return filename.substr(0, dotPosition) + "_" + runLabel.runNumber + "_" +
          std::to_string(runLabel.bank) +
          filename.substr(dotPosition, filename.length());
 }
@@ -76,7 +75,6 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   std::vector<GSASIIRefineFitPeaksParameters> inputParams;
   std::vector<std::string> GSASIIProjectFiles;
   inputParams.reserve(runLabels.size());
-  GSASIIProjectFiles.reserve(runLabels.size());
 
   const auto refinementMethod = m_view->getRefinementMethod();
   const auto instParamFile = m_view->getInstrumentFileName();
@@ -86,6 +84,7 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   if (runLabels.size() == 1) {
     GSASIIProjectFiles = std::vector<std::string>({GSASIIProjectFile});
   } else {
+    GSASIIProjectFiles.reserve(runLabels.size());
     for (const auto &runLabel : runLabels) {
       GSASIIProjectFiles.emplace_back(
           addRunNumberToGSASIIProjectFile(GSASIIProjectFile, runLabel));
@@ -144,7 +143,7 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
     m_view->userError("Invalid run identifier",
                       "Unexpectedly tried to display fit results for invalid "
                       "run, run number = " +
-                          std::to_string(runLabel.runNumber) +
+                          runLabel.runNumber +
                           ", bank ID = " + std::to_string(runLabel.bank) +
                           ". Please contact the development team");
     return;
@@ -240,7 +239,7 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
     m_view->userError(
         "Invalid run selected for refinement",
         "Tried to run refinement on invalid focused run, run number " +
-            std::to_string(runLabel->runNumber) + " and bank ID " +
+            runLabel->runNumber + " and bank ID " +
             std::to_string(runLabel->bank) +
             ". Please contact the development team with this message");
     return;

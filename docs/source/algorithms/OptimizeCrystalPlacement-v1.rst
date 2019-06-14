@@ -54,16 +54,16 @@ Usage
 .. testcode:: ExOptimizeCrystalPlacement
 
     ws=LoadIsawPeaks("TOPAZ_3007.peaks")
-    LoadIsawUB(ws,"ls5637.mat")
+    LoadIsawUB(ws,"TOPAZ_3007.mat")
     wsd = OptimizeCrystalPlacement(ws)
-    (wsPeakOut,fitInfoTable,chi2overDoF,nPeaks,nParams,nIndexed,covrianceInfoTable) = OptimizeCrystalPlacement(ws)
+    (wsPeakOut,fitInfoTable,chi2overDoF,nPeaks,nParams,nIndexed,covrianceInfoTable) = OptimizeCrystalPlacement(ws,AdjustSampleOffsets=True)
     print("Chi2: {:.4f}".format(chi2overDoF))
 
 Output:
 
 .. testoutput:: ExOptimizeCrystalPlacement
 
-    Chi2: 0.0203
+    Chi2: 0.0003
 
 .. categories::
 

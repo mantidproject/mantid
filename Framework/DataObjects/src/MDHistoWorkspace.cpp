@@ -17,7 +17,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/scoped_array.hpp>
@@ -138,8 +138,10 @@ void MDHistoWorkspace::init(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
   std::vector<IMDDimension_sptr> dim2;
   dim2.reserve(dimensions.size());
-  for (auto &dimension : dimensions)
-    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimension));
+  std::transform(dimensions.cbegin(), dimensions.cend(),
+                 std::back_inserter(dim2), [](const auto dimension) {
+                   return boost::dynamic_pointer_cast<IMDDimension>(dimension);
+                 });
   this->init(dim2);
   m_nEventsContributed = 0;
 }
@@ -327,7 +329,7 @@ MDHistoWorkspace::getVertexesArray(size_t linearIndex,
       numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
   // The output vertexes coordinates
-  auto out = Kernel::make_unique<coord_t[]>(numDimensions * numVertices);
+  auto out = std::make_unique<coord_t[]>(numDimensions * numVertices);
   for (size_t i = 0; i < numVertices; ++i) {
     size_t outIndex = i * numDimensions;
     // Offset the 0th box by the position of this linear index, in each
@@ -455,7 +457,7 @@ MDHistoWorkspace::createIterators(
     if (function)
       clonedFunction = new Mantid::Geometry::MDImplicitFunction(*function);
 
-    out.push_back(Kernel::make_unique<MDHistoWorkspaceIterator>(
+    out.push_back(std::make_unique<MDHistoWorkspaceIterator>(
         this, clonedFunction, begin, end));
   }
   return out;
@@ -592,10 +594,9 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
     }
 
     ++it;
-    coord_t linePos = 0;
     for (; it != boundaries.cend(); ++it) {
       // This is our current position along the line
-      linePos = *it;
+      const coord_t linePos = *it;
 
       // This is the full position at this boundary
       VMD pos = start + (dir * linePos);

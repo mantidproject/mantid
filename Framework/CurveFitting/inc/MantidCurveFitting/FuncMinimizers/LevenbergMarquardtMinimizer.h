@@ -47,7 +47,7 @@ private:
   int hasConverged();
 
   /// GSL data container
-  GSL_FitData *m_data;
+  std::unique_ptr<GSL_FitData> m_data;
 
   /// GSL minimizer container
   gsl_multifit_function_fdf gslContainer;

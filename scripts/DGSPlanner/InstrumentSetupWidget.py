@@ -13,7 +13,7 @@ import numpy
 
 sys.path.append('..')
 #the following matplotlib imports cannot be placed before the setting of the backend, so we ignore flake8 warnings
-from MPLwidgets import * # noqa
+from mantidqt.MPLwidgets import * # noqa
 from matplotlib.figure import Figure # noqa
 from mpl_toolkits.mplot3d import Axes3D # noqa
 import matplotlib.pyplot # noqa
@@ -148,7 +148,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
 
 class InstrumentSetupWidget(QtWidgets.QWidget):
     #signal when things change and valid
-    changed=QtCore.pyqtSignal(dict)
+    changed=QtCore.Signal(dict)
 
     def __init__(self,parent=None):
         # pylint: disable=unused-argument,super-on-old-class

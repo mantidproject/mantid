@@ -8,9 +8,9 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -21,6 +21,7 @@ namespace Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HyspecScharpfCorrection)
@@ -53,7 +54,7 @@ void HyspecScharpfCorrection::init() {
   auto wsValidator = boost::make_shared<Mantid::Kernel::CompositeValidator>();
   wsValidator->add<Mantid::API::WorkspaceUnitValidator>("DeltaE");
   wsValidator->add<Mantid::API::InstrumentValidator>();
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace in units of energy transfer.");
 
@@ -73,7 +74,7 @@ void HyspecScharpfCorrection::init() {
       "If cosine of twice the "
       "Scharpf angle is closer to 0 than the precision, the intensities "
       "and errors will be set to 0");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -105,7 +106,7 @@ void HyspecScharpfCorrection::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<API::MatrixWorkspace>(*m_inputWS);
   }
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();

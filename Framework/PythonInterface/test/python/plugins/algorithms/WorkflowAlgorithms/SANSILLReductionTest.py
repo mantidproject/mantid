@@ -14,15 +14,23 @@ from mantid.simpleapi import SANSILLReduction, config, mtd
 class SANSILLReductionTest(unittest.TestCase):
 
     _facility = None
+    _instrument = None
 
     def setUp(self):
-        self._facility = config['default.facility']
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
+
+        self._facility = config['default.facility']
+        self._instrument = config['default.instrument']
+
         config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
 
     def tearDown(self):
-        config['default.facility'] = self._facility
+        if self._facility:
+            config['default.facility'] = self._facility
+        if self._instrument:
+            config['default.instrument'] = self._instrument
         mtd.clear()
 
     def test_absorber(self):
@@ -31,14 +39,16 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['Cd'], 'Absorber')
 
     def test_beam(self):
-        SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
+        SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db', FluxOutputWorkspace='Fl')
         self._check_output(mtd['Db'], True, 1, 128*128)
         self._check_process_flag(mtd['Db'], 'Beam')
         run = mtd['Db'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0048, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, -0.0027, delta=1e-4)
-        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 6618939, delta=1)
-        self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 8554, delta=1)
+        self._check_output(mtd['Fl'], False, 1, 128*128)
+        self._check_process_flag(mtd['Fl'], 'Beam')
+        self.assertAlmostEqual(mtd['Fl'].readY(0)[0], 6628249, delta=1)
+        self.assertAlmostEqual(mtd['Fl'].readE(0)[0], 8566, delta=1)
 
     def test_transmission(self):
         SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
@@ -73,26 +83,20 @@ class SANSILLReductionTest(unittest.TestCase):
 
     def test_beam_tof(self):
         # D33 VTOF
-        SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam')
+        SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam', FluxOutputWorkspace='flux')
         self._check_output(mtd['beam'], True, 30, 256*256)
         self._check_process_flag(mtd['beam'], 'Beam')
         run = mtd['beam'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0025, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, 0.0009, delta=1e-4)
-        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 33698, delta=1)
-        self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 16, delta=1)
+        self._check_output(mtd['flux'], False, 30, 256*256)
+        self._check_process_flag(mtd['flux'], 'Beam')
 
     def test_transmission_tof(self):
         # D33 VTOF
         SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam')
         SANSILLReduction(Run='093407', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
         self._check_output(mtd['ctr'], False, 75, 1)
-
-    def test_container_tof(self):
-        # D33 VTOF
-        SANSILLReduction(Run='093409', ProcessAs='Container', OutputWorkspace='can')
-        self._check_output(mtd['can'], True, 30, 256*256)
-        self._check_process_flag(mtd['can'], 'Container')
 
     def test_container_tof(self):
         # D33 VTOF

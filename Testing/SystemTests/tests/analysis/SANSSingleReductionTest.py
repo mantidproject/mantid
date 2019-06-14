@@ -33,7 +33,6 @@ class SANSSingleReductionTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("MoveWorkspace", False)
 
         load_alg.setProperty("SampleScatterWorkspace", EMPTY_NAME)
         load_alg.setProperty("SampleScatterMonitorWorkspace", EMPTY_NAME)
@@ -162,7 +161,6 @@ class SANSSingleReductionTest(unittest.TestCase):
         # COMPATIBILITY END
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         state = user_file_director.construct()
-        state.adjustment.show_transmission = True
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor, \

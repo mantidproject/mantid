@@ -10,7 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 
 using namespace Mantid::API;
 
@@ -103,13 +103,13 @@ void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {
 }
 
 void ALCPeakFittingPresenter::onFittedPeaksChanged() {
-  IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
+  IFunction_const_sptr fitted = m_model->fittedPeaks();
   auto dataWS = m_model->data();
-  if (fittedPeaks && dataWS) {
-    auto x = dataWS->x(0);
+  if (fitted && dataWS) {
+    const auto &x = dataWS->x(0);
     m_view->setFittedCurve(
-        *(QwtHelper::curveDataFromFunction(fittedPeaks, x.rawData())));
-    m_view->setFunction(fittedPeaks);
+        *(QwtHelper::curveDataFromFunction(fitted, x.rawData())));
+    m_view->setFunction(fitted);
   } else {
     m_view->setFittedCurve(*(QwtHelper::emptyCurveData()));
     m_view->setFunction(IFunction_const_sptr());
@@ -154,7 +154,7 @@ bool ALCPeakFittingPresenter::plotGuessOnGraph() {
   auto func = m_view->function("");
   auto dataWS = m_model->data();
   if (func && dataWS) {
-    auto xdata = dataWS->x(0);
+    const auto &xdata = dataWS->x(0);
     m_view->setFittedCurve(
         *(QwtHelper::curveDataFromFunction(func, xdata.rawData())));
     plotted = true;

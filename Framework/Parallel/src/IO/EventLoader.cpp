@@ -5,10 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/IO/EventLoader.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidParallel/IO/EventLoaderHelpers.h"
+#include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
 #include <H5Cpp.h>
+#include <thread>
 
 namespace Mantid {
 namespace Parallel {
@@ -39,7 +44,7 @@ makeAnyEventIdToBankMap(const std::string &filename,
   return idToBank;
 }
 
-/// Load events from given banks into event lists.
+/// Load events from given banks into event lists using MPI.
 void load(const Communicator &comm, const std::string &filename,
           const std::string &groupName,
           const std::vector<std::string> &bankNames,
@@ -50,6 +55,26 @@ void load(const Communicator &comm, const std::string &filename,
   load(readDataType(group, bankNames, "event_time_offset"), comm, group,
        bankNames, bankOffsets, std::move(eventLists));
 }
+
+/// Load events from given banks into event lists.
+void load(const std::string &filename, const std::string &groupname,
+          const std::vector<std::string> &bankNames,
+          const std::vector<int32_t> &bankOffsets,
+          std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
+          bool precalcEvents) {
+  auto concurencyNumber = PARALLEL_GET_MAX_THREADS;
+  auto numThreads = std::max<int>(concurencyNumber / 2, 1);
+  auto numProceses = std::max<int>(concurencyNumber / 2, 1);
+  std::string executableName =
+      Kernel::ConfigService::Instance().getPropertiesDir() +
+      "/MantidNexusParallelLoader";
+
+  MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()),
+                                 numProceses, numThreads, executableName,
+                                 precalcEvents);
+  loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
+}
+
 } // namespace EventLoader
 
 } // namespace IO

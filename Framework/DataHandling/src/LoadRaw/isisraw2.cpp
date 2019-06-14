@@ -8,7 +8,6 @@
 #include "byte_rel_comp.h"
 #include <cstdio>
 #include <exception>
-#include <iostream>
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"

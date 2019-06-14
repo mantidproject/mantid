@@ -13,19 +13,19 @@ Contains the Python wrapper class for the C++ instrument widget
 from __future__ import (absolute_import, unicode_literals)
 
 # 3rdparty imports
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.utils.qt import import_qt
-
-
 # import widget class from C++ wrappers
+from mantidqt.widgets.observers.observing_view import ObservingView
+
 InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
                              'InstrumentWidget')
 
 
-class InstrumentView(QWidget):
+class InstrumentView(QWidget, ObservingView):
     """
     Defines a Window wrapper for the instrument widget. Sets
     the Qt.Window flag and window title. Holds a reference
@@ -35,14 +35,27 @@ class InstrumentView(QWidget):
     _presenter = None
     _widget = None
 
-    def __init__(self, presenter, name, parent=None):
+    close_signal = Signal()
+
+    def __init__(self, parent, presenter, name):
         super(InstrumentView, self).__init__(parent)
-        self._presenter = presenter
+
+        self.widget = InstrumentWidget(name)
+
+        # used by the observers view to delete the ADS observer
+        self.presenter = presenter
 
         self.setWindowTitle(name)
         self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(InstrumentWidget(name))
+        layout.addWidget(self.widget)
         self.setLayout(layout)
+
+        self.close_signal.connect(self._run_close)
+
+    @Slot()
+    def _run_close(self):
+        self.close()

@@ -8,9 +8,9 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -27,6 +27,7 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ConvertToConstantL2)
@@ -43,10 +44,10 @@ void ConvertToConstantL2::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
 }
@@ -63,7 +64,7 @@ void ConvertToConstantL2::initWorkspaces() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
 
   m_wavelength = getRunProperty("wavelength");

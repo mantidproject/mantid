@@ -121,6 +121,8 @@ private:
     throw std::runtime_error(
         "Cloning of MockIEventWorkspace is not implemented.");
   }
+  MOCK_METHOD1(getSpectrumWithoutInvalidation,
+               Mantid::API::IEventList &(const std::size_t));
 };
 } // namespace
 

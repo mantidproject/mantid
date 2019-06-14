@@ -67,6 +67,7 @@ _translations = {
     'T Nielsen'               : 'Nielsen, Torben',
     'Karl Palmen'             : 'Palmen, Karl',
     'Peter Parker'            : 'Parker, Peter G.',
+    'Parker, Peter G'         : 'Parker, Peter G.',
     'Gesner Passos'           : 'Passos, Gesner',
     'Pete Peterson'           : 'Peterson, Peter F.',
     'Peter Peterson'          : 'Peterson, Peter F.',
@@ -176,14 +177,34 @@ _translations = {
     'Keith Butler'            : 'Butler, Keith T.',
     'fodblog'                 : 'Butler, Keith T.',
     'Marshall McDonnell'      : 'McDonnell, Marshall',
-    'McDonnell, Marshall T'      : 'McDonnell, Marshall',
+    'McDonnell, Marshall T'   : 'McDonnell, Marshall',
     'Neil Vaytet'             : 'Vaytet, Neil',
     'Sam'                     : 'Sam Jones',
     'Tom Jubb'                : 'Jubb, Tom',
     'T Jubb'                  : 'Jubb, Tom',
     'TWJubb'                  : 'Jubb, Tom',
     'Brendan Sullivan'        : 'Sullivan, Brendan',
-    'Joachim Coenen'          : 'Coenen, Joachim'
+    'Joachim Coenen'          : 'Coenen, Joachim',
+    'Alice Russell'           : 'Russell, Alice',
+    'Tom'                     : 'Titcombe, Tom',
+    'Tom Titcombe'            : 'Titcombe, Tom',
+    'Igor Gudich'             : 'Gudich, Igor',
+    'igudich'                 : 'Gudich, Igor',
+    'Ewan'                    : 'Cook, Ewan',
+    'Ewan Cook'               : 'Cook, Ewan',
+    'Lewis Edwards'           : 'Edwards, Lewis',
+    'Michael Turner'          : 'Turner, Michael',
+    'Bhuvan Bezawada'         : 'Bezawada, Bhuvan',
+    'Andre Bamidele'          : 'Bamidele, Andre',
+    'Robert Applin'           : 'Applin, Robert',
+    'robertapplin'            : 'Applin, Robert',
+    'Rob'                     : 'Applin, Robert',
+    'Rob Applin'              : 'Applin, Robert',
+    'SamJenkins1'             : 'Jenkins, Sam',
+    'Sam Jenkins'             : 'Jenkins, Sam',
+    'Samuel Jones'            : 'Jones, Sam',
+    'Harry Saunders'          : 'Saunders, Harry',
+    'Geish Miladinovic'       : 'Miladinovic, Geish'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -201,7 +222,8 @@ _blacklist = [
     'Bartomeu Llopis',
     'dpaj',
     'Daniel Pajerowski',
-    'thomueller'
+    'thomueller',
+    'luz.paz'
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,

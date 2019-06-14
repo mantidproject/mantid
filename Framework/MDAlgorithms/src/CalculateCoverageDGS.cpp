@@ -105,7 +105,7 @@ void CalculateCoverageDGS::cacheDimensionXValues() {
 /** Initialize the algorithm's properties.
  */
 void CalculateCoverageDGS::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Mantid::Kernel::Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "An input workspace.");
@@ -120,22 +120,22 @@ void CalculateCoverageDGS::init() {
   Q1[0] = 1.;
   Q2[1] = 1.;
   Q3[2] = 1.;
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "Q1Basis", std::move(Q1), mustBe3D->clone()),
+                  "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "Q2Basis", std::move(Q2), mustBe3D->clone()),
+                  "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      "Q3Basis", std::move(Q3), std::move(mustBe3D)),
+                  "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q1Basis", Q1, mustBe3D),
-      "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q2Basis", Q2, mustBe3D),
-      "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q3Basis", Q3, mustBe3D),
-      "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("IncidentEnergy", EMPTY_DBL(),
-                                             mustBePositive,
-                                             Mantid::Kernel::Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "IncidentEnergy", EMPTY_DBL(), std::move(mustBePositive),
+          Mantid::Kernel::Direction::Input),
       "Incident energy. If set, will override Ei in the input workspace");
 
   std::vector<std::string> options{"Q1", "Q2", "Q3", "DeltaE"};
@@ -156,7 +156,7 @@ void CalculateCoverageDGS::init() {
                     dim + " step size. If empty the dimension will be "
                           "integrated between minimum and maximum values");
   }
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Mantid::Kernel::Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
 }

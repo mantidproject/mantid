@@ -20,9 +20,7 @@
 #include "MantidGeometry/Instrument.h"
 
 #include "IO_MuonGrouping.h"
-#include "MantidQtWidgets/Common/MWDiag.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "MantidQtWidgets/Common/pythonCalc.h"
 #include "MuonAnalysisDataLoader.h"
 #include "MuonAnalysisHelper.h"
 

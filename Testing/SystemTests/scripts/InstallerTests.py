@@ -28,12 +28,14 @@ parser.add_argument('-o', dest='out2stdout', action='store_true',
                     help='Output to the screen instead of log files')
 parser.add_argument('-R', dest='test_regex', metavar='regexp', default=None,
                     help='Optionally only run the test matched by the regex')
+parser.add_argument("-E", dest="test_exclude", metavar="exclude", default=None,
+                    help="String specifying which tests to not run")
 parser.add_argument('--archivesearch', dest='archivesearch', action='store_true',
                     help='Turn on archive search for file finder')
 parser.add_argument('--exclude-in-pull-requests', dest="exclude_in_pr_builds",action="store_true",
                     help="Skip tests that are not run in pull request builds")
 log_levels = ['error', 'warning', 'notice', 'information', 'debug']
-parser.add_argument('-l', dest='log_level', metavar='level', default='notice',
+parser.add_argument('-l', dest='log_level', metavar='level', default='information',
                     choices=log_levels, help='Log level '+str(log_levels))
 options = parser.parse_args()
 
@@ -54,32 +56,34 @@ if options.doInstall:
     log("Installing package '%s'" % installer.mantidInstaller)
     try:
         installer.install()
-        log("Application path " + installer.mantidPlotPath)
+        log("Application path: %r" % installer.mantidPlotPath)
         installer.no_uninstall = False
     except Exception as err:
         scriptfailure("Installing failed. "+str(err))
 else:
     installer.no_uninstall = True
 
-try:
-    # Keep hold of the version that was run
-    version = run(installer.mantidPlotPath + ' -v')
-    version_tested = open(os.path.join(output_dir,'version_tested.log'),'w')
-    if version and len(version) > 0:
-        version_tested.write(version)
-    version_tested.close()
-except Exception as err:
-    scriptfailure('Version test failed: '+str(err), installer)
+# conda mantid-framework does not have mantid plot. skip these
+if not os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
+    try:
+        # Keep hold of the version that was run
+        version = run(installer.mantidPlotPath + ' -v')
+        version_tested = open(os.path.join(output_dir,'version_tested.log'),'w')
+        if version and len(version) > 0:
+            version_tested.write(version)
+        version_tested.close()
+    except Exception as err:
+        scriptfailure('Version test failed: '+str(err), installer)
 
-try:
-    # Now get the revision number/git commit ID (remove the leading 'g' that isn't part of it)
-    revision = run(installer.mantidPlotPath + ' -r').lstrip('g')
-    revision_tested = open(os.path.join(output_dir, 'revision_tested.log'), 'w')
-    if revision and len(version) > 0:
-        revision_tested.write(revision)
-    revision_tested.close()
-except Exception as err:
-    scriptfailure('Revision test failed: '+str(err), installer)
+    try:
+        # Now get the revision number/git commit ID (remove the leading 'g' that isn't part of it)
+        revision = run(installer.mantidPlotPath + ' -r').lstrip('g')
+        revision_tested = open(os.path.join(output_dir, 'revision_tested.log'), 'w')
+        if revision and len(version) > 0:
+            revision_tested.write(revision)
+        revision_tested.close()
+    except Exception as err:
+        scriptfailure('Revision test failed: '+str(err), installer)
 
 log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath,testRunErrPath))
 try:
@@ -89,6 +93,8 @@ try:
     run_test_cmd += " -j%i --quiet --output-on-failure" % options.ncores
     if options.test_regex is not None:
         run_test_cmd += " -R " + options.test_regex
+    if options.test_exclude is not None:
+        run_test_cmd += " -E " + options.test_exclude
     if options.archivesearch:
         run_test_cmd += ' --archivesearch'
     if options.exclude_in_pr_builds:

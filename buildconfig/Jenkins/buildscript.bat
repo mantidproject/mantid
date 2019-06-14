@@ -13,23 +13,27 @@ setlocal enableextensions enabledelayedexpansion
 call cmake.exe --version
 echo %sha1%
 
-:: Find the grep tool for later
-for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
-set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
-set GREP_EXE=%GIT_ROOT_DIR%\usr\bin\grep.exe
+:: Set cmake generator
+call %~dp0cmakegenerator.bat
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Environment setup
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Source the VS setup script
-set VS_VERSION=14
-:: 8.1 is backwards compatible with Windows 7. It allows us to target Windows 7
-:: when building on newer versions of Windows. This value must be supplied
-:: externally and cannot be supplied in the cmake configuration
-set SDK_VERSION=8.1
-call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64 %SDK_VERSION%
-set UseEnv=true
-set CM_GENERATOR=Visual Studio 14 2015 Win64
+:: Find grep
+for /f "delims=" %%I in ('where git') do (
+  @set _grep_exe=%%~dpI..\usr\bin\grep.exe
+  @echo Checking for grep at: !_grep_exe!
+  if EXIST "!_grep_exe!" (
+    goto :endfor
+  ) else (
+    @set _grep_exe=""
+  )
+)
+:endfor
+if !_grep_exe! == "" (
+  @echo Unable to find grep.exe
+  exit /b 1
+)
+@echo Using grep: !_grep_exe!
+
+:: ParaView version
 set PARAVIEW_DIR=%PARAVIEW_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -41,9 +45,17 @@ set PARAVIEW_DIR=%PARAVIEW_DIR%
 if EXIST %WORKSPACE%\external\src\ThirdParty\.git (
   cd %WORKSPACE%\external\src\ThirdParty
   git reset --hard HEAD
-  git clean -fdx
+  git clean -d -x --force
   cd %WORKSPACE%
 )
+
+set BUILD_DIR_REL=build
+set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
+
+:: Clean the source tree to remove stale configured files but make sure to
+:: leave external/ and the BUILD_DIR directory intact.
+:: There is a later check to see if this is a clean build and remove BUILD_DIR.
+git clean -d -x --force --exclude=external --exclude=%BUILD_DIR_REL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
@@ -85,15 +97,25 @@ if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
 :: For a clean build the entire thing is removed to guarantee it is clean. All
 :: other build types are assumed to be incremental and the following items
 :: are removed to ensure stale build objects don't interfere with each other:
-::   - those removed by git clean -fdx --exclude=build
 ::   - build/bin: if libraries are removed from cmake they are not deleted
 ::                   from bin and can cause random failures
 ::   - build/ExternalData/**: data files will change over time and removing
 ::                            the links helps keep it fresh
+::   - build/Testing/**: old ctest xml files will change over time and removing
+::                       the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set BUILD_DIR_REL=build
-set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
-call %~dp0setupcompiler.bat %BUILD_DIR%
+if EXIST %BUILD_DIR%\CMakeCache.txt (
+  call "%_grep_exe%" CMAKE_GENERATOR:INTERNAL %BUILD_DIR%\CMakeCache.txt > %BUILD_DIR%\cmake_generator.log
+  call "%_grep_exe%" -q "%CM_GENERATOR%" %BUILD_DIR%\cmake_generator.log
+  if ERRORLEVEL 1 (
+    set CLEANBUILD=yes
+    echo Previous build used a different compiler. Performing a clean build.
+  ) else (
+    set CLEANBUILD=no
+    echo Previous build used the same compiler. No need to clean.
+  )
+)
+
 
 if "!CLEANBUILD!" == "yes" (
   echo Removing build directory for a clean build
@@ -101,13 +123,11 @@ if "!CLEANBUILD!" == "yes" (
 )
 
 if EXIST %BUILD_DIR% (
-  git clean -fdx --exclude=external --exclude=%BUILD_DIR_REL%
-  rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
+  rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData %BUILD_DIR%\Testing
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
     rmdir /S /Q %BUILD_DIR%\eigen-prefix
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
-    rmdir /S /Q %BUILD_DIR%\python-xmlrunner-download %BUILD_DIR%\python-xmlrunner-src
   )
 ) else (
   md %BUILD_DIR%
@@ -165,15 +185,17 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=ON
 )
 
-call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=ON -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-call %BUILD_DIR%\buildenv.bat
-msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% Mantid.sln
+call %BUILD_DIR%\thirdpartypaths.bat
+cmake --build . -- /nologo /m:%BUILD_THREADS% /verbosity:minimal /p:Configuration=%BUILD_CONFIG%
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+cmake --build . --target AllTests -- /nologo /m:%BUILD_THREADS% /verbosity:minimal /p:Configuration=%BUILD_CONFIG%
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -183,13 +205,16 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: This prevents race conditions when creating the user config directory
 set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
-set CONFIGDIR=%APPDATA%\mantidproject\mantid
+set CONFIGDIR=%APPDATA%\mantidproject
 rmdir /S /Q %CONFIGDIR%
-mkdir %CONFIGDIR%
+:: remove old MantidPlot state (sets errorlevel on failure but we don't check so script continues)
+reg delete HKCU\Software\Mantid /f
+:: create the config directory to avoid any race conditions
+mkdir %CONFIGDIR%\mantid
 :: use a fixed number of openmp threads to avoid overloading the system
 echo MultiThreaded.MaxCores=2 > %USERPROPS%
 
-call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
+call ctest.exe -C %BUILD_CONFIG%  --no-compress-output -T Test -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -210,7 +235,7 @@ echo Note: not running doc-test target as it currently takes too long
 
 if "%BUILDPKG%" == "yes" (
   :: Build offline documentation
-  msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
+  cmake --build . --target docs-qthelp -- /p:Configuration=%BUILD_CONFIG%  /verbosity:minimal
   :: Ignore errors as the exit code of msbuild is wrong here.
   :: It always marks the build as a failure even though MantidPlot exits correctly
   echo Building package

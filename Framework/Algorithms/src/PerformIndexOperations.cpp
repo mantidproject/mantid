@@ -57,7 +57,7 @@ using VecCommands = std::vector<boost::shared_ptr<Command>>;
  */
 class NullCommand : public Command {
   bool isValid() const override { return false; }
-  MatrixWorkspace_sptr execute(MatrixWorkspace_sptr) const override {
+  MatrixWorkspace_sptr execute(MatrixWorkspace_sptr /*input*/) const override {
     throw std::runtime_error(
         "Should not be attempting ::execute on a NullCommand");
   }
@@ -269,13 +269,13 @@ const std::string PerformIndexOperations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PerformIndexOperations::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input to processes workspace.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
                   "Processing instructions. See full instruction list.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output processed workspace");
 }

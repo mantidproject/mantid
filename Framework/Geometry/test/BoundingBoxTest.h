@@ -46,13 +46,13 @@ public:
   test_That_Construction_With_An_Invalid_Point_Does_Not_Create_A_Bounding_Box() {
     // xmax < xmin
     TS_ASSERT_THROWS(BoundingBox(1.0, 4.0, 5.0, 3.0, 2.0, 3.0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // ymax < ymin
     TS_ASSERT_THROWS(BoundingBox(1.0, 0.5, 5.0, 3.0, 2.0, 3.0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // zmax < zmin
     TS_ASSERT_THROWS(BoundingBox(1.0, 4.0, 5.0, 3.0, 2.0, 6.0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_That_Default_Construction_Gives_A_Null_Bounding_Box() {
@@ -154,17 +154,25 @@ public:
         true);
 
     // Mix
-    TS_ASSERT_EQUALS(
-        bbox.doesLineIntersect(Track(V3D(-5.0, -1.0, 0.0), V3D(1.0, 1.0, 0.0))),
-        true);
-    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
-                         Track(V3D(-5.0, -1.0, -0.5), V3D(1.0, 1.0, 1.0))),
+    V3D dir(1., 1., 0);
+    dir.normalize();
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-5.0, -1.0, 0.0), dir)),
                      true);
-    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
-                         Track(V3D(10.0, 10.0, 0.0), V3D(-1.0, -0.4, 0.0))),
+    dir = {
+        1.,
+        1.,
+        1.,
+    };
+    dir.normalize();
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-5.0, -1.0, -0.5), dir)),
+                     true);
+    dir = {-1., -0.4, 0.};
+    dir.normalize();
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(10.0, 10.0, 0.0), dir)),
                      false);
-    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
-                         Track(V3D(-10.0, -10.0, 0.0), V3D(1.0, 1.0, 0.0))),
+    dir = {1., 1., 0.};
+    dir.normalize();
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-10.0, -10.0, 0.0), dir)),
                      true); // Hits box at edge
   }
 
@@ -276,9 +284,9 @@ public:
 
     TS_ASSERT_THROWS(
         bbox.doesLineIntersect(V3D(-5.0, -1.0, 0.0), V3D(1.0, 1.0, 0.0)),
-        Kernel::Exception::NotImplementedError);
+        const Kernel::Exception::NotImplementedError &);
     TS_ASSERT_THROWS(bbox.isPointInside(V3D(-5.0, -1.0, 0.0)),
-                     Kernel::Exception::NotImplementedError);
+                     const Kernel::Exception::NotImplementedError &);
   }
   void testBBAlignedToNewCoordinateSystemWorksCorrect() {
     BoundingBox bbox(3.0, 4.0, 5.5, 1.0, 1.0, 1.5);

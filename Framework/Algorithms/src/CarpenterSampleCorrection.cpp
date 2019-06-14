@@ -47,10 +47,10 @@ void CarpenterSampleCorrection::init() {
       "CalculateCarpenterSampleCorrection");
   algCalcCarpenter->initialize();
 
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
@@ -79,13 +79,8 @@ void CarpenterSampleCorrection::exec() {
   auto absWksp = boost::dynamic_pointer_cast<MatrixWorkspace>(absPtr);
   auto msWksp = boost::dynamic_pointer_cast<MatrixWorkspace>(msPtr);
 
-  // Clone input -> to apply corrections
-  MatrixWorkspace_sptr outputWksp = getProperty("OutputWorkspace");
-
   EventWorkspace_sptr inputWkspEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(inputWksp);
-
-  outputWksp = inputWksp->clone();
 
   // Inverse the absorption correction ( 1/A)
   const int64_t NUM_HIST =
@@ -107,7 +102,7 @@ void CarpenterSampleCorrection::exec() {
   // Apply the correction to the sample workspace
   //   = (1/A - MS) * wksp
   //   = wksp/A - MS * wksp
-  outputWksp = multiply(inputWksp, correctionWksp);
+  MatrixWorkspace_sptr outputWksp = multiply(inputWksp, correctionWksp);
 
   // Output workspace
   if (inputWkspEvent) {

@@ -81,12 +81,12 @@ int LoadILLIndirect2::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLIndirect2::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "File path of the Data file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "File path of the Data file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -289,7 +289,7 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
   for (size_t im = 0; im < m_numberOfMonitors; im++) {
 
     if (im > 0) {
-      m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
+      m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
     }
 
     // Assign Y
@@ -370,7 +370,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(
   // Add also "Facility", as asked
   runDetails.addProperty("Facility", std::string("ILL"));
 
-  stat = NXclose(&nxfileID);
+  NXclose(&nxfileID);
 }
 
 /**

@@ -32,9 +32,7 @@ public:
   PoissonErrorsTest() {
     inputProp1 = "InputWorkspace";
     inputProp2 = "CountsWorkspace";
-    ;
     outputProp = "OutputWorkspace";
-    ;
   }
 
   void testInit() {
@@ -43,9 +41,9 @@ public:
     TS_ASSERT(alg.isInitialized());
     // Setting properties to input workspaces that don't exist throws
     TS_ASSERT_THROWS(alg.setPropertyValue(inputProp1, "test_in21"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue(inputProp2, "test_in22"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(outputProp, "test_out2"));
   }
 
@@ -276,26 +274,26 @@ private:
                      size_t ws2Index) {
     // printf("I=%d\tws2Index=%d\n",i,ws2Index);
     double sig1 =
-        work_in1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    double sig2 = work_in2->dataY(
+        work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    double sig2 = work_in2->y(
         ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
-    double sig2e = work_in2->dataE(
+    double sig2e = work_in2->e(
         ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
     double sig3 =
-        work_out1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
+        work_out1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
     TS_ASSERT_DELTA(
-        work_in1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()],
-        work_out1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()],
+        work_in1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
+        work_out1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
         0.0001);
     TS_ASSERT_DELTA(sig1, sig3, 0.0001);
     // double err1 =
-    // work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
+    // work_in1->e(i/work_in1->blocksize())[i%work_in1->blocksize()];
     // double err2 =
-    // work_in2->dataE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
+    // work_in2->e(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
     double err3((sig2e / sig2) * sig3);
     TS_ASSERT_DELTA(
         err3,
-        work_out1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()],
+        work_out1->e(i / work_in1->blocksize())[i % work_in1->blocksize()],
         0.0001);
   }
 

@@ -32,17 +32,19 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
  */
 void ApplyDeadTimeCorr::init() {
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<EqualBinSizesValidator>(0.5)),
-                  "The name of the input workspace containing measured counts");
-
-  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "DeadTimeTable", "", Direction::Input),
-                  "Name of the Dead Time Table");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<EqualBinSizesValidator>(0.5)),
+      "The name of the input workspace containing measured counts");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "DeadTimeTable", "", Direction::Input),
+      "Name of the Dead Time Table");
+
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "The name of the output workspace containing corrected counts");
 }
@@ -75,9 +77,10 @@ void ApplyDeadTimeCorr::exec() {
       duplicate->setProperty<Workspace_sptr>(
           "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWs));
       duplicate->execute();
-      Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
       MatrixWorkspace_sptr outputWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+          boost::dynamic_pointer_cast<MatrixWorkspace>(
+              static_cast<Workspace_sptr>(
+                  duplicate->getProperty("OutputWorkspace")));
 
       // Presumed to be the same for all data
       double timeBinWidth(inputWs->x(0)[1] - inputWs->x(0)[0]);
@@ -93,14 +96,16 @@ void ApplyDeadTimeCorr::exec() {
             const auto &yIn = inputWs->y(index);
             auto &yOut = outputWs->mutableY(index);
             for (size_t j = 0; j < yIn.size(); ++j) {
-              const double temp(1 - yIn[j] * (deadTimeRow.Double(1) /
-                                              (timeBinWidth * numGoodFrames)));
-              if (temp != 0) {
-                yOut[j] = yIn[j] / temp;
+              const double correction(1 - yIn[j] *
+                                              (deadTimeRow.Double(1) /
+                                               (timeBinWidth * numGoodFrames)));
+              if (correction != 0) {
+                yOut[j] = yIn[j] / correction;
               } else {
-                g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width "
-                                 "is currently ("
-                              << temp << "). Can't divide by this amount.\n";
+                g_log.error()
+                    << "1 - MeasuredCount * (Deadtime/TimeBin width "
+                       "is currently ("
+                    << correction << "). Can't divide by this amount.\n";
 
                 throw std::invalid_argument("Can't divide by 0");
               }

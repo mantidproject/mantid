@@ -8,14 +8,13 @@
 #include "MantidKernel/Matrix.h"
 
 // PropertyWithValue implementation
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
 #include <NeXusFile.hpp>
 
 namespace Mantid {
 namespace Kernel {
-// Forward declare
-class PropertyManager;
 
 #define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                   \
   template <>                                                                  \
@@ -54,8 +53,6 @@ template class MANTID_KERNEL_DLL
     PropertyWithValue<std::vector<std::vector<int32_t>>>;
 template class MANTID_KERNEL_DLL
     PropertyWithValue<std::vector<std::vector<std::string>>>;
-template class MANTID_KERNEL_DLL
-    PropertyWithValue<boost::shared_ptr<IValidator>>;
 template class MANTID_KERNEL_DLL
     PropertyWithValue<boost::shared_ptr<PropertyManager>>;
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)

@@ -7,10 +7,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-
-from PyQt4 import QtGui, QtCore
+from qtpy import QtCore, QtWidgets
 from six import with_metaclass
-from . import ui_diagnostics_page
+
+from mantidqt.utils.qt import load_ui
 from sans.gui_logic.gui_common import (load_file, GENERIC_SETTINGS)
 
 try:
@@ -19,8 +19,10 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+Ui_DiagnosticsPage, _ = load_ui(__file__, "diagnostics_page.ui")
 
-class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
+
+class DiagnosticsPage(QtWidgets.QWidget, Ui_DiagnosticsPage):
     class DiagnosticsPageListener(with_metaclass(ABCMeta, object)):
         """
         Defines the elements which a presenter can listen to for the beam centre finder
@@ -197,3 +199,16 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
     @detector.setter
     def detector(self, value):
         self.detector_combo_box.currentText(value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Activate buttons
+    # ------------------------------------------------------------------------------------------------------------------
+    def enable_integrals(self):
+        self.horizontal_button.setEnabled(True)
+        self.vertical_button.setEnabled(True)
+        self.time_button.setEnabled(True)
+
+    def disable_integrals(self):
+        self.horizontal_button.setEnabled(False)
+        self.vertical_button.setEnabled(False)
+        self.time_button.setEnabled(False)

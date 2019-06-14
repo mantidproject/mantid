@@ -62,10 +62,10 @@ public:
   void testInvalidInputs() {
     SmoothData smooth2;
     TS_ASSERT_THROWS_NOTHING(smooth2.initialize());
-    TS_ASSERT_THROWS(smooth2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(smooth2.execute(), const std::runtime_error &);
     // Can't set Npoints to value less than 3
     TS_ASSERT_THROWS(smooth2.setPropertyValue("NPoints", "1"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(
         smooth2.setPropertyValue("InputWorkspace", "noisy"));

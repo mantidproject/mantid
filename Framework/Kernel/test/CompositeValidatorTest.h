@@ -89,6 +89,27 @@ public:
     TS_ASSERT_EQUALS(comp.isValid(70), "");  // In range of val2
     TS_ASSERT_DIFFERS(comp.isValid(55), ""); // Not in range
   }
+
+  void test_ContainsReturnsTrueIfListContainsType() {
+    CompositeValidator comp;
+    auto val1 = boost::make_shared<BoundedValidator<int>>(1, 50);
+    auto val2 = boost::make_shared<BoundedValidator<double>>(60, 100);
+    comp.add(val1);
+    comp.add(val2);
+
+    TS_ASSERT(comp.contains<BoundedValidator<int>>());
+    TS_ASSERT(comp.contains<BoundedValidator<double>>());
+  }
+
+  void test_ContainsReturnsFalseIfListDoesNotContainType() {
+    CompositeValidator comp;
+    auto val1 = boost::make_shared<BoundedValidator<int>>(1, 50);
+    auto val2 = boost::make_shared<BoundedValidator<double>>(60, 100);
+    comp.add(val1);
+    comp.add(val2);
+
+    TS_ASSERT_EQUALS(false, comp.contains<StringListValidator>());
+  }
 };
 
 #endif /* MANTID_KERNEL_COMPOSITEVALIDATORTEST_H_ */

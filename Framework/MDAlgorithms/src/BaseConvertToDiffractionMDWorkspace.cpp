@@ -45,32 +45,33 @@ public:
  */
 void BaseConvertToDiffractionMDWorkspace::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace. If the workspace "
                   "already exists, then the events will be added to it.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("Append", false, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("Append", false,
+                                                Direction::Input),
       "Append events to the output workspace. The workspace is replaced if "
       "unchecked.");
 
   // Disabled for this version
-  declareProperty(make_unique<PropertyWithValue<bool>>("ClearInputWorkspace",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "ClearInputWorkspace", false, Direction::Input),
                   "Clearing the events from the input workspace during "
                   "conversion (to save memory) is not supported by algorithm "
                   "v2");
   // disable property on interface
   this->setPropertySettings("ClearInputWorkspace",
-                            make_unique<DisabledProperty>());
+                            std::make_unique<DisabledProperty>());
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("OneEventPerBin", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("OneEventPerBin", true,
+                                                Direction::Input),
       "Use the histogram representation (event for event workspaces).\n"
       "One MDEvent will be created for each histogram bin (even empty ones).\n"
       "Warning! This can use significantly more memory!");
@@ -87,8 +88,8 @@ void BaseConvertToDiffractionMDWorkspace::init() {
       "the sample (taking out goniometer rotation).\n"
       "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("LorentzCorrection",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "LorentzCorrection", false, Direction::Input),
                   "Correct the weights of events by multiplying by the Lorentz "
                   "formula: sin(theta)^2 / lambda^4");
 
@@ -97,7 +98,7 @@ void BaseConvertToDiffractionMDWorkspace::init() {
                                20 /*MaxRecursionDepth*/);
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1),
+      std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 1 = one level of splitting, etc.\n"
       "Be careful using this since it can quickly create a huge number of "

@@ -71,7 +71,7 @@ void NormaliseByPeakArea::init() {
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
 
@@ -85,20 +85,20 @@ void NormaliseByPeakArea::init() {
       "If true all spectra on the Y-space, fitted & symmetrised workspaces "
       "are summed in quadrature to produce the final result");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Input workspace normalised by the fitted peak area");
-  declareProperty(make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace",
+                                                        "", Direction::Output),
                   "Input workspace converted to units of Y-space");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("FittedWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("FittedWorkspace", "",
+                                            Direction::Output),
       "Output from fit of the single mass peakin y-space. The output units are "
       "in momentum (A^-1)");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("SymmetrisedWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("SymmetrisedWorkspace", "",
+                                            Direction::Output),
       "The input data symmetrised about Y=0.  The output units are in momentum "
       "(A^-1)");
 }
@@ -168,14 +168,14 @@ void NormaliseByPeakArea::createOutputWorkspaces(
   if (m_sumResults) {
     // Copy over xvalues & assign "high" initial error values to simplify
     // symmetrisation calculation
-    double high(1e6);
+    constexpr double high(1e6);
 
     m_yspaceWS->setSharedX(0, yspaceIn->sharedX(0));
     m_fittedWS->setSharedX(0, yspaceIn->sharedX(0));
     m_symmetrisedWS->setSharedX(0, yspaceIn->sharedX(0));
     m_yspaceWS->mutableE(0) = high;
-    m_fittedWS->mutableE(0) = high;
-    m_symmetrisedWS->mutableE(0) = high;
+    m_fittedWS->setSharedE(0, m_yspaceWS->sharedE(0));
+    m_symmetrisedWS->setSharedE(0, m_yspaceWS->sharedE(0));
   }
 
   setUnitsToMomentum(m_yspaceWS);

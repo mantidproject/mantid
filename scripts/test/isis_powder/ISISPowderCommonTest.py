@@ -170,13 +170,13 @@ class ISISPowderCommonTest(unittest.TestCase):
         number_of_expected_banks = 5
         ws_to_split = mantid.CreateSampleWorkspace(XMin=0, XMax=2, BankPixelWidth=1,
                                                    NumBanks=number_of_expected_banks)
-        input_name = ws_to_split.getName()
+        input_name = ws_to_split.name()
 
         extracted_banks = common.extract_ws_spectra(ws_to_split=ws_to_split)
         self.assertEqual(len(extracted_banks), number_of_expected_banks)
         for i, ws in enumerate(extracted_banks):
             expected_name = input_name + '-' + str(i + 1)
-            self.assertEqual(expected_name, ws.getName())
+            self.assertEqual(expected_name, ws.name())
 
     def test_generate_run_numbers(self):
         # Mantid handles most of this for us
@@ -538,7 +538,7 @@ class ISISPowderCommonTest(unittest.TestCase):
                     'Height': 4.0,
                     'Radius': 3.0,
                     'Center': [0.5, 1.0, -3.2]}
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_generate_sample_material(self):
         # Create mock SampleDetails
@@ -554,7 +554,7 @@ class ISISPowderCommonTest(unittest.TestCase):
                     'SampleNumberDensity': 1.5,
                     'AttenuationXSection': 123.0,
                     'ScatteringXSection': 456.0}
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
 
 class ISISPowderMockInst(object):

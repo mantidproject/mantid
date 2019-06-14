@@ -337,28 +337,28 @@ public:
       std::vector<double> y{1.0, 2.0};
       fun.setAttributeValue("FWHMX", x);
       fun.setAttributeValue("FWHMY", y);
-      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+      TS_ASSERT_THROWS(fun.buildTargetFunction(), const std::runtime_error &);
     }
     {
       std::vector<double> x{0.0, 50.0};
       std::vector<double> y{1.0, 2.0, 3.0};
       fun.setAttributeValue("FWHMX", x);
       fun.setAttributeValue("FWHMY", y);
-      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+      TS_ASSERT_THROWS(fun.buildTargetFunction(), const std::runtime_error &);
     }
     {
       std::vector<double> x;
       std::vector<double> y{1.0, 2.0};
       fun.setAttributeValue("FWHMX", x);
       fun.setAttributeValue("FWHMY", y);
-      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+      TS_ASSERT_THROWS(fun.buildTargetFunction(), const std::runtime_error &);
     }
     {
       std::vector<double> x{0.0, 10.0, 50.0};
       std::vector<double> y;
       fun.setAttributeValue("FWHMX", x);
       fun.setAttributeValue("FWHMY", y);
-      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+      TS_ASSERT_THROWS(fun.buildTargetFunction(), const std::runtime_error &);
     }
   }
 
@@ -874,8 +874,8 @@ private:
     FunctionDomain1DVector x(x0, x1, nbins);
     FunctionValues y(x);
     fun.function(x, y);
-    ws->dataX(0) = x.toVector();
-    ws->dataY(0) = y.toVector();
+    ws->mutableX(0) = x.toVector();
+    ws->mutableY(0) = y.toVector();
     return ws;
   }
 };

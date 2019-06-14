@@ -139,7 +139,7 @@ Testing
    RunningTheUnitTests
    DebuggingUnitTests
    UnitTestGoodPractice
-   IndividualTicketTesting
+   ReviewingAPullRequest
    WritingPerformanceTests
    SystemTests
    DataFilesForTesting
@@ -154,8 +154,8 @@ Testing
 :doc:`UnitTestGoodPractice`
    Guidance on writing good unit tests.
 
-:doc:`IndividualTicketTesting`
-   What to expect and inspect when reviewing an individual contribution to mantid.
+:doc:`ReviewingAPullRequest`
+   What to do when reviewing an individual contribution to mantid.
 
 :doc:`WritingPerformanceTests`
    A walk through of how to write a performance test.
@@ -179,6 +179,7 @@ GUI Development
    GUIDesignGuidelines
    MVPTutorial/index
    QtDesignerForPython
+   MantidUsedIconsTable
 
 :doc:`GUIDesignGuidelines`
    Gives some guidelines to consider when developing a new graphical user interface.
@@ -188,6 +189,25 @@ GUI Development
 
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
+
+:doc:`MantidUsedIconsTable`
+   The currently used Icons in Mantid and what they are used for.
+
+=========
+Workbench
+=========
+
+The workbench is the new PyQt-based GUI that will be the primary interface for
+interacting with the mantid framework. The plotting is provided by
+`matplotlib <https://matplotlib.org/>`_. It will eventually replace MantidPlot.
+
+.. toctree::
+   :hidden:
+
+   Workbench/index
+
+:doc:`Workbench Documentation <Workbench/index>`
+   The Index of the workbench specific files.
 
 ===================
 Component Overviews
@@ -205,9 +225,10 @@ Component Overviews
    ISISSANSReductionBackend
    LoadAlgorithmHook
    Logging
+   MatplotlibInCpp
    MultiThreadingInAlgorithms
    PythonVSCppAlgorithms
    RemoteJobSubmissionAPI
-   Workbench
+   Widgets/Plotting
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation

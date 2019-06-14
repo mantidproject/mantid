@@ -7,24 +7,23 @@
 #include "IndirectFitDataPresenter.h"
 #include "IndirectAddWorkspaceDialog.h"
 
-#include "MantidKernel/make_unique.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IndirectFittingModel *model,
-                                                   IndirectFitDataView *view)
-    : IndirectFitDataPresenter(
-          model, view,
-          Mantid::Kernel::make_unique<IndirectDataTablePresenter>(
-              model, view->getDataTable())) {}
+                                                   IIndirectFitDataView *view)
+    : IndirectFitDataPresenter(model, view,
+                               std::make_unique<IndirectDataTablePresenter>(
+                                   model, view->getDataTable())) {}
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(
-    IndirectFittingModel *model, IndirectFitDataView *view,
+    IndirectFittingModel *model, IIndirectFitDataView *view,
     std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
     : m_model(model), m_view(view),
       m_tablePresenter(std::move(tablePresenter)) {
+  observeReplace(true);
+
   connect(m_view, SIGNAL(singleDataViewSelected()), this,
           SLOT(setModelFromSingleData()));
   connect(m_view, SIGNAL(multipleDataViewSelected()), this,
@@ -37,8 +36,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
 
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
           SLOT(setModelWorkspace(const QString &)));
-  connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
-          SIGNAL(singleSampleLoaded()));
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
           SIGNAL(dataChanged()));
 
@@ -65,7 +62,9 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
                                       std::size_t)));
 }
 
-IndirectFitDataView const *IndirectFitDataPresenter::getView() const {
+IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
+
+IIndirectFitDataView const *IndirectFitDataPresenter::getView() const {
   return m_view;
 }
 
@@ -87,6 +86,36 @@ void IndirectFitDataPresenter::setResolutionWSSuffices(
 void IndirectFitDataPresenter::setResolutionFBSuffices(
     const QStringList &suffices) {
   m_view->setResolutionFBSuffices(suffices);
+}
+
+void IndirectFitDataPresenter::setMultiInputSampleWSSuffixes() {
+  if (m_addWorkspaceDialog)
+    m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
+}
+
+void IndirectFitDataPresenter::setMultiInputSampleFBSuffixes() {
+  if (m_addWorkspaceDialog)
+    m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
+}
+
+void IndirectFitDataPresenter::setMultiInputResolutionWSSuffixes() {
+  if (m_addWorkspaceDialog)
+    setMultiInputResolutionWSSuffixes(m_addWorkspaceDialog.get());
+}
+
+void IndirectFitDataPresenter::setMultiInputResolutionFBSuffixes() {
+  if (m_addWorkspaceDialog)
+    setMultiInputResolutionFBSuffixes(m_addWorkspaceDialog.get());
+}
+
+void IndirectFitDataPresenter::setMultiInputResolutionFBSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  UNUSED_ARG(dialog);
+}
+
+void IndirectFitDataPresenter::setMultiInputResolutionWSSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  UNUSED_ARG(dialog);
 }
 
 void IndirectFitDataPresenter::setStartX(double startX, std::size_t dataIndex,
@@ -134,11 +163,30 @@ void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
 }
 
 void IndirectFitDataPresenter::setModelWorkspace(const QString &name) {
+  observeReplace(false);
   setSingleModelData(name.toStdString());
+  observeReplace(true);
 }
 
 void IndirectFitDataPresenter::loadSettings(const QSettings &settings) {
   m_view->readSettings(settings);
+}
+
+void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
+                                             const Workspace_sptr &workspace) {
+  UNUSED_ARG(workspace)
+  if (m_model->hasWorkspace(workspaceName) &&
+      !m_view->isMultipleDataTabSelected())
+    selectReplacedWorkspace(QString::fromStdString(workspaceName));
+}
+
+void IndirectFitDataPresenter::selectReplacedWorkspace(
+    const QString &workspaceName) {
+  if (m_view->isSampleWorkspaceSelectorVisible()) {
+    setModelWorkspace(workspaceName);
+    emit dataChanged();
+  } else
+    m_view->setSampleWorkspaceSelectorIndex(workspaceName);
 }
 
 UserInputValidator &
@@ -147,22 +195,32 @@ IndirectFitDataPresenter::validate(UserInputValidator &validator) {
 }
 
 void IndirectFitDataPresenter::showAddWorkspaceDialog() {
-  const auto dialog = getAddWorkspaceDialog(m_view->parentWidget());
-  dialog->setWSSuffices(m_view->getSampleWSSuffices());
-  dialog->setFBSuffices(m_view->getSampleFBSuffices());
-  dialogExecuted(dialog.get(),
-                 static_cast<QDialog::DialogCode>(dialog->exec()));
-}
-
-void IndirectFitDataPresenter::dialogExecuted(IAddWorkspaceDialog const *dialog,
-                                              QDialog::DialogCode result) {
-  if (result == QDialog::Accepted)
-    addData(dialog);
+  if (!m_addWorkspaceDialog)
+    m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
+  m_addWorkspaceDialog->updateSelectedSpectra();
+  setMultiInputSampleWSSuffixes();
+  setMultiInputSampleFBSuffixes();
+  m_addWorkspaceDialog->show();
+  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
+  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this,
+          SLOT(closeDialog()));
 }
 
 std::unique_ptr<IAddWorkspaceDialog>
 IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  return Mantid::Kernel::make_unique<AddWorkspaceDialog>(parent);
+  return std::make_unique<AddWorkspaceDialog>(parent);
+}
+
+void IndirectFitDataPresenter::addData() {
+  addData(m_addWorkspaceDialog.get());
+}
+
+void IndirectFitDataPresenter::closeDialog() {
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this,
+             SLOT(addData()));
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this,
+             SLOT(closeDialog()));
+  m_addWorkspaceDialog->close();
 }
 
 void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
@@ -194,6 +252,8 @@ void IndirectFitDataPresenter::addModelData(const std::string &name) {
     m_model->addWorkspace(name);
   } catch (const std::runtime_error &ex) {
     displayWarning("Unable to load workspace:\n" + std::string(ex.what()));
+  } catch (const std::invalid_argument &ex) {
+    displayWarning("Invalid workspace:\n" + std::string(ex.what()));
   }
 }
 

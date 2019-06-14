@@ -7,10 +7,13 @@
 #ifndef MPLCPPTESTGLOBALINITIALIZATION_H
 #define MPLCPPTESTGLOBALINITIALIZATION_H
 
-#include "cxxtest/GlobalFixture.h"
+#include <cxxtest/GlobalFixture.h>
 
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include <QApplication>
 
 /**
@@ -22,9 +25,22 @@
 class PythonInterpreter : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
+    using Mantid::Kernel::ConfigService;
+    namespace Python = MantidQt::Widgets::Common::Python;
+
     Py_Initialize();
     PyEval_InitThreads();
     Mantid::PythonInterface::importNumpy();
+    // Insert the directory of the properties file as a sitedir
+    // to ensure the built copy of mantid gets picked up
+    const Python::Object siteModule{
+        Python::NewRef(PyImport_ImportModule("site"))};
+    siteModule.attr("addsitedir")(ConfigService::Instance().getPropertiesDir());
+
+    // Use Agg backend for matplotlib
+    auto mpl = Python::NewRef(PyImport_ImportModule("matplotlib"));
+    mpl.attr("use")("Agg");
+
     return Py_IsInitialized();
   }
 
@@ -51,9 +67,8 @@ public:
 class QApplicationHolder : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
-    int argc(0);
-    char **argv = {};
-    m_app = new QApplication(argc, argv);
+    m_app = new QApplication(m_argc, m_argv);
+
     return true;
   }
 
@@ -62,7 +77,10 @@ public:
     return true;
   }
 
-private:
+  int m_argc = 1;
+  GNU_DIAG_OFF("pedantic")
+  char *m_argv[1] = {"MplCppTest"};
+  GNU_DIAG_ON("pedantic")
   QApplication *m_app;
 };
 

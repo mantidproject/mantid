@@ -18,13 +18,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/**
-  A presenter.
-*/
-class DLLExport JumpFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INDIRECT_DLL JumpFitDataPresenter
+    : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  JumpFitDataPresenter(JumpFitModel *model, IndirectFitDataView *view,
+  JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter);
 
@@ -32,22 +30,22 @@ private slots:
   void hideParameterComboBoxes();
   void showParameterComboBoxes();
   void updateAvailableParameters();
-  void updateAvailableParameters(int typeIndex);
+  void updateAvailableParameterTypes();
+  void updateAvailableParameters(const QString &type);
   void updateParameterSelectionEnabled();
   void setParameterLabel(const QString &parameter);
+  void dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *dialog,
+                                  const std::string &type);
   void setDialogParameterNames(JumpFitAddWorkspaceDialog *dialog,
                                const std::string &workspace);
-  void setDialogParameterNames(JumpFitAddWorkspaceDialog *dialog,
-                               int parameterType);
-  void setActiveParameterType(int type);
+  void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
   void setSingleModelSpectrum(int index);
 
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
-  void dialogExecuted(IAddWorkspaceDialog const *dialog,
-                      QDialog::DialogCode result) override;
+  void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(JumpFitAddWorkspaceDialog *dialog);
@@ -56,7 +54,10 @@ private:
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
 
-  int m_activeParameterType;
+  void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
+  void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
+
+  std::string m_activeParameterType;
   std::size_t m_dataIndex;
 
   QComboBox *m_cbParameterType;

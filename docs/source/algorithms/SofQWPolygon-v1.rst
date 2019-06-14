@@ -14,16 +14,17 @@ of spectrum number/**energy transfer** to
 the intensity as a function of momentum transfer 
 :math:`Q` and energy transfer :math:`\Delta E`. 
 
-The rebinning is done as a weighted sum of overlapping polygons.
-The polygon in :math:`Q-\Delta E` space is calculated from the
-energy bin boundaries and the detector scattering angle :math:`2\theta`.
-The detectors (pixels) are assumed to be uniform, and characterised
-by a single angular width :math:`\Delta2\theta`. The signal and error
-of the rebinned data (in :math:`Q-\Delta E` space) is then the
-sum of the contributing pixels in each bin weighted by their fractional
-overlap area. Unlike the more precise :ref:`algm-SofQWNormalisedPolygon`
-algorithm, these fractional weights are not thereafter retained in the
-workspace produced by this algorithm.
+The rebinning is done as a weighted sum of overlapping polygons. The polygon 
+in :math:`Q-\Delta E` space is calculated from the energy bin boundaries and 
+the detector scattering angle :math:`2\theta`. The detectors (pixels) are 
+assumed to be uniform, and characterised by a single angular width 
+:math:`\Delta2\theta`. This is calculated from the nominal :math:`2\theta` of 
+each detector; this algorithm does not utilize the `DetectorTwoThetaRanges` 
+optional input property. The signal and error of the rebinned data (in 
+:math:`Q-\Delta E` space) is then the sum of the contributing pixels in each 
+bin weighted by their fractional overlap area. Unlike the more precise 
+:ref:`algm-SofQWNormalisedPolygon` algorithm, these fractional weights are not 
+thereafter retained in the workspace produced by this algorithm.
 
 See :ref:`algm-SofQWCentre` for centre-point binning.
 Alternatively, see :ref:`algm-SofQWNormalisedPolygon` for a

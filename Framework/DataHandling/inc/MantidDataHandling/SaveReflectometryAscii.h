@@ -10,7 +10,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -60,10 +59,13 @@ private:
   bool writeString(bool write, std::string s);
   /// Print a string value to file
   void outputval(std::string val);
-  /// Retrieve sample log information
-  std::string sampleInfo(const std::string &logName);
+  /// Retrieve sample log value
+  std::string sampleLogValue(const std::string &logName);
+  /// Retrieve sample log unit
+  std::string sampleLogUnit(const std::string &logName);
   /// Write one header line
-  void writeInfo(const std::string logName, const std::string logValue = "");
+  void writeInfo(const std::string logName,
+                 const std::string logNameFixed = "");
   /// Write header
   void header();
   /// Determine the separator

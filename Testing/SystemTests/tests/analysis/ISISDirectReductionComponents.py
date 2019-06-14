@@ -79,9 +79,9 @@ class ISIS_ReductionWebLike(systemtesting.MantidSystemTest):
         # tolerance defined outside of init
 #pylint: disable=W0201
         self.tolerance = 1e-6
-        # tolerance_is_reller defined outside of init
+        # tolerance_is_rel_err defined outside of init
 #pylint: disable=W0201
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -201,7 +201,7 @@ class ISISLoadFilesMER(systemtesting.MantidSystemTest):
         propman.ei_mon2_spec = [ 69638,69639,69640,69641]
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(mon_ws is not None)
+        self.assertNotEqual(mon_ws, None)
 
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
@@ -213,7 +213,7 @@ class ISISLoadFilesMER(systemtesting.MantidSystemTest):
         propman.sample_run  = 6398
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(mon_ws is not None)
+        self.assertNotEqual(mon_ws, None)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69641)
@@ -223,7 +223,7 @@ class ISISLoadFilesMER(systemtesting.MantidSystemTest):
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue('SR_MER018492' in mtd)
-        self.assertTrue(mon_ws is not None)
+        self.assertNotEqual(mon_ws, None)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69641)
@@ -241,7 +241,7 @@ class ISISLoadFilesMER(systemtesting.MantidSystemTest):
         propman.load_monitors_with_workspace = False
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(mon_ws is not None)
+        self.assertNotEqual(mon_ws, None)
         self.assertTrue('SR_MER018492_monitors' in mtd)
 
         ws = PropertyManager.sample_run.get_workspace()
@@ -299,7 +299,7 @@ class ISISLoadFilesLET(systemtesting.MantidSystemTest):
         self.assertEqual(propman.ei_mon1_spec,40966)
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(mon_ws is not None)
+        self.assertNotEqual(mon_ws, None)
 
         self.assertTrue(isinstance(ws,IEventWorkspace))
         self.assertEqual(ws.getNumberHistograms(),40960)

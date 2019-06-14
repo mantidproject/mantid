@@ -25,10 +25,18 @@ also loaded using :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
 **Monitors** are loaded using :ref:`LoadNexusMonitors
 <algm-LoadNexusMonitors>`.
 
-**Instrument geometry** is loaded using :ref:`LoadIDFFromNexus
-<algm-LoadIDFFromNexus>`. If the instrument geometry is not in the
-file :ref:`LoadInstrument <algm-LoadInstrument>` is used.
+**Instrument geometry**
 
+There are a series of approaches for extracting the instrument geometry. 
+These follow the escalation path as follows:
+
+- Tries to load embedded instrument_xml from the NXinstrument if present 
+  using :ref:`LoadIDFFromNexus <algm-LoadIDFFromNexus>`.
+- Else tries to load embedded nexus geometry from the NXinstrument if present
+- Else tries to load the instrument using the name extracted from NXinstrument 
+
+The latter two possibilities are achieved via 
+:ref:`LoadInstrument <algm-LoadInstrument>`
 
 Optional properties
 ###################
@@ -107,6 +115,22 @@ Here are some tables that show it in more detail:
 |                              | ``isis_vms_compat``                       |                                     |
 |                              | else sample not loaded                    |                                     |
 +------------------------------+-------------------------------------------+-------------------------------------+
+
+Invalid Period Logs Error
+#########################
+
+There is an issue specific to ISIS, particularly on long runs, where noise on data collection instruments can change the period
+of the data. This can cause the period associated with certain data points to exceed the total number of periods we expect.
+
+LoadEventNeXus compares the total number of periods we expect, which can be found in the **periods/number** attribute of the run,
+and the greatest period number found in **framelog/period_log/value** attribute of the data. If they do not match, an error message
+is raised which explains this problem, and loading of the data will be unsuccessful.
+
+In this case, the data is fundamentally corrupted, so Mantid does not know how to correct this automatically. If you only expect 1 period, there is a script
+in the script repository, *user/TomTitcombe/correct_period_logs.py*, which will change all the periods in **framelog/period_log/value** to 1.
+
+If you expect more than 1 periods, there is currently no solution script available through Mantid. You should contact the Mantid team to discuss
+the problem and possible solutions.
 
 Sample Object
 '''''''''''''

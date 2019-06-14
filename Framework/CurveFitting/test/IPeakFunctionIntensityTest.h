@@ -75,6 +75,9 @@ public:
         double newIntensity = newIntensities[j];
         double intensityRatio = newIntensity / oldIntensity;
 
+        std::cout << "[Testing] " << m_peakFunctions[j]->name() << ":"
+                  << "\n";
+
         TSM_ASSERT_DELTA(
             "ITERATION " + DBL2STR(i) + ", " + m_peakFunctions[j]->name() +
                 ": Height was increased from " + DBL2STR(oldHeight) + " to " +
@@ -121,10 +124,16 @@ private:
       // for Ikeda-Carpenter it's not allowed to set Fwhm
       try {
         peak->setFwhm(parameters.fwhm);
-      } catch (std::invalid_argument) {
+      } catch (const std::invalid_argument &) {
       }
 
       peak->setHeight(parameters.height);
+
+      // PeudoVoigt requires an explicit set for mixing parameters
+      try {
+        peak->setParameter("Mixing", 0.5);
+      } catch (const std::invalid_argument &) {
+      }
     }
   }
 

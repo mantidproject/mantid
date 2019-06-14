@@ -126,7 +126,7 @@ class SANSFunctionsTest(unittest.TestCase):
         # Assert
         run = workspace.run()
         self.assertTrue(run.hasProperty(log_name))
-        self.assertTrue(run.getProperty(log_name).value == log_value)
+        self.assertEqual(run.getProperty(log_name).value,  log_value)
 
     def test_that_sample_log_raises_for_non_string_type_arguments(self):
         # Arrange
@@ -176,7 +176,7 @@ class SANSFunctionsTest(unittest.TestCase):
         # Act
         output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB)
         # Assert
-        self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+        self.assertEqual("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37",  output_workspace)
 
     def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace(self):
         # Arrange
@@ -278,16 +278,16 @@ class SANSFunctionsTest(unittest.TestCase):
 
     def test_that_sanitises_instrument_names(self):
         name1 = sanitise_instrument_name("LOQ_trans")
-        self.assertTrue(LOQ == name1)
+        self.assertEqual(name1, LOQ)
 
         name2 = sanitise_instrument_name("sans2d")
-        self.assertTrue(SANS2D == name2)
+        self.assertEqual(name2, SANS2D)
 
         name3 = sanitise_instrument_name("__LArMOR_")
-        self.assertTrue(LARMOR == name3)
+        self.assertEqual(name3, LARMOR)
 
         name4 = sanitise_instrument_name("OThER")
-        self.assertTrue("OThER" == name4)
+        self.assertEqual(name4, "OThER")
 
     def test_that_can_find_can_reduction_if_it_exists(self):
         # Arrange
@@ -305,12 +305,12 @@ class SANSFunctionsTest(unittest.TestCase):
                                                                               reduction_mode=ISISReductionMode.LAB)  # noqa
 
         # Assert
-        self.assertTrue(workspace is not None)
-        self.assertTrue(workspace.name() == AnalysisDataService.retrieve("test_ws").name())
-        self.assertTrue(workspace_count is not None)
-        self.assertTrue(workspace_count.name() == AnalysisDataService.retrieve("test_ws_count").name())
-        self.assertTrue(workspace_norm is not None)
-        self.assertTrue(workspace_norm.name() == AnalysisDataService.retrieve("test_ws_norm").name())
+        self.assertNotEqual(workspace, None)
+        self.assertEqual(workspace.name(),  AnalysisDataService.retrieve("test_ws").name())
+        self.assertNotEqual(workspace_count, None)
+        self.assertEqual(workspace_count.name(),  AnalysisDataService.retrieve("test_ws_count").name())
+        self.assertNotEqual(workspace_norm, None)
+        self.assertEqual(workspace_norm.name(),  AnalysisDataService.retrieve("test_ws_norm").name())
 
         # Clean up
         SANSFunctionsTest._remove_workspaces()
@@ -332,9 +332,9 @@ class SANSFunctionsTest(unittest.TestCase):
             get_reduced_can_workspace_from_ads(state, output_parts=False, reduction_mode=ISISReductionMode.LAB)
 
         # Assert
-        self.assertTrue(workspace is None)
-        self.assertTrue(workspace_count is None)
-        self.assertTrue(workspace_norm is None)
+        self.assertEqual(workspace, None)
+        self.assertEqual(workspace_count, None)
+        self.assertEqual(workspace_norm, None)
 
         # Clean up
         SANSFunctionsTest._remove_workspaces()
@@ -354,22 +354,22 @@ class SANSFunctionsTest(unittest.TestCase):
                                                                                              DetectorType.LAB))
 
     def test_that_converts_detector_name_to_type(self):
-        self.assertTrue(convert_bank_name_to_detector_type_isis("rEar-detector") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("MAIN-detector-BANK") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("DeTectorBench") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("rear") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("MAIN") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("FRoNT-DETECTOR") is DetectorType.HAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("HaB") is DetectorType.HAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("front") is DetectorType.HAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("rEar-detector"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("MAIN-detector-BANK"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("DeTectorBench"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("rear"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("MAIN"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("FRoNT-DETECTOR"), DetectorType.HAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("HaB"), DetectorType.HAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("front"), DetectorType.HAB)
         self.assertRaises(RuntimeError, convert_bank_name_to_detector_type_isis, "test")
 
     def test_that_gets_facility(self):
-        self.assertTrue(get_facility(SANSInstrument.SANS2D) is SANSFacility.ISIS)
-        self.assertTrue(get_facility(SANSInstrument.LOQ) is SANSFacility.ISIS)
-        self.assertTrue(get_facility(SANSInstrument.LARMOR) is SANSFacility.ISIS)
-        self.assertTrue(get_facility(SANSInstrument.ZOOM) is SANSFacility.ISIS)
-        self.assertTrue(get_facility(SANSInstrument.NoInstrument) is SANSFacility.NoFacility)
+        self.assertEqual(get_facility(SANSInstrument.SANS2D), SANSFacility.ISIS)
+        self.assertEqual(get_facility(SANSInstrument.LOQ), SANSFacility.ISIS)
+        self.assertEqual(get_facility(SANSInstrument.LARMOR), SANSFacility.ISIS)
+        self.assertEqual(get_facility(SANSInstrument.ZOOM), SANSFacility.ISIS)
+        self.assertEqual(get_facility(SANSInstrument.NoInstrument), SANSFacility.NoFacility)
 
     def test_that_diagnostic_parser_produces_correct_list(self):
         string_to_parse = '8-11, 12:15, 5, 7:9'

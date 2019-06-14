@@ -20,7 +20,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
 
 #include <H5Cpp.h>
 #include <Poco/Path.h>
@@ -100,10 +99,10 @@ LoadILLDiffraction::LoadILLDiffraction()
  * Initialize the algorithm's properties.
  */
 void LoadILLDiffraction::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "File path of the data file to load");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "File path of the data file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
@@ -113,8 +112,8 @@ void LoadILLDiffraction::init() {
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("AlignTubes", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
+                                                Direction::Input),
       "Apply vertical and horizontal alignment of tubes as defined in IPF");
 }
 
@@ -248,7 +247,7 @@ void LoadILLDiffraction::loadMetaData() {
 
   if (nxStat != NX_ERROR) {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
-    nxStat = NXclose(&nxHandle);
+    NXclose(&nxHandle);
   }
 
   if (mutableRun.hasProperty("Detector.calibration_file")) {
@@ -440,8 +439,11 @@ void LoadILLDiffraction::calculateRelativeRotations(
   double firstTubeRotationAngle =
       firstTubePosition.angle(V3D(0, 0, 1)) * RAD_TO_DEG;
 
+  // note that for D20 we have to subtract the offset here
+  // unlike in the static detector case, because in the transform
+  // below, we take (angle - firstTubeRotatingAngle)
   if (m_instName == "D20") {
-    firstTubeRotationAngle += m_offsetTheta;
+    firstTubeRotationAngle -= m_offsetTheta;
   } else if (m_instName == "D2B") {
     firstTubeRotationAngle = -firstTubeRotationAngle;
     std::transform(tubeRotations.begin(), tubeRotations.end(),
@@ -514,8 +516,8 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                                                   const NXDouble &scan,
                                                   const NXFloat &twoTheta0) {
 
-  std::vector<double> axis = getAxis(scan);
-  std::vector<double> monitor = getMonitor(scan);
+  const std::vector<double> axis = getAxis(scan);
+  const std::vector<double> monitor = getMonitor(scan);
 
   // Assign monitor counts
   m_outWorkspace->mutableX(0) = axis;
@@ -591,12 +593,12 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
       const std::string scanVarProp =
           boost::algorithm::to_lower_copy(m_scanVar[i].property);
       const std::string propName = scanVarName + "." + scanVarProp;
-      auto property = Kernel::make_unique<TimeSeriesProperty<double>>(propName);
+      auto property = std::make_unique<TimeSeriesProperty<double>>(propName);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));
       }
-      mutableRun.addLogData(std::move(property));
+      mutableRun.addLogData(std::move(property), true);
     }
   }
 }
@@ -717,12 +719,14 @@ LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
  */
 void LoadILLDiffraction::resolveScanType() {
   ScanType result = NoScan;
-  for (const auto &scanVar : m_scanVar) {
-    if (scanVar.scanned == 1) {
-      result = OtherScan;
-      if (scanVar.name == "2theta") {
-        result = DetectorScan;
-        break;
+  if (m_numberScanPoints != 1) {
+    for (const auto &scanVar : m_scanVar) {
+      if (scanVar.scanned == 1) {
+        result = OtherScan;
+        if (scanVar.name == "2theta") {
+          result = DetectorScan;
+          break;
+        }
       }
     }
   }

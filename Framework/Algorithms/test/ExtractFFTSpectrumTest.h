@@ -62,7 +62,7 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.execute(),
-                     std::runtime_error); // check it does output error
+                     const std::runtime_error &); // check it does output error
     TS_ASSERT(!alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
@@ -87,7 +87,7 @@ public:
     TS_ASSERT_EQUALS(inputWS->blocksize(), outputWS->blocksize());
 
     // Units ( Axis 1 should be the same, Axis 0 should be "Time/ns"
-    TS_ASSERT_EQUALS(inputWS->getAxis(1)->unit(), outputWS->getAxis(1)->unit());
+    TS_ASSERT(*inputWS->getAxis(1)->unit() == *outputWS->getAxis(1)->unit());
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Time");
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "ns");
   }

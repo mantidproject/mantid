@@ -7,12 +7,12 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 import numpy as np
-from scipy.constants import m_n, h
+from scipy.constants import m_n, h, physical_constants
 import os
 import sys
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     FileProperty, FileAction
-from mantid.kernel import Direction, StringListValidator, DateAndTime, IntBoundedValidator
+from mantid.kernel import Direction, StringListValidator, DateAndTime, IntBoundedValidator, FloatBoundedValidator
 
 from dnsdata import DNSdata
 
@@ -64,6 +64,9 @@ class LoadDNSLegacy(PythonAlgorithm):
 
         self.declareProperty(name="ElasticChannel",defaultValue=0,validator=IntBoundedValidator(lower=0),
                              doc="Time channel number where elastic peak is observed. Only for TOF data.")
+
+        self.declareProperty(name="Wavelength",defaultValue=0.0,validator=FloatBoundedValidator(lower=0.0),
+                             doc="Wavelength in nm. If 0 will be read from data file.")
         return
 
     def get_polarisation_table(self):
@@ -113,6 +116,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         filename = self.getPropertyValue("Filename")
         outws_name = self.getPropertyValue("OutputWorkspace")
         norm = self.getPropertyValue("Normalization")
+        wavelength = self.getProperty("Wavelength").value
 
         # load data array from the given file
         data_array = np.loadtxt(filename)
@@ -132,6 +136,13 @@ class LoadDNSLegacy(PythonAlgorithm):
             self.log().error(message)
             raise RuntimeError(message)
 
+        if wavelength < 0.01:
+            wavelength = metadata.wavelength
+
+        # calculate incident energy, since given in the data file is wrong
+        velocity = h/(m_n*wavelength*1e-10)   # m/s
+        incident_energy = 0.5e+03*m_n*velocity*velocity/physical_constants['electron volt'][0]  # meV
+
         tmp = api.LoadEmptyInstrument(InstrumentName='DNS')
         self.instrument = tmp.getInstrument()
         api.DeleteWorkspace(tmp)
@@ -148,7 +159,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         arr = data_array[0:ndet, 1:]
         if metadata.tof_channel_number < 2:
             dataX = np.zeros(2*ndet)
-            dataX.fill(metadata.wavelength + 0.00001)
+            dataX.fill(wavelength + 0.00001)
             dataX[::2] -= 0.000002
         else:
             unitX="TOF"
@@ -163,7 +174,6 @@ class LoadDNSLegacy(PythonAlgorithm):
             # channel width
             dt = metadata.tof_channel_width*dt_factor
             # calculate tof1
-            velocity = h/(m_n*metadata.wavelength*1e-10)   # m/s
             tof1 = 1e+06*l1/velocity        # microseconds
             self.log().debug("TOF1 = {} microseconds".format(tof1))
             self.log().debug("Delay time = {} microsecond".format(metadata.tof_delay_time))
@@ -242,7 +252,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         api.RotateInstrumentComponent(outws, "bank0", X=0, Y=1, Z=0, Angle=metadata.deterota)
         # add sample log Ei and wavelength
         logs["names"].extend(["Ei", "wavelength"])
-        logs["values"].extend([metadata.incident_energy, metadata.wavelength])
+        logs["values"].extend([incident_energy, wavelength])
         logs["units"].extend(["meV", "Angstrom"])
 
         # add other sample logs

@@ -103,7 +103,7 @@ public:
 
     // Check that unregistered class request throws
     TS_ASSERT_THROWS(factory.create("fdsfds", false),
-                     Mantid::Kernel::Exception::NotFoundError)
+                     const Mantid::Kernel::Exception::NotFoundError &)
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(product.get()));
     factory.unsubscribe("MockLiveListener");
   }
@@ -139,7 +139,8 @@ public:
     EXPECT_CALL(*product, connect(testing::_))
         .WillOnce(testing::Return(false /*cannot connect*/));
     Kernel::ConfigService::Instance().setFacility("TEST");
-    TS_ASSERT_THROWS(factory.create("MINITOPAZ", true), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create("MINITOPAZ", true),
+                     const std::runtime_error &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(product.get()));
     // Now test that it doesn't throw if we ask not to connect
     EXPECT_CALL(*product, connect(testing::_)).Times(0);
@@ -164,7 +165,7 @@ public:
     Mantid::Kernel::DynamicFactory<ILiveListener> &f =
         LiveListenerFactory::Instance();
     TS_ASSERT_THROWS(f.createUnwrapped(""),
-                     Mantid::Kernel::Exception::NotImplementedError)
+                     const Mantid::Kernel::Exception::NotImplementedError &)
     factory.unsubscribe("MockLiveListener");
   }
 };

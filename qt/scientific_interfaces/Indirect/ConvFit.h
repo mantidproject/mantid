@@ -24,35 +24,26 @@ class DLLExport ConvFit : public IndirectFitAnalysisTab {
 public:
   ConvFit(QWidget *parent = nullptr);
 
+  std::string tabName() const override { return "ConvFit"; }
+
+  bool hasResolution() const override { return true; }
+
 protected slots:
   void setModelResolution(const QString &resolutionName);
   void runClicked();
-  void saveClicked();
-  void plotClicked();
-  void updatePlotOptions() override;
   void fitFunctionChanged();
 
 protected:
-  bool shouldEnablePlotResult() override { return true; };
-
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
-
   void setRunIsRunning(bool running) override;
+  void setRunEnabled(bool enable) override;
 
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setPlotResultIsPlotting(bool plotting);
-
   std::string fitTypeString() const;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;
-
   // ShortHand Naming for fit functions
   QHash<QString, std::string> m_fitStrings;
   ConvFitModel *m_convFittingModel;

@@ -24,7 +24,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
-#include <MantidHistogramData/LinearGenerator.h>
+#include "MantidHistogramData/LinearGenerator.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -237,8 +237,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 2);
 
     // peak 0:
-    auto p0_x = peaksws->x(0);
-    auto p0_y = peaksws->y(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
@@ -250,8 +250,8 @@ public:
     TS_ASSERT_DELTA(p0_y[800], 10.0, 1.0E-4);
 
     // peak 2:
-    auto p1_x = peaksws->x(1);
-    auto p1_y = peaksws->y(1);
+    const auto &p1_x = peaksws->x(1);
+    const auto &p1_y = peaksws->y(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[400], 20.0, 1.0E-4);
 
@@ -311,8 +311,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 5);
 
     // Peak 0:
-    auto p0_x = peaksws->x(0);
-    auto p0_y = peaksws->y(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[50], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[50], 5.0, 1.0E-4);
 
@@ -324,8 +324,8 @@ public:
     TS_ASSERT_DELTA(p0_y[350], 10.0, 1.0E-4);
 
     // Peak 2:
-    auto p1_x = peaksws->x(2);
-    auto p1_y = peaksws->y(2);
+    const auto &p1_x = peaksws->x(2);
+    const auto &p1_y = peaksws->y(2);
     TS_ASSERT_DELTA(p1_x[150], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[150], 20.0, 1.0E-4);
 
@@ -385,8 +385,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 2);
 
     // peak 0:
-    auto p0_x = peaksws->x(0);
-    auto p0_y = peaksws->y(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 10.0, 1.0E-4);
 
@@ -395,8 +395,8 @@ public:
     TS_ASSERT_DELTA(p0_y[800], 20.0, 1.0E-4);
 
     // peak 2:
-    auto p1_x = peaksws->x(1);
-    auto p1_y = peaksws->y(1);
+    const auto &p1_x = peaksws->x(1);
+    const auto &p1_y = peaksws->y(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[400], 24.0, 1.0E-4);
 
@@ -455,8 +455,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 1);
 
     // peak 0:
-    auto p0_x = peaksws->x(0);
-    auto p0_y = peaksws->y(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
@@ -514,8 +514,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 1);
 
     // peak 0:
-    auto p0_x = peaksws->x(0);
-    auto p0_y = peaksws->y(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 

@@ -15,6 +15,8 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -32,7 +34,22 @@ public:
   void setUp() override {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+
+    m_oldFacility = ConfigService::Instance().getFacility().name();
     ConfigService::Instance().setFacility("ILL");
+
+    m_oldInstrument = ConfigService::Instance().getInstrument().name();
+    ConfigService::Instance().setString("default.instrument", "");
+  }
+
+  void tearDown() override {
+    if (!m_oldFacility.empty()) {
+      ConfigService::Instance().setFacility(m_oldFacility);
+    }
+    if (!m_oldInstrument.empty()) {
+      ConfigService::Instance().setString("default.instrument",
+                                          m_oldInstrument);
+    }
   }
 
   void test_Init() {
@@ -212,6 +229,29 @@ public:
         "4.8\n2017-Feb-15 08:59:02.423509996  5\n";
 
     TS_ASSERT_EQUALS(omega->value(), omegaTimeSeriesValue)
+  }
+
+  void test_D20_detector_scan_offset() {
+    // Checks the 2theta0 for a D20 detector scan
+    LoadILLDiffraction alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "129080"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_outWS");
+    TS_ASSERT(outputWS)
+
+    const auto detectorInfo = outputWS->detectorInfo();
+    const auto indexOfFirstDet = detectorInfo.indexOf(1);
+    const V3D position =
+        detectorInfo.position(std::make_pair(indexOfFirstDet, 0));
+    double r, theta, phi;
+    position.getSpherical(r, theta, phi);
+    TS_ASSERT_DELTA(theta, 5.825, 0.001);
+    TS_ASSERT_LESS_THAN(position.X(), 0.);
   }
 
   void test_D20_multifile() {
@@ -400,6 +440,8 @@ public:
 
 private:
   const double RAD_2_DEG = 180.0 / M_PI;
+  std::string m_oldFacility;
+  std::string m_oldInstrument;
 };
 
 #endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_ */

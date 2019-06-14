@@ -12,7 +12,7 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/shared_ptr.hpp>
 #include <memory>
 #include <vector>
@@ -54,7 +54,7 @@ makeRenderingMesh(const Adaptee &adaptee) {
     }
     virtual ~Adapter() {}
   };
-  return Kernel::make_unique<Adapter>(adaptee);
+  return std::make_unique<Adapter>(adaptee);
 }
 } // namespace detail
 
@@ -105,9 +105,9 @@ public:
                         std::vector<uint32_t> &&faces);
   /// return the actual type and points of one of the "standard" objects,
   /// cuboid/cone/cyl/sphere
-  void GetObjectGeom(detail::ShapeInfo::GeometryShape &mytype,
-                     std::vector<Kernel::V3D> &vectors, double &myradius,
-                     double &myheight) const;
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vector, double &innerRadius,
+                     double &radius, double &height) const;
   void setShapeInfo(detail::ShapeInfo &&shapeInfo);
 };
 

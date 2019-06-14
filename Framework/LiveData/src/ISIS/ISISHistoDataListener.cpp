@@ -31,7 +31,6 @@ GNU_DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 
 #include <algorithm>
@@ -56,14 +55,14 @@ ISISHistoDataListener::ISISHistoDataListener()
     : LiveListener(), isInitilized(false), m_daeHandle(nullptr),
       m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList"),
+      std::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList"),
       "An optional list of spectra to load. If blank, all "
       "available spectra will be loaded.");
 
   auto validator = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
   validator->setLower(1);
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList", validator),
+      std::make_unique<Kernel::ArrayProperty<int>>("PeriodList", validator),
       "An optional list of periods to load. If blank, all "
       "available periods will be loaded.");
 }

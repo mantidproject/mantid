@@ -34,7 +34,6 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 
 #include <fstream>
-#include <iostream>
 
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>
@@ -82,37 +81,37 @@ FitPowderDiffPeaks::FitPowderDiffPeaks()
  */
 void FitPowderDiffPeaks::init() {
   // Input data workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "Anonymous", Direction::Input),
                   "Input workspace for data (diffraction pattern). ");
 
   // Output workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputWorkspace", "Anonymous2", Direction::Output),
                   "Output Workspace2D for the fitted peaks. ");
 
   // Input/output peaks table workspace
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "BraggPeakParameterWorkspace", "AnonymousPeak", Direction::Input),
       "TableWorkspace containg all peaks' parameters.");
 
   // Input and output instrument parameters table workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InstrumentParameterWorkspace", "AnonymousInstrument",
                       Direction::InOut),
                   "TableWorkspace containg instrument's parameters.");
 
   // Workspace to output fitted peak parameters
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputBraggPeakParameterWorkspace", "AnonymousOut2",
           Direction::Output),
       "Output TableWorkspace containing the fitted peak parameters for each "
       "peak.");
 
   // Data workspace containing fitted peak parameters
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                       "OutputBraggPeakParameterDataWorkspace", "ParameterData",
                       Direction::Output),
                   "Output Workspace2D containing fitted peak parameters for "
@@ -120,7 +119,7 @@ void FitPowderDiffPeaks::init() {
 
   // Zscore table workspace
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "OutputZscoreWorkspace", "ZscoreTable", Direction::Output),
       "Output TableWorkspace containing the Zscore of the fitted "
       "peak parameters. ");
@@ -171,7 +170,7 @@ void FitPowderDiffPeaks::init() {
       "are correlated by an analytical function");
 
   // Option for peak's HKL for minimum d-spacing
-  auto arrayprop = Kernel::make_unique<ArrayProperty<int>>("MinimumHKL", "");
+  auto arrayprop = std::make_unique<ArrayProperty<int>>("MinimumHKL", "");
   declareProperty(std::move(arrayprop),
                   "Miller index of the left most peak (peak with "
                   "minimum d-spacing) to be fitted. ");
@@ -183,7 +182,7 @@ void FitPowderDiffPeaks::init() {
 
   // Right most peak property
   auto righthklprop =
-      Kernel::make_unique<ArrayProperty<int>>("RightMostPeakHKL", "");
+      std::make_unique<ArrayProperty<int>>("RightMostPeakHKL", "");
   declareProperty(std::move(righthklprop),
                   "Miller index of the right most peak. "
                   "It is only required and used in RobustFit mode.");
@@ -816,11 +815,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
       finalchi2 = chi2compf;
     } else {
       finalchi2 = bestchi2;
-      stringstream dbss;
-      dbss << "Fit peak-background composite function failed! "
-           << "Need to find out how this case peak value is changed from best "
-              "fit.";
-      g_log.warning(dbss.str());
+      g_log.warning("Fit peak-background composite function failed! Need to "
+                    "find out how this case peak value is changed from best "
+                    "fit.");
     }
   } else {
     // Flag is turned off
@@ -1159,34 +1156,33 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
 
     if (indexpeakgroup.size() == 1) {
       // Fit a single peak
-      size_t &ipeak = indexpeakgroup[0];
+      const size_t ifit = indexpeakgroup[0];
       double peakfitleftbound, peakfitrightbound;
-      calculatePeakFitBoundary(ipeak, ipeak, peakfitleftbound,
-                               peakfitrightbound);
+      calculatePeakFitBoundary(ifit, ifit, peakfitleftbound, peakfitrightbound);
 
-      g_log.information() << "\n[T] Fit Peak Indexed " << ipeak << " ("
-                          << m_vecPeakFunctions.size() - 1 - ipeak
+      g_log.information() << "\n[T] Fit Peak Indexed " << ifit << " ("
+                          << m_vecPeakFunctions.size() - 1 - ifit
                           << ")\t----------------------------------\n";
 
       BackToBackExponential_sptr thispeak =
-          m_vecPeakFunctions[ipeak].second.second;
+          m_vecPeakFunctions[ifit].second.second;
       bool annihilatedpeak;
-      m_goodFit[ipeak] =
+      m_goodFit[ifit] =
           fitSinglePeakConfident(thispeak, backgroundfunction, peakfitleftbound,
                                  peakfitrightbound, chi2, annihilatedpeak);
-      m_peakFitChi2[ipeak] = chi2;
+      m_peakFitChi2[ifit] = chi2;
       if (annihilatedpeak)
         thispeak->setHeight(0.0);
 
       // Debug output
-      vector<int> &hkl = m_vecPeakFunctions[ipeak].second.first;
+      vector<int> &hkl = m_vecPeakFunctions[ifit].second.first;
       stringstream dbss;
       dbss << "Peak [" << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
            << "] expected @ TOF = " << thispeak->centre() << ": \t";
       if (annihilatedpeak)
         dbss << "Annihilated!";
       else
-        dbss << "Fit Status = " << m_goodFit[ipeak] << ",   Chi2 = " << chi2;
+        dbss << "Fit Status = " << m_goodFit[ifit] << ",   Chi2 = " << chi2;
       g_log.information() << "[DB531] " << dbss.str() << '\n';
     } else {
       // Fit overlapped peaks
@@ -1262,18 +1258,18 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // a) Peak centre
   double peakcentreleftbound = peak->centre() - peak->fwhm();
   double peakcentrerightbound = peak->centre() + peak->fwhm();
-  auto x0bc = Kernel::make_unique<BoundaryConstraint>(
+  auto x0bc = std::make_unique<BoundaryConstraint>(
       peak.get(), "X0", peakcentreleftbound, peakcentrerightbound);
   peak->addConstraint(std::move(x0bc));
 
   // b) A
   auto abc =
-      Kernel::make_unique<BoundaryConstraint>(peak.get(), "A", 1.0E-10, false);
+      std::make_unique<BoundaryConstraint>(peak.get(), "A", 1.0E-10, false);
   peak->addConstraint(std::move(abc));
 
   // c) B
   auto bbc =
-      Kernel::make_unique<BoundaryConstraint>(peak.get(), "B", 1.0E-10, false);
+      std::make_unique<BoundaryConstraint>(peak.get(), "B", 1.0E-10, false);
   peak->addConstraint(std::move(bbc));
 
   // d) Guessed height
@@ -1530,7 +1526,7 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
     double tof_h = peakfunction->centre();
     double centerleftend = tof_h - guessedfwhm * 3.0;
     double centerrightend = tof_h + guessedfwhm * 3.0;
-    auto centerbound = Kernel::make_unique<BoundaryConstraint>(
+    auto centerbound = std::make_unique<BoundaryConstraint>(
         peakfunction.get(), "X0", centerleftend, centerrightend, false);
     peakfunction->addConstraint(std::move(centerbound));
 
@@ -1539,16 +1535,16 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
   }
 
   // A > 0, B > 0, S > 0
-  auto abound = Kernel::make_unique<BoundaryConstraint>(
-      peakfunction.get(), "A", 0.0000001, DBL_MAX, false);
+  auto abound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "A",
+                                                     0.0000001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(abound));
 
-  auto bbound = Kernel::make_unique<BoundaryConstraint>(
-      peakfunction.get(), "B", 0.0000001, DBL_MAX, false);
+  auto bbound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "B",
+                                                     0.0000001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(bbound));
 
-  auto sbound = Kernel::make_unique<BoundaryConstraint>(peakfunction.get(), "S",
-                                                        0.0001, DBL_MAX, false);
+  auto sbound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "S",
+                                                     0.0001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(sbound));
 
   // 2. Unfix all parameters
@@ -1818,7 +1814,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // b) Constraint
   double centerleftend = in_center - leftfwhm * 0.5;
   double centerrightend = in_center + rightfwhm * 0.5;
-  auto centerbound = Kernel::make_unique<BoundaryConstraint>(
+  auto centerbound = std::make_unique<BoundaryConstraint>(
       gaussianpeak.get(), "PeakCentre", centerleftend, centerrightend, false);
   gaussianpeak->addConstraint(std::move(centerbound));
 
@@ -1991,18 +1987,15 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
                                    "Levenberg-MarquardtMD", 1000, chi2);
   bool evergood = fitgood;
 
-  // c) Process result
+  // c) Process result; possibly early return
   if (!fitgood) {
     vecfitgood.resize(numpeaks, false);
     vecchi2s.resize(numpeaks, -1.0);
+    return false;
   } else {
     vecfitgood.resize(numpeaks, true);
     vecchi2s.resize(numpeaks, chi2);
   }
-
-  // d) Possible early return
-  if (!fitgood)
-    return false;
 
   // 2. Fit A/B/S peak by peak
   for (size_t ipkfit = 0; ipkfit < numpeaks; ++ipkfit) {
@@ -2023,8 +2016,8 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
     // b) Fit
     storeFunctionParameters(peaksfunc, peaksfuncparams);
 
-    bool fitgood = doFitNPeaksSimple(dataws, wsindex, peaksfunc, peakfuncs,
-                                     "Levenberg-MarquardtMD", 1000, chi2);
+    fitgood = doFitNPeaksSimple(dataws, wsindex, peaksfunc, peakfuncs,
+                                "Levenberg-MarquardtMD", 1000, chi2);
 
     // not required. before loop starts, evergood=fitgood WITH fitgood==true
     // evergood = evergood || fitgood;
@@ -2125,7 +2118,7 @@ void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     double leftcentrebound = centre - 0.5 * fwhm;
     double rightcentrebound = centre + 0.5 * fwhm;
 
-    auto bc = Kernel::make_unique<BoundaryConstraint>(
+    auto bc = std::make_unique<BoundaryConstraint>(
         thispeak.get(), "X0", leftcentrebound, rightcentrebound, false);
     thispeak->addConstraint(std::move(bc));
   }
@@ -2819,9 +2812,6 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
       double tof_h = calThermalNeutronTOF(d_h, dtt1, dtt1t, dtt2t, zero, zerot,
                                           width, tcross);
       newpeakptr->setCentre(tof_h);
-
-      peakcalmode = "Calculate TOF Only";
-
     } else {
       // d) Calculate a lot of peak parameters
       // Initialize the function
@@ -3009,8 +2999,9 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else {
-    cout << "[DBx211] Cropped Workspace Range: " << m_dataWS->x(m_wsIndex)[0]
-         << ", " << m_dataWS->x(m_wsIndex).back() << '\n';
+    g_log.information() << "[DBx211] Cropped Workspace Range: "
+                        << m_dataWS->x(m_wsIndex)[0] << ", "
+                        << m_dataWS->x(m_wsIndex).back() << '\n';
   }
 }
 

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from itertools import groupby
@@ -7,8 +13,8 @@ import re
 
 delimiter = ","
 range_separator = "-"
-run_string_regex = "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
-max_run_list_size = 1000
+run_string_regex = "^[0-9]*([0-9]+\s*[,-]{0,1}\s*)*[0-9]*$"
+max_run_list_size = 100
 valid_float_regex = "^[0-9]+([.][0-9]*)?$"
 valid_name_regex = "^\w+$"
 valid_alpha_regex = "^[0-9]*[.]?[0-9]+$"
@@ -31,20 +37,23 @@ def lambda_tuple_unpacking(lam):
     return f_inner
 
 
-def run_list_to_string(run_list):
+def run_list_to_string(run_list, max_value = True):
     """
     Converts a list of runs into a formatted string using a delimiter/range separator
     :param run_list: list of integers
     :return: string representation
     """
+    if not isinstance(run_list, list):
+        run_list = [run_list]
     run_list = _remove_duplicates_from_list(run_list)
     run_list = [i for i in run_list if i >= 0]
     run_list.sort()
-    if len(run_list) > max_run_list_size:
-        raise IndexError("Too many runs (" + str(len(run_list)) + ") must be <" + str(max_run_list_size))
+    if max_value and len(run_list) > max_run_list_size:
+        raise IndexError("Too many runs ({}) must be <{}".format(len(run_list), max_run_list_size))
 
     range_list = []
-    # use groupby to group run_list into sublists of sequential integers
+    # use groupby to group run_list into sublists of sequential integers. e.g. [50, 49, 48, 3, 2, 1] will turn into
+    # "1-3,48-50"
     for _, grouped_list in groupby(enumerate(run_list), key=lambda_tuple_unpacking(lambda i, x: i - x)):
         concurrent_range = list(map(itemgetter(1), grouped_list))
         if len(concurrent_range) > 1:
@@ -67,29 +76,40 @@ def validate_run_string(run_string):
     return False
 
 
-def run_string_to_list(run_string):
+def run_string_to_list(run_string, max_value = True):
     """
     Does the opposite of run_list_to_string(), taking a string representation of a series of runs
     and producing an ordered list of unique runs. Calls validate_run_string().
     :param run_string: string, a series of runs
+    :max_value: if to use the max number of runs
     :return: list of integers
     """
     if not validate_run_string(run_string):
-        raise IndexError(run_string + " is not a valid run string")
+        raise IndexError("{} is not a valid run string".format(run_string))
     run_list = []
+    if run_string.endswith(',') or run_string.endswith('-'):
+        run_string = run_string[:-1]
     if run_string == "":
         return run_list
+
     run_string_list = run_string.split(delimiter)
     for runs in run_string_list:
         split_runs = runs.split(range_separator)
         if len(runs) == 1:
             run_list += [int(runs)]
         else:
-            range_max = int(split_runs[-1])
-            range_min = int(split_runs[0])
-            if (range_max - range_min) > max_run_list_size:
+            range_max = split_runs[-1]
+            range_min = split_runs[0]
+            max_length = len(range_max)
+            min_length = len(range_min)
+            if(max_length < min_length):
+                range_max = range_min[:min_length - max_length] + range_max
+
+            range_max = int(range_max)
+            range_min = int(range_min)
+            if max_value and (range_max - range_min) > max_run_list_size:
                 raise IndexError(
-                    "Too many runs (" + str(range_max - range_min) + ") must be <" + str(max_run_list_size))
+                    "Too many runs ({}) must be <{}".format(range_max - range_min, max_run_list_size))
             else:
                 run_list += [range_min + i for i in range(range_max - range_min + 1)]
     run_list = _remove_duplicates_from_list(run_list)

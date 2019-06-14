@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -48,16 +45,16 @@ Sample::Sample(const Sample &copy)
       m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height),
       m_width(copy.m_width) {
   if (copy.m_lattice)
-    m_lattice = new OrientedLattice(copy.getOrientedLattice());
+    m_lattice = std::make_unique<OrientedLattice>(copy.getOrientedLattice());
 
   if (copy.hasCrystalStructure()) {
-    m_crystalStructure.reset(
-        new Geometry::CrystalStructure(copy.getCrystalStructure()));
+    m_crystalStructure = std::make_unique<Geometry::CrystalStructure>(
+        copy.getCrystalStructure());
   }
 }
 
 /// Destructor
-Sample::~Sample() { delete m_lattice; }
+Sample::~Sample() = default;
 
 /** Assignment operator
  * @param rhs :: const reference to the sample object
@@ -75,12 +72,10 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
-  if (m_lattice != nullptr)
-    delete m_lattice;
   if (rhs.m_lattice)
-    m_lattice = new OrientedLattice(rhs.getOrientedLattice());
+    m_lattice = std::make_unique<OrientedLattice>(rhs.getOrientedLattice());
   else
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
 
   m_crystalStructure.reset();
   if (rhs.hasCrystalStructure()) {
@@ -126,7 +121,9 @@ void Sample::setShape(const IObject_sptr &shape) {
 /** Return the material.
  * @return A reference to the material the sample is composed of
  */
-const Material Sample::getMaterial() const { return m_shape->material(); }
+const Material &Sample::getMaterial() const { return m_shape->material(); }
+
+bool Sample::hasEnvironment() const { return (m_environment != nullptr); }
 
 /**
  * Return a reference to the sample environment that this sample is attached to
@@ -146,8 +143,8 @@ const SampleEnvironment &Sample::getEnvironment() const {
  * @param env :: A pointer to a created sample environment. This takes
  * ownership of the object.
  */
-void Sample::setEnvironment(SampleEnvironment *env) {
-  m_environment = boost::shared_ptr<SampleEnvironment>(env);
+void Sample::setEnvironment(std::unique_ptr<SampleEnvironment> env) {
+  m_environment = boost::shared_ptr<SampleEnvironment>(std::move(env));
 }
 
 /** Return a const reference to the OrientedLattice of this sample
@@ -179,13 +176,10 @@ OrientedLattice &Sample::getOrientedLattice() {
  * @param latt :: A pointer to a OrientedLattice.
  */
 void Sample::setOrientedLattice(OrientedLattice *latt) {
-  if (m_lattice != nullptr) {
-    delete m_lattice;
-  }
   if (latt != nullptr)
-    m_lattice = new OrientedLattice(*latt);
+    m_lattice = std::make_unique<OrientedLattice>(*latt);
   else
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
 }
 
 /** @return true if the sample has an OrientedLattice  */
@@ -293,7 +287,7 @@ std::size_t Sample::size() const { return m_samples.size() + 1; }
  * @param childSample The child sample to be added
  */
 void Sample::addSample(boost::shared_ptr<Sample> childSample) {
-  m_samples.push_back(childSample);
+  m_samples.emplace_back(childSample);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -304,6 +298,9 @@ void Sample::addSample(boost::shared_ptr<Sample> childSample) {
 void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
+  if (m_name.empty()) {
+    file->putAttr("name_empty", 1);
+  }
   file->putAttr("version", 1);
   std::string shapeXML("");
   if (auto csgObject =
@@ -363,6 +360,13 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
   if (version > 0) {
     // Name is an attribute
     file->getAttr("name", m_name);
+    if (file->hasAttr("name_empty")) {
+      int isEmpty;
+      file->getAttr("name_empty", isEmpty);
+      if (isEmpty) {
+        m_name.clear();
+      }
+    }
 
     // Shape (from XML)
     std::string shape_xml;
@@ -394,7 +398,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     int num_oriented_lattice;
     file->readData("num_oriented_lattice", num_oriented_lattice);
     if (num_oriented_lattice > 0) {
-      m_lattice = new OrientedLattice;
+      m_lattice = std::make_unique<OrientedLattice>();
       m_lattice->loadNexus(file, "oriented_lattice");
     }
   }
@@ -418,8 +422,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
  */
 void Sample::clearOrientedLattice() {
   if (m_lattice) {
-    delete m_lattice;
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
   }
 }
 } // namespace API

@@ -267,19 +267,15 @@ std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(
     const std::vector<double> &tofsFor1Angstrom, double deltaT, double deltaD,
     size_t nd) const {
   /* Currently, all d-values get the same weight, so in fact this calculation
-   * would is not really
-   * necessary. But since there are not too many calculations involved and in
-   * order to stay close
-   * to the original implementation, this is kept.
+   * would is not really necessary. But since there are not too many
+   * calculations involved and in order to stay close to the original
+   * implementation, this is kept.
    */
-  std::vector<double> tofs;
-  tofs.reserve(tofsFor1Angstrom.size());
-
-  for (double tofFor1Angstrom : tofsFor1Angstrom) {
-    tofs.push_back(tofFor1Angstrom * deltaD);
-  }
-
-  double sum = std::accumulate(tofs.begin(), tofs.end(), 0.0);
+  const double sum =
+      std::accumulate(tofsFor1Angstrom.cbegin(), tofsFor1Angstrom.cend(), 0.0,
+                      [deltaD](auto sum, auto tofFor1Angstrom) {
+                        return sum + tofFor1Angstrom * deltaD;
+                      });
 
   return std::vector<double>(nd, sum / deltaT);
 }
@@ -574,15 +570,13 @@ double PoldiAutoCorrelationCore::reduceChopperSlitList(
  */
 std::vector<double>
 PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
-  double chopperDistance = m_chopper->distanceFromSample();
+  const double chopperDistance = m_chopper->distanceFromSample();
   std::vector<double> distances;
   distances.reserve(elements.size());
-
-  for (auto element : elements) {
-    distances.push_back(chopperDistance +
-                        m_detector->distanceFromSample(element));
+  for (const auto element : elements) {
+    distances.emplace_back(chopperDistance +
+                           m_detector->distanceFromSample(element));
   }
-
   return distances;
 }
 

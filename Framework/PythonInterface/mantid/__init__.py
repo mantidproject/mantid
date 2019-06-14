@@ -26,10 +26,11 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 import os
-import site
 import sys
 
+import site
 from .pyversion import check_python_version
+
 check_python_version()
 
 
@@ -40,14 +41,37 @@ def apiVersion():
     return 2
 
 
-# Bail out early if a Mantid.properties files is not found in the
-# parent directory - it indicates a broken installation or build.
-_moduledir = os.path.abspath(os.path.dirname(__file__))
-_bindir = os.path.dirname(_moduledir)
-if not os.path.exists(os.path.join(_bindir, 'Mantid.properties')):
-    raise ImportError("Unable to find Mantid.properties file next to this package - broken installation!")
+def _bin_dirs():
+    """
+    Generate a list of possible paths that contain the Mantid.properties file
+    """
+    _moduledir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 
-# Windows doesn"t have rpath settings so make sure the C-extensions can find the rest of the
+    # standard packaged install
+    yield _moduledir
+
+    # conda layout
+    yield os.path.dirname(sys.executable)
+
+    # iterate over the PYTHONPATH, to scan all possible bin dirs
+    for path in sys.path:
+        yield path
+
+
+# Bail out early if a Mantid.properties files is not found in
+# one of the expected places - it indicates a broken installation or build.
+_bindir = None
+for path in _bin_dirs():
+    if os.path.exists(os.path.join(path, "Mantid.properties")):
+        _bindir = path
+        break
+
+if _bindir is None:
+    raise ImportError(
+        "Broken installation! Unable to find Mantid.properties file.\n"
+        "Directories searched: {}".format(', '.join(_bin_dirs())))
+
+# Windows doesn't have rpath settings so make sure the C-extensions can find the rest of the
 # mantid dlls. We assume they will be next to the properties file.
 if sys.platform == "win32":
     os.environ["PATH"] = _bindir + ";" + os.environ.get("PATH", "")
@@ -59,33 +83,36 @@ site.addsitedir(_bindir)
 try:
     # Flag indicating whether mantidplot layer is loaded.
     import _qti
+
     __gui__ = True
 except ImportError:
     __gui__ = False
 
 # Set deprecation warnings back to default (they are ignored in 2.7)
 import warnings as _warnings
+
 # Default we see everything
-_warnings.filterwarnings("default",category=DeprecationWarning,
+_warnings.filterwarnings("default", category=DeprecationWarning,
                          module="mantid.*")
 # We can't do anything about numpy.oldnumeric being deprecated but
 # still used in other libraries, e.g scipy, so just ignore those
-_warnings.filterwarnings("ignore",category=DeprecationWarning,
+_warnings.filterwarnings("ignore", category=DeprecationWarning,
                          module="numpy.oldnumeric")
 
 ###############################################################################
 # Load all non-plugin subpackages that contain a C-extension. The boost.python
 # registry will be missing entries if all are not loaded.
 ###############################################################################
-from . import kernel as _kernel
-from . import api as _api
-from . import geometry as _geometry
-from . import dataobjects as _dataobjects
+from mantid import kernel as _kernel
+from mantid import api as _api
+from mantid import geometry as _geometry
+from mantid import dataobjects as _dataobjects
 
-# Make the aliases from each module accessible in a the mantid namespace
-from .kernel._aliases import *
-from .api._aliases import *
+# Make the aliases from each module accessible in the mantid namespace
+from mantid.kernel._aliases import *
+from mantid.api._aliases import *
 
 # Make the version string accessible in the standard way
-from .kernel import version_str as _version_str
+from mantid.kernel import version_str as _version_str
+
 __version__ = _version_str()

@@ -34,7 +34,8 @@ public:
     CombinePeaksWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     // Tolerance has to be positive. Even if CombineMatchingPeaks is false!
-    TS_ASSERT_THROWS(alg.setProperty("Tolerance", -1.0), std::invalid_argument)
+    TS_ASSERT_THROWS(alg.setProperty("Tolerance", -1.0),
+                     const std::invalid_argument &)
   }
 
   void test_keep_all_peaks() {

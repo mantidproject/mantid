@@ -120,7 +120,7 @@ public:
     TSM_ASSERT_EQUALS("should return empty path", 0, result.size());
     TSM_ASSERT_THROWS(" this path should go out of range",
                       split_path("/aaaa\\bbbbb/../../../", result),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
   void testSkipLine() {
     TS_ASSERT(skipLine("#blah blah"));

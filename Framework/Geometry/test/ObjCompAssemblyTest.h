@@ -26,7 +26,7 @@ public:
   void testNameValueConstructor() {
     ObjCompAssembly q("Name");
     TS_ASSERT_EQUALS(q.nelements(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
+    TS_ASSERT_THROWS(q[0], const std::runtime_error &);
 
     TS_ASSERT_EQUALS(q.getName(), "Name");
     TS_ASSERT(!q.getParent());
@@ -42,7 +42,7 @@ public:
     ObjCompAssembly *q = new ObjCompAssembly("Child", parent);
     TS_ASSERT_EQUALS(q->getName(), "Child");
     TS_ASSERT_EQUALS(q->nelements(), 0);
-    TS_ASSERT_THROWS((*q)[0], std::runtime_error);
+    TS_ASSERT_THROWS((*q)[0], const std::runtime_error &);
     // check the parent
     TS_ASSERT(q->getParent());
     TS_ASSERT_EQUALS(q->getParent()->getName(), parent->getName());
@@ -57,8 +57,9 @@ public:
   void testAddBad() {
     ObjCompAssembly bank("BankName");
     Component det1("Det1Name");
-    TS_ASSERT_THROWS(bank.add(&det1),
-                     Mantid::Kernel::Exception::InstrumentDefinitionError);
+    TS_ASSERT_THROWS(
+        bank.add(&det1),
+        const Mantid::Kernel::Exception::InstrumentDefinitionError &);
   }
 
   void testAdd() {
@@ -67,7 +68,7 @@ public:
     Component *det2 = new ObjComponent("Det2Name");
     Component *det3 = new ObjComponent("Det3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 0);
-    TS_ASSERT_THROWS(bank[0], std::runtime_error);
+    TS_ASSERT_THROWS(bank[0], const std::runtime_error &);
     bank.add(det1);
     bank.add(det2);
     bank.add(det3);
@@ -86,7 +87,7 @@ public:
     ObjComponent det2("Det2Name");
     ObjComponent det3("Det3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 0);
-    TS_ASSERT_THROWS(bank[0], std::runtime_error);
+    TS_ASSERT_THROWS(bank[0], const std::runtime_error &);
     bank.addCopy(&det1);
     bank.addCopy(&det2);
     bank.addCopy(&det3, "ChangedDet3Name");
@@ -367,8 +368,8 @@ public:
 
     detail::ShapeInfo::GeometryShape otype;
     std::vector<V3D> vectors;
-    double radius, height;
-    shape->GetObjectGeom(otype, vectors, radius, height);
+    double radius, height, innerRadius;
+    shape->GetObjectGeom(otype, vectors, innerRadius, radius, height);
 
     TS_ASSERT_EQUALS(otype, detail::ShapeInfo::GeometryShape::CYLINDER);
     TS_ASSERT_EQUALS(radius, 0.1);
@@ -396,7 +397,7 @@ public:
     bank.add(det3);
 
     TS_ASSERT_THROWS(boost::shared_ptr<IObject> shape = bank.createOutline(),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 };
 

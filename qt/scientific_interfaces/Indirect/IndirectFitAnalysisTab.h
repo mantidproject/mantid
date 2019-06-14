@@ -9,6 +9,8 @@
 
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
+#include "IndirectFitOutputOptionsPresenter.h"
+#include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionPresenter.h"
@@ -31,15 +33,19 @@ class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  /// Constructor
   IndirectFitAnalysisTab(IndirectFittingModel *model,
                          QWidget *parent = nullptr);
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IIndirectFitPlotView *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
+  void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
+
+  virtual std::string tabName() const = 0;
+
+  virtual bool hasResolution() const = 0;
 
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
@@ -112,53 +118,33 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
+public slots:
+  void setBrowserWorkspace() override;
+
 protected:
   IndirectFittingModel *fittingModel() const;
 
-  void setSampleWSSuffices(const QStringList &suffices);
-  void setSampleFBSuffices(const QStringList &suffices);
-  void setResolutionWSSuffices(const QStringList &suffices);
-  void setResolutionFBSuffices(const QStringList &suffices);
-
   void run() override;
-  void plotResult(const QString &plotType);
-  void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
-  void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
-                     const std::string &parameter);
-  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace,
-               const std::size_t &index);
-  void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
-                     const std::string &parameter, const std::size_t &index);
-  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const std::string &parameterToPlot);
+
+  void setSampleWSSuffixes(const QStringList &suffices);
+  void setSampleFBSuffixes(const QStringList &suffices);
+  void setResolutionWSSuffixes(const QStringList &suffices);
+  void setResolutionFBSuffixes(const QStringList &suffices);
 
   void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  void updatePlotOptions(QComboBox *cbPlotType);
-  void enablePlotResult(bool error);
-
-  void setPlotOptions(QComboBox *cbPlotType,
-                      const std::vector<std::string> &parameters) const;
-
-  void setPlotOptions(QComboBox *cbPlotType,
-                      const QSet<QString> &options) const;
-
-  virtual bool shouldEnablePlotResult() = 0;
-
-  virtual void setPlotResultEnabled(bool enabled) = 0;
-  virtual void setSaveResultEnabled(bool enabled) = 0;
-
   virtual void setRunIsRunning(bool running) = 0;
+  virtual void setRunEnabled(bool enable) = 0;
+  void setEditResultVisible(bool visible);
 
 signals:
   void functionChanged();
-  void parameterChanged(const Mantid::API::IFunction *);
+  void parameterChanged(const Mantid::API::IFunction * /*_t1*/);
   void customBoolChanged(const QString &key, bool value);
-  void updateFitTypes();
+  void updateAvailableFitTypes();
 
 protected slots:
 
@@ -171,7 +157,6 @@ protected slots:
   void setBrowserStartX(double startX);
   void setBrowserEndX(double endX);
   void updateBrowserFittingRange();
-  void setBrowserWorkspace();
   void setBrowserWorkspace(std::size_t dataIndex);
   void setBrowserWorkspaceIndex(std::size_t spectrum);
   void setBrowserWorkspaceIndex(int spectrum);
@@ -207,13 +192,11 @@ protected slots:
       const std::unordered_map<std::string, ParameterValue> &parameters);
   void updateFitBrowserParameterValues();
 
-  virtual void updatePlotOptions() = 0;
-
   void updateResultOptions();
-  void saveResult();
 
 private slots:
-  void emitUpdateFitTypes();
+  void updatePlotGuess();
+  void plotSelectedSpectra();
 
 private:
   /// Overidden by child class.
@@ -222,17 +205,33 @@ private:
   virtual void setupFitTab() = 0;
   bool validate() override;
 
+  void setFileExtensionsByName(bool filter) override;
+  void setSampleSuffixes(std::string const &tab, bool filter);
+  void setResolutionSuffixes(std::string const &tab, bool filter);
+
   void connectDataAndPlotPresenters();
   void connectSpectrumAndPlotPresenters();
   void connectFitBrowserAndPlotPresenter();
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
 
+  void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
+  void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
+
+  std::string getOutputBasename() const;
+  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
+  std::vector<std::string> getFitParameterNames() const;
+
+  void enableFitButtons(bool enable);
+  void enableOutputOptions(bool enable);
+  void setPDFWorkspace(std::string const &workspaceName);
+
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
+  std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
 
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };

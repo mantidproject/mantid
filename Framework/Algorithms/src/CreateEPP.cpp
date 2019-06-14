@@ -10,8 +10,8 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitConversion.h"
@@ -90,10 +90,10 @@ void CreateEPP::init() {
   auto inputWSValidator = boost::make_shared<Kernel::CompositeValidator>();
   inputWSValidator->add(boost::make_shared<API::InstrumentValidator>());
   inputWSValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("TOF"));
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, inputWSValidator),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The calculated output EPP table.");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
@@ -110,7 +110,7 @@ void CreateEPP::exec() {
       getProperty(PropertyNames::INPUT_WORKSPACE);
   const auto &spectrumInfo = inputWS->spectrumInfo();
   API::ITableWorkspace_sptr outputWS =
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      boost::make_shared<DataObjects::TableWorkspace>();
   addEPPColumns(outputWS);
   const double sigma = getProperty(PropertyNames::SIGMA);
   const size_t spectraCount = spectrumInfo.size();
@@ -128,7 +128,7 @@ void CreateEPP::exec() {
     outputWS->getRef<double>(ColumnNames::SIGMA_ERR, i) = 0;
     double height = 0;
     try {
-      const auto elasticIndex = inputWS->binIndexOf(elasticTOF, i);
+      const auto elasticIndex = inputWS->yIndexOfX(elasticTOF, i);
       height = inputWS->y(i)[elasticIndex];
     } catch (std::out_of_range &) {
       std::ostringstream sout;

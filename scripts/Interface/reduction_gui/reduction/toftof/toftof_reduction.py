@@ -60,6 +60,7 @@ class TOFTOFScriptElement(BaseScriptElement):
     # default values
     DEF_prefix     = 'ws'
     DEF_ecFactor   = 1.0
+    DEF_vanEcFactor = 1.0
 
     DEF_binEon     = True
     DEF_binEstart  = 0.0
@@ -100,6 +101,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.vanRuns  = ''
         self.vanCmnt  = ''
         self.vanTemp  = OptionalFloat()
+        self.vanEcFactor = self.DEF_vanEcFactor
 
         # empty can runs, comment, and factor
         self.ecRuns   = ''
@@ -150,6 +152,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('van_runs',        self.vanRuns)
         put('van_comment',     self.vanCmnt)
         put('van_temperature', self.vanTemp)
+        put('van_ec_factor',   self.vanEcFactor)
 
         put('ec_runs',     self.ecRuns)
         put('ec_temp',     self.ecTemp)
@@ -225,6 +228,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.vanRuns  = get_str('van_runs')
             self.vanCmnt  = get_str('van_comment')
             self.vanTemp  = get_optFloat('van_temperature')
+            self.vanEcFactor = get_flt('van_ec_factor', self.DEF_vanEcFactor)
 
             self.ecRuns   = get_str('ec_runs')
             self.ecTemp   = get_optFloat('ec_temp')
@@ -447,7 +451,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             self.l("names = []")
             self.l("for ws in {}:" .format(gDataRuns))
-            self.l("    name = ws.getName() + 'Norm'")
+            self.l("    name = ws.name() + 'Norm'")
             self.l("    names.append(name)")
             self.l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)"
                    .format(self.get_time('ws')))
@@ -597,10 +601,16 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')"
                    .format(scaledEC, wsECNorm))
             self.l("{} = Minus({}, {})" .format(gDataSubEC, gDataNorm, scaledEC))
+            wslist = [scaledEC]
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
-                self.l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
-            self.delete_workspaces([scaledEC])
+                scaledECvan = self.prefix + 'ScaledECvan'
+                self.l("van_ecFactor = {:.3f}" .format(self.vanEcFactor))
+                self.l("{} = Scale({}, Factor=van_ecFactor, Operation='Multiply')"
+                       .format(scaledECvan, wsECNorm))
+                self.l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledECvan))
+                wslist.append(scaledECvan)
+            self.delete_workspaces(wslist)
 
         self.l("# group data for processing")
         gDataSource = gDataSubEC if self.ecRuns else gDataNorm
@@ -684,12 +694,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("DeleteWorkspaces('step1,step2,step3')")
             self.l()
 
-        # save S(2theta, w):
-        suf = "'_Ei_{}'.format(round(Ei,2))"
-        #nxspe only if self.binEon
-        saveFormats = set(compress(self.allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii]))
-        self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
-
         if self.binQon and self.binEon:
             gDataBinQ = gData + 'SQW'
             self.l("# calculate momentum transfer Q for sample data")
@@ -701,11 +705,19 @@ class TOFTOFScriptElement(BaseScriptElement):
                 self.l("{} = ReplaceSpecialValues({}, NaNValue=0, NaNError=1)".format(gDataBinQ, gDataBinQ))
             self.l()
 
-            # save S(Q, w)
+        self.rename_workspaces(gData)
+        self.l()
+
+        # save S(2theta, w), has to be done after renaming
+        suf = "'_Ei_{}'.format(round(Ei,2))"
+        saveFormats = set(compress(self.allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii]))
+        self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
+        self.l()
+
+        # save S(Q, w), has to be done after renaming
+        if self.binQon and self.binEon:
             saveFormats = set(compress(self.allowed_save_formats, [False, self.saveSofQWNexus, self.saveSofQWAscii]))
             self.save_wsgroup(gDataBinQ, "'_SQW'", 'Q', saveFormats)
-
-        self.rename_workspaces(gData)
 
         return self.script[0]
 

@@ -9,15 +9,11 @@
 #
 from __future__ import (absolute_import)
 
-# std imports
-import unittest
-import sys
-
-# 3rdparty
 from qtpy.QtCore import QCoreApplication, QObject
+import unittest
 
-# local imports
-from mantidqt.utils.qt.test import GuiTest
+from mantid.py3compat.mock import patch
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.writetosignal import WriteToSignal
 
 
@@ -30,14 +26,37 @@ class Receiver(QObject):
 
 class WriteToSignalTest(GuiTest):
 
+    def test_run_with_output_present(self):
+        with patch("sys.stdout") as mock_stdout:
+            mock_stdout.fileno.return_value = 10
+            writer = WriteToSignal(mock_stdout)
+            mock_stdout.fileno.assert_called_once_with()
+            self.assertEqual(writer._original_out, mock_stdout)
+
+    def test_run_without_output_present(self):
+        with patch("sys.stdout") as mock_stdout:
+            mock_stdout.fileno.return_value = -1
+            writer = WriteToSignal(mock_stdout)
+            mock_stdout.fileno.assert_called_once_with()
+            self.assertEqual(writer._original_out, None)
+
     def test_connected_receiver_receives_text(self):
-        recv = Receiver()
-        writer = WriteToSignal(sys.stdout)
-        writer.sig_write_received.connect(recv.capture_text)
-        txt = "I expect to see this"
-        writer.write(txt)
-        QCoreApplication.processEvents()
-        self.assertEqual(txt, recv.captured_txt)
+        with patch("sys.stdout") as mock_stdout:
+            mock_stdout.fileno.return_value = -1
+            recv = Receiver()
+            writer = WriteToSignal(mock_stdout)
+            writer.sig_write_received.connect(recv.capture_text)
+            txt = "I expect to see this"
+            writer.write(txt)
+            QCoreApplication.processEvents()
+            self.assertEqual(txt, recv.captured_txt)
+            mock_stdout.fileno.assert_called_once_with()
+
+    def test_with_fileno_not_defined(self):
+        with patch('sys.stdout') as mock_stdout:
+            del mock_stdout.fileno
+            writer = WriteToSignal(mock_stdout)
+            self.assertEqual(writer._original_out, None)
 
 
 if __name__ == "__main__":

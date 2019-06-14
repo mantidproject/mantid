@@ -49,28 +49,25 @@ std::string WeightedMean::checkSizeCompatibility(
   }
 }
 
-void WeightedMean::performBinaryOperation(const MantidVec &lhsX,
-                                          const MantidVec &lhsY,
-                                          const MantidVec &lhsE,
-                                          const MantidVec &rhsY,
-                                          const MantidVec &rhsE,
-                                          MantidVec &YOut, MantidVec &EOut) {
-  (void)lhsX; // Avoid compiler warning
-  const size_t bins = lhsY.size();
+void WeightedMean::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                          const HistogramData::Histogram &rhs,
+                                          HistogramData::HistogramY &YOut,
+                                          HistogramData::HistogramE &EOut) {
+  const size_t bins = lhs.size();
   for (size_t j = 0; j < bins; ++j) {
-    if (lhsE[j] > 0.0 && rhsE[j] > 0.0) {
-      const double err1 = lhsE[j] * lhsE[j];
-      const double err2 = rhsE[j] * rhsE[j];
-      YOut[j] = (lhsY[j] / err1) + (rhsY[j] / err2);
+    if (lhs.e()[j] > 0.0 && rhs.e()[j] > 0.0) {
+      const double err1 = lhs.e()[j] * lhs.e()[j];
+      const double err2 = rhs.e()[j] * rhs.e()[j];
+      YOut[j] = (lhs.y()[j] / err1) + (rhs.y()[j] / err2);
       EOut[j] = (err1 * err2) / (err1 + err2);
       YOut[j] *= EOut[j];
       EOut[j] = sqrt(EOut[j]);
-    } else if (lhsE[j] > 0.0 && rhsE[j] <= 0.0) {
-      YOut[j] = lhsY[j];
-      EOut[j] = lhsE[j];
-    } else if (lhsE[j] <= 0.0 && rhsE[j] > 0.0) {
-      YOut[j] = rhsY[j];
-      EOut[j] = rhsE[j];
+    } else if (lhs.e()[j] > 0.0 && rhs.e()[j] <= 0.0) {
+      YOut[j] = lhs.y()[j];
+      EOut[j] = lhs.e()[j];
+    } else if (lhs.e()[j] <= 0.0 && rhs.e()[j] > 0.0) {
+      YOut[j] = rhs.y()[j];
+      EOut[j] = rhs.e()[j];
     } else {
       YOut[j] = 0.0;
       EOut[j] = 0.0;
@@ -78,25 +75,23 @@ void WeightedMean::performBinaryOperation(const MantidVec &lhsX,
   }
 }
 
-void WeightedMean::performBinaryOperation(const MantidVec &lhsX,
-                                          const MantidVec &lhsY,
-                                          const MantidVec &lhsE,
+void WeightedMean::performBinaryOperation(const HistogramData::Histogram &lhs,
                                           const double rhsY, const double rhsE,
-                                          MantidVec &YOut, MantidVec &EOut) {
-  UNUSED_ARG(lhsX);
-  assert(lhsX.size() == 1);
+                                          HistogramData::HistogramY &YOut,
+                                          HistogramData::HistogramE &EOut) {
+  assert(lhs.size() == 1);
   // If we get here we've got two single column workspaces so it's easy.
-  if (lhsE[0] > 0.0 && rhsE > 0.0) {
-    const double err1 = lhsE[0] * lhsE[0];
+  if (lhs.e()[0] > 0.0 && rhsE > 0.0) {
+    const double err1 = lhs.e()[0] * lhs.e()[0];
     const double err2 = rhsE * rhsE;
-    YOut[0] = (lhsY[0] / err1) + (rhsY / err2);
+    YOut[0] = (lhs.y()[0] / err1) + (rhsY / err2);
     EOut[0] = (err1 * err2) / (err1 + err2);
     YOut[0] *= EOut[0];
     EOut[0] = sqrt(EOut[0]);
-  } else if (lhsE[0] > 0.0 && rhsE <= 0.0) {
-    YOut[0] = lhsY[0];
-    EOut[0] = lhsE[0];
-  } else if (lhsE[0] <= 0.0 && rhsE > 0.0) {
+  } else if (lhs.e()[0] > 0.0 && rhsE <= 0.0) {
+    YOut[0] = lhs.y()[0];
+    EOut[0] = lhs.e()[0];
+  } else if (lhs.e()[0] <= 0.0 && rhsE > 0.0) {
     YOut[0] = rhsY;
     EOut[0] = rhsE;
   } else {

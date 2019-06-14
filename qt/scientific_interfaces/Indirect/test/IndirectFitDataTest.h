@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDIRECTFITDATATEST_H_
 #define MANTID_INDIRECTFITDATATEST_H_
 
@@ -8,8 +14,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -187,9 +191,10 @@ public:
     data->setExcludeRegionString("2,5", 1);
     data->setExcludeRegionString("1,2,5,6,3,4", 2);
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "1.0,8.0");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.0,5.0");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(2), "1.0,2.0,5.0,6.0,3.0,4.0");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "1.000,8.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.000,5.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(2),
+                     "1.000,2.000,5.000,6.000,3.000,4.000");
     TS_ASSERT_EQUALS(data->getExcludeRegion(3), "");
   }
 
@@ -219,11 +224,12 @@ public:
 
     std::vector<double> const regionVector{2.0, 6.0};
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.0,6.0");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.000,6.000");
     TS_ASSERT_EQUALS(data->getExcludeRegion(1),
-                     "2.0,6.0,1.0,2.0,3.0,4.0,6.0,7.0");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(2),
-                     "1.0,2.0,2.0,3.0,18.0,20.0,21.0,22.0,7.0,8.0");
+                     "2.000,6.000,1.000,2.000,3.000,4.000,6.000,7.000");
+    TS_ASSERT_EQUALS(
+        data->getExcludeRegion(2),
+        "1.000,2.000,2.000,3.000,18.000,20.000,21.000,22.000,7.000,8.000");
     TS_ASSERT_EQUALS(data->excludeRegionsVector(0), regionVector);
   }
 
@@ -235,22 +241,23 @@ public:
     data->setExcludeRegionString("6,  2,1  ,2,  3,4  ,7,6", 1);
     data->setExcludeRegionString("1,2 ,2,3,  20,  18,21,22,7, 8   ", 2);
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.0,6.0");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.000,6.000");
     TS_ASSERT_EQUALS(data->getExcludeRegion(1),
-                     "2.0,6.0,1.0,2.0,3.0,4.0,6.0,7.0");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(2),
-                     "1.0,2.0,2.0,3.0,18.0,20.0,21.0,22.0,7.0,8.0");
+                     "2.000,6.000,1.000,2.000,3.000,4.000,6.000,7.000");
+    TS_ASSERT_EQUALS(
+        data->getExcludeRegion(2),
+        "1.000,2.000,2.000,3.000,18.000,20.000,21.000,22.000,7.000,8.000");
   }
 
   void
   test_that_setExcludeRegion_rounds_the_numbers_in_the_input_string_to_the_appropriate_decimal_place() {
     auto data = getIndirectFitData(2);
 
-    data->setExcludeRegionString("6.29,2.93", 0);
-    data->setExcludeRegionString("2.6,2.3,1.99,3.01", 1);
+    data->setExcludeRegionString("6.29445,2.93343", 0);
+    data->setExcludeRegionString("2.6,2.3,1.9999,3.0125", 1);
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.9,6.3");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.3,2.6,2.0,3.0");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.933,6.294");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.300,2.600,2.000,3.013");
   }
 
   void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
@@ -263,9 +270,11 @@ public:
         "10", "100000000000000000000000000000", "1,5,10", "1,2,3,4,5,6,22"};
 
     for (auto i = 0u; i < spectraPairs.size(); ++i)
-      TS_ASSERT_THROWS(data->setSpectra(spectraPairs[i]), std::runtime_error);
+      TS_ASSERT_THROWS(data->setSpectra(spectraPairs[i]),
+                       const std::runtime_error &);
     for (auto i = 0u; i < spectraStrings.size(); ++i)
-      TS_ASSERT_THROWS(data->setSpectra(spectraStrings[i]), std::runtime_error);
+      TS_ASSERT_THROWS(data->setSpectra(spectraStrings[i]),
+                       const std::runtime_error &);
   }
 
   void test_no_throw_when_setSpectra_is_provided_a_valid_spectra() {
@@ -359,8 +368,9 @@ public:
     data1->setExcludeRegionString("6,2", 1);
     auto const combinedData = data2->combine(*data1);
 
-    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(0), "1.0,2.0,5.0,6.0");
-    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(1), "2.0,6.0");
+    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(0),
+                     "1.000,2.000,5.000,6.000");
+    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(1), "2.000,6.000");
   }
 
   void

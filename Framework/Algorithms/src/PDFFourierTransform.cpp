@@ -8,8 +8,10 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -32,6 +34,7 @@ DECLARE_ALGORITHM(PDFFourierTransform)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace DataObjects;
 
 namespace { // anonymous namespace
 /// Crystalline PDF
@@ -66,12 +69,12 @@ const std::string PDFFourierTransform::category() const {
 void PDFFourierTransform::init() {
   auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, uv),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input, uv),
                   S_OF_Q + ", " + S_OF_Q_MINUS_ONE + ", or " +
                       Q_S_OF_Q_MINUS_ONE);
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Result paired-distribution function");
 
   // Set up input data type
@@ -329,8 +332,7 @@ void PDFFourierTransform::exec() {
   bool filter = getProperty("Filter");
 
   // create the output workspace
-  API::MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);
+  API::MatrixWorkspace_sptr outputWS = create<Workspace2D>(1, Points(sizer));
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr unit = outputWS->getAxis(0)->unit();
   boost::shared_ptr<Units::Label> label =

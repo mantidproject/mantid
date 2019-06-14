@@ -285,9 +285,7 @@ void PropertyWidget::setPreviousValue(const QString &previousValue) {
   setValue(m_previousValue);
 
   // Handle input workspace options that have been set to a workspace
-  // previously,
-  // but where the workspace no longer exists.
-  const auto currentValue = getValue().toStdString();
+  // previously, but where the workspace no longer exists.
   if (getValue() != previousValue) {
     m_previousValue = "";
     setValue(m_previousValue);
@@ -426,16 +424,16 @@ void PropertyWidget::setError(const QString &error) {
 /** Sets all widgets contained within to Enabled
  * @param val :: enabled or not   */
 void PropertyWidget::setEnabled(bool val) {
-  for (int i = 0; i < m_widgets.size(); i++)
-    m_widgets[i]->setEnabled(val);
+  for (auto &widget : m_widgets)
+    widget->setEnabled(val);
   QWidget::setEnabled(val);
 }
 
 /** Sets all widgets contained within to Visible
  * @param val :: Visible or not   */
 void PropertyWidget::setVisible(bool val) {
-  for (int i = 0; i < m_widgets.size(); i++)
-    m_widgets[i]->setVisible(val);
+  for (auto &widget : m_widgets)
+    widget->setVisible(val);
   QWidget::setVisible(val);
 }
 

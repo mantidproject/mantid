@@ -13,16 +13,21 @@ from __future__ import (absolute_import, unicode_literals)
 from functools import partial
 
 # third-party library imports
-from mantid.api import AnalysisDataService
-from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
-from mantidqt.widgets.samplelogs.presenter import SampleLogs
-from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
-from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+import matplotlib.pyplot
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
+from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.kernel import logger
+from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from mantidqt.widgets.samplelogs.presenter import SampleLogs
+from mantidqt.widgets.sliceviewer.presenter import SliceViewer
+from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
+from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names, plot
 
 
 class WorkspaceWidget(PluginWidget):
@@ -50,8 +55,10 @@ class WorkspaceWidget(PluginWidget):
                                                                                errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
         self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
+        self.workspacewidget.sliceViewerClicked.connect(self._do_slice_viewer)
         self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
+        self.workspacewidget.showAlgorithmHistoryClicked.connect(self._do_show_algorithm_history)
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -107,7 +114,28 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            SampleLogs(ws=ws, parent=self)
+            try:
+                SampleLogs(ws=ws, parent=self)
+            except Exception as exception:
+                logger.warning("Could not open sample logs for workspace '{}'."
+                               "".format(ws.name()))
+                logger.debug("{}: {}".format(type(exception).__name__,
+                                             exception))
+
+    def _do_slice_viewer(self, names):
+        """
+        Show the sliceviewer window for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            try:
+                SliceViewer(ws=ws, parent=self)
+            except Exception as exception:
+                logger.warning("Could not open slice viewer for workspace '{}'."
+                               "".format(ws.name()))
+                logger.debug("{}: {}".format(type(exception).__name__,
+                                             exception))
 
     def _do_show_instrument(self, names):
         """
@@ -116,15 +144,49 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            presenter = InstrumentViewPresenter(ws, parent=self)
-            presenter.view.show()
+            if ws.getInstrument().getName():
+                try:
+                    presenter = InstrumentViewPresenter(ws, parent=self)
+                    presenter.show_view()
+                except Exception as exception:
+                    logger.warning("Could not show instrument for workspace "
+                                   "'{}':\n{}.\n".format(ws.name(), exception))
+            else:
+                logger.warning("Could not show instrument for workspace '{}':"
+                               "\nNo instrument available.\n"
+                               "".format(ws.name()))
 
     def _do_show_data(self, names):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            # the plot function is being injected in the presenter
-            # this is done so that the plotting library is mockable in testing
-            presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
-            presenter.view.show()
+            try:
+                MatrixWorkspaceDisplay.supports(ws)
+                # the plot function is being injected in the presenter
+                # this is done so that the plotting library is mockable in testing
+                presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
+                presenter.show_view()
+            except ValueError:
+                try:
+                    TableWorkspaceDisplay.supports(ws)
+                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self)
+                    presenter.show_view()
+                except ValueError:
+                    logger.error(
+                        "Could not open workspace: {0} with neither "
+                        "MatrixWorkspaceDisplay nor TableWorkspaceDisplay."
+                        "".format(ws.name()))
+
+    def _do_show_algorithm_history(self, names):
+        for name in names:
+            if not isinstance(self._ads.retrieve(name), WorkspaceGroup):
+                try:
+                    AlgorithmHistoryWindow(self, name).show()
+                except Exception as exception:
+                    logger.warning("Could not open history of '{}'. "
+                                   "".format(name))
+                    logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])
+
+    def refresh_workspaces(self):
+        self.workspacewidget.refreshWorkspaces()

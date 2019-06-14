@@ -77,10 +77,10 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadDaveGrp::init() {
   std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, exts),
                   "A DAVE grouped ASCII file");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the workspace that will be created.");
 
@@ -98,10 +98,10 @@ void LoadDaveGrp::init() {
                   "The name of the units for the Y-Axis (must be one of "
                   "those registered in "
                   "the Unit Factory)");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "IsMicroEV", false, Kernel::Direction::Input),
                   "Original file is in units of micro-eV for DeltaE");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "ConvertToHistogram", false, Kernel::Direction::Input),
                   "Convert output workspace to histogram data.");
 }
@@ -181,8 +181,9 @@ void LoadDaveGrp::setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
                                    const std::vector<double> &yAxis) const {
 
   auto verticalAxis = workspace->getAxis(1);
+  auto sharedX = Kernel::make_cow<HistogramData::HistogramX>(xAxis);
   for (size_t i = 0; i < nGroups; i++) {
-    workspace->mutableX(i) = xAxis;
+    workspace->setSharedX(i, sharedX);
     verticalAxis->setValue(i, yAxis.at(i));
   }
 }

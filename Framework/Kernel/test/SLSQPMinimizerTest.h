@@ -42,11 +42,11 @@ public:
 
     ObjFunction userFunc;
     TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     equality = DblMatrix(1, nparams - 1); // cols < number parameters
     TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -60,11 +60,11 @@ public:
 
     ObjFunction userFunc;
     TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     inequality = DblMatrix(1, nparams - 1); // cols < number parameters
     TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_minimizer_calls_user_function() {

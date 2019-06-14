@@ -1,15 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAsciiStl.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <fstream>
-#include <string>
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadAsciiStl::isAsciiSTL() {
-  std::ifstream file(m_filename.c_str());
+bool LoadAsciiStl::isAsciiSTL(std::string filename) {
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    // if the file cannot be read then it is not a valid asciiStl File
+    return false;
+  }
   std::string line;
   getline(file, line);
   boost::trim(line);
@@ -22,32 +29,52 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
   getline(file, line);
   m_lineNumber++;
   Kernel::V3D t1, t2, t3;
+  uint32_t vertexCount = 0;
   while (readSTLTriangle(file, t1, t2, t3)) {
     // Add triangle if all 3 vertices are distinct
     if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
         !areEqualVertices(t2, t3)) {
-      m_triangle.emplace_back(addSTLVertex(t1));
-      m_triangle.emplace_back(addSTLVertex(t2));
-      m_triangle.emplace_back(addSTLVertex(t3));
+      auto vertexPair = std::pair<Kernel::V3D, uint32_t>(t1, vertexCount);
+      auto emplacementResult = vertexSet.insert(vertexPair);
+      if (emplacementResult.second) {
+        vertexCount++;
+      }
+      m_triangle.emplace_back(emplacementResult.first->second);
+      vertexPair = std::pair<Kernel::V3D, uint32_t>(t2, vertexCount);
+      emplacementResult = vertexSet.insert(vertexPair);
+      if (emplacementResult.second) {
+        vertexCount++;
+      }
+      m_triangle.emplace_back(emplacementResult.first->second);
+      vertexPair = std::pair<Kernel::V3D, uint32_t>(t3, vertexCount);
+      emplacementResult = vertexSet.insert(vertexPair);
+      if (emplacementResult.second) {
+        vertexCount++;
+      }
+      m_triangle.emplace_back(emplacementResult.first->second);
     }
   }
-  // Use efficient constructor of MeshObject
-  std::unique_ptr<Geometry::MeshObject> retVal =
-      Kernel::make_unique<Geometry::MeshObject>(std::move(m_triangle),
-                                                std::move(m_verticies),
-                                                Mantid::Kernel::Material());
+  changeToVector();
+  Mantid::Kernel::Material material;
+  if (m_setMaterial) {
+    g_logstl.information("Setting Material");
+    ReadMaterial reader;
+    reader.setMaterialParameters(m_params);
+    material = *(reader.buildMaterial());
+  } else {
+    material = Mantid::Kernel::Material();
+  }
+  auto retVal = std::make_unique<Geometry::MeshObject>(
+      std::move(m_triangle), std::move(m_vertices), material);
   return retVal;
 }
 
 bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
                                    Kernel::V3D &v2, Kernel::V3D &v3) {
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
-    const bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
-                     readSTLVertex(file, v3));
-    if (!ok) {
-      throw Kernel::Exception::ParseError("Error on reading STL triangle",
-                                          m_filename, m_lineNumber);
-    }
+    readSTLVertex(file, v1);
+    readSTLVertex(file, v2);
+    readSTLVertex(file, v3);
   } else {
     return false; // End of file
   }
@@ -62,16 +89,18 @@ bool LoadAsciiStl::readSTLVertex(std::ifstream &file, Kernel::V3D &vertex) {
     std::vector<std::string> tokens;
     boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
     if (tokens.size() == 4 && tokens[0] == "vertex") {
-      vertex.setX(std::stod(tokens[1]));
-      vertex.setY(std::stod(tokens[2]));
-      vertex.setZ(std::stod(tokens[3]));
+      double xVal = std::stod(tokens[1]);
+      double yVal = std::stod(tokens[2]);
+      double zVal = std::stod(tokens[3]);
+      vertex = createScaledV3D(xVal, yVal, zVal);
       return true;
     } else {
       throw Kernel::Exception::ParseError("Error on reading STL vertex",
                                           m_filename, m_lineNumber);
     }
   }
-  return false;
+  throw Kernel::Exception::ParseError("Error on reading STL triangle",
+                                      m_filename, m_lineNumber);
 }
 
 // Read, check and ignore line in STL file. Return true if line is read

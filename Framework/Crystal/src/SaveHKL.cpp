@@ -39,7 +39,7 @@ DECLARE_ALGORITHM(SaveHKL)
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
@@ -66,14 +66,14 @@ void SaveHKL::init() {
   declareProperty("Radius", EMPTY_DBL(), mustBePositive,
                   "Radius of the sample in centimeters");
   declareProperty("PowerLambda", 4.0, "Power of lambda ");
-  declareProperty(make_unique<FileProperty>("SpectraFile", "",
-                                            API::FileProperty::OptionalLoad,
-                                            ".dat"),
-                  " Spectrum data read from a spectrum file.");
-
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".hkl"),
-      "Path to an hkl file to save.");
+      std::make_unique<FileProperty>("SpectraFile", "",
+                                     API::FileProperty::OptionalLoad, ".dat"),
+      " Spectrum data read from a spectrum file.");
+
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".hkl"),
+                  "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
   declareProperty("SortBy", histoTypes[2],
@@ -84,7 +84,7 @@ void SaveHKL::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "SaveHKLOutput", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty(
@@ -95,7 +95,7 @@ void SaveHKL::init() {
       "Extra columns (22 total) in file if true for direction cosines.\n"
       "If false, original 14 columns (default).");
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "UBFilename", "", FileProperty::OptionalLoad, exts),
                   "Path to an ISAW-style UB matrix text file only needed for "
                   "DirectionCosines if workspace does not have lattice.");
@@ -274,9 +274,8 @@ void SaveHKL::exec() {
                    << "Power Lorentz corrections = " << m_power_th << " \n";
   API::Run &run = peaksW->mutableRun();
   if (run.hasProperty("Radius")) {
-    Kernel::Property *prop = run.getProperty("Radius");
     if (m_radius == EMPTY_DBL())
-      m_radius = boost::lexical_cast<double, std::string>(prop->value());
+      m_radius = run.getPropertyValueAsType<double>("Radius");
   } else {
     run.addProperty<double>("Radius", m_radius, true);
   }
@@ -348,7 +347,7 @@ void SaveHKL::exec() {
           banned.insert(wi);
           continue;
         }
-        int run = p.getRunNumber();
+        const int runNumber = p.getRunNumber();
         int seqNum = p.getPeakNumber();
         int bank = 0;
         std::string bankName = p.getBankName();
@@ -410,7 +409,7 @@ void SaveHKL::exec() {
         bankSequence = static_cast<int>(
             std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
         runSequence = static_cast<int>(
-            std::distance(uniqueRuns.begin(), uniqueRuns.find(run)));
+            std::distance(uniqueRuns.begin(), uniqueRuns.find(runNumber)));
         if (correctPeaks) {
           // correct for the slant path throught the scintillator glass
           double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
@@ -549,7 +548,7 @@ void SaveHKL::exec() {
                 << dir_cos_2[k];
           }
 
-          out << std::setw(6) << run;
+          out << std::setw(6) << runNumber;
 
           out << std::setw(6) << seqNum;
 
@@ -571,7 +570,7 @@ void SaveHKL::exec() {
 
           out << std::setw(7) << std::fixed << std::setprecision(4) << tbar;
 
-          out << std::setw(7) << run;
+          out << std::setw(7) << runNumber;
 
           out << std::setw(7) << wi + 1;
 

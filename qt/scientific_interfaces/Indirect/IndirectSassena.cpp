@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSassena.h"
 
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+
 #include <QFileInfo>
 #include <QString>
 
@@ -16,9 +18,10 @@ IndirectSassena::IndirectSassena(QWidget *parent)
   m_uiForm.setupUi(parent);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(handleAlgorithmFinish(bool)));
-  // Handle plotting and saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 void IndirectSassena::setup() {}
@@ -29,9 +32,14 @@ void IndirectSassena::setup() {}
  * @return Whether the form was valid
  */
 bool IndirectSassena::validate() {
-  // There is very little to actually be invalid here
-  // that was not already done via restrictions on input
-  return true;
+  UserInputValidator uiv;
+
+  auto const inputFileName = m_uiForm.mwInputFile->getFirstFilename();
+  if (inputFileName.isEmpty())
+    uiv.addErrorMessage("Incorrect input file provided.");
+
+  emit showMessageBox(uiv.generateErrorMessage());
+  return uiv.isAllInputValid();
 }
 
 /**
@@ -41,27 +49,23 @@ void IndirectSassena::run() {
   using namespace Mantid::API;
   using MantidQt::API::BatchAlgorithmRunner;
 
-  QString inputFileName = m_uiForm.mwInputFile->getFirstFilename();
-  QFileInfo inputFileInfo(inputFileName);
-  m_outWsName = inputFileInfo.baseName();
+  setRunIsRunning(true);
+
+  QString const inputFileName = m_uiForm.mwInputFile->getFirstFilename();
+  m_outWsName = QFileInfo(inputFileName).baseName();
 
   // If the workspace group already exists then remove it
   if (AnalysisDataService::Instance().doesExist(m_outWsName.toStdString()))
     AnalysisDataService::Instance().deepRemoveGroup(m_outWsName.toStdString());
 
-  IAlgorithm_sptr sassenaAlg =
-      AlgorithmManager::Instance().create("LoadSassena");
+  auto sassenaAlg = AlgorithmManager::Instance().create("LoadSassena");
   sassenaAlg->initialize();
-
   sassenaAlg->setProperty("Filename", inputFileName.toStdString());
   sassenaAlg->setProperty("SortByQVectors", m_uiForm.cbSortQ->isChecked());
   sassenaAlg->setProperty("TimeUnit", m_uiForm.sbTimeUnit->value());
   sassenaAlg->setProperty("OutputWorkspace", m_outWsName.toStdString());
 
   m_batchAlgoRunner->addAlgorithm(sassenaAlg);
-
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSassenaAlg;
-  inputFromSassenaAlg["InputWorkspace"] = m_outWsName.toStdString();
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -72,14 +76,11 @@ void IndirectSassena::run() {
  * @param error If the batch was stopped due to error
  */
 void IndirectSassena::handleAlgorithmFinish(bool error) {
-
-  // Nothing to do if the algorithm failed
-  if (error)
-    return;
-
-  // Enable plot and save
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
+  setRunIsRunning(false);
+  if (error) {
+    setPlotEnabled(false);
+    setSaveEnabled(false);
+  }
 }
 
 /**
@@ -92,12 +93,16 @@ void IndirectSassena::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
 }
 
+void IndirectSassena::runClicked() { runTab(); }
+
 /**
  * Handle mantid plotting of workspace
  */
 void IndirectSassena::plotClicked() {
+  setPlotIsPlotting(true);
   if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), true))
     plotSpectrum(m_outWsName);
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -107,6 +112,34 @@ void IndirectSassena::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), false))
     addSaveWorkspaceToQueue(m_outWsName);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void IndirectSassena::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void IndirectSassena::setPlotIsPlotting(bool running) {
+  m_uiForm.pbPlot->setText(running ? "Plotting..." : "Plot Result");
+  setButtonsEnabled(!running);
+}
+
+void IndirectSassena::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotEnabled(enabled);
+  setSaveEnabled(enabled);
+}
+
+void IndirectSassena::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void IndirectSassena::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+
+void IndirectSassena::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
 }
 
 } // namespace CustomInterfaces

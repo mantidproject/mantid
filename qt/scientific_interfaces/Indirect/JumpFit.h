@@ -23,33 +23,25 @@ class DLLExport JumpFit : public IndirectFitAnalysisTab {
 public:
   JumpFit(QWidget *parent = nullptr);
 
+  std::string tabName() const override { return "FQFit"; }
+
+  bool hasResolution() const override { return false; }
+
   void setupFitTab() override;
 
 protected slots:
-  void updatePlotOptions() override;
   void updateModelFitTypeString();
-  void plotClicked();
   void runClicked();
 
 protected:
-  bool shouldEnablePlotResult() override;
-
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
-
   void setRunIsRunning(bool running) override;
+  void setRunEnabled(bool enable) override;
 
 private slots:
-  void updateParameterFitTypes();
+  void updateAvailableFitTypes();
 
 private:
-  void addEISFFunctionsToFitTypeComboBox();
-  void addWidthFunctionsToFitTypeComboBox();
-
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setPlotResultIsPlotting(bool plotting);
+  void addFunctions(std::vector<std::string> const &functions);
 
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;

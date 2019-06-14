@@ -49,7 +49,13 @@ def get_run_number(ws_name):
         if match:
             run_number = match.group(2)
         else:
-            raise RuntimeError("Could not find run number associated with workspace.")
+            # attempt reading from the logs (ILL)
+            run = workspace.getRun()
+            if run.hasProperty('run_number'):
+                log = run.getLogData('run_number').value
+                run_number = log.split(',')[0]
+            else:
+                raise RuntimeError("Could not find run number associated with workspace.")
 
     return run_number
 
@@ -263,7 +269,7 @@ def PadArray(inarray, nfixed):
     return outarray
 
 
-def CheckAnalysers(in1WS, in2WS):
+def check_analysers_are_equal(in1WS, in2WS):
     """
     Check workspaces have identical analysers and reflections
 
@@ -275,8 +281,8 @@ def CheckAnalysers(in1WS, in2WS):
       @return None
 
     Raises:
-      @exception Valuerror - workspaces have different analysers
-      @exception Valuerror - workspaces have different reflections
+      @exception ValueError - workspaces have different analysers
+      @exception ValueError - workspaces have different reflections
     """
     ws1 = s_api.mtd[in1WS]
     try:
@@ -299,9 +305,42 @@ def CheckAnalysers(in1WS, in2WS):
         logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
 
 
+def get_sample_log(workspace, log_name):
+    table = s_api.CreateLogPropertyTable(workspace, log_name, EnableLogging=False)
+    log_value = table.cell(0, 0) if table else None
+    s_api.DeleteWorkspace(table, EnableLogging=False)
+    return log_value
+
+
+def try_get_sample_log(workspace, log_name):
+    messages = s_api.CheckForSampleLogs(workspace, log_name, EnableLogging=False)
+    return get_sample_log(workspace, log_name) if not messages else None
+
+
+def check_e_fixed_are_equal(workspace1, workspace2):
+    if getEfixed(workspace1) != getEfixed(workspace2):
+        raise ValueError('Workspaces {0} and {1} have a different EFixed.' % (workspace1, workspace2))
+
+
+def is_technique_direct(workspace):
+    return try_get_sample_log(workspace, 'deltaE-mode') == 'Direct'
+
+
+def CheckAnalysersOrEFixed(workspace1, workspace2):
+    """
+    Check that the workspaces have EFixed if the technique is direct, otherwise check that the analysers and
+    reflections are identical
+    """
+    if is_technique_direct(workspace1) or is_technique_direct(workspace2):
+        logger.warning('Could not find an analyser for the input workspaces because the energy mode is Direct')
+        check_e_fixed_are_equal(workspace1, workspace2)
+    else:
+        check_analysers_are_equal(workspace1, workspace2)
+
+
 def CheckHistZero(inWS):
     """
-    Retrieves basic info on a worskspace
+    Retrieves basic info on a workspace
 
     Checks the workspace is not empty, then returns the number of histogram and
     the number of X-points, which is the number of bin boundaries minus one

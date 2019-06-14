@@ -58,14 +58,13 @@ const std::string CalculateDynamicRange::summary() const {
  */
 void CalculateDynamicRange::init() {
   auto unitValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::InOut, unitValidator),
                   "An input workspace.");
 
-  declareProperty(
-      Kernel::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
-          "ComponentNames"),
-      "List of component names to calculate the q ranges for.");
+  declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
+                      "ComponentNames"),
+                  "List of component names to calculate the q ranges for.");
 }
 
 /**
@@ -80,9 +79,11 @@ void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
   const auto &spectrumInfo = workspace->spectrumInfo();
   double min = std::numeric_limits<double>::max(),
          max = std::numeric_limits<double>::min();
+  // PARALLEL_FOR_NO_WSP_CHECK does not work with range-based for so NOLINT this
+  // block
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t index = 0; index < static_cast<int64_t>(indices.size());
-       ++index) {
+       ++index) { // NOLINT (modernize-for-loop)
     if (!spectrumInfo.isMonitor(indices[index]) &&
         !spectrumInfo.isMasked(indices[index])) {
       const auto &spectrum = workspace->histogram(indices[index]);
