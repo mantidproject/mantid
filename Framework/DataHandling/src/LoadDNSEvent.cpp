@@ -73,9 +73,9 @@ void LoadDNSEvent::init() {
   /// Initialise the properties
 
   const std::vector<std::string> exts{".mdat"};
-  declareProperty(std::make_unique<FileProperty>("InputFile", "",
-                                                    FileProperty::Load, exts),
-                  "The XML or Map file with full path.");
+  declareProperty(
+      std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
+      "The XML or Map file with full path.");
 
   declareProperty(std::make_unique<Kernel::PropertyWithValue<uint>>(
                       "ChopperChannel", 1,
@@ -91,9 +91,10 @@ void LoadDNSEvent::init() {
                       Kernel::Direction::Input),
                   "The Monitor Channel");
 
-  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output workspace.");
 }
 
 /// Run the algorithm
