@@ -43,9 +43,9 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
-      : m_thetaTolerance(0.01),
-        m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
-        m_runsTableView(), m_progressView(), m_messageHandler(),
+      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
+                                              "POLREF", "OFFSPEC"},
+        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
         m_searcher(nullptr), m_autoreduction(), m_pythonRunner(),
         m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
@@ -122,7 +122,7 @@ public:
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setSearchButtonEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true)).Times(1);
-    presenter.notifySearchResults();
+    presenter.notifySearchComplete();
     verifyAndClear();
   }
 
@@ -297,7 +297,7 @@ public:
     auto presenter = makePresenter();
     expectIsNotAutoreducing();
     EXPECT_CALL(m_view, resizeSearchResultsColumnsToContents()).Times(1);
-    presenter.notifySearchResults();
+    presenter.notifySearchComplete();
     verifyAndClear();
   }
 
@@ -305,7 +305,7 @@ public:
     auto presenter = makePresenter();
     expectIsAutoreducing();
     EXPECT_CALL(m_view, resizeSearchResultsColumnsToContents()).Times(0);
-    presenter.notifySearchResults();
+    presenter.notifySearchComplete();
     verifyAndClear();
   }
 
@@ -314,7 +314,7 @@ public:
     expectIsAutoreducing();
     EXPECT_CALL(m_autoreduction, setSearchResultsExist()).Times(AtLeast(1));
     EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
-    presenter.notifySearchResults();
+    presenter.notifySearchComplete();
     verifyAndClear();
   }
 
@@ -334,7 +334,7 @@ public:
           .Times(1)
           .WillOnce(ReturnRef(searchResult));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
-    presenter.notifySearchResults();
+    presenter.notifySearchComplete();
     verifyAndClear();
   }
 

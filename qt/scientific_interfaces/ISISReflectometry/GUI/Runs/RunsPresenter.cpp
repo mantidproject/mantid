@@ -115,7 +115,7 @@ void RunsPresenter::notifySearch() {
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
-void RunsPresenter::notifySearchResults() {
+void RunsPresenter::notifySearchComplete() {
   m_instrumentChanged = false;
 
   if (!isAutoreducing())

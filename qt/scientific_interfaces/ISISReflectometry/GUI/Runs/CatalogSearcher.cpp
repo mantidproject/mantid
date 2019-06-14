@@ -80,7 +80,7 @@ void CatalogSearcher::notifySearchComplete() {
     results().addDataFromTable(table, m_instrument);
   }
 
-  m_notifyee->notifySearchResults();
+  m_notifyee->notifySearchComplete();
 }
 
 bool CatalogSearcher::searchInProgress() const { return m_searchInProgress; }

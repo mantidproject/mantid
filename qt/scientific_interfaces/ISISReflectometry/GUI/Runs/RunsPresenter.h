@@ -105,7 +105,7 @@ public:
   void notifyCheckForNewRuns() override;
 
   // SearcherSubscriber overrides
-  void notifySearchResults() override;
+  void notifySearchComplete() override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;
