@@ -321,7 +321,7 @@ void FilterEvents::exec() {
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   Goniometer inputGonio = m_eventWS->run().getGoniometer();
-  for (auto miter : m_outputWorkspacesMap) {
+  for (auto &miter : m_outputWorkspacesMap) {
     try {
       DataObjects::EventWorkspace_sptr ws_i = miter.second;
       ws_i->mutableRun().setGoniometer(inputGonio, true);
