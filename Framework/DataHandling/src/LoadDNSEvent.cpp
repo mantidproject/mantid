@@ -66,8 +66,8 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadDNSEvent)
 
 const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
-const unsigned MAX_BUFFER_BYTES_SIZE = 1500;     // maximum buffer size in data file
-const unsigned DETECTOR_PIXEL_COUNT = 960 * 128; // number of >pixels< in detector
+const unsigned MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
+const unsigned DETECTOR_PIXEL_COUNT = 960 * 128; // number of pixels in detector
 
 void LoadDNSEvent::init() {
   /// Initialise the properties
