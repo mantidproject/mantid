@@ -733,13 +733,20 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min,
  * @param lower :: The lower bound property in the property browser
  * @param upper :: The upper bound property in the property browser
  * @param bounds :: The upper and lower bounds to be set
+ * @param range :: The range to set the range selector to.
  */
-void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower,
-                                   QtProperty *upper,
-                                   const QPair<double, double> &bounds) {
+void IndirectTab::setRangeSelector(
+    RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+    const QPair<double, double> &bounds,
+    const boost::optional<QPair<double, double>> &range) {
   m_dblManager->setValue(lower, bounds.first);
   m_dblManager->setValue(upper, bounds.second);
-  rs->setRange(bounds.first, bounds.second);
+  rs->setLimits(bounds.first, bounds.second);
+
+  if (!range)
+    rs->setRange(bounds.first, bounds.second);
+  else
+    rs->setRange(range.get().first, range.get().second);
 }
 
 /**

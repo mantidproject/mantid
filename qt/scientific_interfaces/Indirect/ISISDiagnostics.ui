@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>524</width>
-    <height>448</height>
+    <height>633</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -109,11 +109,30 @@
       <string>Time Slice</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
-       <layout class="QVBoxLayout" name="properties"/>
+       <layout class="QVBoxLayout" name="properties">
+        <property name="topMargin">
+         <number>9</number>
+        </property>
+        <property name="bottomMargin">
+         <number>9</number>
+        </property>
+       </layout>
       </item>
       <item>
        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppRawPlot" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>200</height>
+         </size>
+        </property>
         <property name="canvasColour" stdset="0">
          <color>
           <red>255</red>
@@ -132,8 +151,20 @@
       <string>Preview</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_15">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppSlicePreview" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>200</height>
+         </size>
+        </property>
         <property name="canvasColour" stdset="0">
          <color>
           <red>255</red>
@@ -258,12 +289,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/DataSelector.h</header>
@@ -272,6 +297,12 @@
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::API::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

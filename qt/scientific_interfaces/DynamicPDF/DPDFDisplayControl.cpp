@@ -145,9 +145,8 @@ void DisplayControl::updateSliceForFitting() {
   m_displayModelFit->addSpectrum(curveType::data, m_dataShown);
   auto curveRange = m_displayModelFit->getCurveRange(curveType::data);
   auto rangeSelectorFit = m_displayModelFit->m_rangeSelector.at(dcRange::fit);
+  rangeSelectorFit->setLimits(curveRange.first, curveRange.second);
   rangeSelectorFit->setRange(curveRange.first, curveRange.second);
-  rangeSelectorFit->setMinimum(curveRange.first);
-  rangeSelectorFit->setMaximum(curveRange.second);
   // emit signalRangeSelectorFitUpdated();
 }
 

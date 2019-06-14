@@ -141,8 +141,7 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
                        m_properties["EMax"], range);
   setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);
-  xRangeSelector->setMinimum(range.first);
-  xRangeSelector->setMaximum(range.second);
+
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 }

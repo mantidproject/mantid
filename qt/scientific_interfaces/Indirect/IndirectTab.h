@@ -19,6 +19,9 @@
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
+#include <boost/none_t.hpp>
+#include <boost/optional.hpp>
+
 #include <QDoubleValidator>
 #include <QMap>
 #include <QPair>
@@ -153,9 +156,10 @@ protected:
                             QtProperty *min, QtProperty *max,
                             const QPair<double, double> &bounds);
   /// Function to set the range selector on the mini plot
-  void setRangeSelector(MantidQt::MantidWidgets::RangeSelector *rs,
-                        QtProperty *lower, QtProperty *upper,
-                        const QPair<double, double> &bounds);
+  void setRangeSelector(
+      MantidQt::MantidWidgets::RangeSelector *rs, QtProperty *lower,
+      QtProperty *upper, const QPair<double, double> &bounds,
+      const boost::optional<QPair<double, double>> &range = boost::none);
 
   /// Function to get energy mode from a workspace
   std::string getEMode(Mantid::API::MatrixWorkspace_sptr ws);

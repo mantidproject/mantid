@@ -44,12 +44,28 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
 }
 
+void RangeSelector::setLimits(const std::pair<double, double> &limits) {
+  setLimits(limits.first, limits.second);
+}
+
+void RangeSelector::setLimits(const double min, const double max) {
+  // Not used for Mpl as limits are set when creating the range marker.
+  Q_UNUSED(min);
+  Q_UNUSED(max);
+}
+
+std::pair<double, double> RangeSelector::getLimits() const {
+  const auto limits = m_plot->getAxisRange();
+  return std::make_pair(std::get<0>(limits), std::get<1>(limits));
+}
+
 void RangeSelector::setRange(const std::pair<double, double> &range) {
   setRange(range.first, range.second);
 }
 
 void RangeSelector::setRange(const double min, const double max) {
   m_rangeMarker->setXRange(min, max);
+  m_plot->replot();
   emit selectionChanged(min, max);
 }
 

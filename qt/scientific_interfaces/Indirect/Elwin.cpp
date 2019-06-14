@@ -176,13 +176,12 @@ void Elwin::setup() {
       m_uiForm.ppPlot->addRangeSelector("ElwinBackgroundRange");
   backgroundRangeSelector->setColour(
       Qt::darkGreen); // dark green for background
-  connect(integrationRangeSelector, SIGNAL(rangeChanged(double, double)),
+  connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)),
           backgroundRangeSelector, SLOT(setRange(double, double)));
   connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this,
           SLOT(minChanged(double)));
   connect(backgroundRangeSelector, SIGNAL(maxValueChanged(double)), this,
           SLOT(maxChanged(double)));
-  backgroundRangeSelector->setRange(integrationRangeSelector->getRange());
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRS(QtProperty *, double)));
@@ -524,6 +523,14 @@ void Elwin::newInputFiles() {
   QString const wsname = m_uiForm.cbPreviewFile->currentText();
   auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
   setInputWorkspace(inputWs);
+
+  const auto range = getXRangeFromWorkspace(inputWs);
+  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"),
+                   m_properties["IntegrationStart"],
+                   m_properties["IntegrationEnd"], range);
+  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"),
+                   m_properties["BackgroundStart"],
+                   m_properties["BackgroundEnd"], range);
 }
 
 /**

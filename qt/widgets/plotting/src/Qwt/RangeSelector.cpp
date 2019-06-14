@@ -213,6 +213,24 @@ std::pair<double, double> RangeSelector::getRange() {
 }
 
 /**
+ * @brief set the range of the range selector
+ * @param range The minimum and maximum of the range
+ */
+void RangeSelector::setRange(const std::pair<double, double> &range) {
+  setRange(range.first, range.second);
+}
+
+/**
+ * @brief set the range of the range selector
+ * @param min The minimum of the range.
+ * @param max The maximum of the range
+ */
+void RangeSelector::setRange(double min, double max) {
+  setMin(min);
+  setMax(max);
+}
+
+/**
  * @brief set the lowest and highest values for the position of the minimum and
  * maximum
  * @post ensures the lines marking the position of the maximum and the minimum
@@ -220,7 +238,7 @@ std::pair<double, double> RangeSelector::getRange() {
  * @param min
  * @param max
  */
-void RangeSelector::setRange(double min, double max) {
+void RangeSelector::setLimits(double min, double max) {
   m_lower = (min < max) ? min : max;
   m_higher = (min < max) ? max : min;
   verify();
@@ -232,8 +250,17 @@ void RangeSelector::setRange(double min, double max) {
  * maximum
  * @param range
  */
-void RangeSelector::setRange(std::pair<double, double> range) {
-  this->setRange(range.first, range.second);
+void RangeSelector::setLimits(std::pair<double, double> range) {
+  this->setLimits(range.first, range.second);
+}
+
+/**
+ * @brief get the lowest and highest limits for the range selector
+ * @return the limits for the allowed values of the range selector
+ */
+std::pair<double, double> RangeSelector::getLimits() const {
+  std::pair<double, double> limits(m_lower, m_higher);
+  return limits;
 }
 
 /**

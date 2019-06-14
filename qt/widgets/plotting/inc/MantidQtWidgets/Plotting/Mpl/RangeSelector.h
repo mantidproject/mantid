@@ -30,7 +30,11 @@ public:
                 const QColor &colour = Qt::black);
 
   void setColour(const QColor &colour);
+  void setLimits(const std::pair<double, double> &limits);
+  void setLimits(const double min, const double max);
+  std::pair<double, double> getLimits() const;
   void setRange(const std::pair<double, double> &range);
+  void setRange(const double min, const double max);
   std::pair<double, double> getRange() const;
 
   void setMinimum(const double min);
@@ -40,12 +44,10 @@ public:
 
   void setVisible(bool visible);
 
+  void detach();
+
 signals:
   void selectionChanged(double min, double max);
-
-public slots:
-  void setRange(const double min, const double max);
-  void detach();
 
 private slots:
   void handleMouseDown(const QPoint &point);

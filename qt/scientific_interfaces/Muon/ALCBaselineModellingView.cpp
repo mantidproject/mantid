@@ -171,6 +171,7 @@ void ALCBaselineModellingView::addSectionSelector(
   m_rangeSelectors[index] = newSelector;
 
   // Set initial values
+  newSelector->setLimits(values.first, values.second);
   newSelector->setRange(values.first, values.second);
   setSelectorValues(newSelector, values);
 
@@ -224,7 +225,7 @@ void ALCBaselineModellingView::setSelectorValues(
     values.first = values.second;
     values.second = tempSwapValue;
   }
-  selector->setRange(values.first, values.second);
+  selector->setLimits(values.first, values.second);
 }
 
 void ALCBaselineModellingView::help() {
