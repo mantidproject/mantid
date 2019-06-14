@@ -111,7 +111,7 @@ public:
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
-  MOCK_METHOD0(notifySearchResults, void());
+  MOCK_METHOD0(notifySearchComplete, void());
 };
 
 class MockEventPresenter : public IEventPresenter {
