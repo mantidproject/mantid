@@ -11,6 +11,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -20,11 +21,13 @@ namespace WorkflowAlgorithms {
     for the absence of curvature of the detector.
 
     Note: one could use SolidAngle to perform this calculation. Solid Angle
-    returns the solid angle of each detector pixel. The correction is then
-    given by:
+    returns the solid angle of each detector pixel, but that approach requires
+   more un-necessary calculations.
+
+    In the contrary, this algorithm performs analytical correction as follows:
       Omega(theta) = Omega(0) cos^3(theta)
       where Omega is the solid angle.
-    This approach requires more un-necessary calculations so we simply apply the
+     so we simply apply the
    cos^3(theta).
 
     Brulet et al, J. Appl. Cryst. (2007) 40, 165-177.
@@ -40,8 +43,11 @@ namespace WorkflowAlgorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SANSSolidAngleCorrection : public API::Algorithm {
+class DLLExport SANSSolidAngleCorrection : public API::Algorithm,
+                                           public API::DeprecatedAlgorithm {
 public:
+  SANSSolidAngleCorrection();
+
   /// Algorithm's name
   const std::string name() const override { return "SANSSolidAngleCorrection"; }
   /// Summary of algorithms purpose

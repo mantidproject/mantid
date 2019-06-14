@@ -27,6 +27,8 @@ using namespace DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
+namespace {
+
 /// Returns the angle between the sample-to-pixel vector and its
 /// projection on the X-Z plane.
 static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
@@ -42,6 +44,16 @@ static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
   // This is the angle between the sample-to-detector vector
   // and its project on the X-Z plane.
   return sampleDetVec.angle(inPlane);
+}
+
+}
+
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+SANSSolidAngleCorrection::SANSSolidAngleCorrection() {
+  useAlgorithm("SolidAngle");
+  deprecatedDate("2019-06-15");
 }
 
 void SANSSolidAngleCorrection::init() {
