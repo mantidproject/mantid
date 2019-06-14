@@ -35,12 +35,12 @@ using namespace DataObjects;
  *
  */
 void CalculateSensitivity::init() {
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The workspace containing the flood data");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The workspace containing the flood data");
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
