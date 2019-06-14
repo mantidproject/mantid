@@ -19,10 +19,10 @@ from qtpy.QtCore import (QFile, QFileInfo, QSettings)  # noqa
 from mantid.kernel import Logger
 
 # Check whether Mantid is available
-CAN_REDUCE = False
+HAS_CONFIG_SERVICE = False
 try:
-    CAN_REDUCE = True
     from mantid.kernel import ConfigService
+    HAS_CONFIG_SERVICE = True
 except ImportError:
     pass
 try:
@@ -36,7 +36,7 @@ if six.PY3:
 
 STARTUP_WARNING = ""
 
-if CAN_REDUCE:
+if HAS_CONFIG_SERVICE:
     try:
         import reduction  # noqa
         if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
@@ -99,7 +99,7 @@ class ReductionGUI(QMainWindow):
         self._number_of_nodes = 1
         self._cores_per_node = 16
         self._compute_resources = ['Fermi']
-        if CAN_REDUCE and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
+        if HAS_CONFIG_SERVICE and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
             self._compute_resources = ConfigService.Instance().getFacility().computeResources()
 
         # Internal flag for clearing all settings and restarting the application
@@ -114,7 +114,7 @@ class ReductionGUI(QMainWindow):
         # jcoenen-
 
         # Event connections
-        if not CAN_REDUCE:
+        if not HAS_CONFIG_SERVICE:
             self.reduce_button.hide()
         self.export_button.clicked.connect(self._export)
         self.reduce_button.clicked.connect(self.reduce_clicked)
@@ -161,7 +161,7 @@ class ReductionGUI(QMainWindow):
                 if self._instrument in INSTRUMENT_DICT[facility].keys():
                     self._facility = facility
                     break
-        if self._facility is None and IS_IN_MANTIDPLOT:
+        if self._facility is None and HAS_CONFIG_SERVICE:
             self._facility = ConfigService.Instance().getFacility().name()
 
         self.general_settings.facility_name = self._facility
