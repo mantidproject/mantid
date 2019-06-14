@@ -27,6 +27,9 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
 
   const unsigned int NUM_DECIMALS = 6;
 
+  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppMomentsPreview->setCanvasColour(QColor(240, 240, 240));
+
   MantidWidgets::RangeSelector *xRangeSelector =
       m_uiForm.ppRawPlot->addRangeSelector("XRange");
 
@@ -138,6 +141,8 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
                        m_properties["EMax"], range);
   setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);
+  xRangeSelector->setMinimum(range.first);
+  xRangeSelector->setMaximum(range.second);
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 }
@@ -168,6 +173,7 @@ void IndirectMoments::updateProperties(QtProperty *prop, double val) {
       m_dblManager->setValue(prop, emax);
     } else {
       m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMinimum(val);
+      m_uiForm.ppRawPlot->replot();
     }
   } else if (prop == m_properties["EMax"]) {
     double emin = m_dblManager->value(m_properties["EMin"]);
@@ -175,6 +181,7 @@ void IndirectMoments::updateProperties(QtProperty *prop, double val) {
       m_dblManager->setValue(prop, emin);
     } else {
       m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMaximum(val);
+      m_uiForm.ppRawPlot->replot();
     }
   }
 }

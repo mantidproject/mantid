@@ -455,7 +455,7 @@ void PreviewPlot::onWorkspaceRemoved(
       m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
-    m_canvas->draw();
+    this->replot();
   }
 }
 
@@ -471,7 +471,7 @@ void PreviewPlot::onWorkspaceReplaced(
     if (auto newWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
       m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS);
-      m_canvas->draw();
+      this->replot();
     }
   }
 }
