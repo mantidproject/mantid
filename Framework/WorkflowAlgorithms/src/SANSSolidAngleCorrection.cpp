@@ -49,13 +49,6 @@ static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
 } // namespace
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SANSSolidAngleCorrection::SANSSolidAngleCorrection() {
-  useAlgorithm("SolidAngle");
-  deprecatedDate("2019-06-15");
-}
-
 void SANSSolidAngleCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
