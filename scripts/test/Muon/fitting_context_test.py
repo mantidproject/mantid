@@ -17,13 +17,14 @@ class FittingContextTest(unittest.TestCase):
     def test_len_gives_length_of_fit_list(self):
         self.assertEqual(0, len(self.fitting_context))
         self.fitting_context.add_fit(
-            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock()))
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(), []))
         self.assertEqual(1, len(self.fitting_context))
 
     def test_items_can_be_added_to_fitting_context(self):
         fit_information_object = FitInformation(mock.MagicMock(),
                                                 'MuonGuassOsc',
-                                                mock.MagicMock())
+                                                mock.MagicMock(),
+                                                [])
 
         self.fitting_context.add_fit(fit_information_object)
 
@@ -34,10 +35,10 @@ class FittingContextTest(unittest.TestCase):
         test_fit_function = 'MuonGuassOsc'
         self.fitting_context.add_fit_from_values(mock.MagicMock(),
                                                  test_fit_function,
-                                                 mock.MagicMock())
+                                                 mock.MagicMock(), [])
         self.fitting_context.add_fit_from_values(mock.MagicMock(),
                                                  test_fit_function,
-                                                 mock.MagicMock())
+                                                 mock.MagicMock(), [])
 
         fit_functions = self.fitting_context.fit_function_names()
 
@@ -48,12 +49,12 @@ class FittingContextTest(unittest.TestCase):
             self):
         fit_information_object_0 = FitInformation(mock.MagicMock(),
                                                   'MuonGuassOsc',
-                                                  mock.MagicMock())
+                                                  mock.MagicMock(), [])
         fit_information_object_1 = FitInformation(mock.MagicMock(), 'MuonOsc',
-                                                  mock.MagicMock())
+                                                  mock.MagicMock(), [])
         fit_information_object_2 = FitInformation(mock.MagicMock(),
                                                   'MuonGuassOsc',
-                                                  mock.MagicMock())
+                                                  mock.MagicMock(), [])
         self.fitting_context.add_fit(fit_information_object_0)
         self.fitting_context.add_fit(fit_information_object_1)
         self.fitting_context.add_fit(fit_information_object_2)
@@ -69,11 +70,11 @@ class FittingContextTest(unittest.TestCase):
         fit_function_name = 'MuonGuassOsc'
         fit_information_object = FitInformation(parameter_workspace,
                                                 fit_function_name,
-                                                input_workspace)
+                                                input_workspace, [])
 
         self.fitting_context.add_fit_from_values(parameter_workspace,
                                                  fit_function_name,
-                                                 input_workspace)
+                                                 input_workspace, [])
 
         self.assertEqual(fit_information_object,
                          self.fitting_context.fit_list[0])

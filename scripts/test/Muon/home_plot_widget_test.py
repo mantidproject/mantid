@@ -106,10 +106,8 @@ class HomeTabPlotPresenterTest(GuiTest):
 
     def test_handle_fit_completed_adds_appropriate_fits_to_plot(self):
         self.model.plotted_workspaces = self.workspace_list
-        mock_fit = mock.MagicMock()
-        mock_fit.parameter_name = 'MUSR62260; Group; bottom; Asymmetry; MA; Fitted; Parameters'
-        self.context.fitting_context.find_fit_for_input_workspace_name.return_value =\
-            [mock_fit]
+        self.context.fitting_context.find_output_workspaces_for_input_workspace_name.return_value =\
+            ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted;']
 
         self.presenter.handle_fit_completed()
 

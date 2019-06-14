@@ -177,7 +177,7 @@ class ResultsTabModelTest(unittest.TestCase):
             'Error': [16, 0.002, 0.003, 0]
         }
         self.fitting_context.fit_list = create_test_fits(('ws1', ), 'func1',
-                                                         parameters)
+                                                         parameters, [])
         selected_results = [('ws1', 0)]
         table = self.model.create_results_table([], selected_results)
 
@@ -323,7 +323,7 @@ def create_test_fits_with_only_workspace_names(input_workspaces,
     return fits, list_state
 
 
-def create_test_fits(input_workspaces, function_name, parameters):
+def create_test_fits(input_workspaces, function_name, parameters, output_workspace_names):
     """
     Create a list of fits
     :param input_workspaces: The input workspaces
@@ -336,7 +336,7 @@ def create_test_fits(input_workspaces, function_name, parameters):
         parameter_workspace = mock.NonCallableMagicMock()
         parameter_workspace.workspace.toDict.return_value = parameters
         parameter_workspace.workspace_name = name + '_Parameters'
-        fits.append(FitInformation(parameter_workspace, function_name, name))
+        fits.append(FitInformation(parameter_workspace, function_name, name, output_workspace_names))
 
     return fits
 
@@ -351,7 +351,7 @@ def create_test_fits_with_logs(input_workspaces, function_name, parameters,
     :param logs: A list of log names to create
     :return: A list of Fits with workspaces/logs attached
     """
-    fits = create_test_fits(input_workspaces, function_name, parameters)
+    fits = create_test_fits(input_workspaces, function_name, parameters, [])
     for fit, workspace_name in zip(fits, input_workspaces):
         test_ws = create_test_workspace(workspace_name)
         run = test_ws.run()

@@ -28,6 +28,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._plot_window = None
         self._view.on_plot_button_clicked(self.handle_data_updated)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
+        self._view.on_plot_type_changed(self.handle_plot_type_changed)
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.fit_observer = GenericObserver(self.handle_fit_completed)
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
@@ -112,8 +113,10 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         :return:
         """
         for plotted_workspace in self._model.plotted_workspaces:
-            list_of_fits = self.context.fitting_context.find_fit_for_input_workspace_name(plotted_workspace)
-            list_of_workspaces_to_plot = [fit.parameter_name.replace(' Parameters', '') for fit in list_of_fits]
+            list_of_workspaces_to_plot = self.context.fitting_context.find_output_workspaces_for_input_workspace_name(plotted_workspace)
+
+            for workspace_name in list_of_workspaces_to_plot:
+                self._model.remove_workpace_from_plot(workspace_name)
 
             for workspace_name in list_of_workspaces_to_plot:
                 self._model.add_workspace_to_plot(workspace_name, 2)

@@ -118,3 +118,6 @@ class HomePlotWidgetView(QtWidgets.QWidget):
 
     def on_rebin_options_changed(self, slot):
         self.raw.stateChanged.connect(slot)
+
+    def on_plot_type_changed(self, slot):
+        self.plot_selector.currentIndexChanged.connect(slot)

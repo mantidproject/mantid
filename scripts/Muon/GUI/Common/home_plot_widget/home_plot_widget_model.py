@@ -51,6 +51,14 @@ class HomePlotWidgetModel(object):
         workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace], unrollGroups=True)
         self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True)
 
+    def remove_workpace_from_plot(self, workspace_name):
+        """
+        :param workspace_name: Name of workspace to remove from plot
+        :return:
+        """
+        workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+        self.plot_figure.gca().remove_workspace_artists(workspace)
+
     def _close_plot(self):
         """
         callback to call when the plot window is closed. Removes the reference and resets plotted workspaces
