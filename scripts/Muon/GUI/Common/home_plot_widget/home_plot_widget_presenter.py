@@ -114,8 +114,9 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         for plotted_workspace in self._model.plotted_workspaces:
             list_of_fits = self.context.fitting_context.find_fit_for_input_workspace_name(plotted_workspace)
             list_of_workspaces_to_plot = [fit.parameter_name.replace(' Parameters', '') for fit in list_of_fits]
+
             for workspace_name in list_of_workspaces_to_plot:
-                self._model.add_workspace_to_plot(workspace_name, 3)
+                self._model.add_workspace_to_plot(workspace_name, 2)
 
     def get_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """

@@ -114,7 +114,7 @@ class HomeTabPlotPresenterTest(GuiTest):
         self.presenter.handle_fit_completed()
 
         self.assertEqual(self.model.add_workspace_to_plot.call_count, 2)
-        self.model.add_workspace_to_plot.assert_called_with('MUSR62260; Group; bottom; Asymmetry; MA; Fitted;', 3)
+        self.model.add_workspace_to_plot.assert_called_with('MUSR62260; Group; bottom; Asymmetry; MA; Fitted;', 2)
 
 
 if __name__ == '__main__':
