@@ -295,9 +295,7 @@ public:
 
   void testNotifySearchResultsResizesColumnsWhenNotAutoreducing() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    expectIsNotAutoreducing();
     EXPECT_CALL(m_view, resizeSearchResultsColumnsToContents()).Times(1);
     presenter.notifySearchResults();
     verifyAndClear();
@@ -305,9 +303,7 @@ public:
 
   void testNotifySearchResultsDoesNotResizeColumnsWhenAutoreducing() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    expectIsAutoreducing();
     EXPECT_CALL(m_view, resizeSearchResultsColumnsToContents()).Times(0);
     presenter.notifySearchResults();
     verifyAndClear();
@@ -315,9 +311,7 @@ public:
 
   void testNotifySearchResultsResumesReductionWhenAutoreducing() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    expectIsAutoreducing();
     EXPECT_CALL(m_autoreduction, setSearchResultsExist()).Times(AtLeast(1));
     EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
     presenter.notifySearchResults();
@@ -326,9 +320,7 @@ public:
 
   void testNotifySearchResultsTransfersRowsWhenAutoreducing() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    expectIsAutoreducing();
     EXPECT_CALL(m_autoreduction, setSearchResultsExist()).Times(AtLeast(1));
     // Transfer some valid rows
     auto rowsToTransfer = std::set<int>{0, 1, 2};
@@ -363,9 +355,7 @@ public:
   void testTransferWithAutoreductionRunning() {
     auto presenter = makePresenter();
     expectGetValidSearchRowSelection();
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    expectIsAutoreducing();
     expectCreateEndlessProgressIndicator();
     presenter.notifyTransfer();
     verifyAndClear();
@@ -374,9 +364,7 @@ public:
   void testTransferWithAutoreductionStopped() {
     auto presenter = makePresenter();
     expectGetValidSearchRowSelection();
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    expectIsNotAutoreducing();
     expectCreatePercentageProgressIndicator();
     presenter.notifyTransfer();
     verifyAndClear();
@@ -632,12 +620,8 @@ private:
   }
 
   void expectWidgetsEnabledForAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    expectIsNotProcessing();
+    expectIsAutoreducing();
     EXPECT_CALL(m_view, updateMenuEnabledState(false));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
@@ -648,12 +632,8 @@ private:
   }
 
   void expectWidgetsEnabledForProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    expectIsProcessing();
+    expectIsNotAutoreducing();
     EXPECT_CALL(m_view, updateMenuEnabledState(true));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
@@ -664,12 +644,8 @@ private:
   }
 
   void expectWidgetsEnabledForProcessingAndAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+    expectIsProcessing();
+    expectIsAutoreducing();
     EXPECT_CALL(m_view, updateMenuEnabledState(true));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
@@ -680,12 +656,8 @@ private:
   }
 
   void expectWidgetsEnabledForPaused() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
     EXPECT_CALL(m_view, updateMenuEnabledState(false));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true));
@@ -693,6 +665,30 @@ private:
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
     EXPECT_CALL(m_view, setTransferButtonEnabled(true));
+  }
+
+  void expectIsAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+  }
+
+  void expectIsNotAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+  }
+
+  void expectIsProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+  }
+
+  void expectIsNotProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
   }
 
   double m_thetaTolerance;
