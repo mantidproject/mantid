@@ -466,7 +466,6 @@ def new_figure_manager_given_figure(num, figure):
 
 if __name__ == '__main__':
     # testing code
-    import numpy as np
 
     qapp = QApplication([' '])
     qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
