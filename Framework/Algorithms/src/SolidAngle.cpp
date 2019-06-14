@@ -31,6 +31,7 @@ using namespace API;
 using namespace Geometry;
 
 namespace {
+constexpr double MM_TO_METERS = 1. / 1000.;
 
 /**
  * Returns the angle between the sample-to-pixel vector and its
@@ -57,9 +58,10 @@ std::function<double(size_t)>
 getSolidAngleFunction(const DetectorInfo &detectorInfo,
                       const std::string &method, const double pixelArea) {
   if (method == "GenericShape") {
-    return [&detectorInfo](size_t index) {
-      return detectorInfo.detector(index).solidAngle(
-          detectorInfo.samplePosition());
+    const auto &samplePosition = detectorInfo.samplePosition();
+
+    return [&detectorInfo, &samplePosition](size_t index) {
+      return detectorInfo.detector(index).solidAngle(samplePosition);
     };
   } else if (method == "Rectangular") {
     return [&detectorInfo, pixelArea](size_t index) {
@@ -186,9 +188,9 @@ void SolidAngle::exec() {
     if (instrument->hasParameter("x-pixel-size") &&
         instrument->hasParameter("y-pixel-size")) {
       const double pixelSizeX =
-          instrument->getNumberParameter("x-pixel-size")[0] / 1000.;
+          instrument->getNumberParameter("x-pixel-size")[0] * MM_TO_METERS;
       const double pixelSizeY =
-          instrument->getNumberParameter("y-pixel-size")[0] / 1000.;
+          instrument->getNumberParameter("y-pixel-size")[0] * MM_TO_METERS;
       pixelAreaZero = pixelSizeX * pixelSizeY; // l2 is retrieved per pixel
     } else {
       // TODO: get the l2 as Z coordinate of the whole bank, and pixel sizes
