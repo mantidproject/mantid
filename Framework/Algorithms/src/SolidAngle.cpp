@@ -75,7 +75,8 @@ getSolidAngleFunction(const DetectorInfo &detectorInfo,
     };
   } else if (method == "VerticalTube") {
     return [&detectorInfo, pixelArea](size_t index) {
-      const double cosAlpha = std::cos(getTubeAngleVertical(detectorInfo, index));
+      const double cosAlpha =
+          std::cos(getTubeAngleVertical(detectorInfo, index));
       const double l2 = detectorInfo.l2(index);
       return pixelArea * cosAlpha / (l2 * l2);
     };
@@ -89,9 +90,11 @@ getSolidAngleFunction(const DetectorInfo &detectorInfo,
   } else if (method == "VerticalWing") {
     return [&detectorInfo, pixelArea](size_t index) {
       const double cosTheta = std::cos(detectorInfo.twoTheta(index));
-      const double cosAlpha = std::cos(getTubeAngleVertical(detectorInfo, index));
+      const double cosAlpha =
+          std::cos(getTubeAngleVertical(detectorInfo, index));
       const double l2 = detectorInfo.l2(index);
-      return pixelArea * cosAlpha * cosAlpha * cosAlpha / (l2 * l2 * cosTheta * cosTheta);
+      return pixelArea * cosAlpha * cosAlpha * cosAlpha /
+             (l2 * l2 * cosTheta * cosTheta);
     };
   } else if (method == "HorizontalWing") {
     return [&detectorInfo, pixelArea](size_t index) {
@@ -99,7 +102,8 @@ getSolidAngleFunction(const DetectorInfo &detectorInfo,
       const double cosAlpha =
           std::cos(getTubeAngleHorizontal(detectorInfo, index));
       const double l2 = detectorInfo.l2(index);
-      return pixelArea * cosAlpha * cosAlpha * cosAlpha/ (l2 * l2 * cosTheta * cosTheta);
+      return pixelArea * cosAlpha * cosAlpha * cosAlpha /
+             (l2 * l2 * cosTheta * cosTheta);
     };
   } else {
     throw std::runtime_error("Unknown method of solid angle calculation.");
@@ -139,10 +143,9 @@ void SolidAngle::init() {
   const std::vector<std::string> methods{"GenericShape", "Rectangular",
                                          "VerticalTube", "HorizontalTube",
                                          "VerticalWing", "HorizontalWing"};
-  declareProperty(
-      "Method", "GenericShape",
-      boost::make_shared<StringListValidator>(methods),
-      "Select the method to calculate the Solid Angle.");
+  declareProperty("Method", "GenericShape",
+                  boost::make_shared<StringListValidator>(methods),
+                  "Select the method to calculate the Solid Angle.");
 }
 
 /** Executes the algorithm
@@ -167,8 +170,8 @@ void SolidAngle::exec() {
     m_MaxSpec = numberOfSpectra - 1;
   }
 
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
-      inputWS, numberOfSpectra, 2, 1);
+  MatrixWorkspace_sptr outputWS =
+      WorkspaceFactory::Instance().create(inputWS, numberOfSpectra, 2, 1);
   // The result of this will be a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
