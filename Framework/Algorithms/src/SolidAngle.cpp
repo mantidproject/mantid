@@ -55,40 +55,45 @@ double getTubeAngle(const DetectorInfo &detectorInfo, size_t index,
  */
 std::function<double(size_t)>
 getSolidAngleFunction(const DetectorInfo &detectorInfo,
-                      const std::string &method, const double solidAngleZero) {
+                      const std::string &method, const double pixelArea) {
   if (method == "GenericShape") {
     return [&detectorInfo](size_t index) {
       return detectorInfo.detector(index).solidAngle(
           detectorInfo.samplePosition());
     };
   } else if (method == "Rectangular") {
-    return [&detectorInfo, solidAngleZero](size_t index) {
+    return [&detectorInfo, pixelArea](size_t index) {
       const double cosTheta = std::cos(detectorInfo.twoTheta(index));
-      return solidAngleZero * cosTheta * cosTheta * cosTheta;
+      const double l2 = detectorInfo.l2(index);
+      return pixelArea * cosTheta / (l2 * l2);
     };
   } else if (method == "VerticalTube") {
-    return [&detectorInfo, solidAngleZero](size_t index) {
-      const double cosTheta = std::cos(detectorInfo.twoTheta(index));
+    return [&detectorInfo, pixelArea](size_t index) {
       const double cosAlpha = std::cos(getTubeAngle(detectorInfo, index, true));
-      return solidAngleZero * cosTheta * cosTheta * cosAlpha;
+      const double l2 = detectorInfo.l2(index);
+      return pixelArea * cosAlpha / (l2 * l2);
     };
   } else if (method == "HorizontalTube") {
-    return [&detectorInfo, solidAngleZero](size_t index) {
+    return [&detectorInfo, pixelArea](size_t index) {
+      const double cosAlpha =
+          std::cos(getTubeAngle(detectorInfo, index, false));
+      const double l2 = detectorInfo.l2(index);
+      return pixelArea * cosAlpha / (l2 * l2);
+    };
+  } else if (method == "VerticalWing") {
+    return [&detectorInfo, pixelArea](size_t index) {
+      const double cosTheta = std::cos(detectorInfo.twoTheta(index));
+      const double cosAlpha = std::cos(getTubeAngle(detectorInfo, index, true));
+      const double l2 = detectorInfo.l2(index);
+      return pixelArea * cosAlpha * cosAlpha * cosAlpha / (l2 * l2 * cosTheta * cosTheta);
+    };
+  } else if (method == "HorizontalWing") {
+    return [&detectorInfo, pixelArea](size_t index) {
       const double cosTheta = std::cos(detectorInfo.twoTheta(index));
       const double cosAlpha =
           std::cos(getTubeAngle(detectorInfo, index, false));
-      return solidAngleZero * cosTheta * cosTheta * cosAlpha;
-    };
-  } else if (method == "VerticalWing") {
-    return [&detectorInfo, solidAngleZero](size_t index) {
-      const double cosAlpha = std::cos(getTubeAngle(detectorInfo, index, true));
-      return solidAngleZero * cosAlpha * cosAlpha * cosAlpha;
-    };
-  } else if (method == "HorizontalWing") {
-    return [&detectorInfo, solidAngleZero](size_t index) {
-      const double cosAlpha =
-          std::cos(getTubeAngle(detectorInfo, index, false));
-      return solidAngleZero * cosAlpha * cosAlpha * cosAlpha;
+      const double l2 = detectorInfo.l2(index);
+      return pixelArea * cosAlpha * cosAlpha * cosAlpha/ (l2 * l2 * cosTheta * cosTheta);
     };
   } else {
     throw std::runtime_error("Unknown method of solid angle calculation.");
@@ -173,20 +178,18 @@ void SolidAngle::exec() {
 
   // this is the solid angle of the pixel at 2theta=0
   // this is used only if Method != GenericShape
-  double solidAngleZero = 0.;
+  double pixelAreaZero = 0.;
   const std::string method = getProperty("Method");
 
   if (method != "GenericShape") {
     const auto instrument = inputWS->getInstrument();
     if (instrument->hasParameter("x-pixel-size") &&
-        instrument->hasParameter("y-pixel-size") &&
-        instrument->hasParameter("l2")) {
+        instrument->hasParameter("y-pixel-size")) {
       const double pixelSizeX =
           instrument->getNumberParameter("x-pixel-size")[0] / 1000.;
       const double pixelSizeY =
           instrument->getNumberParameter("y-pixel-size")[0] / 1000.;
-      const double l2 = instrument->getNumberParameter("l2")[0];
-      solidAngleZero = pixelSizeX * pixelSizeY / (l2 * l2);
+      pixelAreaZero = pixelSizeX * pixelSizeY; // l2 is retrieved per pixel
     } else {
       // TODO: get the l2 as Z coordinate of the whole bank, and pixel sizes
       // from bounding box
@@ -196,7 +199,7 @@ void SolidAngle::exec() {
   }
 
   const auto solidAngleFunction =
-      getSolidAngleFunction(detectorInfo, method, solidAngleZero);
+      getSolidAngleFunction(detectorInfo, method, pixelAreaZero);
   const int loopIterations = m_MaxSpec - m_MinSpec;
   int failCount = 0;
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
