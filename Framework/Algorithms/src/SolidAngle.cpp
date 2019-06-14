@@ -39,15 +39,19 @@ constexpr double MM_TO_METERS = 1. / 1000.;
  * Note, in all cases Y is assumed to be the pointing-up direction, Z is the
  * beam direction.
  */
-double getTubeAngle(const DetectorInfo &detectorInfo, size_t index,
-                    const bool vertical) {
+double getTubeAngleVertical(const DetectorInfo &detectorInfo, size_t index) {
   const auto sampleDetVec =
       detectorInfo.position(index) - detectorInfo.samplePosition();
   auto inPlane = sampleDetVec;
-  if (vertical)
-    inPlane.setY(0.0);
-  else
-    inPlane.setX(0.0);
+  inPlane.setY(0.0);
+  return sampleDetVec.angle(inPlane);
+}
+
+double getTubeAngleHorizontal(const DetectorInfo &detectorInfo, size_t index) {
+  const auto sampleDetVec =
+      detectorInfo.position(index) - detectorInfo.samplePosition();
+  auto inPlane = sampleDetVec;
+  inPlane.setX(0.0);
   return sampleDetVec.angle(inPlane);
 }
 
@@ -71,21 +75,21 @@ getSolidAngleFunction(const DetectorInfo &detectorInfo,
     };
   } else if (method == "VerticalTube") {
     return [&detectorInfo, pixelArea](size_t index) {
-      const double cosAlpha = std::cos(getTubeAngle(detectorInfo, index, true));
+      const double cosAlpha = std::cos(getTubeAngleVertical(detectorInfo, index));
       const double l2 = detectorInfo.l2(index);
       return pixelArea * cosAlpha / (l2 * l2);
     };
   } else if (method == "HorizontalTube") {
     return [&detectorInfo, pixelArea](size_t index) {
       const double cosAlpha =
-          std::cos(getTubeAngle(detectorInfo, index, false));
+          std::cos(getTubeAngleHorizontal(detectorInfo, index));
       const double l2 = detectorInfo.l2(index);
       return pixelArea * cosAlpha / (l2 * l2);
     };
   } else if (method == "VerticalWing") {
     return [&detectorInfo, pixelArea](size_t index) {
       const double cosTheta = std::cos(detectorInfo.twoTheta(index));
-      const double cosAlpha = std::cos(getTubeAngle(detectorInfo, index, true));
+      const double cosAlpha = std::cos(getTubeAngleVertical(detectorInfo, index));
       const double l2 = detectorInfo.l2(index);
       return pixelArea * cosAlpha * cosAlpha * cosAlpha / (l2 * l2 * cosTheta * cosTheta);
     };
@@ -93,7 +97,7 @@ getSolidAngleFunction(const DetectorInfo &detectorInfo,
     return [&detectorInfo, pixelArea](size_t index) {
       const double cosTheta = std::cos(detectorInfo.twoTheta(index));
       const double cosAlpha =
-          std::cos(getTubeAngle(detectorInfo, index, false));
+          std::cos(getTubeAngleHorizontal(detectorInfo, index));
       const double l2 = detectorInfo.l2(index);
       return pixelArea * cosAlpha * cosAlpha * cosAlpha/ (l2 * l2 * cosTheta * cosTheta);
     };
