@@ -11,6 +11,7 @@
 #include "IndirectDataReductionTab.h"
 #include "IndirectInterface.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 

@@ -16,6 +16,16 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="1">
     <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="2">
+      <widget class="MantidQt::MantidWidgets::ColorBarWidget" name="colourBar" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="1">
       <widget class="MantidQt::MantidWidgets::SafeQwtPlot" name="plot2D">
        <property name="sizePolicy">
@@ -100,6 +110,11 @@
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::ColorBarWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/Qwt/ColorBarWidget.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::SafeQwtPlot</class>

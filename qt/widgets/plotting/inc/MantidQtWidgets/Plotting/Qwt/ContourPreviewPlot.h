@@ -56,10 +56,8 @@ public:
   SafeQwtPlot *getPlot2D();
 
   void setPlotVisible(bool const &visible);
-  void setColourBarVisible(bool const &visible);
 
   bool isPlotVisible() const;
-  bool isColourBarVisible() const;
 
   void setXAxisLabel(QString const &label);
   void setYAxisLabel(QString const &label);
@@ -70,19 +68,13 @@ protected:
       boost::shared_ptr<Mantid::API::Workspace> const workspace) override;
 
 private slots:
-  void handleColourRangeChanged();
-  void handleLoadColourMap();
   void handleSetTransparentZeros(bool const &transparent);
 
 private:
-  void setupColourBarAndPlot();
-  QString colourMapFileName(QString const &filename);
+  void setupPlot();
   void loadSettings();
-  void setCurrentColourMapFile(QSettings const &settings);
-  void setCurrentColourMapFile(QString const &file);
   void saveSettings();
 
-  void loadColourMap(QString filename = QString());
   void updateDisplay();
 
   void checkRangeLimits() const;
@@ -102,8 +94,6 @@ private:
   std::unique_ptr<QwtPlotSpectrogram> m_spectrogram;
   /// Data presenter
   std::unique_ptr<API::QwtRasterDataMD> m_data;
-  /// File of the last loaded colour map.
-  QString m_currentColourMapFile;
   /// Md Settings for colour maps
   boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
   /// Workspace being shown

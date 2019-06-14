@@ -64,9 +64,12 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
-  m_uiForm.rqwPlot2D->setColourBarVisible(false);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_uiForm.rqwPlot2D->setXAxisLabel("Energy (meV)");
   m_uiForm.rqwPlot2D->setYAxisLabel("Q (A-1)");
+#else
+  m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
+#endif
 }
 
 IndirectSqw::~IndirectSqw() {}
@@ -239,12 +242,8 @@ void IndirectSqw::plotSpectrumClicked() {
 void IndirectSqw::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
-    QString pyInput = "from mantidplot import plot2D\nimportMatrixWorkspace('" +
-                      QString::fromStdString(m_pythonExportWsName) +
-                      "').plotGraph2D()\n";
-    m_pythonRunner.runPythonCode(pyInput);
-  }
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    IndirectTab::plot2D(QString::fromStdString(m_pythonExportWsName));
 
   setPlotContourIsPlotting(false);
 }

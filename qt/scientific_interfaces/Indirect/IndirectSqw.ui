@@ -560,7 +560,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::ContourPreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Plotting/Qwt/ContourPreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/ContourPreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
