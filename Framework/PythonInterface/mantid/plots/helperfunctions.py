@@ -12,13 +12,14 @@ from __future__ import (absolute_import, division, print_function)
 import datetime
 
 import numpy
+from scipy.interpolate import interp1d
 
 import mantid.api
 import mantid.kernel
 from mantid.api import MultipleExperimentInfos
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
 from mantid.plots.utility import MantidAxType
-from scipy.interpolate import interp1d
+
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
 # These functions are common between plotfunctions.py and plotfunctions3D.py
@@ -645,3 +646,40 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
                 unit = unit.caption()
             axes_labels.append(unit)
     return tuple(axes_labels)
+
+
+def get_data_from_errorbar_container(err_cont):
+    """Get plot coordinates and errorbar sizes from ErrorbarContainer"""
+    x_segments = _get_x_errorbar_segments(err_cont)
+    y_segments = _get_y_errorbar_segments(err_cont)
+    x, y, x_errs, y_errs = [], [], None, None
+    if x_segments:
+        x_errs = []
+        for vertex in x_segments:
+            x_errs.append((vertex[1][0] - vertex[0][0])/2)
+            x.append((vertex[0][0] + vertex[1][0])/2)
+            y.append((vertex[0][1] + vertex[1][1])/2)
+        if y_segments:
+            y_errs = [(vertex[1][1] - vertex[0][1])/2 for vertex in y_segments]
+    else:
+        y_errs = []
+        for vertex in y_segments:
+            y_errs.append((vertex[1][1] - vertex[0][1])/2)
+            x.append((vertex[0][0] + vertex[1][0])/2)
+            y.append((vertex[0][1] + vertex[1][1])/2)
+    return x, y, x_errs, y_errs
+
+
+def _get_x_errorbar_segments(err_cont):
+    if err_cont.has_xerr:
+        return err_cont[2][0].get_segments()
+    return None
+
+
+def _get_y_errorbar_segments(err_cont):
+    if err_cont.has_yerr and not err_cont.has_xerr:
+        return err_cont[2][0].get_segments()
+    elif err_cont.has_yerr and err_cont.has_xerr:
+        return err_cont[2][1].get_segments()
+    else:
+        return None

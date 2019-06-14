@@ -30,7 +30,7 @@ class ColorSelector(QWidget):
     def __init__(self, initial_color=MPL_DEFAULT, parent=None):
         super(ColorSelector, self).__init__(parent=parent)
 
-        self.initial_color = initial_color
+        self.initial_color = QColor(initial_color)
 
         # Create line edit and push button and add to a horizontal layout
         self.line_edit = QLineEdit(self)

@@ -46,6 +46,14 @@ def errorbars_hidden(err_container):
     return hidden
 
 
+def get_ax_from_curve(curve):
+    """Get the Axes a Line2D or ErrorbarContainer sits on"""
+    if isinstance(curve, Line2D):
+        return curve.axes
+    elif isinstance(curve, ErrorbarContainer):
+        return curve[2][0].axes
+
+
 def get_marker_name(marker):
     for name, short_name in MARKER_MAP.items():
         if short_name == marker:
@@ -86,12 +94,30 @@ def get_ax_from_curve(curve):
         return curve[2][0].axes
 
 
-def curve_has_errors(curve):
+def remove_curve_from_ax(curve):
+    """
+    Remove a Line2D or ErrobarContainer from its Axes
+    :param curve: A Line2D or ErrorbarContainer object
+    """
     ax = get_ax_from_curve(curve)
-    if isinstance(curve, Line2D):
-        return False
+    if isinstance(ax, MantidAxes):
+        ax.remove_artists_if(lambda art: art == curve)
+    else:
+        curve.remove()
+        if isinstance(curve, ErrorbarContainer):
+            ax.containers.remove(curve)
+
+
+def curve_has_errors(curve):
+    """
+    Return True if there are errors associated with a Line2D or
+    ErrorbarContainer object. This checks whether there is a Workspace
+    associated with the curve and checks if that workspace has errors and
+    returns True if it does.
+    """
     if isinstance(curve, ErrorbarContainer):
         return True
+    ax = get_ax_from_curve(curve)
     if isinstance(ax, MantidAxes):
         try:
             workspace, spec_num = ax.get_artists_workspace_and_spec_num(curve)
@@ -100,14 +126,19 @@ def curve_has_errors(curve):
                 return True
             else:
                 return False
-        except ValueError:
+        except ValueError:  # Value error raised if artist has no associated workspace
             return False
+    if isinstance(curve, Line2D):
+        return False
 
 
 class CurveProperties:
 
     def __init__(self, props):
         self.__dict__.update(props)
+
+    def __eq__(self, other):
+        return self.to_dict() == other.to_dict()
 
     def to_dict(self):
         return self.__dict__

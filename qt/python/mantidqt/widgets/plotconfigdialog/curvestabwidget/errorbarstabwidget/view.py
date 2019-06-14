@@ -28,6 +28,7 @@ class ErrorbarsTabWidgetView(QWidget):
                                   self.color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        # Disable errorbar fields when they are hidden
         self.hide_errorbars_tickbox.stateChanged.connect(
             lambda: self.set_fields_enabled(not self.get_hide())
         )

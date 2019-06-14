@@ -319,6 +319,15 @@ class MantidAxes(Axes):
             return True
         return False
 
+    def get_tracked_artists(self):
+        """Get the Matplotlib artist objects that are tracked"""
+        tracked_artists = []
+        for ws_artists_list in self.tracked_workspaces.values():
+            for ws_artists in ws_artists_list:
+                for artist in ws_artists._artists:
+                    tracked_artists.append(artist)
+        return tracked_artists
+
     def remove_workspace_artists(self, workspace):
         """
         Remove the artists reference by this workspace (if any) and return True
@@ -349,6 +358,13 @@ class MantidAxes(Axes):
             is_empty = self._remove_artist_info_if(artist_info, unary_predicate)
             if is_empty:
                 is_empty_list.append(workspace_name)
+
+        # Catch any artists that are not tracked
+        for artist in self.artists + self.lines + self.containers + self.images:
+            if unary_predicate(artist):
+                artist.remove()
+                if isinstance(artist, ErrorbarContainer):
+                    self.containers.remove(artist)
 
         for workspace_name in is_empty_list:
             self.tracked_workspaces.pop(workspace_name)

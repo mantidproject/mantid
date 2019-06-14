@@ -12,81 +12,13 @@ from matplotlib.axes import ErrorbarContainer
 from matplotlib.lines import Line2D
 
 from mantid.plots import MantidAxes
+from mantid.plots.helperfunctions import get_data_from_errorbar_container
 from mantidqt.utils import BlockQSignals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
-from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, set_curve_hidden, set_errorbars_hidden
+from mantidqt.widgets.plotconfigdialog.curvestabwidget import (CurveProperties, set_curve_hidden,
+                                                               set_errorbars_hidden, curve_has_errors,
+                                                               remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
-
-
-def get_ax_from_curve(curve):
-    if isinstance(curve, Line2D):
-        return curve.axes
-    elif isinstance(curve, ErrorbarContainer):
-        return curve[2][0].axes
-
-
-def curve_has_errors(curve):
-    ax = get_ax_from_curve(curve)
-    if isinstance(curve, Line2D):
-        return False
-    if isinstance(curve, ErrorbarContainer):
-        return True
-    if isinstance(ax, MantidAxes):
-        try:
-            workspace, spec_num = ax.get_artists_workspace_and_spec_num(curve)
-            workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
-            if any(workspace.readE(workspace_index) != 0):
-                return True
-            else:
-                return False
-        except ValueError:
-            return False
-
-
-def remove_curve_from_ax(ax, curve):
-    if isinstance(curve, MantidAxes):
-        ax.remove_artists_if(lambda art: art == curve)
-    else:
-        curve.remove()
-        if isinstance(curve, ErrorbarContainer):
-            ax.containers.remove(curve)
-
-
-def get_data_from_errorbar_container(err_cont):
-    """Get plot coordinates and errorbar sizes from ErrorbarContainer"""
-    x_segments = get_x_errorbar_segments(err_cont)
-    y_segments = get_y_errorbar_segments(err_cont)
-    x, y, x_errs, y_errs = [], [], None, None
-    if x_segments:
-        x_errs = []
-        for vertex in x_segments:
-            x_errs.append((vertex[1][0] - vertex[0][0])/2)
-            x.append((vertex[0][0] + vertex[1][0])/2)
-            y.append((vertex[0][1] + vertex[1][1])/2)
-        if y_segments:
-            y_errs = [(vertex[1][1] - vertex[0][1])/2 for vertex in y_segments]
-    else:
-        y_errs = []
-        for vertex in y_segments:
-            y_errs.append((vertex[1][1] - vertex[0][1])/2)
-            x.append((vertex[0][0] + vertex[1][0])/2)
-            y.append((vertex[0][1] + vertex[1][1])/2)
-    return x, y, x_errs, y_errs
-
-
-def get_x_errorbar_segments(err_cont):
-    if err_cont.has_xerr:
-        return err_cont[2][0].get_segments()
-    return None
-
-
-def get_y_errorbar_segments(err_cont):
-    if err_cont.has_yerr and not err_cont.has_xerr:
-        return err_cont[2][0].get_segments()
-    elif err_cont.has_yerr and err_cont.has_xerr:
-        return err_cont[2][1].get_segments()
-    else:
-        return None
 
 
 class CurvesTabWidgetPresenter:
@@ -115,12 +47,13 @@ class CurvesTabWidgetPresenter:
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
         view_props = self.get_view_properties()
-        # Replot curve
+        # Re-plot curve
         self.replot_selected_curve(view_props.get_plot_kwargs())
-        # Set the curves label, hide if necessary and redraw legend
+        # Set the curve's label, hide if necessary and redraw legend
         curve = self.get_selected_curve()
         self.set_curve_label(curve, view_props.label)
         set_curve_hidden(curve, view_props.hide)
+        # No need to hide errors if they're already hidden
         if not view_props.hide:
             set_errorbars_hidden(curve, view_props.hide_errors)
         self.get_selected_ax().legend().draggable()
@@ -151,7 +84,7 @@ class CurvesTabWidgetPresenter:
     @staticmethod
     def replot_curve(ax, curve, plot_kwargs):
         """Replot the given curve with new kwargs"""
-        remove_curve_from_ax(ax, curve)
+        remove_curve_from_ax(curve)
         # Because of 'error every' option we must store an original copy of the
         # curve so we do not lose data when plotting fewer errorbars. Store it
         # on the current curve as this will be persistent after closing the
@@ -217,7 +150,7 @@ class CurvesTabWidgetPresenter:
         curves left on the axes remove that axes from the axes combo box
         """
         # Remove curve from ax and remove from curve names dictionary
-        remove_curve_from_ax(self.get_selected_ax(), self.get_selected_curve())
+        remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
 
         # Update the legend and redraw
@@ -256,17 +189,7 @@ class CurvesTabWidgetPresenter:
 
     def set_errorbars_tab_enabled(self):
         """Enable/disable the errorbar tab for selected curve"""
-        ax = self.get_selected_ax()
-        curve = self.get_selected_curve()
-        if isinstance(curve, ErrorbarContainer):
-            enable_errorbars = True
-        elif isinstance(ax, MantidAxes):
-            try:
-                enable_errorbars = ax.artist_has_errorbars(curve)
-            except ValueError:  # ValueError raised if curve not tracked by Axes
-                enable_errorbars = False
-        else:
-            enable_errorbars = False
+        enable_errorbars = curve_has_errors(self.get_selected_curve())
         self.view.set_errorbars_tab_enabled(enable_errorbars)
 
     def update_view(self):
@@ -314,7 +237,7 @@ class CurvesTabWidgetPresenter:
 
         for errorbar_container in self._get_selected_ax_errorbars():
             self._update_selected_curve_name(errorbar_container)
-        for line in self.get_selected_ax().get_lines():
+        for line in selected_ax.get_lines():
             self._update_selected_curve_name(line)
 
         self.view.populate_select_curve_combo_box(self.curve_names_dict.keys())
