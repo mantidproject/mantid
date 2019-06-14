@@ -12,6 +12,7 @@ SANS Changes
 :ref:`Release 4.1.0 <v4.1.0>`
 
 - New IDF for EQSANS
+- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS``to :ref:`MaskBTP <algm-MaskBTP>`
 
 ISIS SANS Interface
 -------------------
