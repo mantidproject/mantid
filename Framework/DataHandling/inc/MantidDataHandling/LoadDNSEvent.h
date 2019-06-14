@@ -140,8 +140,8 @@ private:
   };
   EventAccumulator _eventAccumulator;
 
-  uint chopperChannel;
-  uint monitorChannel;
+  unsigned chopperChannel;
+  unsigned monitorChannel;
 
   void runLoadInstrument(std::string instrumentName,
                          DataObjects::EventWorkspace_sptr &eventWS);
@@ -153,7 +153,7 @@ private:
   std::vector<uint8_t> parse_Header(FileByteStream &file);
 
   std::vector<std::vector<uint8_t>> split_File(FileByteStream &file,
-                                               const uint maxChunckCount);
+                                               const unsigned maxChunckCount);
 
   void parse_BlockList(VectorByteStream &file,
                        EventAccumulator &eventAccumulator);

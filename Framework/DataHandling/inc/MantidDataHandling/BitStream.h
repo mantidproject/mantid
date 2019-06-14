@@ -223,7 +223,7 @@ private:
 
   inline void streamignore(const std::size_t &bytecount) { pos += bytecount; }
 
-  inline uint streampeek() const { return *pos; }
+  inline unsigned streampeek() const { return *pos; }
 
   inline bool streameof() const { return pos >= end; }
 

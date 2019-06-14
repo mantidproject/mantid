@@ -66,8 +66,8 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadDNSEvent)
 
 const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
-const uint MAX_BUFFER_BYTES_SIZE = 1500;     // maximum buffer size in data file
-const uint DETECTOR_PIXEL_COUNT = 960 * 128; // number of >pixels< in detector
+const unsigned MAX_BUFFER_BYTES_SIZE = 1500;     // maximum buffer size in data file
+const unsigned DETECTOR_PIXEL_COUNT = 960 * 128; // number of >pixels< in detector
 
 void LoadDNSEvent::init() {
   /// Initialise the properties
@@ -77,17 +77,17 @@ void LoadDNSEvent::init() {
       std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
       "The XML or Map file with full path.");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<uint>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<unsigned>>(
                       "ChopperChannel", 1,
-                      boost::shared_ptr<BoundedValidator<uint>>(
-                          new BoundedValidator<uint>(0, 4)),
+                      boost::shared_ptr<BoundedValidator<unsigned>>(
+                          new BoundedValidator<unsigned>(0, 4)),
                       Kernel::Direction::Input),
                   "The Chopper Channel");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<uint>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<unsigned>>(
                       "MonitorChannel", 1,
-                      boost::shared_ptr<BoundedValidator<uint>>(
-                          new BoundedValidator<uint>(0, 4)),
+                      boost::shared_ptr<BoundedValidator<unsigned>>(
+                          new BoundedValidator<unsigned>(0, 4)),
                       Kernel::Direction::Input),
                   "The Monitor Channel");
 
@@ -110,12 +110,12 @@ void LoadDNSEvent::exec() {
 
   // loadProperties:
   const std::string fileName = getPropertyValue("InputFile");
-  chopperChannel = static_cast<uint>(getProperty("ChopperChannel"));
-  monitorChannel = static_cast<uint>(getProperty("MonitorChannel"));
+  chopperChannel = static_cast<unsigned>(getProperty("ChopperChannel"));
+  monitorChannel = static_cast<unsigned>(getProperty("MonitorChannel"));
   const auto chopperChannels =
-      outputWS->instrumentParameters().getType<uint>("chopper", "channel");
+      outputWS->instrumentParameters().getType<unsigned>("chopper", "channel");
   const auto monitorChannels =
-      outputWS->instrumentParameters().getType<uint>("monitor", "channel");
+      outputWS->instrumentParameters().getType<unsigned>("monitor", "channel");
   chopperChannel = chopperChannel != 0
                        ? chopperChannel
                        : (chopperChannels.empty() ? 99 : chopperChannels.at(0));
@@ -154,7 +154,7 @@ void sortVector(Vector &v, _Compare comp) {
 }
 
 void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
-  static const uint EVENTS_PER_PROGRESS = 100;
+  static const unsigned EVENTS_PER_PROGRESS = 100;
   // The number of steps depends on the type of input file
   Progress progress(this, 0.0, 1.0,
                     _eventAccumulator.neutronEvents.size() /
@@ -170,7 +170,7 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   std::atomic<uint64_t> oversizedPosCounterA(0);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS) && USE_PARALLELISM)
-  for (uint j = 0; j < _eventAccumulator.neutronEvents.size(); j++) {
+  for (size_t j = 0; j < _eventAccumulator.neutronEvents.size(); j++) {
     // uint64_t chopperTimestamp = 0;
     uint64_t oversizedChanelIndexCounter = 0;
     uint64_t oversizedPosCounter = 0;
@@ -319,7 +319,7 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
 }
 
 std::vector<std::vector<uint8_t>>
-LoadDNSEvent::split_File(FileByteStream &file, const uint maxChunckCount) {
+LoadDNSEvent::split_File(FileByteStream &file, const unsigned maxChunckCount) {
   static const auto skipTable = buildSkipTable2(block_sep);
 
   const uint64_t minChunckSize = MAX_BUFFER_BYTES_SIZE;
@@ -443,7 +443,7 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
       PARALLEL_SECTION {
         auto origSize = _eventAccumulator.triggerEvents.size();
         _eventAccumulator.triggerEvents.resize(std::accumulate(
-            eventAccumulators.cbegin(), eventAccumulators.cend(), 0,
+            eventAccumulators.cbegin(), eventAccumulators.cend(), 0u,
             [](const auto s, const auto &v) {
               return s + v.triggerEvents.size();
             }));
@@ -456,10 +456,10 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
       // combine neutronEvents:
       PARALLEL_SECTION {
         PARALLEL_FOR_NO_WSP_CHECK()
-        for (int i = 0; i < _eventAccumulator.neutronEvents.size(); ++i) {
+        for (size_t i = 0; i < _eventAccumulator.neutronEvents.size(); ++i) {
           auto origSize = _eventAccumulator.neutronEvents[i].size();
           _eventAccumulator.neutronEvents[i].resize(std::accumulate(
-              eventAccumulators.cbegin(), eventAccumulators.cend(), 0,
+              eventAccumulators.cbegin(), eventAccumulators.cend(), 0u,
               [&](const auto s, const auto &v) {
                 return s + v.neutronEvents[i].size();
               }));
