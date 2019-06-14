@@ -138,11 +138,7 @@ void SolidAngle::init() {
   declareProperty(
       "Method", "GenericShape",
       boost::make_shared<StringListValidator>(methods),
-      "Select the method to calculate the Solid Angle.\n"
-      "GenericShape: generic shape; Rectangular: cos^3(2theta); "
-      "VerticalTube: cos(alpha_y)*cos^2(2theta); HorizontalTube: "
-      "cos(alpha_x)*cos^2(2theta);"
-      "VerticalWing: cos^3(alpha_y); HorizontalWing: cos^3(alpha_x);");
+      "Select the method to calculate the Solid Angle.");
 }
 
 /** Executes the algorithm
