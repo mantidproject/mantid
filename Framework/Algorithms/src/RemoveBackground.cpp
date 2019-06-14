@@ -213,9 +213,10 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   this->deleteUnitsConverters();
   // allocate the array of units converters to avoid units reallocation within a
   // loop
-  m_WSUnit.resize(nThreads);
+  m_WSUnit.clear();
+  m_WSUnit.reserve(nThreads);
   for (int i = 0; i < nThreads; i++) {
-    m_WSUnit[i] = std::unique_ptr<Kernel::Unit>(WSUnit->clone());
+    m_WSUnit.emplace_back(std::unique_ptr<Kernel::Unit>(WSUnit->clone()));
   }
 
   m_singleValueBackground = false;
