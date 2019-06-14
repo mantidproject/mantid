@@ -157,15 +157,6 @@ BackgroundHelper::BackgroundHelper()
       m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
       m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
-/// Destructor
-BackgroundHelper::~BackgroundHelper() {}
-
-/** The method deletes all units converter allocated*/
-void BackgroundHelper::deleteUnitsConverters() {
-  for (auto &unit : m_WSUnit) {
-    unit.reset(nullptr);
-  }
-}
 
 /** Initialization method:
 *@param bkgWS    -- shared pointer to the workspace which contains background
@@ -209,8 +200,6 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
 
   m_spectrumInfo = &sourceWS->spectrumInfo();
 
-  // just in case.
-  this->deleteUnitsConverters();
   // allocate the array of units converters to avoid units reallocation within a
   // loop
   m_WSUnit.clear();

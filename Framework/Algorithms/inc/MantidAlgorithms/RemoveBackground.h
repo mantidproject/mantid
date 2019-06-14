@@ -39,7 +39,11 @@ from a matrix workspace, expressed in units, different from TOF.
 class DLLExport BackgroundHelper {
 public:
   BackgroundHelper();
-  ~BackgroundHelper();
+
+  // MSVC 2017 does not properly detect that this type contains a move-only
+  // type, so we force delete the copy constructor and copy assignment here.
+  BackgroundHelper &operator=(const BackgroundHelper &) = delete;
+  BackgroundHelper(const BackgroundHelper &) = delete;
 
   void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                   const API::MatrixWorkspace_sptr &sourceWS, int emode,
@@ -87,12 +91,14 @@ private:
 
   // get Ei attached to direct or indirect instrument workspace
   double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;
-  // the procedure user to delete existing unit converter pointers
-  void deleteUnitsConverters();
 };
 
 class DLLExport RemoveBackground : public API::Algorithm {
 public:
+  RemoveBackground() {}
+  RemoveBackground(const RemoveBackground &) = delete;
+  RemoveBackground &operator=(const RemoveBackground &) = delete;
+
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveBackground"; }
   /// Summary of algorithms purpose
