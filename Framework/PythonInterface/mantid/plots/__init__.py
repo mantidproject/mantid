@@ -25,7 +25,7 @@ from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
-from matplotlib.container import Container
+from matplotlib.container import Container, ErrorbarContainer
 from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
@@ -333,6 +333,13 @@ class MantidAxes(Axes):
 
         for workspace_name in is_empty_list:
             self.tracked_workspaces.pop(workspace_name)
+
+        # Catch any artists that are not tracked
+        for artist in self.artists + self.lines + self.containers + self.images:
+            if unary_predicate(artist):
+                artist.remove()
+                if isinstance(artist, ErrorbarContainer):
+                    self.containers.remove(artist)
 
         return self.is_empty(self)
 
