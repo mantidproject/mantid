@@ -27,8 +27,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL SearchModel : public QAbstractTableModel,
                                                    public ISearchModel {
   Q_OBJECT
 public:
-  SearchModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
-              const std::string &instrument);
+  SearchModel();
   void addDataFromTable(Mantid::API::ITableWorkspace_sptr tableWorkspace,
                         const std::string &instrument) override;
   // row and column counts

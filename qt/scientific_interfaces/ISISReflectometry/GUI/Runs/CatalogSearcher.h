@@ -27,12 +27,17 @@ public:
   CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *m_view);
   ~CatalogSearcher() override{};
 
-  bool searchInProgress() const override;
-
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
-  Mantid::API::ITableWorkspace_sptr search(const std::string &text) override;
-  bool startSearchAsync(const std::string &text) override;
+  Mantid::API::ITableWorkspace_sptr
+  search(const std::string &text, const std::string &instrument) override;
+  bool startSearchAsync(const std::string &text,
+                        const std::string &instrument) override;
+  bool searchInProgress() const override;
+  SearchResult const &getSearchResult(int index) const override;
+  void setSearchResultError(int index,
+                            const std::string &errorMessage) override;
+  void resetResults() override;
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
@@ -41,12 +46,14 @@ private:
   IPythonRunner *m_pythonRunner;
   IRunsView *m_view;
   SearcherSubscriber *m_notifyee;
+  std::string m_instrument;
   bool m_searchInProgress;
 
   bool hasActiveSession() const;
   bool logInToCatalog();
   std::string activeSessionId() const;
   Mantid::API::IAlgorithm_sptr createSearchAlgorithm(const std::string &text);
+  ISearchModel &results() const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

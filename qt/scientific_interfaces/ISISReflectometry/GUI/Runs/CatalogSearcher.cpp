@@ -44,7 +44,9 @@ void CatalogSearcher::subscribe(SearcherSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-ITableWorkspace_sptr CatalogSearcher::search(const std::string &text) {
+ITableWorkspace_sptr CatalogSearcher::search(const std::string &text,
+                                             const std::string &instrument) {
+  m_instrument = instrument;
   auto algSearch = createSearchAlgorithm(text);
   algSearch->execute();
   ITableWorkspace_sptr results = algSearch->getProperty("OutputWorkspace");
@@ -53,7 +55,10 @@ ITableWorkspace_sptr CatalogSearcher::search(const std::string &text) {
   return results;
 }
 
-bool CatalogSearcher::startSearchAsync(const std::string &text) {
+bool CatalogSearcher::startSearchAsync(const std::string &text,
+                                       const std::string &instrument) {
+  m_instrument = instrument;
+
   if (!logInToCatalog())
     return false;
 
@@ -70,16 +75,26 @@ void CatalogSearcher::notifySearchComplete() {
   auto algRunner = m_view->getAlgorithmRunner();
   IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
 
-  // TODO: still notify if results are empty in case the notifyee needs to take
-  // action e.g. restarting polling for autoreduction.
-  if (!searchAlg->isExecuted())
-    return;
+  if (searchAlg->isExecuted()) {
+    ITableWorkspace_sptr table = searchAlg->getProperty("OutputWorkspace");
+    results().addDataFromTable(table, m_instrument);
+  }
 
-  ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
-  m_notifyee->notifySearchResults(results);
+  m_notifyee->notifySearchResults();
 }
 
 bool CatalogSearcher::searchInProgress() const { return m_searchInProgress; }
+
+SearchResult const &CatalogSearcher::getSearchResult(int index) const {
+  return results().getRowData(index);
+}
+
+void CatalogSearcher::setSearchResultError(int index,
+                                           const std::string &errorMessage) {
+  results().setError(index, errorMessage);
+}
+
+void CatalogSearcher::resetResults() { results().clear(); }
 
 bool CatalogSearcher::hasActiveSession() const {
   auto sessions = CatalogManager::Instance().getActiveSessions();
@@ -132,6 +147,10 @@ CatalogSearcher::createSearchAlgorithm(const std::string &text) {
   algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
 
   return algSearch;
+}
+
+ISearchModel &CatalogSearcher::results() const {
+  return m_view->mutableSearchResults();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

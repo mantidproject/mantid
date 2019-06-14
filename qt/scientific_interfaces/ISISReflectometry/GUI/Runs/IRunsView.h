@@ -81,8 +81,10 @@ public:
   virtual void startTimer(const int millisecs) = 0;
   virtual void stopTimer() = 0;
 
-  // Connect the model
-  virtual void showSearch(ISearchModel_sptr model) = 0;
+  // Search methods
+  virtual void resizeSearchResultsColumnsToContents() = 0;
+  virtual ISearchModel const &searchResults() = 0;
+  virtual ISearchModel &mutableSearchResults() = 0;
 
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,

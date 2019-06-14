@@ -108,14 +108,19 @@ RunsTable &RunsPresenter::mutableRunsTable() {
 */
 
 void RunsPresenter::notifySearch() {
+  m_searcher->resetResults();
   updateWidgetEnabledState();
   search();
 }
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
-void RunsPresenter::notifySearchResults(ITableWorkspace_sptr results) {
-  populateSearchResults(results);
+void RunsPresenter::notifySearchResults() {
+  m_instrumentChanged = false;
+
+  if (!isAutoreducing())
+    m_view->resizeSearchResultsColumnsToContents();
+
   updateWidgetEnabledState();
 
   if (isAutoreducing())
@@ -128,6 +133,7 @@ void RunsPresenter::notifyTransfer() {
 
 void RunsPresenter::notifyInstrumentChanged() {
   auto const instrumentName = m_view->getSearchInstrument();
+  m_searcher->resetResults();
   if (m_mainPresenter)
     m_mainPresenter->notifyInstrumentChanged(instrumentName);
 }
@@ -236,28 +242,13 @@ bool RunsPresenter::search() {
   if (searchString.empty())
     return false;
 
-  if (!m_searcher->startSearchAsync(searchString)) {
+  if (!m_searcher->startSearchAsync(searchString,
+                                    m_view->getSearchInstrument())) {
     m_messageHandler->giveUserCritical("Catalog login failed", "Error");
     return false;
   }
 
   return true;
-}
-
-/** Populates the search results table
- */
-void RunsPresenter::populateSearchResults(ITableWorkspace_sptr results) {
-  // Update the state and model
-  m_instrumentChanged = false;
-
-  if (shouldUpdateExistingSearchResults()) {
-    m_searchModel->addDataFromTable(results, m_view->getSearchInstrument());
-  } else {
-    // Create a new search results list and display it on the view
-    m_searchModel =
-        boost::make_shared<SearchModel>(results, m_view->getSearchInstrument());
-    m_view->showSearch(m_searchModel);
-  }
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
@@ -316,13 +307,6 @@ int RunsPresenter::percentComplete() const {
 
 IRunsTablePresenter *RunsPresenter::tablePresenter() const {
   return m_tablePresenter.get();
-}
-
-bool RunsPresenter::shouldUpdateExistingSearchResults() const {
-  // Existing search results should be updated rather than replaced if
-  // autoreduction is running and has valid results
-  return m_searchModel && isAutoreducing() &&
-         m_autoreduction.searchResultsExist();
 }
 
 /** Check that the given rows are valid for a transfer and warn the user if not
@@ -396,7 +380,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
     auto jobs = runsTable().reductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
-      auto &result = m_searchModel->getRowData(rowIndex);
+      auto const &result = m_searcher->getSearchResult(rowIndex);
       auto resultMetadata = metadataFromDescription(result.description);
       auto row = validateRowFromRunAndTheta(jobs, result.runNumber,
                                             resultMetadata.theta);
@@ -407,8 +391,8 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
         mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
                           resultMetadata.groupName, rowChanged);
       } else {
-        m_searchModel->setError(rowIndex,
-                                "Theta was not specified in the description.");
+        m_searcher->setSearchResultError(
+            rowIndex, "Theta was not specified in the description.");
       }
     }
 

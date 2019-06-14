@@ -7,7 +7,6 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "Reduction/RunsTable.h"
 #include <string>
 
@@ -46,8 +45,7 @@ public:
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
   virtual int percentComplete() const = 0;
-  virtual void
-  notifySearchResults(Mantid::API::ITableWorkspace_sptr results) = 0;
+  virtual void notifySearchResults() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
