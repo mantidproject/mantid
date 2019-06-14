@@ -188,8 +188,8 @@ void SolidAngle::exec() {
       const double l2 = instrument->getNumberParameter("l2")[0];
       solidAngleZero = pixelSizeX * pixelSizeY / (l2 * l2);
     } else {
-      // TODO: get the l2 as Z coordinate of the whole bank, and pixel sizes from
-      // bounding box
+      // TODO: get the l2 as Z coordinate of the whole bank, and pixel sizes
+      // from bounding box
       throw std::runtime_error(
           "Missing necessary instrument parameters for non generic shape.");
     }
