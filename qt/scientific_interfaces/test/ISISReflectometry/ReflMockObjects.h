@@ -111,8 +111,7 @@ public:
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
-  MOCK_METHOD1(notifySearchResults,
-               void(Mantid::API::ITableWorkspace_sptr results));
+  MOCK_METHOD0(notifySearchResults, void());
 };
 
 class MockEventPresenter : public IEventPresenter {
@@ -187,9 +186,14 @@ public:
 class MockSearcher : public ISearcher {
 public:
   MOCK_METHOD1(subscribe, void(SearcherSubscriber *notifyee));
-  MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
-  MOCK_METHOD1(startSearchAsync, bool(const std::string &));
+  MOCK_METHOD2(search, Mantid::API::ITableWorkspace_sptr(const std::string &,
+                                                         const std::string &));
+  MOCK_METHOD2(startSearchAsync,
+               bool(const std::string &, const std::string &));
   MOCK_CONST_METHOD0(searchInProgress, bool());
+  MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
+  MOCK_METHOD2(setSearchResultError, void(int, const std::string &));
+  MOCK_METHOD0(resetResults, void());
 };
 
 class MockRunNotifier : public IRunNotifier {

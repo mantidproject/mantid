@@ -105,14 +105,12 @@ public:
   void notifyCheckForNewRuns() override;
 
   // SearcherSubscriber overrides
-  void notifySearchResults(Mantid::API::ITableWorkspace_sptr results) override;
+  void notifySearchResults() override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
   IAutoreduction &m_autoreduction;
-  /// The search model
-  boost::shared_ptr<ISearchModel> m_searchModel;
   /// The current transfer method
   std::string m_currentTransferMethod;
   /// The data processor presenters stored in a vector
@@ -151,7 +149,6 @@ private:
   bool requireNewAutoreduction() const;
   void checkForNewRuns();
   void autoreduceNewRuns();
-  bool shouldUpdateExistingSearchResults() const;
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer,

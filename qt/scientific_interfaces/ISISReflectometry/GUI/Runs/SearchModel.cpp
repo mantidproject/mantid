@@ -44,6 +44,8 @@ bool resultExists(SearchResult const &result,
 }
 } // unnamed namespace
 
+SearchModel::SearchModel() : m_runDetails() {}
+
 bool SearchModel::knownFileType(std::string const &filename) const {
   boost::regex pattern("raw$", boost::regex::icase);
   boost::smatch match; // Unused.
@@ -52,16 +54,6 @@ bool SearchModel::knownFileType(std::string const &filename) const {
 
 std::vector<SearchResult> const &SearchModel::results() const {
   return m_runDetails;
-}
-
-/**
-@param tableWorkspace : The table workspace to copy data from
-@param instrument : instrument name
-*/
-SearchModel::SearchModel(ITableWorkspace_sptr tableWorkspace,
-                         const std::string &instrument) {
-  if (tableWorkspace)
-    addDataFromTable(tableWorkspace, instrument);
 }
 
 void SearchModel::setError(int i, std::string const &error) {

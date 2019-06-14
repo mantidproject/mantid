@@ -29,8 +29,11 @@ using namespace MantidQt::Icons;
  */
 RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr), m_timerNotifyee(nullptr),
-      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()) {
+      m_searchNotifyee(nullptr), m_searchModel(),
+      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()),
+      m_timer() {
   initLayout();
+  ui.tableSearchResults->setModel(&m_searchModel);
 }
 
 void RunsView::subscribe(RunsViewSubscriber *notifyee) {
@@ -225,15 +228,18 @@ void RunsView::setProgress(int progress) { ui.progressBar->setValue(progress); }
 void RunsView::clearProgress() { ui.progressBar->reset(); }
 
 /**
-Set a new model for search results
-@param model : the model to be attached to the search results
-*/
-void RunsView::showSearch(ISearchModel_sptr model) {
-  m_searchModel = model;
-  ui.tableSearchResults->setModel(
-      boost::dynamic_pointer_cast<SearchModel>(m_searchModel).get());
+ * Resize the search results table columns
+ */
+void RunsView::resizeSearchResultsColumnsToContents() {
   ui.tableSearchResults->resizeColumnsToContents();
 }
+
+/**
+ * Get the model containing the search results
+ */
+ISearchModel const &RunsView::searchResults() { return m_searchModel; }
+
+ISearchModel &RunsView::mutableSearchResults() { return m_searchModel; }
 
 /**
 This slot notifies the presenter that the ICAT search was completed
@@ -295,8 +301,6 @@ void RunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
  */
 void RunsView::onInstrumentChanged(int index) {
   ui.textSearch->clear();
-  if (m_searchModel)
-    m_searchModel->clear();
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();

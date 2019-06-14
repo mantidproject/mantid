@@ -12,6 +12,7 @@
 #include "IRunsView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "SearchModel.h"
 
 #include "ui_RunsWidget.h"
 #include <QBasicTimer>
@@ -30,9 +31,6 @@ class AlgorithmRunner;
 }
 
 namespace CustomInterfaces {
-
-// Forward decs
-class ISearchModel;
 
 using MantidWidgets::SlitCalculator;
 namespace DataProcessor = MantidWidgets::DataProcessor;
@@ -56,8 +54,10 @@ public:
   void startTimer(const int millisecs) override;
   void stopTimer() override;
 
-  // Connect the model
-  void showSearch(boost::shared_ptr<ISearchModel> model) override;
+  // Search methods
+  void resizeSearchResultsColumnsToContents() override;
+  ISearchModel const &searchResults() override;
+  ISearchModel &mutableSearchResults() override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
@@ -108,7 +108,7 @@ private:
   RunsViewTimerSubscriber *m_timerNotifyee;
   RunsViewSearchSubscriber *m_searchNotifyee;
 
-  boost::shared_ptr<ISearchModel> m_searchModel;
+  SearchModel m_searchModel;
 
   // the interface
   Ui::RunsWidget ui;

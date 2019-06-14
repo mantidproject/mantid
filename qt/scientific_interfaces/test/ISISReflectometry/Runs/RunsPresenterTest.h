@@ -43,11 +43,11 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
-      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
-                                              "POLREF", "OFFSPEC"},
-        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
+      : m_thetaTolerance(0.01),
+        m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
+        m_runsTableView(), m_progressView(), m_messageHandler(),
         m_searcher(nullptr), m_autoreduction(), m_pythonRunner(),
-        m_runNotifier(nullptr), m_searchModel(nullptr),
+        m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
         m_searchString("test search string") {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
@@ -88,6 +88,20 @@ public:
     verifyAndClear();
   }
 
+  void testStartingSearchClearsPreviousResults() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_searcher, resetResults()).Times(AtLeast(1));
+    presenter.notifySearch();
+    verifyAndClear();
+  }
+
+  void testInstrumentChangedClearsPreviousResults() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_searcher, resetResults()).Times(AtLeast(1));
+    presenter.notifyInstrumentChanged();
+    verifyAndClear();
+  }
+
   void testStartingSearchDisablesSearchInputs() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_searcher, searchInProgress())
@@ -102,14 +116,29 @@ public:
 
   void testNotifySearchResultsEnablesSearchInputs() {
     auto presenter = makePresenter();
-    ITableWorkspace_sptr results = boost::make_shared<TableWorkspace>();
     EXPECT_CALL(*m_searcher, searchInProgress())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setSearchButtonEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true)).Times(1);
-    presenter.notifySearchResults(results);
+    presenter.notifySearchResults();
+    verifyAndClear();
+  }
+
+  void testSearchUsesCorrectSearchProperties() {
+    auto presenter = makePresenter();
+    auto searchString = std::string("test search string");
+    auto instrument = std::string("test instrument");
+    EXPECT_CALL(m_view, getSearchString())
+        .Times(1)
+        .WillOnce(Return(searchString));
+    EXPECT_CALL(m_view, getSearchInstrument())
+        .Times(1)
+        .WillOnce(Return(instrument));
+    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument))
+        .Times(1);
+    presenter.notifySearch();
     verifyAndClear();
   }
 
@@ -119,7 +148,7 @@ public:
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
         .WillOnce(Return(searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_, _)).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -129,7 +158,7 @@ public:
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
         .WillOnce(Return(m_searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(m_messageHandler,
@@ -144,7 +173,7 @@ public:
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
         .WillOnce(Return(m_searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -264,28 +293,39 @@ public:
     verifyAndClear();
   }
 
-  void testNotifySearchResults() {
+  void testNotifySearchResultsResizesColumnsWhenNotAutoreducing() {
     auto presenter = makePresenter();
-    auto results = expectPopulateSearchResultsCreatesNewModel();
-    presenter.notifySearchResults(results);
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, resizeSearchResultsColumnsToContents()).Times(1);
+    presenter.notifySearchResults();
+    verifyAndClear();
+  }
+
+  void testNotifySearchResultsDoesNotResizeColumnsWhenAutoreducing() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, resizeSearchResultsColumnsToContents()).Times(0);
+    presenter.notifySearchResults();
     verifyAndClear();
   }
 
   void testNotifySearchResultsResumesReductionWhenAutoreducing() {
     auto presenter = makePresenter();
-    auto results = expectPopulateSearchResultsAddsToExistingModel();
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(true));
     EXPECT_CALL(m_autoreduction, setSearchResultsExist()).Times(AtLeast(1));
     EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
-    presenter.notifySearchResults(results);
+    presenter.notifySearchResults();
     verifyAndClear();
   }
 
   void testNotifySearchResultsTransfersRowsWhenAutoreducing() {
     auto presenter = makePresenter();
-    auto results = expectPopulateSearchResultsAddsToExistingModel();
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(true));
@@ -298,11 +338,11 @@ public:
     auto searchResult =
         SearchResult("12345", "Test run th=0.5", "test location");
     for (auto rowIndex : rowsToTransfer)
-      EXPECT_CALL(*m_searchModel, getRowData(rowIndex))
+      EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
           .Times(1)
           .WillOnce(ReturnRef(searchResult));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
-    presenter.notifySearchResults(results);
+    presenter.notifySearchResults();
     verifyAndClear();
   }
 
@@ -345,8 +385,8 @@ public:
   void testTransferSetsErrorForInvalidRows() {
     auto presenter = makePresenter();
     expectGetValidSearchRowSelection();
-    EXPECT_CALL(*m_searchModel, setError(3, _)).Times(1);
-    EXPECT_CALL(*m_searchModel, setError(5, _)).Times(1);
+    EXPECT_CALL(*m_searcher, setSearchResultError(3, _)).Times(1);
+    EXPECT_CALL(*m_searcher, setSearchResultError(5, _)).Times(1);
     presenter.notifyTransfer();
     verifyAndClear();
   }
@@ -465,9 +505,6 @@ private:
     presenter.m_searcher.reset(new NiceMock<MockSearcher>());
     m_searcher =
         dynamic_cast<NiceMock<MockSearcher> *>(presenter.m_searcher.get());
-    presenter.m_searchModel = boost::make_shared<NiceMock<MockSearchModel>>();
-    m_searchModel = dynamic_cast<NiceMock<MockSearchModel> *>(
-        presenter.m_searchModel.get());
 
     // Return an empty table by default
     ON_CALL(*m_runsTablePresenter, runsTable())
@@ -558,7 +595,7 @@ private:
     EXPECT_CALL(m_view, getSearchString())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(m_searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -567,7 +604,7 @@ private:
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_)).Times(0);
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_, _)).Times(0);
   }
 
   void expectGetValidSearchRowSelection() {
@@ -579,7 +616,7 @@ private:
         .Times(1)
         .WillOnce(Return(selectedRows));
     for (auto rowIndex : selectedRows)
-      EXPECT_CALL(*m_searchModel, getRowData(rowIndex))
+      EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
           .Times(1)
           .WillOnce(ReturnRef(m_searchResult));
   }
@@ -658,33 +695,6 @@ private:
     EXPECT_CALL(m_view, setTransferButtonEnabled(true));
   }
 
-  ITableWorkspace_sptr expectPopulateSearchResultsCreatesNewModel() {
-    auto const instrument = std::string("test_instrument");
-    ITableWorkspace_sptr results = boost::make_shared<TableWorkspace>();
-    EXPECT_CALL(m_view, getSearchInstrument())
-        .Times(1)
-        .WillOnce(Return(instrument));
-    EXPECT_CALL(m_autoreduction, searchResultsExist())
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_searchModel, addDataFromTable(results, instrument)).Times(0);
-    EXPECT_CALL(m_view, showSearch(_)).Times(1);
-    return results;
-  }
-
-  ITableWorkspace_sptr expectPopulateSearchResultsAddsToExistingModel() {
-    auto const instrument = std::string("test_instrument");
-    ITableWorkspace_sptr results = boost::make_shared<TableWorkspace>();
-    EXPECT_CALL(m_autoreduction, searchResultsExist())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(m_view, getSearchInstrument())
-        .Times(1)
-        .WillOnce(Return(instrument));
-    EXPECT_CALL(*m_searchModel, addDataFromTable(results, instrument)).Times(1);
-    return results;
-  }
-
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   NiceMock<MockRunsView> m_view;
@@ -697,7 +707,6 @@ private:
   NiceMock<MockAutoreduction> m_autoreduction;
   MockPythonRunner *m_pythonRunner;
   MockRunNotifier *m_runNotifier;
-  NiceMock<MockSearchModel> *m_searchModel;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   RunsTable m_runsTable;
   std::string m_searchString;

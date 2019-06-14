@@ -17,8 +17,7 @@ namespace CustomInterfaces {
 
 class SearcherSubscriber {
 public:
-  virtual void
-  notifySearchResults(Mantid::API::ITableWorkspace_sptr results) = 0;
+  virtual void notifySearchResults() = 0;
 };
 
 /** @class ISearcher
@@ -30,9 +29,15 @@ class ISearcher {
 public:
   virtual ~ISearcher(){};
   virtual void subscribe(SearcherSubscriber *notifyee) = 0;
-  virtual Mantid::API::ITableWorkspace_sptr search(const std::string &text) = 0;
-  virtual bool startSearchAsync(const std::string &text) = 0;
+  virtual Mantid::API::ITableWorkspace_sptr
+  search(const std::string &text, const std::string &instrument) = 0;
+  virtual bool startSearchAsync(const std::string &text,
+                                const std::string &instrument) = 0;
   virtual bool searchInProgress() const = 0;
+  virtual SearchResult const &getSearchResult(int index) const = 0;
+  virtual void setSearchResultError(int index,
+                                    const std::string &errorMessage) = 0;
+  virtual void resetResults() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
