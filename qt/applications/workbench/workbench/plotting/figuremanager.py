@@ -11,6 +11,7 @@
 from __future__ import  (absolute_import, unicode_literals)
 
 from functools import wraps
+import numpy as np
 import sys
 
 # 3rdparty imports
@@ -285,29 +286,101 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
 
+    @staticmethod
+    def get_bounds_from_container(container, errors_are_bounds):
+        """
+        Get the maximum and minimum points in a container.
+        :param container: a MPL container
+        :type container: matplotlib.container.Container
+        :param errors_are_bounds: Decides if we should include error bars when calculating bounds
+        :type errors_are_bounds: bool
+        :return: minimum point in the container, maximum point in the container
+        """
+        # Get the bounds of the line
+        line_ydata = container[0].get_ydata()
+        print(line_ydata)
+        try:
+            line_min = np.min(line_ydata)
+            print(line_min)
+            line_max = np.max(line_ydata)
+        except ValueError:
+            # No y data
+            line_min = None
+            line_max = None
+
+        error_min = None
+        error_max = None
+        if errors_are_bounds:
+            caps = container[1]
+            try:
+                error_min = np.min(caps[0].get_ydata())
+            except ValueError:
+                # There are no lower caps
+                pass
+            try:
+                error_max = np.max(caps[1].get_ydata())
+            except ValueError:
+                # There are no upper caps
+                pass
+
+        # None < all numbers, so exclude the None lower bounds
+        lower_bounds = [_min for _min in (line_min, error_min) if _min is not None]
+        if lower_bounds:
+            lower_bound = np.min(lower_bounds)
+        else:
+            lower_bound = None
+
+        upper_bounds = [line_max, error_max]
+
+        return lower_bound, np.max(upper_bounds)
+
     def on_home_clicked(self):
         """
         The matplotlib home button centres and scales the figure.
-        When we have visible errorbars, we should scale off of the bounds
-        of the error bars.
+        We may change the plot post creation by adding error bars, or
+        making them (in)visible.
+        If we have not changed the plot post creation in one of those ways,
+        then the post_creation_args dict will not contain the relevant key.
+
+        - If we have ERRORS_VISIBLE = True: Scale off the error bars
+        - If we have ERRORS_VISIBLE = False: Scale off the line only
+        - If we don't have an ERRORS_VISIBLE key: Do nothing, this will be covered by
+                                                  default home button behaviour
         """
         ax = self.canvas.figure.axes[0]
         creation_args = ax.creation_args
+        containers = ax.containers
 
         min_bounds = []
         max_bounds = []
-        for cargs in creation_args:
-            # Creation args do not necessarily contain POST_CREATION_ARGS
-            if (MantidAxKwargs.POST_CREATION_ARGS in cargs and
-                    cargs[MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_VISIBLE]):
-                for container in ax.containers:
-                    caps = container[1]
-                    if caps != ():
-                        min_bounds.extend(caps[0].get_ydata())
-                        max_bounds.extend(caps[1].get_ydata())
+
+        for container, cargs in zip(containers, creation_args):
+            print(cargs)
+            if MantidAxKwargs.POST_CREATION_ARGS in cargs:
+                pcargs = cargs[MantidAxKwargs.POST_CREATION_ARGS]
+                if MantidAxKwargs.ERRORS_VISIBLE in pcargs:
+                    if pcargs[MantidAxKwargs.ERRORS_VISIBLE]:
+                        # Scale off errors
+                        container_lower_bound, container_upper_bound = self.get_bounds_from_container(container, True)
+                    else:
+                        # Scale off line, not the errors
+                        container_lower_bound, container_upper_bound = self.get_bounds_from_container(container, False)
+                    if container_lower_bound is not None:
+                        min_bounds.append(container_lower_bound)
+                    if container_upper_bound is not None:
+                        max_bounds.append(container_upper_bound)
+
         if min_bounds and max_bounds:
-            # Set ylim if we have caps
-            ax.set_ylim((min(min_bounds), max(max_bounds)))
+            # If we don't have bounds, don't scale here.
+            # Scaling is covered by default home button behaviour
+
+            # Default behaviour includes a margin of ~10%
+            # Create this margin by increasing/decreasing max/min by 5%
+            min_y = np.min(min_bounds)
+            max_y = np.max(max_bounds)
+            five_per_cent_diff = 0.05 * (max_y - min_y)
+
+            ax.set_ylim((min_y - five_per_cent_diff, max_y + five_per_cent_diff))
 
     def grid_toggle(self):
         """
