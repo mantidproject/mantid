@@ -16,8 +16,6 @@ attenuation_correction_pre_2016 = {1.0: 0.007655, 2.0: -1.0, 3.0: 1.0, 4.0: -1.0
 attenuation_correction_post_2016 = {1.0: 1.0, 2.0: 0.00955, 3.0: 0.005886, 4.0: 0.00290, 5.0: 0.00062}
 
 ##############################################################################
-# REDUCTION ##################################################################
-##############################################################################
 
 
 def string_boolean(line):
@@ -64,9 +62,6 @@ def files_list_reduce(filename):
     return parameters
 
 ##############################################################################
-# Function to extract list of lines in the csv file to be processed;
-# input format is a combination of digits, '-' ,',' or empty space
-# returns list of numbers to be processed
 
 
 def evaluate_files_list(numbers):
@@ -101,8 +96,6 @@ def files_to_reduce(parameters, evaluate_files):
     return files_to_reduce
 
 ##############################################################################
-# For output file formatting #################################################
-##############################################################################
 
 
 def strip_NaNs(output_workspace, base_output_name):
@@ -121,7 +114,6 @@ def strip_NaNs(output_workspace, base_output_name):
     return base_output_name
 
 ##############################################################################
-# 26 March 2019
 
 
 def output_header(external_mode, used_wl_range, ws_sample, sample_thickness,
@@ -153,19 +145,19 @@ def output_header(external_mode, used_wl_range, ws_sample, sample_thickness,
         resolution = "Nominal resolution: 10%"
         header.append(resolution)
 
-    L1 = 'L1: ' + str(format(float(ws_sample.run().getProperty("L1").value), '.3f')) + ' m'
-    header.append(L1)
+    l1 = 'L1: ' + str(format(float(ws_sample.run().getProperty("L1").value), '.3f')) + ' m'
+    header.append(l1)
 
-    rear_L2_row = 'L2 to rear detector: ' + str(format(float(ws_sample.run().getProperty("L2_det_value").value), '.3f')) + ' m'
-    header.append(rear_L2_row)
+    rear_l2_row = 'L2 to rear detector: ' + str(format(float(ws_sample.run().getProperty("L2_det_value").value), '.3f')) + ' m'
+    header.append(rear_l2_row)
 
-    curtain_ud_L2_row = 'L2 to horizontal curtains: ' \
+    curtain_ud_l2_row = 'L2 to horizontal curtains: ' \
                         + str(format(float(ws_sample.run().getProperty("L2_curtainu_value").value), '.3f')) + ' m'
-    header.append(curtain_ud_L2_row)
+    header.append(curtain_ud_l2_row)
 
-    curtain_lr_L2_row = 'L2 to vertical curtains: ' \
+    curtain_lr_l2_row = 'L2 to vertical curtains: ' \
                         + str(format(float(ws_sample.run().getProperty("L2_curtainr_value").value), '.3f')) + ' m'
-    header.append(curtain_lr_L2_row)
+    header.append(curtain_lr_l2_row)
 
     curtain_l_separation_row = 'Left curtain separation: ' \
         + str(format(float(ws_sample.run().getProperty("D_curtainl_value").value), '.3f')) + ' m'
@@ -202,17 +194,15 @@ def output_header(external_mode, used_wl_range, ws_sample, sample_thickness,
     return header
 
 ##############################################################################
-# GENERAL ####################################################################
-##############################################################################
 
 
 def get_pixel_size():     # reads current IDF and get pixelsize from there
-    """ To get pixel size for Bilby detectors from the BILBY_Definition.xml file """
+    """ To get pixel size for Bilby detectors from the Bilby_Definition.xml file """
 
     from mantid.api import ExperimentInfo
     import xml.etree.cElementTree as ET
 
-    currentIDF = ExperimentInfo.getInstrumentFilename("BILBY")
+    currentIDF = ExperimentInfo.getInstrumentFilename("Bilby")
     # print currentIDF
     tree = ET.parse(currentIDF)
     for node in tree.iter():
@@ -255,9 +245,6 @@ def attenuation_correction(att_pos, data_before_May_2016):
     return scale
 
 ##############################################################################
-# FOR WAVELENGTH SLICES ######################################################
-##############################################################################
-# To create a set of wavelength slices, if requested by reduction settings
 
 
 def wavelengh_slices(wavelength_intervals, binning_wavelength_ini, wav_delta):
@@ -298,8 +285,6 @@ def wavelengh_slices(wavelength_intervals, binning_wavelength_ini, wav_delta):
     return binning_wavelength, n
 
 ##############################################################################
-# FOR TUBE ADJUSTMENT ########################################################
-##############################################################################
 
 
 def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
@@ -326,11 +311,11 @@ def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
     return
 
 ##############################################################################
-# sutable for one Cd stripe correction and for the stripes on BorAl mask on left curtain
 
 
 def correct_element_one_stripe(panel, pixelsize, shift, ws):
-    """ Technical for CorrectionTubesShift """
+    """ Technical for CorrectionTubesShift.
+    Sutable for one Cd stripe correction and for the stripes on BorAl mask on left curtain """
 
     eightpack = ['eight_pack1', 'eight_pack2', 'eight_pack3', 'eight_pack4', 'eight_pack5']
     tube = ['tube1', 'tube2', 'tube3', 'tube4', 'tube5', 'tube6', 'tube7', 'tube8']
@@ -353,7 +338,6 @@ def correct_element_one_stripe(panel, pixelsize, shift, ws):
     return ws
 
 ##############################################################################
-# moves only rear left and rear right, each on shift; +1 to the right panel to make them symmetrical
 
 
 def move_rear_panels(shift, pixelsize, ws):
@@ -373,9 +357,8 @@ def move_rear_panels(shift, pixelsize, ws):
 
 
 def correction_based_on_experiment(ws_to_correct):
-    """ The function to move curtains, based on fits/analysis of a massive set of AgBeh and liquid crystals data.
-          Laser tracker has not picked up these imperfections.
-         Added on October, 6th, 2016 """
+    """ The function to move curtains, based on fits/analysis of a massive set of AgBeh and liquid crystals data
+        collected on 6 Oct 2016. Previous Laser tracker data has not picked up these imperfections."""
 
     MoveInstrumentComponent(ws_to_correct, 'CurtainLeft', X=-5.3/1000, Y=0, Z=13.0/1000)
     MoveInstrumentComponent(ws_to_correct, 'CurtainRight', X=5.5/1000, Y=0, Z=17.0/1000)
