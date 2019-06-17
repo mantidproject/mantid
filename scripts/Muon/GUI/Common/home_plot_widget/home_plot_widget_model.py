@@ -33,9 +33,9 @@ class HomePlotWidgetModel(object):
         workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
         if self.plot_figure:
             self.plot_figure.clear()
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title)
+            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title, plot_kwargs={'distribution': True})
         else:
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title)
+            self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title, plot_kwargs={'distribution': True})
 
         self.plot_figure.canvas.set_window_title('Muon Analysis')
         self.plot_figure.gca().set_title(title)
@@ -54,7 +54,7 @@ class HomePlotWidgetModel(object):
         :return:
         """
         workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace], unrollGroups=True)
-        self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True)
+        self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True, plot_kwargs={'distribution': True})
 
     def remove_workpace_from_plot(self, workspace_name):
         """
