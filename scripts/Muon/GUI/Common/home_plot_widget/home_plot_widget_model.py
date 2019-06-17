@@ -57,7 +57,7 @@ class HomePlotWidgetModel(object):
         """
         workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace], unrollGroups=True)
         self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True,
-                                plot_kwargs={'distribution': True}, errors=True)
+                                plot_kwargs={'distribution': True})
 
     def remove_workpace_from_plot(self, workspace_name):
         """
