@@ -105,7 +105,7 @@ RunsTable &RunsPresenter::mutableRunsTable() {
 */
 
 void RunsPresenter::notifySearch() {
-  m_searcher->resetResults();
+  m_searcher->reset();
   updateWidgetEnabledState();
   search();
 }
@@ -128,7 +128,7 @@ void RunsPresenter::notifyTransfer() {
 
 void RunsPresenter::notifyInstrumentChanged() {
   auto const instrumentName = m_view->getSearchInstrument();
-  m_searcher->resetResults();
+  m_searcher->reset();
   if (m_mainPresenter)
     m_mainPresenter->notifyInstrumentChanged(instrumentName);
 }
@@ -184,10 +184,10 @@ bool RunsPresenter::resumeAutoreduction() {
   auto const searchString = m_view->getSearchString();
   auto const instrument = m_view->getSearchInstrument();
 
+  // Check if starting an autoreduction with new settings, reset the previous
+  // search results and clear the main table
   if (m_searcher->searchSettingsChanged(searchString, instrument)) {
-    // If starting a brand new autoreduction, delete all rows / groups in
-    // existing table first.  We'll prompt the user to check it's ok to delete
-    // existing rows
+    // If there are unsaved changes, ask the user first
     auto ok = true;
     if (hasGroupsWithContent(runsTable().reductionJobs())) {
       ok = m_messageHandler->askUserYesNo(
@@ -195,6 +195,7 @@ bool RunsPresenter::resumeAutoreduction() {
       if (!ok)
         return false;
     }
+    m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
