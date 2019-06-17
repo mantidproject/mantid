@@ -18,7 +18,7 @@ from mantid import ConfigService
 from isis_reflectometry.combineMulti import combineDataMulti, getWorkspace
 
 
-class ISISReflectometryAutoreductionTest(systemtesting.MantidSystemTest):
+class ISISReflAutoreductionTransRunTest(systemtesting.MantidSystemTest):
     # NOTE: When updating the run range used be sure to update the run_titles table below.
     # You may also find the regenerate functions useful.
     investigation_id = 1710262
@@ -30,7 +30,7 @@ class ISISReflectometryAutoreductionTest(systemtesting.MantidSystemTest):
     result_workspace = 'Result'
 
     def __init__(self):
-        super(ISISReflectometryAutoreductionTest, self).__init__()
+        super(ISISReflAutoreductionTransRunTest, self).__init__()
         self.tolerance = 0.00000001
 
     def requiredFiles(self):
@@ -42,21 +42,7 @@ class ISISReflectometryAutoreductionTest(systemtesting.MantidSystemTest):
     def runTest(self):
         ConfigService.Instance().setString("default.instrument", "INTER")
         Load(self.runs_file, OutputWorkspace=self.runs_workspace)
-        CreateTransmissionWorkspaces(self.transmission_run_names[0],
-                                     self.transmission_run_names[1],
-                                     scale=False)
-        workspaces_to_exclude_from_result = AnalysisDataService.Instance().getObjectNames()
-        stitched_name = StitchedTransmissionWorkspaceName(self.transmission_run_names[0], self.transmission_run_names[1])
-        Stitch1D(
-            LHSWorkspace=TransmissionWorkspaceName(self.transmission_run_names[0]),
-            RHSWorkspace=TransmissionWorkspaceName(self.transmission_run_names[1]),
-            StartOverlap=10,
-            EndOverlap=12,
-            ScaleRHSWorkspace=False,
-            OutputWorkspace=stitched_name)
-        AutoReduce([stitched_name, stitched_name],
-                   self.run_numbers)
-        RemoveWorkspaces(workspaces_to_exclude_from_result)
+        AutoReduce(self.transmission_run_names, self.run_numbers)
         GroupWorkspaces(InputWorkspaces=AnalysisDataService.Instance().getObjectNames(),
                         OutputWorkspace=self.result_workspace)
         mtd[self.result_workspace].sortByName()
