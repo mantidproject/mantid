@@ -95,6 +95,9 @@ void RunsTablePresenter::removeRowsFromModel(
 }
 
 void RunsTablePresenter::notifyDeleteRowRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
   auto selected = m_view->jobs().selectedRowLocations();
   if (!selected.empty()) {
     if (!containsGroups(selected)) {
@@ -112,6 +115,9 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
 }
 
 void RunsTablePresenter::notifyDeleteGroupRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
   auto selected = m_view->jobs().selectedRowLocations();
   if (selected.size() > 0) {
     auto groupIndicesOrderedLowToHigh = groupIndexesFromSelection(selected);
@@ -148,6 +154,9 @@ void RunsTablePresenter::notifyReductionPaused() {
 }
 
 void RunsTablePresenter::notifyInsertRowRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
   auto selected = m_view->jobs().selectedRowLocations();
   if (selected.size() > 0) {
     auto groups = groupIndexesFromSelection(selected);
@@ -234,6 +243,9 @@ void RunsTablePresenter::appendRowsToGroupsInModel(
 }
 
 void RunsTablePresenter::notifyInsertGroupRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
   auto selected = m_view->jobs().selectedRowLocations();
   if (selected.size() > 0) {
     auto selectedGroupIndexes = groupIndexesFromSelection(selected);
@@ -456,6 +468,9 @@ void RunsTablePresenter::removeAllRowsAndGroupsFromView() {
 void RunsTablePresenter::notifyRemoveRowsRequested(
     std::vector<MantidWidgets::Batch::RowLocation> const
         &locationsOfRowsToRemove) {
+  if (isProcessing() || isAutoreducing())
+    return;
+
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
   ensureAtLeastOneGroupExists();
@@ -463,6 +478,9 @@ void RunsTablePresenter::notifyRemoveRowsRequested(
 }
 
 void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
   removeAllRowsAndGroupsFromModel();
   removeAllRowsAndGroupsFromView();
   ensureAtLeastOneGroupExists();
@@ -478,6 +496,9 @@ void RunsTablePresenter::notifyCopyRowsRequested() {
 }
 
 void RunsTablePresenter::notifyCutRowsRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
   m_clipboard = m_view->jobs().selectedSubtrees();
   if (m_clipboard.is_initialized()) {
     m_view->jobs().removeRows(m_view->jobs().selectedRowLocations());
@@ -490,6 +511,9 @@ void RunsTablePresenter::notifyCutRowsRequested() {
 }
 
 void RunsTablePresenter::notifyPasteRowsRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
   auto maybeReplacementRoots = m_view->jobs().selectedSubtreeRoots();
   if (maybeReplacementRoots.is_initialized() && m_clipboard.is_initialized()) {
     auto &replacementRoots = maybeReplacementRoots.get();
