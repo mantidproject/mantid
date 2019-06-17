@@ -75,7 +75,7 @@
      </spacer>
     </item>
     <item row="1" column="2">
-     <widget class="QLineEdit" name="x_label_line_edit_15">
+     <widget class="QLineEdit" name="label_line_edit">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -117,7 +117,7 @@
      </spacer>
     </item>
     <item row="2" column="2">
-     <widget class="QComboBox" name="0_6">
+     <widget class="QComboBox" name="colormap_combo_box">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -158,28 +158,6 @@
       </property>
      </spacer>
     </item>
-    <item row="3" column="2">
-     <widget class="QLineEdit" name="x_label_line_edit_16">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>190</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>211</width>
-        <height>20</height>
-       </size>
-      </property>
-     </widget>
-    </item>
     <item row="4" column="0">
      <widget class="QLabel" name="color_label_4">
       <property name="text">
@@ -199,28 +177,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item row="4" column="2">
-     <widget class="QLineEdit" name="x_label_line_edit_17">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>190</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>211</width>
-        <height>20</height>
-       </size>
-      </property>
-     </widget>
     </item>
     <item row="5" column="0">
      <widget class="QLabel" name="color_label_5">
@@ -243,7 +199,7 @@
      </spacer>
     </item>
     <item row="5" column="2">
-     <widget class="QComboBox" name="0_4">
+     <widget class="QComboBox" name="interpolation_combo_box">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -285,7 +241,7 @@
      </spacer>
     </item>
     <item row="6" column="2">
-     <widget class="QComboBox" name="0_5">
+     <widget class="QComboBox" name="scale_combo_box">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -305,6 +261,12 @@
        </size>
       </property>
      </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QDoubleSpinBox" name="min_value_spin_box"/>
+    </item>
+    <item row="4" column="2">
+     <widget class="QDoubleSpinBox" name="max_value_spin_box"/>
     </item>
    </layout>
   </widget>
@@ -326,7 +288,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QComboBox" name="images_selector_combo_box"/>
+     <widget class="QComboBox" name="select_image_combo_box"/>
     </item>
    </layout>
   </widget>

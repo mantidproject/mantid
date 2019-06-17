@@ -8,10 +8,11 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.widgets.plotconfigdialog import curve_in_figure
+from mantidqt.widgets.plotconfigdialog import curve_in_figure, image_in_figure
 from mantidqt.widgets.plotconfigdialog.view import PlotConfigDialogView
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTabWidgetPresenter
+from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
 
 
 class PlotConfigDialogPresenter:
@@ -36,6 +37,14 @@ class PlotConfigDialogPresenter:
         else:
             self.tab_widget_presenters.append(None)
             self.tab_widget_views.append(None)
+        # Images tab
+        if image_in_figure(self.fig):
+            images_tab = ImagesTabWidgetPresenter(self.fig, parent=self.view)
+            self.tab_widget_presenters.append(images_tab)
+            self.tab_widget_views.append((images_tab.view, "Images"))
+        else:
+            self.tab_widget_presenters.append(None)
+            self.tab_widget_views.append(None)
 
         self._add_tab_widget_views()
 
@@ -49,7 +58,7 @@ class PlotConfigDialogPresenter:
 
     def apply_properties(self):
         for tab in self.tab_widget_presenters:
-            if tab.view:
+            if tab:
                 tab.apply_properties()
         self.fig.canvas.draw()
 

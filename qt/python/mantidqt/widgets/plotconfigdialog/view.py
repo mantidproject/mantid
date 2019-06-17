@@ -26,4 +26,5 @@ class PlotConfigDialogView(QDialog):
 
     def add_tab_widgets(self, tab_widgets):
         for tab_widget in tab_widgets:
-            self.main_tab_widget.addTab(*tab_widget)
+            if tab_widget:
+                self.main_tab_widget.addTab(*tab_widget)
