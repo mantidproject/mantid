@@ -335,7 +335,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             upper_bound = np.max(upper_bounds)
         else:
             upper_bound = None
-            
+
         return lower_bound, upper_bound
 
     def on_home_clicked(self):
