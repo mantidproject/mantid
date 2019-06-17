@@ -36,10 +36,10 @@ bool checkPeriodInWorkspaceGroup(const int &period,
  * for "unset"
  * @returns Result of the removal
  */
-MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
-                                       const int index, const double startX,
-                                       const double endX,
-                                       const double normalizationIn) {
+std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr>
+estimateAsymmetry(const Workspace_sptr &inputWS, const int index,
+                  const double startX, const double endX,
+                  const double normalizationIn) {
   IAlgorithm_sptr asym = AlgorithmManager::Instance().createUnmanaged(
       "EstimateMuonAsymmetryFromCounts");
   asym->initialize();
@@ -54,19 +54,23 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
   asym->setProperty("StartX", startX);
   asym->setProperty("EndX", endX);
   asym->setProperty("NormalizationIn", normalizationIn);
-  asym->setProperty("OutputUnNormData", false);
+  asym->setProperty("OutputUnNormData", true);
   asym->setProperty("OutputUnNormWorkspace", "tmp_unNorm");
   asym->execute();
   MatrixWorkspace_sptr outWS = asym->getProperty("OutputWorkspace");
-
-  return outWS;
+  MatrixWorkspace_sptr unNormWS = asym->getProperty("OutputUnNormWorkspace");
+  std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> outputWS;
+  outputWS.first = outWS;
+  outputWS.second = unNormWS;
+  return outputWS;
 }
 
-Mantid::API::MatrixWorkspace_sptr estimateMuonAsymmetry(
+std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> estimateMuonAsymmetry(
     WorkspaceGroup_sptr inputWS, const std::vector<int> &summedPeriods,
     const std::vector<int> &subtractedPeriods, int groupIndex,
     const double startX, const double endX, const double normalizationIn) {
   MatrixWorkspace_sptr tempWS;
+  MatrixWorkspace_sptr unNormWS;
   int numPeriods = inputWS->getNumberOfEntries();
   if (numPeriods > 1) {
 
@@ -76,32 +80,42 @@ Mantid::API::MatrixWorkspace_sptr estimateMuonAsymmetry(
         Mantid::MuonAlgorithmHelper::sumPeriods(inputWS, subtractedPeriods);
 
     // Remove decay (summed periods ws)
-    MatrixWorkspace_sptr asymSummedPeriods =
+    std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> asymSummedPeriods =
         estimateAsymmetry(summedWS, groupIndex, startX, endX, normalizationIn);
 
     if (!subtractedPeriods.empty()) {
       // Remove decay (subtracted periods ws)
-      MatrixWorkspace_sptr asymSubtractedPeriods = estimateAsymmetry(
-          subtractedWS, groupIndex, startX, endX, normalizationIn);
+      std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr>
+          asymSubtractedPeriods = estimateAsymmetry(
+              subtractedWS, groupIndex, startX, endX, normalizationIn);
 
       // Now subtract
       tempWS = Mantid::MuonAlgorithmHelper::subtractWorkspaces(
-          asymSummedPeriods, asymSubtractedPeriods);
+          asymSummedPeriods.first, asymSubtractedPeriods.first);
+      unNormWS = Mantid::MuonAlgorithmHelper::subtractWorkspaces(
+          asymSummedPeriods.second, asymSubtractedPeriods.second);
     } else {
-      tempWS = asymSummedPeriods;
+      tempWS = asymSummedPeriods.first;
+      unNormWS = asymSummedPeriods.second;
     }
   } else {
     // Only one period was supplied
-    tempWS =
+    std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> WSPair =
         estimateAsymmetry(inputWS->getItem(0), groupIndex, startX, endX,
                           normalizationIn); // change -1 to m_groupIndex and
                                             // follow through to store as a
                                             // table for later.
+    tempWS = WSPair.first;
+    unNormWS = WSPair.second;
   }
 
   MatrixWorkspace_sptr outWS =
       Mantid::MuonAlgorithmHelper::extractSpectrum(tempWS, groupIndex);
-  return outWS;
+  MatrixWorkspace_sptr unNormOutWS =
+      Mantid::MuonAlgorithmHelper::extractSpectrum(unNormWS, groupIndex);
+  std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> outputPair(outWS,
+                                                                   unNormOutWS);
+  return outputPair;
 }
 
 MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
@@ -152,6 +166,12 @@ void MuonGroupingAsymmetry::init() {
                       "OutputWorkspace", emptyString, Direction::Output),
                   "Output workspace which will hold the results of the group "
                   "asymmetry calculation.");
+
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputUnNormWorkspace", "unNormalisedData", Direction::Output,
+          API::PropertyMode::Optional),
+      "The name of the output unnormalized workspace.");
 
   declareProperty("GroupName", emptyString,
                   "The name of the group. Must "
@@ -280,7 +300,7 @@ MuonGroupingAsymmetry::createGroupWorkspace(WorkspaceGroup_sptr inputWS) {
 void MuonGroupingAsymmetry::exec() {
 
   WorkspaceGroup_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outWS;
+  std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> outWS;
 
   const double startX = getProperty("AsymmetryTimeMin");
   const double endX = getProperty("AsymmetryTimeMax");
@@ -294,8 +314,9 @@ void MuonGroupingAsymmetry::exec() {
   outWS = estimateMuonAsymmetry(groupedWS, summedPeriods, subtractedPeriods, 0,
                                 startX, endX, normalizationIn);
 
-  addGroupingAsymmetrySampleLogs(outWS);
-  setProperty("OutputWorkspace", outWS);
+  addGroupingAsymmetrySampleLogs(outWS.first);
+  setProperty("OutputWorkspace", outWS.first);
+  setProperty("OutputUnNormWorkspace", outWS.second);
 }
 
 void MuonGroupingAsymmetry::addGroupingAsymmetrySampleLogs(

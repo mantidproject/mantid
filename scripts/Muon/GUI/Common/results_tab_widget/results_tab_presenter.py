@@ -49,7 +49,7 @@ class ResultsTabPresenter(QObject):
         try:
             self.model.create_results_table(log_selection, results_selection)
         except Exception as exc:
-            self.view.show_warning("Error creating results table: " + str(exc))
+            self.view.show_warning(str(exc))
 
     def on_function_selection_changed(self):
         """React to the change in function selection"""

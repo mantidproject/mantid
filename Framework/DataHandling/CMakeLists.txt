@@ -181,8 +181,10 @@ set(SRC_FILES
     src/SaveReflectometryAscii.cpp
     src/SaveReflCustomAscii.cpp
     src/SaveReflThreeColumnAscii.cpp
+    src/SaveSampleEnvironmentAndShape.cpp
     src/SaveSESANS.cpp
     src/SaveSPE.cpp
+    src/SaveStl.cpp
     src/SaveTBL.cpp
     src/SaveToSNSHistogramNexus.cpp
     src/SaveVTK.cpp
@@ -376,8 +378,10 @@ set(INC_FILES
     inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveReflCustomAscii.h
     inc/MantidDataHandling/SaveReflThreeColumnAscii.h
+    inc/MantidDataHandling/SaveSampleEnvironmentAndShape.h
     inc/MantidDataHandling/SaveSESANS.h
     inc/MantidDataHandling/SaveSPE.h
+    inc/MantidDataHandling/SaveStl.h
     inc/MantidDataHandling/SaveTBL.h
     inc/MantidDataHandling/SaveToSNSHistogramNexus.h
     inc/MantidDataHandling/SaveVTK.h
@@ -557,8 +561,10 @@ set(TEST_FILES
     SaveReflectometryAsciiTest.h
     SaveReflCustomAsciiTest.h
     SaveReflThreeColumnAsciiTest.h
+    SaveSampleEnvironmentAndShapeTest.h
     SaveSESANSTest.h
     SaveSPETest.h
+    SaveStlTest.h
     SaveTBLTest.h
     SaveToSNSHistogramNexusTest.h
     SetBeamTest.h

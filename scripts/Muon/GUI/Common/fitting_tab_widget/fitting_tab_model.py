@@ -68,7 +68,7 @@ class FittingTabModel(object):
 
         return name, directory
 
-    def do_simultaneous_fit(self, parameter_dict):
+    def do_simultaneous_fit(self, parameter_dict, global_parameters):
         fit_group_name = parameter_dict.pop('FitGroupName')
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared = \
             self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
@@ -88,7 +88,9 @@ class FittingTabModel(object):
                                                                 table_directory)
         self.add_fit_to_context(wrapped_parameter_workspace,
                                 parameter_dict['Function'],
-                                parameter_dict['InputWorkspace'], workspace_name)
+                                parameter_dict['InputWorkspace'],
+                                workspace_name,
+                                global_parameters)
 
         return function_object, output_status, output_chi_squared
 
@@ -154,7 +156,7 @@ class FittingTabModel(object):
             return function_temp.name()
 
     def add_fit_to_context(self, parameter_workspace, function,
-                           input_workspace, output_workspace_name):
+                           input_workspace, output_workspace_name, global_parameters=None):
         self.context.fitting_context.add_fit_from_values(
             parameter_workspace, self.function_name,
-            input_workspace, output_workspace_name)
+            input_workspace, output_workspace_name, global_parameters)
