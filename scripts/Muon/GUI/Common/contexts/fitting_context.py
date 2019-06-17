@@ -182,6 +182,7 @@ class FitInformation(object):
                  parameter_workspace,
                  fit_function_name,
                  input_workspace,
+                 output_workspace_names,
                  global_parameters=None):
         """
         :param parameter_workspace: The workspace wrapper
@@ -189,6 +190,7 @@ class FitInformation(object):
         :param fit_function_name: The name of the function used
         :param input_workspace: The name of the workspace containing
         the original data
+        :param output_workspace_names: A list containing the names of the output workspaces containing the fits
         :param global_parameters: An optional list of parameters
         that were tied together during the fit
         """
@@ -196,12 +198,14 @@ class FitInformation(object):
                                              global_parameters)
         self.fit_function_name = fit_function_name
         self.input_workspace = input_workspace
+        self.output_workspace_names = output_workspace_names
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self.parameters == other.parameters and \
+        return self._fit_parameters.parameter_workspace_name == other._fit_parameters.parameter_workspace_name and \
             self.fit_function_name == other.fit_function_name and \
-            self.input_workspace == other.input_workspace
+            self.input_workspace == other.input_workspace and \
+            self.output_workspace_names == other.output_workspace_names
 
     @property
     def parameters(self):
@@ -233,6 +237,7 @@ class FittingContext(object):
                             parameter_workspace,
                             fit_function_name,
                             input_workspace,
+                            output_workspace_names,
                             global_parameters=None):
         """
         Add a new fit information object based on the raw values.
@@ -240,13 +245,15 @@ class FittingContext(object):
         """
         self.add_fit(
             FitInformation(parameter_workspace, fit_function_name,
-                           input_workspace, global_parameters))
+                           input_workspace, output_workspace_names, global_parameters))
 
     def add_fit(self, fit):
         """
         Add a new fit to the context. Subscribers are notified of the update.
         :param fit: A new FitInformation object
         """
+        if fit in self.fit_list:
+            return
         self.fit_list.append(fit)
         self.new_fit_notifier.notify_subscribers()
 
@@ -266,3 +273,20 @@ class FittingContext(object):
             fit for fit in self.fit_list
             if fit.fit_function_name == fit_function_name
         ]
+
+    def find_output_workspaces_for_input_workspace_name(self, input_workspace_name):
+        """
+        Find the fits in the list whose input workspace matches
+        :param input_workspace_name: The name of the input_workspace
+        :return: A list of matching fits
+        """
+        workspace_list = []
+        for fit in self.fit_list:
+            if type(fit.input_workspace) == list:
+                for index, workspace in enumerate(fit.input_workspace):
+                    if workspace == input_workspace_name:
+                        workspace_list.append(fit.output_workspace_names[index])
+            else:
+                if input_workspace_name == fit.input_workspace:
+                    workspace_list.append(fit.output_workspace_names[0])
+        return workspace_list

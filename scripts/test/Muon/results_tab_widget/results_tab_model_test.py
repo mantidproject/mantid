@@ -49,12 +49,14 @@ def create_test_workspacegroup(size, group_name=None):
 def create_test_fits(input_workspaces,
                      function_name,
                      parameters,
+                     output_workspace_names,
                      global_parameters=None):
     """
     Create a list of fits
     :param input_workspaces: The input workspaces
     :param function_name: The name of the function
     :param parameters: The parameters list
+    :param output_workspace_names: A list of workspace names
     :param global_parameters: An optional list of tied parameters
     :return: A list of Fits
     """
@@ -71,7 +73,7 @@ def create_test_fits(input_workspaces,
         parameter_workspace.workspace.__iter__.return_value = fit_table
         parameter_workspace.workspace_name = name + '_Parameters'
         fits.append(
-            FitInformation(parameter_workspace, function_name, name,
+            FitInformation(parameter_workspace, function_name, name, output_workspace_names,
                            global_parameters))
 
     return fits
@@ -80,6 +82,7 @@ def create_test_fits(input_workspaces,
 def create_test_model(input_workspaces,
                       function_name,
                       parameters,
+                      output_workspace_names,
                       logs=None,
                       global_parameters=None):
     """
@@ -91,7 +94,7 @@ def create_test_model(input_workspaces,
     :param global_parameters: An optional list of tied parameters
     :return: A list of Fits with workspaces/logs attached
     """
-    fits = create_test_fits(input_workspaces, function_name, parameters,
+    fits = create_test_fits(input_workspaces, function_name, parameters, output_workspace_names,
                             global_parameters)
     logs = logs if logs is not None else []
     for fit, workspace_name in zip(fits, input_workspaces):
@@ -205,7 +208,7 @@ class ResultsTabModelTest(unittest.TestCase):
                          msg="{} not found in log list".format(logs[1]))
 
     def test_model_returns_fit_functions_from_context(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters,
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [],
                                      self.logs)
 
         self.assertEqual(['func1'], model.fit_functions())
@@ -215,14 +218,14 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(0, len(model.fit_selection({})))
 
     def test_model_creates_fit_selection_given_no_existing_state(self):
-        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, [],
                                      self.logs)
 
         expected_list_state = {'ws1': [0, True, True], 'ws2': [1, True, True]}
         self.assertDictEqual(expected_list_state, model.fit_selection({}))
 
     def test_model_creates_fit_selection_given_existing_state(self):
-        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, [],
                                      self.logs)
 
         orig_list_state = {'ws1': [0, False, True]}
@@ -235,7 +238,7 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(0, len(model.log_selection({})))
 
     def test_model_returns_log_selection_of_first_workspace(self):
-        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters)
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters, [])
         with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
             ws1_logs = ('run_number', 'run_start')
             ws2_logs = ('temp', 'magnetic_field')
@@ -252,7 +255,7 @@ class ResultsTabModelTest(unittest.TestCase):
             self.assertEqual(expected_selection, model.log_selection({}))
 
     def test_model_combines_existing_log_selection(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters)
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [])
         with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
             mock_log_names.return_value = [
                 'run_number', 'run_start', 'magnetic_field'
@@ -273,7 +276,7 @@ class ResultsTabModelTest(unittest.TestCase):
                                  model.log_selection(existing_selection))
 
     def test_create_results_table_with_no_logs_or_global_parameters(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters)
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [])
         logs = []
         selected_results = [('ws1', 0)]
         table = model.create_results_table(logs, selected_results)
@@ -295,7 +298,7 @@ class ResultsTabModelTest(unittest.TestCase):
                                             table, model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters,
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [],
                                      self.logs)
         selected_results = [('ws1', 0)]
         table = model.create_results_table(self.logs, selected_results)
@@ -321,7 +324,7 @@ class ResultsTabModelTest(unittest.TestCase):
     def test_create_results_table_with_fit_with_global_parameters(self):
         logs = []
         global_parameters = ['Height']
-        _, model = create_test_model(('simul-1', ), 'func1', self.parameters,
+        _, model = create_test_model(('simul-1', ), 'func1', self.parameters, [],
                                      logs, global_parameters)
         selected_results = [('simul-1', 0)]
         table = model.create_results_table(logs, selected_results)
@@ -349,11 +352,11 @@ class ResultsTabModelTest(unittest.TestCase):
             self):
         parameters = OrderedDict([('Height', (100, 0.1)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters)
+        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters, [])
 
         parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func2 = create_test_fits(('ws2', ), 'func2', parameters)
+        fits_func2 = create_test_fits(('ws2', ), 'func2', parameters, [])
         model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
 
         selected_results = [('ws1', 0), ('ws2', 1)]
@@ -365,8 +368,8 @@ class ResultsTabModelTest(unittest.TestCase):
         parameters = OrderedDict([('f0.Height', (100, 0.1)),
                                   ('f1.Height', (90, 0.001)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func1= create_test_fits(('ws1', ), 'func1', parameters)
-        fits_globals = create_test_fits(('ws2', ), 'func1', parameters,
+        fits_func1= create_test_fits(('ws1', ), 'func1', parameters, [])
+        fits_globals = create_test_fits(('ws2', ), 'func1', parameters, [],
                                         global_parameters=['Height'])
         model = ResultsTabModel(FittingContext(fits_func1 + fits_globals))
 
