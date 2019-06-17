@@ -66,13 +66,13 @@ void EQSANSCorrectFrame::exec() {
     explicit correctTofFactory(double pulsePeriod, double minTOF,
                                double frameWidth, bool isFrameSkipping)
         : m_pulsePeriod(pulsePeriod), m_minTOF(minTOF),
-          m_frameWidth(frameWidth), m_isFrameSkipping(isFrameSkipping) {
+          m_frameWidth(frameWidth), m_minTOF_delayed(minTOF + pulsePeriod),
+          m_isFrameSkipping(isFrameSkipping) {
       // Find how many frame widths elapsed from the time the neutrons of the
       // lead pulse were emitted and the time the neutrons arrived to the
       // detector bank. This time must be added to the stored TOF values
-      const size_t nf = static_cast<size_t>(minTOF / frameWidth);
-      m_framesOffsetTime = frameWidth * static_cast<double>(nf);
-      m_minTOF_delayed = minTOF + pulsePeriod;
+      const double nf = std::floor(minTOF / frameWidth);
+      m_framesOffsetTime = frameWidth * nf;
     }
 
     double operator()(const double tof) const {
@@ -91,9 +91,9 @@ void EQSANSCorrectFrame::exec() {
     double m_pulsePeriod;
     double m_minTOF;
     double m_frameWidth;
-    bool m_isFrameSkipping;
     double m_framesOffsetTime;
     double m_minTOF_delayed;
+    bool m_isFrameSkipping;
   };
 
   auto correctTof =
