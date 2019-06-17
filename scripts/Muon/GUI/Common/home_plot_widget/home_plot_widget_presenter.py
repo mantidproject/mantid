@@ -120,6 +120,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
             for workspace_name in list_of_workspaces_to_plot:
                 self._model.add_workspace_to_plot(workspace_name, 2)
+                self._model.add_workspace_to_plot(workspace_name, 3)
 
     def get_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """
