@@ -12,7 +12,7 @@ tableworkspace.
 
 Log Values Selection
 ^^^^^^^^^^^^^^^^^^^^
-The log values selection area lists log values from the fitted run(s) that can be selected to be output into the results
+Lists log values from the fitted run(s) that can be selected to be output into the results
 table
 
 **Search bar** The search bar can be used to find (Include) or filter out (Exclude) log values by name.
@@ -32,7 +32,7 @@ The Fit selection area lists outputs from the fitting tab filtered by fitting fu
 outputted to the results table
 
 **Fit function selection** This drop down menu filters the selection box by fit function. Only fits with the same
-function can be output together
+function can be output together.
 
 **Search bar** The search bar can be used to find (Include) or filter out (Exclude) fit functions by name.
 
@@ -48,7 +48,7 @@ selection box
 Output
 ^^^^^^
 
-**Table Name** The selected results will be output to a tableworkspace with the name given here.
+**Table Name** The output tableworkspace's name is given here.
 
 **Output results** This will put put the fit funtions for the selected runs along with the selected log values for that run.
 

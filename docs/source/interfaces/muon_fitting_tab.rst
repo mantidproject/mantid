@@ -36,7 +36,7 @@ right side of the box.
 **Unselect/Select All** When clicked these buttons will automatically unselect or select all log values currently in the
 selection box
 
-**Run selection** Filter desplayed data sets by run number
+**Run selection** Filter displayed data sets by run number
 
 **Group & Pair selection** filter by group or pair name.
 
