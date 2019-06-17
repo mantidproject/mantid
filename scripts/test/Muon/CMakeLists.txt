@@ -7,6 +7,8 @@ set ( TEST_PY_FILES
    fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    fitting_tab_widget/fitting_tab_presenter_test.py
    fitting_tab_widget/fitting_tab_model_test.py
+   fit_information_test.py
+   fit_parameters_test.py
    fitting_context_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
@@ -72,6 +74,8 @@ set ( TEST_PY_FILES_QT4
    fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    fitting_tab_widget/fitting_tab_presenter_test.py
    fitting_tab_widget/fitting_tab_model_test.py
+   fit_information_test.py
+   fit_parameters_test.py
    fitting_context_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
