@@ -79,15 +79,13 @@ void LoadDNSEvent::init() {
 
   declareProperty(std::make_unique<Kernel::PropertyWithValue<uint32_t>>(
                       "ChopperChannel", 1,
-                      boost::shared_ptr<BoundedValidator<uint32_t>>(
-                          new BoundedValidator<uint32_t>(0, 4)),
+                      boost::make_shared<BoundedValidator<int>>(0, 4),
                       Kernel::Direction::Input),
                   "The Chopper Channel");
 
   declareProperty(std::make_unique<Kernel::PropertyWithValue<uint32_t>>(
                       "MonitorChannel", 1,
-                      boost::shared_ptr<BoundedValidator<uint32_t>>(
-                          new BoundedValidator<uint32_t>(0, 4)),
+                      boost::make_shared<BoundedValidator<int>>(0, 4),
                       Kernel::Direction::Input),
                   "The Monitor Channel");
 
