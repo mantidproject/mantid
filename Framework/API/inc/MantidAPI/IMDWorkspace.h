@@ -11,12 +11,15 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include <cstdint>
 #include <vector>
 
 namespace Mantid {
+
+namespace Geometry {
+class MDImplicitFunction;
+}
 
 namespace API {
 
@@ -75,9 +78,9 @@ public:
   virtual uint64_t getNEvents() const = 0;
 
   /// Creates a new iterator pointing to the first cell in the workspace
-  virtual std::vector<std::unique_ptr<IMDIterator>>
-  createIterators(size_t suggestedNumCores = 1,
-                  Geometry::MDImplicitFunction *function = nullptr) const = 0;
+  virtual std::vector<std::unique_ptr<IMDIterator>> createIterators(
+      size_t suggestedNumCores = 1,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const = 0;
 
   /// Returns the (normalized) signal at a given coordinates
   virtual signal_t
@@ -95,8 +98,8 @@ public:
                                const Mantid::Kernel::VMD &end,
                                Mantid::API::MDNormalization normalize) const;
 
-  std::unique_ptr<IMDIterator>
-  createIterator(Geometry::MDImplicitFunction *function = nullptr) const;
+  std::unique_ptr<IMDIterator> createIterator(
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   std::string getConvention() const;
   void setConvention(std::string convention);
@@ -112,8 +115,8 @@ public:
                              Mantid::API::VolumeNormalization) const;
 
   /// Setter for the masking region.
-  virtual void
-  setMDMasking(std::unique_ptr<Geometry::MDImplicitFunction> maskingRegion) = 0;
+  virtual void setMDMasking(
+      std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) = 0;
 
   /// Clear existing masks
   virtual void clearMDMasking() = 0;
