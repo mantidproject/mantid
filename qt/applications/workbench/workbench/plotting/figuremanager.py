@@ -323,16 +323,20 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 # There are no upper caps
                 pass
 
-        # None < all numbers, so exclude the None lower bounds
+        # min/max does not work on python3 for lists containing None values
         lower_bounds = [_min for _min in (line_min, error_min) if _min is not None]
         if lower_bounds:
             lower_bound = np.min(lower_bounds)
         else:
             lower_bound = None
 
-        upper_bounds = [line_max, error_max]
-
-        return lower_bound, np.max(upper_bounds)
+        upper_bounds = [_max for _max in (line_max, error_max) if _max is not None]
+        if upper_bounds:
+            upper_bound = np.max(upper_bounds)
+        else:
+            upper_bound = None
+            
+        return lower_bound, upper_bound
 
     def on_home_clicked(self):
         """
