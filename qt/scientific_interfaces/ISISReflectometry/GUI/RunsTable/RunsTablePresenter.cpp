@@ -465,6 +465,27 @@ void RunsTablePresenter::removeAllRowsAndGroupsFromView() {
   m_view->jobs().removeAllRows();
 }
 
+void RunsTablePresenter::notifyAppendAndEditAtChildRowRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
+  m_view->jobs().appendAndEditAtChildRow();
+}
+
+void RunsTablePresenter::notifyAppendAndEditAtRowBelowRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
+  m_view->jobs().appendAndEditAtRowBelow();
+}
+
+void RunsTablePresenter::notifyEditAtRowAboveRequested() {
+  if (isProcessing() || isAutoreducing())
+    return;
+
+  m_view->jobs().editAtRowAbove();
+}
+
 void RunsTablePresenter::notifyRemoveRowsRequested(
     std::vector<MantidWidgets::Batch::RowLocation> const
         &locationsOfRowsToRemove) {

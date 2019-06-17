@@ -27,6 +27,9 @@ public:
                              std::string const &newValue) override;
   void notifySelectionChanged() override;
   void notifyRowInserted(RowLocation const &newRowLocation) override;
+  void notifyAppendAndEditAtChildRowRequested() override;
+  void notifyAppendAndEditAtRowBelowRequested() override;
+  void notifyEditAtRowAboveRequested() override;
   void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) override;
   void notifyCopyRowsRequested() override;
@@ -45,6 +48,9 @@ signals:
   void removeRowsRequested(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
           &locationsOfRowsToRemove);
+  void appendAndEditAtChildRowRequested();
+  void appendAndEditAtRowBelowRequested();
+  void editAtRowAboveRequested();
   void copyRowsRequested();
   void pasteRowsRequested();
   void cutRowsRequested();

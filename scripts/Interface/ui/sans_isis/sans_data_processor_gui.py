@@ -445,6 +445,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
         self.table_signals.cellTextChanged.connect(self._data_changed)
         self.table_signals.rowInserted.connect(self._row_inserted)
+        self.table_signals.appendAndEditAtChildRowRequested.connect(self._append_and_edit_at_child_row_requested)
+        self.table_signals.appendAndEditAtRowBelowRequested.connect(self._append_and_edit_at_row_below_requested)
+        self.table_signals.editAtRowAboveRequested.connect(self._edit_at_row_above_requested)
         self.table_signals.removeRowsRequested.connect(self._remove_rows_requested)
         self.table_signals.copyRowsRequested.connect(self._copy_rows_requested)
         self.table_signals.pasteRowsRequested.connect(self._paste_rows_requested)
@@ -506,6 +509,15 @@ class SANSDataProcessorGui(QMainWindow,
             index = row_location.rowRelativeToParent()
             row = self.get_row(row_location)
             self._call_settings_listeners(lambda listener: listener.on_row_inserted(index, row))
+
+    def _append_and_edit_at_child_row_requested(self):
+        self.data_processor_table.appendAndEditAtChildRow()
+
+    def _append_and_edit_at_row_below_requested(self):
+        self.data_processor_table.appendAndEditAtRowBelow()
+
+    def _edit_at_row_above_requested(self):
+        self.data_processor_table.editAtRowAbove()
 
     def _remove_rows_requested(self, rows):
         rows = [item.rowRelativeToParent() for item in rows]

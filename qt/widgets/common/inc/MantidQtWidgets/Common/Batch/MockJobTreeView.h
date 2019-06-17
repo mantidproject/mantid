@@ -40,6 +40,9 @@ public:
   MOCK_METHOD1(appendChildRowOf, RowLocation(RowLocation const &));
   MOCK_METHOD2(appendChildRowOf,
                RowLocation(RowLocation const &, std::vector<Cell> const &));
+  MOCK_METHOD0(appendAndEditAtChildRow, void());
+  MOCK_METHOD0(appendAndEditAtRowBelow, void());
+  MOCK_METHOD0(editAtRowAbove, void());
 
   MOCK_METHOD1(removeRowAt, void(RowLocation const &));
   MOCK_METHOD1(removeRows, void(std::vector<RowLocation>));
