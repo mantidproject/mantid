@@ -77,17 +77,17 @@ void LoadDNSEvent::init() {
       std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
       "The XML or Map file with full path.");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<unsigned>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<uint32_t>>(
                       "ChopperChannel", 1,
-                      boost::shared_ptr<BoundedValidator<unsigned>>(
-                          new BoundedValidator<unsigned>(0, 4)),
+                      boost::shared_ptr<BoundedValidator<uint32_t>>(
+                          new BoundedValidator<uint32_t>(0, 4)),
                       Kernel::Direction::Input),
                   "The Chopper Channel");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<unsigned>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<uint32_t>>(
                       "MonitorChannel", 1,
-                      boost::shared_ptr<BoundedValidator<unsigned>>(
-                          new BoundedValidator<unsigned>(0, 4)),
+                      boost::shared_ptr<BoundedValidator<uint32_t>>(
+                          new BoundedValidator<uint32_t>(0, 4)),
                       Kernel::Direction::Input),
                   "The Monitor Channel");
 
@@ -110,12 +110,12 @@ void LoadDNSEvent::exec() {
 
   // loadProperties:
   const std::string fileName = getPropertyValue("InputFile");
-  chopperChannel = static_cast<unsigned>(getProperty("ChopperChannel"));
-  monitorChannel = static_cast<unsigned>(getProperty("MonitorChannel"));
+  chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
+  monitorChannel = static_cast<uint32_t>(getProperty("MonitorChannel"));
   const auto chopperChannels =
-      outputWS->instrumentParameters().getType<unsigned>("chopper", "channel");
+      outputWS->instrumentParameters().getType<uint32_t>("chopper", "channel");
   const auto monitorChannels =
-      outputWS->instrumentParameters().getType<unsigned>("monitor", "channel");
+      outputWS->instrumentParameters().getType<uint32_t>("monitor", "channel");
   chopperChannel = chopperChannel != 0
                        ? chopperChannel
                        : (chopperChannels.empty() ? 99 : chopperChannels.at(0));

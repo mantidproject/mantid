@@ -139,8 +139,8 @@ private:
     std::vector<CompactEvent> triggerEvents;
   };
 
-  unsigned chopperChannel;
-  unsigned monitorChannel;
+  uint32_t chopperChannel;
+  uint32_t monitorChannel;
 
   void runLoadInstrument(std::string instrumentName,
                          DataObjects::EventWorkspace_sptr &eventWS);
