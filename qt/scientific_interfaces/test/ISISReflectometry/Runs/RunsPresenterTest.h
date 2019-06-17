@@ -162,8 +162,9 @@ public:
 
   void testResumeAutoreductionWarnsUserIfTableChanged() {
     auto presenter = makePresenter();
+    auto runsTable = makeRunsTableWithContent();
     expectAutoreductionSettingsChanged();
-    expectRunsTableWithContent();
+    expectRunsTableWithContent(runsTable);
     expectUserRespondsYes();
     expectStartNewAutoreduction();
     presenter.resumeAutoreduction();
@@ -181,8 +182,9 @@ public:
 
   void testResumeAutoreductionCancelledByUserIfTableChanged() {
     auto presenter = makePresenter();
+    auto runsTable = makeRunsTableWithContent();
     expectAutoreductionSettingsChanged();
-    expectRunsTableWithContent();
+    expectRunsTableWithContent(runsTable);
     expectUserRespondsNo();
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
@@ -395,8 +397,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
-  void expectRunsTableWithContent() {
-    auto runsTable = makeRunsTableWithContent();
+  void expectRunsTableWithContent(RunsTable &runsTable) {
     EXPECT_CALL(*m_runsTablePresenter, runsTable())
         .Times(1)
         .WillOnce(ReturnRef(runsTable));
