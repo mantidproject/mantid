@@ -170,7 +170,7 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   std::atomic<uint64_t> oversizedPosCounterA(0);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS) && USE_PARALLELISM)
-  for (size_t j = 0; j < _eventAccumulator.neutronEvents.size(); j++) {
+  for (int j = 0; j < static_cast<int>(_eventAccumulator.neutronEvents.size()); j++) {
     // uint64_t chopperTimestamp = 0;
     uint64_t oversizedChanelIndexCounter = 0;
     uint64_t oversizedPosCounter = 0;
@@ -413,8 +413,7 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
   std::vector<std::vector<uint8_t>> filechuncks = split_File(file, threadCount);
   g_log.notice() << "filechuncks count = " << filechuncks.size() << std::endl;
 
-  std::vector<EventAccumulator> eventAccumulators;
-  eventAccumulators.resize(filechuncks.size());
+  std::vector<EventAccumulator> eventAccumulators(filechuncks.size());
   for (auto &evtAcc : eventAccumulators) {
     evtAcc.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
   }
@@ -425,17 +424,14 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
       << std::endl;
 
   // parse file chuncks:
-  const auto end = filechuncks.cend();
-  size_t j = 0;
   PARALLEL_FOR_IF(USE_PARALLELISM)
-  for (auto iter = filechuncks.cbegin(); iter < end; iter++) {
-    g_log.notice() << "filechunck.size() = " << iter->size() << std::endl;
-    auto vbs = VectorByteStream(*iter, file.endianess);
-    const auto fileChunckIndex = iter - filechuncks.cbegin();
-    parse_BlockList(vbs, eventAccumulators[size_t(fileChunckIndex)]);
+  for (int i = 0; i < static_cast<int>(filechuncks.size()); ++i) {
+    auto filechunck = filechuncks[static_cast<size_t>(i)];
+    g_log.notice() << "filechunck.size() = " << filechunck.size() << std::endl;
+    auto vbs = VectorByteStream(filechunck, file.endianess);
+    parse_BlockList(vbs, eventAccumulators[static_cast<size_t>(i)]);
   }
 
-  g_log.notice() << "j = " << j << std::endl;
   // combine eventAccumulators:
   PRAGMA_OMP(parallel num_threads(2)) {
     PARALLEL_SECTIONS {
@@ -456,18 +452,20 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
       // combine neutronEvents:
       PARALLEL_SECTION {
         PARALLEL_FOR_NO_WSP_CHECK()
-        for (size_t i = 0; i < _eventAccumulator.neutronEvents.size(); ++i) {
-          auto origSize = _eventAccumulator.neutronEvents[i].size();
-          _eventAccumulator.neutronEvents[i].resize(std::accumulate(
+        for (int i = 0; i < static_cast<int>(_eventAccumulator.neutronEvents.size()); ++i) {
+          auto &allNeutronEvents = _eventAccumulator.neutronEvents[static_cast<size_t>(i)];
+          auto origSize = allNeutronEvents.size();
+          allNeutronEvents.resize(std::accumulate(
               eventAccumulators.cbegin(), eventAccumulators.cend(), 0u,
               [&](const auto s, const auto &v) {
                 return s + v.neutronEvents[i].size();
               }));
           for (const auto &evtAcc : eventAccumulators) {
-            std::memcpy(_eventAccumulator.neutronEvents[i].data() + origSize,
-                        evtAcc.neutronEvents[i].data(),
-                        evtAcc.neutronEvents[i].size());
-            origSize += evtAcc.neutronEvents[i].size();
+            auto &neutronEvents = evtAcc.neutronEvents[static_cast<size_t>(i)];
+            std::memcpy(allNeutronEvents.data() + origSize,
+                        neutronEvents.data(),
+                        neutronEvents.size());
+            origSize += neutronEvents.size();
           }
         }
       }

@@ -203,7 +203,7 @@ private:
     } break;
     default:
       // Panic!!!!
-      g_log.error() << "unknow event id " << eventId << "\n";
+      g_log.error() << "unknown event id " << eventId << "\n";
       break;
     }
   }
