@@ -41,10 +41,13 @@ within the interval.
 */
 class MANTID_KERNEL_DLL LogParser {
 public:
+  /// Returns the name of the log that contains the current period number
+  static const std::string currentPeriodLogName() { return "current_period"; }
   /// Returns the name of the log created that defines the status during a run
-  static const std::string statusLogName();
+  static const std::string statusLogName() { return "running"; }
   /// Returns the name of the log that contains all of the periods
-  static const std::string periodsLogName();
+  static const std::string periodsLogName() { return "periods"; }
+
   /// Creates a TimeSeriesProperty of either double or string type depending on
   /// the log data
   /// Returns a pointer to the created property
