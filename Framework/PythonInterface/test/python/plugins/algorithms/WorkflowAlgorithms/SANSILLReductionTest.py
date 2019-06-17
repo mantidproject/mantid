@@ -92,13 +92,13 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_output(mtd['flux'], False, 30, 256*256)
         self._check_process_flag(mtd['flux'], 'Beam')
 
-    def xtest_transmission_tof(self):
+    def test_transmission_tof(self):
         # D33 VTOF
         SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam')
         SANSILLReduction(Run='093407', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
         self._check_output(mtd['ctr'], False, 75, 1)
 
-    def test_container_tof(self):
+    def test_reference_tof(self):
         # D33 VTOF
         # this is actually a sample run, not water, but is fine for this test
         SANSILLReduction(Run='093410', ProcessAs='Reference', OutputWorkspace='ref')
