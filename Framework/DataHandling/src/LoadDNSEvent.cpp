@@ -139,8 +139,8 @@ void sortVector(Vector &v, _Compare comp) {
   std::sort(v.begin(), v.end(), comp);
 }
 
-void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS,
-                                           EventAccumulator &finalEventAccumulator) {
+void LoadDNSEvent::populate_EventWorkspace(
+    EventWorkspace_sptr eventWS, EventAccumulator &finalEventAccumulator) {
   static const unsigned EVENTS_PER_PROGRESS = 100;
   // The number of steps depends on the type of input file
   Progress progress(this, 0.0, 1.0,
@@ -158,7 +158,7 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS,
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS) && USE_PARALLELISM)
   for (int j = 0;
-      j < static_cast<int>(finalEventAccumulator.neutronEvents.size()); ++j) {
+       j < static_cast<int>(finalEventAccumulator.neutronEvents.size()); ++j) {
     // uint64_t chopperTimestamp = 0;
     uint64_t oversizedChanelIndexCounter = 0;
     uint64_t oversizedPosCounter = 0;
@@ -185,8 +185,8 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS,
       }
 
       chopperIt = std::lower_bound(
-          chopperIt, finalEventAccumulator.triggerEvents.cend(), event.timestamp,
-          [](auto l, auto r) { return l.timestamp > r; });
+          chopperIt, finalEventAccumulator.triggerEvents.cend(),
+          event.timestamp, [](auto l, auto r) { return l.timestamp > r; });
       const uint64_t chopperTimestamp =
           chopperIt != finalEventAccumulator.triggerEvents.cend()
               ? chopperIt->timestamp
@@ -377,8 +377,8 @@ bool endsWith(const V1 &sequence, const V2 &subSequence) {
 
 } // namespace
 
-LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file,
-                              const std::string fileName) {
+LoadDNSEvent::EventAccumulator
+LoadDNSEvent::parse_File(FileByteStream &file, const std::string fileName) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
 
@@ -428,23 +428,20 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file,
   // combine triggerEvents:
   for (const auto &v : eventAccumulators) {
     finalEventAccumulator.triggerEvents.insert(
-          finalEventAccumulator.triggerEvents.end(),
-          v.triggerEvents.begin(),
-          v.triggerEvents.end());
+        finalEventAccumulator.triggerEvents.end(), v.triggerEvents.begin(),
+        v.triggerEvents.end());
   }
 
   // combine neutronEvents:
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0;
-       i < static_cast<int>(finalEventAccumulator.neutronEvents.size());
-       ++i) {
+       i < static_cast<int>(finalEventAccumulator.neutronEvents.size()); ++i) {
     auto &allNeutronEvents =
         finalEventAccumulator.neutronEvents[static_cast<size_t>(i)];
     for (const auto &v : eventAccumulators) {
-      allNeutronEvents.insert(
-            allNeutronEvents.end(),
-            v.neutronEvents[static_cast<size_t>(i)].begin(),
-            v.neutronEvents[static_cast<size_t>(i)].end());
+      allNeutronEvents.insert(allNeutronEvents.end(),
+                              v.neutronEvents[static_cast<size_t>(i)].begin(),
+                              v.neutronEvents[static_cast<size_t>(i)].end());
     }
   }
 
@@ -508,7 +505,9 @@ LoadDNSEvent::parse_DataBufferHeader(VectorByteStream &file) {
   return header;
 }
 
-void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent::BufferHeader &bufferHeader, LoadDNSEvent::EventAccumulator &eventAccumulator) {
+void LoadDNSEvent::parse_andAddEvent(
+    VectorByteStream &file, const LoadDNSEvent::BufferHeader &bufferHeader,
+    LoadDNSEvent::EventAccumulator &eventAccumulator) {
   CompactEvent event = {};
   event_id_e eventId;
   const auto dataChunk = file.extractDataChunk<6>().readBits<1>(eventId);
@@ -516,8 +515,7 @@ void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent:
   switch (eventId) {
   case event_id_e::TRIGGER: {
     uint8_t trigId;
-    dataChunk.readBits<3>(trigId).skipBits<25>().readBits<19>(
-          event.timestamp);
+    dataChunk.readBits<3>(trigId).skipBits<25>().readBits<19>(event.timestamp);
     if (!(trigId == chopperChannel)) {
       return;
     }

@@ -63,14 +63,12 @@ namespace {
 static endian getMachineEndianess() {
   union {
     std::array<uint8_t, 4> val;
-      uint32_t asUint;
+    uint32_t asUint;
   } arrayValue;
   arrayValue.val = {0x00u, 0x00u, 0xFFu, 0xFFu};
   const uint32_t mixInt = 0x0000FFFFu;
   const endian machineEndianess =
-      (arrayValue.asUint == mixInt)
-          ? endian::big
-          : endian::little;
+      (arrayValue.asUint == mixInt) ? endian::big : endian::little;
   return machineEndianess;
 }
 } // namespace
@@ -94,7 +92,7 @@ public:
 
     union {
       Buffer buf;
-        T asT;
+      T asT;
     } shiftedBuffer;
     shiftedBuffer.buf = maskedBuffer >> shiftAmount;
 
@@ -124,6 +122,7 @@ public:
   }
 
   endian endianess() const { return endianess_; }
+
 private:
   std::ifstream stream_;
   const endian endianess_;
@@ -230,7 +229,9 @@ private:
     pos += static_cast<long>(bytecount);
   }
 
-  inline void streamignore(const std::size_t &bytecount) { pos += static_cast<long>(bytecount); }
+  inline void streamignore(const std::size_t &bytecount) {
+    pos += static_cast<long>(bytecount);
+  }
 
   inline unsigned streampeek() const { return *pos; }
 

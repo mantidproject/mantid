@@ -145,9 +145,8 @@ private:
   void runLoadInstrument(std::string instrumentName,
                          DataObjects::EventWorkspace_sptr &eventWS);
 
-  void
-  populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS,
-                          EventAccumulator &finalEventAccumulator);
+  void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS,
+                               EventAccumulator &finalEventAccumulator);
 
   EventAccumulator parse_File(FileByteStream &file, const std::string fileName);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
@@ -164,8 +163,8 @@ private:
   BufferHeader parse_DataBufferHeader(VectorByteStream &file);
 
   inline size_t getWsIndex(const uint16_t &channel, const uint16_t &position) {
-    const uint16_t channelIndex =
-        ((channel & 0b1111111111100000u) >> 1) | (channel & 0b0000000000001111u);
+    const uint16_t channelIndex = ((channel & 0b1111111111100000u) >> 1) |
+                                  (channel & 0b0000000000001111u);
     return channelIndex * 960 + position;
   }
 
