@@ -453,7 +453,8 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
       // combine neutronEvents:
       PARALLEL_SECTION {
         PARALLEL_FOR_NO_WSP_CHECK()
-        for (int i = 0; i < static_cast<int>(_eventAccumulator.neutronEvents.size());
+        for (int i = 0;
+             i < static_cast<int>(_eventAccumulator.neutronEvents.size());
              ++i) {
           auto &allNeutronEvents =
               _eventAccumulator.neutronEvents[static_cast<size_t>(i)];
