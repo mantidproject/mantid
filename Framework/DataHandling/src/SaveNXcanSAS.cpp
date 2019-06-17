@@ -298,11 +298,15 @@ std::string getDate() {
 /**
  * Add the process information to the NXcanSAS file. This information
  * about the run number, the Mantid version and the user file (if available)
- * @param process: the process group
+ * @param group: the sasEntry
  * @param workspace: the workspace which is being stored
  */
-void addToProcess(H5::Group &process,
-                  Mantid::API::MatrixWorkspace_sptr workspace) {
+void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace) {
+  // Setup process
+  const std::string sasProcessNameForGroup = sasProcessGroupName;
+  auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
+
   // Add name
   Mantid::DataHandling::H5Util::write(process, sasProcessName,
                                       sasProcessNameValue);
@@ -325,59 +329,75 @@ void addToProcess(H5::Group &process,
 }
 
 /**
- * Add the process and note information to the NXcanSAS file. Process includes
- * the run number, the Mantid version, and the user file. Process/note contains
- * information on all other run numbers used in the reduction
+ * Add the process information to the NXcanSAS file. This information
+ * about the run number, the Mantid version and the user file (if available)
  * @param group: the sasEntry
  * @param workspace: the workspace which is being stored
- * @param sampleTransmission: the sample transmission workspace
- * @param canTransmission: the can transmission workspace
- * @param sampleTransmissionRun: string of the sample transmission run number
- * @param sampleDirectRun: string of the sample direct run number
- * @param canScatterRun: string of the can scatter run number
- * @param canDirectRun: string of the can direct run number
  */
-void addProcessWithNote(H5::Group &group,
-                        Mantid::API::MatrixWorkspace_sptr workspace,
-                        Mantid::API::MatrixWorkspace_sptr sampleTransmission,
-                        Mantid::API::MatrixWorkspace_sptr canTransmission,
-                        const std::string &sampleTransmissionRun,
-                        const std::string &sampleDirectRun,
-                        const std::string &canScatterRun,
-                        const std::string &canDirectRun) {
+void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
+                Mantid::API::MatrixWorkspace_sptr canWorkspace) {
   // Setup process
   const std::string sasProcessNameForGroup = sasProcessGroupName;
   auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(
       group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
 
-  // Populate process
-  addToProcess(process, workspace);
+  // Add name
+  Mantid::DataHandling::H5Util::write(process, sasProcessName,
+                                      sasProcessNameValue);
 
-  // Setup process/note
-  const std::string sasNoteNameForGroup = sasNoteGroupName;
+  // Add creation date of the file
+  auto date = getDate();
+  Mantid::DataHandling::H5Util::write(process, sasProcessDate, date);
+
+  // Add Mantid version
+  const auto version = std::string(MantidVersion::version());
+  Mantid::DataHandling::H5Util::write(process, sasProcessTermSvn, version);
+
+  const auto run = workspace->run();
+  if (run.hasProperty(sasProcessUserFileInLogs)) {
+    auto userFileProperty = run.getProperty(sasProcessUserFileInLogs);
+    auto userFileString = userFileProperty->value();
+    Mantid::DataHandling::H5Util::write(process, sasProcessTermUserFile,
+                                        userFileString);
+  }
+
+  // Add can run number
+  const auto canRun = canWorkspace->getRunNumber();
+  Mantid::DataHandling::H5Util::write(process, sasProcessTermCan,
+                                      std::to_string(canRun));
+}
+
+/**
+ * Create a note class within process
+ * @param group: the sasEntry
+ */
+void createNote(H5::Group &group) {
+  auto process = group.openGroup(sasProcessGroupName);
   auto note = Mantid::DataHandling::H5Util::createGroupCanSAS(
-      process, sasNoteNameForGroup, nxNoteClassAttr, sasNoteClassAttr);
+      process, sasNoteGroupName, nxNoteClassAttr, sasNoteClassAttr);
+}
+
+/**
+ * Add a note containing sample or can run numbers to the process group.
+ * We can add two sample runs, direct and trans, and two can runs, scatter and
+ * direct. Sample Scatter and Can Transmission are added to the data elsewhere
+ * @param group: the sasEntry
+ * @param firstEntryName: string containing the name of the first value to save
+ * @param firstEntryValue: string containing the first value to save
+ * @param secondEntryName: string contianing the name of the second value to
+ * save
+ * @param secondEntryValue: string containing the second value to save
+ */
+void addNoteToProcess(H5::Group &group, const std::string &firstEntryName,
+                      const std::string &firstEntryValue,
+                      const std::string &secondEntryName,
+                      const std::string &secondEntryValue) {
+  auto process = group.openGroup(sasProcessGroupName);
+  auto note = process.openGroup(sasNoteGroupName);
 
   // Populate note
-  if (sampleTransmission) {
-    // Add sample transmission and direct to process/note
-    Mantid::DataHandling::H5Util::write(note, sasProcessTermSampleTrans,
-                                        sampleTransmissionRun);
-    Mantid::DataHandling::H5Util::write(note, sasProcessTermSampleDirect,
-                                        sampleDirectRun);
-  }
-  if (canTransmission) {
-    // Add can run number to process
-    const auto canRun = canTransmission->getRunNumber();
-    Mantid::DataHandling::H5Util::write(process, sasProcessTermCan,
-                                        std::to_string(canRun));
-
-    // Add scatter and direct to process/note
-    Mantid::DataHandling::H5Util::write(note, sasProcessTermCanScatter,
-                                        canScatterRun);
-    Mantid::DataHandling::H5Util::write(note, sasProcessTermCanDirect,
-                                        canDirectRun);
-  }
+  Mantid::DataHandling::H5Util::write(note, firstEntryName, firstEntryValue);
+  Mantid::DataHandling::H5Util::write(note, secondEntryName, secondEntryValue);
 }
 
 WorkspaceDimensionality
@@ -906,9 +926,22 @@ void SaveNXcanSAS::exec() {
 
   // Add the process information
   progress.report("Adding process information.");
-  addProcessWithNote(sasEntry, workspace, transmissionSample, transmissionCan,
-                     sampleTransmissionRun, sampleDirectRun, canScatterRun,
-                     canDirectRun);
+  if (transmissionCan) {
+    addProcess(sasEntry, workspace, transmissionCan);
+  } else {
+    addProcess(sasEntry, workspace);
+  }
+
+  if (transmissionCan || transmissionSample) {
+    createNote(sasEntry);
+    if (transmissionCan)
+      addNoteToProcess(sasEntry, sasProcessTermCanScatter, canScatterRun,
+                       sasProcessTermCanDirect, canDirectRun);
+    if (transmissionSample)
+      addNoteToProcess(sasEntry, sasProcessTermSampleTrans,
+                       sampleTransmissionRun, sasProcessTermSampleDirect,
+                       sampleDirectRun);
+  }
 
   // Add the transmissions for sample
   if (transmissionSample) {
