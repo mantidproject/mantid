@@ -18,6 +18,7 @@ from Muon.GUI.Common.observer_pattern import GenericObserver
 DEFAULT_TABLE_NAME = 'ResultsTable'
 ALLOWED_NON_TIME_SERIES_LOGS = ("run_number", "run_start", "run_end", "group",
                                 "period", "sample_temp", "sample_magn_field")
+ERROR_COL_SUFFIX = 'Error'
 # This is not a particularly robust way of ignoring this as it
 # depends on how Fit chooses to output the name of that value
 RESULTS_TABLE_COLUMNS_NO_ERRS = ['Cost function value']
@@ -131,12 +132,17 @@ class ResultsTabModel(object):
         [(workspace, fit_position),...]
         It is assumed this is not empty and ordered as it should be displayed.
         """
+        self._raise_error_on_incompatible_selection(results_selection)
+
         results_table = self._create_empty_results_table(
             log_selection, results_selection)
-        fit_list = self._fit_context.fit_list
+        all_fits = self._fit_context.fit_list
         for _, position in results_selection:
-            fit = fit_list[position]
-            row_dict = {'workspace_name': fit.parameter_name}
+            fit = all_fits[position]
+            fit_parameters = fit.parameters
+            row_dict = {
+                'workspace_name': fit_parameters.parameter_workspace_name
+            }
             # logs first
             if len(log_selection) > 0:
                 workspace = _workspace_for_logs(fit.input_workspace)
@@ -148,24 +154,35 @@ class ResultsTabModel(object):
                         log_value = np.nan
                     row_dict.update({log_name: log_value})
             # fit parameters
-            parameter_dict = fit.parameter_workspace.workspace.toDict()
-            for name, value, error in zip(parameter_dict['Name'],
-                                          parameter_dict['Value'],
-                                          parameter_dict['Error']):
-                row_dict.update({name: value})
-                if name not in RESULTS_TABLE_COLUMNS_NO_ERRS:
-                    row_dict.update({name + 'Error': error})
+            for param_name in fit_parameters.names():
+                row_dict.update({param_name: fit_parameters.value(param_name)})
+                if _param_error_should_be_displayed(param_name):
+                    row_dict.update({
+                        _error_column_name(param_name):
+                        fit_parameters.error(param_name)
+                    })
 
-            try:
-                results_table.addRow(row_dict)
-            except ValueError:
-                msg = "Incompatible fits for results table:\n"
-                msg += " fit 1 and {} have a different parameters".format(position + 1)
-                raise RuntimeError(msg)
+            results_table.addRow(row_dict)
 
         AnalysisDataService.Instance().addOrReplace(self.results_table_name(),
                                                     results_table)
         return results_table
+
+    def _raise_error_on_incompatible_selection(self, results_selection):
+        """If the selected results cannot be displayed together then raise an error
+
+        :param results_selection: See create_results_output
+        :raises RuntimeError
+        """
+        all_fits = self._fit_context.fit_list
+        nparams_selected = [len(all_fits[position].parameters) for _, position in results_selection]
+        if nparams_selected[1:] != nparams_selected[:-1]:
+            msg = "The number of parameters for each selected fit does not match:\n"
+            for (_, position), nparams in zip(results_selection, nparams_selected):
+                fit = all_fits[position]
+                msg += "  {}: {}\n".format(
+                    fit.parameters.parameter_workspace_name, nparams)
+            raise RuntimeError(msg)
 
     def _create_empty_results_table(self, log_selection, results_selection):
         """
@@ -180,11 +197,11 @@ class ResultsTabModel(object):
             table.addColumn('float', log_name)
         # assume all fit functions are the same in fit_selection and take
         # the parameter names from the first fit.
-        parameters = self._first_fit_parameters(results_selection)
-        for name in parameters['Name']:
+        parameters = self._find_parameters_for_table(results_selection)
+        for name in parameters.names():
             table.addColumn('float', name)
-            if name not in RESULTS_TABLE_COLUMNS_NO_ERRS:
-                table.addColumn('float', name + 'Error')
+            if _param_error_should_be_displayed(name):
+                table.addColumn('float', _error_column_name(name))
         return table
 
     # Private API
@@ -206,15 +223,17 @@ class ResultsTabModel(object):
 
         self.set_selected_fit_function(function_name)
 
-    def _first_fit_parameters(self, results_selection):
+    def _find_parameters_for_table(self, results_selection):
         """
-        Return the first fit in the selected list.
+        Return the parameters that should be inserted into the
+        results table. This takes into account any global parameters
+        that are set
 
         :param results_selection: The list of selected results
-        :return: The parameters of the first fit
+        :return: The parameters for the table
         """
         first_fit = self._fit_context.fit_list[results_selection[0][1]]
-        return first_fit.parameter_workspace.workspace.toDict()
+        return first_fit.parameters
 
 
 # Public helper functions
@@ -252,6 +271,20 @@ def _log_should_be_displayed(log):
     """Returns true if the given log should be included in the display"""
     return isinstance(log, FloatTimeSeriesProperty) or \
         log.name in ALLOWED_NON_TIME_SERIES_LOGS
+
+
+def _param_error_should_be_displayed(param_name):
+    """Returns true if the given parameter's error should included in the display"""
+    return param_name not in RESULTS_TABLE_COLUMNS_NO_ERRS
+
+
+def _error_column_name(name):
+    """
+    Create the name of a column for an error on the named value
+    :param name: The name of a value column
+    :return: A name for the error column
+    """
+    return name + ERROR_COL_SUFFIX
 
 
 def _result_workspace_name(fit):

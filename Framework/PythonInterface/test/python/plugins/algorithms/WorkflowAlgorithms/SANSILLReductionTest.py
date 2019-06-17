@@ -92,7 +92,7 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_output(mtd['flux'], False, 30, 256*256)
         self._check_process_flag(mtd['flux'], 'Beam')
 
-    def test_transmission_tof(self):
+    def xtest_transmission_tof(self):
         # D33 VTOF
         SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam')
         SANSILLReduction(Run='093407', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')

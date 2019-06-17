@@ -6,22 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 
-import stresstesting
-from mantid.simpleapi import Load, EQSANSTOFStructure
+import systemtesting
+from mantid.simpleapi import Load, EQSANSTofStructure
 
-class EQSANSTOFSTructureTest(stresstesting.MantidStressTest):
 
+class EQSANSTOFSTructureTest(systemtesting.MantidSystemTest):
     alg_out = None
+    in_file = 'EQSANS_92353_event_eqsanstofstr_in.nxs'
+    ref_file = 'EQSANS_92353_event_eqsanstofstr_out.nxs'
 
     def requiredFiles(self):
-        return ['EQSANS_92353_event_eqsanstofstr_in.nxs',
-                'EQSANS_92353_event_eqsanstofstr_out.nxs']
+        return [self.in_file, self.ref_file]
 
     def runTest(self):
-        in_file = 'EQSANS_92353_event_eqsanstofstr_in.nxs'
-        Load(Filename='EQSANS_92353_event_eqsanstofstr_in.nxs',
+        Load(Filename=self.in_file,
              OutputWorkspace='change_tof_structure')
-        self.alg_out = EQSANSTOFStructure(InputWorkspace='change_tof_structure',
+        self.alg_out = EQSANSTofStructure(InputWorkspace='change_tof_structure',
                                           LowTOFCut=500,
                                           HighTOFCut=2000)
 
@@ -38,5 +38,4 @@ class EQSANSTOFSTructureTest(stresstesting.MantidStressTest):
                          'Incorrect WavelengthMinFrame2')
         self.assertDelta(self.alg_out.WavelengthMaxFrame2, 12.9809, 0.0001,
                          'Incorrect TofOffset')
-        return 'change_tof_structure',\
-               'EQSANS_92353_event_eqsanstofstr_out.nxs'
+        return 'change_tof_structure', self.ref_file
