@@ -130,18 +130,6 @@ void LoadDNSEvent::exec() {
   auto finalEventAccumulator = parse_File(file, fileName);
   populate_EventWorkspace(outputWS, finalEventAccumulator);
 
-  // g_log.notice()
-  //    << " ## elapsedTime Parsing\t= " << elapsedTimeParsing
-  //    << "\n  # elapsedTime Splitting\t= " <<
-  //    elapsedTimeCombineSplitting.first
-  //    << "\n  # elapsedTime Combining\t= " <<
-  //    elapsedTimeCombineSplitting.second
-  //    << "\n ## elapsedTime Processing\t= " << elapsedTimeProcessing
-  //    << "\n  # elapsedTime Sorting\t= " << elapsedTimeSorting
-  //    << "\n### elapsedTime Total  \t= " << elapsedTimeParsing +
-  //    elapsedTimeProcessing
-  //    << std::endl;
-
   setProperty("OutputWorkspace", outputWS);
   g_log.notice() << std::endl;
 }
@@ -433,19 +421,12 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file,
     parse_BlockList(vbs, eventAccumulators[static_cast<size_t>(i)]);
   }
 
-
   EventAccumulator finalEventAccumulator;
   finalEventAccumulator.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
 
   // combine eventAccumulators:
 
   // combine triggerEvents:
-  // set triggerEvents vector to its final size:
-  finalEventAccumulator.triggerEvents.resize(std::accumulate(
-      eventAccumulators.begin(), eventAccumulators.end(), 0u,
-      [](const auto s, const auto &v) {
-        return s + v.triggerEvents.size();
-      }));
   for (const auto &v : eventAccumulators) {
     finalEventAccumulator.triggerEvents.insert(
           finalEventAccumulator.triggerEvents.end(),
@@ -460,16 +441,11 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file,
        ++i) {
     auto &allNeutronEvents =
         finalEventAccumulator.neutronEvents[static_cast<size_t>(i)];
-    allNeutronEvents.resize(std::accumulate(
-        eventAccumulators.cbegin(), eventAccumulators.cend(), 0u,
-        [&](const auto s, const auto &v) {
-          return s + v.neutronEvents[i].size();
-        }));
     for (const auto &v : eventAccumulators) {
       allNeutronEvents.insert(
             allNeutronEvents.end(),
-            v.triggerEvents.begin(),
-            v.triggerEvents.end());
+            v.neutronEvents[static_cast<size_t>(i)].begin(),
+            v.neutronEvents[static_cast<size_t>(i)].end());
     }
   }
 
