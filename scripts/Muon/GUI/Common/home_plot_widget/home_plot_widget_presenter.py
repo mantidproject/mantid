@@ -128,17 +128,20 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         :param plot_type: Whether to plot counts or asymmetry
         :return: a list of workspace names
         """
-        if is_raw:
-            workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(
-                self.context.data_context.current_runs)
-        else:
-            workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names_rebinned(
-                self.context.data_context.current_runs)
+        try:
+            if is_raw:
+                workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(
+                    self.context.data_context.current_runs)
+            else:
+                workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names_rebinned(
+                    self.context.data_context.current_runs)
 
-        if plot_type == COUNTS_PLOT_TYPE:
-            workspace_list = [item.replace(ASYMMETRY_PLOT_TYPE, COUNTS_PLOT_TYPE) for item in workspace_list]
+            if plot_type == COUNTS_PLOT_TYPE:
+                workspace_list = [item.replace(ASYMMETRY_PLOT_TYPE, COUNTS_PLOT_TYPE) for item in workspace_list]
 
-        return workspace_list
+            return workspace_list
+        except AttributeError:
+            return []
 
     def get_plot_title(self):
         """

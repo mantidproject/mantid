@@ -25,6 +25,11 @@ class HomePlotWidgetModel(object):
         :param title: The name to give to the subplot created, currently only one subplot is ever created
         :return: A reference to the newly created plot window is passed back
         """
+        if not workspace_list:
+            self.plot_figure.clear()
+            self.plot_figure.canvas.draw()
+            return self.plot_figure
+
         workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
         if self.plot_figure:
             self.plot_figure.clear()
