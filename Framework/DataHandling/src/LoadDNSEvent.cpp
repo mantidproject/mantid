@@ -125,12 +125,10 @@ void LoadDNSEvent::exec() {
   g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
   g_log.notice() << "MonitorChannel: " << monitorChannel << std::endl;
 
-  _eventAccumulator.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
-
   FileByteStream file(static_cast<std::string>(fileName), endian::big);
 
-  parse_File(file, fileName);
-  populate_EventWorkspace(outputWS);
+  auto finalEventAccumulator = parse_File(file, fileName);
+  populate_EventWorkspace(outputWS, finalEventAccumulator);
 
   // g_log.notice()
   //    << " ## elapsedTime Parsing\t= " << elapsedTimeParsing
@@ -153,38 +151,39 @@ void sortVector(Vector &v, _Compare comp) {
   std::sort(v.begin(), v.end(), comp);
 }
 
-void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
+void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS,
+                                           EventAccumulator &finalEventAccumulator) {
   static const unsigned EVENTS_PER_PROGRESS = 100;
   // The number of steps depends on the type of input file
   Progress progress(this, 0.0, 1.0,
-                    _eventAccumulator.neutronEvents.size() /
+                    finalEventAccumulator.neutronEvents.size() /
                         EVENTS_PER_PROGRESS);
 
   // Sort reversed (latest event first, most early event last):
-  sortVector(_eventAccumulator.triggerEvents,
+  sortVector(finalEventAccumulator.triggerEvents,
              [](auto l, auto r) { return l.timestamp > r.timestamp; });
 
-  g_log.notice() << _eventAccumulator.neutronEvents.size() << std::endl;
+  g_log.notice() << finalEventAccumulator.neutronEvents.size() << std::endl;
 
   std::atomic<uint64_t> oversizedChanelIndexCounterA(0);
   std::atomic<uint64_t> oversizedPosCounterA(0);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS) && USE_PARALLELISM)
-  for (int j = 0; j < static_cast<int>(_eventAccumulator.neutronEvents.size());
-       ++j) {
+  for (int j = 0;
+      j < static_cast<int>(finalEventAccumulator.neutronEvents.size()); ++j) {
     // uint64_t chopperTimestamp = 0;
     uint64_t oversizedChanelIndexCounter = 0;
     uint64_t oversizedPosCounter = 0;
     uint64_t triggerCounter = 0;
     uint64_t i = 0;
     const auto wsIndex = j;
-    auto &eventList = _eventAccumulator.neutronEvents[j];
+    auto &eventList = finalEventAccumulator.neutronEvents[j];
     if (eventList.size() != 0) {
       std::sort(eventList.begin(), eventList.end(),
                 [](auto l, auto r) { return l.timestamp < r.timestamp; });
     }
 
-    auto chopperIt = _eventAccumulator.triggerEvents.cbegin();
+    auto chopperIt = finalEventAccumulator.triggerEvents.cbegin();
 
     auto &spectrum = eventWS->getSpectrum(wsIndex);
     // PARALLEL_START_INTERUPT_REGION
@@ -199,10 +198,10 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
       }
 
       chopperIt = std::lower_bound(
-          chopperIt, _eventAccumulator.triggerEvents.cend(), event.timestamp,
+          chopperIt, finalEventAccumulator.triggerEvents.cend(), event.timestamp,
           [](auto l, auto r) { return l.timestamp > r; });
       const uint64_t chopperTimestamp =
-          chopperIt != _eventAccumulator.triggerEvents.cend()
+          chopperIt != finalEventAccumulator.triggerEvents.cend()
               ? chopperIt->timestamp
               : 0;
 
@@ -221,7 +220,7 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   g_log.notice() << "Bad position values: " << oversizedPosCounterA
                  << std::endl;
   g_log.notice() << "Trigger Counter: "
-                 << _eventAccumulator.triggerEvents.size() << std::endl;
+                 << finalEventAccumulator.triggerEvents.size() << std::endl;
 }
 
 void LoadDNSEvent::runLoadInstrument(std::string instrumentName,
@@ -391,7 +390,7 @@ bool endsWith(const V1 &sequence, const V2 &subSequence) {
 
 } // namespace
 
-void LoadDNSEvent::parse_File(FileByteStream &file,
+LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file,
                               const std::string fileName) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
@@ -409,6 +408,7 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
         "This seems not to be a mesytec psd listmode file: ", fileName);
   }
 
+  // Parse actual data:
   const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 1;
   // Split File:
   std::vector<std::vector<uint8_t>> filechuncks = split_File(file, threadCount);
@@ -424,7 +424,7 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
       << eventAccumulators[eventAccumulators.size() - 1].neutronEvents.size()
       << std::endl;
 
-  // parse file chuncks:
+  // parse individual file chuncks:
   PARALLEL_FOR_IF(USE_PARALLELISM)
   for (int i = 0; i < static_cast<int>(filechuncks.size()); ++i) {
     auto filechunck = filechuncks[static_cast<size_t>(i)];
@@ -433,50 +433,50 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
     parse_BlockList(vbs, eventAccumulators[static_cast<size_t>(i)]);
   }
 
+
+  EventAccumulator finalEventAccumulator;
+  finalEventAccumulator.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
+
   // combine eventAccumulators:
-  PRAGMA_OMP(parallel num_threads(2)) {
-    PARALLEL_SECTIONS {
-      // combine triggerEvents:
-      PARALLEL_SECTION {
-        auto origSize = _eventAccumulator.triggerEvents.size();
-        _eventAccumulator.triggerEvents.resize(std::accumulate(
-            eventAccumulators.cbegin(), eventAccumulators.cend(), 0u,
-            [](const auto s, const auto &v) {
-              return s + v.triggerEvents.size();
-            }));
-        for (const auto &evtAcc : eventAccumulators) {
-          std::memcpy(_eventAccumulator.triggerEvents.data() + origSize,
-                      evtAcc.triggerEvents.data(), evtAcc.triggerEvents.size());
-          origSize += evtAcc.triggerEvents.size();
-        }
-      }
-      // combine neutronEvents:
-      PARALLEL_SECTION {
-        PARALLEL_FOR_NO_WSP_CHECK()
-        for (int i = 0;
-             i < static_cast<int>(_eventAccumulator.neutronEvents.size());
-             ++i) {
-          auto &allNeutronEvents =
-              _eventAccumulator.neutronEvents[static_cast<size_t>(i)];
-          auto origSize = allNeutronEvents.size();
-          allNeutronEvents.resize(std::accumulate(
-              eventAccumulators.cbegin(), eventAccumulators.cend(), 0u,
-              [&](const auto s, const auto &v) {
-                return s + v.neutronEvents[i].size();
-              }));
-          for (const auto &evtAcc : eventAccumulators) {
-            auto &neutronEvents = evtAcc.neutronEvents[static_cast<size_t>(i)];
-            std::memcpy(allNeutronEvents.data() + origSize,
-                        neutronEvents.data(), neutronEvents.size());
-            origSize += neutronEvents.size();
-          }
-        }
-      }
+
+  // combine triggerEvents:
+  // set triggerEvents vector to its final size:
+  finalEventAccumulator.triggerEvents.resize(std::accumulate(
+      eventAccumulators.begin(), eventAccumulators.end(), 0u,
+      [](const auto s, const auto &v) {
+        return s + v.triggerEvents.size();
+      }));
+  for (const auto &v : eventAccumulators) {
+    finalEventAccumulator.triggerEvents.insert(
+          finalEventAccumulator.triggerEvents.end(),
+          v.triggerEvents.begin(),
+          v.triggerEvents.end());
+  }
+
+  // combine neutronEvents:
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int i = 0;
+       i < static_cast<int>(finalEventAccumulator.neutronEvents.size());
+       ++i) {
+    auto &allNeutronEvents =
+        finalEventAccumulator.neutronEvents[static_cast<size_t>(i)];
+    allNeutronEvents.resize(std::accumulate(
+        eventAccumulators.cbegin(), eventAccumulators.cend(), 0u,
+        [&](const auto s, const auto &v) {
+          return s + v.neutronEvents[i].size();
+        }));
+    for (const auto &v : eventAccumulators) {
+      allNeutronEvents.insert(
+            allNeutronEvents.end(),
+            v.triggerEvents.begin(),
+            v.triggerEvents.end());
     }
   }
 
   // parse_BlockList(file, _eventAccumulator);
   // parse_EndSignature(file);
+
+  return finalEventAccumulator;
 }
 
 void LoadDNSEvent::parse_BlockList(VectorByteStream &file,
@@ -531,6 +531,42 @@ LoadDNSEvent::parse_DataBufferHeader(VectorByteStream &file) {
   file.read<6>(header.timestamp);
   file.skip<24>();
   return header;
+}
+
+void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent::BufferHeader &bufferHeader, LoadDNSEvent::EventAccumulator &eventAccumulator) {
+  CompactEvent event = {};
+  event_id_e eventId;
+  const auto dataChunk = file.extractDataChunk<6>().readBits<1>(eventId);
+  // // datachunck has now 6 bytes - 1 bit (= 47 bits) left
+  switch (eventId) {
+  case event_id_e::TRIGGER: {
+    uint8_t trigId;
+    dataChunk.readBits<3>(trigId).skipBits<25>().readBits<19>(
+          event.timestamp);
+    if (!(trigId == chopperChannel)) {
+      return;
+    }
+    event.timestamp += bufferHeader.timestamp;
+    eventAccumulator.triggerEvents.push_back(event);
+  } break;
+  case event_id_e::NEUTRON: {
+    uint16_t channel;
+    uint16_t position;
+    dataChunk.readBits<8>(channel)
+        .skipBits<10>()
+        .readBits<10>(position)
+        .readBits<19>(event.timestamp);
+    event.timestamp += bufferHeader.timestamp;
+    channel |= bufferHeader.mcpdId << 8;
+
+    const size_t wsIndex = getWsIndex(channel, position);
+    eventAccumulator.neutronEvents[wsIndex].push_back(event);
+  } break;
+  default:
+    // Panic!!!!
+    g_log.error() << "unknown event id " << eventId << "\n";
+    break;
+  }
 }
 
 void LoadDNSEvent::parse_EndSignature(FileByteStream &file) {

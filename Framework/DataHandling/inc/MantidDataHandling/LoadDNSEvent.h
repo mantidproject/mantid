@@ -138,7 +138,6 @@ private:
     std::vector<std::vector<CompactEvent>> neutronEvents;
     std::vector<CompactEvent> triggerEvents;
   };
-  EventAccumulator _eventAccumulator;
 
   unsigned chopperChannel;
   unsigned monitorChannel;
@@ -147,9 +146,10 @@ private:
                          DataObjects::EventWorkspace_sptr &eventWS);
 
   void
-  populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
+  populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS,
+                          EventAccumulator &finalEventAccumulator);
 
-  void parse_File(FileByteStream &file, const std::string fileName);
+  EventAccumulator parse_File(FileByteStream &file, const std::string fileName);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
 
   std::vector<std::vector<uint8_t>> split_File(FileByteStream &file,
@@ -172,41 +172,7 @@ private:
 
   inline void parse_andAddEvent(VectorByteStream &file,
                                 const BufferHeader &bufferHeader,
-                                EventAccumulator &eventAccumulator) {
-    CompactEvent event = {};
-    event_id_e eventId;
-    const auto dataChunk = file.extractDataChunk<6>().readBits<1>(eventId);
-    // // datachunck has now 6 bytes - 1 bit (= 47 bits) left
-    switch (eventId) {
-    case event_id_e::TRIGGER: {
-      uint8_t trigId;
-      dataChunk.readBits<3>(trigId).skipBits<25>().readBits<19>(
-          event.timestamp);
-      if (!(trigId == chopperChannel)) {
-        return;
-      }
-      event.timestamp += bufferHeader.timestamp;
-      eventAccumulator.triggerEvents.push_back(event);
-    } break;
-    case event_id_e::NEUTRON: {
-      uint16_t channel;
-      uint16_t position;
-      dataChunk.readBits<8>(channel)
-          .skipBits<10>()
-          .readBits<10>(position)
-          .readBits<19>(event.timestamp);
-      event.timestamp += bufferHeader.timestamp;
-      channel |= bufferHeader.mcpdId << 8;
-
-      const size_t wsIndex = getWsIndex(channel, position);
-      eventAccumulator.neutronEvents[wsIndex].push_back(event);
-    } break;
-    default:
-      // Panic!!!!
-      g_log.error() << "unknown event id " << eventId << "\n";
-      break;
-    }
-  }
+                                EventAccumulator &eventAccumulator);
 
   void parse_EndSignature(FileByteStream &file);
 };
