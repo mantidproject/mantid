@@ -41,7 +41,7 @@ This parameter is unused at the moment.
 Usage
 -----
 
-**Example 1 - Load a DNS PSD .mdat file to EventWorkspace:**
+**Example 1 - Plot TOF Spectrum:**
 
 .. testcode:: LoadDNSEventex1
 
@@ -56,18 +56,28 @@ Usage
     print("It has {0} events and {1} dimensions:".format(wsOut.getNEvents(), wsOut.getNumDims()))
 
     for i in range(wsOut.getNumDims()):
-       dimension = wsOut.getDimension(i)
-       print("Dimension {0} has name: {1}, id: {2}, Range: {3:.2f} to {4:.2f} {5}".format(i,
-          dimension.getDimensionId(),
-          dimension.name,
-          dimension.getMinimum(),
-          dimension.getMaximum(),
-          dimension.getUnits()))
-
+        dimension = wsOut.getDimension(i)
+        print("Dimension {0} has name: {1}, id: {2}, Range: {3:.2f} to {4:.2f} {5}".format(i,
+            dimension.getDimensionId(),
+            dimension.name,
+            dimension.getMinimum(),
+            dimension.getMaximum(),
+            dimension.getUnits()))
+            
+    # sum spectra of all pixels
+    wsSum = SumSpectra(wsOut)
+    # rebin to something usefull
+    wsBinned = Rebin(wsSum, Params='0,12.8,2700')
+    #plot the spectrum:
+    try:
+        plotSpectrum(wsBinned,[0],)
+    except NameError:
+        #plotSpectrum was not available, Mantidplot is probably not running
+        pass
 
 **Output:**
 
-.. testoutput:: LoadDNSSCDEx1
+.. testoutput:: LoadDNSEventex1
 
    Output Workspace Type is:  EventWorkspace
    It has 122904 events and 2 dimensions:
@@ -85,47 +95,6 @@ Usage
     # load data to EventWorkspace
     wsOut = LoadDNSEvent(filename, 3, 0)
 
-
-
-**Example 3 - Plot TOF Spectrum:**
-
-.. testcode:: LoadDNSEventex3
-
-    # data file.
-    filename = "00550232.mdat"
-
-    # load data to EventWorkspace
-    wsOut = LoadDNSEvent(filename, 4, 1)
-
-    # print output workspace information
-    print("Output Workspace Type is:  {}".format(wsOut.id()))
-    print("It has {0} events and {1} dimensions:".format(wsOut.getNEvents(), wsOut.getNumDims()))
-
-    for i in range(wsOut.getNumDims()):
-       dimension = wsOut.getDimension(i)
-       print("Dimension {0} has name: {1}, id: {2}, Range: {3:.2f} to {4:.2f} {5}".format(i,
-          dimension.getDimensionId(),
-          dimension.name,
-          dimension.getMinimum(),
-          dimension.getMaximum(),
-          dimension.getUnits()))
-            
-    # sum spectra of all pixels
-    wsSum = SumSpectra(wsOut)
-    # rebin to something usefull
-    wsBinned = Rebin(wsSum, Params='0,12.8,2700')
-    #plot the spectrum:
-    plotSpectrum(wsBinned,[0],)
-
-
-**Output:**
-
-.. testoutput:: LoadDNSSCDEx3
-
-   Output Workspace Type is:  EventWorkspace
-   It has 122904 events and 2 dimensions:
-   Dimension 0 has name: xDimension, id: Time-of-flight, Range: 0.00 to 0.00 microsecond
-   Dimension 1 has name: yDimension, id: Spectrum, Range: 1.00 to 122904.00 
 
 
 .. categories::
