@@ -170,7 +170,8 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   std::atomic<uint64_t> oversizedPosCounterA(0);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS) && USE_PARALLELISM)
-  for (int j = 0; j < static_cast<int>(_eventAccumulator.neutronEvents.size()); j++) {
+  for (int j = 0; j < static_cast<int>(_eventAccumulator.neutronEvents.size());
+       ++j) {
     // uint64_t chopperTimestamp = 0;
     uint64_t oversizedChanelIndexCounter = 0;
     uint64_t oversizedPosCounter = 0;
@@ -452,8 +453,10 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
       // combine neutronEvents:
       PARALLEL_SECTION {
         PARALLEL_FOR_NO_WSP_CHECK()
-        for (int i = 0; i < static_cast<int>(_eventAccumulator.neutronEvents.size()); ++i) {
-          auto &allNeutronEvents = _eventAccumulator.neutronEvents[static_cast<size_t>(i)];
+        for (int i = 0; i < static_cast<int>(_eventAccumulator.neutronEvents.size());
+             ++i) {
+          auto &allNeutronEvents =
+              _eventAccumulator.neutronEvents[static_cast<size_t>(i)];
           auto origSize = allNeutronEvents.size();
           allNeutronEvents.resize(std::accumulate(
               eventAccumulators.cbegin(), eventAccumulators.cend(), 0u,
@@ -463,8 +466,7 @@ void LoadDNSEvent::parse_File(FileByteStream &file,
           for (const auto &evtAcc : eventAccumulators) {
             auto &neutronEvents = evtAcc.neutronEvents[static_cast<size_t>(i)];
             std::memcpy(allNeutronEvents.data() + origSize,
-                        neutronEvents.data(),
-                        neutronEvents.size());
+                        neutronEvents.data(), neutronEvents.size());
             origSize += neutronEvents.size();
           }
         }
