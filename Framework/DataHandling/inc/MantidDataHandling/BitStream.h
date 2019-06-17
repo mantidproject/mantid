@@ -61,11 +61,14 @@ enum class endian {
 
 namespace {
 static endian getMachineEndianess() {
-  constexpr const uint32_t mixInt = 0x0000FFFFu;
-  constexpr const std::array<uint8_t, 4> mixArray = {0x00u, 0x00u, 0xFFu,
-                                                     0xFFu};
+  union {
+    std::array<uint8_t, 4> val;
+      uint32_t asUint;
+  } arrayValue;
+  arrayValue.val = {0x00u, 0x00u, 0xFFu, 0xFFu};
+  const uint32_t mixInt = 0x0000FFFFu;
   const endian machineEndianess =
-      (*reinterpret_cast<const uint32_t *const>(&mixArray) == mixInt)
+      (arrayValue.asUint == mixInt)
           ? endian::big
           : endian::little;
   return machineEndianess;
@@ -74,7 +77,7 @@ static endian getMachineEndianess() {
 
 static const endian MACHINE_ENDIANESS = getMachineEndianess();
 
-template <size_t bytecount, int bitsLeft = bytecount * 8> struct DataChunk {
+template <size_t bytecount, size_t bitsLeft = bytecount * 8> struct DataChunk {
   static_assert(bytecount * 8 >= bitsLeft,
                 "bitsLeft must be smaller or equal to bytecount * 8 ");
   static_assert(bitsLeft >= 0, "bitcount must be greater than zero");
@@ -88,8 +91,14 @@ public:
     const size_t shiftAmount = sizeof(buffer) * 8 - bitcount;
     const Buffer bufferMask = ~((Buffer(0x1) << shiftAmount) - Buffer(1));
     const Buffer maskedBuffer = buffer & bufferMask;
-    Buffer shiftedBuffer = maskedBuffer >> shiftAmount;
-    result = *reinterpret_cast<T *const>(&shiftedBuffer);
+
+    union {
+      Buffer buf;
+        T asT;
+    } shiftedBuffer;
+    shiftedBuffer.buf = maskedBuffer >> shiftAmount;
+
+    result = shiftedBuffer.asT;
     return {buffer << bitcount};
   }
 
@@ -109,15 +118,15 @@ template <size_t bytecount> struct DataChunk<bytecount, 0> {
 class FileByteStream {
 public:
   explicit FileByteStream(const std::string &filename, const endian endianess)
-      : stream_(filename, std::ios_base::binary), endianess(endianess),
-        fileSize_(getFileSize(filename)) {
+      : stream_(filename, std::ios_base::binary), endianess_(endianess),
+        fileSize_(static_cast<size_t>(getFileSize(filename))) {
     stream_.exceptions(std::ifstream::eofbit);
   }
 
-  const endian endianess;
-
+  endian endianess() const { return endianess_; }
 private:
   std::ifstream stream_;
+  const endian endianess_;
   const uint64_t fileSize_;
 
   long getFileSize(std::string filename) {
@@ -161,7 +170,7 @@ public:
   template <std::size_t bytecount, typename T>
   inline FileByteStream &read(T &result) {
     readRaw<bytecount>(result);
-    if (endianess != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
+    if (endianess() != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
       result = convert_endianness(result);
     }
     return *this;
@@ -217,11 +226,11 @@ private:
   }
 
   inline void streamread(char *dest, const std::size_t &bytecount) {
-    std::copy(pos, pos + bytecount, dest);
-    pos += bytecount;
+    std::copy(pos, pos + static_cast<long>(bytecount), dest);
+    pos += static_cast<long>(bytecount);
   }
 
-  inline void streamignore(const std::size_t &bytecount) { pos += bytecount; }
+  inline void streamignore(const std::size_t &bytecount) { pos += static_cast<long>(bytecount); }
 
   inline unsigned streampeek() const { return *pos; }
 

@@ -165,8 +165,7 @@ private:
 
   inline size_t getWsIndex(const uint16_t &channel, const uint16_t &position) {
     const uint16_t channelIndex =
-        ((channel & 0b1111111111100000) >> 1) | (channel & 0b0000000000001111);
-    const uint16_t positionClamped = std::min(uint16_t(959u), position);
+        ((channel & 0b1111111111100000u) >> 1) | (channel & 0b0000000000001111u);
     return channelIndex * 960 + position;
   }
 

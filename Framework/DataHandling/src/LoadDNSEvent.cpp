@@ -162,7 +162,6 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS,
     // uint64_t chopperTimestamp = 0;
     uint64_t oversizedChanelIndexCounter = 0;
     uint64_t oversizedPosCounter = 0;
-    uint64_t triggerCounter = 0;
     uint64_t i = 0;
     const auto wsIndex = j;
     auto &eventList = finalEventAccumulator.neutronEvents[j];
@@ -245,20 +244,20 @@ buildSkipTable(const Iterable &iterable) {
     i--;
     auto &cPos = skipTable[c];
     cPos = cPos == 0 ? iterable.size() : cPos;
-    cPos = i == 0 ? cPos : i;
+    cPos = i == 0 ? static_cast<size_t>(cPos) : i;
   }
   return skipTable;
 }
 
 template <typename Iterable>
 const std::vector<uint8_t> buildSkipTable2(const Iterable &iterable) {
-  std::vector<uint8_t> skipTable(256, iterable.size());
+  std::vector<uint8_t> skipTable(256, static_cast<uint8_t>(iterable.size()));
 
   size_t i = iterable.size();
   for (auto c : iterable) {
     i--;
     auto &cPos = skipTable[c];
-    cPos = i == 0 ? cPos : i;
+    cPos = i == 0 ? cPos : static_cast<uint8_t>(i);
   }
   return skipTable;
 }
@@ -417,7 +416,7 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file,
   for (int i = 0; i < static_cast<int>(filechuncks.size()); ++i) {
     auto filechunck = filechuncks[static_cast<size_t>(i)];
     g_log.notice() << "filechunck.size() = " << filechunck.size() << std::endl;
-    auto vbs = VectorByteStream(filechunck, file.endianess);
+    auto vbs = VectorByteStream(filechunck, file.endianess());
     parse_BlockList(vbs, eventAccumulators[static_cast<size_t>(i)]);
   }
 
@@ -533,7 +532,7 @@ void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent:
         .readBits<10>(position)
         .readBits<19>(event.timestamp);
     event.timestamp += bufferHeader.timestamp;
-    channel |= bufferHeader.mcpdId << 8;
+    channel |= bufferHeader.mcpdId << 8u;
 
     const size_t wsIndex = getWsIndex(channel, position);
     eventAccumulator.neutronEvents[wsIndex].push_back(event);
