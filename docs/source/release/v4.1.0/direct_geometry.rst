@@ -34,6 +34,7 @@ Interfaces
 New features
 ############
 
+- Added a progress bar to the bottom of the reduction dialog indicating the progress of the currently running reduction.
 
 Improvements
 ############
