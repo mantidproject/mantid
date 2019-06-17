@@ -4,11 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
-from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 import unittest
-from mantidqt.utils.qt.testing import GuiTest
+
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+
+from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 
 
 class TestListSelectorPresenter(GuiTest):

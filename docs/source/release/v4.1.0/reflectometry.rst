@@ -9,7 +9,6 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-
 ISIS Reflectometry Interface
 ----------------------------
 
@@ -20,6 +19,11 @@ Bug fixes
 
 Algorithms
 ----------
+
+Improvements
+############
+
+- An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
 
 Bug fixes
 #########

@@ -6,7 +6,7 @@
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="TOPAZ" valid-from   ="2019-01-01 00:00:00"
               valid-to     ="2019-05-31 23:59:59"
-                     last-modified="2019-02-11 14:00:00">
+                     last-modified="2019-06-06 16:00:00">
 
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->

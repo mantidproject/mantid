@@ -5,12 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
+from mantid.api import FunctionFactory
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 from qtpy import QtWidgets
+
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from mantid.api import FunctionFactory
 
 
 def retrieve_combobox_info(combo_box):
@@ -36,6 +38,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter = self.widget.fitting_tab_presenter
         self.view = self.widget.fitting_tab_view
         self.presenter.model = mock.MagicMock()
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
 
     @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.WorkspaceSelectorView.get_selected_data')
     def test_handle_select_fit_data_clicked_updates_current_run_list(self, dialog_mock):
@@ -71,6 +74,8 @@ class FittingTabPresenterTest(GuiTest):
             self):
         self.presenter.selected_data = ['Input Workspace Name']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.model.do_single_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                           'Fit Suceeded', 0.5)
 
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
@@ -99,20 +104,50 @@ class FittingTabPresenterTest(GuiTest):
 
         self.assertEqual(self.view.function_browser.getDatasetNames(), ['Input Workspace Name'])
 
-    def test_fit_clicked_with_simultaneous_selected(self):
+    def test_fit_clicked_with_simultaneous_selected_and_no_globals(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
         self.view.simul_fit_radio.toggle()
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                                 'Fit Suceeded', 0.5)
 
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
 
-        call_args_dict = self.presenter.model.do_simultaneous_fit.call_args[0][0]
+        simultaneous_call_args = self.presenter.model.do_simultaneous_fit.call_args
+        call_args_dict = simultaneous_call_args[0][0]
 
         self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
         self.assertEqual(call_args_dict['Minimizer'], 'Levenberg-Marquardt')
         self.assertEqual(call_args_dict['StartX'], [0.0, 0.0])
         self.assertEqual(call_args_dict['EndX'], [15.0, 15.0])
+
+        call_args_globals = simultaneous_call_args[0][1]
+        self.assertEqual(call_args_globals, [])
+
+    def test_fit_clicked_with_simultaneous_selected_with_global_parameters(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
+        self.view.simul_fit_radio.toggle()
+        self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.view.function_browser.setGlobalParameters(['A'])
+        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                                 'Fit Suceeded', 0.5)
+
+        self.view.fit_button.clicked.emit(True)
+        wait_for_thread(self.presenter.calculation_thread)
+
+        simultaneous_call_args = self.presenter.model.do_simultaneous_fit.call_args
+
+        call_args_dict = simultaneous_call_args[0][0]
+        self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
+        self.assertEqual(call_args_dict['Minimizer'], 'Levenberg-Marquardt')
+        self.assertEqual(call_args_dict['StartX'], [0.0, 0.0])
+        self.assertEqual(call_args_dict['EndX'], [15.0, 15.0])
+
+        call_args_globals = simultaneous_call_args[0][1]
+        self.assertEqual(call_args_globals, ['A'])
 
     def test_when_new_data_is_selected_clear_out_old_fits_and_information(self):
         self.presenter._fit_status = ['success', 'success', 'success']
@@ -291,6 +326,7 @@ class FittingTabPresenterTest(GuiTest):
 
     def test_fit_name_not_updated_if_already_changed_by_user(self):
         self.view.function_name = 'test function'
+        self.view.function_name_line_edit.textChanged.emit('test function')
 
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 

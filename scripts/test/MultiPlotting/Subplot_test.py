@@ -8,12 +8,11 @@ import unittest
 from matplotlib.gridspec import GridSpec
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 
-from MultiPlotting.subplot.subplot_context import *
-from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot import subplot
-from Muon.GUI.Common.test_helpers import mock_widget
+
 
 
 def rm_logic(name):
@@ -22,10 +21,9 @@ def rm_logic(name):
     return True
 
 
-class SubplotTest(unittest.TestCase):
+class SubplotTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         context = PlottingContext()
         self.subplot = subplot(context)
         self.subplot.canvas.draw = mock.MagicMock()

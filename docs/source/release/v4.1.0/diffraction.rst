@@ -12,6 +12,10 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+New Algorithms
+##############
+- New algorithm :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` to save out a sample shape and environment as a single STL file, this can be used to save out pieces with a set rotation or scale, or to assemble multiple stl files into one for viewing purposes.
+
 Improvements
 ############
 
@@ -83,6 +87,8 @@ Improvements
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
 
 - New TOPAZ instrument geometry for 2019B run cycle
+
+- Maximum order of modulated vectors is now available to python: ws.sample().getOrientedLattice().getMaxOrder()
 
 
 Imaging
