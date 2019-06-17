@@ -5,14 +5,16 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, unicode_literals)
+from __future__ import (absolute_import, print_function, unicode_literals)
 
+from collections import OrderedDict
+from copy import deepcopy
 import itertools
 import unittest
 
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
-from mantid.py3compat import mock
+from mantid.py3compat import iteritems, mock, string_types
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ALLOWED_NON_TIME_SERIES_LOGS, log_names,
@@ -23,33 +25,127 @@ from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformat
 LOG_NAMES_FUNC = 'Muon.GUI.Common.results_tab_widget.results_tab_model.log_names'
 
 
+def create_test_workspace(ws_name=None):
+    fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
+    ws_name = ws_name if ws_name is not None else 'results_tab_model_test'
+    AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
+    return fake_ws
+
+
+def create_test_workspacegroup(size, group_name=None):
+    group_name = group_name if group_name is not None else 'results_tab_model_testgroup'
+    ads = AnalysisDataService.Instance()
+    group = WorkspaceGroup()
+    for i in range(size):
+        fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
+        ws_name = '{}_{}'.format(group_name, i)
+        ads.addOrReplace(ws_name, fake_ws)
+        group.addWorkspace(fake_ws)
+
+    ads.addOrReplace(group_name, group)
+    return group
+
+
+def create_test_fits(input_workspaces,
+                     function_name,
+                     parameters,
+                     global_parameters=None):
+    """
+    Create a list of fits
+    :param input_workspaces: The input workspaces
+    :param function_name: The name of the function
+    :param parameters: The parameters list
+    :param global_parameters: An optional list of tied parameters
+    :return: A list of Fits
+    """
+    # Convert parameters to fit table-like structure
+    fit_table = [{
+        'Name': name,
+        'Value': value,
+        'Error': error
+    } for name, (value, error) in iteritems(parameters)]
+
+    fits = []
+    for name in input_workspaces:
+        parameter_workspace = mock.NonCallableMagicMock()
+        parameter_workspace.workspace.__iter__.return_value = fit_table
+        parameter_workspace.workspace_name = name + '_Parameters'
+        fits.append(
+            FitInformation(parameter_workspace, function_name, name,
+                           global_parameters))
+
+    return fits
+
+
+def create_test_model(input_workspaces,
+                      function_name,
+                      parameters,
+                      logs=None,
+                      global_parameters=None):
+    """
+    Create a list of fits with time series logs on the workspaces
+    :param input_workspaces: See create_test_fits
+    :param function_name: See create_test_fits
+    :param parameters: See create_test_fits
+    :param logs: A list of log names to create
+    :param global_parameters: An optional list of tied parameters
+    :return: A list of Fits with workspaces/logs attached
+    """
+    fits = create_test_fits(input_workspaces, function_name, parameters,
+                            global_parameters)
+    logs = logs if logs is not None else []
+    for fit, workspace_name in zip(fits, input_workspaces):
+        test_ws = create_test_workspace(workspace_name)
+        run = test_ws.run()
+        # populate with log data
+        for index, name in enumerate(logs):
+            tsp = FloatTimeSeriesProperty(name)
+            tsp.addValue("2019-05-30T09:00:00", float(index))
+            tsp.addValue("2019-05-30T09:00:05", float(index + 1))
+            run.addProperty(name, tsp, replace=True)
+
+        fit.input_workspace = workspace_name
+
+    fitting_context = FittingContext()
+    for fit in fits:
+        fitting_context.add_fit(fit)
+    return fitting_context, ResultsTabModel(fitting_context)
+
+
 class ResultsTabModelTest(unittest.TestCase):
     def setUp(self):
-        self.parameters = {
-            'Name': ['Height', 'PeakCentre', 'Sigma', 'Cost function value'],
-            'Value': [2309.2, 2.1, 0.04, 30.8],
-            'Error': [16, 0.002, 0.003, 0]
-        }
-        self.logs = ['sample_temp', 'sample_magn_field']
-        fits = create_test_fits_with_logs(('ws1', ), 'func1', self.parameters,
-                                          self.logs)
-        self.fitting_context = FittingContext()
-        for fit in fits:
-            self.fitting_context.add_fit(fit)
+        self.f0_height = (2309.2, 16)
+        self.f0_centre = (2.1, 0.002)
+        self.f0_sigma = (1.1, 0.001)
+        self.f1_height = (2315.2, 14)
+        self.f1_centre = (2.5, 0.004)
+        self.f1_sigma = (0.9, 0.002)
+        self.cost_function = (30.8, 0)
+        self.parameters = OrderedDict([('f0.Height', self.f0_height),
+                                       ('f0.PeakCentre', self.f0_centre),
+                                       ('f0.Sigma', self.f0_sigma),
+                                       ('f1.Height', self.f1_height),
+                                       ('f1.PeakCentre', self.f1_centre),
+                                       ('f1.Sigma', self.f1_sigma),
+                                       ('Cost function value',
+                                        self.cost_function)])
 
-        self.model = ResultsTabModel(self.fitting_context)
+        self.logs = ['sample_temp', 'sample_magn_field']
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
 
     # ------------------------- success tests ----------------------------
     def test_default_model_has_results_table_name(self):
-        self.assertEqual(self.model.results_table_name(), DEFAULT_TABLE_NAME)
+        model = ResultsTabModel(FittingContext())
+        self.assertEqual(model.results_table_name(), DEFAULT_TABLE_NAME)
 
     def test_updating_model_results_table_name(self):
         table_name = 'table_name'
-        self.model.set_results_table_name(table_name)
-        self.assertEqual(self.model.results_table_name(), table_name)
+        model = ResultsTabModel(FittingContext())
+        model.set_results_table_name(table_name)
+
+        self.assertEqual(model.results_table_name(), table_name)
 
     def test_default_model_has_no_selected_function_without_fits(self):
         model = ResultsTabModel(FittingContext())
@@ -57,9 +153,11 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertTrue(model.selected_fit_function() is None)
 
     def test_updating_model_selected_fit_function(self):
+        model = ResultsTabModel(FittingContext())
         new_selection = 'func2'
-        self.model.set_selected_fit_function(new_selection)
-        self.assertEqual(self.model.selected_fit_function(), new_selection)
+        model.set_selected_fit_function(new_selection)
+
+        self.assertEqual(model.selected_fit_function(), new_selection)
 
     def test_log_names_from_workspace_with_logs(self):
         fake_ws = create_test_workspace()
@@ -107,35 +205,37 @@ class ResultsTabModelTest(unittest.TestCase):
                          msg="{} not found in log list".format(logs[1]))
 
     def test_model_returns_fit_functions_from_context(self):
-        self.assertEqual(['func1'], self.model.fit_functions())
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters,
+                                     self.logs)
+
+        self.assertEqual(['func1'], model.fit_functions())
 
     def test_model_returns_no_fit_selection_if_no_fits_present(self):
         model = ResultsTabModel(FittingContext())
         self.assertEqual(0, len(model.fit_selection({})))
 
-    def test_model_creates_fit_selection_given_zero_existing_state(self):
-        expected_list_state = {'ws1': [0, True, True]}
+    def test_model_creates_fit_selection_given_no_existing_state(self):
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
+                                     self.logs)
 
-        self.assertEqual(expected_list_state, self.model.fit_selection({}))
+        expected_list_state = {'ws1': [0, True, True], 'ws2': [1, True, True]}
+        self.assertDictEqual(expected_list_state, model.fit_selection({}))
 
     def test_model_creates_fit_selection_given_existing_state(self):
-        more_fits = create_test_fits_with_logs(('ws2', ), 'func1',
-                                               self.parameters, self.logs)
-        for fit in more_fits:
-            self.fitting_context.add_fit(fit)
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
+                                     self.logs)
 
         orig_list_state = {'ws1': [0, False, True]}
         expected_list_state = {'ws1': [0, False, True], 'ws2': [1, True, True]}
         self.assertEqual(expected_list_state,
-                         self.model.fit_selection(orig_list_state))
+                         model.fit_selection(orig_list_state))
 
-    def test_model_returns_no_log_selection_if_not_fits_present(self):
-        self.fitting_context.fit_list = []
-        self.assertEqual(0, len(self.model.log_selection({})))
+    def test_model_returns_no_log_selection_if_no_fits_present(self):
+        model = ResultsTabModel(FittingContext())
+        self.assertEqual(0, len(model.log_selection({})))
 
     def test_model_returns_log_selection_of_first_workspace(self):
-        self.fitting_context.fit_list = create_test_fits_with_only_workspace_names(
-            ('ws1', 'ws2'))[0]
+        _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters)
         with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
             ws1_logs = ('run_number', 'run_start')
             ws2_logs = ('temp', 'magnetic_field')
@@ -149,100 +249,97 @@ class ResultsTabModelTest(unittest.TestCase):
                 'run_start': [1, False, True],
             }
 
-            self.assertEqual(expected_selection, self.model.log_selection({}))
+            self.assertEqual(expected_selection, model.log_selection({}))
 
-    def test_model_combines_existing_selection(self):
-        self.fitting_context.fit_list = create_test_fits_with_only_workspace_names(
-            ('ws1', ))[0]
+    def test_model_combines_existing_log_selection(self):
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters)
         with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
-            mock_log_names.return_value = ('run_number', 'run_start',
-                                           'magnetic_field')
+            mock_log_names.return_value = [
+                'run_number', 'run_start', 'magnetic_field'
+            ]
 
             existing_selection = {
                 'run_number': [0, False, True],
                 'run_start': [1, True, True],
             }
-            expected_selection = {
+            expected_selection = deepcopy(existing_selection)
+            expected_selection.update({
                 'run_number': [0, False, True],
                 'run_start': [1, True, True],
-                'magnetic_field': [2, False, True]
-            }
+                'magnetic_field': [2, False, True],
+            })
+
             self.assertDictEqual(expected_selection,
-                                 self.model.log_selection(existing_selection))
+                                 model.log_selection(existing_selection))
 
-    def test_create_results_table_with_no_logs(self):
-        parameters = {
-            'Name': ['Height', 'PeakCentre', 'Sigma', 'Cost function value'],
-            'Value': [2309.2, 2.1, 0.04, 30.8],
-            'Error': [16, 0.002, 0.003, 0]
-        }
-        self.fitting_context.fit_list = create_test_fits(('ws1', ), 'func1',
-                                                         parameters)
+    def test_create_results_table_with_no_logs_or_global_parameters(self):
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters)
+        logs = []
         selected_results = [('ws1', 0)]
-        table = self.model.create_results_table([], selected_results)
+        table = model.create_results_table(logs, selected_results)
 
-        self.assertTrue(isinstance(table, ITableWorkspace))
-        self.assertEqual(8, table.columnCount())
-        self.assertEqual(1, table.rowCount())
         expected_cols = [
-            'workspace_name', 'Height', 'HeightError', 'PeakCentre',
-            'PeakCentreError', 'Sigma', 'SigmaError', 'Cost function value'
+            'workspace_name', 'f0.Height', 'f0.HeightError', 'f0.PeakCentre',
+            'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.Height',
+            'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError',
+            'f1.Sigma', 'f1.SigmaError', 'Cost function value'
         ]
-        self.assertEqual(expected_cols, table.getColumnNames())
-        self.assertEqual('ws1_Parameters', table.cell(0, 0))
-        for index, (expected_val, expected_err) in enumerate(
-                zip(parameters['Value'], parameters['Error'])):
-            self.assertAlmostEqual(expected_val,
-                                   table.cell(0, 2 * index + 1),
-                                   places=2)
-            if 2 * index + 2 < table.columnCount():
-                self.assertAlmostEqual(expected_err,
-                                       table.cell(0, 2 * index + 2),
-                                       places=2)
-
-        self.assertTrue(
-            self.model.results_table_name() in AnalysisDataService.Instance())
+        expected_content = [
+            ('ws1_Parameters', self.f0_height[0], self.f0_height[1],
+             self.f0_centre[0], self.f0_centre[1], self.f0_sigma[0],
+             self.f0_sigma[1], self.f1_height[0], self.f1_height[1],
+             self.f1_centre[0], self.f1_centre[1], self.f1_sigma[0],
+             self.f1_sigma[1], self.cost_function[0])
+        ]
+        self._assert_table_matches_expected(expected_cols, expected_content,
+                                            table, model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters,
+                                     self.logs)
         selected_results = [('ws1', 0)]
-        logs = self.logs
-        table = self.model.create_results_table(logs, selected_results)
+        table = model.create_results_table(self.logs, selected_results)
 
-        self.assertTrue(isinstance(table, ITableWorkspace))
-        self.assertEqual(10, table.columnCount())
-        self.assertEqual(1, table.rowCount())
-
-        expected_cols = ['workspace_name'] + logs + [
-            'Height', 'HeightError', 'PeakCentre', 'PeakCentreError', 'Sigma',
-            'SigmaError', 'Cost function value'
+        expected_cols = ['workspace_name'] + self.logs + [
+            'f0.Height', 'f0.HeightError', 'f0.PeakCentre',
+            'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.Height',
+            'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError',
+            'f1.Sigma', 'f1.SigmaError', 'Cost function value'
         ]
-        self.assertEqual(expected_cols, table.getColumnNames())
+        avg_log_values = 0.5, 1.5
+        expected_content = [
+            ('ws1_Parameters', avg_log_values[0], avg_log_values[1],
+             self.f0_height[0], self.f0_height[1], self.f0_centre[0],
+             self.f0_centre[1], self.f0_sigma[0], self.f0_sigma[1],
+             self.f1_height[0], self.f1_height[1], self.f1_centre[0],
+             self.f1_centre[1], self.f1_sigma[0], self.f1_sigma[1],
+             self.cost_function[0])
+        ]
+        self._assert_table_matches_expected(expected_cols, expected_content,
+                                            table, model.results_table_name())
 
-        # first value is workspace name
-        self.assertEqual('ws1_Parameters', table.cell(0, 0))
+    def test_create_results_table_with_fit_with_global_parameters(self):
+        logs = []
+        global_parameters = ['Height']
+        _, model = create_test_model(('simul-1', ), 'func1', self.parameters,
+                                     logs, global_parameters)
+        selected_results = [('simul-1', 0)]
+        table = model.create_results_table(logs, selected_results)
 
-        # first check log columns
-        nlogs = len(logs)
-        for index, _ in enumerate(logs):
-            expected_val = 0.5 * (float(index) + float(index + 1))
-            self.assertAlmostEqual(expected_val,
-                                   table.cell(0, index + 1),
-                                   places=2)
-        checked_columns = 1 + nlogs
-        parameters = self.parameters
-        for index, (expected_val, expected_err) in enumerate(
-                zip(parameters['Value'], parameters['Error'])):
-            self.assertAlmostEqual(expected_val,
-                                   table.cell(0, 2 * index + checked_columns),
-                                   places=2)
-            err_col_idx = 2 * index + checked_columns + 1
-            if err_col_idx < table.columnCount():
-                self.assertAlmostEqual(expected_err,
-                                       table.cell(0, err_col_idx),
-                                       places=2)
-
-        self.assertTrue(
-            self.model.results_table_name() in AnalysisDataService.Instance())
+        expected_cols = [
+            'workspace_name', 'Height', 'HeightError', 'f0.PeakCentre',
+            'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.PeakCentre',
+            'f1.PeakCentreError', 'f1.Sigma', 'f1.SigmaError',
+            'Cost function value'
+        ]
+        expected_content = [
+            ('simul-1_Parameters', self.f0_height[0], self.f0_height[1],
+             self.f0_centre[0], self.f0_centre[1], self.f0_sigma[0],
+             self.f0_sigma[1], self.f1_centre[0], self.f1_centre[1],
+             self.f1_sigma[0], self.f1_sigma[1], self.cost_function[0])
+        ]
+        self._assert_table_matches_expected(expected_cols, expected_content,
+                                            table, model.results_table_name())
 
     # ------------------------- failure tests ----------------------------
     def test_log_names_from_workspace_not_in_ADS_raises_exception(self):
@@ -250,121 +347,53 @@ class ResultsTabModelTest(unittest.TestCase):
 
     def test_create_results_table_raises_error_if_number_params_different(
             self):
-        parameters = {
-            'Name': ['Height', 'Cost function value'],
-            'Value': [2309.2, 30.8],
-            'Error': [16, 0]
-        }
-        fits = create_test_fits_with_logs(('ws1', ), 'func1', parameters,
-                                          self.logs)
-        self.fitting_context = FittingContext()
-        for fit in fits:
-            self.fitting_context.add_fit(fit)
+        parameters = OrderedDict([('Height', (100, 0.1)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters)
 
-        parameters = {
-            'Name': ['Height', 'A0', 'Cost function value'],
-            'Value': [2309.2, 0.1, 30.8],
-            'Error': [16, 0.001, 0]
-        }
-        fits = create_test_fits_with_logs(('ws2', ), 'func1', parameters,
-                                          self.logs)
-        for fit in fits:
-            self.fitting_context.add_fit(fit)
-        self.model = ResultsTabModel(self.fitting_context)
+        parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func2 = create_test_fits(('ws2', ), 'func2', parameters)
+        model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
 
         selected_results = [('ws1', 0), ('ws2', 1)]
-        self.assertRaises(
-            RuntimeError,
-            self.model.create_results_table, [], selected_results)
+        self.assertRaises(RuntimeError, model.create_results_table, [],
+                          selected_results)
 
+    def test_create_results_table_with_mixed_global_non_global_raises_error(
+            self):
+        parameters = OrderedDict([('f0.Height', (100, 0.1)),
+                                  ('f1.Height', (90, 0.001)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func1= create_test_fits(('ws1', ), 'func1', parameters)
+        fits_globals = create_test_fits(('ws2', ), 'func1', parameters,
+                                        global_parameters=['Height'])
+        model = ResultsTabModel(FittingContext(fits_func1 + fits_globals))
 
-def create_test_workspace(ws_name=None):
-    fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
-    ws_name = ws_name if ws_name is not None else 'results_tab_model_test'
-    AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
-    return fake_ws
+        selected_results = [('ws1', 0), ('ws2', 1)]
+        self.assertRaises(RuntimeError, model.create_results_table, [],
+                          selected_results)
 
+    # ---------------------- Private helper functions -------------------------
 
-def create_test_workspacegroup(size, group_name=None):
-    group_name = group_name if group_name is not None else 'results_tab_model_testgroup'
-    ads = AnalysisDataService.Instance()
-    group = WorkspaceGroup()
-    for i in range(size):
-        fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
-        ws_name = '{}_{}'.format(group_name, i)
-        ads.addOrReplace(ws_name, fake_ws)
-        group.addWorkspace(fake_ws)
+    def _assert_table_matches_expected(self, expected_cols, expected_content,
+                                       table, table_name):
+        self.assertTrue(isinstance(table, ITableWorkspace))
+        self.assertTrue(table_name in AnalysisDataService.Instance())
+        self.assertEqual(len(expected_cols), table.columnCount())
+        self.assertEqual(len(expected_content), table.rowCount())
+        self.assertEqual(expected_cols, table.getColumnNames())
 
-    ads.addOrReplace(group_name, group)
-    return group
-
-
-def create_test_fits_with_only_workspace_names(input_workspaces,
-                                               checked_states=None):
-    """
-    Create a minimal list of fits and selection states with only
-    workspace names attached to them.
-    :param input_workspaces: The name of the input workspaces to create
-    :param checked_states: Option set of checked states (list of boolean)
-    :return: A 2-tuple of fits, selection states
-    """
-    fits = []
-    list_state = {}
-    if checked_states is None:
-        checked_states = (True for _ in input_workspaces)
-    enabled = True
-    for index, (name,
-                checked) in enumerate(zip(input_workspaces, checked_states)):
-        fit_info = mock.MagicMock()
-        fit_info.input_workspace = name
-        fits.append(fit_info)
-        list_state[name] = [index, checked, enabled]
-
-    return fits, list_state
-
-
-def create_test_fits(input_workspaces, function_name, parameters):
-    """
-    Create a list of fits
-    :param input_workspaces: The input workspaces
-    :param function_name: The name of the function
-    :param parameters: The parameters list
-    :return: A list of Fits
-    """
-    fits = []
-    for name in input_workspaces:
-        parameter_workspace = mock.NonCallableMagicMock()
-        parameter_workspace.workspace.toDict.return_value = parameters
-        parameter_workspace.workspace_name = name + '_Parameters'
-        fits.append(FitInformation(parameter_workspace, function_name, name))
-
-    return fits
-
-
-def create_test_fits_with_logs(input_workspaces, function_name, parameters,
-                               logs):
-    """
-    Create a list of fits with time series logs on the workspaces
-    :param input_workspaces: See create_test_fits
-    :param function_name: See create_test_fits
-    :param parameters: See create_test_fits
-    :param logs: A list of log names to create
-    :return: A list of Fits with workspaces/logs attached
-    """
-    fits = create_test_fits(input_workspaces, function_name, parameters)
-    for fit, workspace_name in zip(fits, input_workspaces):
-        test_ws = create_test_workspace(workspace_name)
-        run = test_ws.run()
-        # populate with log data
-        for index, name in enumerate(logs):
-            tsp = FloatTimeSeriesProperty(name)
-            tsp.addValue("2019-05-30T09:00:00", float(index))
-            tsp.addValue("2019-05-30T09:00:05", float(index + 1))
-            run.addProperty(name, tsp, replace=True)
-
-        fit.input_workspace = workspace_name
-
-    return fits
+        for row_index, (expected_row,
+                        actual_row) in enumerate(zip(expected_content, table)):
+            self.assertEqual(len(expected_row), len(actual_row))
+            for col_index, expected in enumerate(expected_row):
+                actual = table.cell(row_index, col_index)
+                if isinstance(expected, string_types):
+                    self.assertEqual(expected, actual)
+                else:
+                    # Fit pushes things back/forth through strings so exact match is not possible
+                    self.assertAlmostEqual(expected, actual, places=3)
 
 
 if __name__ == '__main__':
