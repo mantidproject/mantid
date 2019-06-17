@@ -163,7 +163,7 @@ private:
   BufferHeader parse_DataBufferHeader(VectorByteStream &file);
 
   inline size_t getWsIndex(const uint16_t &channel, const uint16_t &position) {
-    const uint16_t channelIndex = ((channel & 0b1111111111100000u) >> 1u) |
+    const uint32_t channelIndex = ((channel & 0b1111111111100000u) >> 1u) |
                                   (channel & 0b0000000000001111u);
     return channelIndex * 960 + position;
   }

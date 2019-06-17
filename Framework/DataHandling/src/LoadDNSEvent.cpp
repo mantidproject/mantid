@@ -528,7 +528,7 @@ void LoadDNSEvent::parse_andAddEvent(
         .readBits<10>(position)
         .readBits<19>(event.timestamp);
     event.timestamp += bufferHeader.timestamp;
-    channel |= bufferHeader.mcpdId << 8u;
+    channel |= static_cast<uint16_t>(bufferHeader.mcpdId << 8u);
 
     const size_t wsIndex = getWsIndex(channel, position);
     eventAccumulator.neutronEvents[wsIndex].push_back(event);
