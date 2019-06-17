@@ -192,7 +192,7 @@ public:
   MOCK_CONST_METHOD0(searchInProgress, bool());
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
   MOCK_METHOD2(setSearchResultError, void(int, const std::string &));
-  MOCK_METHOD0(resetResults, void());
+  MOCK_METHOD0(reset, void());
   MOCK_CONST_METHOD2(searchSettingsChanged,
                      bool(const std::string &, const std::string &));
 };

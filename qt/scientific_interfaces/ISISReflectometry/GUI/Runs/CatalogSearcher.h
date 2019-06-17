@@ -37,7 +37,7 @@ public:
   SearchResult const &getSearchResult(int index) const override;
   void setSearchResultError(int index,
                             const std::string &errorMessage) override;
-  void resetResults() override;
+  void reset() override;
   bool searchSettingsChanged(const std::string &text,
                              const std::string &instrument) const override;
 

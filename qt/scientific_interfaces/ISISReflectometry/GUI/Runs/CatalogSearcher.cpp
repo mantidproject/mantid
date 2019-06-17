@@ -97,7 +97,11 @@ void CatalogSearcher::setSearchResultError(int index,
   results().setError(index, errorMessage);
 }
 
-void CatalogSearcher::resetResults() { results().clear(); }
+void CatalogSearcher::reset() {
+  m_searchText.clear();
+  m_instrument.clear();
+  results().clear();
+}
 
 bool CatalogSearcher::searchSettingsChanged(
     const std::string &text, const std::string &instrument) const {

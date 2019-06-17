@@ -89,14 +89,14 @@ public:
 
   void testStartingSearchClearsPreviousResults() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_searcher, resetResults()).Times(AtLeast(1));
+    EXPECT_CALL(*m_searcher, reset()).Times(AtLeast(1));
     presenter.notifySearch();
     verifyAndClear();
   }
 
   void testInstrumentChangedClearsPreviousResults() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_searcher, resetResults()).Times(AtLeast(1));
+    EXPECT_CALL(*m_searcher, reset()).Times(AtLeast(1));
     presenter.notifyInstrumentChanged();
     verifyAndClear();
   }
@@ -545,11 +545,13 @@ private:
   }
 
   void expectClearExistingTable() {
+    EXPECT_CALL(*m_searcher, reset()).Times(1);
     EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
         .Times(1);
   }
 
   void expectDoNotClearExistingTable() {
+    EXPECT_CALL(*m_searcher, reset()).Times(0);
     EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
         .Times(0);
   }
