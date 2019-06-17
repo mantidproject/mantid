@@ -79,6 +79,7 @@ Improvements
 - :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` will integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
+- New TOPAZ instrument geometry for 2019B run cycle
 - Maximum order of modulated vectors is now available to python: ws.sample().getOrientedLattice().getMaxOrder()
 
 Bug Fixes
