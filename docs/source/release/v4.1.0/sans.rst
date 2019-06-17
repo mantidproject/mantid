@@ -13,7 +13,7 @@ SANS Changes
 
 - New IDF for EQSANS
 - New algorithm :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>`
-- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS``to :ref:`MaskBTP <algm-MaskBTP>`
+- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`
 
 ISIS SANS Interface
 -------------------

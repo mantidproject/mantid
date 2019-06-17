@@ -134,6 +134,7 @@ public:
   /// Read access to mesh object for rendering
   size_t numberOfVertices() const;
   std::vector<double> getVertices() const;
+  const std::vector<Kernel::V3D> &getV3Ds() const;
   size_t numberOfTriangles() const;
   std::vector<uint32_t> getTriangles() const;
 
