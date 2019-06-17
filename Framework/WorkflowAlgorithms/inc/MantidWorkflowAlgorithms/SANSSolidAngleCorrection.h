@@ -45,8 +45,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport SANSSolidAngleCorrection : public API::Algorithm {
 public:
-  SANSSolidAngleCorrection();
-
   /// Algorithm's name
   const std::string name() const override { return "SANSSolidAngleCorrection"; }
   /// Summary of algorithms purpose
