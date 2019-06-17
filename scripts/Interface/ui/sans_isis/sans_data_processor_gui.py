@@ -541,7 +541,7 @@ class SANSDataProcessorGui(QMainWindow,
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
         else:
-            InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject.4.0/doc/'
+            InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
                                             'interfaces/ISIS%20SANS%20v2.html')
 
     def _on_output_mode_clicked(self):
