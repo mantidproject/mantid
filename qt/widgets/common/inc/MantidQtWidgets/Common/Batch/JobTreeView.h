@@ -52,6 +52,9 @@ public:
   RowLocation appendChildRowOf(RowLocation const &parent) override;
   RowLocation appendChildRowOf(RowLocation const &parentLocation,
                                std::vector<Cell> const &rowText) override;
+  void appendAndEditAtChildRow() override;
+  void appendAndEditAtRowBelow() override;
+  void editAtRowAbove() override;
 
   void removeRowAt(RowLocation const &location) override;
   void removeAllRows() override;
@@ -104,6 +107,9 @@ protected:
   bool edit(const QModelIndex &index, EditTrigger trigger,
             QEvent *event) override;
   void setHeaderLabels(QStringList const &columnHeadings);
+  void appendAndEditAtChildRowRequested();
+  void appendAndEditAtRowBelowRequested();
+  void editAtRowAboveRequested();
   void removeSelectedRequested();
   void copySelectedRequested();
   void cutSelectedRequested();
@@ -119,9 +125,6 @@ private:
   // The view property values for an uneditable, unselectable cell.
   static Cell const g_deadCell;
 
-  void appendAndEditAtChildRow();
-  void appendAndEditAtRowBelow();
-  void editAtRowAbove();
   bool indexesAreOnSameRow(QModelIndex const &a, QModelIndex const &b) const;
 
   QModelIndexForMainModel

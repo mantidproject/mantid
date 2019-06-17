@@ -64,6 +64,9 @@ public:
   void notifySelectionChanged() override;
   void notifyRowInserted(MantidQt::MantidWidgets::Batch::RowLocation const
                              &newRowLocation) override;
+  void notifyAppendAndEditAtChildRowRequested() override;
+  void notifyAppendAndEditAtRowBelowRequested() override;
+  void notifyEditAtRowAboveRequested() override;
   void notifyRemoveRowsRequested(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
           &locationsOfRowsToRemove) override;

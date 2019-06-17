@@ -170,6 +170,18 @@ std::vector<RowLocation> JobTreeView::selectedRowLocations() const {
   return rowSelection;
 }
 
+void JobTreeView::appendAndEditAtChildRowRequested() {
+  m_notifyee->notifyAppendAndEditAtChildRowRequested();
+}
+
+void JobTreeView::appendAndEditAtRowBelowRequested() {
+  m_notifyee->notifyAppendAndEditAtRowBelowRequested();
+}
+
+void JobTreeView::editAtRowAboveRequested() {
+  m_notifyee->notifyEditAtRowAboveRequested();
+}
+
 void JobTreeView::removeSelectedRequested() {
   m_notifyee->notifyRemoveRowsRequested(selectedRowLocations());
 }
@@ -375,8 +387,10 @@ void JobTreeView::removeAllRows() {
 
 RowLocation JobTreeView::insertChildRowOf(RowLocation const &parent,
                                           int beforeRow) {
-  return rowLocation().atIndex(m_adaptedMainModel.insertEmptyChildRow(
-      rowLocation().indexAt(parent), beforeRow));
+  auto const child = m_adaptedMainModel.insertEmptyChildRow(
+      rowLocation().indexAt(parent), beforeRow);
+  editAt(expanded(mapToFilteredModel(child)));
+  return rowLocation().atIndex(child);
 }
 
 RowLocation JobTreeView::insertChildRowOf(RowLocation const &parent,
@@ -385,9 +399,11 @@ RowLocation JobTreeView::insertChildRowOf(RowLocation const &parent,
   assertOrThrow(static_cast<int>(cells.size()) <= m_mainModel.columnCount(),
                 "Attempted to add row with more cells than columns. Increase "
                 "the number of columns by increasing the number of headings.");
-  return rowLocation().atIndex(m_adaptedMainModel.insertChildRow(
+  auto child = m_adaptedMainModel.insertChildRow(
       rowLocation().indexAt(parent), beforeRow,
-      paddedCellsToWidth(cells, g_deadCell, m_mainModel.columnCount())));
+      paddedCellsToWidth(cells, g_deadCell, m_mainModel.columnCount()));
+  editAt(expanded(mapToFilteredModel(child)));
+  return rowLocation().atIndex(child);
 }
 
 Cell const JobTreeView::g_deadCell =
@@ -503,11 +519,11 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Return:
   case Qt::Key_Enter: {
     if (event->modifiers() & Qt::ControlModifier) {
-      appendAndEditAtChildRow();
+      appendAndEditAtChildRowRequested();
     } else if (event->modifiers() & Qt::ShiftModifier) {
-      editAtRowAbove();
+      editAtRowAboveRequested();
     } else {
-      appendAndEditAtRowBelow();
+      appendAndEditAtRowBelowRequested();
     }
     break;
   }
