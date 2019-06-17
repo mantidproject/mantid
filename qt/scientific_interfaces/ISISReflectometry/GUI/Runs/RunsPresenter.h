@@ -31,7 +31,6 @@ class ProgressableView;
 namespace CustomInterfaces {
 
 // Forward decs
-class IAutoreduction;
 class IMessageHandler;
 class IPythonRunner;
 class ISearchModel;
@@ -61,7 +60,7 @@ public:
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
                 int defaultInstrumentIndex, IMessageHandler *messageHandler,
-                IAutoreduction &autoreduction, IPythonRunner *pythonRunner);
+                IPythonRunner *pythonRunner);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -109,8 +108,6 @@ public:
 
 protected:
   IRunsTablePresenter *tablePresenter() const;
-  /// Information about the autoreduction process
-  IAutoreduction &m_autoreduction;
   /// The current transfer method
   std::string m_currentTransferMethod;
   /// The data processor presenters stored in a vector
@@ -135,8 +132,6 @@ private:
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list
   int m_defaultInstrumentIndex;
-  /// Whether the instrument has been changed before a search was made with it
-  bool m_instrumentChanged;
   /// The name to use for the live data workspace
   Mantid::API::IAlgorithm_sptr m_monitorAlg;
   double m_thetaTolerance;

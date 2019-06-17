@@ -77,7 +77,7 @@ void MainWindowView::initLayout() {
   auto messageHandler = this;
   auto makeRunsPresenter = RunsPresenterFactory(
       std::move(makeRunsTablePresenter), thetaTolerance, instruments,
-      defaultInstrumentIndex, messageHandler, Autoreduction(), pythonRunner);
+      defaultInstrumentIndex, messageHandler, pythonRunner);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();

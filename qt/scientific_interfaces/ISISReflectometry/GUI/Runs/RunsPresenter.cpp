@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
-#include "Autoreduction.h"
 #include "CatalogRunNotifier.h"
 #include "CatalogSearcher.h"
 #include "GUI/Batch/IBatchPresenter.h"
@@ -52,7 +51,6 @@ namespace CustomInterfaces {
  * @param defaultInstrumentIndex The index of the instrument to have selected by
  * default.
  * @param messageHandler :: A handler to pass messages to the user
- * @param autoreduction :: [input] The autoreduction implementation
  * @param pythonRunner :: [input] Interface for running python code
  */
 RunsPresenter::RunsPresenter(
@@ -60,15 +58,14 @@ RunsPresenter::RunsPresenter(
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
     int defaultInstrumentIndex, IMessageHandler *messageHandler,
-    IAutoreduction &autoreduction, IPythonRunner *pythonRunner)
-    : m_autoreduction(autoreduction),
-      m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
+    IPythonRunner *pythonRunner)
+    : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<CatalogSearcher>(pythonRunner, mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
       m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
-      m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
+      m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -116,8 +113,6 @@ void RunsPresenter::notifySearch() {
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
 void RunsPresenter::notifySearchComplete() {
-  m_instrumentChanged = false;
-
   if (!isAutoreducing())
     m_view->resizeSearchResultsColumnsToContents();
 
@@ -186,7 +181,10 @@ void RunsPresenter::reductionPaused() {
  * starts a search to check if there are new runs.
  */
 bool RunsPresenter::resumeAutoreduction() {
-  if (requireNewAutoreduction()) {
+  auto const searchString = m_view->getSearchString();
+  auto const instrument = m_view->getSearchInstrument();
+
+  if (m_searcher->searchSettingsChanged(searchString, instrument)) {
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first.  We'll prompt the user to check it's ok to delete
     // existing rows
@@ -200,7 +198,6 @@ bool RunsPresenter::resumeAutoreduction() {
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
-  m_autoreduction.setupNewAutoreduction(m_view->getSearchString());
   checkForNewRuns();
   return true;
 }
@@ -213,7 +210,6 @@ void RunsPresenter::autoreductionResumed() {
 
 void RunsPresenter::autoreductionPaused() {
   m_runNotifier->stopPolling();
-  m_autoreduction.stop();
   m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
   tablePresenter()->autoreductionPaused();
@@ -226,7 +222,6 @@ void RunsPresenter::autoreductionCompleted() {
 }
 
 void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
-  m_instrumentChanged = true;
   m_view->setSearchInstrument(instrumentName);
   tablePresenter()->instrumentChanged(instrumentName);
 }
@@ -251,17 +246,6 @@ bool RunsPresenter::search() {
   return true;
 }
 
-/** Determines whether to start a new autoreduction. Starts a new one if the
- * either the search number, transfer method or instrument has changed
- * @return : Boolean on whether to start a new autoreduction
- */
-bool RunsPresenter::requireNewAutoreduction() const {
-  bool searchNumChanged =
-      m_autoreduction.searchStringChanged(m_view->getSearchString());
-
-  return searchNumChanged || m_instrumentChanged;
-}
-
 /** Start a single autoreduction process. Called periodially to add and process
  *  any new runs in the table.
  */
@@ -278,7 +262,6 @@ void RunsPresenter::checkForNewRuns() {
  */
 void RunsPresenter::autoreduceNewRuns() {
 
-  m_autoreduction.setSearchResultsExist();
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0)

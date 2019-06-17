@@ -18,7 +18,6 @@
 #include "GUI/Instrument/InstrumentOptionDefaults.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
-#include "GUI/Runs/IAutoreduction.h"
 #include "GUI/Runs/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearcher.h"
@@ -194,6 +193,8 @@ public:
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
   MOCK_METHOD2(setSearchResultError, void(int, const std::string &));
   MOCK_METHOD0(resetResults, void());
+  MOCK_CONST_METHOD2(searchSettingsChanged,
+                     bool(const std::string &, const std::string &));
 };
 
 class MockRunNotifier : public IRunNotifier {
@@ -242,19 +243,6 @@ public:
                           std::vector<std::string> const &,
                           FileFormatOptions const &));
   virtual ~MockAsciiSaver() = default;
-};
-
-/**** Autoreduction ****/
-class MockAutoreduction : public IAutoreduction {
-public:
-  MOCK_CONST_METHOD0(running, bool());
-  MOCK_CONST_METHOD1(searchStringChanged, bool(const std::string &));
-  MOCK_CONST_METHOD0(searchResultsExist, bool());
-  MOCK_METHOD0(setSearchResultsExist, void());
-
-  MOCK_METHOD1(setupNewAutoreduction, void(const std::string &));
-  MOCK_METHOD0(pause, bool());
-  MOCK_METHOD0(stop, void());
 };
 
 /**** Job runner ****/

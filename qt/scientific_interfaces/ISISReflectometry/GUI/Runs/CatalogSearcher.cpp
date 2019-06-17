@@ -36,7 +36,8 @@ void removeResultsWithoutFilenameExtension(ITableWorkspace_sptr results) {
 } // unnamed namespace
 
 CatalogSearcher::CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *view)
-    : m_pythonRunner(pythonRunner), m_view(view), m_searchInProgress(false) {
+    : m_pythonRunner(pythonRunner), m_view(view), m_notifyee(nullptr),
+      m_searchText(), m_instrument(), m_searchInProgress(false) {
   m_view->subscribeSearch(this);
 }
 
@@ -46,6 +47,7 @@ void CatalogSearcher::subscribe(SearcherSubscriber *notifyee) {
 
 ITableWorkspace_sptr CatalogSearcher::search(const std::string &text,
                                              const std::string &instrument) {
+  m_searchText = text;
   m_instrument = instrument;
   auto algSearch = createSearchAlgorithm(text);
   algSearch->execute();
@@ -57,6 +59,7 @@ ITableWorkspace_sptr CatalogSearcher::search(const std::string &text,
 
 bool CatalogSearcher::startSearchAsync(const std::string &text,
                                        const std::string &instrument) {
+  m_searchText = text;
   m_instrument = instrument;
 
   if (!logInToCatalog())
@@ -95,6 +98,11 @@ void CatalogSearcher::setSearchResultError(int index,
 }
 
 void CatalogSearcher::resetResults() { results().clear(); }
+
+bool CatalogSearcher::searchSettingsChanged(
+    const std::string &text, const std::string &instrument) const {
+  return m_searchText != text || m_instrument != instrument;
+}
 
 bool CatalogSearcher::hasActiveSession() const {
   auto sessions = CatalogManager::Instance().getActiveSessions();

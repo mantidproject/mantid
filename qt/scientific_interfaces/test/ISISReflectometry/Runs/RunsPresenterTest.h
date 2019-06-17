@@ -46,8 +46,7 @@ public:
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
                                               "POLREF", "OFFSPEC"},
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_searcher(nullptr), m_autoreduction(), m_pythonRunner(),
-        m_runNotifier(nullptr),
+        m_searcher(nullptr), m_pythonRunner(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
         m_searchString("test search string") {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
@@ -214,7 +213,7 @@ public:
     auto presenter = makePresenter();
     expectAutoreductionSettingsChanged();
     expectClearExistingTable();
-    expectStartNewAutoreduction();
+    expectCheckForNewRuns();
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
@@ -223,7 +222,7 @@ public:
     auto presenter = makePresenter();
     expectAutoreductionSettingsUnchanged();
     expectDoNotClearExistingTable();
-    expectStartNewAutoreduction();
+    expectCheckForNewRuns();
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
@@ -234,7 +233,7 @@ public:
     expectAutoreductionSettingsChanged();
     expectRunsTableWithContent(runsTable);
     expectUserRespondsYes();
-    expectStartNewAutoreduction();
+    expectCheckForNewRuns();
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
@@ -243,7 +242,7 @@ public:
     auto presenter = makePresenter();
     expectAutoreductionSettingsChanged();
     EXPECT_CALL(m_messageHandler, askUserYesNo(_, _)).Times(0);
-    expectStartNewAutoreduction();
+    expectCheckForNewRuns();
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
@@ -270,7 +269,6 @@ public:
   void testAutoreductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-    EXPECT_CALL(m_autoreduction, stop()).Times(1);
     EXPECT_CALL(*m_runsTablePresenter, autoreductionPaused()).Times(1);
     expectWidgetsEnabledForPaused();
     presenter.autoreductionPaused();
@@ -280,7 +278,6 @@ public:
   void testAutoreductionCompleted() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runNotifier, startPolling()).Times(1);
-    EXPECT_CALL(m_autoreduction, stop()).Times(0);
     expectWidgetsEnabledForAutoreducing();
     presenter.autoreductionCompleted();
     verifyAndClear();
@@ -312,7 +309,6 @@ public:
   void testNotifySearchResultsResumesReductionWhenAutoreducing() {
     auto presenter = makePresenter();
     expectIsAutoreducing();
-    EXPECT_CALL(m_autoreduction, setSearchResultsExist()).Times(AtLeast(1));
     EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
     presenter.notifySearchComplete();
     verifyAndClear();
@@ -321,7 +317,6 @@ public:
   void testNotifySearchResultsTransfersRowsWhenAutoreducing() {
     auto presenter = makePresenter();
     expectIsAutoreducing();
-    EXPECT_CALL(m_autoreduction, setSearchResultsExist()).Times(AtLeast(1));
     // Transfer some valid rows
     auto rowsToTransfer = std::set<int>{0, 1, 2};
     EXPECT_CALL(m_view, getAllSearchRows())
@@ -461,11 +456,10 @@ private:
                         std::vector<std::string> const &instruments,
                         int defaultInstrumentIndex,
                         IMessageHandler *messageHandler,
-                        IAutoreduction &autoreduction,
                         IPythonRunner *pythonRunner)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
-                        messageHandler, autoreduction, pythonRunner) {}
+                        messageHandler, pythonRunner) {}
   };
 
   RunsPresenterFriend makePresenter() {
@@ -481,7 +475,7 @@ private:
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
         m_instruments, defaultInstrumentIndex, &m_messageHandler,
-        m_autoreduction, m_pythonRunner);
+        m_pythonRunner);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
@@ -510,7 +504,6 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runsTableView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_progressView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_autoreduction));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_pythonRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_runNotifier));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
@@ -539,15 +532,15 @@ private:
 
   void expectStopAutoreduction() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-    EXPECT_CALL(m_autoreduction, stop()).Times(1);
   }
 
   void expectAutoreductionSettingsChanged() {
-    EXPECT_CALL(m_autoreduction, searchStringChanged(_)).WillOnce(Return(true));
+    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _))
+        .WillOnce(Return(true));
   }
 
   void expectAutoreductionSettingsUnchanged() {
-    EXPECT_CALL(m_autoreduction, searchStringChanged(_))
+    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _))
         .WillOnce(Return(false));
   }
 
@@ -573,11 +566,6 @@ private:
         .WillOnce(Return(false));
   }
 
-  void expectStartNewAutoreduction() {
-    EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_)).Times(1);
-    expectCheckForNewRuns();
-  }
-
   void expectCheckForNewRuns() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_view, getSearchString())
@@ -590,7 +578,6 @@ private:
   }
 
   void expectDoNotStartAutoreduction() {
-    EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_)).Times(0);
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
     EXPECT_CALL(*m_searcher, startSearchAsync(_, _)).Times(0);
   }
@@ -700,7 +687,6 @@ private:
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
   NiceMock<MockSearcher> *m_searcher;
-  NiceMock<MockAutoreduction> m_autoreduction;
   MockPythonRunner *m_pythonRunner;
   MockRunNotifier *m_runNotifier;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;

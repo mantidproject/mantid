@@ -38,6 +38,8 @@ public:
   void setSearchResultError(int index,
                             const std::string &errorMessage) override;
   void resetResults() override;
+  bool searchSettingsChanged(const std::string &text,
+                             const std::string &instrument) const override;
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
@@ -46,6 +48,7 @@ private:
   IPythonRunner *m_pythonRunner;
   IRunsView *m_view;
   SearcherSubscriber *m_notifyee;
+  std::string m_searchText;
   std::string m_instrument;
   bool m_searchInProgress;
 

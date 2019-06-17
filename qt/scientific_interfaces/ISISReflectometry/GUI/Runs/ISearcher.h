@@ -38,6 +38,8 @@ public:
   virtual void setSearchResultError(int index,
                                     const std::string &errorMessage) = 0;
   virtual void resetResults() = 0;
+  virtual bool searchSettingsChanged(const std::string &text,
+                                     const std::string &instrument) const = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
