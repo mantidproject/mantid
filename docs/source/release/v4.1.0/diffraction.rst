@@ -68,26 +68,23 @@ New Algorithms
 ##############
 
 - New algorithm :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` to predict satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace or range of wavelength and DSpacing.
-
 - New algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` to index peaks with satellites and set modulation vectors and maximum order of satellite from input values.
 
 
 Improvements
 ############
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` will load satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
-
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` will save satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
-
 - :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>` finds UB matrix using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace.
-
 - :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
-
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` will integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
-
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
-
 - Maximum order of modulated vectors is now available to python: ws.sample().getOrientedLattice().getMaxOrder()
 
+Bug Fixes
+#########
+
+- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now only calculates statistics for integer HKL (not satellite peaks) instead of combining. Statistics for satellite peaks will be added later.
 
 Imaging
 -------
