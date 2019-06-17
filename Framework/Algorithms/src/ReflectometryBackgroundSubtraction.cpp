@@ -210,7 +210,7 @@ void ReflectometryBackgroundSubtraction::init() {
                                                   inputIndexTypeRef),
                   "An optional set of spectra containing the background. If "
                   "not set all spectra will be processed. The indices in this "
-                  "list can be workspace indices or possibly spectrum numbers, "
+                  "list can be workspace indices or spectrum numbers, "
                   "depending on the selection made for the index type; Indices "
                   "are entered as a comma-separated list of values, and/or "
                   "ranges.");
@@ -247,7 +247,7 @@ void ReflectometryBackgroundSubtraction::init() {
                                       inputIndexTypeRef),
       "A set of spectra defining the reflectivity peak. If not set all spectra "
       "will be processed. The indices in this list can be workspace indices or "
-      "possibly spectrum numbers, depending on the InputWorkspaceIndexType");
+      "spectrum numbers, depending on the InputWorkspaceIndexType");
 
   declareProperty("SumPeak", false,
                   "If True, the resulting peak will be summed");
