@@ -29,8 +29,11 @@ class HomePlotWidgetModel(object):
             self.plot_figure.clear()
             self.plot_figure.canvas.draw()
             return self.plot_figure
+        try:
+            workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
+        except RuntimeError:
+            return
 
-        workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
         if self.plot_figure:
             self.plot_figure.clear()
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
@@ -46,8 +49,6 @@ class HomePlotWidgetModel(object):
 
         self.plotted_workspaces = workspace_list
 
-        return self.plot_figure
-
     def add_workspace_to_plot(self, workspace, specNum):
         """
         Adds a plot line to the specified subplot
@@ -55,7 +56,11 @@ class HomePlotWidgetModel(object):
         :param specNum: Spectrum number to plot from workspace
         :return:
         """
-        workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace], unrollGroups=True)
+        try:
+            workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace], unrollGroups=True)
+        except RuntimeError:
+            return
+
         self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True,
                                 plot_kwargs={'distribution': True})
 
@@ -64,7 +69,10 @@ class HomePlotWidgetModel(object):
         :param workspace_name: Name of workspace to remove from plot
         :return:
         """
-        workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+        try:
+            workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+        except RuntimeError:
+            return
         self.plot_figure.gca().remove_workspace_artists(workspace)
 
     def _close_plot(self):
