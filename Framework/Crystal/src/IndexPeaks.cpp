@@ -107,7 +107,7 @@ void IndexPeaks::exec() {
   double average_sate_error;
   double tolerance = this->getProperty("Tolerance");
 
-  if (commonUB) {
+  if (commonUB && o_lattice.getModVec(0) == V3D(0, 0, 0)) {
     std::vector<V3D> miller_indices;
     std::vector<V3D> q_vectors;
 
@@ -413,7 +413,7 @@ void IndexPeaks::exec() {
       average_sate_error = 0;
   }
 
-  if (o_lattice.getMaxOrder() == 0 || commonUB) {
+  if (o_lattice.getMaxOrder() == 0) {
     // tell the user how many were indexed overall and the overall average error
     g_log.notice() << "ALL Runs: indexed " << total_indexed << " Peaks out of "
                    << n_peaks << " with tolerance of " << tolerance << '\n';

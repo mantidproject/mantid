@@ -178,7 +178,7 @@ class FittingContextTest(unittest.TestCase):
 
     def test_context_constructor_accepts_fit_list(self):
         fit_list = [
-            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(), mock.MagicMock())
         ]
         context = FittingContext(fit_list)
 
@@ -187,12 +187,12 @@ class FittingContextTest(unittest.TestCase):
     def test_len_gives_length_of_fit_list(self):
         self.assertEqual(0, len(self.fitting_context))
         self.fitting_context.add_fit(
-            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock()))
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(), []))
         self.assertEqual(1, len(self.fitting_context))
 
     def test_fitinformation_equality_with_no_globals(self):
         fit_info = FitInformation(mock.MagicMock(), 'MuonGuassOsc',
-                                  mock.MagicMock())
+                                  mock.MagicMock(), mock.MagicMock())
         self.assertEqual(fit_info, fit_info)
 
     def test_fitinformation_equality_with_globals(self):
@@ -209,7 +209,7 @@ class FittingContextTest(unittest.TestCase):
 
     def test_items_can_be_added_to_fitting_context(self):
         fit_information_object = FitInformation(
-            mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
+            mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(), mock.MagicMock())
 
         self.fitting_context.add_fit(fit_information_object)
 
@@ -219,6 +219,7 @@ class FittingContextTest(unittest.TestCase):
     def test_empty_global_parameters_if_none_specified(self):
         fit_information_object = FitInformation(mock.MagicMock(),
                                                 mock.MagicMock(),
+                                                mock.MagicMock(),
                                                 mock.MagicMock())
 
         self.assertEqual([],
@@ -227,7 +228,9 @@ class FittingContextTest(unittest.TestCase):
     def test_global_parameters_are_captured(self):
         fit_information_object = FitInformation(mock.MagicMock(),
                                                 mock.MagicMock(),
-                                                mock.MagicMock(), ['A'])
+                                                mock.MagicMock(),
+                                                mock.MagicMock(),
+                                                ['A'])
 
         self.assertEqual(['A'],
                          fit_information_object.parameters.global_parameters)
@@ -236,10 +239,10 @@ class FittingContextTest(unittest.TestCase):
         test_fit_function = 'MuonGuassOsc'
         self.fitting_context.add_fit_from_values(mock.MagicMock(),
                                                  test_fit_function,
-                                                 mock.MagicMock())
+                                                 mock.MagicMock(), [])
         self.fitting_context.add_fit_from_values(mock.MagicMock(),
                                                  test_fit_function,
-                                                 mock.MagicMock())
+                                                 mock.MagicMock(), [])
 
         fit_functions = self.fitting_context.fit_function_names()
 
@@ -250,12 +253,12 @@ class FittingContextTest(unittest.TestCase):
             self):
         fit_information_object_0 = FitInformation(mock.MagicMock(),
                                                   'MuonGuassOsc',
-                                                  mock.MagicMock())
+                                                  mock.MagicMock(), [])
         fit_information_object_1 = FitInformation(mock.MagicMock(), 'MuonOsc',
-                                                  mock.MagicMock())
+                                                  mock.MagicMock(), [])
         fit_information_object_2 = FitInformation(mock.MagicMock(),
                                                   'MuonGuassOsc',
-                                                  mock.MagicMock())
+                                                  mock.MagicMock(), [])
         self.fitting_context.add_fit(fit_information_object_0)
         self.fitting_context.add_fit(fit_information_object_1)
         self.fitting_context.add_fit(fit_information_object_2)
@@ -268,29 +271,13 @@ class FittingContextTest(unittest.TestCase):
     def test_can_add_fits_without_first_creating_fit_information_objects(self):
         parameter_workspace = mock.MagicMock()
         input_workspace = mock.MagicMock()
+        output_workspace_names = mock.MagicMock()
         fit_function_name = 'MuonGuassOsc'
         fit_information_object = FitInformation(
-            parameter_workspace, fit_function_name, input_workspace)
+            parameter_workspace, fit_function_name, input_workspace, output_workspace_names)
 
         self.fitting_context.add_fit_from_values(
-            parameter_workspace, fit_function_name, input_workspace)
-
-        self.assertEqual(fit_information_object,
-                         self.fitting_context.fit_list[0])
-
-    def test_can_add_fits_with_global_parameters_without_creating_fit_information(
-            self):
-        parameter_workspace = mock.MagicMock()
-        input_workspace = mock.MagicMock()
-        fit_function_name = 'MuonGuassOsc'
-        global_params = ['A']
-        fit_information_object = FitInformation(parameter_workspace,
-                                                fit_function_name,
-                                                input_workspace, global_params)
-
-        self.fitting_context.add_fit_from_values(
-            parameter_workspace, fit_function_name, input_workspace,
-            global_params)
+            parameter_workspace, fit_function_name, input_workspace, output_workspace_names)
 
         self.assertEqual(fit_information_object,
                          self.fitting_context.fit_list[0])
@@ -318,7 +305,8 @@ class FittingContextTest(unittest.TestCase):
                                        ('Cost function', (0.1, 0.))])
         fit_params = create_test_fit_parameters(test_parameters)
         fit_info = FitInformation(fit_params._parameter_workspace,
-                                  mock.MagicMock(), mock.MagicMock())
+                                  mock.MagicMock(), mock.MagicMock(),
+                                  mock.MagicMock())
 
         self.assertRaises(AttributeError, setattr, fit_info, "parameters",
                           fit_params)

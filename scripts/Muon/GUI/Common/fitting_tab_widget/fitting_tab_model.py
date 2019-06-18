@@ -33,7 +33,7 @@ class FittingTabModel(object):
         wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name, table_directory)
         self.add_fit_to_context(wrapped_parameter_workspace,
                                 parameter_dict['Function'],
-                                parameter_dict['InputWorkspace'])
+                                parameter_dict['InputWorkspace'], [workspace_name])
 
         return function_object.clone(), output_status, output_chi_squared
 
@@ -81,14 +81,15 @@ class FittingTabModel(object):
 
         self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
         if len(parameter_dict['InputWorkspace']) > 1:
-            self.rename_members_of_fitted_workspace_group(output_workspace, parameter_dict['InputWorkspace'],
-                                                          parameter_dict['Function'],
-                                                          fit_group_name)
+            workspace_name = self.rename_members_of_fitted_workspace_group(output_workspace, parameter_dict['InputWorkspace'],
+                                                                           parameter_dict['Function'],
+                                                                           fit_group_name)
         wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
                                                                 table_directory)
         self.add_fit_to_context(wrapped_parameter_workspace,
                                 parameter_dict['Function'],
                                 parameter_dict['InputWorkspace'],
+                                workspace_name,
                                 global_parameters)
 
         return function_object, output_status, output_chi_squared
@@ -99,12 +100,16 @@ class FittingTabModel(object):
         return run_simultaneous_Fit(parameters_dict, alg)
 
     def rename_members_of_fitted_workspace_group(self, group_workspace, inputworkspace_list, function, group_name):
+        output_workspace_list = []
         for index, workspace_name in enumerate(group_workspace.getNames()):
             new_name, _ = self.create_fitted_workspace_name(inputworkspace_list[index], function, group_name)
 
             new_name += '; Simultaneous'
+            output_workspace_list.append(new_name)
             RenameWorkspace(InputWorkspace=workspace_name,
                             OutputWorkspace=new_name)
+
+        return output_workspace_list
 
     def do_sequential_fit(self, parameter_dict):
         function_object_list = []
@@ -151,7 +156,7 @@ class FittingTabModel(object):
             return function_temp.name()
 
     def add_fit_to_context(self, parameter_workspace, function,
-                           input_workspace, global_parameters=None):
+                           input_workspace, output_workspace_name, global_parameters=None):
         self.context.fitting_context.add_fit_from_values(
             parameter_workspace, self.function_name,
-            input_workspace, global_parameters)
+            input_workspace, output_workspace_name, global_parameters)

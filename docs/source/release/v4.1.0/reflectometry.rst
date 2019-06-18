@@ -16,14 +16,16 @@ Bug fixes
 #########
 
 - Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
-
+	
 Algorithms
 ----------
 
 Improvements
 ############
 
+- The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
 - An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
+- In ref:`ReflectometryISISLoadAndPreprocess` the TOF workspaces are now grouped together.
 
 Bug fixes
 #########
