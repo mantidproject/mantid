@@ -26,11 +26,22 @@ namespace Algorithms {
 // Register with the algorithm factory
 DECLARE_ALGORITHM(SolidAngle)
 
+namespace SolidAngleMethods {
+static const std::string GENERIC_SHAPE = "GenericShape";
+static const std::string RECTANGLE = "Rectangle";
+static const std::string VERTICAL_TUBE = "VerticalTube";
+static const std::string HORIZONTAL_TUBE = "HorizontalTube";
+static const std::string VERTICAL_WING = "VerticalWing";
+static const std::string HORIZONTAL_WING = "HorizontalWing";
+} // namespace SolidAngleMethods
+
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace SolidAngleMethods;
 
-namespace {
+namespace SolidAngleHelpers {
+
 constexpr double MM_TO_METERS = 1. / 1000.;
 
 /**
@@ -39,77 +50,98 @@ constexpr double MM_TO_METERS = 1. / 1000.;
  * Note, in all cases Y is assumed to be the pointing-up direction, Z is the
  * beam direction.
  */
-double getTubeAngleVertical(const DetectorInfo &detectorInfo, size_t index) {
-  const auto sampleDetVec =
-      detectorInfo.position(index) - detectorInfo.samplePosition();
-  auto inPlane = sampleDetVec;
-  inPlane.setY(0.0);
-  return sampleDetVec.angle(inPlane);
-}
+struct AlphaAngleCalculator {
+  AlphaAngleCalculator(const DetectorInfo &detectorInfo)
+      : m_detectorInfo(detectorInfo),
+        m_samplePos(detectorInfo.samplePosition()) {}
+  double getAlpha(size_t index) const {
+    const auto sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
+    auto inPlane = sampleDetVec;
+    project(inPlane);
+    return sampleDetVec.angle(inPlane);
+  }
+  virtual void project(V3D &v) const = 0;
+  virtual ~AlphaAngleCalculator() = default;
 
-double getTubeAngleHorizontal(const DetectorInfo &detectorInfo, size_t index) {
-  const auto sampleDetVec =
-      detectorInfo.position(index) - detectorInfo.samplePosition();
-  auto inPlane = sampleDetVec;
-  inPlane.setX(0.0);
-  return sampleDetVec.angle(inPlane);
-}
+private:
+  const DetectorInfo &m_detectorInfo;
+  const V3D m_samplePos;
+};
+
+struct AlphaAngleVertical : public AlphaAngleCalculator {
+  using AlphaAngleCalculator::AlphaAngleCalculator;
+  void project(V3D &v) const override { v.setY(0.0); }
+};
+
+struct AlphaAngleHorizontal : public AlphaAngleCalculator {
+  using AlphaAngleCalculator::AlphaAngleCalculator;
+  void project(V3D &v) const override { v.setX(0.0); }
+};
 
 /**
- *Returns correct angular function for the specified method
+ *Creates the solid angle calculator based on the selected method.
  */
-std::function<double(size_t)>
-getSolidAngleFunction(const DetectorInfo &detectorInfo,
-                      const std::string &method, const double pixelArea) {
-  if (method == "GenericShape") {
-    const auto &samplePosition = detectorInfo.samplePosition();
-
-    return [&detectorInfo, &samplePosition](size_t index) {
-      return detectorInfo.detector(index).solidAngle(samplePosition);
-    };
-  } else if (method == "Rectangular") {
-    return [&detectorInfo, pixelArea](size_t index) {
-      const double cosTheta = std::cos(detectorInfo.twoTheta(index));
-      const double l2 = detectorInfo.l2(index);
-      return pixelArea * cosTheta / (l2 * l2);
-    };
-  } else if (method == "VerticalTube") {
-    return [&detectorInfo, pixelArea](size_t index) {
-      const double cosAlpha =
-          std::cos(getTubeAngleVertical(detectorInfo, index));
-      const double l2 = detectorInfo.l2(index);
-      return pixelArea * cosAlpha / (l2 * l2);
-    };
-  } else if (method == "HorizontalTube") {
-    return [&detectorInfo, pixelArea](size_t index) {
-      const double cosAlpha =
-          std::cos(getTubeAngleHorizontal(detectorInfo, index));
-      const double l2 = detectorInfo.l2(index);
-      return pixelArea * cosAlpha / (l2 * l2);
-    };
-  } else if (method == "VerticalWing") {
-    return [&detectorInfo, pixelArea](size_t index) {
-      const double cosTheta = std::cos(detectorInfo.twoTheta(index));
-      const double cosAlpha =
-          std::cos(getTubeAngleVertical(detectorInfo, index));
-      const double l2 = detectorInfo.l2(index);
-      return pixelArea * cosAlpha * cosAlpha * cosAlpha /
-             (l2 * l2 * cosTheta * cosTheta);
-    };
-  } else if (method == "HorizontalWing") {
-    return [&detectorInfo, pixelArea](size_t index) {
-      const double cosTheta = std::cos(detectorInfo.twoTheta(index));
-      const double cosAlpha =
-          std::cos(getTubeAngleHorizontal(detectorInfo, index));
-      const double l2 = detectorInfo.l2(index);
-      return pixelArea * cosAlpha * cosAlpha * cosAlpha /
-             (l2 * l2 * cosTheta * cosTheta);
-    };
-  } else {
-    throw std::runtime_error("Unknown method of solid angle calculation.");
+struct SolidAngleCalculator {
+  SolidAngleCalculator(const DetectorInfo &detectorInfo,
+                       const std::string &method, const double pixelArea)
+      : m_detectorInfo(detectorInfo), m_pixelArea(pixelArea) {
+    if (method.find("Vertical") != std::string::npos) {
+      m_alphaAngleCalculator =
+          std::make_unique<AlphaAngleVertical>(detectorInfo);
+    } else if (method.find("Horizontal") != std::string::npos) {
+      m_alphaAngleCalculator =
+          std::make_unique<AlphaAngleHorizontal>(detectorInfo);
+    } else if (method == GENERIC_SHAPE) {
+      m_samplePos = m_detectorInfo.samplePosition();
+    }
   }
-}
-} // namespace
+  virtual double solidAngle(size_t index) const = 0;
+  virtual ~SolidAngleCalculator() = default;
+
+protected:
+  const DetectorInfo &m_detectorInfo;
+  const double m_pixelArea;
+  std::unique_ptr<const AlphaAngleCalculator> m_alphaAngleCalculator;
+  V3D m_samplePos;
+};
+
+struct GenericShape : public SolidAngleCalculator {
+  using SolidAngleCalculator::SolidAngleCalculator;
+  double solidAngle(size_t index) const override {
+    return m_detectorInfo.detector(index).solidAngle(m_samplePos);
+  }
+};
+
+struct Rectangle : public SolidAngleCalculator {
+  using SolidAngleCalculator::SolidAngleCalculator;
+  double solidAngle(size_t index) const override {
+    const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
+    const double l2 = m_detectorInfo.l2(index);
+    return m_pixelArea * cosTheta / (l2 * l2);
+  }
+};
+
+struct Tube : public SolidAngleCalculator {
+  using SolidAngleCalculator::SolidAngleCalculator;
+  double solidAngle(size_t index) const override {
+    const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
+    const double l2 = m_detectorInfo.l2(index);
+    return m_pixelArea * cosAlpha / (l2 * l2);
+  }
+};
+
+struct Wing : public SolidAngleCalculator {
+  using SolidAngleCalculator::SolidAngleCalculator;
+  double solidAngle(size_t index) const override {
+    const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
+    const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
+    const double l2 = m_detectorInfo.l2(index);
+    return m_pixelArea * cosAlpha * cosAlpha * cosAlpha /
+           (l2 * l2 * cosTheta * cosTheta);
+  }
+};
+
+} // namespace SolidAngleHelpers
 
 /// Initialisation method
 void SolidAngle::init() {
@@ -140,10 +172,10 @@ void SolidAngle::init() {
                   "found (default: the\n"
                   "last spectrum in the workspace)");
 
-  const std::vector<std::string> methods{"GenericShape", "Rectangular",
-                                         "VerticalTube", "HorizontalTube",
-                                         "VerticalWing", "HorizontalWing"};
-  declareProperty("Method", "GenericShape",
+  const std::vector<std::string> methods{GENERIC_SHAPE, RECTANGLE,
+                                         VERTICAL_TUBE, HORIZONTAL_TUBE,
+                                         VERTICAL_WING, HORIZONTAL_WING};
+  declareProperty("Method", GENERIC_SHAPE,
                   boost::make_shared<StringListValidator>(methods),
                   "Select the method to calculate the Solid Angle.");
 }
@@ -181,12 +213,13 @@ void SolidAngle::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto &detectorInfo = inputWS->detectorInfo();
 
-  // this is the solid angle of the pixel at 2theta=0
-  // this is used only if Method != GenericShape
-  double pixelAreaZero = 0.;
+  // this is the pixel area that is supposed to be constant for the whole
+  // instrument this is used only if Method != GenericShape
+  double pixelArea = 0.;
   const std::string method = getProperty("Method");
 
-  if (method != "GenericShape") {
+  using namespace SolidAngleHelpers;
+  if (method != GENERIC_SHAPE) {
     const auto instrument = inputWS->getInstrument();
     if (instrument->hasParameter("x-pixel-size") &&
         instrument->hasParameter("y-pixel-size")) {
@@ -194,17 +227,30 @@ void SolidAngle::exec() {
           instrument->getNumberParameter("x-pixel-size")[0] * MM_TO_METERS;
       const double pixelSizeY =
           instrument->getNumberParameter("y-pixel-size")[0] * MM_TO_METERS;
-      pixelAreaZero = pixelSizeX * pixelSizeY; // l2 is retrieved per pixel
+      pixelArea = pixelSizeX * pixelSizeY; // l2 is retrieved per pixel
     } else {
-      // TODO: get the l2 as Z coordinate of the whole bank, and pixel sizes
-      // from bounding box
+      // TODO: try to get the pixel sizes from bounding box
       throw std::runtime_error(
-          "Missing necessary instrument parameters for non generic shape.");
+          "Missing necessary instrument parameters for non generic shape: "
+          "x-pixel-size and y-pixel-size [in mm].");
     }
   }
 
-  const auto solidAngleFunction =
-      getSolidAngleFunction(detectorInfo, method, pixelAreaZero);
+  std::unique_ptr<SolidAngleCalculator> solidAngleCalculator;
+  if (method == GENERIC_SHAPE) {
+    solidAngleCalculator =
+        std::make_unique<GenericShape>(detectorInfo, method, pixelArea);
+  } else if (method == "Rectangle") {
+    solidAngleCalculator =
+        std::make_unique<Rectangle>(detectorInfo, method, pixelArea);
+  } else if (method == VERTICAL_TUBE || method == HORIZONTAL_TUBE) {
+    solidAngleCalculator =
+        std::make_unique<Tube>(detectorInfo, method, pixelArea);
+  } else if (method == VERTICAL_WING || method == HORIZONTAL_WING) {
+    solidAngleCalculator =
+        std::make_unique<Wing>(detectorInfo, method, pixelArea);
+  }
+
   const int loopIterations = m_MaxSpec - m_MinSpec;
   int failCount = 0;
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
@@ -222,7 +268,7 @@ void SolidAngle::exec() {
       for (const auto detID : inputWS->getSpectrum(i).getDetectorIDs()) {
         const auto index = detectorInfo.indexOf(detID);
         if (!detectorInfo.isMasked(index) && !detectorInfo.isMonitor(index))
-          solidAngle += solidAngleFunction(index);
+          solidAngle += solidAngleCalculator->solidAngle(index);
       }
       outputWS->mutableY(j)[0] = solidAngle;
     } else {
