@@ -57,11 +57,11 @@ private:
   // Variables describing the data in the detector
   size_t m_numberOfTubes{16};          // number of tubes - X
   size_t m_numberOfPixelsPerTube{128}; // number of pixels per tube - Y
-  size_t m_numberOfChannels{1024};           // time channels - Z
-  size_t m_numberOfSimpleDetectors{8};       // number of simple detector
-  size_t m_numberOfMonitors{1};              // number of monitors
-  std::set<int> m_activeSDIndices;           // set of Single Detector indices,
-                                             // that were actually active
+  size_t m_numberOfChannels{1024};     // time channels - Z
+  size_t m_numberOfSimpleDetectors{8}; // number of simple detector
+  size_t m_numberOfMonitors{1};        // number of monitors
+  std::set<int> m_activeSDIndices;     // set of Single Detector indices,
+                                       // that were actually active
 
   std::vector<std::string> m_supportedInstruments{"IN16B"};
   LoadHelper m_loader;
