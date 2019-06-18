@@ -17,34 +17,30 @@ from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTa
 
 class PlotConfigDialogPresenter:
 
-    def __init__(self, fig, parent=None):
+    def __init__(self, fig, view=None, parent=None):
         self.fig = fig
-        self.view = PlotConfigDialogView(parent)
+        if view:
+            self.view = view
+        else:
+            self.view = PlotConfigDialogView(parent)
         self.view.show()
 
-        self.tab_widget_presenters = []
-        self.tab_widget_views = []
-
+        self.tab_widget_presenters = [None, None, None]
+        self.tab_widget_views = [None, None, None]
         # Axes tab
         axes_tab = AxesTabWidgetPresenter(self.fig, parent=self.view)
-        self.tab_widget_presenters.append(axes_tab)
-        self.tab_widget_views.append((axes_tab.view, "Axes"))
+        self.tab_widget_presenters[0] = axes_tab
+        self.tab_widget_views[0] = (axes_tab.view, "Axes")
         # Curves tab (only add if curves present in figure)
         if curve_in_figure(self.fig):
             curves_tab = CurvesTabWidgetPresenter(self.fig, parent=self.view)
-            self.tab_widget_presenters.append(curves_tab)
-            self.tab_widget_views.append((curves_tab.view, "Curves"))
-        else:
-            self.tab_widget_presenters.append(None)
-            self.tab_widget_views.append(None)
+            self.tab_widget_presenters[1] = curves_tab
+            self.tab_widget_views[1] = (curves_tab.view, "Curves")
         # Images tab
         if image_in_figure(self.fig):
             images_tab = ImagesTabWidgetPresenter(self.fig, parent=self.view)
-            self.tab_widget_presenters.append(images_tab)
-            self.tab_widget_views.append((images_tab.view, "Images"))
-        else:
-            self.tab_widget_presenters.append(None)
-            self.tab_widget_views.append(None)
+            self.tab_widget_presenters[2] = images_tab
+            self.tab_widget_views[2] = (images_tab.view, "Images")
 
         self._add_tab_widget_views()
 
@@ -54,7 +50,9 @@ class PlotConfigDialogPresenter:
         self.view.cancel_button.clicked.connect(self.exit)
 
     def _add_tab_widget_views(self):
-        self.view.add_tab_widgets(self.tab_widget_views)
+        for tab in self.tab_widget_views:
+            if tab:
+                self.view.add_tab_widget(tab)
 
     def apply_properties(self):
         for tab in self.tab_widget_presenters:
