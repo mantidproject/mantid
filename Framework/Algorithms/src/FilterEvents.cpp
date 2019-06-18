@@ -108,10 +108,6 @@ void FilterEvents::init() {
                   "workspaces.  Group name will be "
                   "OutputWorkspaceBaseName.");
 
-  declareProperty("DescriptiveOutputNames", false,
-                  "If selected, the names of the output workspaces will "
-                  "include information about each slice.");
-
   declareProperty("OutputWorkspaceIndexedFrom1", false,
                   "If selected, the minimum output workspace is indexed from 1 "
                   "and continuous.");
@@ -185,6 +181,10 @@ void FilterEvents::init() {
                   "If true, all the TimeSeriesProperty logs listed will be "
                   "excluded from duplicating. "
                   "Otherwise, only those specified logs will be split.");
+
+  declareProperty("DescriptiveOutputNames", false,
+                  "If selected, the names of the output workspaces will "
+                  "include information about each slice.");
 }
 
 std::map<std::string, std::string> FilterEvents::validateInputs() {
