@@ -127,7 +127,7 @@ bool CatalogSearcher::logInToCatalog() {
     pythonSrc << "except:\n";
     pythonSrc << "  pass\n";
     m_pythonRunner->runPythonAlgorithm(pythonSrc.str());
-  } catch (std::runtime_error &e) {
+  } catch (std::runtime_error &) {
     return false;
   }
 
