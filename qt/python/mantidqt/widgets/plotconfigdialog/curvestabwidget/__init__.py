@@ -32,6 +32,7 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
 
 
 def errorbars_hidden(err_container):
+    """Return True if all lines in ErrorbarContainer are not visible"""
     hidden = True
     try:
         for lines in err_container.lines:
@@ -55,12 +56,14 @@ def get_ax_from_curve(curve):
 
 
 def get_marker_name(marker):
+    """Get a marker's full name from its shorthand"""
     for name, short_name in MARKER_MAP.items():
         if short_name == marker:
             return name
 
 
 def curve_hidden(curve):
+    """Return True if curve is not visible"""
     if isinstance(curve, ErrorbarContainer):
         return errorbars_hidden(curve)
     else:
@@ -68,6 +71,7 @@ def curve_hidden(curve):
 
 
 def set_curve_hidden(curve, hide):
+    """Set all lines in a curve to non-visible"""
     if isinstance(curve, ErrorbarContainer):
         if curve[0]:
             curve[0].set_visible(not hide)
@@ -77,6 +81,7 @@ def set_curve_hidden(curve, hide):
 
 
 def set_errorbars_hidden(container, hide):
+    """Set all lines in an ErrorbarContainer to non-visible"""
     if not isinstance(container, ErrorbarContainer):
         return
     if container[1]:
@@ -85,13 +90,6 @@ def set_errorbars_hidden(container, hide):
     if container[2]:
         for bars in container[2]:
             bars.set_visible(not hide)
-
-
-def get_ax_from_curve(curve):
-    if isinstance(curve, Line2D):
-        return curve.axes
-    elif isinstance(curve, ErrorbarContainer):
-        return curve[2][0].axes
 
 
 def remove_curve_from_ax(curve):
@@ -144,6 +142,7 @@ class CurveProperties:
         return self.__dict__
 
     def get_plot_kwargs(self):
+        """Return curve properties that can be used a plot kwargs"""
         kwargs = {}
         for k, v in self.to_dict().items():
             if k not in ['hide', 'hide_errors']:
@@ -152,32 +151,21 @@ class CurveProperties:
 
     @classmethod
     def from_view(cls, view):
+        """Get curve properties from the view"""
         props = dict()
         props['label'] = view.get_curve_label()
         props['hide'] = (view.get_hide_curve() == Qt.Checked)
-        props = CurveProperties._get_line_props_from_view(view, props)
-        props = CurveProperties._get_marker_props_from_view(view, props)
-        props = CurveProperties._get_errorbar_props_from_view(view, props)
-        return cls(props)
-
-    @staticmethod
-    def _get_line_props_from_view(view, props):
+        # Line props
         props['linestyle'] = view.line.get_style()
         props['drawstyle'] = view.line.get_draw_style()
         props['linewidth'] = view.line.get_width()
         props['color'] = view.line.get_color()
-        return props
-
-    @staticmethod
-    def _get_marker_props_from_view(view, props):
+        # Marker props
         props['marker'] = MARKER_MAP[view.marker.get_style()]
         props['markersize'] = view.marker.get_size()
         props['markerfacecolor'] = view.marker.get_face_color()
         props['markeredgecolor'] = view.marker.get_edge_color()
-        return props
-
-    @staticmethod
-    def _get_errorbar_props_from_view(view, props):
+        # Errorbar props
         props['hide_errors'] = view.errorbars.get_hide()
         props['errorevery'] = view.errorbars.get_error_every()
         props['capsize'] = view.errorbars.get_capsize()
@@ -185,11 +173,12 @@ class CurveProperties:
         props['ecolor'] = view.errorbars.get_color()
         # setting errorbar line width to 0 sets width to default, so add a
         # little bit on to avoid this
-        props['elinewidth'] = view.errorbars.get_width() + 0.000001
-        return props
+        props['elinewidth'] = view.errorbars.get_width() + 1e-6
+        return cls(props)
 
     @classmethod
     def from_curve(cls, curve):
+        """Get curve properties from a Line2D or ErrorbarContainer"""
         props = dict()
         props['label'] = curve.get_label()
         props['hide'] = curve_hidden(curve)
@@ -202,6 +191,7 @@ class CurveProperties:
 
     @staticmethod
     def _get_line_props_from_curve(curve, props):
+        """Get a curve's line properties and add to props dict"""
         if not curve:
             props['linestyle'] = 'None'
             props['drawstyle'] = 'default'
@@ -216,6 +206,7 @@ class CurveProperties:
 
     @staticmethod
     def _get_marker_props_from_curve(curve, props):
+        """Get a curve's marker properties and add to props dict"""
         if not curve:
             props['marker'] = 'None'
             props['markersize'] = rcParams['lines.markersize']
@@ -230,6 +221,7 @@ class CurveProperties:
 
     @staticmethod
     def _get_errorbars_props_from_curve(curve, props):
+        """Get a curve's errorbar properties and add to props dict"""
         props['hide_errors'] = errorbars_hidden(curve)
         props['errorevery'] = getattr(curve, 'errorevery', 1)
         try:

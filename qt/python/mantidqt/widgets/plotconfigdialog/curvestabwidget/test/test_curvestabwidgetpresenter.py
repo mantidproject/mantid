@@ -150,7 +150,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         self.assertNotIn('First Axes', presenter.axes_names_dict)
         self.assertNotIn("ax0 curve", presenter.curve_names_dict)
 
-    def test_curve_has_errors_with_workspace_with_no_errors(self):
+    def test_curve_has_errors_on_workspace_with_no_errors(self):
         try:
             ws = CreateWorkspace(DataX=[0], DataY=[0], NSpec=1,
                                  OutputWorkspace='test_ws')
@@ -161,7 +161,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         finally:
             ws.delete()
 
-    def test_curve_has_errors_with_workspace_with_errors(self):
+    def test_curve_has_errors_on_workspace_with_errors(self):
         fig = figure()
         ax = fig.add_subplot(111, projection='mantid')
         curve = ax.plot(self.ws, specNum=1)[0]
@@ -182,6 +182,18 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(new_err_container[0].get_marker(), 'v')
         # Test only one errorbar is plotted
         self.assertEqual(1, len(new_err_container[2][0].get_segments()))
+
+    def test_curve_has_all_errorbars_on_replot_after_error_every_increase(self):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        curve = ax.errorbar([0, 1, 2, 4], [0, 1, 2, 4], yerr=[0.1, 0.2, 0.3, 0.4])
+        new_curve = CurvesTabWidgetPresenter.replot_curve(ax, curve,
+                                                          {'errorevery': 2})
+        self.assertEqual(2, len(new_curve[2][0].get_segments()))
+        new_curve = CurvesTabWidgetPresenter.replot_curve(ax, new_curve,
+                                                          {'errorevery': 1})
+        self.assertTrue(hasattr(new_curve, 'errorbar_data'))
+        self.assertEqual(4, len(new_curve[2][0].get_segments()))
 
 
 if __name__ == '__main__':

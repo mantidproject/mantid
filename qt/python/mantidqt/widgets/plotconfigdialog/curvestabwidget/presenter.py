@@ -15,9 +15,9 @@ from mantid.plots import MantidAxes
 from mantid.plots.helperfunctions import get_data_from_errorbar_container
 from mantidqt.utils import BlockQSignals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
-from mantidqt.widgets.plotconfigdialog.curvestabwidget import (CurveProperties, set_curve_hidden,
-                                                               set_errorbars_hidden, curve_has_errors,
-                                                               remove_curve_from_ax)
+from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
+    CurveProperties, set_curve_hidden, set_errorbars_hidden, curve_has_errors,
+    remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 
 
@@ -85,25 +85,22 @@ class CurvesTabWidgetPresenter:
     def replot_curve(ax, curve, plot_kwargs):
         """Replot the given curve with new kwargs"""
         remove_curve_from_ax(curve)
-        # Because of 'error every' option we must store an original copy of the
-        # curve so we do not lose data when plotting fewer errorbars. Store it
-        # on the current curve as this will be persistent after closing the
-        # options dialog
-        curve = getattr(curve, 'original_curve', curve)
-        setattr(curve, 'original_curve', curve)
         if isinstance(curve, Line2D):
             [plot_kwargs.pop(arg, None) for arg in
              ['capsize', 'capthick', 'ecolor', 'elinewidth', 'errorevery']]
             new_curve = ax.plot(curve.get_xdata(), curve.get_ydata(),
                                 **plot_kwargs)[0]
         elif isinstance(curve, ErrorbarContainer):
-            x, y, xerr, yerr = get_data_from_errorbar_container(curve)
+            # Because of "error every" option, we need to store the original
+            # errorbar data on the curve or we will lose data on re-plotting
+            x, y, xerr, yerr = getattr(curve, 'errorbar_data',
+                                       get_data_from_errorbar_container(curve))
             new_curve = ax.errorbar(x, y, xerr=xerr, yerr=yerr, **plot_kwargs)
+            setattr(new_curve, 'errorbar_data', [x, y, xerr, yerr])
         else:
             raise ValueError("Curve must have type 'Line2D' or "
                              "'ErrorbarContainer'. Found '{}'"
                              "".format(type(curve)))
-        setattr(new_curve, 'original_curve', curve)
         return new_curve
 
     def replot_selected_curve(self, plot_kwargs):
@@ -114,7 +111,7 @@ class CurvesTabWidgetPresenter:
             try:
                 new_curve = ax.replot_artist(curve, errorbars=True,
                                              **plot_kwargs)
-            except ValueError:
+            except ValueError:  # ValueError raised if Artist not tracked by Axes
                 new_curve = self.replot_curve(ax, curve, plot_kwargs)
         else:
             new_curve = self.replot_curve(ax, curve, plot_kwargs)
