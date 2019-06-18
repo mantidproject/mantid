@@ -40,7 +40,7 @@ class FittingTabPresenter(object):
         self.enable_tab_observer = GenericObserver(lambda: self.view.
                                                    setEnabled(True))
 
-        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+        self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
 
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
@@ -319,5 +319,5 @@ class FittingTabPresenter(object):
                                           self._fit_chi_squared[current_index])
         self.view.update_global_fit_state(self._fit_status)
 
-    def update_view_from_model(self):
-        pass
+    def update_view_from_model(self, list_of_workspaces_removed):
+        self.selected_data = [item for item in self.selected_data if item not in list_of_workspaces_removed]

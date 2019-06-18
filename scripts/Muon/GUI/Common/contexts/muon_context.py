@@ -281,4 +281,4 @@ class MuonContext(object):
         self.group_pair_context.remove_workspace_by_name(workspace_name)
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
-        self.update_view_from_model_notifier.notify_subscribers()
+        self.update_view_from_model_notifier.notify_subscribers(workspace_name)

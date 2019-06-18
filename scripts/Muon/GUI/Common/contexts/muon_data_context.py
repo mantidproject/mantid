@@ -72,7 +72,6 @@ class MuonDataContext(object):
         Groups and Pairs associated to the current run are stored in _grousp and _pairs as ordered dictionaries.
         """
         self._loaded_data = load_data
-        # self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}  # self.get_result(False)
 
         self._current_runs = []
         self._main_field_direction = ''
@@ -129,7 +128,6 @@ class MuonDataContext(object):
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
-        # self._current_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
 
         if self.current_data['MainFieldDirection'] and self.current_data['MainFieldDirection'] != self._main_field_direction\
                 and self._main_field_direction:
@@ -139,12 +137,11 @@ class MuonDataContext(object):
 
     @property
     def _current_data(self):
+        loaded_data = {}
         if self.current_runs:
             loaded_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
-        else:
-            loaded_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}
 
-        return loaded_data
+        return loaded_data if loaded_data else {"workspace": load_utils.empty_loaded_data(), 'run': []}
 
     @property
     def current_data(self):
