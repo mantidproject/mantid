@@ -75,13 +75,15 @@ void LoadDNSEvent::init() {
       std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
       "The XML or Map file with full path.");
 
-  declareProperty<uint32_t>("ChopperChannel", 1u,
-                  boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
-                  "The Chopper Channel", Kernel::Direction::Input);
+  declareProperty<uint32_t>(
+      "ChopperChannel", 1u,
+      boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
+      "The Chopper Channel", Kernel::Direction::Input);
 
-  declareProperty<uint32_t>("MonitorChannel", 1u,
-                  boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
-                  "The Monitor Channel", Kernel::Direction::Input);
+  declareProperty<uint32_t>(
+      "MonitorChannel", 1u,
+      boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
+      "The Monitor Channel", Kernel::Direction::Input);
 
   declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
