@@ -45,6 +45,7 @@ class PhaseTablePresenter(object):
         self.update_current_phase_tables()
 
     def update_view_from_model(self):
+        self.update_current_run_list()
         for key, item in self.context.phase_context.options_dict.items():
             setattr(self.view, key, item)
 

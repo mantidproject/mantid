@@ -319,5 +319,5 @@ class FittingTabPresenter(object):
                                           self._fit_chi_squared[current_index])
         self.view.update_global_fit_state(self._fit_status)
 
-    def update_view_from_model(self, list_of_workspaces_removed):
-        self.selected_data = [item for item in self.selected_data if item not in list_of_workspaces_removed]
+    def update_view_from_model(self, workspace_removed):
+        self.selected_data = [item for item in self.selected_data if item != workspace_removed]
