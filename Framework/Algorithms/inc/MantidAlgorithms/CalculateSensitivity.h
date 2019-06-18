@@ -13,6 +13,14 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+namespace {
+struct SummedResults {
+  double sum{0.0};
+  double error{0.0};
+  size_t nPixels{0};
+};
+} // namespace
+
 namespace Mantid {
 namespace Algorithms {
 /**
@@ -70,13 +78,13 @@ private:
   void exec() override;
 
   /// Sum all detectors, excluding monitors and masked detectors
-  std::tuple<double, double, int>
-      sumUnmaskedAndDeadPixels(API::MatrixWorkspace_sptr);
+  SummedResults sumUnmaskedAndDeadPixels(const API::MatrixWorkspace &workspace);
 
-  void averageAndNormalizePixels(API::MatrixWorkspace_sptr,
-                                 std::tuple<double, double, int>);
+  void averageAndNormalizePixels(API::MatrixWorkspace &workspace,
+                                 const SummedResults &results);
 
-  void applyBadPixelThreshold(API::MatrixWorkspace_sptr, double, double);
+  // void applyBadPixelThreshold(API::MatrixWorkspace &outputWS, double,
+  // double);
 };
 
 } // namespace Algorithms

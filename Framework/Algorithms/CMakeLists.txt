@@ -26,6 +26,7 @@ set(SRC_FILES
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
     src/CalculatePolynomialBackground.cpp
+    src/CalculateSensitivity.cpp
     src/CalculateSlits.cpp
     src/CalculateTransmission.cpp
     src/CalculateTransmissionBeamSpreader.cpp
@@ -368,6 +369,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
+    inc/MantidAlgorithms/CalculateSensitivity.h
     inc/MantidAlgorithms/CalculateSlits.h
     inc/MantidAlgorithms/CalculateTransmission.h
     inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -725,6 +727,7 @@ set(TEST_FILES
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
     CalculatePolynomialBackgroundTest.h
+    CalculateSensitivityTest.h
     CalculateSlitsTest.h
     CalculateTransmissionBeamSpreaderTest.h
     CalculateTransmissionTest.h
