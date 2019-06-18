@@ -129,6 +129,22 @@ public:
 
     verifyAndClearExpectations();
   }
+
+  void testGroupNotInsertedWhenProcessing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsProcessing();
+    EXPECT_CALL(m_jobs, insertChildRowOf(_, _)).Times(0);
+    presenter.notifyInsertGroupRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testGroupNotInsertedWhenAutoreducing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsAutoreducing();
+    EXPECT_CALL(m_jobs, insertChildRowOf(_, _)).Times(0);
+    presenter.notifyInsertGroupRequested();
+    verifyAndClearExpectations();
+  }
 };
 
 #endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPINSERTTEST_H_

@@ -105,6 +105,91 @@ public:
 
     verifyAndClearExpectations();
   }
+
+  void testRowNotInsertedWhenProcessing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsProcessing();
+    EXPECT_CALL(m_jobs, appendChildRowOf(_)).Times(0);
+    presenter.notifyInsertRowRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testRowNotInsertedWhenAutoreducing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsAutoreducing();
+    EXPECT_CALL(m_jobs, appendChildRowOf(_)).Times(0);
+    presenter.notifyInsertRowRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyAppendAndEditAtChildRowRequested() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    EXPECT_CALL(m_jobs, appendAndEditAtChildRow()).Times(1);
+    presenter.notifyAppendAndEditAtChildRowRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testRowNotAppendedWhenProcessing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsProcessing();
+    EXPECT_CALL(m_jobs, appendAndEditAtChildRow()).Times(0);
+    presenter.notifyAppendAndEditAtChildRowRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testRowNotAppendedWhenAutoreducing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsAutoreducing();
+    EXPECT_CALL(m_jobs, appendAndEditAtChildRow()).Times(0);
+    presenter.notifyAppendAndEditAtChildRowRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testAppendAndEditAtRowBelowRequested() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    EXPECT_CALL(m_jobs, appendAndEditAtRowBelow()).Times(1);
+    presenter.notifyAppendAndEditAtRowBelowRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testRowNotAppendedBelowWhenProcessing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsProcessing();
+    EXPECT_CALL(m_jobs, appendAndEditAtRowBelow()).Times(0);
+    presenter.notifyAppendAndEditAtRowBelowRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testRowNotAppendedBelowWhenAutoreducing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsAutoreducing();
+    EXPECT_CALL(m_jobs, appendAndEditAtRowBelow()).Times(0);
+    presenter.notifyAppendAndEditAtRowBelowRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testEditAtRowAboveRequested() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    EXPECT_CALL(m_jobs, editAtRowAbove()).Times(1);
+    presenter.notifyEditAtRowAboveRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testRowAboveNotEditedWhenProcessing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsProcessing();
+    EXPECT_CALL(m_jobs, editAtRowAbove()).Times(0);
+    presenter.notifyEditAtRowAboveRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testRowAboveNotEditedWhenAutoreducing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsAutoreducing();
+    EXPECT_CALL(m_jobs, editAtRowAbove()).Times(0);
+    presenter.notifyEditAtRowAboveRequested();
+    verifyAndClearExpectations();
+  }
 };
 
 #endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPINSERTTEST_H_

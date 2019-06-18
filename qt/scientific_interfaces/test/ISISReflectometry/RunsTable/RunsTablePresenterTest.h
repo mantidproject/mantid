@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -80,6 +81,18 @@ public:
         RunsTablePresenter(&view, {}, 0.01, std::move(jobs), plotter);
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
+  }
+
+  void expectIsProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+  }
+
+  void expectIsAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
   }
 
 protected:
