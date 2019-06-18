@@ -64,20 +64,20 @@ if(ENABLE_WORKBENCH)
   # ctest targets
   set(
     PYTHON_TEST_FILES
+    mantidqt/test/test_algorithm_observer.py
+    mantidqt/test/test_import.py
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
     mantidqt/dialogs/test/test_spectraselectorutils.py
     mantidqt/plotting/test/test_figuretype.py
     mantidqt/plotting/test/test_functions.py
-    mantidqt/project/test/test_plotsloader.py
     mantidqt/project/test/test_plotssaver.py
+    mantidqt/project/test/test_plotsloader.py
     mantidqt/project/test/test_project.py
     mantidqt/project/test/test_projectloader.py
     mantidqt/project/test/test_projectsaver.py
     mantidqt/project/test/test_workspaceloader.py
     mantidqt/project/test/test_workspacesaver.py
-    mantidqt/test/test_algorithm_observer.py
-    mantidqt/test/test_import.py
     mantidqt/utils/test/test_async.py
     mantidqt/utils/test/test_modal_tester.py
     mantidqt/utils/test/test_qt_utils.py
@@ -86,11 +86,9 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/codeeditor/test/test_errorformatter.py
     mantidqt/widgets/codeeditor/test/test_execution.py
     mantidqt/widgets/codeeditor/test/test_interpreter.py
-    mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
-    mantidqt/widgets/observers/test/test_ads_observer.py
-    mantidqt/widgets/observers/test/test_observing_presenter.py
-    mantidqt/widgets/observers/test/test_observing_view.py
-    mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
+    mantidqt/widgets/test/test_messagedisplay.py
+    mantidqt/widgets/test/test_fitpropertybrowser.py
+    mantidqt/widgets/test/test_functionbrowser.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
@@ -115,6 +113,9 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
+    qt/python/mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
+    qt/python/mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
+    qt/python/mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
