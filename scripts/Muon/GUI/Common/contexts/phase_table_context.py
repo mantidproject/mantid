@@ -30,3 +30,7 @@ class PhaseTableContext(object):
     def get_phase_quad(self, instrument, run):
         return [phase_quad.workspace_name for phase_quad in self.phase_quad if instrument in phase_quad.workspace_name
                 and run in phase_quad.workspace_name]
+
+    def remove_workspace_by_name(self, workspace_name):
+        self.phase_tables = [item for item in self.phase_tables if item!=workspace_name]
+        self.phase_quad = [item for item in self.phase_tables if item!=workspace_name]

@@ -202,7 +202,7 @@ class FitInformation(object):
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self._fit_parameters.parameter_workspace_name == other._fit_parameters.parameter_workspace_name and \
+        return self.parameter_workspace_name == other.parameter_workspace_name and \
             self.fit_function_name == other.fit_function_name and \
             self.input_workspace == other.input_workspace and \
             self.output_workspace_names == other.output_workspace_names
@@ -210,6 +210,10 @@ class FitInformation(object):
     @property
     def parameters(self):
         return self._fit_parameters
+
+    @property
+    def parameter_workspace_name(self):
+        return self._fit_parameters.parameter_workspace_name
 
 
 class FittingContext(object):
@@ -290,3 +294,12 @@ class FittingContext(object):
                 if input_workspace_name == fit.input_workspace:
                     workspace_list.append(fit.output_workspace_names[0])
         return workspace_list
+
+    def remove_workspace_by_name(self, workspace_name):
+        set_of_fits_to_remove = set()
+        for fit in self.fit_list:
+            if workspace_name in fit.output_workspace_names or workspace_name==fit.parameter_workspace_name:
+                set_of_fits_to_remove.add(fit)
+
+        for fit in set_of_fits_to_remove:
+            self.fit_list.remove(fit)
