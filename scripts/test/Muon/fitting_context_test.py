@@ -88,7 +88,8 @@ class FittingContextTest(unittest.TestCase):
 
     def test_context_constructor_accepts_fit_list(self):
         fit_list = [
-            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(),
+                           mock.MagicMock())
         ]
         context = FittingContext(fit_list)
 
@@ -97,12 +98,15 @@ class FittingContextTest(unittest.TestCase):
     def test_len_gives_length_of_fit_list(self):
         self.assertEqual(0, len(self.fitting_context))
         self.fitting_context.add_fit(
-            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock()))
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock(),
+                           mock.MagicMock()))
         self.assertEqual(1, len(self.fitting_context))
 
     def test_items_can_be_added_to_fitting_context(self):
-        fit_information_object = FitInformation(
-            mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
+        fit_information_object = FitInformation(mock.MagicMock(),
+                                                'MuonGuassOsc',
+                                                mock.MagicMock(),
+                                                mock.MagicMock())
 
         self.fitting_context.add_fit(fit_information_object)
 
@@ -113,9 +117,11 @@ class FittingContextTest(unittest.TestCase):
         test_fit_function = 'MuonGuassOsc'
         self.fitting_context.add_fit_from_values(mock.MagicMock(),
                                                  test_fit_function,
+                                                 mock.MagicMock(),
                                                  mock.MagicMock(), [])
         self.fitting_context.add_fit_from_values(mock.MagicMock(),
                                                  test_fit_function,
+                                                 mock.MagicMock(),
                                                  mock.MagicMock(), [])
 
         fit_functions = self.fitting_context.fit_function_names()
@@ -176,9 +182,11 @@ class FittingContextTest(unittest.TestCase):
         fake2 = create_test_workspace(
             ws_name='fake2', time_series_logs=time_series_logs[2:])
         self.fitting_context.add_fit(
-            FitInformation(mock.MagicMock(), 'func1', fake1.name()))
+            FitInformation(mock.MagicMock(), 'func1', fake1.name(),
+                           mock.MagicMock()))
         self.fitting_context.add_fit(
-            FitInformation(mock.MagicMock(), 'func1', fake2.name()))
+            FitInformation(mock.MagicMock(), 'func1', fake2.name(),
+                           mock.MagicMock()))
 
         log_names = self.fitting_context.log_names()
         self.assertEqual(len(time_series_logs), len(log_names))
@@ -194,9 +202,11 @@ class FittingContextTest(unittest.TestCase):
         fake2 = create_test_workspace(
             ws_name='fake2', time_series_logs=time_series_logs[2:])
         self.fitting_context.add_fit(
-            FitInformation(mock.MagicMock(), 'func1', fake1.name()))
+            FitInformation(mock.MagicMock(), 'func1', fake1.name(),
+                           mock.MagicMock()))
         self.fitting_context.add_fit(
-            FitInformation(mock.MagicMock(), 'func1', fake2.name()))
+            FitInformation(mock.MagicMock(), 'func1', fake2.name(),
+                           mock.MagicMock()))
 
         required_logs = ('ts_2', 'ts_4')
         log_names = self.fitting_context.log_names(

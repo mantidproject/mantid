@@ -206,9 +206,9 @@ class FitInformation(object):
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
         return self.parameters == other.parameters and \
-               self.fit_function_name == other.fit_function_name and \
-               self.input_workspaces == other.input_workspaces and \
-               self.output_workspace_names == other.output_workspace_names
+            self.fit_function_name == other.fit_function_name and \
+            self.input_workspaces == other.input_workspaces and \
+            self.output_workspace_names == other.output_workspace_names
 
     @property
     def parameters(self):
