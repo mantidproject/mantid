@@ -43,8 +43,8 @@ void Plotter::reflectometryPlot(
 #else
   // Workbench Plotting
   QHash<QString, QVariant> ax_properties;
-  ax_properties[QString("yscale")] = QVariant("log");
-  ax_properties[QString("xscale")] = QVariant("log");
+  // ax_properties[QString("yscale")] = QVariant("log");
+  // ax_properties[QString("xscale")] = QVariant("log");
 
   // plot(workspaces, spectrum_nums, wksp_indices, fig, plot_kwargs,
   // ax_properties, windows_title, errors, overplot)
