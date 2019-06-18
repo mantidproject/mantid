@@ -19,6 +19,9 @@ the peaks are assigned to their respective unique reflection so that each theore
 reflection may have :math:`n` observations (:math:`n` can be zero). The number of unique reflections
 which have at least one observation can be labeled :math:`N_{unique}`.
 
+Currently the satellite peaks are removed so only peaks with :math:`m=n=p=0` are used in the statistics.
+In the future, this algorithm will also calculate statistics for these peaks.
+
 The intensities of peaks in each reflection are checked for outliers, which are removed. Outliers
 in this context are peaks with an intensity that deviates more than :math:`3\sigma_{hkl}` from the
 mean of the reflection, where :math:`\sigma_{hkl}` is the standard deviation of the peak intensities.

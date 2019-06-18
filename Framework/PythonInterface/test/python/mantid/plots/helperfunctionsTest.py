@@ -195,28 +195,28 @@ class HelperFunctionsTest(unittest.TestCase):
 
     def test_y_units_for_distribution_and_autodist_off_with_latex(self):
         ws = self.ws2d_distribution
-        labels = funcs.get_axes_labels(ws, plot_as_dist=False, use_latex=True)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=False, use_latex=True)
         self.assertEqual(labels[0], 'Counts (microAmp.hour)$^{-1}$')
 
     def test_y_units_for_non_distribution_and_autodist_on_with_ascii(self):
         ws = self.ws2d_non_distribution
-        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=False)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=False)
         self.assertEqual(labels[0], 'Counts per microAmp.hour per Angstrom')
 
     def test_y_units_for_non_distribution_and_autodist_on_with_latex(self):
         ws = self.ws2d_non_distribution
-        labels = funcs.get_axes_labels(ws, plot_as_dist=True)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True)
         self.assertEqual(labels[0], 'Counts (microAmp.hour $\\AA$)$^{-1}$')
 
     def test_y_units_for_non_distribution_with_no_x_or_y_unit_and_autodist_on(self):
         ws = self.ws1d_point
-        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=True)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=True)
         self.assertEqual(labels[0], '')
 
     def test_y_units_for_non_distribution_with_no_x_unit_and_autodist_on(self):
         ws = self.ws2d_point
         ws.setYUnit("Counts")
-        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=True)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=True)
         self.assertEqual(labels[0], 'Counts')
         ws.setYUnit('')
 
@@ -251,21 +251,44 @@ class HelperFunctionsTest(unittest.TestCase):
         centers = funcs.points_from_boundaries(bounds)
         self.assertTrue(np.array_equal(centers, np.array([2., 3.5, 7])))
 
-    def test_get_spectrum(self):
-        # get data divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 1, False, withDy=True, withDx=True)
+    def test_get_spectrum_distribution_workspace(self):
+        # Since the workspace being plotted is a distribution, we should not
+        # divide by bin width whether or not normalize_by_bin_width is True
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 1, True, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15., 25.])))
-        self.assertTrue(np.array_equal(y, np.array([.4, .5])))
-        self.assertTrue(np.array_equal(dy, np.array([.3, .4])))
+        self.assertTrue(np.array_equal(y, np.array([4, 5])))
+        self.assertTrue(np.array_equal(dy, np.array([3, 4])))
         self.assertEqual(dx, None)
-        # get data not divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 0, True, withDy=True, withDx=True)
+
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 0, False, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15., 25.])))
         self.assertTrue(np.array_equal(y, np.array([2, 3])))
         self.assertTrue(np.array_equal(dy, np.array([1, 2])))
         self.assertEqual(dx, None)
         # fail case - try to find spectrum out of range
-        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_histo, 10, True)
+        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_histo,
+                          10, True)
+
+    def test_get_spectrum_non_distribution_workspace(self):
+        # get data divided by bin width
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1,
+                                          normalize_by_bin_width=True,
+                                          withDy=True, withDx=True)
+        self.assertTrue(np.array_equal(x, np.array([15., 25.])))
+        self.assertTrue(np.array_equal(y, np.array([0.4, 0.5])))
+        self.assertTrue(np.array_equal(dy, np.array([0.3, 0.4])))
+        self.assertEqual(dx, None)
+        # get data not divided by bin width
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1,
+                                          normalize_by_bin_width=False,
+                                          withDy=True, withDx=True)
+        self.assertTrue(np.array_equal(x, np.array([15., 25.])))
+        self.assertTrue(np.array_equal(y, np.array([4, 5])))
+        self.assertTrue(np.array_equal(dy, np.array([3, 4])))
+        self.assertEqual(dx, None)
+        # fail case - try to find spectrum out of range
+        self.assertRaises(RuntimeError, funcs.get_spectrum,
+                          self.ws2d_non_distribution, 10, True)
 
     def test_get_md_data2d_bin_bounds(self):
         x, y, data = funcs.get_md_data2d_bin_bounds(self.ws_MD_2d, mantid.api.MDNormalization.NoNormalization)
@@ -609,7 +632,7 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_no_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, distribution=False, withDy=False, withDx=False)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalize_by_bin_width=False, withDy=False, withDx=False)
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
         self.assertIsNone(dy)
@@ -617,7 +640,7 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_with_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, distribution=False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalize_by_bin_width=False, withDy=True, withDx=True)
 
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))

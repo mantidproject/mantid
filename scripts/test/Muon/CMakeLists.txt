@@ -11,6 +11,7 @@ set ( TEST_PY_FILES
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
+   home_plot_widget_model_test.py
    home_runinfo_presenter_test.py
    list_selector/list_selector_view_test.py
    list_selector/list_selector_presenter_test.py
@@ -35,9 +36,6 @@ set ( TEST_PY_FILES
    grouping_tab/grouping_tab_presenter_test.py
    grouping_tab/pairing_table_group_selector_test.py
    grouping_tab/pairing_table_alpha_test.py
-   LoadWidgetModel_test.py
-   LoadWidgetPresenter_test.py
-   LoadWidgetView_test.py
    MaxEntModel_test.py
    MaxEntPresenter_test.py
    max_ent_presenter_load_interaction_test.py
@@ -65,20 +63,25 @@ set ( TEST_PY_FILES
 )
 
 # LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible
-set ( TEST_PY_FILES_QT5
-   FFTModel_test.py
+set ( TEST_PY_FILES_QT4
+   LoadWidgetModel_test.py
+   LoadWidgetPresenter_test.py
+   LoadWidgetView_test.py
    FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
+   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    fitting_tab_widget/fitting_tab_presenter_test.py
+   fitting_tab_widget/fitting_tab_model_test.py
+   fitting_context_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
    home_runinfo_presenter_test.py
-   load_run_widget/loadrun_model_test.py
+   list_selector/list_selector_view_test.py
+   list_selector/list_selector_presenter_test.py
    load_run_widget/loadrun_presenter_current_run_test.py
    load_run_widget/loadrun_presenter_single_file_test.py
    load_run_widget/loadrun_presenter_multiple_file_test.py
-   load_file_widget/loadfile_model_test.py
    load_file_widget/loadfile_presenter_single_file_test.py
    load_file_widget/loadfile_presenter_multiple_file_test.py
    load_file_widget/loadfile_view_test.py
@@ -98,7 +101,7 @@ set ( TEST_PY_FILES_QT5
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
    results_tab_widget/results_tab_presenter_test.py
-   results_tab_widget/results_tab_model_test.py
+   transformWidget_test.py
    help_widget_presenter_test.py
 )
 
@@ -107,9 +110,9 @@ check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 # Prefix for test name=PythonAlgorithms
 set(PYUNITTEST_QT_API pyqt) # force to use qt4
 pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt4
-${TEST_PY_FILES})
+${TEST_PY_FILES_QT4} ${})
 
 set(PYUNITTEST_QT_API pyqt5) # force to use qt5
 pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt5
-${TEST_PY_FILES_QT5})
+${TEST_PY_FILES})
 unset(PYUNITTEST_QT_API)

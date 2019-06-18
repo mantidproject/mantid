@@ -48,7 +48,7 @@ void HKLFilterDRange::checkProperDRangeValues() {
     throw std::range_error("dMax cannot be <= 0.");
   }
 
-  if (m_dmax <= m_dmin) {
+  if (m_dmax < m_dmin) {
     throw std::range_error("dMax cannot be smaller than dMin.");
   }
 }
