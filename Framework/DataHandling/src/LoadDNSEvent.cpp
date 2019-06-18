@@ -1,5 +1,4 @@
-﻿
-#include "MantidDataHandling/LoadDNSEvent.h"
+﻿#include "MantidDataHandling/LoadDNSEvent.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -11,7 +10,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
@@ -77,17 +75,13 @@ void LoadDNSEvent::init() {
       std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
       "The XML or Map file with full path.");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<uint32_t>>(
-                      "ChopperChannel", 1,
-                      boost::make_shared<BoundedValidator<int>>(0, 4),
-                      Kernel::Direction::Input),
-                  "The Chopper Channel");
+  declareProperty("ChopperChannel", 1u,
+                  boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
+                  "The Chopper Channel", Kernel::Direction::Input);
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<uint32_t>>(
-                      "MonitorChannel", 1,
-                      boost::make_shared<BoundedValidator<int>>(0, 4),
-                      Kernel::Direction::Input),
-                  "The Monitor Channel");
+  declareProperty("MonitorChannel", 1u,
+                  boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
+                  "The Monitor Channel", Kernel::Direction::Input);
 
   declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
