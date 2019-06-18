@@ -76,6 +76,8 @@ Changes
   - :doc:`Direct Geometry <direct_geometry>`
 
   - :doc:`Indirect Geometry <indirect_geometry>`
+  
+  - :doc: `Instrument Definition Files <idfs>`
 
 Full Change Listings
 --------------------

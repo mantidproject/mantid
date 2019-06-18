@@ -959,7 +959,7 @@ If name is specified, e.g. as name="det" in the first example, then as seen the
 <location> elements are given the 'name' plus a counter, where by default this counter starts from zero. This counter can optionally be changed by using
 attribute name-count-start, e.g. setting name-count-start="1" in the above
 example would have named the 10 <location> elements det1, det2, ..., det10. Additionally, using the name-count-increment attribute, e.g setting 
-name-count-increment="2" would have named the 10 <location> elements dat1, det3, ..., det21.
+name-count-increment="2" would have named the 10 <location> elements dat1, det3, ..., det21. By default, this increment is one.
 
 When one <locations> tag was used in ISIS LET_Definition.xml the number of
 lines of this file reduced from 1590 to 567.
