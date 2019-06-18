@@ -11,7 +11,9 @@ SANS Changes
 
 :ref:`Release 4.1.0 <v4.1.0>`
 
-- New IDF for EQSANS
+- New IDF for ``EQSANS`` and ``CG2/GP-SANS``
+- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`
+- New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
 
 ISIS SANS Interface
 -------------------

@@ -109,9 +109,9 @@ def _plot_impl(axes, workspace, args, kwargs):
             axes.set_xlabel('Time')
         kwargs['linestyle'] = 'steps-post'
     else:
-        x, y, _, _, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs)
         normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
             workspace, axes, **kwargs)
+        x, y, _, _, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs)
         _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width,
                      axis=axis)
     return x, y, args, kwargs
