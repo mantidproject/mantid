@@ -33,7 +33,7 @@ class ColorbarWidget(QWidget):
 
         self.cmap = QComboBox()
         self.cmap.addItems(sorted(cm.cmap_d.keys()))
-        self.cmap.currentTextChanged.connect(self.cmap_changed)
+        self.cmap.currentIndexChanged.connect(self.cmap_index_changed)
 
         self.cmin = QLineEdit()
         self.cmin_value = 0
@@ -111,8 +111,11 @@ class ColorbarWidget(QWidget):
         self.cmin_value, self.cmax_value = self.colorbar.get_clim()
         self.update_clim_text()
         self.cmap_changed(cmap)
-        self.cmap.setCurrentText(self.colorbar.get_cmap().name)
+        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(self.colorbar.get_cmap().name))
         self.redraw()
+
+    def cmap_index_changed(self):
+        self.cmap_changed(self.cmap.currentText())
 
     def cmap_changed(self, name):
         self.colorbar.set_cmap(name)

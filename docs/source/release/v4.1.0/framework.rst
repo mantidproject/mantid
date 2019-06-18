@@ -42,6 +42,7 @@ Improvements
 - 10x performance improvement in calls to ``Mantid::PhysicalConstants::getAtom``.
 - ARCS, CNCS, HYSPEC, NOMAD, POWGEN, SEQUOIA, SNAP, and VULCAN have had the axis that signed two-theta is calculated against changed from ``+y`` to ``+x``
 - :ref:`SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
+- :ref:`algm-FilterEvents` has a property `InformativeOutputNames` which changes the name of output workspace to include the start and end time of the slice.
 
 Bug fixes
 #########
