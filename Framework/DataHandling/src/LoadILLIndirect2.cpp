@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -191,11 +192,10 @@ void LoadILLIndirect2::initWorkSpace() {
                              m_numberOfMonitors + m_numberOfSimpleDetectors;
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nHistograms, m_numberOfChannels + 1, m_numberOfChannels);
-  for (size_t i = 0; i <= m_numberOfChannels; ++i) {
-    m_localWorkspace->dataX(0)[i] = double(i);
-  }
+  const auto timeChannels = make_cow<HistogramData::HistogramX>(
+      m_numberOfChannels, HistogramData::LinearGenerator(0.0, 1.0));
   for (size_t i = 0; i < nHistograms; ++i) {
-    m_localWorkspace->setSharedX(i, m_localWorkspace->sharedX(0));
+    m_localWorkspace->setSharedX(i, timeChannels);
   }
   m_localWorkspace->getAxis(0)->unit() =
       UnitFactory::Instance().create("Empty");
