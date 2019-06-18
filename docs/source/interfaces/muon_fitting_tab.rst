@@ -50,6 +50,7 @@ Fit function browser
    :height: 250px
 
 Right clicking in the central box will bring up a context menu for adding or removing functions.
+The fitting browser here is similar to that used in the :ref:`Multi-dataset Fitting Interface <Multi-dataset-Fitting-Interface>`.
 
 **Property** This is a list of property names, individual functions can be collapsed down for greater legibility.
 
