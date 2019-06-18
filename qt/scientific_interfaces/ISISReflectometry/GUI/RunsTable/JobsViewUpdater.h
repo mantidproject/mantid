@@ -60,9 +60,14 @@ public:
             cellsFromRow(row.get()));
   }
 
-  void rowAppended(int groupIndex, int, Row const &row) {
-    m_view.appendChildRowOf(
-        MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}),
+  void groupRemoved(int groupIndex) {
+    m_view.removeRowAt(
+        MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}));
+  }
+
+  void rowInserted(int groupIndex, int rowIndex, Row const &row) {
+    m_view.insertChildRowOf(
+        MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}), rowIndex,
         cellsFromRow(row));
   }
 

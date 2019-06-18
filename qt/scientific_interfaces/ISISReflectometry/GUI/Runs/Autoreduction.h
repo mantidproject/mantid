@@ -27,7 +27,7 @@ public:
   bool searchResultsExist() const override;
   void setSearchResultsExist() override;
 
-  bool setupNewAutoreduction(const std::string &searchString) override;
+  void setupNewAutoreduction(const std::string &searchString) override;
   bool pause() override;
   void stop() override;
 

@@ -19,7 +19,10 @@ namespace CustomInterfaces {
 class MockRunsView : public IRunsView {
 public:
   MOCK_METHOD1(subscribe, void(RunsViewSubscriber *));
+  MOCK_METHOD1(subscribeTimer, void(RunsViewTimerSubscriber *));
   MOCK_CONST_METHOD0(table, IRunsTableView *());
+  MOCK_METHOD1(startTimer, void(const int));
+  MOCK_METHOD0(stopTimer, void());
 
   MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
@@ -47,9 +50,6 @@ public:
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_CONST_METHOD0(getMonitorAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
-
-  MOCK_METHOD1(startTimer, void(const int));
-  MOCK_METHOD0(stopTimer, void());
 
   MOCK_METHOD0(startIcatSearch, void());
   MOCK_METHOD0(noActiveICatSessions, void());

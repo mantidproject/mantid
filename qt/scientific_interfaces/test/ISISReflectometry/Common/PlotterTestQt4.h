@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
+#include "../../../ISISReflectometry/GUI/Common/Plotter.h"
 #include "../ReflMockObjects.h"
 #include <cxxtest/TestSuite.h>
 

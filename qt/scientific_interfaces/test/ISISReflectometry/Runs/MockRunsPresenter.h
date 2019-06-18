@@ -19,6 +19,7 @@ class MockRunsPresenter : public IRunsPresenter {
 public:
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_METHOD0(settingsChanged, void());
+
   void notify(IRunsPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IBatchPresenter *presenter) override {
     UNUSED_ARG(presenter);

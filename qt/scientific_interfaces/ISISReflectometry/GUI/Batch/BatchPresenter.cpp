@@ -108,10 +108,12 @@ void BatchPresenter::notifyBatchComplete(bool error) {
 
   // Continue processing the next batch of algorithms, if there is more to do
   auto algorithms = m_jobRunner->getAlgorithms();
-  if (algorithms.size() > 0)
+  if (algorithms.size() > 0) {
     startBatch(std::move(algorithms));
-  else
-    reductionPaused();
+    return;
+  }
+
+  reductionPaused();
 }
 
 void BatchPresenter::notifyBatchCancelled() {
@@ -163,7 +165,7 @@ void BatchPresenter::resumeReduction() {
   // Get the algorithms to process
   auto algorithms = m_jobRunner->getAlgorithms();
   if (algorithms.size() < 1) {
-    m_jobRunner->reductionPaused();
+    reductionPaused();
     return;
   }
   // Start processing
@@ -191,20 +193,21 @@ void BatchPresenter::reductionPaused() {
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
+  // If autoreducing, notify
+  if (isAutoreducing())
+    notifyAutoreductionCompleted();
 }
 
 void BatchPresenter::resumeAutoreduction() {
-  // Update the model
+  // Update the model first to ensure the autoprocessing flag is set
   m_jobRunner->autoreductionResumed();
-  // Get the algorithms to run
-  auto algorithms = m_jobRunner->getAlgorithms();
-  if (algorithms.size() < 1) {
+  // The runs presenter starts autoreduction. This sets off a search to find
+  // new runs, if there are any. When the search completes, we'll receive
+  // a separate callback to reductionResumed.
+  if (m_runsPresenter->resumeAutoreduction())
+    autoreductionResumed();
+  else
     m_jobRunner->autoreductionPaused();
-    return;
-  }
-  // Start processing
-  autoreductionResumed();
-  startBatch(std::move(algorithms));
 }
 
 void BatchPresenter::autoreductionResumed() {
@@ -221,6 +224,7 @@ void BatchPresenter::pauseAutoreduction() {
   m_jobRunner->autoreductionPaused();
   // Stop all processing
   pauseReduction();
+  // Notify child presenters
   autoreductionPaused();
 }
 
@@ -233,7 +237,9 @@ void BatchPresenter::autoreductionPaused() {
   m_runsPresenter->autoreductionPaused();
 }
 
-void BatchPresenter::autoreductionCompleted() {}
+void BatchPresenter::autoreductionCompleted() {
+  m_runsPresenter->autoreductionCompleted();
+}
 
 void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
   updateInstrument(instrumentName);

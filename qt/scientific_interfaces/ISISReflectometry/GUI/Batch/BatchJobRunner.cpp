@@ -28,8 +28,8 @@ void BatchJobRunner::reductionResumed() {
   // If the user has manually selected failed rows, reprocess them; otherwise
   // skip them
   m_reprocessFailed = m_batch.hasSelection();
-  // If there are no selected rows, process everything
-  m_processAll = !m_batch.hasSelection();
+  // If we're autoreducing, or there are no selected rows, process everything
+  m_processAll = m_isAutoreducing || !m_batch.hasSelection();
   m_batch.resetSkippedItems();
 }
 

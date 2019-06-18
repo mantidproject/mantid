@@ -97,6 +97,26 @@ public:
     verifyAndClear();
   }
 
+  void testAutoreductionCompletedWhenReductionResumedWithNoRemainingJobs() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_jobRunner, getAlgorithms())
+        .Times(1)
+        .WillOnce(Return(std::deque<IConfiguredAlgorithm_sptr>()));
+    EXPECT_CALL(*m_jobRunner, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(1);
+    presenter.notifyReductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionNotCompletedWhenReductionResumedWithRemainingJobs() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(0);
+    presenter.notifyReductionResumed();
+    verifyAndClear();
+  }
+
   void testBatchIsCancelledWhenReductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, cancelAlgorithmQueue()).Times(1);
@@ -129,13 +149,24 @@ public:
   void testModelUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_jobRunner, autoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_jobRunner, autoreductionPaused()).Times(0);
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
-  void testBatchIsExecutedWhenAutoreductionResumed() {
+  void testRunsPresenterCalledWhenAutoreductionResumed() {
     auto presenter = makePresenter();
-    expectBatchIsExecuted();
+    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction()).Times(1);
+    presenter.notifyAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testModelResetWhenAutoreductionCancelled() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_jobRunner, autoreductionPaused()).Times(1);
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
@@ -143,6 +174,20 @@ public:
   void testChildPresentersUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter();
     expectAutoreductionResumed();
+    presenter.notifyAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testChildPresentersNotUpdatedWhenAutoreductionCanelled() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_savePresenter, autoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_eventPresenter, autoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_experimentPresenter, autoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_instrumentPresenter, autoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_runsPresenter, autoreductionResumed()).Times(0);
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
@@ -169,8 +214,8 @@ public:
   }
 
   void testAutoreductionComplete() {
-    // TODO Add expectations here when autoreduction is implemented
     auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(1);
     presenter.notifyAutoreductionCompleted();
     verifyAndClear();
   }
@@ -312,8 +357,13 @@ private:
     // Replace the constructed job runner with a mock
     m_jobRunner = new NiceMock<MockBatchJobRunner>();
     presenter.m_jobRunner.reset(m_jobRunner);
+    // The mock job runner should by default return our default algorithms list
     ON_CALL(*m_jobRunner, getAlgorithms())
         .WillByDefault(Return(m_mockAlgorithmsList));
+    // The mock runs presenter should by default return true when autoreduction
+    // is resumed
+    ON_CALL(*m_runsPresenter, resumeAutoreduction())
+        .WillByDefault(Return(true));
     return presenter;
   }
 

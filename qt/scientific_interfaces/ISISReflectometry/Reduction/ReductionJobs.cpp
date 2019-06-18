@@ -57,6 +57,11 @@ bool ReductionJobs::hasGroupWithName(std::string const &groupName) const {
                      });
 }
 
+bool ReductionJobs::containsSingleEmptyGroup() const {
+  return groups().size() == 1 && groups()[0].rows().size() == 0 &&
+         groups()[0].name().empty();
+}
+
 void ReductionJobs::removeGroup(int index) {
   m_groups.erase(m_groups.begin() + index);
   ensureAtLeastOneGroupExists(*this);
@@ -85,6 +90,21 @@ std::string ReductionJobs::nextEmptyGroupName() {
   std::string name = "Group" + std::to_string(m_groupNameSuffix);
   m_groupNameSuffix++;
   return name;
+}
+
+/* Return true if the reduction table has content. This excludes the
+ * case where we have a single empty group that is usually a convenience
+ * group that we've added to avoid an empty table so does not count as
+ * user-entered content
+ */
+bool hasGroupsWithContent(ReductionJobs const &jobs) {
+  if (jobs.groups().size() == 0)
+    return false;
+
+  if (jobs.containsSingleEmptyGroup())
+    return false;
+
+  return true;
 }
 
 /* This function is called after deleting groups to ensure that the model
@@ -129,16 +149,19 @@ void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
 }
 
 void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
-                       double thetaTolerance, std::string const &groupName) {
+                       double thetaTolerance, std::string const &groupName,
+                       bool (*rowChanged)(Row const &rowA, Row const &rowB)) {
   auto &group = findOrMakeGroupWithName(jobs, groupName);
   auto indexOfRowToUpdate =
       group.indexOfRowWithTheta(row.theta(), thetaTolerance);
 
   if (indexOfRowToUpdate.is_initialized()) {
-    auto newRowValue = mergedRow(group[indexOfRowToUpdate.get()].get(), row);
-    group.updateRow(indexOfRowToUpdate.get(), newRowValue);
+    auto rowToUpdate = group[indexOfRowToUpdate.get()].get();
+    auto newRowValue = mergedRow(rowToUpdate, row);
+    if (rowChanged(newRowValue, rowToUpdate))
+      group.updateRow(indexOfRowToUpdate.get(), newRowValue);
   } else {
-    group.appendRow(row);
+    group.insertRowSortedByAngle(row);
   }
 }
 

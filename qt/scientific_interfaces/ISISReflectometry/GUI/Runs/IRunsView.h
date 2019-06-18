@@ -41,13 +41,18 @@ public:
   virtual void notifySearch() = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
-  virtual void notifyTimerEvent() = 0;
   virtual void notifyICATSearchComplete() = 0;
   virtual void notifyTransfer() = 0;
   virtual void notifyInstrumentChanged() = 0;
   virtual void notifyStartMonitor() = 0;
   virtual void notifyStopMonitor() = 0;
   virtual void notifyStartMonitorComplete() = 0;
+};
+
+class RunsViewTimerSubscriber {
+public:
+  virtual void notifyTimerEvent(){};
+  virtual ~RunsViewTimerSubscriber() = default;
 };
 
 /** @class IRunsView
@@ -62,7 +67,12 @@ public:
   virtual ~IRunsView() = default;
 
   virtual void subscribe(RunsViewSubscriber *notifyee) = 0;
+  virtual void subscribeTimer(RunsViewTimerSubscriber *notifyee) = 0;
   virtual IRunsTableView *table() const = 0;
+
+  // Timer methods
+  virtual void startTimer(const int millisecs) = 0;
+  virtual void stopTimer() = 0;
 
   // Connect the model
   virtual void showSearch(boost::shared_ptr<SearchModel> model) = 0;
@@ -92,11 +102,7 @@ public:
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const = 0;
 
-  // Timer methods
-  virtual void startTimer(const int millisecs) = 0;
-  virtual void stopTimer() = 0;
   virtual void loginFailed(std::string const &fullError) = 0;
-
   virtual void noActiveICatSessions() = 0;
   virtual void missingRunsToTransfer() = 0;
 

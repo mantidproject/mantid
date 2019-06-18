@@ -7,10 +7,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "Common/IMessageHandler.h"
 #include "GUI/Batch/IBatchJobAlgorithm.h"
 #include "GUI/Batch/IBatchJobRunner.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Common/IMessageHandler.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
@@ -18,6 +18,7 @@
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
 #include "GUI/Runs/IAutoreduction.h"
+#include "GUI/Runs/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearcher.h"
 #include "GUI/Runs/SearchModel.h"
@@ -45,9 +46,6 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 /**** Views ****/
 class MockMainWindowView : public IMainWindowView {
 public:
-  MOCK_METHOD3(askUserString,
-               std::string(const std::string &, const std::string &,
-                           const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserCritical,
@@ -105,8 +103,10 @@ public:
   MOCK_METHOD0(notifyRowStateChanged, void());
   MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(resumeAutoreduction, bool());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD0(autoreductionCompleted, void());
   MOCK_METHOD1(instrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
@@ -187,6 +187,18 @@ public:
   MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
 };
 
+class MockRunNotifier : public IRunNotifier {
+public:
+  MOCK_METHOD1(subscribe, void(RunNotifierSubscriber *));
+  MOCK_METHOD0(startPolling, void());
+  MOCK_METHOD0(stopPolling, void());
+};
+
+class MockRunNotifierSubscriber : public RunNotifierSubscriber {
+public:
+  MOCK_METHOD0(notifyCheckForNewRuns, void());
+};
+
 class MockSearchModel : public SearchModel {
 public:
   MockSearchModel(std::string const &run, std::string const &description,
@@ -208,6 +220,7 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
+  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
 };
 
 /**** Saver ****/
@@ -229,7 +242,7 @@ public:
   MOCK_CONST_METHOD0(searchResultsExist, bool());
   MOCK_METHOD0(setSearchResultsExist, void());
 
-  MOCK_METHOD1(setupNewAutoreduction, bool(const std::string &));
+  MOCK_METHOD1(setupNewAutoreduction, void(const std::string &));
   MOCK_METHOD0(pause, bool());
   MOCK_METHOD0(stop, void());
 };

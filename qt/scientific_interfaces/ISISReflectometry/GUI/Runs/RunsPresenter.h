@@ -7,11 +7,12 @@
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
 
+#include "CatalogRunNotifier.h"
 #include "Common/DllConfig.h"
-#include "GUI/Runs/IRunsPresenter.h"
-#include "GUI/Runs/IRunsView.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
+#include "IRunsPresenter.h"
+#include "IRunsView.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
@@ -50,16 +51,15 @@ handles any interface functionality and model manipulation.
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
     : public IRunsPresenter,
       public RunsViewSubscriber,
+      public RunNotifierSubscriber,
       public Mantid::API::AlgorithmObserver {
 public:
-  RunsPresenter(
-      IRunsView *mainView, ProgressableView *progressView,
-      const RunsTablePresenterFactory &makeRunsTablePresenter,
-      double thetaTolerance, std::vector<std::string> const &instruments,
-      int defaultInstrumentIndex, IMessageHandler *messageHandler,
-      boost::shared_ptr<IAutoreduction> autoreduction =
-          boost::shared_ptr<IAutoreduction>(),
-      boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>());
+  RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
+                const RunsTablePresenterFactory &makeRunsTablePresenter,
+                double thetaTolerance,
+                std::vector<std::string> const &instruments,
+                int defaultInstrumentIndex, IMessageHandler *messageHandler,
+                IAutoreduction &autoreduction, ISearcher &searcher);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -80,8 +80,10 @@ public:
 
   void reductionPaused() override;
   void reductionResumed() override;
+  bool resumeAutoreduction() override;
   void autoreductionResumed() override;
   void autoreductionPaused() override;
+  void autoreductionCompleted() override;
   void instrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
@@ -89,7 +91,6 @@ public:
   void notifySearch() override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
-  void notifyTimerEvent() override;
   void notifyICATSearchComplete() override;
   void notifyTransfer() override;
   void notifyInstrumentChanged() override;
@@ -97,28 +98,33 @@ public:
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
 
+  // RunNotifierSubscriber overrides
+  void notifyCheckForNewRuns() override;
+
 protected:
   IRunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
-  boost::shared_ptr<IAutoreduction> m_autoreduction;
+  IAutoreduction &m_autoreduction;
   /// The search model
   boost::shared_ptr<SearchModel> m_searchModel;
   /// The current transfer method
   std::string m_currentTransferMethod;
+  /// The data processor presenters stored in a vector
+  std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
+  /// The run notifier implementation
+  std::unique_ptr<IRunNotifier> m_runNotifier;
 
 private:
   /// The main view we're managing
   IRunsView *m_view;
   /// The progress view
   ProgressableView *m_progressView;
-  /// The data processor presenters stored in a vector
-  std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The main presenter
   IBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
   IMessageHandler *m_messageHandler;
   /// The search implementation
-  boost::shared_ptr<ISearcher> m_searcher;
+  ISearcher &m_searcher;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list
@@ -131,13 +137,11 @@ private:
 
   /// searching
   bool search();
-  void icatSearchComplete();
-  void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
+  void populateSearchResults();
   /// autoreduction
   bool requireNewAutoreduction() const;
   void checkForNewRuns();
   void autoreduceNewRuns();
-  void stopAutoreduction();
   bool shouldUpdateExistingSearchResults() const;
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);

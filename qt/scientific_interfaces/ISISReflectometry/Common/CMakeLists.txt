@@ -11,7 +11,6 @@ set(COMMON_INC_FILES
     IndexOf.h
     InstrumentParameters.h
     Map.h
-    IMessageHandler.h
     OptionDefaults.h
     Parse.h
     QWidgetGroup.h

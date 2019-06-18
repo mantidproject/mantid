@@ -28,6 +28,7 @@ BatchView::BatchView(QWidget *parent)
       "MantidQt::API::IConfiguredAlgorithm_sptr");
   initLayout();
   m_batchAlgoRunner.stopOnFailure(false);
+  connectBatchAlgoRunnerSlots();
 }
 
 void BatchView::subscribe(BatchViewSubscriber *notifyee) {
@@ -72,7 +73,7 @@ void BatchView::setAlgorithmQueue(
   m_batchAlgoRunner.setQueue(algorithms);
 }
 
-void BatchView::executeAlgorithmQueue() {
+void BatchView::connectBatchAlgoRunnerSlots() {
   connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(onBatchComplete(bool)));
   connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
@@ -91,6 +92,9 @@ void BatchView::executeAlgorithmQueue() {
           this,
           SLOT(onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr,
                                 std::string)));
+}
+
+void BatchView::executeAlgorithmQueue() {
   m_batchAlgoRunner.executeBatchAsync();
 }
 

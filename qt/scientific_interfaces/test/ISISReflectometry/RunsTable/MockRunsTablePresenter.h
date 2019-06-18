@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
-#include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
+#include "../../../ISISReflectometry/GUI/Common/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <gmock/gmock.h>
@@ -16,41 +16,20 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MockRunsTablePresenter : public RunsTablePresenter {
+class MockRunsTablePresenter : public IRunsTablePresenter {
 public:
-  MockRunsTablePresenter(IRunsTableView *view,
-                         std::vector<std::string> const &instruments,
-                         double thetaTolerance, ReductionJobs reductionJobs,
-                         const IPlotter &plotter)
-      : RunsTablePresenter(view, instruments, thetaTolerance, reductionJobs,
-                           plotter){};
-  MOCK_METHOD0(notifyProcessRequested, void());
-  MOCK_METHOD0(notifyPauseRequested, void());
-  MOCK_METHOD0(notifyInsertRowRequested, void());
-  MOCK_METHOD0(notifyInsertGroupRequested, void());
-  MOCK_METHOD0(notifyDeleteRowRequested, void());
-  MOCK_METHOD0(notifyDeleteGroupRequested, void());
-  MOCK_METHOD1(notifyFilterChanged, void(std::string const &));
-  MOCK_METHOD0(notifyExpandAllRequested, void());
-  MOCK_METHOD0(notifyCollapseAllRequested, void());
-
-  MOCK_METHOD4(notifyCellTextChanged,
-               void(MantidQt::MantidWidgets::Batch::RowLocation const &, int,
-                    std::string const &, std::string const &));
-  MOCK_METHOD0(notifySelectionChanged, void());
-  MOCK_METHOD1(notifyRowInserted,
-               void(MantidQt::MantidWidgets::Batch::RowLocation const &));
-  MOCK_METHOD1(
-      notifyRemoveRowsRequested,
-      void(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &));
-  MOCK_METHOD0(notifyCutRowsRequested, void());
-  MOCK_METHOD0(notifyCopyRowsRequested, void());
-  MOCK_METHOD0(notifyPasteRowsRequested, void());
-  MOCK_METHOD0(notifyFilterReset, void());
-
+  MOCK_METHOD1(acceptMainPresenter, void(IRunsPresenter *));
+  MOCK_CONST_METHOD0(runsTable, RunsTable const &());
+  MOCK_METHOD0(mutableRunsTable, RunsTable &());
+  MOCK_METHOD0(notifyRowStateChanged, void());
+  MOCK_METHOD0(notifyRemoveAllRowsAndGroupsRequested, void());
   MOCK_METHOD1(mergeAdditionalJobs, void(ReductionJobs const &));
-  MOCK_CONST_METHOD0(reductionJobs, ReductionJobs const &());
-  MOCK_METHOD0(reductionJobs, ReductionJobs &());
+  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(autoreductionPaused, void());
+  MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD1(instrumentChanged, void(std::string const &));
+  MOCK_METHOD0(settingsChanged, void());
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

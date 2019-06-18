@@ -8,8 +8,9 @@
 #define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
+#include "../../../ISISReflectometry/Reduction/RunsTable.h"
 #include "../ReflMockObjects.h"
-#include "../RunsTable/MockRunsTablePresenterFactory.h"
+#include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
@@ -25,6 +26,7 @@ using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
+using testing::ReturnRef;
 using testing::_;
 
 //=====================================================================================
@@ -34,23 +36,15 @@ class RunsPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RunsPresenterTest *createSuite() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    IMainWindowView *mainWindowMock = new MockMainWindowView();
-    Plotter plotter(mainWindowMock);
-#else
-    Plotter plotter;
-#endif
-    return new RunsPresenterTest(plotter);
-  }
+  static RunsPresenterTest *createSuite() { return new RunsPresenterTest(); }
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
-  RunsPresenterTest(Plotter plotter)
+  RunsPresenterTest()
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
                                               "POLREF", "OFFSPEC"},
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(new MockAutoreduction), m_searcher(new MockSearcher),
-        m_runsTablePresenterFactory(m_instruments, m_thetaTolerance, plotter) {
+        m_autoreduction(), m_searcher(), m_runNotifier(nullptr),
+        m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -146,51 +140,84 @@ public:
     verifyAndClear();
   }
 
-  void testAutoreductionResumedWithNewSettings() {
-    auto settingsChanged = true;
+  void testResumeAutoreductionWithNewSettings() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getSearchString()).Times(2);
-    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
-        .WillOnce(Return(settingsChanged));
-    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
-        .WillOnce(Return(true));
-    expectCheckForNewRuns();
+    expectAutoreductionSettingsChanged();
+    expectClearExistingTable();
+    expectStartNewAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testResumeAutoreductionWithSameSettings() {
+    auto presenter = makePresenter();
+    expectAutoreductionSettingsUnchanged();
+    expectDoNotClearExistingTable();
+    expectStartNewAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testResumeAutoreductionWarnsUserIfTableChanged() {
+    auto presenter = makePresenter();
+    expectAutoreductionSettingsChanged();
+    expectRunsTableWithContent();
+    expectUserRespondsYes();
+    expectStartNewAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testResumeAutoreductionDoesNotWarnUserIfTableEmpty() {
+    auto presenter = makePresenter();
+    expectAutoreductionSettingsChanged();
+    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _)).Times(0);
+    expectStartNewAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testResumeAutoreductionCancelledByUserIfTableChanged() {
+    auto presenter = makePresenter();
+    expectAutoreductionSettingsChanged();
+    expectRunsTableWithContent();
+    expectUserRespondsNo();
+    expectDoNotStartAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testAutoreductionResumed() {
+    auto presenter = makePresenter();
     expectWidgetsEnabledForAutoreducing();
+    EXPECT_CALL(*m_runsTablePresenter, autoreductionResumed()).Times(1);
     presenter.autoreductionResumed();
     verifyAndClear();
   }
 
-  void testAutoreductionResumedWithSameSettings() {
-    auto settingsChanged = false;
+  void testAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getSearchString()).Times(2);
-    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
-        .WillOnce(Return(settingsChanged));
-    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
-        .WillOnce(Return(true));
-    expectCheckForNewRuns();
-    expectWidgetsEnabledForAutoreducing();
-    presenter.autoreductionResumed();
-    verifyAndClear();
-  }
-
-  void testAutoreductionResumedWarnsUserIfTableChanged() {
-    // TODO
-  }
-
-  void testPauseAutoreduction() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_view, stopTimer()).Times(1);
-    EXPECT_CALL(*m_autoreduction, stop()).Times(1);
+    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
+    EXPECT_CALL(m_autoreduction, stop()).Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, autoreductionPaused()).Times(1);
     expectWidgetsEnabledForPaused();
     presenter.autoreductionPaused();
     verifyAndClear();
   }
 
-  void testAutoreductionPollsForNewRunsOnTimerEvent() {
+  void testAutoreductionCompleted() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runNotifier, startPolling()).Times(1);
+    EXPECT_CALL(m_autoreduction, stop()).Times(0);
+    expectWidgetsEnabledForAutoreducing();
+    presenter.autoreductionCompleted();
+    verifyAndClear();
+  }
+
+  void testNotifyCheckForNewRuns() {
     auto presenter = makePresenter();
     expectCheckForNewRuns();
-    presenter.notifyTimerEvent();
+    presenter.notifyCheckForNewRuns();
     verifyAndClear();
   }
 
@@ -274,14 +301,13 @@ private:
     friend class RunsPresenterTest;
 
   public:
-    RunsPresenterFriend(
-        IRunsView *mainView, ProgressableView *progressView,
-        const RunsTablePresenterFactory &makeRunsTablePresenter,
-        double thetaTolerance, std::vector<std::string> const &instruments,
-        int defaultInstrumentIndex, IMessageHandler *messageHandler,
-        boost::shared_ptr<IAutoreduction> autoreduction =
-            boost::shared_ptr<IAutoreduction>(),
-        boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>())
+    RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
+                        const RunsTablePresenterFactory &makeRunsTablePresenter,
+                        double thetaTolerance,
+                        std::vector<std::string> const &instruments,
+                        int defaultInstrumentIndex,
+                        IMessageHandler *messageHandler,
+                        IAutoreduction &autoreduction, ISearcher &searcher)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
                         messageHandler, autoreduction, searcher) {}
@@ -295,15 +321,38 @@ private:
 #else
     Plotter plotter;
 #endif
-    m_runsTablePresenterFactory =
-        MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance, plotter);
+    auto makeRunsTablePresenter = RunsTablePresenterFactory(
+        m_instruments, m_thetaTolerance, std::move(plotter));
     auto presenter = RunsPresenterFriend(
-        &m_view, &m_progressView, m_runsTablePresenterFactory, m_thetaTolerance,
+        &m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
         m_instruments, defaultInstrumentIndex, &m_messageHandler,
         m_autoreduction, m_searcher);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
+    presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
+    m_runsTablePresenter = dynamic_cast<NiceMock<MockRunsTablePresenter> *>(
+        presenter.m_tablePresenter.get());
+    presenter.m_runNotifier.reset(new NiceMock<MockRunNotifier>());
+    m_runNotifier = dynamic_cast<NiceMock<MockRunNotifier> *>(
+        presenter.m_runNotifier.get());
+    // Return an empty table by default
+    ON_CALL(*m_runsTablePresenter, runsTable())
+        .WillByDefault(ReturnRef(m_runsTable));
     return presenter;
+  }
+
+  Row makeRowWithRun(std::string const &run) {
+    return Row(std::vector<std::string>{"12345"}, 0.5, TransmissionRunPair(),
+               RangeInQ(), boost::none, ReductionOptionsMap(),
+               ReductionWorkspaces(std::vector<std::string>{run},
+                                   TransmissionRunPair()));
+  }
+
+  RunsTable makeRunsTableWithContent() {
+    auto rows = std::vector<boost::optional<Row>>{makeRowWithRun("12345")};
+    auto groups = std::vector<Group>{Group("Group 1", rows)};
+    auto reductionJobs = ReductionJobs(groups);
+    return RunsTable(m_instruments, m_thetaTolerance, reductionJobs);
   }
 
   void verifyAndClear() {
@@ -313,7 +362,15 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_autoreduction));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searcher));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_runNotifier));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
+  }
+
+  void expectRunsTableWithContent() {
+    auto runsTable = makeRunsTableWithContent();
+    EXPECT_CALL(*m_runsTablePresenter, runsTable())
+        .Times(1)
+        .WillOnce(ReturnRef(runsTable));
   }
 
   void expectUpdateViewWhenMonitorStarting() {
@@ -332,18 +389,61 @@ private:
   }
 
   void expectStopAutoreduction() {
-    EXPECT_CALL(m_view, stopTimer()).Times(1);
-    EXPECT_CALL(*m_autoreduction, stop()).Times(1);
+    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
+    EXPECT_CALL(m_autoreduction, stop()).Times(1);
   }
 
   void expectSearchFailed() {
     EXPECT_CALL(m_view, getAlgorithmRunner()).Times(0);
-    expectStopAutoreduction();
+  }
+
+  void expectAutoreductionSettingsChanged() {
+    EXPECT_CALL(m_view, getSearchString()).Times(AtLeast(1));
+    EXPECT_CALL(m_autoreduction, searchStringChanged(_)).WillOnce(Return(true));
+  }
+
+  void expectAutoreductionSettingsUnchanged() {
+    EXPECT_CALL(m_view, getSearchString()).Times(AtLeast(1));
+    EXPECT_CALL(m_autoreduction, searchStringChanged(_))
+        .WillOnce(Return(false));
+  }
+
+  void expectClearExistingTable() {
+    EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
+        .Times(1);
+  }
+
+  void expectDoNotClearExistingTable() {
+    EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
+        .Times(0);
+  }
+
+  void expectUserRespondsYes() {
+    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _))
+        .Times(1)
+        .WillOnce(Return(true));
+  }
+
+  void expectUserRespondsNo() {
+    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _))
+        .Times(1)
+        .WillOnce(Return(false));
+  }
+
+  void expectStartNewAutoreduction() {
+    EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_)).Times(1);
+    expectCheckForNewRuns();
   }
 
   void expectCheckForNewRuns() {
-    EXPECT_CALL(m_view, stopTimer()).Times(1);
+    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_view, startIcatSearch()).Times(1);
+  }
+
+  void expectDoNotStartAutoreduction() {
+    EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_)).Times(0);
+    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
+    EXPECT_CALL(m_view, startIcatSearch()).Times(0);
   }
 
   void expectGetValidSearchRowSelection(RunsPresenterFriend &presenter) {
@@ -439,13 +539,15 @@ private:
   std::vector<std::string> m_instruments;
   NiceMock<MockRunsView> m_view;
   NiceMock<MockRunsTableView> m_runsTableView;
+  NiceMock<MockRunsTablePresenter> *m_runsTablePresenter;
   NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
-  boost::shared_ptr<MockAutoreduction> m_autoreduction;
-  boost::shared_ptr<MockSearcher> m_searcher;
+  MockAutoreduction m_autoreduction;
+  MockSearcher m_searcher;
+  MockRunNotifier *m_runNotifier;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
-  MockRunsTablePresenterFactory m_runsTablePresenterFactory;
+  RunsTable m_runsTable;
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H */

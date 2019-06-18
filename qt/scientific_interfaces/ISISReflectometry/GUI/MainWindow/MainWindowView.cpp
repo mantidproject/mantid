@@ -7,7 +7,7 @@
 #include "MainWindowView.h"
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchView.h"
-#include "GUI/Plotting/Plotter.h"
+#include "GUI/Common/Plotter.h"
 #include "MantidKernel/make_unique.h"
 #include <QMessageBox>
 #include <QToolButton>
@@ -31,7 +31,7 @@ int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
 DECLARE_SUBWINDOW(MainWindowView)
 
 MainWindowView::MainWindowView(QWidget *parent)
-    : UserSubWindow(parent), m_notifyee(NULL) {}
+    : UserSubWindow(parent), m_notifyee(nullptr) {}
 
 IBatchView *MainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
@@ -74,13 +74,11 @@ void MainWindowView::initLayout() {
       instruments, thetaTolerance, std::move(plotter));
 
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
-  auto autoreduction = boost::shared_ptr<IAutoreduction>();
-  auto searcher = boost::shared_ptr<ISearcher>();
   auto messageHandler = this;
-
-  auto makeRunsPresenter = RunsPresenterFactory(
-      std::move(makeRunsTablePresenter), thetaTolerance, instruments,
-      defaultInstrumentIndex, messageHandler, autoreduction, searcher);
+  auto makeRunsPresenter =
+      RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance,
+                           instruments, defaultInstrumentIndex, messageHandler,
+                           Autoreduction(), CatalogSearcher());
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
@@ -94,7 +92,6 @@ void MainWindowView::initLayout() {
 
   // Create the presenter
   m_presenter = MainWindowPresenter(this, std::move(makeBatchPresenter));
-  subscribe(&m_presenter.get());
 
   m_presenter.get().notifyNewBatchRequested();
   m_presenter.get().notifyNewBatchRequested();
@@ -150,6 +147,17 @@ void MainWindowView::giveUserInfo(const std::string &prompt,
   QMessageBox::information(this, QString::fromStdString(title),
                            QString::fromStdString(prompt), QMessageBox::Ok,
                            QMessageBox::Ok);
+}
+
+bool MainWindowView::askUserYesNo(const std::string &prompt,
+                                  const std::string &title) {
+  auto reply = QMessageBox::question(this, QString::fromStdString(title),
+                                     QString::fromStdString(prompt),
+                                     QMessageBox::Yes | QMessageBox::No);
+  if (reply == QMessageBox::Yes)
+    return true;
+
+  return false;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

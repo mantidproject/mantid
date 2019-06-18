@@ -27,7 +27,7 @@ public:
   virtual bool searchResultsExist() const = 0;
   virtual void setSearchResultsExist() = 0;
 
-  virtual bool setupNewAutoreduction(const std::string &searchString) = 0;
+  virtual void setupNewAutoreduction(const std::string &searchString) = 0;
   virtual bool pause() = 0;
   virtual void stop() = 0;
 };

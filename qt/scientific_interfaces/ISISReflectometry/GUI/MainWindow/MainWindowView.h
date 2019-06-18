@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H
 
-#include "Common/IMessageHandler.h"
+#include "GUI/Common/IMessageHandler.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
 #include "MainWindowPresenter.h"
@@ -47,6 +47,8 @@ public:
                         const std::string &title) override;
   void giveUserInfo(const std::string &prompt,
                     const std::string &title) override;
+  bool askUserYesNo(const std::string &prompt,
+                    const std::string &title) override;
 
 public slots:
   void helpPressed();
@@ -58,8 +60,8 @@ private:
   void initLayout() override;
   /// Interface definition with widgets for the main interface window
   Ui::MainWindowWidget m_ui;
-  /// The presenter handling this view
   MainWindowSubscriber *m_notifyee;
+  /// The presenter handling this view
   boost::optional<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
 };

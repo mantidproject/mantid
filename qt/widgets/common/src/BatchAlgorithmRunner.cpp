@@ -50,7 +50,6 @@ BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
 BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
 
 void BatchAlgorithmRunner::addAllObservers() {
-  removeAllObservers();
   m_notificationCenter.addObserver(m_batchCompleteObserver);
   m_notificationCenter.addObserver(m_batchCancelledObserver);
   m_notificationCenter.addObserver(m_algorithmStartedObserver);
@@ -144,7 +143,16 @@ void BatchAlgorithmRunner::executeBatchAsync() {
  */
 void BatchAlgorithmRunner::cancelBatch() {
   std::lock_guard<std::mutex> lock(m_mutex);
-  m_cancelRequested = true;
+  // If the queue is empty, notify straight away that the batch has been
+  // cancelled. Otherwise, set a flag so that it will be cancelled after the
+  // current algorithm finishes processing
+  if (queueLength() < 1) {
+    addAllObservers();
+    m_notificationCenter.postNotification(new BatchCancelledNotification());
+    removeAllObservers();
+  } else {
+    m_cancelRequested = true;
+  }
 }
 
 /**
@@ -152,6 +160,8 @@ void BatchAlgorithmRunner::cancelBatch() {
  */
 void BatchAlgorithmRunner::resetState() {
   std::lock_guard<std::mutex> lock(m_mutex);
+  removeAllObservers();
+  clearQueue();
   m_cancelRequested = false;
 }
 
@@ -190,12 +200,14 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(
     }
   }
 
-  // Clear queue
-  m_algorithms.clear();
+  // Notify observers
+  if (cancelRequested())
+    m_notificationCenter.postNotification(new BatchCancelledNotification());
+  else
+    m_notificationCenter.postNotification(
+        new BatchCompleteNotification(false, errorFlag));
 
-  m_notificationCenter.postNotification(
-      new BatchCompleteNotification(false, errorFlag));
-  removeAllObservers();
+  resetState();
 
   return !errorFlag;
 }
