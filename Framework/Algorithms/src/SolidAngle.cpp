@@ -170,8 +170,8 @@ void SolidAngle::exec() {
     m_MaxSpec = numberOfSpectra - 1;
   }
 
-  MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(inputWS, numberOfSpectra, 2, 1);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
+      inputWS, m_MaxSpec - m_MinSpec + 1, 2, 1);
   // The result of this will be a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
@@ -205,29 +205,28 @@ void SolidAngle::exec() {
 
   const auto solidAngleFunction =
       getSolidAngleFunction(detectorInfo, method, pixelAreaZero);
+  const int loopIterations = m_MaxSpec - m_MinSpec;
   int failCount = 0;
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
-  for (int j = 0; j < numberOfSpectra; ++j) {
+  for (int j = 0; j <= loopIterations; ++j) {
     PARALLEL_START_INTERUPT_REGION
-    outputWS->mutableX(j)[0] = inputWS->x(j).front();
-    outputWS->mutableX(j)[1] = inputWS->x(j).back();
-    outputWS->mutableE(j) = 0.;
-    outputWS->mutableY(j) = 0.; // default value for not calculated
-    if (j >= m_MinSpec && j < m_MaxSpec) {
-      if (spectrumInfo.hasDetectors(j)) {
-        double solidAngle = 0.0;
-        for (const auto detID : inputWS->getSpectrum(j).getDetectorIDs()) {
-          const auto index = detectorInfo.indexOf(detID);
-          if (!detectorInfo.isMasked(index) && !detectorInfo.isMonitor(index))
-            solidAngle += solidAngleFunction(index);
-        }
-        outputWS->mutableY(j)[0] = solidAngle;
-      } else {
-        ++failCount;
+    const int i = j + m_MinSpec;
+    outputWS->mutableX(j)[0] = inputWS->x(i).front();
+    outputWS->mutableX(j)[1] = inputWS->x(i).back();
+    outputWS->mutableE(j) = 0;
+    if (spectrumInfo.hasDetectors(i)) {
+      double solidAngle = 0.0;
+      for (const auto detID : inputWS->getSpectrum(i).getDetectorIDs()) {
+        const auto index = detectorInfo.indexOf(detID);
+        if (!detectorInfo.isMasked(index) && !detectorInfo.isMonitor(index))
+          solidAngle += solidAngleFunction(index);
       }
+      outputWS->mutableY(j)[0] = solidAngle;
+    } else {
+      ++failCount;
     }
 
     prog.report();
