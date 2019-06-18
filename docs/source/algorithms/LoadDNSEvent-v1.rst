@@ -80,9 +80,9 @@ Usage
 .. testoutput:: LoadDNSEventex1
 
    Output Workspace Type is:  EventWorkspace
-   It has 122904 events and 2 dimensions:
+   It has 122880 events and 2 dimensions:
    Dimension 0 has name: xDimension, id: Time-of-flight, Range: 0.00 to 0.00 microsecond
-   Dimension 1 has name: yDimension, id: Spectrum, Range: 1.00 to 122904.00 
+   Dimension 1 has name: yDimension, id: Spectrum, Range: 1.00 to 122880.00 
 
 
 **Example 2 - Specify a different Chopper Channel**
