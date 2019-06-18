@@ -3008,6 +3008,12 @@ InstrumentDefinitionParser::convertLocationsElement(
         Strings::strip(pElem->getAttribute("name-count-start")));
   }
 
+  int nameCountIncrement(1);
+  if (pElem->hasAttribute("name-count-increment")) {
+    nameCountIncrement = boost::lexical_cast<int>(
+        Strings::strip(pElem->getAttribute("name-count-increment")));
+  }
+
   // A list of numeric attributes which are allowed to have corresponding -end
   std::set<std::string> rangeAttrs = {"x", "y", "z", "r", "t", "p", "rot"};
 
@@ -3066,7 +3072,9 @@ InstrumentDefinitionParser::convertLocationsElement(
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      pLoc->setAttribute("name", name + std::to_string(nameCountStart + i));
+      pLoc->setAttribute(
+          "name",
+          name + std::to_string(nameCountStart + (i * nameCountIncrement)));
     }
 
     // Copy values of all the attributes set
