@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtCore import QMetaObject, QObject, Signal, Slot
+from qtpy.QtCore import QMetaObject, QObject, Slot
 
 
 class Observer(object):
