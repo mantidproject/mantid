@@ -311,8 +311,8 @@ class MainWindow(QMainWindow):
             on_triggered=self.load_layout_settings,
             shortcut="Shift+F11", shortcut_context=Qt.ApplicationShortcut)
 
-        self.view_menu_actions = [action_restore_default, action_save_user_layout, action_load_user_layout, None] \
-                                 + self.create_widget_actions()
+        self.view_menu_actions = [action_restore_default, action_save_user_layout, action_load_user_layout,
+                                  None] + self.create_widget_actions()
 
         # help menu
         action_mantid_help = create_action(
@@ -436,11 +436,6 @@ class MainWindow(QMainWindow):
         except KeyError:
             self.setup_default_layouts()  # If user layout not found load default
 
-    def setup_layout(self):
-        """Assume this is a first run of the application and set layouts
-        accordingly"""
-        self.load_layout_settings()
-
     def prep_window_for_reset(self):
         """Function to reset all dock widgets to a state where they can be
         ordered by setup_default_layout"""
@@ -509,8 +504,8 @@ class MainWindow(QMainWindow):
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
 
-
     # ----------------------- Events ---------------------------------
+    
     def closeEvent(self, event):
         # Check whether or not to save project
         if not self.project.saved:
