@@ -24,6 +24,7 @@ Improvements
 ############
 
 - An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
+- In ref:`ReflectometryISISLoadAndPreprocess` the TOF workspaces are now grouped together.
 
 Bug fixes
 #########
