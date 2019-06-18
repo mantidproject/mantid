@@ -125,7 +125,7 @@ void PreviewPlot::addSpectrum(const QString &lineName,
 
   regenerateLegend();
   axes.relim();
-  m_canvas->draw();
+  this->replot();
 }
 
 /**
@@ -544,7 +544,7 @@ void PreviewPlot::setScaleType(AxisID id, QString actionName) {
   default:
     break;
   }
-  m_canvas->draw();
+  this->replot();
 }
 
 /**
@@ -557,7 +557,7 @@ void PreviewPlot::toggleLegend(const bool checked) {
   } else {
     removeLegend();
   }
-  m_canvas->draw();
+  this->replot();
 }
 
 } // namespace MantidWidgets

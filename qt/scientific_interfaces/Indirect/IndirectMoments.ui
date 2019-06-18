@@ -114,14 +114,44 @@
        <number>0</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="properties">
-        <property name="topMargin">
-         <number>9</number>
+       <widget class="QFrame" name="fPropertyTable">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
         </property>
-        <property name="bottomMargin">
-         <number>9</number>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
         </property>
-       </layout>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <layout class="QHBoxLayout" name="properties">
+           <property name="topMargin">
+            <number>9</number>
+           </property>
+           <property name="bottomMargin">
+            <number>9</number>
+           </property>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </item>
       <item>
        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppRawPlot" native="true">

@@ -30,6 +30,7 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppSlicePreview->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppRawPlot->watchADS(false);
 
   // Property Tree
   m_propTrees["SlicePropTree"] = new QtTreePropertyBrowser();
