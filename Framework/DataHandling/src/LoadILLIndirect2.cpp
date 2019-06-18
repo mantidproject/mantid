@@ -193,7 +193,7 @@ void LoadILLIndirect2::initWorkSpace() {
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nHistograms, m_numberOfChannels + 1, m_numberOfChannels);
   const auto timeChannels = make_cow<HistogramData::HistogramX>(
-      m_numberOfChannels, HistogramData::LinearGenerator(0.0, 1.0));
+      m_numberOfChannels + 1, HistogramData::LinearGenerator(0.0, 1.0));
   for (size_t i = 0; i < nHistograms; ++i) {
     m_localWorkspace->setSharedX(i, timeChannels);
   }
