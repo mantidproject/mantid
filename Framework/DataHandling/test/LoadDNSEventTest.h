@@ -143,7 +143,7 @@ public:
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMaximum(), 0);
 
     // test event count:
-    const auto rng = boost::irange(0ul, iws->size());
+    const auto rng = boost::irange(static_cast<size_t>(0), iws->size());
     const size_t eventCount =
         std::accumulate(rng.begin(), rng.end(), 0ul, [&](auto a, auto b) {
           return a + iws->getSpectrum(b).getEvents().size();
