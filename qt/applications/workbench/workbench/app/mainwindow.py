@@ -302,13 +302,17 @@ class MainWindow(QMainWindow):
             self, "Restore Default Layout",
             on_triggered=self.setup_default_layouts,
             shortcut="Shift+F10", shortcut_context=Qt.ApplicationShortcut)
-
+        action_save_user_layout = create_action(
+            self, "Set Custom Layout",
+            on_triggered=self.save_layout_settings,
+            shortcut_context=Qt.ApplicationShortcut)
         action_load_user_layout = create_action(
-            self, "Load Custom layout Layout",
+            self, "Restore Custom Layout",
             on_triggered=self.load_layout_settings,
-            shortcut="Shift+F11", shortcut_context=Qt.ApplicationShortcut)
+            shortcut="Shift+F12", shortcut_context=Qt.ApplicationShortcut)
 
-        self.view_menu_actions = [action_restore_default, action_load_user_layout, None] + self.create_widget_actions()
+        self.view_menu_actions = [action_restore_default, action_save_user_layout, action_load_user_layout, None] \
+                                 + self.create_widget_actions()
 
         # help menu
         action_mantid_help = create_action(
@@ -434,34 +438,6 @@ class MainWindow(QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea, widget.dockwidget)  # Un-tabify all widgets
             widget.toggle_view(False)
 
-    def load_layout_settings(self):
-        """Load a layout for the child widgets from a file"""
-        # layout definition
-        logmessages = self.messagedisplay
-        ipython = self.ipythonconsole
-        workspacewidget = self.workspacewidget
-        editor = self.editor
-        algorithm_selector = self.algorithm_selector
-        plot_selector = self.plot_selector
-        loaded_layout = {
-            'widgets': [
-                # column 0
-                [[workspacewidget], [algorithm_selector, plot_selector]],
-                # column 1
-                [[editor, ipython]],
-                # column 2
-                [[logmessages]]
-            ],
-            'width-fraction': [0.25,  # column 0 width
-                               0.50,  # column 1 width
-                               0.25],  # column 2 width
-            'height-fraction': [[0.5, 0.5],  # column 0 row heights
-                                [1.0],  # column 1 row heights
-                                [1.0]]  # column 2 row heights
-        }
-        #CONF.set("Layout/Layout_1", widget_dict)
-        self.arrange_layout(loaded_layout)
-
     def setup_default_layouts(self):
         """Set the default layouts of the child widgets"""
         # layout definition
@@ -479,7 +455,7 @@ class MainWindow(QMainWindow):
                 [[editor, ipython]],
                 # column 2
                 [[logmessages]]
-            ],
+                ],
             'width-fraction': [0.25,  # column 0 width
                                0.50,  # column 1 width
                                0.25],  # column 2 width
@@ -492,14 +468,8 @@ class MainWindow(QMainWindow):
     def arrange_layout(self, layout):
         """Arrange the layout of the child widgets according to the supplied layout"""
         self.prep_window_for_reset()
-        widget_dict = {"logmessages": self.messagedisplay,
-                       "ipython": self.ipythonconsole,
-                       "workspacewidget": self.workspacewidget,
-                       "editor": self.editor,
-                       "algorithm_selector": self.algorithm_selector,
-                       "plot_selector": self.plot_selector}
+        widgets_layout = layout['widgets']
         with widget_updates_disabled(self):
-            widgets_layout = layout['widgets']
             # flatten list
             widgets = [item for column in widgets_layout for row in column for item in row]
             # show everything
@@ -527,6 +497,17 @@ class MainWindow(QMainWindow):
                     # Raise front widget per row
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
+
+    def save_layout_settings(self):
+        """Save the current layout to configuration"""
+        CONF.set("Layout/Layout", self.saveState())
+
+    def load_layout_settings(self):
+        """Load a layout for the child widgets from a file"""
+        try:
+            self.restoreState(CONF.get("Layout/Layout"))
+        except KeyError:
+            self.setup_default_layouts()  # If user layout not found load default
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
