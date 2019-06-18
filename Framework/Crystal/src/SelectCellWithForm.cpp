@@ -174,8 +174,8 @@ void SelectCellWithForm::exec() {
       num_indexed = static_cast<int>(num_indexed);
       for (size_t i = 0; i < n_peaks; i++) {
         average_error += (peaks[i].getHKL()).hklError();
-        peaks[i].setIntHKL(T*peaks[i].getIntHKL());
-        peaks[i].setHKL(T*peaks[i].getHKL());
+        peaks[i].setIntHKL(T * peaks[i].getIntHKL());
+        peaks[i].setHKL(T * peaks[i].getHKL());
       }
     }
 

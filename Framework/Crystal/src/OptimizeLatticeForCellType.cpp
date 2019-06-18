@@ -129,7 +129,8 @@ void OptimizeLatticeForCellType::exec() {
     auto ol = peakWS->sample().getOrientedLattice();
     DblMatrix modUB = peakWS->mutableSample().getOrientedLattice().getModUB();
     int maxOrder = peakWS->mutableSample().getOrientedLattice().getMaxOrder();
-    bool crossTerms = peakWS->mutableSample().getOrientedLattice().getCrossTerm();
+    bool crossTerms =
+        peakWS->mutableSample().getOrientedLattice().getCrossTerm();
     std::vector<double> lat(6);
     IndexingUtils::GetLatticeParameters(UB, lat);
 
