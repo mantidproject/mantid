@@ -76,11 +76,11 @@ void LoadDNSEvent::init() {
       "The XML or Map file with full path.");
 
   declareProperty("ChopperChannel", 1u,
-                  boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
+                  boost::make_shared<BoundedValidator<uint64_t>>(0, 4),
                   "The Chopper Channel", Kernel::Direction::Input);
 
   declareProperty("MonitorChannel", 1u,
-                  boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
+                  boost::make_shared<BoundedValidator<uint64_t>>(0, 4),
                   "The Monitor Channel", Kernel::Direction::Input);
 
   declareProperty(
