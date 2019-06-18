@@ -14,7 +14,7 @@ input workspace for all of the spectra selected. If several detectors
 have been mapped to the same spectrum then the solid angles of this
 detectors will be summed to provide the solid angle for the spectrum.
 The solid angle of a detector that has been masked or marked as dead is
-considered to be 0 steradians.
+considered to be 0 steradians. For grouped detectors, the solid angles will be summed.
 
 This algorithms can happily accept :ref:`ragged workspace <Ragged_Workspace>`
 as an input workspace. The result would
@@ -33,7 +33,7 @@ perfomed.
 ``GenericShape`` uses the ray-tracing methods of :ref:`Instrument`.
 
 All of the others have special analytical forms taken from small angle scattering literature.
-For thos equations :math:`2\theta` is the scattering angle (from direct beam rather than in-plane), :math:`\alpha` is angle constrained in either the x (horizontal) or y (vertical) plane.
+For those equations :math:`2\theta` is the scattering angle (from direct beam rather than in-plane), :math:`\alpha` is the scattering angle constrained in either the x (horizontal) or y (vertical) plane.
 The methods below also assume that the instrument has properties ``x-pixel-size`` and ``y-pixel-size`` which define the size of the pixels in millimetres.
 A difference between this implementation and what is in literature, is that rather than using the detector elements distance as :math:`L_{2i} = \frac{D}{\cos(2\theta_i)}`, this uses the actual :math:`L_{2i}` and in the equation after proper substitution.
 
@@ -100,7 +100,7 @@ Output:
 References
 ----------
 
-The specialzed ``Method`` calculations are based on work published in
+The specialzed ``Method`` calculations are based on work summarized in:
 
 #. I. Grillo, *Small-angle neutron scattering and applications in soft condensed matter.* Soft matter characterization (2008): 723-782.
 
