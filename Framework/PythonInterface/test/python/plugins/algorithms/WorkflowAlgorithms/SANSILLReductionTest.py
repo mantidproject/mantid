@@ -7,8 +7,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import MatrixWorkspace
+from mantid.api import MatrixWorkspace, Run
 from mantid.simpleapi import SANSILLReduction, config, mtd
+from mantid.geometry import Instrument
 
 
 class SANSILLReductionTest(unittest.TestCase):
@@ -122,8 +123,8 @@ class SANSILLReductionTest(unittest.TestCase):
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "Wavelength")
         self.assertEqual(ws.blocksize(), blocksize)
         self.assertEqual(ws.getNumberHistograms(), spectra)
-        self.assertTrue(ws.getInstrument())
-        self.assertTrue(ws.getRun())
+        self.assertTrue(isinstance(ws.getInstrument(), Instrument))
+        self.assertTrue(isinstance(ws.getRun(), Run))
         self.assertTrue(ws.getHistory())
         if logs:
             self.assertTrue(ws.getRun().hasProperty('qmin'))
