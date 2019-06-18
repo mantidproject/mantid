@@ -1,7 +1,4 @@
-set(
-  COMMON_SRC_FILES
-  Plotter.cpp
-)
+set(COMMON_SRC_FILES Plotter.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(
