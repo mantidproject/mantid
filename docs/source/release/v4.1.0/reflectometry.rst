@@ -23,6 +23,7 @@ Algorithms
 Improvements
 ############
 
+- The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
 - An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
 - In ref:`ReflectometryISISLoadAndPreprocess` the TOF workspaces are now grouped together.
 

@@ -110,7 +110,7 @@ void FilterEvents::init() {
 
   declareProperty("OutputWorkspaceIndexedFrom1", false,
                   "If selected, the minimum output workspace is indexed from 1 "
-                  "and continuous. ");
+                  "and continuous.");
 
   // TOF correction
   vector<string> corrtypes{"None", "Customized", "Direct", "Elastic",
@@ -181,6 +181,10 @@ void FilterEvents::init() {
                   "If true, all the TimeSeriesProperty logs listed will be "
                   "excluded from duplicating. "
                   "Otherwise, only those specified logs will be split.");
+
+  declareProperty("DescriptiveOutputNames", false,
+                  "If selected, the names of the output workspaces will "
+                  "include information about each slice.");
 }
 
 std::map<std::string, std::string> FilterEvents::validateInputs() {
@@ -269,7 +273,7 @@ void FilterEvents::exec() {
   if (m_useArbTableSplitters)
     createOutputWorkspacesTableSplitterCase();
   else if (m_useSplittersWorkspace)
-    createOutputWorkspaces();
+    createOutputWorkspacesSplitters();
   else
     createOutputWorkspacesMatrixCase();
 
@@ -316,17 +320,15 @@ void FilterEvents::exec() {
 
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
   Goniometer inputGonio = m_eventWS->run().getGoniometer();
-  for (miter = m_outputWorkspacesMap.begin();
-       miter != m_outputWorkspacesMap.end(); ++miter) {
+  for (auto &miter : m_outputWorkspacesMap) {
     try {
-      DataObjects::EventWorkspace_sptr ws_i = miter->second;
+      DataObjects::EventWorkspace_sptr ws_i = miter.second;
       ws_i->mutableRun().setGoniometer(inputGonio, true);
     } catch (std::runtime_error &) {
       g_log.warning("Cannot set goniometer.");
     }
-    outputwsnames.push_back(miter->second->getName());
+    outputwsnames.push_back(miter.second->getName());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);
 
@@ -431,7 +433,7 @@ void FilterEvents::processAlgorithmProperties() {
   }
 
   m_informationWS = this->getProperty("InformationWorkspace");
-  // Informatin workspace is specified?
+  // Information workspace is specified?
   if (!m_informationWS)
     m_hasInfoWS = false;
   else
@@ -489,11 +491,12 @@ void FilterEvents::processAlgorithmProperties() {
   else
     m_useDBSpectrum = true;
 
-  // Get run start time from property 'run_start'
-  if (m_eventWS->run().hasProperty("run_start")) {
-    Types::Core::DateAndTime run_start_time(
-        m_eventWS->run().getProperty("run_start")->value());
-    m_runStartTime = run_start_time;
+  bool start_time_set = false;
+  // Get run start time
+  try {
+    m_runStartTime = m_eventWS->run().startTime();
+    start_time_set = true;
+  } catch (std::runtime_error &) {
   }
 
   // Splitters are given relative time
@@ -507,7 +510,7 @@ void FilterEvents::processAlgorithmProperties() {
       m_filterStartTime = temp_shift_time;
     } else {
       // Retrieve filter starting time from property run_start as default
-      if (m_eventWS->run().hasProperty("run_start")) {
+      if (start_time_set) {
         m_filterStartTime = m_runStartTime;
       } else {
         throw std::runtime_error(
@@ -1007,7 +1010,7 @@ int64_t timeInSecondsToNanoseconds(const int64_t offset_ns,
  * The method will transfer the start/stop time to "m_vecSplitterTime"
  * and map the splitting target (in string) to "m_vecSplitterGroup".
  * The mapping will be recorded in "m_targetIndexMap" and
- *"m_wsGroupIndexTargetMap".
+ * "m_wsGroupIndexTargetMap".
  * Also, "m_maxTargetIndex" is set up to record the highest target group/index,
  * i.e., max value of m_vecSplitterGroup
  */
@@ -1102,7 +1105,7 @@ void FilterEvents::processTableSplittersWorkspace() {
  * given by
  *  SplittersWorkspace
  */
-void FilterEvents::createOutputWorkspaces() {
+void FilterEvents::createOutputWorkspacesSplitters() {
 
   // Convert information workspace to map
   std::map<int, std::string> infomap;
@@ -1132,14 +1135,47 @@ void FilterEvents::createOutputWorkspaces() {
   double numnewws = static_cast<double>(m_targetWorkspaceIndexSet.size());
   double wsgindex = 0.;
 
+  // Work out how it has been split so the naming can be done
+  // if generateEventsFilter has been used the infoWS will contain time or log
+  // otherwise it is assumed that it has been split by time.
+  bool descriptiveNames = getProperty("DescriptiveOutputNames");
+  bool splitByTime = true;
+  if (descriptiveNames) {
+    if ((m_hasInfoWS && infomap[0].find("Log") != std::string::npos) ||
+        m_targetWorkspaceIndexSet.size() - 1 != m_splitters.size()) {
+      splitByTime = false;
+    }
+  }
+
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
     bool add2output = true;
     std::stringstream wsname;
+    wsname << m_outputWSNameBase << "_";
     if (wsgroup >= 0) {
-      wsname << m_outputWSNameBase << "_" << (wsgroup + delta_wsindex);
+      if (descriptiveNames && splitByTime) {
+        auto splitter = m_splitters[wsgroup];
+        auto startTimeInSeconds =
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(
+                splitter.start() - m_runStartTime);
+        auto stopTimeInSeconds =
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(
+                splitter.stop() - m_runStartTime);
+        wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
+      } else if (descriptiveNames) {
+        auto infoiter = infomap.find(wsgroup);
+        if (infoiter != infomap.end()) {
+          std::string name = infoiter->second;
+          name = Kernel::Strings::removeSpace(name);
+          wsname << name;
+        } else {
+          wsname << wsgroup + delta_wsindex;
+        }
+      } else {
+        wsname << wsgroup + delta_wsindex;
+      }
     } else {
-      wsname << m_outputWSNameBase << "_unfiltered";
+      wsname << "unfiltered";
       if (from1)
         add2output = false;
     }
@@ -1161,7 +1197,7 @@ void FilterEvents::createOutputWorkspaces() {
         if (infoiter != infomap.end()) {
           info = infoiter->second;
         } else {
-          info = "This workspace has no informatin provided. ";
+          info = "This workspace has no information provided. ";
         }
       }
       optws->setComment(info);
@@ -1216,7 +1252,7 @@ void FilterEvents::createOutputWorkspaces() {
   setProperty("NumberOutputWS", numoutputws);
 
   g_log.information("Output workspaces are created. ");
-}
+} // namespace Algorithms
 
 //----------------------------------------------------------------------------------------------
 /** Create output EventWorkspaces in the case that the splitters are given by
@@ -1240,6 +1276,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
   // SplittersWorkspace, MatrixWorkspace and TableWorkspace cases
   size_t numoutputws = m_targetWorkspaceIndexSet.size();
   size_t wsgindex = 0;
+  bool descriptiveNames = getProperty("DescriptiveOutputNames");
 
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < 0)
@@ -1249,8 +1286,14 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // workspace name
     std::stringstream wsname;
     if (wsgroup > 0) {
-      int target_name = m_wsGroupdYMap[wsgroup];
-      wsname << m_outputWSNameBase << "_" << target_name;
+      if (descriptiveNames) {
+        auto startTime = m_vecSplitterTime[wsgroup];
+        auto stopTime = m_vecSplitterTime[wsgroup + 1];
+        wsname << m_outputWSNameBase << "_" << startTime << "_" << stopTime;
+      } else {
+        int target_name = m_wsGroupdYMap[wsgroup];
+        wsname << m_outputWSNameBase << "_" << target_name;
+      }
     } else {
       wsname << m_outputWSNameBase << "_unfiltered";
     }
@@ -1338,10 +1381,27 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 
     // workspace name
     std::stringstream wsname;
+    bool descriptiveNames = getProperty("DescriptiveOutputNames");
+
     if (wsgroup > 0) {
-      // get target name via map
-      std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
-      wsname << m_outputWSNameBase << "_" << target_name;
+      if (descriptiveNames) {
+        size_t startIndex = 0;
+        for (size_t itr = 0; itr < m_vecSplitterGroup.size(); ++itr) {
+          if (m_vecSplitterGroup[itr] == wsgroup)
+            startIndex = itr;
+        }
+        auto startTime =
+            static_cast<double>(m_vecSplitterTime[startIndex] -
+                                m_runStartTime.totalNanoseconds()) /
+            1.E9;
+        auto stopTime = static_cast<double>(m_vecSplitterTime[startIndex + 1] -
+                                            m_runStartTime.totalNanoseconds()) /
+                        1.E9;
+        wsname << m_outputWSNameBase << "_" << startTime << "_" << stopTime;
+      } else {
+        std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
+        wsname << m_outputWSNameBase << "_" << target_name;
+      }
     } else {
       wsname << m_outputWSNameBase << "_unfiltered";
     }
@@ -1776,9 +1836,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 //----------------------------------------------------------------------------------------------
 /** Generate a vector of integer time series property for each splitter
  * corresponding to each target (in integer)
- * in each splitter-time-series-property, 1 stands for include and 0 stands for
- * time for neutrons to be discarded.
- * If there is no UN-DEFINED
+ * in each splitter-time-series-property, 1 stands for include and 0 stands
+ * for time for neutrons to be discarded. If there is no UN-DEFINED
  * @brief FilterEvents::generateSplitterTSP
  * @param split_tsp_vec
  */
@@ -1792,7 +1851,8 @@ void FilterEvents::generateSplitterTSP(
     Kernel::TimeSeriesProperty<int> *split_tsp =
         new Kernel::TimeSeriesProperty<int>("splitter");
     split_tsp_vec.push_back(split_tsp);
-    // add initial value if the first splitter time is after the run start time
+    // add initial value if the first splitter time is after the run start
+    // time
     split_tsp->addValue(Types::Core::DateAndTime(m_runStartTime), 0);
   }
 

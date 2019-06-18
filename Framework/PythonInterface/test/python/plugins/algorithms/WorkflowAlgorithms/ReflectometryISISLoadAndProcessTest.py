@@ -49,13 +49,21 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             'SliceWorkspace' : True,
             'TimeInterval' : 210
         }
-        self._expected_sliced_outputs = [
-             'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
-             'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
-             'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
-             'IvsQ_binned_38415_3', 'TOF_38415', 'TOF_38415_monitors',
-             'TOF_38415_sliced', 'TOF_38415_sliced_1', 'TOF_38415_sliced_2',
-             'TOF_38415_sliced_3', 'TOF']
+        self._expected_dummy_time_sliced_outputs = [
+            'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
+            'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
+            'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
+            'IvsQ_binned_38415_3', 'TOF_38415', 'TOF_38415_monitors',
+            'TOF_38415_sliced', 'TOF_38415_sliced_0_1200', 'TOF_38415_sliced_1200_2400',
+            'TOF_38415_sliced_2400_3600', 'TOF']
+        
+        self._expected_real_time_sliced_outputs = [
+            'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
+            'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
+            'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
+            'IvsQ_binned_38415_3', 'TOF_38415', 'TOF_38415_monitors',
+            'TOF_38415_sliced', 'TOF_38415_sliced_0_210', 'TOF_38415_sliced_210_420',
+            'TOF_38415_sliced_420_610', 'TOF']
 
     def tearDown(self):
         mtd.clear()
@@ -299,7 +307,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options.copy()
         args.update(self._default_slice_options_dummy_run)
         args['InputRunList'] = '38415'
-        outputs = self._expected_sliced_outputs
+        outputs = self._expected_dummy_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         # Note that the child sliced workspaces don't include the full history - this
         # might be something we want to change in the underlying algorithms at some point
@@ -317,8 +325,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
              'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
              'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
              'IvsQ_binned_38415_3', '38415', '38415_monitors',
-             '38415_sliced', '38415_sliced_1', '38415_sliced_2',
-             '38415_sliced_3', 'TOF']
+             '38415_sliced', '38415_sliced_0_1200', '38415_sliced_1200_2400',
+             '38415_sliced_2400_3600', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -328,7 +336,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args.update(self._default_slice_options_real_run)
         args['InputRunList'] = '38415'
-        outputs = self._expected_sliced_outputs
+        outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -339,7 +347,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args.update(self._default_slice_options_real_run)
         args['InputRunList'] = '38415'
-        outputs = self._expected_sliced_outputs
+        outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -350,7 +358,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args.update(self._default_slice_options_real_run)
         args['InputRunList'] = '38415'
-        outputs = self._expected_sliced_outputs
+        outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -363,7 +371,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['SliceWorkspace'] = True
         outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1',
                    'IvsLam_38415', 'IvsLam_38415_1', 'TOF_38415', 'TOF_38415_monitors',
-                   'TOF_38415_sliced', 'TOF_38415_sliced_1', 'TOF']
+                   'TOF_38415_sliced', 'TOF_38415_sliced_0_4200', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
@@ -374,7 +382,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '38415'
         args['SliceWorkspace'] = True
         args['NumberOfSlices'] = 3
-        outputs = self._expected_sliced_outputs
+        outputs = self._expected_dummy_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -387,7 +395,13 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['SliceWorkspace'] = True
         args['LogName'] = 'proton_charge'
         args['LogValueInterval'] = 60
-        outputs = self._expected_sliced_outputs
+        outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
+                   'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
+                   'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
+                   'IvsQ_binned_38415_3', 'TOF', 'TOF_38415', 'TOF_38415_monitors',
+                   'TOF_38415_sliced', 'TOF_38415_sliced_Log.proton_charge.From.-30.To.30.Value-change-direction:both',
+                   'TOF_38415_sliced_Log.proton_charge.From.30.To.90.Value-change-direction:both',
+                   'TOF_38415_sliced_Log.proton_charge.From.90.To.150.Value-change-direction:both']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -400,8 +414,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['SliceWorkspace'] = True
         args['LogName'] = 'proton_charge'
         outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1',
-                   'IvsLam_38415', 'IvsLam_38415_1', 'TOF_38415', 'TOF_38415_monitors',
-                   'TOF_38415_sliced', 'TOF_38415_sliced_1', 'TOF']
+                   'IvsLam_38415', 'IvsLam_38415_1', 'TOF', 'TOF_38415', 'TOF_38415_monitors',
+                   'TOF_38415_sliced', 'TOF_38415_sliced_Log.proton_charge.From.0.To.100.Value-change-direction:both']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
@@ -430,11 +444,11 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         CreateSampleWorkspace(WorkspaceType='Event',NumBanks=1, NumMonitors=3,
                               BankPixelWidth=2, XMin=200, OutputWorkspace=name)
         if includeMonitors:
-            CropWorkspace(InputWorkspace=name,StartWorkspaceIndex=0,EndWorkspaceIndex=2,
+            CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=0, EndWorkspaceIndex=2,
                           OutputWorkspace=name + '_monitors')
-            Rebin(InputWorkspace=name + '_monitors',Params='0,200,20000',
-                  OutputWorkspace=name + '_monitors',PreserveEvents=False)
-        CropWorkspace(InputWorkspace=name,StartWorkspaceIndex=3,EndWorkspaceIndex=4,
+            Rebin(InputWorkspace=name + '_monitors', Params='0,200,20000',
+                  OutputWorkspace=name + '_monitors', PreserveEvents=False)
+        CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=3, EndWorkspaceIndex=4,
                       OutputWorkspace=name)
         AddSampleLog(Workspace=name, LogName='run_number', LogText=str(run_number))
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
@@ -470,7 +484,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self.assertEqual(algNames, expected)
 
     def _assert_run_algorithm_succeeds(self, args, expected):
-        """Run the algorithm with the given args and check it succeeds, 
+        """Run the algorithm with the given args and check it succeeds,
         and that the additional workspaces produced match the expected list.
         Clear these additional workspaces from the ADS"""
         alg = create_algorithm('ReflectometryISISLoadAndProcess', **args)
