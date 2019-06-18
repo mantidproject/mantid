@@ -84,15 +84,14 @@ struct AlphaAngleHorizontal : public AlphaAngleCalculator {
 struct SolidAngleCalculator {
   SolidAngleCalculator(const DetectorInfo &detectorInfo,
                        const std::string &method, const double pixelArea)
-      : m_detectorInfo(detectorInfo), m_pixelArea(pixelArea) {
+      : m_detectorInfo(detectorInfo), m_pixelArea(pixelArea),
+        m_samplePos(detectorInfo.samplePosition()) {
     if (method.find("Vertical") != std::string::npos) {
       m_alphaAngleCalculator =
           std::make_unique<AlphaAngleVertical>(detectorInfo);
     } else if (method.find("Horizontal") != std::string::npos) {
       m_alphaAngleCalculator =
           std::make_unique<AlphaAngleHorizontal>(detectorInfo);
-    } else if (method == GENERIC_SHAPE) {
-      m_samplePos = m_detectorInfo.samplePosition();
     }
   }
   virtual double solidAngle(size_t index) const = 0;
@@ -101,8 +100,8 @@ struct SolidAngleCalculator {
 protected:
   const DetectorInfo &m_detectorInfo;
   const double m_pixelArea;
+  const V3D m_samplePos;
   std::unique_ptr<const AlphaAngleCalculator> m_alphaAngleCalculator;
-  V3D m_samplePos;
 };
 
 struct GenericShape : public SolidAngleCalculator {
