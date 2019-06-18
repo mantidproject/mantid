@@ -1,15 +1,15 @@
 #ifndef MANTID_MDALGORITHMS_LOADDNSSCDEWTEST_H_
 #define MANTID_MDALGORITHMS_LOADDNSSCDEWTEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Strings.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDNSEvent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/range/irange.hpp>
 #include <cxxtest/TestSuite.h>
