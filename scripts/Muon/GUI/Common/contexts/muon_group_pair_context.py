@@ -25,7 +25,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         else:
             grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
     except IndexError:
-        return [], []
+        return [], [], ''
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = instrument_directory + grouping_file
     new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)

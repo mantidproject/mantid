@@ -120,6 +120,7 @@ set(SRC_FILES
     src/LoadSassena.cpp
     src/LoadSpec.cpp
     src/LoadSpice2D.cpp
+    src/LoadHFIRSANS.cpp
     src/LoadSpiceAscii.cpp
     src/LoadSpiceXML2DDet.cpp
     src/LoadSwans.cpp
@@ -182,8 +183,10 @@ set(SRC_FILES
     src/SaveReflectometryAscii.cpp
     src/SaveReflCustomAscii.cpp
     src/SaveReflThreeColumnAscii.cpp
+    src/SaveSampleEnvironmentAndShape.cpp
     src/SaveSESANS.cpp
     src/SaveSPE.cpp
+    src/SaveStl.cpp
     src/SaveTBL.cpp
     src/SaveToSNSHistogramNexus.cpp
     src/SaveVTK.cpp
@@ -316,6 +319,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadShape.h
     inc/MantidDataHandling/LoadSpec.h
     inc/MantidDataHandling/LoadSpice2D.h
+    inc/MantidDataHandling/LoadHFIRSANS.h
     inc/MantidDataHandling/LoadSpiceAscii.h
     inc/MantidDataHandling/LoadSpiceXML2DDet.h
     inc/MantidDataHandling/LoadStl.h
@@ -379,8 +383,10 @@ set(INC_FILES
     inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveReflCustomAscii.h
     inc/MantidDataHandling/SaveReflThreeColumnAscii.h
+    inc/MantidDataHandling/SaveSampleEnvironmentAndShape.h
     inc/MantidDataHandling/SaveSESANS.h
     inc/MantidDataHandling/SaveSPE.h
+    inc/MantidDataHandling/SaveStl.h
     inc/MantidDataHandling/SaveTBL.h
     inc/MantidDataHandling/SaveToSNSHistogramNexus.h
     inc/MantidDataHandling/SaveVTK.h
@@ -503,6 +509,7 @@ set(TEST_FILES
     LoadSaveAsciiTest.h
     LoadSpecTest.h
     LoadSpice2dTest.h
+    LoadHFIRSANSTest.h
     LoadSpiceAsciiTest.h
     LoadSpiceXML2DDetTest.h
     LoadSwansTest.h
@@ -560,8 +567,10 @@ set(TEST_FILES
     SaveReflectometryAsciiTest.h
     SaveReflCustomAsciiTest.h
     SaveReflThreeColumnAsciiTest.h
+    SaveSampleEnvironmentAndShapeTest.h
     SaveSESANSTest.h
     SaveSPETest.h
+    SaveStlTest.h
     SaveTBLTest.h
     SaveToSNSHistogramNexusTest.h
     SetBeamTest.h

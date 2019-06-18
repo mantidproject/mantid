@@ -56,10 +56,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../../MantidPlot/icons/icons.qrc">
-          <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
-        </property>
        </widget>
       </item>
       <item>

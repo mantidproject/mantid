@@ -160,9 +160,6 @@ class RunTabPresenter(object):
         def on_sample_geometry_selection(self, show_geometry):
             self._presenter.on_sample_geometry_view_changed(show_geometry)
 
-        def on_compatibility_unchecked(self):
-            self._presenter.on_compatibility_unchecked()
-
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ProcessListener, self).__init__()
@@ -832,11 +829,6 @@ class RunTabPresenter(object):
             self._view.show_geometry()
         else:
             self._view.hide_geometry()
-
-    def on_compatibility_unchecked(self):
-        self.display_warning_box('Warning', 'Are you sure you want to uncheck compatibility mode?',
-                                 'Non-compatibility mode has known issues. DO NOT USE if applying bin masking'
-                                 ' to event workspaces.')
 
     def get_row_indices(self):
         """

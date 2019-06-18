@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 # Original from https://stackoverflow.com/questions/26227885/drag-and-drop-rows-within-qtablewidget
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QTableWidget, QAbstractItemView, QTableWidgetItem
