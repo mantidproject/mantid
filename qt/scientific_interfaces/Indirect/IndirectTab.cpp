@@ -524,8 +524,14 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   const auto nSpectra = specEnd - specStart + 1;
   std::vector<int> wkspIndices(nSpectra);
   std::iota(std::begin(wkspIndices), std::end(wkspIndices), specStart);
-  plot(workspaceNames, boost::none, wkspIndices, boost::none, boost::none,
-       boost::none, boost::none, m_plotErrorBars);
+  try {
+    plot(workspaceNames, boost::none, wkspIndices, boost::none, boost::none,
+         boost::none, boost::none, m_plotErrorBars);
+  } catch (Mantid::PythonInterface::PythonException &ex) {
+    std::string lll = ex.what();
+    auto iii = "";
+  }
+
 #endif
 }
 

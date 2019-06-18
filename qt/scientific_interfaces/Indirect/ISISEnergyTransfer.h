@@ -74,7 +74,10 @@ private:
   std::pair<std::string, std::string> createMapFile(
       const std::string
           &groupType); ///< create the mapping file with which to group results
-  std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
+
+  void plotWorkspace(std::string const &workspaceName,
+                     std::string const &plotType);
+  void saveWorkspace(std::string const &workspaceName);
 
   bool numberInCorrectRange(std::size_t const &spectraNumber) const;
   QString checkCustomGroupingNumbersInRange(
