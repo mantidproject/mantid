@@ -4,12 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-/*
- * XmlHandler.cpp
- *
- *  Created on: Nov 5, 2015
- *      Author: rhf
- */
+#include <algorithm>
+#include <boost/algorithm/string/trim.hpp>
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <vector>
 
 #include "MantidDataHandling/XmlHandler.h"
 
@@ -39,7 +39,7 @@ XmlHandler::~XmlHandler() {
  *
  */
 std::map<std::string, std::string>
-XmlHandler::get_metadata(const std::string &tag_to_ignore) {
+XmlHandler::get_metadata(const std::vector<std::string> &tags_to_ignore) {
   std::map<std::string, std::string> metadata;
 
   Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
@@ -47,10 +47,12 @@ XmlHandler::get_metadata(const std::string &tag_to_ignore) {
 
   while (pNode) {
     if (pNode->childNodes()->length() == 1 &&
-        pNode->nodeName() != tag_to_ignore) {
+        std::find(std::begin(tags_to_ignore), std::end(tags_to_ignore),
+                  pNode->nodeName()) == std::end(tags_to_ignore)) {
       std::string key =
           pNode->parentNode()->nodeName() + "/" + pNode->nodeName();
       std::string value = pNode->innerText();
+      boost::algorithm::trim(value);
       metadata.emplace(key, value);
     }
     pNode = it.nextNode();
