@@ -23,7 +23,7 @@ elements of that type. For example:
 
 The algorithm allows ranged inputs:
 
-- ``Pixel="1-8,121-128"` is equivalent to ``Pixel="1,2,3,4,5,6,7,8,121,122,123,124,125,126,127,128"
+- ``Pixel="1-8,121-128"`` is equivalent to ``Pixel="1,2,3,4,5,6,7,8,121,122,123,124,125,126,127,128"``
 
 Alternatively, the ``Components`` argument can be used to select named components instead of ``Banks``.
 This is can be used for masking entire sub-components of an instrument.
