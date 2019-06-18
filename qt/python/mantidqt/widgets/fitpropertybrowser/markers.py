@@ -498,7 +498,7 @@ class RangeMarker(QObject):
         Remove this range marker from the canvas.
         """
         self.min_marker.remove()
-        self.max_marker.remove()
+        #self.max_marker.remove()
 
     def set_color(self, color):
         """

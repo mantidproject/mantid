@@ -28,9 +28,9 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
       m_rangeMarker(std::make_unique<RangeMarker>(
           m_plot->canvas(), colour.name(QColor::HexRgb),
           std::get<0>(m_plot->getAxisRange()),
-          std::get<1>(m_plot->getAxisRange()), defaultLineKwargs())) {
+          std::get<1>(m_plot->getAxisRange()), defaultLineKwargs())),
+      m_visible(visible) {
   Q_UNUSED(type);
-  Q_UNUSED(visible);
   Q_UNUSED(infoOnly);
 
   m_plot->canvas()->draw();
@@ -89,10 +89,8 @@ double RangeSelector::getMinimum() const { return m_rangeMarker->getMinimum(); }
 double RangeSelector::getMaximum() const { return m_rangeMarker->getMaximum(); }
 
 void RangeSelector::setVisible(bool visible) {
-  if (visible)
-    redrawMarker();
-  else
-    detach();
+  m_visible = visible;
+  m_plot->replot();
 }
 
 void RangeSelector::detach() {
@@ -123,7 +121,10 @@ void RangeSelector::handleMouseUp(const QPoint &point) {
   m_rangeMarker->mouseMoveStop();
 }
 
-void RangeSelector::redrawMarker() { m_rangeMarker->redraw(); }
+void RangeSelector::redrawMarker() {
+  if (m_visible)
+    m_rangeMarker->redraw();
+}
 
 } // namespace MantidWidgets
 } // namespace MantidQt

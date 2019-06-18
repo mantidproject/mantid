@@ -61,6 +61,8 @@ private:
   PreviewPlot *m_plot;
   /// The minimum marker
   std::unique_ptr<MantidQt::Widgets::MplCpp::RangeMarker> m_rangeMarker;
+  /// Is the marker visible or hidden
+  bool m_visible;
 };
 
 } // namespace MantidWidgets

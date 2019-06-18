@@ -43,6 +43,11 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
 
+  m_uiForm.ppCalibration->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppCalibration->watchADS(false);
+  m_uiForm.ppResolution->watchADS(false);
+
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
 
   // CAL PROPERTY TREE
