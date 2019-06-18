@@ -44,8 +44,8 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeFilter;
@@ -3012,6 +3012,10 @@ InstrumentDefinitionParser::convertLocationsElement(
   if (pElem->hasAttribute("name-count-increment")) {
     nameCountIncrement = boost::lexical_cast<int>(
         Strings::strip(pElem->getAttribute("name-count-increment")));
+
+    if (nameCountIncrement <= 0)
+      throw Exception::InstrumentDefinitionError(
+          "name-count-increment must be greater than zero.");
   }
 
   // A list of numeric attributes which are allowed to have corresponding -end
