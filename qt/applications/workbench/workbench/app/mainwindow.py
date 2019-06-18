@@ -238,7 +238,7 @@ class MainWindow(QMainWindow):
         self.readSettings(CONF)
         self.config_updated()
 
-        self.setup_layout()
+        self.load_layout_settings()
         self.create_actions()
 
     def post_mantid_init(self):
@@ -309,7 +309,7 @@ class MainWindow(QMainWindow):
         action_load_user_layout = create_action(
             self, "Restore Custom Layout",
             on_triggered=self.load_layout_settings,
-            shortcut="Shift+F12", shortcut_context=Qt.ApplicationShortcut)
+            shortcut="Shift+F11", shortcut_context=Qt.ApplicationShortcut)
 
         self.view_menu_actions = [action_restore_default, action_save_user_layout, action_load_user_layout, None] \
                                  + self.create_widget_actions()
@@ -425,10 +425,21 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Layout ---------------------------------
 
+    def save_layout_settings(self):
+        """Save the current layout to configuration"""
+        CONF.set("Layout/Layout", self.saveState())
+
+    def load_layout_settings(self):
+        """Load a layout for the child widgets from the user config, if no user default exists load the default"""
+        try:
+            self.restoreState(CONF.get("Layout/Layout"))
+        except KeyError:
+            self.setup_default_layouts()  # If user layout not found load default
+
     def setup_layout(self):
         """Assume this is a first run of the application and set layouts
         accordingly"""
-        self.setup_default_layouts()
+        self.load_layout_settings()
 
     def prep_window_for_reset(self):
         """Function to reset all dock widgets to a state where they can be
@@ -498,16 +509,6 @@ class MainWindow(QMainWindow):
                     row[0].dockwidget.show()
                     row[0].dockwidget.raise_()
 
-    def save_layout_settings(self):
-        """Save the current layout to configuration"""
-        CONF.set("Layout/Layout", self.saveState())
-
-    def load_layout_settings(self):
-        """Load a layout for the child widgets from a file"""
-        try:
-            self.restoreState(CONF.get("Layout/Layout"))
-        except KeyError:
-            self.setup_default_layouts()  # If user layout not found load default
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
