@@ -3,11 +3,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Strings.h"
-//#include "MantidAPI/IMDIterator.h"
-//#include "MantidAPI/IMDEventWorkspace.h"
-//#include "MantidDataObjects/MDBox.h"
-//#include "MantidDataObjects/MDGridBox.h"
-//#include "MantidDataObjects/EventFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -53,8 +48,8 @@ public:
   }
 
   std::shared_ptr<LoadDNSEvent>
-  makeAlgorithm(const std::string &inputFile, uint chopperChannel,
-                uint monitorChannel, const std::string &outputWorkspace,
+  makeAlgorithm(const std::string &inputFile, uint32_t chopperChannel,
+                uint32_t monitorChannel, const std::string &outputWorkspace,
                 bool doesThrow = true) {
     auto alg = makeAlgorithm(inputFile, outputWorkspace, doesThrow);
     TS_ASSERT_THROWS_NOTHING(
