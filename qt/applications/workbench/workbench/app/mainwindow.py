@@ -505,7 +505,6 @@ class MainWindow(QMainWindow):
                     row[0].dockwidget.raise_()
 
     # ----------------------- Events ---------------------------------
-    
     def closeEvent(self, event):
         # Check whether or not to save project
         if not self.project.saved:
