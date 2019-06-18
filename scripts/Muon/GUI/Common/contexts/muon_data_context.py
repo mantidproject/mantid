@@ -142,12 +142,9 @@ class MuonDataContext(object):
         if self.current_runs:
             loaded_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
         else:
-            loaded_data = {}
+            loaded_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}
 
-        if loaded_data:
-            return loaded_data
-        else:
-            return {"workspace": load_utils.empty_loaded_data(), 'run': []}  # self.get_result(False)
+        return loaded_data
 
     @property
     def current_data(self):
@@ -275,7 +272,9 @@ class MuonDataContext(object):
         return message
 
     def remove_workspace_by_name(self, workspace_name):
-        self._loaded_data.remove_workspace_by_name(workspace_name)
+        runs_removed = self._loaded_data.remove_workspace_by_name(workspace_name, self.instrument)
+
+        self.current_runs = [item for item in self.current_runs if item not in runs_removed]
 
     class InstrumentNotifier(Observable):
         def __init__(self, outer):

@@ -138,13 +138,16 @@ class MuonLoadData:
         else:
             return None
 
-    def remove_workspace_by_name(self, workspace_name):
+    def remove_workspace_by_name(self, workspace_name, instrument=''):
         list_of_workspace_names_to_remove = []
         for entry in self.params:
             if any([workspace.workspace_name == workspace_name for workspace in entry['workspace']['OutputWorkspace']]):
                 list_of_workspace_names_to_remove.append(entry)
 
-        print('Removing {} from raw data'.format(list_of_workspace_names_to_remove))
-
+        runs_removed = []
         for entry in list_of_workspace_names_to_remove:
+            if instrument == entry['instrument']:
+                runs_removed.append(entry['run'])
             self.remove_data(**entry)
+
+        return runs_removed

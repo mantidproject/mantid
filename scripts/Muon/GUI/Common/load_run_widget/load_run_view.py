@@ -131,6 +131,7 @@ class LoadRunWidgetView(QtWidgets.QWidget):
 
     def set_run_edit_text(self, text):
         self.run_edit.setText(text)
+        self.run_edit.setText(text)
         self._cached_text = self.get_run_edit_text()
 
     def set_run_edit_without_validator(self, text):
