@@ -44,7 +44,7 @@ SortHKL::SortHKL() {
 SortHKL::~SortHKL() = default;
 
 void SortHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
 
@@ -80,15 +80,15 @@ void SortHKL::init() {
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty("OutputChi2", 0.0, "Chi-square is available as output",
                   Direction::Output);
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "RowName", "Overall", Direction::Input),
                   "name of row");
   declareProperty("Append", false,
@@ -99,12 +99,12 @@ void SortHKL::init() {
                   boost::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "SigmaCritical", 3.0, Direction::Input),
                   "Removes peaks whose intensity deviates more than "
                   "SigmaCritical from the mean (or median).");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
       "Output Equivalent Intensities");
   declareProperty("WeightedZScore", false,
@@ -119,7 +119,7 @@ void SortHKL::exec() {
   std::vector<Peak> peaks = getNonZeroPeaks(inputPeaks);
 
   if (peaks.empty()) {
-    g_log.error() << "Number of peaks should not be 0 for SortHKL.\n";
+    g_log.warning() << "Number of peaks should not be 0 for SortHKL.\n";
     return;
   }
 
@@ -205,11 +205,6 @@ void SortHKL::exec() {
           UniqE[i] = intensityStatistics.median - intensities[i];
         g_log.debug() << zScores[i] << "  ";
       }
-      for (size_t i = zScores.size(); i < 20; ++i) {
-        UniqX[i] = wavelengths[zScores.size() - 1];
-        UniqY[i] = intensities[zScores.size() - 1];
-        UniqE[i] = 0.0;
-      }
       g_log.debug() << "\n";
     }
   }
@@ -266,6 +261,7 @@ SortHKL::getNonZeroPeaks(const std::vector<Peak> &inputPeaks) const {
                       std::back_inserter(peaks), [](const Peak &peak) {
                         return peak.getIntensity() <= 0.0 ||
                                peak.getSigmaIntensity() <= 0.0 ||
+                               peak.getIntMNP() != V3D(0, 0, 0) ||
                                peak.getHKL() == V3D(0, 0, 0);
                       });
 

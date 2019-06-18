@@ -15,7 +15,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
@@ -63,38 +63,35 @@ public:
   }
 
   void testConstructWithNullRepositoryThrows() {
-    TSM_ASSERT_THROWS(
-        "Should throw with null repository.",
-        MDHWInMemoryLoadingPresenter(
-            Mantid::Kernel::make_unique<MockMDLoadingView>(), nullptr, "_"),
-        const std::invalid_argument &);
+    TSM_ASSERT_THROWS("Should throw with null repository.",
+                      MDHWInMemoryLoadingPresenter(
+                          std::make_unique<MockMDLoadingView>(), nullptr, "_"),
+                      const std::invalid_argument &);
   }
 
   void testConstructWithEmptyWsNameThrows() {
     std::string emptyName = "";
-    TSM_ASSERT_THROWS("Should throw with empty Workspace name.",
-                      MDHWInMemoryLoadingPresenter(
-                          Mantid::Kernel::make_unique<MockMDLoadingView>(),
-                          new MockWorkspaceProvider, emptyName),
-                      const std::invalid_argument &);
+    TSM_ASSERT_THROWS(
+        "Should throw with empty Workspace name.",
+        MDHWInMemoryLoadingPresenter(std::make_unique<MockMDLoadingView>(),
+                                     new MockWorkspaceProvider, emptyName),
+        const std::invalid_argument &);
   }
 
   void testConstruction() {
     TS_ASSERT_THROWS_NOTHING(MDHWInMemoryLoadingPresenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_"));
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_"));
   }
 
   void testCanLoadWithInvalidName() {
-    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
+    auto repository = std::make_unique<MockWorkspaceProvider>();
     EXPECT_CALL(*repository, canProvideWorkspace(_))
         .WillOnce(Return(
             false)); // No matter what the argument, always returns false.
 
     // Give a dummy name corresponding to the workspace.
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository.release(),
-        "_");
+        std::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     TSM_ASSERT("Should indicate that the workspace cannot be read-out since "
                "the name is not in the Repository.",
@@ -102,7 +99,7 @@ public:
   }
 
   void testCanLoadWithWrongWsType() {
-    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
+    auto repository = std::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr badWs =
         getBadWorkspace(); // Not an IMDHistoWorkspace.
     EXPECT_CALL(*repository, canProvideWorkspace(_))
@@ -112,8 +109,7 @@ public:
 
     // Give a dummy name corresponding to the workspace.
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository.release(),
-        "_");
+        std::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     TSM_ASSERT("Should indicate that the workspace cannot be read-out since it "
                "is not of the right type.",
@@ -121,7 +117,7 @@ public:
   }
 
   void testCanLoadSucceeds() {
-    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
+    auto repository = std::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr goodWs = getGoodWorkspace();
     EXPECT_CALL(*repository, canProvideWorkspace(_))
         .WillOnce(
@@ -130,8 +126,7 @@ public:
 
     // Give a dummy name corresponding to the workspace.
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository.release(),
-        "_");
+        std::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     TSM_ASSERT("Should have worked! Workspace is of correct type and "
                "repository says ws is present.!",
@@ -139,15 +134,14 @@ public:
   }
 
   void testExtractMetadata() {
-    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
+    auto repository = std::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr ws = getGoodWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_))
         .Times(1)
         .WillRepeatedly(Return(ws));
 
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository.release(),
-        "_");
+        std::make_unique<MockMDLoadingView>(), repository.release(), "_");
 
     // Test that it doesn't work when not setup.
     TSM_ASSERT_THROWS("::executeLoadMetadata is critical to setup, should "
@@ -168,8 +162,7 @@ public:
   void testExecution() {
 
     // Setup view
-    std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MockMDLoadingView>();
+    std::unique_ptr<MDLoadingView> view = std::make_unique<MockMDLoadingView>();
     MockMDLoadingView *mockView = dynamic_cast<MockMDLoadingView *>(view.get());
     EXPECT_CALL(*mockView, getRecursionDepth()).Times(0);
     EXPECT_CALL(*mockView, getLoadInMemory())
@@ -182,7 +175,7 @@ public:
     EXPECT_CALL(factory, create(_))
         .WillOnce(Return(vtkSmartPointer<vtkUnstructuredGrid>::New()));
 
-    auto repository = Mantid::Kernel::make_unique<MockWorkspaceProvider>();
+    auto repository = std::make_unique<MockWorkspaceProvider>();
     Mantid::API::Workspace_sptr ws = getGoodWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_))
         .Times(2)
@@ -217,8 +210,7 @@ public:
 
   void testCallHasTDimThrows() {
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.hasTDimensionAvailable(),
                       const std::runtime_error &);
@@ -226,8 +218,7 @@ public:
 
   void testCallGetTDimensionValuesThrows() {
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getTimeStepValues(),
                       const std::runtime_error &);
@@ -235,24 +226,21 @@ public:
 
   void testCallGetGeometryThrows() {
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
                       presenter.getGeometryXML(), const std::runtime_error &);
   }
 
   void testGetWorkspaceTypeName() {
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
                       presenter.getWorkspaceTypeName());
   }
 
   void testGetSpecialCoordinates() {
     MDHWInMemoryLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<MockMDLoadingView>(),
-        new MockWorkspaceProvider, "_");
+        std::make_unique<MockMDLoadingView>(), new MockWorkspaceProvider, "_");
     TSM_ASSERT_EQUALS("Characterisation Test Failed", -1,
                       presenter.getSpecialCoordinates());
   }

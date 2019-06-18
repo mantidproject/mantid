@@ -9,8 +9,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
-#include <MantidAPI/IMDWorkspace.h>
 
 namespace Mantid {
 namespace MDAlgorithms {

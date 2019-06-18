@@ -16,7 +16,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 
@@ -364,7 +364,11 @@ void FunctionFactoryImpl::addTie(IFunction_sptr fun,
 }
 
 std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
-  auto &allNames = getFunctionNames<IFunction1D>();
+  auto allNames = getFunctionNames<IFunction1D>();
+  allNames.push_back("ProductFunction");
+  allNames.push_back("CompositeFunction");
+  allNames.push_back("Convolution");
+  std::sort(allNames.begin(), allNames.end());
   std::vector<std::string> names;
   names.reserve(allNames.size());
   auto excludes =

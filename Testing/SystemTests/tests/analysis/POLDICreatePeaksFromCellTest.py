@@ -44,7 +44,7 @@ class ReflectionCheckingTest(systemtesting.MantidSystemTest):
             idx = self.getPeakIndex(peakTable, reference[0])
 
             # Make sure the reflection exists.
-            self.assertTrue(idx != -1)
+            self.assertNotEqual(idx,  -1)
 
             currentPeak = peakTable.row(idx)
 

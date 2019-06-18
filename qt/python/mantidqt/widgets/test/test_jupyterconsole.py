@@ -27,13 +27,13 @@ class InProcessJupyterConsoleTest(GuiTest):
         widget = InProcessJupyterConsole()
         self.assertTrue(hasattr(widget, "kernel_manager"))
         self.assertTrue(hasattr(widget, "kernel_client"))
-        self.assertTrue(len(widget.banner) > 0)
+        self.assertGreater(len(widget.banner), 0)
         self._pre_delete_console_cleanup(widget)
         del widget
 
     def test_construction_with_startup_code_adds_to_banner_and_executes(self):
         widget = InProcessJupyterConsole(startup_code="x = 1")
-        self.assertEquals(1, widget.kernel_manager.kernel.shell.user_ns['x'])
+        self.assertEqual(1, widget.kernel_manager.kernel.shell.user_ns['x'])
         self._pre_delete_console_cleanup(widget)
         del widget
 

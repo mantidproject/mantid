@@ -415,7 +415,7 @@ private:
   }
 
   std::unique_ptr<GenericDataProcessorPresenterFriend> makeDefaultPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenterFriend>(
+    return std::make_unique<GenericDataProcessorPresenterFriend>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         DEFAULT_GROUP_NUMBER);
@@ -423,7 +423,7 @@ private:
 
   std::unique_ptr<GenericDataProcessorPresenterNoThread>
   makeDefaultPresenterNoThread() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenterNoThread>(
+    return std::make_unique<GenericDataProcessorPresenterNoThread>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         DEFAULT_GROUP_NUMBER);
@@ -1702,7 +1702,7 @@ public:
   }
 
   std::unique_ptr<GenericDataProcessorPresenter> makeNonPostProcessPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+    return std::make_unique<GenericDataProcessorPresenter>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), DEFAULT_GROUP_NUMBER);
   }
@@ -3150,7 +3150,7 @@ public:
   void testPlotRowPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto mockTreeManager = std::make_unique<MockTreeManager>();
     auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -3195,7 +3195,7 @@ public:
   void testPlotGroupPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto mockTreeManager = std::make_unique<MockTreeManager>();
     auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);

@@ -469,7 +469,7 @@ void LoadPLN::init() {
   // file to load.
   exts.clear();
   exts.emplace_back(".hdf");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       FilenameStr, "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
 
@@ -481,7 +481,7 @@ void LoadPLN::init() {
   // mask
   exts.clear();
   exts.emplace_back(".xml");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       MaskStr, "", API::FileProperty::OptionalLoad, exts),
                   "The input filename of the mask data");
 
@@ -490,7 +490,7 @@ void LoadPLN::init() {
                   "  eg 16,19-45,47");
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output));
 
   declareProperty(SelectDatasetStr, 0,

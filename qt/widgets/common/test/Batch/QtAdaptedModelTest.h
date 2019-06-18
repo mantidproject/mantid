@@ -7,7 +7,6 @@
 #ifndef MANTID_MANTIDWIDGETS_QTADAPTEDMODELTEST_H
 #define MANTID_MANTIDWIDGETS_QTADAPTEDMODELTEST_H
 
-#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include <QModelIndex>
 #include <QStandardItemModel>
@@ -30,7 +29,7 @@ public:
   }
 
   std::unique_ptr<QStandardItemModel> emptyModel() const {
-    return Mantid::Kernel::make_unique<QStandardItemModel>();
+    return std::make_unique<QStandardItemModel>();
   }
 
   void testInvalidIndexIsRoot() {

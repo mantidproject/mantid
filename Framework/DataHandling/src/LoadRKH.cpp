@@ -25,7 +25,7 @@
 // clang-format on
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <istream>
 #include <numeric>
@@ -179,10 +179,10 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadRKH::init() {
   const std::vector<std::string> exts{".txt", ".q", ".dat"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, exts),
                   "Name of the RKH file to load");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
   // Get the units registered with the UnitFactory

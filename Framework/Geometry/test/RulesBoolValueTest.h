@@ -16,7 +16,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cfloat>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -79,12 +79,12 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)nullptr);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    auto B = Mantid::Kernel::make_unique<BoolValue>();
+    auto B = std::make_unique<BoolValue>();
     TS_ASSERT_EQUALS(B->display(), " Unknown ");
     B->setStatus(1);
     A.setLeaves(std::move(B), std::unique_ptr<Rule>());
     TS_ASSERT_EQUALS(A.display(), " True ");
-    auto C = Mantid::Kernel::make_unique<BoolValue>();
+    auto C = std::make_unique<BoolValue>();
     TS_ASSERT_EQUALS(C->display(), " Unknown ");
     C->setStatus(0);
     A.setLeaf(std::move(C), 1);
@@ -98,7 +98,7 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)nullptr);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    auto B = Mantid::Kernel::make_unique<BoolValue>();
+    auto B = std::make_unique<BoolValue>();
     TS_ASSERT_EQUALS(B->display(), " Unknown ");
     B->setStatus(1);
     Rule *ptrB = B.get();

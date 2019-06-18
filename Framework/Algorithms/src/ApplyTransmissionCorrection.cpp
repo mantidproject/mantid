@@ -31,15 +31,15 @@ void ApplyTransmissionCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Workspace to apply the transmission correction to");
-  declareProperty(make_unique<WorkspaceProperty<>>("TransmissionWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("TransmissionWorkspace",
+                                                        "", Direction::Output,
+                                                        PropertyMode::Optional),
                   "Workspace containing the transmission values [optional]");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Workspace to store the corrected data in");
 
   // Alternatively, the user can specify a transmission that will ba applied to

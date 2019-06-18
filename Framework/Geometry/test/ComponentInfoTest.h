@@ -22,7 +22,7 @@
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <Eigen/Geometry>
 #include <boost/make_shared.hpp>
@@ -117,7 +117,7 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
   auto componentType =
       boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
   auto children = boost::make_shared<std::vector<std::vector<size_t>>>(1);
-  return Kernel::make_unique<Beamline::ComponentInfo>(
+  return std::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
       parentIndices, children, positions, rotations, scaleFactors,
       componentType, names, -1, -1);
@@ -166,7 +166,7 @@ public:
         2, ComponentType::Generic);
     auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
         1, std::vector<size_t>(1));
-    auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
+    auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
         parentIndices, children, positions, rotations, scaleFactors, isRectBank,
         names, -1, -1);

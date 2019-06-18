@@ -96,18 +96,6 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
     mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
-    mantidqt/widgets/workspacedisplay/test/test_data_copier.py
-    mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
     )
 
   # ctest target for widgets that only get tested in qt5, because they are only
@@ -126,10 +114,23 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
     mantidqt/widgets/test/test_jupyterconsole.py
+    mantidqt/widgets/workspacedisplay/test/test_data_copier.py
+    mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
     mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
-    mantidqt/icons/test/test_icons.py)
+    mantidqt/icons/test/test_icons.py
+)
 
   # Tests
   set(PYUNITTEST_QT_API pyqt5)

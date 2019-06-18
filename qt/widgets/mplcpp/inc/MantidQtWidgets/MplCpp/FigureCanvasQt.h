@@ -27,15 +27,19 @@ class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
                                          public Common::Python::InstanceHolder {
   Q_OBJECT
 public:
-  FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);
+  FigureCanvasQt(const int subplotspec, const QString projection = "",
+                 QWidget *parent = nullptr);
   FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 
   /// Attach an event filter to the underlying matplotlib canvas
   void installEventFilterToMplCanvas(QObject *filter);
   /// Access to the current figure instance.
   inline Figure gcf() const { return m_figure; }
+
   /// Access to the current active axes instance.
-  inline Axes gca() const { return m_figure.gca(); }
+  template <typename AxesType = Axes> inline AxesType gca() const {
+    return m_figure.gca<AxesType>();
+  }
 
   /// Convert a point in screen coordinates to data coordinates
   QPointF toDataCoords(QPoint pos) const;

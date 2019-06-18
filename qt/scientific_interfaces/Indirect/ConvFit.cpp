@@ -41,7 +41,7 @@ ConvFit::ConvFit(QWidget *parent)
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
 
-  setFitDataPresenter(Mantid::Kernel::make_unique<ConvFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<ConvFitDataPresenter>(
       m_convFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);

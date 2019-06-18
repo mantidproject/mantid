@@ -31,6 +31,7 @@ set(QT5_SRC_FILES
     # todo: move this to the instrument view library when the slice
     # viewer library is removed
     src/InputController.cpp
+    src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
     src/LineEditWithClear.cpp
     src/ListPropertyWidget.cpp
@@ -149,6 +150,7 @@ set(
   inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/InputController.h
+  inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/LocalParameterEditor.h
@@ -221,10 +223,10 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FlowLayout.h
+    inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
-    inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/IFunctionView.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h

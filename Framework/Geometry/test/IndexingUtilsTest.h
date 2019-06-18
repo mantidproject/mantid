@@ -7,12 +7,12 @@
 #ifndef MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_
 #define MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_
 
+#include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <MantidGeometry/Crystal/IndexingUtils.h>
-#include <MantidKernel/Matrix.h>
-#include <MantidKernel/System.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/V3D.h>
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;

@@ -8,9 +8,9 @@
 #define MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGETSIMPLE_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h>
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 
-#include <MantidAPI/MatrixWorkspace_fwd.h>
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QMenu>
 #include <QWidget>

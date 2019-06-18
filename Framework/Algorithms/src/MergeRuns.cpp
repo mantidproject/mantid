@@ -24,7 +24,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTypes/SpectrumDefinition.h"
 
 using Mantid::HistogramData::HistogramX;
@@ -46,12 +46,12 @@ void MergeRuns::init() {
   // declare arbitrary number of input workspaces as a list of strings at the
   // moment
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces", boost::make_shared<ADSValidator>()),
       "The names of the input workspaces as a list. You may "
       "also group workspaces using the GUI or [[GroupWorkspaces]], and specify "
       "the name of the group instead.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
   declareProperty(SampleLogsBehaviour::TIME_SERIES_PROP, "",
@@ -312,7 +312,7 @@ void MergeRuns::execEvent() {
     outWS->getSpectrum(i) = inputWS->getSpectrum(i);
 
   int64_t n = m_inEventWS.size() - 1;
-  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, n);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, n);
 
   // Note that we start at 1, since we already have the 0th workspace
   auto current = inputSize;
@@ -382,7 +382,7 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
   auto isScanning = outWS->detectorInfo().isScanning();
 
   const size_t numberOfWSs = m_inMatrixWS.size();
-  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
   // Note that the iterator is incremented before first pass so that 1st
   // workspace isn't added to itself
   auto it = m_inMatrixWS.begin();

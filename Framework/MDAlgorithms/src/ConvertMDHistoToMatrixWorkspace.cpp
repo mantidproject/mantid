@@ -97,11 +97,11 @@ DECLARE_ALGORITHM(ConvertMDHistoToMatrixWorkspace)
 
 /// Decalare the properties
 void ConvertMDHistoToMatrixWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input IMDHistoWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output Workspace2D.");
 
   std::array<std::string, 3> normalizations = {
@@ -113,7 +113,8 @@ void ConvertMDHistoToMatrixWorkspace::init() {
                   "Signal normalization method");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("FindXAxis", true, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("FindXAxis", true,
+                                                Direction::Input),
       "If True, tries to automatically determine the dimension to use as the "
       "output x-axis. Applies to line cut MD workspaces.");
 }

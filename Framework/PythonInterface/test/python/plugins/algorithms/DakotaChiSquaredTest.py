@@ -79,7 +79,7 @@ class DakotaChiSquaredTest(unittest.TestCase):
             simpleapi.DakotaChiSquared(self.datafile, self.simfile, self.chifile)
             f = open(self.chifile, 'r')
             chistr = f.read()
-            self.assertEquals(chistr, '4.5 obj_fn\n')
+            self.assertEqual(chistr, '4.5 obj_fn\n')
             f.close()
         except:
             assert False, "Raised an exception"
@@ -89,17 +89,17 @@ class DakotaChiSquaredTest(unittest.TestCase):
         self.makeFiles()
         try:
             alg = simpleapi.DakotaChiSquared(self.datafile, self.simfile, self.chifile)
-            self.assertEquals(len(alg), 2)
-            self.assertEquals(alg[0], 4.5)
-            self.assertEquals(alg[1].name(), "alg")
-            self.assertEquals(alg[1].blocksize(), 5)
-            self.assertEquals(alg[1].getNumberHistograms(), 1)
-            self.assertEquals(alg[1].dataY(0)[3], 1.5)
+            self.assertEqual(len(alg), 2)
+            self.assertEqual(alg[0], 4.5)
+            self.assertEqual(alg[1].name(), "alg")
+            self.assertEqual(alg[1].blocksize(), 5)
+            self.assertEqual(alg[1].getNumberHistograms(), 1)
+            self.assertEqual(alg[1].dataY(0)[3], 1.5)
             ads = AnalysisDataServiceImpl.Instance()
             ads.remove("alg")
             alg1 = simpleapi.DakotaChiSquared(self.datafile, self.simfile, self.chifile, ResidualsWorkspace="res")
-            self.assertEquals(alg1[0], 4.5)
-            self.assertEquals(alg1[1].name(), "res")
+            self.assertEqual(alg1[0], 4.5)
+            self.assertEqual(alg1[1].name(), "res")
             ads.remove("res")
         except:
             assert False, "Raised an exception"

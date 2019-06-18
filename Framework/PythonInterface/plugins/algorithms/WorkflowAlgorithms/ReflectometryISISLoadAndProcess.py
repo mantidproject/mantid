@@ -39,7 +39,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._transPrefix = "TRANS_"
 
     def category(self):
-        """Return the categories of the algrithm."""
+        """Return the categories of the algorithm."""
         return 'ISIS\\Reflectometry;Workflow\\Reflectometry'
 
     def name(self):
@@ -111,6 +111,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Perform the reduction
         alg = self._reduce(input_workspace, first_trans_workspace, second_trans_workspace)
         self._finalize(alg)
+        if len(inputWorkspaces) >= 2:
+            inputWorkspaces.append(input_workspace)
+        self._group_workspaces(inputWorkspaces, "TOF")
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -213,6 +216,28 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return workspace_name
         # Not found
         return None
+
+    def _group_workspaces(self, workspaces, output_ws_name):
+        """
+        Groups all the given workspaces into a group with the given name. If the group
+        already exists it will add them to that group.
+        """
+        if AnalysisDataService.doesExist(output_ws_name):
+            ws_group = AnalysisDataService.retrieve(output_ws_name)
+            if not isinstance(ws_group, WorkspaceGroup):
+                raise RuntimeError('Cannot group TOF workspaces, a workspace called TOF already exists')
+            else:
+                for ws in workspaces:
+                    if ws not in ws_group:
+                        ws_group.add(ws)
+        else:
+            alg = self.createChildAlgorithm("GroupWorkspaces")
+            alg.setProperty("InputWorkspaces", workspaces)
+            alg.setProperty("OutputWorkspace", output_ws_name)
+            alg.execute()
+            ws_group = alg.getProperty("OutputWorkspace").value
+        AnalysisDataService.addOrReplace(output_ws_name, ws_group)
+        return ws_group
 
     def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
         """Rename the given workspace based on its run number and a standard prefix"""

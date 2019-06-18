@@ -45,7 +45,7 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  setFitDataPresenter(Mantid::Kernel::make_unique<JumpFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
       m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter));
   setPlotView(m_uiForm->pvFitPlotView);

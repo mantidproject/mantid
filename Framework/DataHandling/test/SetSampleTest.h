@@ -286,6 +286,54 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
   }
 
+  void test_Setting_Geometry_As_Cylinder_With_Axis() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createCylinderWithAxisGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
+                   .getShapeXML()
+                   .find("cylinder");
+    TS_ASSERT(tag != std::string::npos);
+
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
+  }
+
+  void test_Setting_Geometry_As_Cylinder_With_Indexed_Axis() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createCylinderWithIndexedAxisGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
+                   .getShapeXML()
+                   .find("cylinder");
+    TS_ASSERT(tag != std::string::npos);
+
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
+  }
+
   void test_Setting_Geometry_No_Volume() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
@@ -336,6 +384,44 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
   }
 
+  void test_Setting_Geometry_As_HollowCylinder_With_Axis() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createHollowCylinderWithAxisGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.035, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.035, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
+  }
+
+  void test_Setting_Geometry_As_HollowCylinder_With_Indexed_Axis() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry",
+                     createHollowCylinderWithIndexedAxisGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.035, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.035, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
+  }
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -348,8 +434,8 @@ public:
     auto alg = createAlgorithm(inputWS);
 
     auto args = boost::make_shared<PropertyManager>();
-    args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Container", "8mm"), "");
+    args->declareProperty(std::make_unique<StringProperty>("Container", "8mm"),
+                          "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
@@ -362,8 +448,8 @@ public:
     auto alg = createAlgorithm(inputWS);
 
     auto args = boost::make_shared<PropertyManager>();
-    args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Name", m_envName), "");
+    args->declareProperty(std::make_unique<StringProperty>("Name", m_envName),
+                          "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
@@ -376,13 +462,12 @@ public:
     auto alg = createAlgorithm(inputWS);
 
     auto args = boost::make_shared<PropertyManager>();
-    args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Name", ""), "");
+    args->declareProperty(std::make_unique<StringProperty>("Name", ""), "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     args->removeProperty("Name");
-    args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Container", ""), "");
+    args->declareProperty(std::make_unique<StringProperty>("Container", ""),
+                          "");
     alg->setProperty("Environment", args);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
@@ -396,13 +481,12 @@ public:
     auto alg = createAlgorithm();
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+        std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
     std::array<const std::string, 3> dimensions = {
         {"Width", "Height", "Thick"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
-      args->declareProperty(
-          Mantid::Kernel::make_unique<DoubleProperty>(dim, -1.0), "");
+      args->declareProperty(std::make_unique<DoubleProperty>(dim, -1.0), "");
       alg->setProperty(geometryProp, args);
       TS_ASSERT(validateErrorProduced(*alg, geometryProp));
       args->removeProperty(dim);
@@ -416,13 +500,12 @@ public:
 
     auto alg = createAlgorithm();
     auto args = boost::make_shared<PropertyManager>();
-    args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    args->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"),
+                          "");
     std::array<const std::string, 2> dimensions = {{"Radius", "Height"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
-      args->declareProperty(
-          Mantid::Kernel::make_unique<DoubleProperty>(dim, -1.0), "");
+      args->declareProperty(std::make_unique<DoubleProperty>(dim, -1.0), "");
       alg->setProperty(geometryProp, args);
       TS_ASSERT(validateErrorProduced(*alg, geometryProp));
       args->removeProperty(dim);
@@ -438,13 +521,12 @@ public:
     auto alg = createAlgorithm();
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+        std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
     std::array<const std::string, 3> dimensions = {
         {"InnerRadius", "OuterRadius", "Height"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
-      args->declareProperty(
-          Mantid::Kernel::make_unique<DoubleProperty>(dim, -1.0), "");
+      args->declareProperty(std::make_unique<DoubleProperty>(dim, -1.0), "");
       alg->setProperty(geometryProp, args);
       TS_ASSERT(validateErrorProduced(*alg, geometryProp));
       args->removeProperty(dim);
@@ -458,7 +540,7 @@ private:
   Mantid::API::IAlgorithm_uptr
   createAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS =
                       Mantid::API::MatrixWorkspace_sptr()) {
-    auto alg = Mantid::Kernel::make_unique<SetSample>();
+    auto alg = std::make_unique<SetSample>();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();
@@ -494,13 +576,11 @@ private:
 
     auto props = boost::make_shared<PropertyManager>();
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("ChemicalFormula", "V"),
-        "");
+        std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
     if (volume > 0.) // <mass> = <standard mass density for vanadium> x <volume>
-      props->declareProperty(
-          Mantid::Kernel::make_unique<PropertyWithValue<double>>("SampleMass",
-                                                                 6.11 * volume),
-          "");
+      props->declareProperty(std::make_unique<PropertyWithValue<double>>(
+                                 "SampleMass", 6.11 * volume),
+                             "");
     return props;
   }
 
@@ -510,10 +590,10 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "CSG"),
+                           "");
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "CSG"), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>(
+        std::make_unique<StringProperty>(
             "Value", ComponentCreationHelper::sphereXML(0.02, V3D(), "sp-1")),
         "");
     return props;
@@ -524,10 +604,10 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Name", m_envName),
+                           "");
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Name", m_envName), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Container", "10mm"), "");
+        std::make_unique<StringProperty>("Container", "10mm"), "");
     return props;
   }
 
@@ -536,8 +616,7 @@ private:
     using DoubleProperty = Mantid::Kernel::PropertyWithValue<double>;
 
     auto props = boost::make_shared<PropertyManager>();
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Radius", 40), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Radius", 40), "");
     return props;
   }
 
@@ -550,20 +629,16 @@ private:
 
     auto props = boost::make_shared<PropertyManager>();
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "FlatPlate"), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Width", 5), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Height", 4), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Thick", 0.1), "");
+        std::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Width", 5), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 4), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Thick", 0.1), "");
     std::vector<double> center{1, 0, 0};
-    props->declareProperty(Mantid::Kernel::make_unique<DoubleArrayProperty>(
-                               "Center", std::move(center)),
-                           "");
+    props->declareProperty(
+        std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
     if (angle != 0.0) {
-      props->declareProperty(
-          Mantid::Kernel::make_unique<DoubleProperty>("Angle", angle), "");
+      props->declareProperty(std::make_unique<DoubleProperty>("Angle", angle),
+                             "");
     }
     return props;
   }
@@ -576,16 +651,35 @@ private:
 
     auto props = boost::make_shared<PropertyManager>();
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "Cylinder"), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Height", 2), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Radius", 5), "");
+        std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Radius", 5), "");
     std::vector<double> center{0, 0, 1};
-    props->declareProperty(Mantid::Kernel::make_unique<DoubleArrayProperty>(
-                               "Center", std::move(center)),
-                           "");
+    props->declareProperty(
+        std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
 
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr createCylinderWithAxisGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    auto props = createCylinderGeometryProps();
+    // Use the same pointing up direction as in the without axis test
+    std::vector<double> axis{0, 0, 1};
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
+                           "");
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr
+  createCylinderWithIndexedAxisGeometryProps() {
+    using namespace Mantid::Kernel;
+    using IntProperty = PropertyWithValue<int>;
+    auto props = createCylinderGeometryProps();
+    // Use the same pointing up direction as in the without axis test
+    int axis{2};
+    props->declareProperty(std::make_unique<IntProperty>("Axis", axis), "");
     return props;
   }
 
@@ -597,19 +691,40 @@ private:
 
     auto props = boost::make_shared<PropertyManager>();
     props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "HollowCylinder"),
-        "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Height", 2), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("InnerRadius", 3), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("OuterRadius", 4), "");
-    std::vector<double> center{0, 0, 1};
-    props->declareProperty(Mantid::Kernel::make_unique<DoubleArrayProperty>(
-                               "Center", std::move(center)),
+        std::make_unique<StringProperty>("Shape", "HollowCylinder"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("InnerRadius", 3),
                            "");
+    props->declareProperty(std::make_unique<DoubleProperty>("OuterRadius", 4),
+                           "");
+    std::vector<double> center{0, 0, 1};
+    props->declareProperty(
+        std::make_unique<DoubleArrayProperty>("Center", std::move(center)), "");
 
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr
+  createHollowCylinderWithAxisGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    auto props = createHollowCylinderGeometryProps();
+    // Use the same pointing up direction as in the without axis test
+    std::vector<double> axis{0, 0, 1};
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
+                           "");
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr
+  createHollowCylinderWithIndexedAxisGeometryProps() {
+    using namespace Mantid::Kernel;
+    using IntProperty = PropertyWithValue<int>;
+    ;
+    auto props = createHollowCylinderGeometryProps();
+    // Use the same pointing up direction as in the without axis test
+    int axis{2};
+    props->declareProperty(std::make_unique<IntProperty>("Axis", axis), "");
     return props;
   }
 

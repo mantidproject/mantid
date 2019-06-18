@@ -43,8 +43,8 @@ class LRPeakSelectionTest(unittest.TestCase):
         diff_peak_centre = abs((position - peak_center) / peak_center)
         diff_sigma = abs((width - sigma) / sigma)
 
-        self.assertTrue(diff_peak_centre < 0.03)
-        self.assertTrue(diff_sigma < 0.05)
+        self.assertLess(diff_peak_centre, 0.03)
+        self.assertLess(diff_sigma, 0.05)
 
     def test_primary_range(self):
         """
@@ -63,12 +63,12 @@ class LRPeakSelectionTest(unittest.TestCase):
         diff_peak_centre = abs((position - peak_center) / peak_center)
         diff_sigma = abs((width - sigma) / sigma)
 
-        self.assertTrue(diff_peak_centre < 0.03)
-        self.assertTrue(diff_sigma < 0.05)
+        self.assertLess(diff_peak_centre, 0.03)
+        self.assertLess(diff_sigma, 0.05)
 
         # The low resolution range should fit within the primary range
-        self.assertTrue(primary_range[0] < low_res[0])
-        self.assertTrue(primary_range[1] > low_res[1])
+        self.assertLess(primary_range[0], low_res[0])
+        self.assertGreater(primary_range[1], low_res[1])
 
 if __name__ == "__main__":
     unittest.main()
