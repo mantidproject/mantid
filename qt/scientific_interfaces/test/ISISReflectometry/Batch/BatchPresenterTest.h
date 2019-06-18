@@ -334,16 +334,13 @@ private:
 
   BatchPresenterFriend makePresenter() {
     // Create pointers to the child presenters and pass them into the batch
-    auto runsPresenter =
-        Mantid::Kernel::make_unique<NiceMock<MockRunsPresenter>>();
-    auto eventPresenter =
-        Mantid::Kernel::make_unique<NiceMock<MockEventPresenter>>();
+    auto runsPresenter = std::make_unique<NiceMock<MockRunsPresenter>>();
+    auto eventPresenter = std::make_unique<NiceMock<MockEventPresenter>>();
     auto experimentPresenter =
-        Mantid::Kernel::make_unique<NiceMock<MockExperimentPresenter>>();
+        std::make_unique<NiceMock<MockExperimentPresenter>>();
     auto instrumentPresenter =
-        Mantid::Kernel::make_unique<NiceMock<MockInstrumentPresenter>>();
-    auto savePresenter =
-        Mantid::Kernel::make_unique<NiceMock<MockSavePresenter>>();
+        std::make_unique<NiceMock<MockInstrumentPresenter>>();
+    auto savePresenter = std::make_unique<NiceMock<MockSavePresenter>>();
     m_runsPresenter = runsPresenter.get();
     m_eventPresenter = eventPresenter.get();
     m_experimentPresenter = experimentPresenter.get();

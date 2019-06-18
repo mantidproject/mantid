@@ -34,8 +34,7 @@ bool RegexFilter::rowMeetsCriteria(RowLocation const &location) const {
 std::unique_ptr<RegexFilter> filterFromRegexString(std::string const &regex,
                                                    IJobTreeView const &view,
                                                    ReductionJobs const &jobs) {
-  return Mantid::Kernel::make_unique<RegexFilter>(boost::regex(regex), view,
-                                                  jobs);
+  return std::make_unique<RegexFilter>(boost::regex(regex), view, jobs);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -8,7 +8,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_ROWFILTER_H_
 #define MANTID_CUSTOMINTERFACES_ROWFILTER_H_
 
-#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/ReductionJobs.h"

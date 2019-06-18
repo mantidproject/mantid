@@ -8,7 +8,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::API;
 
@@ -85,8 +84,7 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  */
 void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo,
                                         AlgorithmRuntimeProps props) {
-  m_algorithms.emplace_back(
-      Mantid::Kernel::make_unique<ConfiguredAlgorithm>(algo, props));
+  m_algorithms.emplace_back(std::make_unique<ConfiguredAlgorithm>(algo, props));
 
   g_log.debug() << "Added algorithm \""
                 << m_algorithms.back()->algorithm()->name()

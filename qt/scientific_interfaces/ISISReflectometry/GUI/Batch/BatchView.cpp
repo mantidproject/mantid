@@ -10,7 +10,6 @@
 #include "GUI/Save/SaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 #include <QMessageBox>
@@ -44,12 +43,10 @@ void BatchView::initLayout() {
   m_eventHandling = createEventTab();
   m_ui.batchTabs->addTab(m_eventHandling.get(), "Event Handling");
 
-  m_experiment =
-      Mantid::Kernel::make_unique<ExperimentView>(createReductionAlg(), this);
+  m_experiment = std::make_unique<ExperimentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_experiment.get(), "Experiment Settings");
 
-  m_instrument =
-      Mantid::Kernel::make_unique<InstrumentView>(createReductionAlg(), this);
+  m_instrument = std::make_unique<InstrumentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_instrument.get(), "Instrument Settings");
 
   m_save = createSaveTab();
@@ -122,12 +119,11 @@ void BatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
 std::unique_ptr<RunsView> BatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
-  return Mantid::Kernel::make_unique<RunsView>(
-      this, RunsTableViewFactory(instruments));
+  return std::make_unique<RunsView>(this, RunsTableViewFactory(instruments));
 }
 
 std::unique_ptr<EventView> BatchView::createEventTab() {
-  return Mantid::Kernel::make_unique<EventView>(this);
+  return std::make_unique<EventView>(this);
 }
 
 IAlgorithm_sptr BatchView::createReductionAlg() {
@@ -136,7 +132,7 @@ IAlgorithm_sptr BatchView::createReductionAlg() {
 }
 
 std::unique_ptr<SaveView> BatchView::createSaveTab() {
-  return Mantid::Kernel::make_unique<SaveView>(this);
+  return std::make_unique<SaveView>(this);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

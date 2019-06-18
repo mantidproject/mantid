@@ -19,8 +19,8 @@ namespace CustomInterfaces {
 class SavePresenterFactory {
 public:
   std::unique_ptr<ISavePresenter> make(ISaveView *view) {
-    return Mantid::Kernel::make_unique<SavePresenter>(
-        view, Mantid::Kernel::make_unique<AsciiSaver>());
+    return std::make_unique<SavePresenter>(view,
+                                           std::make_unique<AsciiSaver>());
   }
 };
 } // namespace CustomInterfaces

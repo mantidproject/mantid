@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTablePresenterFactory.h"
-#include "MantidKernel/make_unique.h"
 #include "RunsTablePresenter.h"
 
 namespace MantidQt {
@@ -19,7 +18,7 @@ RunsTablePresenterFactory::RunsTablePresenterFactory(
 
 std::unique_ptr<IRunsTablePresenter> RunsTablePresenterFactory::
 operator()(IRunsTableView *view) const {
-  return Mantid::Kernel::make_unique<RunsTablePresenter>(
+  return std::make_unique<RunsTablePresenter>(
       view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter);
 }
 } // namespace CustomInterfaces

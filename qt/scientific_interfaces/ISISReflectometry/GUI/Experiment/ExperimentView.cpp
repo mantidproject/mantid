@@ -78,8 +78,8 @@ Initialise the Interface
 */
 void ExperimentView::initLayout() {
   m_ui.setupUi(this);
-  m_deleteShortcut = Mantid::Kernel::make_unique<QShortcut>(
-      QKeySequence(tr("Delete")), m_ui.optionsTable);
+  m_deleteShortcut = std::make_unique<QShortcut>(QKeySequence(tr("Delete")),
+                                                 m_ui.optionsTable);
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this,
           SLOT(onRemovePerThetaDefaultsRequested()));
   initOptionsTable();

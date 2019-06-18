@@ -330,7 +330,7 @@ public:
 
 private:
   SavePresenter makePresenter() {
-    auto asciiSaver = Mantid::Kernel::make_unique<NiceMock<MockAsciiSaver>>();
+    auto asciiSaver = std::make_unique<NiceMock<MockAsciiSaver>>();
     m_asciiSaver = asciiSaver.get();
     auto presenter = SavePresenter(&m_view, std::move(asciiSaver));
     presenter.acceptMainPresenter(&m_mainPresenter);

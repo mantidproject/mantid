@@ -8,7 +8,6 @@
 #include "../Runs/RunsView.h"
 #include "Common/IndexOf.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
@@ -21,12 +20,11 @@ RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
                              int defaultInstrumentIndex)
     : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
-  m_jobs =
-      Mantid::Kernel::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
-          QStringList({"Run(s)", "Angle", "First Transmission Run",
-                       "Second Transmission Run", "Q min", "Q max", "dQ/Q",
-                       "Scale", "Options"}),
-          MantidQt::MantidWidgets::Batch::Cell(""), this);
+  m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
+      QStringList({"Run(s)", "Angle", "First Transmission Run",
+                   "Second Transmission Run", "Q min", "Q max", "dQ/Q", "Scale",
+                   "Options"}),
+      MantidQt::MantidWidgets::Batch::Cell(""), this);
   m_ui.mainLayout->insertWidget(2, m_jobs.get());
   showAlgorithmPropertyHintsInOptionsColumn();
   addToolbarActions();
@@ -106,8 +104,7 @@ void RunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
   auto constexpr optionsColumn = 8;
   m_jobs->setHintsForColumn(
       optionsColumn,
-      Mantid::Kernel::make_unique<
-          MantidQt::MantidWidgets::AlgorithmHintStrategy>(
+      std::make_unique<MantidQt::MantidWidgets::AlgorithmHintStrategy>(
           "ReflectometryReductionOneAuto",
           std::vector<std::string>{
               "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace",

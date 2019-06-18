@@ -13,7 +13,6 @@
 #include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
 #include "MockRunsView.h"

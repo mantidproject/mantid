@@ -8,7 +8,6 @@
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchView.h"
 #include "GUI/Common/Plotter.h"
-#include "MantidKernel/make_unique.h"
 #include <QMessageBox>
 #include <QToolButton>
 
