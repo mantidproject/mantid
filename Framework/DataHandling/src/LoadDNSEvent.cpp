@@ -75,12 +75,12 @@ void LoadDNSEvent::init() {
       std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
       "The XML or Map file with full path.");
 
-  declareProperty("ChopperChannel", 1u,
-                  boost::make_shared<BoundedValidator<uint64_t>>(0, 4),
+  declareProperty<uint32_t>("ChopperChannel", 1u,
+                  boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
                   "The Chopper Channel", Kernel::Direction::Input);
 
-  declareProperty("MonitorChannel", 1u,
-                  boost::make_shared<BoundedValidator<uint64_t>>(0, 4),
+  declareProperty<uint32_t>("MonitorChannel", 1u,
+                  boost::make_shared<BoundedValidator<uint32_t>>(0, 4),
                   "The Monitor Channel", Kernel::Direction::Input);
 
   declareProperty(
@@ -105,9 +105,9 @@ void LoadDNSEvent::exec() {
   chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
   monitorChannel = static_cast<uint32_t>(getProperty("MonitorChannel"));
   const auto chopperChannels =
-      outputWS->instrumentParameters().getType<uint32_t>("chopper", "channel");
+      outputWS->instrumentParameters().getType<int>("chopper", "channel");
   const auto monitorChannels =
-      outputWS->instrumentParameters().getType<uint32_t>("monitor", "channel");
+      outputWS->instrumentParameters().getType<int>("monitor", "channel");
   chopperChannel = chopperChannel != 0
                        ? chopperChannel
                        : (chopperChannels.empty() ? 99 : chopperChannels.at(0));
