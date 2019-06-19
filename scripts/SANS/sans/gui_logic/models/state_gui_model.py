@@ -12,6 +12,7 @@ are not available in the model associated with the data table.
 
 from __future__ import (absolute_import, division, print_function)
 
+from mantid.py3compat import ensure_str
 from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId, GravityId,
                                           QResolutionId, FitId, MaskId, event_binning_string_values, set_scales_entry,
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
@@ -888,7 +889,7 @@ class StateGuiModel(object):
 
     @q_1d_rebin_string.setter
     def q_1d_rebin_string(self, value):
-        self._set_q_1d_limits(rebin_string=value)
+        self._set_q_1d_limits(rebin_string=ensure_str(value))
 
     @property
     def q_xy_max(self):

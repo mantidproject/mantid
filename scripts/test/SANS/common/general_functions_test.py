@@ -13,7 +13,8 @@ from sans.common.general_functions import (quaternion_to_angle_and_axis, create_
                                            get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
-                                           get_facility, parse_diagnostic_settings, get_transmission_output_name, get_output_name)
+                                           get_facility, parse_diagnostic_settings, get_transmission_output_name,
+                                           get_output_name)
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
 from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
                                SANSInstrument, DetectorType, SANSFacility, DataType)
@@ -539,6 +540,7 @@ class SANSFunctionsTest(unittest.TestCase):
 
         self.assertEqual(output_name, '12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
         self.assertEqual(group_output_name, '12345rear_1DPhi12.0_56.0')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -203,6 +203,16 @@ class MaskBTPTest(unittest.TestCase):
         self.assertEqual(int(32 * 160), len(masked))
         self.checkConsistentMask(wksp, masked)
 
+    def test_components(self):
+        # this also verifies support for instruments that aren't explicitly in the list
+        wksp = LoadEmptyInstrument(InstrumentName='GEM', OutputWorkspace='GEM')
+        masked = MaskBTP(Workspace=wksp, Components='bank3-east,bank3-west', Tube='1-3')  # zero indexed b/c not supported instrument
+        self.assertEqual(2*3*90, len(masked))
+
+        wksp = LoadEmptyInstrument(InstrumentName='GEM', OutputWorkspace='GEM')
+        masked = MaskBTP(Workspace=wksp, Components='bank3')
+        self.assertEqual(10 * 90, len(masked))
+
 
 if __name__ == '__main__':
     unittest.main()
