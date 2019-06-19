@@ -346,7 +346,7 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   for (auto &finalPeak : finalv) {
     finalPeak.reduce();
     try {
-      std::unique_ptr<Geometry::IPeak> peak = std::unique_ptr<Geometry::IPeak>(
+      auto peak = std::unique_ptr<Geometry::IPeak>(
           m_peaks->createPeak(finalPeak.getQ()));
       if (peak) {
         peak->setIntensity(finalPeak.getIntensity());
