@@ -90,8 +90,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         workspace = self.getProperty("ScatterWorkspace").value
         # --------------------------------------------------------------------------------------------------------------
         # 1. Create event slice
-        #    If we are dealing with an event workspace as input, this will cut out a time-based (user-defined) slice.
-        #    In case of a histogram workspace, nothing happens.
+        #    This will cut out a time-based (user-defined) slice.
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Event slicing ...")
         data_type_as_string = self.getProperty("DataType").value
@@ -100,14 +99,10 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
                                                                        data_type_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 7. Create adjustment workspaces, those are
+        # 2. Create adjustment workspaces, those are
         #     1. pixel-based adjustments
         #     2. wavelength-based adjustments
         #     3. pixel-and-wavelength-based adjustments
-        # Note that steps 4 to 7 could run in parallel if we don't use wide angle correction. If we do then the
-        # creation of the adjustment workspaces requires the sample workspace itself and we have to run it sequentially.
-        # We could consider to have a serial and a parallel strategy here, depending on the wide angle correction
-        # settings. On the other hand it is not clear that this would be an advantage with the GIL.
         # --------------------------------------------------------------------------------------------------------------
         component_as_string = self.getProperty("Component").value
         data_type_as_string = self.getProperty("DataType").value
@@ -117,13 +112,13 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
             self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
         # ------------------------------------------------------------
-        # 2. Convert event workspaces to histogram workspaces
+        # 3. Convert event workspaces to histogram workspaces
         # ------------------------------------------------------------
         progress.report("Converting to histogram mode ...")
         workspace = self._convert_to_histogram(workspace)
 
         # ------------------------------------------------------------
-        # 3. Re-mask. We need to bin mask in histogram mode in order
+        # 4. Re-mask. We need to bin mask in histogram mode in order
         #    to have knowledge of masked regions: masking
         #    EventWorkspaces simply removes their events
         # ------------------------------------------------------------
@@ -131,7 +126,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         workspace = self._copy_bin_masks(workspace, dummy_mask_workspace)
 
         # ------------------------------------------------------------
-        # 3. Convert to Q
+        # 5. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
         workspace, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,

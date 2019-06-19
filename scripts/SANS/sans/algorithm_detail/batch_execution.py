@@ -862,8 +862,8 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         # there we output these as a workspace containing shifts as X data and scales as Y data.
         reduction_alg.setProperty("OutShiftAndScaleFactor", "ShiftAndScaleFactors")
         # Set properties used to generated names for workspaces within the output workspace groups
-        reduction_alg.setProperty("period", is_part_of_multi_period_reduction)
-        reduction_alg.setProperty("wavelength_range", is_part_of_wavelength_range_reduction)
+        reduction_alg.setProperty("Period", is_part_of_multi_period_reduction)
+        reduction_alg.setProperty("WavelengthRange", is_part_of_wavelength_range_reduction)
 
     reduction_mode = reduction_package.reduction_mode
     if reduction_mode is ISISReductionMode.Merged:
