@@ -114,6 +114,21 @@ public:
     TS_ASSERT_EQUALS(result["Params"], "-0.015000");
   }
 
+  void
+  testQOutputResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
+    auto experiment =
+        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                   SummationType::SumInLambda, false, false,
+                   PolarizationCorrections(PolarizationCorrectionType::None),
+                   FloodCorrections(FloodCorrectionType::Workspace),
+                   boost::none, std::map<std::string, std::string>(),
+                   makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto group = makeGroupWithTwoRowsWithOutputQResolutions();
+    auto result = createAlgorithmRuntimeProps(model, group);
+    TS_ASSERT_EQUALS(result["Params"], "-0.016000");
+  }
+
 private:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;

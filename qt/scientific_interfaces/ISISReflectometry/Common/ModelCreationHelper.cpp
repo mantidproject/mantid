@@ -107,7 +107,22 @@ Group makeGroupWithTwoRowsWithMixedQResolutions() {
   group1.appendRow(
       Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.016, 0.9),
           boost::none, ReductionOptionsMap(),
-          ReductionWorkspaces({"1234533333"}, TransmissionRunPair({}))));
+          ReductionWorkspaces({"33333"}, TransmissionRunPair({}))));
+  return group1;
+}
+
+Group makeGroupWithTwoRowsWithOutputQResolutions() {
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow());
+  group1.appendRow(
+      Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(), boost::none,
+          ReductionOptionsMap(),
+          ReductionWorkspaces({"22222"}, TransmissionRunPair({}))));
+  auto row = Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(),
+                 boost::none, ReductionOptionsMap(),
+                 ReductionWorkspaces({"33333"}, TransmissionRunPair({})));
+  row.setOutputQRange(RangeInQ(0.5, 0.016, 0.9));
+  group1.appendRow(row);
   return group1;
 }
 
