@@ -113,9 +113,11 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
-    qt/python/mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
-    qt/python/mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
-    qt/python/mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
+    mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
+    mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
+    mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
+    mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
+    mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
