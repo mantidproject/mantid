@@ -78,6 +78,7 @@ Usage
 **Output:**
 
 .. testoutput:: LoadDNSEventex1
+   :options: +NORMALIZE_WHITESPACE
 
    Output Workspace Type is:  EventWorkspace
    It has 122880 events and 2 dimensions:
