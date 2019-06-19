@@ -229,16 +229,18 @@ class Abins(PythonAlgorithm):
                 if atom_symbol not in all_atms_smbls:
                     raise ValueError("User defined atom selection (by element) '%s': not present in the system." %
                                      atom_symbol)
+
             for atom_number in atom_numbers:
-                try:
-                    atom_number = int(atom_number)
-                except ValueError:
-                    raise ValueError("Invalid user atom selection (by number) '%s': could not convert to integer" %
-                                     atom_number)
                 if atom_number < 1 or atom_number > num_atoms:
                     raise ValueError("Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" %
                                      (prefix, atom_number, 1, num_atoms))
-            atom_numbers = list(map(int, atom_numbers))
+
+            # Final sanity check that everything in "atoms" field was understood
+            if len(atom_symbols) + len (atom_numbers) < len(self._atoms):
+                elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
+                numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
+                raise ValueError("Not all user atom selections ('atoms' option) were understood." +
+                                 elements_report + numbers_report)
 
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
