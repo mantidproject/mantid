@@ -145,7 +145,7 @@ public:
     // test event count:
     const auto rng = boost::irange(static_cast<size_t>(0), iws->size());
     const size_t eventCount =
-        std::accumulate(rng.begin(), rng.end(), 0ul, [&](auto a, auto b) {
+        std::accumulate(rng.begin(), rng.end(), static_cast<size_t>(0), [&](auto a, auto b) {
           return a + iws->getSpectrum(b).getEvents().size();
         });
     TS_ASSERT_EQUALS(eventCount, 6721)
