@@ -209,17 +209,21 @@ class Abins(PythonAlgorithm):
             atom_symbols = all_atms_smbls
             atom_numbers = []
         else:  # case selected atoms
-            if len(self._atoms) != len(set(self._atoms)):  # only different types
-                raise ValueError("Not all user defined atoms are unique.")
-
             # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
             # A regular expression match is used to make the underscore separator optional and check the index format
             prefix = AbinsModules.AbinsConstants.ATOM_PREFIX
             atom_symbols = [item for item in self._atoms if item[:len(prefix)] != prefix]
+            if len(atom_symbols) != len(set(atom_symbols)):  # only different types
+                raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
+                                 "Abins cannot create multiple workspaces with the same name.")
 
             numbered_atom_test = re.compile('^' + prefix + '_?(\d+)$')
             atom_numbers = [numbered_atom_test.findall(item) for item in self._atoms]  # Matches will be lists of str
             atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
+
+            if len(atom_numbers) != len(set(atom_numbers)):
+                raise ValueError("User atom selection (by number) contains repeated atom. This is not permitted as Abins"
+                                 " cannot create multiple workspaces with the same name.")
 
             for atom_symbol in atom_symbols:
                 if atom_symbol not in all_atms_smbls:

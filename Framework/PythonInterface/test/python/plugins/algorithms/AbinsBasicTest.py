@@ -75,11 +75,18 @@ class AbinsBasicTest(unittest.TestCase):
                           OutputWorkspace=self._workspace_name)
 
     # test if intermediate results are consistent
-    def test_non_unique_atoms(self):
-        """Test scenario in which a user specifies non unique atoms (for example in squaricn that would be "C,C,H").
+    def test_non_unique_elements(self):
+        """Test scenario in which a user specifies non-unique elements (for example in squaricn that would be "C,C,H").
            In that case Abins should terminate and print a meaningful message.
         """
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon", Atoms="C,C,H",
+                          OutputWorkspace=self._workspace_name)
+
+    def test_non_unique_atoms(self):
+        """Test scenario in which a user specifies non-unique atoms (for example "atom_1,atom_2,atom1").
+           In that case Abins should terminate and print a meaningful message.
+        """
+        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon", Atoms="atom_1,atom_2,atom1",
                           OutputWorkspace=self._workspace_name)
 
     def test_non_existing_atoms(self):
