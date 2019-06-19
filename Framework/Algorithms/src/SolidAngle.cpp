@@ -80,10 +80,11 @@ struct AlphaAngleHorizontal : public AlphaAngleCalculator {
  *Creates the solid angle calculator based on the selected method.
  */
 struct SolidAngleCalculator {
-  SolidAngleCalculator(const DetectorInfo &detectorInfo,
+  SolidAngleCalculator(const ComponentInfo &componentInfo,
+                       const DetectorInfo &detectorInfo,
                        const std::string &method, const double pixelArea)
-      : m_detectorInfo(detectorInfo), m_pixelArea(pixelArea),
-        m_samplePos(detectorInfo.samplePosition()) {
+      : m_componentInfo(componentInfo), m_detectorInfo(detectorInfo),
+        m_pixelArea(pixelArea), m_samplePos(detectorInfo.samplePosition()) {
     if (method.find("Vertical") != std::string::npos) {
       m_alphaAngleCalculator =
           std::make_unique<AlphaAngleVertical>(detectorInfo);
@@ -96,6 +97,7 @@ struct SolidAngleCalculator {
   virtual ~SolidAngleCalculator() = default;
 
 protected:
+  const ComponentInfo &m_componentInfo;
   const DetectorInfo &m_detectorInfo;
   const double m_pixelArea;
   const V3D m_samplePos;
@@ -114,7 +116,10 @@ struct Rectangle : public SolidAngleCalculator {
   double solidAngle(size_t index) const override {
     const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
     const double l2 = m_detectorInfo.l2(index);
-    return m_pixelArea * cosTheta / (l2 * l2);
+    Kernel::V3D scaleFactor = m_componentInfo.scaleFactor(index);
+    const double scaledPixelArea =
+        m_pixelArea * scaleFactor[0] * scaleFactor[1];
+    return scaledPixelArea * cosTheta / (l2 * l2);
   }
 };
 
@@ -123,7 +128,10 @@ struct Tube : public SolidAngleCalculator {
   double solidAngle(size_t index) const override {
     const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
     const double l2 = m_detectorInfo.l2(index);
-    return m_pixelArea * cosAlpha / (l2 * l2);
+    Kernel::V3D scaleFactor = m_componentInfo.scaleFactor(index);
+    const double scaledPixelArea =
+        m_pixelArea * scaleFactor[0] * scaleFactor[1];
+    return scaledPixelArea * cosAlpha / (l2 * l2);
   }
 };
 
@@ -133,7 +141,10 @@ struct Wing : public SolidAngleCalculator {
     const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
     const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
     const double l2 = m_detectorInfo.l2(index);
-    return m_pixelArea * cosAlpha * cosAlpha * cosAlpha /
+    Kernel::V3D scaleFactor = m_componentInfo.scaleFactor(index);
+    const double scaledPixelArea =
+        m_pixelArea * scaleFactor[0] * scaleFactor[1];
+    return scaledPixelArea * cosAlpha * cosAlpha * cosAlpha /
            (l2 * l2 * cosTheta * cosTheta);
   }
 };
@@ -210,6 +221,7 @@ void SolidAngle::exec() {
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto &detectorInfo = inputWS->detectorInfo();
+  const auto &componentInfo = inputWS->componentInfo();
 
   // this is the pixel area that is supposed to be constant for the whole
   // instrument this is used only if Method != GenericShape
@@ -236,17 +248,17 @@ void SolidAngle::exec() {
 
   std::unique_ptr<SolidAngleCalculator> solidAngleCalculator;
   if (method == GENERIC_SHAPE) {
-    solidAngleCalculator =
-        std::make_unique<GenericShape>(detectorInfo, method, pixelArea);
+    solidAngleCalculator = std::make_unique<GenericShape>(
+        componentInfo, detectorInfo, method, pixelArea);
   } else if (method == "Rectangle") {
-    solidAngleCalculator =
-        std::make_unique<Rectangle>(detectorInfo, method, pixelArea);
+    solidAngleCalculator = std::make_unique<Rectangle>(
+        componentInfo, detectorInfo, method, pixelArea);
   } else if (method == VERTICAL_TUBE || method == HORIZONTAL_TUBE) {
     solidAngleCalculator =
-        std::make_unique<Tube>(detectorInfo, method, pixelArea);
+        std::make_unique<Tube>(componentInfo, detectorInfo, method, pixelArea);
   } else if (method == VERTICAL_WING || method == HORIZONTAL_WING) {
     solidAngleCalculator =
-        std::make_unique<Wing>(detectorInfo, method, pixelArea);
+        std::make_unique<Wing>(componentInfo, detectorInfo, method, pixelArea);
   }
 
   auto outputSpectrumInfo = outputWS->mutableSpectrumInfo();
