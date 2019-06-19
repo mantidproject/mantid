@@ -130,21 +130,18 @@ def curve_has_errors(curve):
         return False
 
 
-class CurveProperties:
+class CurveProperties(dict):
 
     def __init__(self, props):
-        self.__dict__.update(props)
+        self.update(props)
 
-    def __eq__(self, other):
-        return self.to_dict() == other.to_dict()
-
-    def to_dict(self):
-        return self.__dict__
+    def __getattr__(self, item):
+        return self[item]
 
     def get_plot_kwargs(self):
         """Return curve properties that can be used a plot kwargs"""
         kwargs = {}
-        for k, v in self.to_dict().items():
+        for k, v in self.items():
             if k not in ['hide', 'hide_errors']:
                 kwargs[k] = v
         return kwargs

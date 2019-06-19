@@ -75,3 +75,20 @@ class CurvePropertiesTest(unittest.TestCase):
 
     def test_label_set_errorbar(self):
         self.assertEqual('ax1', self.error_props.label)
+
+    def test_get_plot_kwargs(self):
+        expected_dict = {'capsize': 0,
+                         'capthick': 1,
+                         'color': '#ff0000',
+                         'drawstyle': u'steps',
+                         'ecolor': '#1f77b4',
+                         'elinewidth': 1,
+                         'errorevery': 1,
+                         'label': 'ax0',
+                         'linestyle': 'dashdot',
+                         'linewidth': 4,
+                         'marker': 'triangle_down',
+                         'markeredgecolor': '#008000',
+                         'markerfacecolor': '#000000',
+                         'markersize': 10}
+        self.assertEqual(expected_dict, self.props.get_plot_kwargs())

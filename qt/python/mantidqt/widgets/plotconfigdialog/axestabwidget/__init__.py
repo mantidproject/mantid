@@ -7,33 +7,38 @@
 #  This file is part of the mantid workbench.
 
 
-class AxProperties:
+class AxProperties(dict):
     """
     An object to store the properties that can be set in the Axes
     Tab. It can be constructed from a view or an Axes object.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, props):
+        self.update(props)
+
+    def __getattr__(self, item):
+        return self[item]
 
     @classmethod
     def from_ax_object(cls, ax):
-        cls.title = ax.get_title().encode('unicode_escape')
-        cls.xlim = ax.get_xlim()
-        cls.xlabel = ax.get_xlabel()
-        cls.xscale = ax.get_xscale().title()
-        cls.ylim = ax.get_ylim()
-        cls.ylabel = ax.get_ylabel()
-        cls.yscale = ax.get_yscale().title()
-        return cls()
+        props = dict()
+        props['title'] = ax.get_title().encode('unicode_escape')
+        props['xlim'] = ax.get_xlim()
+        props['xlabel'] = ax.get_xlabel()
+        props['xscale'] = ax.get_xscale().title()
+        props['ylim'] = ax.get_ylim()
+        props['ylabel'] = ax.get_ylabel()
+        props['yscale'] = ax.get_yscale().title()
+        return cls(props)
 
     @classmethod
     def from_view(cls, view):
-        cls.title = view.get_title().decode('unicode_escape')
-        cls.xlim = [view.get_xlower_limit(), view.get_xupper_limit()]
-        cls.xlabel = view.get_xlabel()
-        cls.xscale = view.get_xscale()
-        cls.ylim = [view.get_ylower_limit(), view.get_yupper_limit()]
-        cls.ylabel = view.get_ylabel()
-        cls.yscale = view.get_yscale()
-        return cls()
+        props = dict()
+        props['title'] = view.get_title().decode('unicode_escape')
+        props['xlim'] = [view.get_xlower_limit(), view.get_xupper_limit()]
+        props['xlabel'] = view.get_xlabel()
+        props['xscale'] = view.get_xscale()
+        props['ylim'] = [view.get_ylower_limit(), view.get_yupper_limit()]
+        props['ylabel'] = view.get_ylabel()
+        props['yscale'] = view.get_yscale()
+        return cls(props)
