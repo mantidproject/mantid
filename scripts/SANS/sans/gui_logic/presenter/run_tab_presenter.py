@@ -1171,6 +1171,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("zero_error_free", state_model)
         self._set_on_state_model("save_types", state_model)
         self._set_on_state_model("compatibility_mode", state_model)
+        self._set_on_state_model("event_slice_optimisation", state_model)
         self._set_on_state_model("merge_scale", state_model)
         self._set_on_state_model("merge_shift", state_model)
         self._set_on_state_model("merge_scale_fit", state_model)
