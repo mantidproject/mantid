@@ -31,6 +31,7 @@ Improvements
 - File type buttons are disabled when memory mode is selected to make it clearer that SANS will not save to file.
 - The path to the user file used to reduce the data is now added to the workspace sample logs. This user file path is added to canSAS file metadata.
 - The **diagnostic** page icon has been changed from a question mark to a stethoscope, to distinguish it from the **Help** page icon. The **Export Table** button now has an icon. There have been minor icon changes elsewhere on the interface.
+- Sample thickness, height, and width can be read from a batch file. These parameters are also included in the batch file generated from exporting the table.
 
 Bug Fixes
 #########

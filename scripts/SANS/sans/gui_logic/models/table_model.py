@@ -92,7 +92,7 @@ class TableModel(object):
 
     def remove_table_entries(self, rows):
         # For speed rows should be a Set here but don't think it matters for the list sizes involved.
-        self._table_entries[:] = [item for i,item in enumerate(self._table_entries) if i not in rows]
+        self._table_entries[:] = [item for i, item in enumerate(self._table_entries) if i not in rows]
         if not self._table_entries:
             row_index_model = self.create_empty_row()
             self.append_table_entry(row_index_model)
@@ -161,7 +161,9 @@ class TableModel(object):
             rows = range(len(self._table_entries))
         for row in rows:
             entry = self._table_entries[row]
-            if entry.is_empty():
+            # If the row is empty, or a sample thickness has been provided in the batch file
+            # we do not need to get thickness for row
+            if entry.is_empty() or entry.sample_thickness != '':
                 continue
             entry.file_finding = True
             success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
@@ -332,12 +334,13 @@ class TableIndexModel(object):
 
     def to_batch_list(self):
         """
-        :return: a list of data in the order as would typically appear
-        in a batch file
+        Return a list of data in the order as would typically appear in the batch file
+        :return: a list containing entries in the row present in the batch file
         """
         return_list = [self.sample_scatter, self.sample_transmission,
                        self.sample_direct, self.can_scatter, self.can_transmission,
-                       self.can_direct, self.output_name, self.user_file]
+                       self.can_direct, self.output_name, self.user_file, self.sample_thickness, self.sample_height,
+                       self.sample_width]
         return list(map(lambda item: str(item).strip(), return_list))
 
     def isMultiPeriod(self):
