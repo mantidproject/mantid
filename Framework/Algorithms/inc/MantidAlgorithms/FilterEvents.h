@@ -82,7 +82,7 @@ private:
   /// create event workspace
   boost::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
   /// create output workspaces if the splitters are given in SplittersWorkspace
-  void createOutputWorkspaces();
+  void createOutputWorkspacesSplitters();
   /// create output workspaces in the case of using TableWorlspace for splitters
   void createOutputWorkspacesTableSplitterCase();
   /// create output workspaces in the case of using MatrixWorkspace for
@@ -199,7 +199,7 @@ private:
   /// Vector for splitting time
   /// FIXME - shall we convert this to DateAndTime???.  Need to do speed test!
   std::vector<int64_t> m_vecSplitterTime;
-  /// Vector for splitting grouip
+  /// Vector for splitting group
   std::vector<int> m_vecSplitterGroup;
 
   /// Flag to split sample logs

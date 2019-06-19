@@ -12,7 +12,7 @@ SANS Changes
 :ref:`Release 4.1.0 <v4.1.0>`
 
 - New IDF for ``EQSANS`` and ``CG2/GP-SANS``
-- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`
+- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
 - New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
 
 ISIS SANS Interface
