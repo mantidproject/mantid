@@ -169,13 +169,13 @@ void SolidAngle::init() {
                   "the algorithm.  A workspace of this name will be created "
                   "and stored in the Analysis Data Service.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", int64_t{0}, mustBePositive,
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "The index number of the first spectrum for which to find "
                   "the solid angle\n"
                   "(default: 0)");
-  declareProperty("EndWorkspaceIndex", int64_t{EMPTY_INT()}, mustBePositive,
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "The index of the last spectrum whose solid angle is to be "
                   "found (default: the\n"
                   "last spectrum in the workspace)");
@@ -193,11 +193,11 @@ void SolidAngle::init() {
 void SolidAngle::exec() {
   // Get the workspaces
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  int64_t m_MinSpec = getProperty("StartWorkspaceIndex");
-  int64_t m_MaxSpec = getProperty("EndWorkspaceIndex");
+  int m_MinSpec = getProperty("StartWorkspaceIndex");
+  int m_MaxSpec = getProperty("EndWorkspaceIndex");
 
-  const int64_t numberOfSpectra =
-      static_cast<int64_t>(inputWS->getNumberHistograms());
+  const int numberOfSpectra =
+      static_cast<int>(inputWS->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if (m_MinSpec > numberOfSpectra) {
