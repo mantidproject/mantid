@@ -38,11 +38,11 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
 
   // Get the list of input workspaces from the output of each row
   auto workspaces = std::vector<std::string>();
-  std::transform(group.rows().cbegin(), group.rows().cend(),
-                 std::back_inserter(workspaces),
-                 [](boost::optional<Row> const &row) -> std::string {
-                   return row->reducedWorkspaceNames().iVsQ();
-                 });
+  std::for_each(group.rows().cbegin(), group.rows().cend(),
+                [&workspaces](boost::optional<Row> const &row) -> void {
+                  if (row)
+                    workspaces.push_back(row->reducedWorkspaceNames().iVsQ());
+                });
   AlgorithmProperties::update("InputWorkspaces", workspaces, properties);
 
   // The stitched name is the row output names concatenated but without the
