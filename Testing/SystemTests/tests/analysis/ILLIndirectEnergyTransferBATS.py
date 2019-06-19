@@ -26,8 +26,8 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-	self.tolerance = 1e-2
-	self.tolerance_rel_err = True
+        self.tolerance = 1e-2
+        self.tolerance_rel_err = True
 
     def tearDown(self):
         config['default.facility'] = self.facility
