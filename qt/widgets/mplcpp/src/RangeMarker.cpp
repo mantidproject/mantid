@@ -17,17 +17,17 @@ using namespace MantidQt::Widgets::MplCpp;
 namespace {
 
 Python::Object
-newMarker(FigureCanvasQt *canvas, QString const &colour, double x_minimum,
-          double x_maximum,
+newMarker(FigureCanvasQt *canvas, QString const &colour, double minimum,
+          double maximum, QString const &rangeType,
           boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(
       PyImport_ImportModule("mantidqt.widgets.fitpropertybrowser.markers"))};
 
-  auto const args = Python::NewRef(
-      Py_BuildValue("(Osdd)", canvas->pyobj().ptr(),
-                    colour.toLatin1().constData(), x_minimum, x_maximum));
+  auto const args = Python::NewRef(Py_BuildValue(
+      "(Osdds)", canvas->pyobj().ptr(), colour.toLatin1().constData(), minimum,
+      maximum, rangeType.toLatin1().constData()));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("RangeMarker")(*args, **kwargs);
@@ -44,14 +44,15 @@ namespace MplCpp {
  * @brief Create a RangeMarker instance
  * @param canvas The canvas to draw the range marker on to
  * @param colour The color of the range marker
- * @param x_minimum The x coordinate of the minimum marker
- * @param x_maximum The x coordinate of the maximum marker
+ * @param minimum The coordinate of the minimum marker
+ * @param maximum The coordinate of the maximum marker
  */
 RangeMarker::RangeMarker(FigureCanvasQt *canvas, QString const &color,
-                         double x_minimum, double x_maximum,
+                         double minimum, double maximum,
+                         QString const &rangeType,
                          QHash<QString, QVariant> const &otherKwargs)
     : InstanceHolder(
-          newMarker(canvas, color, x_minimum, x_maximum, otherKwargs)) {}
+          newMarker(canvas, color, minimum, maximum, rangeType, otherKwargs)) {}
 
 /**
  * @brief Redraw the RangeMarker
@@ -72,26 +73,26 @@ void RangeMarker::setColor(QString const &color) {
 }
 
 /**
- * @brief Sets the x range for the RangeMarker.
+ * @brief Sets the range marked by the RangeMarker.
  * @param minimum The minimum of the range.
  * @param maximum The maximum of the range.
  */
-void RangeMarker::setXRange(double minimum, double maximum) {
-  callMethodNoCheck<void>(pyobj(), "set_x_range", minimum, maximum);
+void RangeMarker::setRange(double minimum, double maximum) {
+  callMethodNoCheck<void>(pyobj(), "set_range", minimum, maximum);
 }
 
 /**
- * @brief Gets the x range for the RangeMarker.
+ * @brief Gets the range marked by the RangeMarker.
  * @return A tuple containing the minimum and maximum of the range.
  */
-std::tuple<double, double> RangeMarker::getXRange() const {
+std::tuple<double, double> RangeMarker::getRange() const {
   GlobalInterpreterLock lock;
 
   auto const toDouble = [](Python::Object const &value) {
     return PyFloat_AsDouble(value.ptr());
   };
 
-  auto const coords = pyobj().attr("get_x_range")();
+  auto const coords = pyobj().attr("get_range")();
   return std::make_tuple<double, double>(toDouble(coords[0]),
                                          toDouble(coords[1]));
 }

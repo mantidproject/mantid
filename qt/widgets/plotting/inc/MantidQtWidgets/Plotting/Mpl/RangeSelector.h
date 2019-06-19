@@ -57,6 +57,9 @@ private slots:
   void redrawMarker();
 
 private:
+  std::tuple<double, double> getAxisRange(const SelectType &type) const;
+  QString selectTypeAsQString(const SelectType &type) const;
+
   /// The preview plot containing the range selector
   PreviewPlot *m_plot;
   /// The minimum marker

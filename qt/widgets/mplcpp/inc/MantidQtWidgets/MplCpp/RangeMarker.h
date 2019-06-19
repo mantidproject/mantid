@@ -25,15 +25,15 @@ class MANTID_MPLCPP_DLL RangeMarker : public Common::Python::InstanceHolder {
 public:
   explicit RangeMarker(
       FigureCanvasQt *canvas, QString const &color, double x_minimum,
-      double x_maximum,
+      double x_maximum, QString const &rangeType,
       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();
   void remove();
 
   void setColor(QString const &color);
-  void setXRange(double minimum, double maximum);
-  std::tuple<double, double> getXRange() const;
+  void setRange(double minimum, double maximum);
+  std::tuple<double, double> getRange() const;
 
   void setMinimum(double minimum);
   void setMaximum(double maximum);

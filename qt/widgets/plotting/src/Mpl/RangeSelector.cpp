@@ -27,10 +27,9 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
     : QObject(), m_plot(plot),
       m_rangeMarker(std::make_unique<RangeMarker>(
           m_plot->canvas(), colour.name(QColor::HexRgb),
-          std::get<0>(m_plot->getAxisRange()),
-          std::get<1>(m_plot->getAxisRange()), defaultLineKwargs())),
+          std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
+          selectTypeAsQString(type), defaultLineKwargs())),
       m_visible(visible) {
-  Q_UNUSED(type);
   Q_UNUSED(infoOnly);
 
   m_plot->canvas()->draw();
@@ -42,6 +41,29 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
 
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
+}
+
+std::tuple<double, double>
+RangeSelector::getAxisRange(const SelectType &type) const {
+  switch (type) {
+  case SelectType::XMINMAX:
+    return m_plot->getAxisRange(AxisID::XBottom);
+  case SelectType::YMINMAX:
+    return m_plot->getAxisRange(AxisID::YLeft);
+  }
+  throw std::runtime_error(
+      "Incorrect SelectType provided. Select types are XMINMAX and YMINMAX.");
+}
+
+QString RangeSelector::selectTypeAsQString(const SelectType &type) const {
+  switch (type) {
+  case SelectType::XMINMAX:
+    return "XMinMax";
+  case SelectType::YMINMAX:
+    return "YMinMax";
+  }
+  throw std::runtime_error(
+      "Incorrect SelectType provided. Select types are XMINMAX and YMINMAX.");
 }
 
 void RangeSelector::setLimits(const std::pair<double, double> &limits) {
@@ -64,13 +86,13 @@ void RangeSelector::setRange(const std::pair<double, double> &range) {
 }
 
 void RangeSelector::setRange(const double min, const double max) {
-  m_rangeMarker->setXRange(min, max);
+  m_rangeMarker->setRange(min, max);
   m_plot->replot();
   emit selectionChanged(min, max);
 }
 
 std::pair<double, double> RangeSelector::getRange() const {
-  const auto range = m_rangeMarker->getXRange();
+  const auto range = m_rangeMarker->getRange();
   return std::make_pair(std::get<0>(range), std::get<1>(range));
 }
 
@@ -111,7 +133,7 @@ void RangeSelector::handleMouseMove(const QPoint &point) {
 
   if (markerMoved) {
     m_plot->replot();
-    const auto range = m_rangeMarker->getXRange();
+    const auto range = m_rangeMarker->getRange();
     emit selectionChanged(std::get<0>(range), std::get<1>(range));
   }
 }
