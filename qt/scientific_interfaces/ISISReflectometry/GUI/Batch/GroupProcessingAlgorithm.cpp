@@ -85,15 +85,20 @@ void updateGroupProperties(AlgorithmRuntimeProps &properties,
   auto resolution = boost::optional<double>(boost::none);
 
   for (auto const &row : group.rows()) {
-    if (!row.is_initialized() || !row->qRange().step().is_initialized())
+    if (!row.is_initialized())
       continue;
 
-    // For now just use the first resolution found. Longer term it would be better
-    // to check that all rows have the same resolution and set a warning if not.
-    if (!resolution.is_initialized()) {
+    // Use the input Q step if provided, or the output Q step otherwise, if set
+    if (row->qRange().step().is_initialized())
       resolution = row->qRange().step();
+    else if (row->qRangeOutput().step().is_initialized())
+      resolution = row->qRangeOutput().step();
+
+    // For now just use the first resolution found. Longer term it would be
+    // better to check that all rows have the same resolution and set a warning
+    // if not.
+    if (resolution.is_initialized())
       break;
-    }
   }
 
   updateParamsFromResolution(properties, resolution);
