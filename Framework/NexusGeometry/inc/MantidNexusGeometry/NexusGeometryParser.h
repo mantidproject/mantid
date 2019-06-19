@@ -7,7 +7,7 @@
 #ifndef MANTIDNEXUSGEOMETRY_PARSER_H_
 #define MANTIDNEXUSGEOMETRY_PARSER_H_
 
-#include "MantidNexusGeometry/DllConfig.h"
+#include "MantidNexusGeometry/DllConfig.h" //
 #include <memory>
 #include <string>
 

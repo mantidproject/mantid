@@ -2,6 +2,7 @@ set(SRC_FILES
     src/Hdf5Version.cpp
     src/InstrumentBuilder.cpp
     src/NexusGeometryParser.cpp
+    src/NexusGeometrySave.cpp
     src/NexusShapeFactory.cpp
     src/TubeBuilder.cpp
     src/TubeHelpers.cpp)
@@ -11,6 +12,7 @@ set(INC_FILES
     inc/MantidNexusGeometry/Hdf5Version.h
     inc/MantidNexusGeometry/InstrumentBuilder.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
+    inc/MantidNexusGeometry/NexusGeometrySave.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
     inc/MantidNexusGeometry/TubeBuilder.h
     inc/MantidNexusGeometry/TubeHelpers.h)
@@ -18,6 +20,7 @@ set(INC_FILES
 set(TEST_FILES
     InstrumentBuilderTest.h
     NexusGeometryParserTest.h
+    NexusGeometrySaveTest.h
     NexusShapeFactoryTest.h
     TubeBuilderTest.h
     TubeHelpersTest.h)
