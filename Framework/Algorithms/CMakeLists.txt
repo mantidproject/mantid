@@ -815,7 +815,6 @@ set(TEST_FILES
     DiffractionFocussingTest.h
     DirectILLTubeBackgroundTest.h
     DivideTest.h
-    EQSANSCorrectFrameTest.h
     EditInstrumentGeometryTest.h
     ElasticWindowTest.h
     EQSANSCorrectFrameTest.h
