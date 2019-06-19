@@ -36,6 +36,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL Group makeEmptyGroup();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithOneRow();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRows();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRowsWithNonstandardNames();
+MANTIDQT_ISISREFLECTOMETRY_DLL Group
+makeGroupWithTwoRowsWithMixedQResolutions();
 
 /* Reduction Jobs */
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneEmptyGroupModel();

@@ -96,6 +96,21 @@ Group makeGroupWithTwoRowsWithNonstandardNames() {
           makeRowWithOutputNames({"testLam2", "testQ2", "testQBin2"})});
 }
 
+Group makeGroupWithTwoRowsWithMixedQResolutions() {
+  auto group1 = Group("Test group 1");
+  group1.appendRow(boost::none);
+  group1.appendRow(makeRow());
+  group1.appendRow(
+      Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.015, 0.9),
+          boost::none, ReductionOptionsMap(),
+          ReductionWorkspaces({"22222"}, TransmissionRunPair({}))));
+  group1.appendRow(
+      Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.016, 0.9),
+          boost::none, ReductionOptionsMap(),
+          ReductionWorkspaces({"1234533333"}, TransmissionRunPair({}))));
+  return group1;
+}
+
 /* Reduction Jobs */
 
 ReductionJobs oneEmptyGroupModel() {
