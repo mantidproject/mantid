@@ -12,7 +12,7 @@ millions_counts_conversion = 1. / 1e6
 
 
 class HomeRunInfoWidgetModel(object):
-    def __init__(self, context=MuonContext()):
+    def __init__(self, context=None):
         self._data = context.data_context
 
     def get_run_number(self):

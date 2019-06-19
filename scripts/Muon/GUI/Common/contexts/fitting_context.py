@@ -230,7 +230,7 @@ class FitInformation(object):
         filter_fn = filter_fn if filter_fn is not None else lambda x: True
 
         all_names = []
-        for ws_name in self.input_workspaces:
+        for ws_name in self.output_workspace_names:
             logs = _run(ws_name).getLogData()
             all_names.extend([log.name for log in logs if filter_fn(log)])
 
@@ -241,7 +241,7 @@ class FitInformation(object):
         :param log_name: A string name
         :return: True if the log exists on all of the input workspaces False, otherwise
         """
-        for ws_name in self.input_workspaces:
+        for ws_name in self.output_workspace_names:
             run = _run(ws_name)
             if not run.hasProperty(log_name):
                 return False
@@ -271,7 +271,7 @@ class FitInformation(object):
 
         values = [
             value_from_workspace(wksp_name)
-            for wksp_name in self.input_workspaces
+            for wksp_name in self.output_workspace_names
         ]
         return np.mean(values)
 
@@ -344,12 +344,12 @@ class FittingContext(object):
         return workspace_list
 
     def remove_workspace_by_name(self, workspace_name):
-        set_of_fits_to_remove = set()
+        list_of_fits_to_remove = []
         for fit in self.fit_list:
             if workspace_name in fit.output_workspace_names or workspace_name==fit.parameter_workspace_name:
-                set_of_fits_to_remove.add(fit)
+                list_of_fits_to_remove.append(fit)
 
-        for fit in set_of_fits_to_remove:
+        for fit in list_of_fits_to_remove:
             self.fit_list.remove(fit)
 
     def log_names(self, filter_fn=None):

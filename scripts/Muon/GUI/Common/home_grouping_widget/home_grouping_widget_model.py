@@ -11,7 +11,7 @@ from Muon.GUI.Common.contexts.muon_context import MuonContext
 
 class HomeGroupingWidgetModel(object):
 
-    def __init__(self, context=MuonContext()):
+    def __init__(self, context=None):
         self._data = context.data_context
         self._context = context
 

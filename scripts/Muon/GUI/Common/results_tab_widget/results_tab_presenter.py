@@ -91,4 +91,4 @@ class ResultsTabPresenter(QObject):
                 existing_selection=self.view.log_values()))
 
     def update_view_from_model(self):
-        pass
+        self.on_new_fit_performed()

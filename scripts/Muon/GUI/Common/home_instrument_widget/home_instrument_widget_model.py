@@ -24,7 +24,7 @@ class InstrumentWidgetModel(object):
     GUI.
     """
 
-    def __init__(self, context=MuonContext()):
+    def __init__(self, context=None):
         self._data = context.data_context
         self._context = context
         self._context.gui_context['RebinType'] = 'None'

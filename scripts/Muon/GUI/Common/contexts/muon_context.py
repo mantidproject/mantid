@@ -25,9 +25,9 @@ from Muon.GUI.Common.observer_pattern import Observable
 
 
 class MuonContext(object):
-    def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
-                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext(),
-                 workspace_suffix=' MA', fitting_context=FittingContext()):
+    def __init__(self, muon_data_context=None, muon_gui_context=None,
+                 muon_group_context=None, base_directory='Muon Data', muon_phase_context=None,
+                 workspace_suffix=' MA', fitting_context=None):
 
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
