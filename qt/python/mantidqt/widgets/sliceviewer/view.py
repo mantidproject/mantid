@@ -48,7 +48,7 @@ class SliceViewerView(QWidget):
         self.create_axes()
         self.mpl_layout.addWidget(self.canvas)
         self.colorbar = ColorbarWidget(self)
-        self.colorbar.colorbarChanged.connect(self.canvas.draw_idle)
+        self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.colorbarChanged.connect(self.update_line_plot_limits)
         self.mpl_layout.addWidget(self.colorbar)
 
@@ -127,10 +127,14 @@ class SliceViewerView(QWidget):
 
     def clear_line_plots(self):
         try: # clear old plots
-            self.xfig.clear()
-            self.yfig.clear()
+            del self.xfig
+            del self.yfig
         except AttributeError:
             pass
+
+    def update_data_clim(self):
+        self.im.set_clim(self.colorbar.colorbar.get_clim()) # force clim update, needed for RHEL7
+        self.canvas.draw_idle()
 
     def update_line_plot_limits(self):
         if self.line_plots:

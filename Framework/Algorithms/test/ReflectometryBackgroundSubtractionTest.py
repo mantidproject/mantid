@@ -8,7 +8,7 @@ import unittest
 from mantid.simpleapi import *
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
-class ReflectometryBackgroundSubtraction(unittest.TestCase):
+class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
 
     def setUp(self):
         dataX = [1, 2, 3]
@@ -42,7 +42,6 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
         """
         args = {'InputWorkspace' : 'workspace_with_peak', 
                 'BackgroundCalculationMethod' : 'AveragePixelFit',
-                'PeakRange' : '3,4',
                 'OutputWorkspace': 'output'}
         output = self._assert_run_algorithm_succeeds(args)
 
@@ -51,7 +50,7 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
             Check that the algorithm the correct output using background method AveragePixelFit
         """
         args = {'InputWorkspace' : 'workspace_with_peak', 
-                'InputWorkspaceIndexSet' : '0-2,5-7',
+                'ProcesssingInstructions' : '0-2,5-7',
                 'BackgroundCalculationMethod' : 'PerDetectorAverage',
                 'OutputWorkspace': 'output'}
         output = self._assert_run_algorithm_succeeds(args)
@@ -68,7 +67,7 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
             Check that the algorithm the correct output using background method Polynomial
         """
         args = {'InputWorkspace' : 'workspace_with_peak', 
-                'InputWorkspaceIndexSet' : '0-2,5-7',
+                'ProcesssingInstructions' : '0-2,5-7',
                 'BackgroundCalculationMethod' : 'Polynomial',
                 'DegreeOfPolynomial' : '0',
                 'OutputWorkspace': 'output'}
@@ -86,10 +85,32 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
             Check that the algorithm the correct output using background method AveragePixelFit
         """
         args = {'InputWorkspace' : 'workspace_with_peak', 
-                'InputWorkspaceIndexSet' : '0-7',
+                'ProcesssingInstructions' : '0-7',
                 'BackgroundCalculationMethod' : 'AveragePixelFit',
-                'PeakRange' : '3,4',
-                'SumPeak' : False,
+                'PeakRange' : '3-4',
+                'SumPeak': False,
+                'OutputWorkspace': 'output'}
+        output = self._assert_run_algorithm_succeeds(args)
+        for i in range(0, output.getNumberHistograms()):
+            if i == 3 or i == 4:
+                for itr in range(0, output.blocksize()):
+                    self.assertEquals(3.0, output.dataY(i)[itr])
+            else:
+                for itr in range(0, output.blocksize()):
+                    self.assertEquals(0.0, output.dataY(i)[itr])
+
+    def test_peak_range_changes_with_index_type(self):
+        """
+            Check that when using the background method AveragePixelFit,
+            the PeakRange and ProcessingInstructions are used as index numbers
+            if entered as spectrum
+        """
+        args = {'InputWorkspace': 'workspace_with_peak',
+                'InputWorkspaceIndexType': 'SpectrumNumber',
+                'ProcesssingInstructions': '1-8',
+                'BackgroundCalculationMethod': 'AveragePixelFit',
+                'PeakRange': '4-5',
+                'SumPeak': False,
                 'OutputWorkspace': 'output'}
         output = self._assert_run_algorithm_succeeds(args)
         for i in range(0, output.getNumberHistograms()):
@@ -102,23 +123,31 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
 
     def test_Polynomial_error_for_single_spectra(self):
         args = {'InputWorkspace' : 'workspace_with_peak',
-                'InputWorkspaceIndexSet' : '3',
+                'ProcesssingInstructions' : '3',
                 'BackgroundCalculationMethod' : 'Polynomial'}
         self._assert_run_algorithm_throws(args)
 
     def test_AveragePixelFit_error_for_single_spectra(self):
         args = {'InputWorkspace' : 'workspace_with_peak',
-                'InputWorkspaceIndexSet' : '3',
+                'ProcesssingInstructions' : '3',
                 'BackgroundCalculationMethod' : 'AveragePixelFit',
-                'PeakRange' : '3,4',
+                'PeakRange' : '3-4',
                 'OutputWorkspace': 'output'}
         self._assert_run_algorithm_throws(args)
 
     def test_AveragePixelFit_error_peakRange_outside_spectra(self):
         args = {'InputWorkspace' : 'workspace_with_peak',
-                'InputWorkspaceIndexSet' : '1-7',
+                'ProcesssingInstructions' : '1-7',
                 'BackgroundCalculationMethod' : 'AveragePixelFit',
-                'PeakRange' : '3,9',
+                'PeakRange' : '3-9',
+                'OutputWorkspace': 'output'}
+        self._assert_run_algorithm_throws(args)
+
+    def test_AveragePixelFit_error_peakRange_two_ranges(self):
+        args = {'InputWorkspace' : 'workspace_with_peak',
+                'ProcesssingInstructions' : '1-7',
+                'BackgroundCalculationMethod' : 'AveragePixelFit',
+                'PeakRange' : '2-4,6-7',
                 'OutputWorkspace': 'output'}
         self._assert_run_algorithm_throws(args)
 

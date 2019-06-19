@@ -49,7 +49,7 @@ class HomeTabRunInfoPresenterTest(GuiTest):
         expected_string_list = ['Instrument:MUSR', 'Run:22725', 'Title:FeTeSeT=1F=100', 'Comment:FCfirstsample',
                                 'Start:2009-03-24T04:18:58', 'End:2009-03-24T04:56:26', 'Counts(MEv):20.076704',
                                 'GoodFrames:88540', 'CountsperGoodFrame:226.753',
-                                'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):2.53386',
+                                'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):19.69992',
                                 'SampleTemperature(K):1.0', 'SampleMagneticField(G):100.0']
 
         self.assertEqual(str(self.view.run_info_box.toPlainText()).replace(' ', '').splitlines(), expected_string_list)

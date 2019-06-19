@@ -92,6 +92,7 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
     mantidqt/widgets/observers/test/test_ads_observer.py
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
@@ -112,7 +113,6 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
-    mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
     mantidqt/widgets/workspacedisplay/test/test_user_notifier.py

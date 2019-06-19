@@ -563,6 +563,5 @@ class SANSFunctionsTest(unittest.TestCase):
         create_managed_non_child_algorithm("TestAlg", **{"test_val": 5})
         alg_manager_mock.create.assert_called_once_with("TestAlg")
 
-
 if __name__ == '__main__':
     unittest.main()

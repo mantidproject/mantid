@@ -457,6 +457,14 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.r_cut, 45.)
         self.assertEqual(state_gui_model.w_cut, 890.)
 
+    def test_that_q_1d_rebin_string_as_bytes_is_converted_to_string(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.q_1d_rebin_string = b"test"
+
+        q_1d_rebin_string = state_gui_model.q_1d_rebin_string
+        self.assertEqual(type(q_1d_rebin_string), str)
+        self.assertEqual(q_1d_rebin_string, "test")
+
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity
     # ------------------------------------------------------------------------------------------------------------------
