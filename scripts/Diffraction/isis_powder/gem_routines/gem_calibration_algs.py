@@ -55,7 +55,7 @@ def create_calibration(calibration_runs, instrument, offset_file_name, grouping_
     focused = mantid.DiffractionFocussing(InputWorkspace=aligned, GroupingFileName=grouping_file,
                                           OutputWorkspace=instrument._generate_output_file_name(calibration_runs)
                                           + "_grouped")
-
+    print("Saved cal file to " + offset_file)
     common.remove_intermediate_workspace([calibration_ws, rebinned, cross_correlated, rebinned_tof, aligned,
                                           offsets_ws_name])
     return focused

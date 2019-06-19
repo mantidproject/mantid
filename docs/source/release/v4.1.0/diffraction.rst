@@ -19,6 +19,8 @@ New Algorithms
 Improvements
 ############
 
+- The Gem scripts can now be used to automatically generate a .cal file, similar to pearl.
+
 - The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
 
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has a new property, ``OffsetData``, which adds a constant to the data at the very end of the reduction.
