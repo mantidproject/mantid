@@ -378,8 +378,7 @@ class MainWindow(QMainWindow):
         items = ConfigService['mantidqt.python_interfaces'].split()
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'Frequency_Domain_Analysis_Old.py',
-                         'Elemental_Analysis.py']
+                         'Frequency_Domain_Analysis_Old.py']
 
         # detect the python interfaces
         interfaces = {}
