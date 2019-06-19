@@ -18,7 +18,9 @@ class ComponentInfo;
 }
 
 namespace NexusGeometry {
-MANTID_NEXUSGEOMETRY_DLL void saveInstrument(const Geometry::ComponentInfo& compInfo, const std::string& fullPath);
+MANTID_NEXUSGEOMETRY_DLL void
+saveInstrument(const Geometry::ComponentInfo &compInfo,
+               const std::string &fullPath);
 
 } // namespace NexusGeometry
 } // namespace Mantid

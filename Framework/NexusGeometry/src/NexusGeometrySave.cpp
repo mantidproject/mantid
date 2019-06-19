@@ -12,13 +12,14 @@
 namespace Mantid {
 namespace NexusGeometry {
 
-void saveInstrument( const Geometry::ComponentInfo& compInfo, const std::string& fullPath) {
+void saveInstrument(const Geometry::ComponentInfo &compInfo,
+                    const std::string &fullPath) {
   std::ifstream tmp(fullPath);
   if (!tmp) {
     throw std::invalid_argument(
-        "The path provided for the file saving is invalid: " + fullPath); //throw error message for invalid path.
+        "The path provided for the file saving is invalid: " +
+        fullPath); // throw error message for invalid path.
   };
-
 };
 } // namespace NexusGeometry
 } // namespace Mantid
