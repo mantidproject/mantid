@@ -42,7 +42,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
     def _generate_presenter(self):
         mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)")
         return Presenter(self.fig, view=mock_view)
-        
+
     def test_generate_ax_name_returns_correct_name(self):
         ax0_name = generate_ax_name(self.fig.get_axes()[0])
         self.assertEqual("My Axes: (0, 0)", ax0_name)

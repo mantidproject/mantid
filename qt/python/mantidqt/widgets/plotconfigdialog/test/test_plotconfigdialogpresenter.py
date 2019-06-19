@@ -11,7 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 import unittest
 
 from matplotlib import use as mpl_use
-mpl_use('Agg')
+mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
 
 from mantid.py3compat.mock import Mock, patch
