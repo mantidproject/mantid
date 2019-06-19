@@ -45,7 +45,8 @@ class PhaseTablePresenter(object):
         self.update_current_phase_tables()
 
     def update_view_from_model(self):
-        self.update_current_run_list()
+        self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
+        self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
         for key, item in self.context.phase_context.options_dict.items():
             setattr(self.view, key, item)
 
@@ -192,8 +193,6 @@ class PhaseTablePresenter(object):
 
         backward_group = self.context.phase_context.options_dict['backward_group']
         parameters['BackwardSpectra'] = self.context.group_pair_context[backward_group].detectors
-
-        parameters['DetectorTable'] = parameters['InputWorkspace'].replace('_raw_data', '') + "; PhaseTable"
 
         parameters['DetectorTable'] = get_phase_table_workspace_name(parameters['InputWorkspace'], forward_group,
                                                                      backward_group)

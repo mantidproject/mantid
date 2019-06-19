@@ -101,8 +101,11 @@ class FittingTabModel(object):
         alg = mantid.AlgorithmManager.create("Fit")
 
         output_workspace, output_parameters, function_object, output_status, output_chi = run_simultaneous_Fit(parameters_dict, alg)
-        for input_workspace, output in zip(parameters_dict['InputWorkspace'], output_workspace.getNames()):
-            CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
+        if len(parameters_dict['InputWorkspace']) > 1:
+            for input_workspace, output in zip(parameters_dict['InputWorkspace'], output_workspace.getNames()):
+                CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
+        else:
+            CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'][0], OutputWorkspace=output_workspace, StoreInADS=False)
         return output_workspace, output_parameters, function_object, output_status, output_chi
 
     def rename_members_of_fitted_workspace_group(self, group_workspace, inputworkspace_list, function, group_name):

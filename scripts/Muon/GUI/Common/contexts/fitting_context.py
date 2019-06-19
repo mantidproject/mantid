@@ -201,7 +201,8 @@ class FitInformation(object):
         self.fit_function_name = fit_function_name
         self.input_workspaces = [input_workspace] if isinstance(
             input_workspace, string_types) else input_workspace
-        self.output_workspace_names = output_workspace_names
+        self.output_workspace_names = [output_workspace_names] if isinstance(
+            output_workspace_names, string_types) else output_workspace_names
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
