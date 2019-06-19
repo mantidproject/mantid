@@ -101,6 +101,8 @@ class CurvesTabWidgetPresenter:
             raise ValueError("Curve must have type 'Line2D' or "
                              "'ErrorbarContainer'. Found '{}'"
                              "".format(type(curve)))
+        ax.relim()
+        ax.autoscale()
         return new_curve
 
     def replot_selected_curve(self, plot_kwargs):
