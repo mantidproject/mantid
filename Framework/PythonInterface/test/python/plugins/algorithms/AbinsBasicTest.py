@@ -180,8 +180,8 @@ class AbinsBasicTest(unittest.TestCase):
                                                Tolerance=self._tolerance)
         self.assertEqual(result, True)
 
-    def test_partial(self):
-        # By default workspaces for all atoms should be created. Test this default behaviour.
+    def test_partial_by_element(self):
+        """Check results of INS spectrum resolved by elements: default should match explicit list of elements"""
 
         experimental_file = ""
 
@@ -229,8 +229,8 @@ class AbinsBasicTest(unittest.TestCase):
                                                    Tolerance=self._tolerance)
             self.assertEqual(result, True)
 
-    def test_numbered(self):
-        # Can request workspaces by atom number; these should add up to the usual elemental totals
+    def test_partial_by_number(self):
+        """Simulated INS spectrum can also be resolved by numbered atoms. Check consistency with element totals"""
 
         wrk_ref = Abins(AbInitioProgram=self._ab_initio_program,
                         VibrationalOrPhononFile=self._squaricn + ".phonon",
@@ -260,39 +260,6 @@ class AbinsBasicTest(unittest.TestCase):
 
         assert_array_almost_equal(wrk_h_total.extractY(),
                                   sum((wrk.extractY() for wrk in wrk_atom_totals)))
-
-    def test_numbered(self):
-        # Can request workspaces by atom number; these should add up to the usual elemental totals
-
-        wrk_ref = Abins(AbInitioProgram=self._ab_initio_program,
-                        VibrationalOrPhononFile=self._squaricn + ".phonon",
-                        Atoms=self._atoms,
-                        QuantumOrderEventsNumber=self._quantum_order_events_number,
-                        ScaleByCrossSection=self._cross_section_factor,
-                        OutputWorkspace=self._squaricn + "_ref")
-
-        numbered_workspace_name = "numbered"
-        h_indices = ("1", "2", "3", "4")
-        wks_numbered_atoms = Abins(VibrationalOrPhononFile=self._squaricn + ".phonon",
-                                   Atoms=", ".join([AbinsConstants.ATOM_PREFIX + s for s in h_indices]),
-                                   SumContributions=self._sum_contributions,
-                                   QuantumOrderEventsNumber=self._quantum_order_events_number,
-                                   ScaleByCrossSection=self._cross_section_factor,
-                                   OutputWorkspace=numbered_workspace_name)
-
-        wrk_ref_names = list(wrk_ref.getNames())
-        wrk_h_total = wrk_ref[wrk_ref_names.index(self._squaricn + "_ref_H_total")]
-
-        wks_numbered_atom_names = list(wks_numbered_atoms.getNames())
-        wrk_atom_totals = [wks_numbered_atoms[wks_numbered_atom_names.index(name)]
-                           for name in
-                           ['_'.join((numbered_workspace_name, AbinsConstants.ATOM_PREFIX, s, 'total')) for s in h_indices]]
-
-        assert_array_almost_equal(wrk_h_total.extractX(), wrk_atom_totals[0].extractX())
-
-        assert_array_almost_equal(wrk_h_total.extractY(),
-                                  sum((wrk.extractY() for wrk in wrk_atom_totals)))
-
 
 if __name__ == "__main__":
     unittest.main()
