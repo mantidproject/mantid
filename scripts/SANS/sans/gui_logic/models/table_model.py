@@ -80,7 +80,10 @@ class TableModel(object):
         self._table_entries.insert(row, table_index_model)
         if row >= self.get_number_of_rows():
             row = self.get_number_of_rows() - 1
-        self.get_thickness_for_rows([row])
+
+        # If we did not provide a sample thickness, get it from file information
+        if table_index_model.sample_thickness == '':
+            self.get_thickness_for_rows([row])
         self.notify_subscribers()
 
     def append_table_entry(self, table_index_model):
@@ -161,9 +164,7 @@ class TableModel(object):
             rows = range(len(self._table_entries))
         for row in rows:
             entry = self._table_entries[row]
-            # If the row is empty, or a sample thickness has been provided in the batch file
-            # we do not need to get thickness for row
-            if entry.is_empty() or entry.sample_thickness != '':
+            if entry.is_empty():
                 continue
             entry.file_finding = True
             success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
