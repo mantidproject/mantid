@@ -50,6 +50,7 @@ void RangeSelector::setRange(const std::pair<double, double> &range) {
 
 void RangeSelector::setRange(const double min, const double max) {
   m_rangeMarker->setXRange(min, max);
+  m_plot->replot();
   emit selectionChanged(min, max);
 }
 
