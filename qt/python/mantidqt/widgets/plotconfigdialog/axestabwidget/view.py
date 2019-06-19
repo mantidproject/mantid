@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-import numpy as np
+from numpy import finfo, float32
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
@@ -30,15 +30,22 @@ class AxesTabWidgetView(QWidget):
         for axis in ['x', 'y']:
             for limit in ['upper', 'lower']:
                 spin_box = getattr(self, '%s%s_limit_spin_box' % (axis, limit))
-                spin_box.setRange(np.finfo(np.float32).min,
-                                  np.finfo(np.float32).max)
+                spin_box.setRange(finfo(float32).min,
+                                  finfo(float32).max)
 
     def populate_select_axes_combo_box(self, axes_names):
         self.select_axes_combo_box.addItems(axes_names)
 
-    def set_current_axes_selector_text(self, new_text):
+    def set_selected_axes_selector_text(self, new_text):
+        """Replace the text of the selected item in the combo box"""
         current_index = self.select_axes_combo_box.currentIndex()
         self.select_axes_combo_box.setItemText(current_index, new_text)
+
+    def get_selected_ax_name(self):
+        return self.select_axes_combo_box.currentText()
+
+    def get_properties(self):
+        return AxProperties.from_view(self)
 
     def get_title(self):
         return self.axes_title_line_edit.text()
@@ -97,20 +104,3 @@ class AxesTabWidgetView(QWidget):
 
     def set_yscale(self, scale):
         self.yscale_combo_box.setCurrentText(scale.title())
-
-    def get_selected_ax_name(self):
-        return self.select_axes_combo_box.currentText()
-
-    def set_properties(self, ax_props):
-        self.set_title(ax_props.title)
-        self.set_xlower_limit(ax_props.xlim[0])
-        self.set_xupper_limit(ax_props.xlim[1])
-        self.set_xlabel(ax_props.xlabel)
-        self.set_xscale(ax_props.xscale)
-        self.set_ylower_limit(ax_props.ylim[0])
-        self.set_yupper_limit(ax_props.ylim[1])
-        self.set_ylabel(ax_props.ylabel)
-        self.set_yscale(ax_props.yscale)
-
-    def get_properties(self):
-        return AxProperties.from_view(self)

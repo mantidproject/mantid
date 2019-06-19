@@ -27,16 +27,15 @@ class AxesTabWidgetPresenter:
         # Add axes names to "select axes" combo box
         self.populate_select_axes_combo_box()
         # Display top axes' properties in input fields
-        self.set_selected_ax_view_properties()
+        self.update_view()
 
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
-            self.set_selected_ax_view_properties
-        )
+            self.update_view)
 
     def apply_properties(self):
         """Update the axes with the user inputted properties"""
-        ax = self.get_current_ax()
+        ax = self.get_selected_ax()
         new_props = self.view.get_properties()
         self.set_ax_title(ax, new_props.title)
         ax.set_xlim(new_props.xlim)
@@ -46,17 +45,17 @@ class AxesTabWidgetPresenter:
         ax.set_ylabel(new_props.ylabel)
         ax.set_yscale(new_props.yscale)
 
-    def get_current_ax(self):
-        """Get Axes object of currently selected axes"""
+    def get_selected_ax(self):
+        """Get Axes object of selected axes"""
         return self.axes_names_dict[self.view.get_selected_ax_name()]
 
-    def get_current_ax_name(self):
-        """Get name of currently selected axes"""
+    def get_selected_ax_name(self):
+        """Get name of selected axes"""
         return self.view.get_selected_ax_name()
 
-    def get_current_ax_properties(self):
-        """Get axes properties from currently selected axes"""
-        return AxProperties.from_ax_object(self.get_current_ax())
+    def get_selected_ax_properties(self):
+        """Get axes properties from selected axes"""
+        return AxProperties.from_ax_object(self.get_selected_ax())
 
     def populate_select_axes_combo_box(self):
         """Add axes' names to the 'select axes' combo box"""
@@ -65,21 +64,29 @@ class AxesTabWidgetPresenter:
                        key=lambda x: x[x.rfind("("):])
         self.view.populate_select_axes_combo_box(names)
 
-    def rename_current_axes(self, new_name):
+    def rename_selected_axes(self, new_name):
         """
-        Rename the current axes, updating the axes_names_dict and
+        Rename the selected axes, updating the axes_names_dict and
         the select_axes_combo_box
         """
-        old_name = self.get_current_ax_name()
-        self.view.set_current_axes_selector_text(new_name)
+        old_name = self.get_selected_ax_name()
+        self.view.set_selected_axes_selector_text(new_name)
         self.axes_names_dict[new_name] = self.axes_names_dict.pop(old_name)
 
     def set_ax_title(self, ax, new_title):
         """Set axes' title and update its entry in the axes selector"""
         ax.set_title(new_title)
-        self.rename_current_axes(generate_ax_name(ax))
+        self.rename_selected_axes(generate_ax_name(ax))
 
-    def set_selected_ax_view_properties(self):
+    def update_view(self):
         """Update the properties in the view from the selected axes"""
-        ax_props = self.get_current_ax_properties()
-        self.view.set_properties(ax_props)
+        ax_props = self.get_selected_ax_properties()
+        self.view.set_title(ax_props.title)
+        self.view.set_xlower_limit(ax_props.xlim[0])
+        self.view.set_xupper_limit(ax_props.xlim[1])
+        self.view.set_xlabel(ax_props.xlabel)
+        self.view.set_xscale(ax_props.xscale)
+        self.view.set_ylower_limit(ax_props.ylim[0])
+        self.view.set_yupper_limit(ax_props.ylim[1])
+        self.view.set_ylabel(ax_props.ylabel)
+        self.view.set_yscale(ax_props.yscale)

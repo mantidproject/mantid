@@ -32,8 +32,7 @@ class CurvePropertiesTest(unittest.TestCase):
             'markeredgecolor': 'g',
             'markeredgewidth': 0.4,
             'markerfacecolor': 'k',
-            'visible': False
-        }
+            'visible': False}
 
         fig0 = figure()
         ax0 = fig0.add_subplot(211)
