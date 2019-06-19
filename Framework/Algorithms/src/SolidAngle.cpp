@@ -18,8 +18,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <cfloat>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -160,13 +158,13 @@ void SolidAngle::init() {
                   "the algorithm.  A workspace of this name will be created "
                   "and stored in the Analysis Data Service.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", 0, mustBePositive,
+  declareProperty("StartWorkspaceIndex", int64_t{0}, mustBePositive,
                   "The index number of the first spectrum for which to find "
                   "the solid angle\n"
                   "(default: 0)");
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
+  declareProperty("EndWorkspaceIndex", int64_t{EMPTY_INT()}, mustBePositive,
                   "The index of the last spectrum whose solid angle is to be "
                   "found (default: the\n"
                   "last spectrum in the workspace)");
@@ -184,10 +182,11 @@ void SolidAngle::init() {
 void SolidAngle::exec() {
   // Get the workspaces
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  int m_MinSpec = getProperty("StartWorkspaceIndex");
-  int m_MaxSpec = getProperty("EndWorkspaceIndex");
+  int64_t m_MinSpec = getProperty("StartWorkspaceIndex");
+  int64_t m_MaxSpec = getProperty("EndWorkspaceIndex");
 
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const int64_t numberOfSpectra =
+      static_cast<int64_t>(inputWS->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if (m_MinSpec > numberOfSpectra) {
@@ -201,8 +200,8 @@ void SolidAngle::exec() {
     m_MaxSpec = numberOfSpectra - 1;
   }
 
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
-      inputWS, m_MaxSpec - m_MinSpec + 1, 2, 1);
+  MatrixWorkspace_sptr outputWS =
+      WorkspaceFactory::Instance().create(inputWS, numberOfSpectra, 2, 1);
   // The result of this will be a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
@@ -250,34 +249,34 @@ void SolidAngle::exec() {
         std::make_unique<Wing>(detectorInfo, method, pixelArea);
   }
 
-  const int loopIterations = m_MaxSpec - m_MinSpec;
-  int failCount = 0;
+  auto outputSpectrumInfo = outputWS->mutableSpectrumInfo();
+  size_t failCount{0};
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
-
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
-  for (int j = 0; j <= loopIterations; ++j) {
-    PARALLEL_START_INTERUPT_REGION
-    const int i = j + m_MinSpec;
-    outputWS->mutableX(j)[0] = inputWS->x(i).front();
-    outputWS->mutableX(j)[1] = inputWS->x(i).back();
-    outputWS->mutableE(j) = 0;
-    if (spectrumInfo.hasDetectors(i)) {
-      double solidAngle = 0.0;
-      for (const auto detID : inputWS->getSpectrum(i).getDetectorIDs()) {
-        const auto index = detectorInfo.indexOf(detID);
-        if (!detectorInfo.isMasked(index) && !detectorInfo.isMonitor(index))
-          solidAngle += solidAngleCalculator->solidAngle(index);
+  for (int j = 0; j < numberOfSpectra; ++j) {
+    outputWS->mutableX(j)[0] = inputWS->x(j).front();
+    outputWS->mutableX(j)[1] = inputWS->x(j).back();
+    outputWS->mutableE(j) = 0.;
+    outputWS->mutableY(j) = 0.; // default value for not calculated
+    if (j >= m_MinSpec && j <= m_MaxSpec) {
+      if (spectrumInfo.hasDetectors(j)) {
+        double solidAngle = 0.0;
+        for (const auto detID : inputWS->getSpectrum(j).getDetectorIDs()) {
+          const auto index = detectorInfo.indexOf(detID);
+          if (!detectorInfo.isMasked(index) && !detectorInfo.isMonitor(index)) {
+            solidAngle += solidAngleCalculator->solidAngle(index);
+          }
+        }
+        outputWS->mutableY(j)[0] = solidAngle;
+      } else {
+        ++failCount;
       }
-      outputWS->mutableY(j)[0] = solidAngle;
     } else {
-      ++failCount;
+      // SpectrumInfo::setMasked is NOT threadsafe.
+      outputSpectrumInfo.setMasked(j, true);
     }
-
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
 
   if (failCount != 0) {
     g_log.information() << "Unable to calculate solid angle for " << failCount

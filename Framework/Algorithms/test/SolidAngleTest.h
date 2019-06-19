@@ -155,15 +155,19 @@ public:
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF")
 
     const size_t numberOfSpectra = output2D->getNumberHistograms();
-    TS_ASSERT_EQUALS(numberOfSpectra, 10);
+    size_t unmaskedSpectra{0};
+    auto spectrumInfo = output2D->spectrumInfo();
     for (size_t i = 0; i < numberOfSpectra; ++i) {
       // all of the values should fall in this range for INES
-      TS_ASSERT_DELTA(output2D->y(i)[0], 0.0013, 0.0001);
-
-      TS_ASSERT_DELTA(output2D->x(i)[0], 0.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
+      if (!spectrumInfo.isMasked(i)) {
+        TS_ASSERT_DELTA(output2D->y(i)[0], 0.0013, 0.0001);
+        TS_ASSERT_DELTA(output2D->x(i)[0], 0.0, 0.000001);
+        TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
+        TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
+        ++unmaskedSpectra;
+      }
     }
+    TS_ASSERT_EQUALS(unmaskedSpectra, 10);
   }
 
   void testCorrectWithIndex() {
@@ -204,10 +208,14 @@ public:
         boost::dynamic_pointer_cast<Workspace2D>(output2);
     const size_t numberOfSpectra1 = output2D_1->getNumberHistograms();
     const size_t numberOfSpectra2 = output2D_2->getNumberHistograms();
-    for (size_t i = 50, j = 0; i < numberOfSpectra1 && j < numberOfSpectra2;
-         i++, j++) {
+    TS_ASSERT_EQUALS(numberOfSpectra1, numberOfSpectra2);
+    auto spectrumInfo1 = output2D_1->spectrumInfo();
+    auto spectrumInfo2 = output2D_2->spectrumInfo();
+    for (size_t i = 0; i < numberOfSpectra1; i++) {
       // all values after the start point of the second workspace should match
-      TS_ASSERT_EQUALS(output2D_1->y(i)[0], output2D_2->y(j)[0]);
+      if (!(spectrumInfo2.isMasked(i) || spectrumInfo2.isMasked(i))) {
+        TS_ASSERT_EQUALS(output2D_1->y(i)[0], output2D_2->y(i)[0]);
+      }
     }
   }
 
