@@ -19,7 +19,8 @@ def convert_color_to_hex(color):
     try:
         return colors.cnames[color]
     except (KeyError, TypeError):
-        return colors.to_hex(color)
+        rgb = colors.colorConverter.to_rgb(color)
+        return colors.rgb2hex(rgb)
 
 
 MPL_DEFAULT = convert_color_to_hex(rcParams['lines.color'])
