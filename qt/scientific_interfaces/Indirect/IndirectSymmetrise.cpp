@@ -9,6 +9,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Plotting/SingleSelector.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectSymmetrise");
@@ -74,8 +75,8 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_propTrees["SymmPVPropTree"]->addProperty(m_properties["DeltaY"]);
 
   // Indicators for Y value at each EMin position
-  // auto negativeEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
-  //    "NegativeEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
+  auto negativeEMinYPos = m_uiForm.ppRawPlot->addSingleSelector(
+      "NegativeEMinYPos", MantidWidgets::SingleSelector::YSINGLE);
   // negativeEMinYPos->setInfoOnly(true);
   // negativeEMinYPos->setColour(Qt::blue);
   // negativeEMinYPos->setMinimum(0.0);

@@ -650,7 +650,7 @@ class SingleMarker(QObject):
         :param position: The position of the marker in axes coords.
         :return True if the value was changed.
         """
-        if self.upper_bound > position > self.lower_bound:
+        if self.upper_bound >= position >= self.lower_bound:
             self.marker.set_position(position)
             self.redraw()
             return True

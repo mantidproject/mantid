@@ -1,11 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGET_POSHPLOTTING_H
-#define MANTIDQT_MANTIDWIDGET_POSHPLOTTING_H
+#ifndef MANTIDQT_MANTIDWIDGET_QWT_SINGLESELECTOR_H
+#define MANTIDQT_MANTIDWIDGET_QWT_SINGLESELECTOR_H
 
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
@@ -20,98 +20,73 @@ namespace MantidWidgets {
 class PreviewPlot;
 
 /**
- * Allows for simpler (in a way) selection of a range on a QwtPlot in MantidQt.
- * @author Michael Whitty, RAL ISIS
- * @date 11/10/2010
+ * Displays a line for selecting a value on a QwtPlot in MantidQt.
  */
-class EXPORT_OPT_MANTIDQT_PLOTTING RangeSelector : public QwtPlotPicker {
+class EXPORT_OPT_MANTIDQT_PLOTTING SingleSelector : public QwtPlotPicker {
   Q_OBJECT
 public:
-  enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
+  enum SelectType { XSINGLE, YSINGLE };
 
-  RangeSelector(QwtPlot *plot, SelectType type = XMINMAX, bool visible = true,
-                bool infoOnly = false);
-  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
-                bool visible = true, bool infoOnly = false);
-  ~RangeSelector() override{};
+  SingleSelector(QwtPlot *plot, SelectType type = XSINGLE, bool visible = true,
+                 bool infoOnly = false);
+  SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE,
+                 bool visible = true, bool infoOnly = false);
+  ~SingleSelector() override{};
 
-  void setRange(const std::pair<double, double> &range);
-  std::pair<double, double> getRange() const;
+  void setColour(const QColor &colour);
 
-  double getMinimum() { return m_min; }
-  double getMaximum() { return m_max; }
+  void setBounds(const std::pair<double, double> &bounds);
+  void setBounds(const double minimum, const double maximum);
+  void setLowerBound(const double minimum);
+  void setUpperBound(const double maximum);
 
-  SelectType getType() { return m_type; }
-  bool isVisible() { return m_visible; }
+  void setPosition(const double position);
+  double getPosition() const;
+
+  void setVisible(bool visible);
+
+  void detach();
 
 signals:
-  void minValueChanged(double /*_t1*/);
-  void maxValueChanged(double /*_t1*/);
-  void rangeChanged(double /*_t1*/, double /*_t2*/);
-  void selectionChanged(double /*_t1*/, double /*_t2*/);
-  void selectionChangedLazy(double /*_t1*/, double /*_t2*/);
-
-public slots:
-  void setRange(double min, double max);
-  void setMinimum(double /*val*/); ///< outside setting of value
-  void setMaximum(double /*val*/); ///< outside setting of value
-  void reapply();                  ///< re-apply the range selector lines
-  void detach(); ///< Detach range selector lines from the plot
-  void setColour(QColor colour);
-  void setInfoOnly(bool state);
-  void setVisible(bool state);
+  void valueChanged(double position);
 
 private:
   void init();
-  void setMin(double val);
-  void setMax(double val);
-  void setMaxMin(const double min, const double max);
-  void setMinLinePos(double /*val*/);
-  void setMaxLinePos(double /*val*/);
-  void verify();
-  bool inRange(double /*x*/);
-  bool changingMin(double /*x*/, double /*xPlusdx*/);
-  bool changingMax(double /*x*/, double /*xPlusdx*/);
+  void setLinePosition(const double position);
+  bool isInsideBounds(double /*x*/);
+  bool isMarkerMoving(double /*x*/, double /*xPlusdx*/);
   bool eventFilter(QObject * /*unused*/, QEvent * /*unused*/) override;
 
-  // MEMBER ATTRIBUTES
-  SelectType m_type; ///< type of selection widget is for
+  /// type of selection widget is for
+  SelectType m_type;
 
-  /// current position of the line marking the minimum
-  double m_min;
-  /// current position of the line marking the maximum
-  double m_max;
-  /// lowest allowed position of the line marking the minimum
-  double m_lower;
-  /// highest allowed position of the line marking the maximum
-  double m_higher;
-  /// the line object in the plot marking the position of the minimum
-  QwtPlotMarker *m_mrkMin;
-  /// the line object in the plot marking the position of the maximum
-  QwtPlotMarker *m_mrkMax;
+  /// The current position of the line
+  double m_position;
+  /// The lower bound allowed for the lines position
+  double m_lowerBound;
+  /// The upper bound allowed for the lines position
+  double m_upperBound;
+  /// The line object in the plot marking the position
+  QwtPlotMarker *m_singleMarker;
 
-  /// widget receiving the  marker lines to be plotted
+  /// The plot
   QwtPlot *m_plot;
-  /// the actual area of m_plot where the marker lines are plotted
+  /// The canvas
   QwtPlotCanvas *m_canvas;
 
-  /// signals the position of the line marking the minimum is to be changed
-  bool m_minChanging;
-  /// signals the position of the line marking the maximum is to be changed
-  bool m_maxChanging;
+  /// Stores whether or not the marker is moving
+  bool m_markerMoving;
 
-  bool m_infoOnly;
-  /// whether the lines should be visible
+  /// Whether the line should be visible
   bool m_visible;
 
-  /** Strictly UI options and settings below this point **/
-
-  QPen *m_pen; ///< pen object used to define line style, colour, etc
-  QCursor
-      m_movCursor; ///< the cursor object to display when an item is being moved
+  /// The pen object used to define line style, colour, etc
+  QPen *m_pen;
+  /// The cursor object to display when an item is being moved
+  QCursor m_moveCursor;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif
+#endif /* MANTIDQT_MANTIDWIDGET_QWT_SINGLESELECTOR_H */

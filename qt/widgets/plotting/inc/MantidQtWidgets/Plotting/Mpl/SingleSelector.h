@@ -17,7 +17,7 @@ namespace MantidWidgets {
 class PreviewPlot;
 
 /**
- * Displays a line for selecting a range on a previewplot
+ * Displays a line for selecting a value on a previewplot in MPL
  */
 class EXPORT_OPT_MANTIDQT_PLOTTING SingleSelector : public QObject {
   Q_OBJECT

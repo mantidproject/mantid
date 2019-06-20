@@ -23,7 +23,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING RangeSelector : public QObject {
   Q_OBJECT
 
 public:
-  enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
+  enum SelectType { XMINMAX, YMINMAX };
 
   RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
                 bool visible = true, bool infoOnly = false,
