@@ -119,7 +119,8 @@ class CurvesTabWidgetPresenter:
             new_curve = self.replot_curve(ax, curve, plot_kwargs)
         setattr(new_curve, 'errorevery', plot_kwargs.get('errorevery', 1))
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
-        self.get_selected_ax().legend().draggable()
+        if self.get_selected_ax().legend_:
+            self.get_selected_ax().legend().draggable()
 
     def populate_curve_combo_box_and_update_view(self):
         """
@@ -152,11 +153,13 @@ class CurvesTabWidgetPresenter:
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
 
+        ax = self.get_selected_ax()
         # Update the legend and redraw
-        self.get_selected_ax().relim()
-        self.get_selected_ax().autoscale()
-        self.get_selected_ax().legend().draggable()
-        self.get_selected_ax().figure.canvas.draw()
+        ax.relim()
+        ax.autoscale()
+        if ax.legend_:
+            ax.legend().draggable()
+        ax.figure.canvas.draw()
 
         # Remove the curve from the curve selection combo box
         if self.remove_selected_curve_combo_box_entry():

@@ -31,7 +31,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         cls.ax0.set_title("Axes 0")
         cls.curve0 = cls.ax0.errorbar(cls.ws, specNum=1, fmt=':g', marker=1,
                                       label='Workspace')
-        cls.ax0.plot([0, 1], [2, 3], '--r', marker='v', lw=1.1)
+        cls.ax0.plot([0, 1], [2, 3], '--r', marker='v', lw=1.1, label='noerrors')
 
         ax1 = cls.fig.add_subplot(222)
         ax1.set_title("Image")
@@ -43,6 +43,11 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.ws.delete()
+
+    def _get_no_errors_line(self):
+        for line in self.ax0.lines:
+            if line.get_label() == "noerrors":
+                return line
 
     def _generate_presenter(self, mock_view=None, fig=None):
         if not mock_view:
@@ -65,7 +70,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
     def test_populate_select_curve_combo_box_called_on_init(self):
         presenter = self._generate_presenter()
         presenter.view.populate_select_curve_combo_box.assert_called_once_with(
-            ["_line1", "Workspace"])
+            ["noerrors", "Workspace"])
 
     def test_update_view_called_on_init(self):
         presenter = self._generate_presenter()
@@ -73,9 +78,9 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
             CurveProperties.from_curve(self.curve0))
 
     def test_curve_names_not_equal_in_curve_names_dict_if_curves_have_same_labels(self):
-        line = self.fig.get_axes()[0].get_lines()[1]
-        # Patch unlabelled line in ax0 to have same label as the errorbar curve
-        # in the same axes
+        line = self._get_no_errors_line()
+        # Patch line in ax0 to have same label as the errorbar curve in the
+        # same axes
         with patch.object(line, 'get_label', lambda: 'Workspace'):
             presenter = self._generate_presenter()
         self.assertSequenceEqual(['Workspace', 'Workspace (1)'],
@@ -89,10 +94,10 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
 
     def test_updating_curve_label_updates_curve_names_dict(self):
         presenter = self._generate_presenter()
-        line = self.fig.get_axes()[0].get_lines()[1]
+        line = self._get_no_errors_line()
         err_bars = self.fig.get_axes()[0].containers[0]
         presenter.set_curve_label(err_bars, 'new_label')
-        self.assertEqual({'new_label': err_bars, '_line1': line},
+        self.assertEqual({'new_label': err_bars, 'noerrors': line},
                          presenter.curve_names_dict)
 
     def test_remove_curve_from_mantid_ax_with_workspace_artist(self):

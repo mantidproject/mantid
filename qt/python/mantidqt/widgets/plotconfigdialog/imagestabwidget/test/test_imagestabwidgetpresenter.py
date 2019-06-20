@@ -33,7 +33,8 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         ax.plot(cls.ws, specNum=1)
 
         ax1 = cls.fig.add_subplot(222)
-        cls.img0 = ax1.imshow([[0, 1], [1, 0]])
+        cls.img0_label = "Im0 label"
+        cls.img0 = ax1.imshow([[0, 1], [1, 0]], label=cls.img0_label)
 
         ax3 = cls.fig.add_subplot(224, projection='mantid')
         cls.img1_label = 'Im1 label'
@@ -55,11 +56,12 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
     def test_select_image_combo_box_populated_on_init(self):
         presenter = self._generate_presenter()
         presenter.view.populate_select_image_combo_box.assert_called_once_with(
-            ['(0, 1) - _image0', 'Second Axes: (1, 1) - {}'.format(self.img1_label)])
+            ['(0, 1) - {}'.format(self.img0_label),
+             'Second Axes: (1, 1) - {}'.format(self.img1_label)])
 
     def test_image_dict_names_populated_on_init(self):
         presenter = self._generate_presenter()
-        expected = {'(0, 1) - _image0': self.img0,
+        expected = {'(0, 1) - {}'.format(self.img0_label): self.img0,
                     'Second Axes: (1, 1) - {}'.format(self.img1_label): self.img1}
         self.assertEqual(presenter.image_names_dict, expected)
 
@@ -103,8 +105,8 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
     def test_apply_properties_sets_properties(self):
         fig = figure()
         ax = fig.add_subplot(111)
-        img = ax.imshow([[0, 2], [2, 0]])
-        mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - _image0',
+        img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - img label',
                          get_label=lambda: 'New Label',
                          get_colormap=lambda: 'jet',
                          get_min_value=lambda: 0,
@@ -122,8 +124,8 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
     def test_apply_properties_log_scale_with_zero_vmin(self):
         fig = figure()
         ax = fig.add_subplot(111)
-        img = ax.imshow([[0, 2], [2, 0]])
-        mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - _image0',
+        img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - img label',
                          get_label=lambda: 'New Label',
                          get_colormap=lambda: 'jet',
                          get_min_value=lambda: 0,
@@ -149,9 +151,9 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
     def test_colorbars_not_included(self):
         fig = figure()
         ax = fig.add_subplot(111)
-        img = ax.imshow([[0, 2], [2, 0]])
+        img = ax.imshow([[0, 2], [2, 0]], label='img label')
         fig.colorbar(img, label='Colorbar')
-        img_name = '(0, 0) - _image0'
+        img_name = '(0, 0) - img label'
         view = Mock(get_selected_image_name=lambda: img_name)
         presenter = self._generate_presenter(view, fig)
         self.assertTrue(1, len(presenter.image_names_dict))

@@ -12,8 +12,10 @@ import unittest
 
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
+from matplotlib import rcParams
 from matplotlib.pyplot import figure
 
+from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 
 
@@ -81,7 +83,7 @@ class CurvePropertiesTest(unittest.TestCase):
                          'capthick': 1,
                          'color': '#ff0000',
                          'drawstyle': u'steps',
-                         'ecolor': '#1f77b4',
+                         'ecolor': convert_color_to_hex(rcParams['lines.color']),
                          'elinewidth': 1,
                          'errorevery': 1,
                          'label': 'ax0',
