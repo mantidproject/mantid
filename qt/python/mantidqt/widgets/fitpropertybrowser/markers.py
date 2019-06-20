@@ -606,18 +606,20 @@ class SingleMarker(QObject):
     """
         A marker used to mark out a vertical or horizontal line on a plot.
     """
-    def __init__(self, canvas, color, position, lower_bound, higher_bound, marker_type='XSingle', line_style='-'):
+    def __init__(self, canvas, color, position, lower_bound, upper_bound, marker_type='XSingle', line_style='-'):
         """
         Init the marker.
         :param canvas: The MPL canvas.
         :param color: An MPL colour value
         :param position: The axes coordinate of the marker.
+        :param lower_bound: The axes coordinate of the lower bound.
+        :param upper_bound: The axes coordinate of the upper bound.
         :param marker_type: Whether the SingleMarker is vertical or horizontal.
         :param line_style: An MPL line style value.
         """
         super(RangeMarker, self).__init__()
         self.lower_bound = lower_bound
-        self.higher_bound = higher_bound
+        self.upper_bound = upper_bound
         self.marker_type = marker_type
         if self.marker_type == 'XSingle':
             self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
@@ -664,7 +666,7 @@ class SingleMarker(QObject):
         :param maximum: The higher end of the marker position.
         """
         self.set_lower_bound(minimum)
-        self.set_higher_bound(maximum)
+        self.set_upper_bound(maximum)
 
     def set_lower_bound(self, minimum):
         """
@@ -673,12 +675,12 @@ class SingleMarker(QObject):
         """
         self.lower_bound = minimum
 
-    def set_higher_bound(self, maximum):
+    def set_upper_bound(self, maximum):
         """
         Sets the maximum bound for the marker.
         :param maximum: The maximum bound for the marker.
         """
-        self.higher_bound = maximum
+        self.upper_bound = maximum
 
     def is_inside_bounds(self, x, y):
         """
@@ -687,9 +689,9 @@ class SingleMarker(QObject):
         :param y: An y mouse coordinate.
         :return True if the axes coordinate is within the bounds.
         """
-        if self.marker_type == 'XSingle' and (self.higher_bound < x < self.lower_bound):
+        if self.marker_type == 'XSingle' and (self.upper_bound < x < self.lower_bound):
             return False
-        if self.marker_type == 'YSingle' and y is not None and (self.higher_bound < y < self.lower_bound):
+        if self.marker_type == 'YSingle' and y is not None and (self.upper_bound < y < self.lower_bound):
             return False
         return True
 
