@@ -361,6 +361,10 @@ class FittingTabPresenter(object):
             self.view.function_name += ',TFAsymmetry'
             self.model.function_name = self.view.function_name
 
+    def handle_function_parameter_changed(self):
+        index = self.view.get_index_for_start_end_times()
+        self._fit_function[index] = self.view.fit_object.clone()
+
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()
 
