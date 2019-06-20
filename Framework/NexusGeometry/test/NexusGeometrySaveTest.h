@@ -9,15 +9,26 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <gmock/gmock.h>
 #include <iostream>
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::NexusGeometry;
+
+namespace {
+
+class MockProgressBase : public Mantid::Kernel::ProgressBase {
+public:
+  MOCK_METHOD1(doReport, void(const std::string &));
+};
+
+} // namespace
 
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
 public:
@@ -42,19 +53,23 @@ public:
                      std::invalid_argument &);
   }
 
-  void test_providing_valid_path_throw_fails() {
 
+  void test_progress_reporting() {
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
         Mantid::Kernel::V3D(1, 1, 1));
 
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
+    MockProgressBase progressRep;
+    EXPECT_CALL(progressRep, doReport(testing::_)).Times(1);
     std::string path = "C:\\Users\\mqi61253\\testfile.txt"; // valid path
+    saveInstrument(*inst2.first, path, &progressRep);
+    ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&progressRep));
 
-    TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
-                     std::invalid_argument &);
+
   }
+  
+
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

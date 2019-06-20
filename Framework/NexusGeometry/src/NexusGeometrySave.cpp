@@ -29,6 +29,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
   if (reporter != nullptr) {
     reporter->report();
+
   } else {
 	  //reporter is null, should still execute.
   }
