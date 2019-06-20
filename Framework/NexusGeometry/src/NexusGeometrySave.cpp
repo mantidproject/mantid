@@ -8,7 +8,8 @@
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ProgressBase.h"
-#include <fstream>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -17,21 +18,22 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
                     Kernel::ProgressBase *reporter) {
 
-  std::ifstream tmp(fullPath);
-  if (!tmp) {
+  boost::filesystem::path tmp(fullPath);
+  if (!boost::filesystem::is_directory(tmp)) {
     throw std::invalid_argument(
-        "The path provided for the file saving is invalid: " + fullPath);
+        "The path provided for the file saving is invalid: " + fullPath + "\n");
   }
 
   if (!compInfo.hasDetectorInfo()) {
-    throw std::invalid_argument("The component has no detector info.");
+    throw std::invalid_argument("The component has no detector info.\n");
   }
 
   if (reporter != nullptr) {
     reporter->report();
+    void saveMethod();
 
   } else {
-	  //reporter is null, should still execute.
+    // reporter is null, should still execute.
   }
 };
 } // namespace NexusGeometry

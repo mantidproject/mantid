@@ -53,7 +53,6 @@ public:
                      std::invalid_argument &);
   }
 
-
   void test_progress_reporting() {
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
@@ -62,14 +61,10 @@ public:
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
     MockProgressBase progressRep;
     EXPECT_CALL(progressRep, doReport(testing::_)).Times(1);
-    std::string path = "C:\\Users\\mqi61253\\testfile.txt"; // valid path
+    std::string path = "C:\\Users\\mqi61253"; // valid path
     saveInstrument(*inst2.first, path, &progressRep);
     ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&progressRep));
-
-
   }
-  
-
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
