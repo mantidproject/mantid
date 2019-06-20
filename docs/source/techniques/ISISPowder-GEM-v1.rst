@@ -55,6 +55,7 @@ The following methods can be executed on a GEM object:
 - :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
 - :ref:`focus_gem_isis-powder-diffraction-ref`
 - :ref:`set_sample_gem_isis-powder-diffraction-ref`
+- :ref:`create_cal_gem_isis-powder-diffraction-ref`
 
 For information on creating a GEM object see:
 :ref:`creating_gem_object-isis-powder-diffraction-ref`
@@ -171,6 +172,29 @@ Example
   sample_obj.set_material(...)
 
   gem_example.set_sample(sample=sample_obj)
+
+.. _create_cal_gem_isis-powder-diffraction-ref:
+
+create_cal
+^^^^^^^^^^
+The *create_cal* method creates the offset calibration file for GEM
+scripts. The following parameters are required:
+
+- :ref:`calibration_mapping_file_gem_isis-powder-diffraction-ref`
+- :ref:`run_number_pearl_isis-powder-diffraction-ref`
+
+Example
+=======
+
+.. code-block:: python
+
+  # Notice how the filename ends with .yaml
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+  
+  gem_example.create_cal(run_number=87618, 
+                           calibration_mapping_file=cal_mapping_file)
+
+
 
 .. _calibration_mapping_gem-isis-powder-ref:
 
