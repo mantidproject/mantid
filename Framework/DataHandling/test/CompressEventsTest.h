@@ -34,7 +34,7 @@ public:
     CompressEvents alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setPropertyValue("Tolerance", "-1.0"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.0"));
   }
 

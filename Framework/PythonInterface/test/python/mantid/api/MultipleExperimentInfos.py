@@ -18,6 +18,6 @@ class MultipleExperimentInfoTest(unittest.TestCase):
         expt_ws = WorkspaceCreationHelper.makeFakeMDHistoWorkspace(signal, ndims)
         expinfo = expt_ws.getExperimentInfo(0)
         self.assertTrue(isinstance(expinfo, ExperimentInfo))
-        self.assertEquals(1, expt_ws.getNumExperimentInfo())
+        self.assertEqual(1, expt_ws.getNumExperimentInfo())
 
 if __name__ == '__main__': unittest.main()

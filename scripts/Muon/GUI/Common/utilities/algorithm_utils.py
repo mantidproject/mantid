@@ -130,6 +130,43 @@ def run_MuonMaxent(parameters_dict, alg):
     return alg.getProperty("OutputWorkspace").value
 
 
+def run_Fit(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty('CreateOutput', True)
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    alg.setProperties(pruned_parameter_dict)
+    alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
+    alg.setProperty('StartX', parameters_dict['StartX'])
+    alg.setProperty('EndX', parameters_dict['EndX'])
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputParameters").value, alg.getProperty(
+        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+
+
+def run_simultaneous_Fit(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty('CreateOutput', True)
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    alg.setProperties(pruned_parameter_dict)
+
+    for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
+        index_str = '_' + str(index) if index else ''
+        alg.setProperty('InputWorkspace' + index_str, input_workspace)
+        alg.setProperty('StartX' + index_str, parameters_dict['StartX'][index])
+        alg.setProperty('EndX' + index_str, parameters_dict['EndX'][index])
+
+    alg.execute()
+
+    return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
+        alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+
+
 def run_AppendSpectra(ws1, ws2):
     """
     Apply the AppendSpectra algorithm to two given workspaces (no checks made).

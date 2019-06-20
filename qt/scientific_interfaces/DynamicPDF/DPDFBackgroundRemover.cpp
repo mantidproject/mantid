@@ -15,7 +15,7 @@
 #include "SliceSelector.h"
 // Mantid headers from other projects
 #include "MantidKernel/UsageService.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/HelpWindow.h"
 // 3rd party library headers
 // System includes
@@ -88,11 +88,11 @@ void BackgroundRemover::summonSliceSelector() {
   if (!m_sliceSelector) {
     // Initialize all the components
     // Initialize the slice selector
-    m_sliceSelector = Mantid::Kernel::make_unique<SliceSelector>(this);
+    m_sliceSelector = std::make_unique<SliceSelector>(this);
     // Initialize the InputDataControl object
-    m_inputDataControl = Mantid::Kernel::make_unique<InputDataControl>();
+    m_inputDataControl = std::make_unique<InputDataControl>();
     // Initialize the DisplayControl object
-    m_displayControl = Mantid::Kernel::make_unique<DisplayControl>(
+    m_displayControl = std::make_unique<DisplayControl>(
         m_inputDataControl.get(), m_uiForm.displayModelFit);
     m_displayControl->init();
     // Initialize the FitControl object

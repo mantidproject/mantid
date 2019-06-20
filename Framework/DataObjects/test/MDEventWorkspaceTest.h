@@ -172,18 +172,18 @@ public:
   void test_initialize_throws() {
     IMDEventWorkspace *ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
+    TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     for (size_t i = 0; i < 5; i++)
       ew->addDimension(MDHistoDimension_sptr(
           new MDHistoDimension("x", "x", frame, -1, 1, 0)));
-    TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
+    TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     delete ew;
   }
 
   void test_initialize() {
     IMDEventWorkspace *ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
+    TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     for (size_t i = 0; i < 3; i++)
       ew->addDimension(MDHistoDimension_sptr(
           new MDHistoDimension("x", "x", frame, -1, 1, 0)));

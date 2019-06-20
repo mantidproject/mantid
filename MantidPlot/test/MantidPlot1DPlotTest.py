@@ -137,12 +137,12 @@ class MantidPlot1DPlotTest(unittest.TestCase):
 
     def test_plotBin_with_single_index(self):
         g = plotBin("fake", 0)
-        self.assertTrue(g is not None)
+        self.assertNotEqual(g, None)
         self.g = g
 
     def test_plotBin_with_single_index_outside_number_histograms_but_still_valid_produces_plot(self):
         g = plotBin("fake", 5)
-        self.assertTrue(g is not None)
+        self.assertNotEqual(g, None)
         self.g = g
 
     def test_plotBin_with_invalid_raises_ValueError(self):
@@ -151,12 +151,12 @@ class MantidPlot1DPlotTest(unittest.TestCase):
 
     def test_plotBin_command_with_list(self):
         g = plotBin("fake", [0,1])
-        self.assertTrue(g is not None)
+        self.assertNotEqual(g, None)
         self.g = g
 
     def test_plotBin_command_with_tuple(self):
         g = plotBin("fake", (0,1))
-        self.assertTrue(g is not None)
+        self.assertNotEqual(g, None)
         self.g = g
 
     # ---------------- Non-test methods ----------------

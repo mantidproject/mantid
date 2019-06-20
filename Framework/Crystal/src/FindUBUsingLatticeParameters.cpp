@@ -24,7 +24,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingLatticeParameters::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 

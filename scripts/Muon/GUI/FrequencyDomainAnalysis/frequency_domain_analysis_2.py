@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore
 
 from mantid.kernel import ConfigServiceImpl
@@ -45,7 +44,6 @@ def check_facility():
 
 
 class FrequencyAnalysisGui(QtWidgets.QMainWindow):
-
     """
     The Frequency Domain Analaysis 2.0 interface.
     """
@@ -64,13 +62,14 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
+        self.data_context = MuonDataContext('Frequency Domain Data', self.loaded_data)
         self.gui_context = MuonGuiContext()
         self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
-                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context)
+                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
+                                   workspace_suffix=' FD')
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -80,7 +79,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
 
         self.setup_tabs()
-        self.help_widget = HelpWidget()
+        self.help_widget = HelpWidget("Frequency Domain Analysis")
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()
@@ -140,9 +139,15 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.phase_tab.phase_table_presenter.run_change_observer)
 
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.home_tab.plot_widget.input_workspace_observer)
+
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+
+        self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
+            self.home_tab.plot_widget.group_pair_observer)
 
     def setup_alpha_recalculated_observers(self):
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(

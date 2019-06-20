@@ -1679,7 +1679,7 @@ bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
             // if the box does not exist and there is more than 1 period in name
             return false;
           }
-        } catch (boost::bad_lexical_cast) {
+        } catch (const boost::bad_lexical_cast &) {
           // none int value
           return false;
         }

@@ -5,24 +5,24 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRunInfoWidgetView
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.test_helpers import mock_widget
+
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class HomeTabRunInfoPresenterTest(unittest.TestCase):
+class HomeTabRunInfoPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
         setup_context_for_tests(self)
         self.data_context.instrument = 'MUSR'
         self.view = HomeRunInfoWidgetView(self.obj)
@@ -49,7 +49,7 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         expected_string_list = ['Instrument:MUSR', 'Run:22725', 'Title:FeTeSeT=1F=100', 'Comment:FCfirstsample',
                                 'Start:2009-03-24T04:18:58', 'End:2009-03-24T04:56:26', 'Counts(MEv):20.076704',
                                 'GoodFrames:88540', 'CountsperGoodFrame:226.753',
-                                'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):2.53386',
+                                'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):19.69992',
                                 'SampleTemperature(K):1.0', 'SampleMagneticField(G):100.0']
 
         self.assertEqual(str(self.view.run_info_box.toPlainText()).replace(' ', '').splitlines(), expected_string_list)

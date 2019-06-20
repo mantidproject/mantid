@@ -88,7 +88,8 @@ public:
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);
     TSM_ASSERT_THROWS("Id doesn't exist. Should throw during find routine.",
-                      matrixWS.getDimensionWithId("3"), std::overflow_error);
+                      matrixWS.getDimensionWithId("3"),
+                      const std::overflow_error &);
   }
 
   void testGetDimension() {
@@ -106,7 +107,7 @@ public:
     matrixWS.initialize(1, 1, 1);
     TSM_ASSERT_THROWS(
         "The dimension does not exist. Attempting to get it should throw",
-        matrixWS.getDimensionWithId("1"), std::overflow_error);
+        matrixWS.getDimensionWithId("1"), const std::overflow_error &);
   }
 
   void testGetNPoints() {

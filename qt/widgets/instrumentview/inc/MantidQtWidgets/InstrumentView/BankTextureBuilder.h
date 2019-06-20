@@ -8,9 +8,9 @@
 #define BANKTEXTUREBUILDER_H
 
 #include "GLColor.h"
+#include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/InstrumentView/GridTextureFace.h"
-#include <MantidBeamline/ComponentType.h>
 #include <utility>
 #include <vector>
 

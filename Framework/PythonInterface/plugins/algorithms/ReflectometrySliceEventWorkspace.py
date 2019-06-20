@@ -77,6 +77,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         alg.setProperty("OutputTOFCorrectionWorkspace", "__mock")
         alg.setProperty("ExcludeSpecifiedLogs", False)
         alg.setProperty("TimeSeriesPropertyLogs", 'proton_charge')
+        alg.setProperty("DescriptiveOutputNames", True)
         alg.execute()
         # Ensure the run number for the child workspaces is stored in the
         # sample logs as a string (FilterEvents converts it to a double).
@@ -96,7 +97,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         monitors_ws_list = []
         i=1
         for slice in sliced_ws_group:
-            slice_monitor_ws_name = input_monitor_ws.getName() + '_'+str(i)
+            slice_monitor_ws_name = input_monitor_ws.name() + '_'+str(i)
             slice_monitor_ws = self._clone_workspace(input_monitor_ws, slice_monitor_ws_name)
             scale_factor = slice.run().getProtonCharge() / total_proton_charge
             slice_monitor_ws = self._scale_workspace(slice_monitor_ws, slice_monitor_ws_name,
@@ -106,7 +107,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             monitors_ws_list.append(slice_monitor_ws_name)
             i+=1
 
-        self._monitor_ws_group_name = input_monitor_ws.getName() + '_sliced'
+        self._monitor_ws_group_name = input_monitor_ws.name() + '_sliced'
         self._monitor_ws_group = self._group_workspaces(monitors_ws_list, self._monitor_ws_group_name)
         mtd.addOrReplace(self._monitor_ws_group_name, self._monitor_ws_group)
 
@@ -158,7 +159,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
 
     def _clean_up(self):
         """Remove worspaces added to the ADS"""
-        monitor_ws_names = [ws.getName() for ws in self._monitor_ws_group]
+        monitor_ws_names = [ws.name() for ws in self._monitor_ws_group]
         alg = self.createChildAlgorithm("UnGroupWorkspace")
         alg.setProperty("InputWorkspace", self._monitor_ws_group_name)
         alg.execute()

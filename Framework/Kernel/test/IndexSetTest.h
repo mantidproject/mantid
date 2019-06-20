@@ -34,13 +34,13 @@ public:
 
   void test_rangeConstructorErrorCases() {
     // min negative
-    TS_ASSERT_THROWS(IndexSet set(-1, 2, 3), Exception::IndexError);
+    TS_ASSERT_THROWS(IndexSet set(-1, 2, 3), const Exception::IndexError &);
     // min > max
-    TS_ASSERT_THROWS(IndexSet set(2, 1, 3), Exception::IndexError);
+    TS_ASSERT_THROWS(IndexSet set(2, 1, 3), const Exception::IndexError &);
     // max above count
-    TS_ASSERT_THROWS(IndexSet set(1, 3, 3), Exception::IndexError);
+    TS_ASSERT_THROWS(IndexSet set(1, 3, 3), const Exception::IndexError &);
     // does it still fail if both are wrong?
-    TS_ASSERT_THROWS(IndexSet set(3, 3, 3), Exception::IndexError);
+    TS_ASSERT_THROWS(IndexSet set(3, 3, 3), const Exception::IndexError &);
   }
 
   void test_indexListConstructor() {
@@ -50,7 +50,7 @@ public:
   }
 
   void test_indexListConstructorErrorCases() {
-    TS_ASSERT_THROWS(IndexSet set({3}, 3), Exception::IndexError);
+    TS_ASSERT_THROWS(IndexSet set({3}, 3), const Exception::IndexError &);
   }
 
   void test_size() {

@@ -19,7 +19,6 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <boost/make_shared.hpp>
@@ -410,7 +409,7 @@ InstrumentVisitor::detectorIdToIndexMap() const {
 
 std::unique_ptr<Beamline::ComponentInfo>
 InstrumentVisitor::componentInfo() const {
-  return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
+  return std::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_children, m_positions, m_rotations,
@@ -419,7 +418,7 @@ InstrumentVisitor::componentInfo() const {
 
 std::unique_ptr<Beamline::DetectorInfo>
 InstrumentVisitor::detectorInfo() const {
-  return Kernel::make_unique<Mantid::Beamline::DetectorInfo>(
+  return std::make_unique<Mantid::Beamline::DetectorInfo>(
       *m_detectorPositions, *m_detectorRotations, *m_monitorIndices);
 }
 
@@ -434,9 +433,9 @@ InstrumentVisitor::makeWrappers() const {
   // Cross link Component and Detector info objects
   compInfo->setDetectorInfo(detInfo.get());
 
-  auto compInfoWrapper = Kernel::make_unique<ComponentInfo>(
+  auto compInfoWrapper = std::make_unique<ComponentInfo>(
       std::move(compInfo), componentIds(), componentIdToIndexMap(), m_shapes);
-  auto detInfoWrapper = Kernel::make_unique<DetectorInfo>(
+  auto detInfoWrapper = std::make_unique<DetectorInfo>(
       std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
 
   return {std::move(compInfoWrapper), std::move(detInfoWrapper)};

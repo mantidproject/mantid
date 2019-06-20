@@ -200,7 +200,7 @@ public:
 
     auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_setting_workspace_with_no_sample_shape_throws_invalid_argument() {
@@ -210,15 +210,17 @@ public:
     auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     testWS->getAxis(0)->setUnit("TOF");
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_setting_nmasses_zero_or_negative_throws_invalid_argument() {
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1), std::invalid_argument);
-    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0),
+                     const std::invalid_argument &);
   }
 
   void test_setting_sampledensity_zero_or_negative_throws_invalid_argument() {
@@ -226,9 +228,9 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setProperty("SampleDensity", -1),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(alg.setProperty("SampleDensity", 0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -241,7 +243,7 @@ public:
     alg->setProperty("AtomicProperties",
                      std::vector<double>(sampleProps, sampleProps + 5));
 
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void
@@ -250,14 +252,15 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setProperty("BeamRadius", -1.5),
-                     std::invalid_argument);
-    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0), std::invalid_argument);
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0),
+                     const std::invalid_argument &);
   }
 
   void test_input_workspace_with_detector_that_has_no_shape_throws_exception() {
     auto alg = createTestAlgorithm(createFlatPlateSampleWS(false));
 
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 };
 class VesuvioCalculateMSTestPerformance : public CxxTest::TestSuite {

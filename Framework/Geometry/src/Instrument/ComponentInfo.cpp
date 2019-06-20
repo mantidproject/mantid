@@ -12,7 +12,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
+
 #include <Eigen/Geometry>
 #include <exception>
 #include <iterator>

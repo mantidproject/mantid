@@ -34,7 +34,7 @@ MSDFit::MSDFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
-  setFitDataPresenter(Mantid::Kernel::make_unique<IndirectFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
       m_msdFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
@@ -52,9 +52,6 @@ void MSDFit::setupFitTab() {
   addComboBoxFunctionGroup("Gaussian", {gaussian});
   addComboBoxFunctionGroup("Peters", {peters});
   addComboBoxFunctionGroup("Yi", {yi});
-
-  setSampleWSSuffices({"_eq"});
-  setSampleFBSuffices({"_eq.nxs"});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,

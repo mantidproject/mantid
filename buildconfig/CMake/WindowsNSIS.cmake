@@ -84,6 +84,7 @@ set ( BOOST_DIST_DLLS
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
     PocoFoundation64.dll
+    PocoJSON64.dll
     PocoNet64.dll
     PocoNetSSL64.dll
     PocoUtil64.dll

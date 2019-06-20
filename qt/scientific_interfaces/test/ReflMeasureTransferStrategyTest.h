@@ -11,7 +11,7 @@
 #include "../ISISReflectometry/ReflMeasurementItemSource.h"
 #include "../ISISReflectometry/ReflTableSchema.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "ReflMockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -51,7 +51,7 @@ public:
         std::make_pair<std::string, SearchResult>("111", SearchResult()));
 
     auto mockMeasurementItemSource =
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+        std::make_unique<MockReflMeasurementItemSource>();
     auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // We expect that we are going to fetch the  measurement data for every
     // search result.
@@ -60,7 +60,7 @@ public:
         .WillRepeatedly(
             Return(MeasurementItem("a", "s_a", "l", "t", 0, "111", "title")));
 
-    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo = std::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
@@ -95,7 +95,7 @@ public:
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
     auto mockMeasurementItemSource =
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+        std::make_unique<MockReflMeasurementItemSource>();
     auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // We are going to return three SearchResults two have the same measurement
     // id
@@ -108,7 +108,7 @@ public:
         .WillOnce(Return(
             MeasurementItem("m2", "s2", "l1", "t1", 0.2, "123", "title")));
 
-    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo = std::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
@@ -166,7 +166,7 @@ public:
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
     auto mockMeasurementItemSource =
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+        std::make_unique<MockReflMeasurementItemSource>();
     auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // We have 2 with valid measurement ids and 1 with no measurement id
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
@@ -178,7 +178,7 @@ public:
         .WillOnce(Return(
             MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123", "title")));
 
-    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo = std::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
 
     // We expect that every location will be translated/transformed to make it
@@ -230,7 +230,7 @@ public:
         std::make_pair<std::string, SearchResult>("113", SearchResult()));
 
     auto mockMeasurementItemSource =
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+        std::make_unique<MockReflMeasurementItemSource>();
     auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
@@ -242,7 +242,7 @@ public:
         .WillOnce(Return(
             MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123", "title")));
 
-    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo = std::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
@@ -299,7 +299,7 @@ public:
         std::make_pair<std::string, SearchResult>("14916", SearchResult()));
 
     auto mockMeasurementItemSource =
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+        std::make_unique<MockReflMeasurementItemSource>();
     auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
@@ -313,7 +313,7 @@ public:
         .WillOnce(Return(
             MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14916", "title")));
 
-    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo = std::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
@@ -361,7 +361,7 @@ public:
         std::make_pair<std::string, SearchResult>("14914", SearchResult()));
 
     auto mockMeasurementItemSource =
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+        std::make_unique<MockReflMeasurementItemSource>();
     auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
 
     // Same measurment id but different title
@@ -372,7 +372,7 @@ public:
         .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.1, "14914",
                                          "Sample 1 H=0.09")));
 
-    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo = std::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
@@ -417,7 +417,7 @@ public:
         std::make_pair<std::string, SearchResult>("111", SearchResult()));
 
     auto mockMeasurementItemSource =
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+        std::make_unique<MockReflMeasurementItemSource>();
     auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
 
     // We expect that we are going to fetch the  measurement data for every
@@ -427,7 +427,7 @@ public:
         .WillRepeatedly(
             Return(MeasurementItem::InvalidMeasurementItem("Abort!")));
 
-    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo = std::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
     // We expect that every location will be translated/transformed to make it
     // os specific
@@ -452,12 +452,12 @@ public:
   void test_clone() {
 
     // Sub component ICatalogInfo will be cloned
-    auto pCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto pCatInfo = std::make_unique<MockICatalogInfo>();
     EXPECT_CALL(*pCatInfo, clone()).WillOnce(Return(new MockICatalogInfo));
 
     // Sub component Measurment source will be cloned
     auto pMeasurementItemSource =
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+        std::make_unique<MockReflMeasurementItemSource>();
     EXPECT_CALL(*pMeasurementItemSource, clone())
         .WillOnce(Return(new MockReflMeasurementItemSource));
 
@@ -472,8 +472,8 @@ public:
   void test_filtering() {
 
     ReflMeasureTransferStrategy strategy(
-        Mantid::Kernel::make_unique<MockICatalogInfo>(),
-        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>());
+        std::make_unique<MockICatalogInfo>(),
+        std::make_unique<MockReflMeasurementItemSource>());
 
     // ISIS nexus format files can have the right logs.
     TSM_ASSERT("Yes this transfer mechanism should know about nexus formats",

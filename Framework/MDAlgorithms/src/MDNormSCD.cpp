@@ -73,7 +73,7 @@ const std::string MDNormSCD::name() const { return "MDNormSCD"; }
  * Initialize the algorithm's properties.
  */
 void MDNormSCD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
@@ -85,8 +85,8 @@ void MDNormSCD::init() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                            Direction::Input),
+        std::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                         Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -99,40 +99,40 @@ void MDNormSCD::init() {
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "FluxWorkspace", "", Direction::Input, fluxValidator),
                   "An input workspace containing momentum dependent flux.");
-  declareProperty(make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
-                                                   Direction::Input,
-                                                   solidAngleValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace",
+                                                        "", Direction::Input,
+                                                        solidAngleValidator),
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "SkipSafetyCheck", false, Direction::Input),
                   "If set to true, the algorithm does "
                   "not check history if the workspace was modified since the"
                   "ConvertToMD algorithm was run, and assume that the elastic "
                   "mode is used.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate normalization "
                   "from multiple MDEventWorkspaces. "
                   "If unspecified a blank MDHistoWorkspace will be created.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryDataWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate data from "
                   "multiple MDEventWorkspaces. If "
                   "unspecified a blank MDHistoWorkspace will be created.");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
@@ -447,9 +447,9 @@ void MDNormSCD::calculateNormalization(
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
   double progStep = 0.7 / m_numExptInfos;
-  auto prog =
-      make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
-                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
+  auto prog = std::make_unique<API::Progress>(
+      this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.),
+      ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {

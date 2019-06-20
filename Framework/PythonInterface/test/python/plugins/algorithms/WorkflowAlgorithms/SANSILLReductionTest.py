@@ -7,22 +7,31 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import MatrixWorkspace
+from mantid.api import MatrixWorkspace, Run
 from mantid.simpleapi import SANSILLReduction, config, mtd
+from mantid.geometry import Instrument
 
 
 class SANSILLReductionTest(unittest.TestCase):
 
     _facility = None
+    _instrument = None
 
     def setUp(self):
-        self._facility = config['default.facility']
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
+
+        self._facility = config['default.facility']
+        self._instrument = config['default.instrument']
+
         config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
 
     def tearDown(self):
-        config['default.facility'] = self._facility
+        if self._facility:
+            config['default.facility'] = self._facility
+        if self._instrument:
+            config['default.instrument'] = self._instrument
         mtd.clear()
 
     def test_absorber(self):
@@ -90,7 +99,7 @@ class SANSILLReductionTest(unittest.TestCase):
         SANSILLReduction(Run='093407', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
         self._check_output(mtd['ctr'], False, 75, 1)
 
-    def test_container_tof(self):
+    def test_reference_tof(self):
         # D33 VTOF
         # this is actually a sample run, not water, but is fine for this test
         SANSILLReduction(Run='093410', ProcessAs='Reference', OutputWorkspace='ref')
@@ -114,8 +123,8 @@ class SANSILLReductionTest(unittest.TestCase):
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "Wavelength")
         self.assertEqual(ws.blocksize(), blocksize)
         self.assertEqual(ws.getNumberHistograms(), spectra)
-        self.assertTrue(ws.getInstrument())
-        self.assertTrue(ws.getRun())
+        self.assertTrue(isinstance(ws.getInstrument(), Instrument))
+        self.assertTrue(isinstance(ws.getRun(), Run))
         self.assertTrue(ws.getHistory())
         if logs:
             self.assertTrue(ws.getRun().hasProperty('qmin'))

@@ -16,6 +16,8 @@ Improvements
 - You can now plot workspaces on top of figures you've created using scripts. Simply create a matplotlib figure in the
   script window, then drag and drop a workspace on top of it.
 - Mantid's offline help is now available in Workbench.
+- A colorfill plot of a workspace with logarithmic bins is plotted on a log scale.
+- You can now toggle the normalization of plots in Workbench from the plot's context menu
 
 Bugfixes
 ########
@@ -23,5 +25,6 @@ Bugfixes
   when no algorithm was selected has been fixed.
 - Help documentation for the manage user directories interface now correctly displays when launched from the interface.
 - A Colorfill plot of a workspace with one spectrum plots correctly and no longer raises an error.
+- The units on the y-axis of distribution workspace plots have been corrected
 
 :ref:`Release 4.1.0 <v4.1.0>`

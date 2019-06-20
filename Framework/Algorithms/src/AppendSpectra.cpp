@@ -34,11 +34,11 @@ int AppendSpectra::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void AppendSpectra::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace1", "", Direction::Input,
                       boost::make_shared<CommonBinsValidator>()),
                   "The name of the first input workspace");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace2", "", Direction::Input,
                       boost::make_shared<CommonBinsValidator>()),
                   "The name of the second input workspace");
@@ -51,8 +51,8 @@ void AppendSpectra::init() {
                   boost::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
                   "Append the spectra from InputWorkspace2 multiple times.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the output workspace");
 
   declareProperty("MergeLogs", false,

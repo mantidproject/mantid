@@ -1,4 +1,6 @@
-﻿Indirect Data Analysis
+﻿.. _interface-indirect-data-analysis:
+
+Indirect Data Analysis
 ======================
 
 .. contents:: Table of Contents
@@ -27,6 +29,10 @@ These interfaces do not support GroupWorkspace as input.
 
 Action Buttons
 ~~~~~~~~~~~~~~
+
+Settings
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  customize the settings for the Indirect interfaces.
 
 ?
   Opens this help page.

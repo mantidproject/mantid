@@ -38,15 +38,15 @@ using Mantid::HistogramData::Points;
 
 void LoadFlexiNexus::init() {
 
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load,
                       std::vector<std::string>{".hdf", ".h5", ""}),
                   "A NeXus file");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "Dictionary", "", FileProperty::Load,
                       std::vector<std::string>{".txt", ".dic", ""}),
                   "A Dictionary for controlling NeXus loading");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "OutputWorkspace", "", Direction::Output));
 }
 

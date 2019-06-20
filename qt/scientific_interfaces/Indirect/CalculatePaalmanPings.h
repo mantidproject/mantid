@@ -10,7 +10,10 @@
 #include "CorrectionsTab.h"
 #include "ui_CalculatePaalmanPings.h"
 
+#include "MantidGeometry/Instrument_fwd.h"
+
 #include <boost/optional.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -46,6 +49,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   bool doValidation(bool silent = false);
 

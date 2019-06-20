@@ -71,26 +71,26 @@ public:
 
     str = "";
     JSONObject jo;
-    TS_ASSERT_THROWS(initFromStream(jo, input), JSONParseException);
+    TS_ASSERT_THROWS(initFromStream(jo, input), const JSONParseException &);
     TS_ASSERT_THROWS_NOTHING(jo["no_param"].getValue(res));
     TS_ASSERT_EQUALS(false, jo["no_param"].getValue(res));
     TS_ASSERT_EQUALS(res, "");
     TS_ASSERT_EQUALS(false, jo["another_no_param"].getValue(res));
     TS_ASSERT_EQUALS(res, "");
 
-    TS_ASSERT_THROWS(initFromStream(jo, input), JSONParseException);
+    TS_ASSERT_THROWS(initFromStream(jo, input), const JSONParseException &);
     TS_ASSERT_THROWS_NOTHING(jo["doesnt_exist"].getValue(res));
     TS_ASSERT_EQUALS(false, jo["doesnt_exist"].getValue(res));
     TS_ASSERT_EQUALS(res, "");
 
     str = "{ mistake: }";
-    TS_ASSERT_THROWS(initFromStream(jo, input), JSONParseException);
+    TS_ASSERT_THROWS(initFromStream(jo, input), const JSONParseException &);
     TS_ASSERT_THROWS_NOTHING(jo["no no"].getValue(res));
     TS_ASSERT_EQUALS(false, jo["it's not here"].getValue(res));
     TS_ASSERT_EQUALS(res, "");
 
     str = "{ ";
-    TS_ASSERT_THROWS(initFromStream(jo, input), JSONParseException);
+    TS_ASSERT_THROWS(initFromStream(jo, input), const JSONParseException &);
     TS_ASSERT_THROWS_NOTHING(jo["no no"].getValue(res));
     TS_ASSERT_EQUALS(false, jo["it's not here"].getValue(res));
     TS_ASSERT_EQUALS(res, "");
@@ -104,7 +104,7 @@ public:
     std::string res;
 
     JSONObject o;
-    TS_ASSERT_THROWS(initFromStream(o, input), JSONParseException);
+    TS_ASSERT_THROWS(initFromStream(o, input), const JSONParseException &);
     TS_ASSERT_THROWS_NOTHING(o["Err_Msg"].getValue(res));
     TS_ASSERT_EQUALS(false, o["Err_Msg"].getValue(res));
     TS_ASSERT_EQUALS(res, "");
@@ -206,7 +206,7 @@ public:
     std::string str = "json failure here";
     std::istringstream istr(str);
     JSONObject jo;
-    TS_ASSERT_THROWS(initFromStream(jo, istr), JSONParseException);
+    TS_ASSERT_THROWS(initFromStream(jo, istr), const JSONParseException &);
     TS_ASSERT_THROWS_NOTHING(prettyPrint(jo, out, 0));
 
     std::string strOK = R"({ "key1": "val1"})";

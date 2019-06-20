@@ -40,6 +40,17 @@
 namespace Mantid {
 namespace DataHandling {
 
+/** @class InvalidLogPeriods
+ * Custom exception extending std::invalid_argument
+ * Thrown when nperiods does not match period_log
+ * Custom exception so we can re-propagate this error and
+ * handle all other errors.
+ */
+class InvalidLogPeriods : public std::invalid_argument {
+public:
+  InvalidLogPeriods(const std::string &msg) : std::invalid_argument(msg) {}
+};
+
 bool exists(::NeXus::File &file, const std::string &name);
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
@@ -86,6 +97,11 @@ public:
       const std::string &nexusfilename, T localWorkspace, Algorithm &alg,
       bool returnpulsetimes, int &nPeriods,
       std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
+
+  static void checkForCorruptedPeriods(
+      std::unique_ptr<Kernel::TimeSeriesProperty<int>> tempPeriodLog,
+      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog,
+      const int &nPeriods, const std::string &nexusfilename);
 
   template <typename T>
   static void loadEntryMetadata(const std::string &nexusfilename, T WS,

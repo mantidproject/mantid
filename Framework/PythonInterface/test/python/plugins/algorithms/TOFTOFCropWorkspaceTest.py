@@ -36,8 +36,8 @@ class TOFTOFCropWorkspaceTest(unittest.TestCase):
         # check their values
         full_channels = float(run.getLogData('full_channels').value)
         channel_width = float(run.getLogData('channel_width').value)
-        self.assertTrue(full_channels > 0.)
-        self.assertTrue(channel_width > 0.)
+        self.assertGreater(full_channels, 0.)
+        self.assertGreater(channel_width, 0.)
         # check unit horizontal axis
         self.assertEqual(self._cropped_ws.getAxis(0).getUnit().unitID(), 'TOF')
         # check length of cropped ws

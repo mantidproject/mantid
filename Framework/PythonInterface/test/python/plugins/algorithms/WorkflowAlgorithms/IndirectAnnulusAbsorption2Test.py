@@ -45,7 +45,7 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
         # Test units of factor workspaces
         for ws in factor_group:
             x_unit = ws.getAxis(0).getUnit().unitID()
-            self.assertEquals(x_unit, 'Wavelength')
+            self.assertEqual(x_unit, 'Wavelength')
 
             y_unit = ws.YUnitLabel()
             self.assertEqual(y_unit, 'Attenuation factor')

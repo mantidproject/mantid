@@ -13,4 +13,4 @@
 
  ***************************************************************************/
 
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"

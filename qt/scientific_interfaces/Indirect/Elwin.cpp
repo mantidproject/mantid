@@ -373,7 +373,7 @@ void Elwin::updatePlotSpectrumOptions() {
 }
 
 void Elwin::updateAvailablePlotWorkspaces() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.cbPlotWorkspace);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.cbPlotWorkspace);
   m_uiForm.cbPlotWorkspace->clear();
   for (auto const &suffix : getOutputWorkspaceSuffices()) {
     auto const workspaceName = getOutputBasename().toStdString() + suffix;
@@ -387,7 +387,7 @@ QString Elwin::getPlotWorkspaceName() const {
 }
 
 void Elwin::setPlotSpectrumValue(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spPlotSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spPlotSpectrum);
   m_uiForm.spPlotSpectrum->setValue(value);
 }
 
@@ -441,6 +441,12 @@ bool Elwin::validate() {
 
 void Elwin::loadSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
+}
+
+void Elwin::setFileExtensionsByName(bool filter) {
+  auto const tabName("Elwin");
+  m_uiForm.dsInputFiles->setFileExtensions(filter ? getSampleFBSuffixes(tabName)
+                                                  : getExtensions(tabName));
 }
 
 void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,

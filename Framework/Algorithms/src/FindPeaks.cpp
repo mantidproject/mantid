@@ -63,9 +63,9 @@ FindPeaks::FindPeaks()
 /** Initialize and declare properties.
  */
 void FindPeaks::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Name of the workspace to search");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the workspace to search");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
@@ -87,12 +87,12 @@ void FindPeaks::init() {
                   "candidates,\n"
                   "Mariscotti recommends 2 (default 4)");
 
-  declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of the centre of the peaks. Only peaks near "
                   "these positions will be fitted.");
 
-  declareProperty(make_unique<ArrayProperty<double>>("FitWindows"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("FitWindows"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of windows to fit. The number of values must be "
                   "exactly double the number of specified peaks.");
@@ -131,7 +131,7 @@ void FindPeaks::init() {
                   "option is turned off.");
 
   // The found peaks in a table
-  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "PeaksList", "", Direction::Output),
                   "The name of the TableWorkspace in which to store the list "
                   "of peaks found");
@@ -343,7 +343,7 @@ void FindPeaks::findPeaksGivenStartingPoints(
   std::size_t numPeaks = peakcentres.size();
 
   // Loop over the spectra searching for peaks
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
 
   for (const auto spec : m_indexSet) {
     const auto &vecX = m_dataWS->x(spec);
@@ -453,7 +453,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
   const int tolerance = getProperty("Tolerance");
 
   // Loop over the spectra searching for peaks
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
 
   for (size_t k_out = 0; k_out < m_indexSet.size(); ++k_out) {
     const size_t k = m_indexSet[k_out];

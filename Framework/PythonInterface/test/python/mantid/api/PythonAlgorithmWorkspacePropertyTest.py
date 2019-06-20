@@ -33,14 +33,14 @@ class PythonAlgorithmWorkspacePropertyTest(unittest.TestCase):
         alg = WorkspaceProperties()
         alg.initialize()
         props = alg.getProperties()
-        self.assertEquals(2, len(props))
+        self.assertEqual(2, len(props))
 
         nodoc = alg.getProperty("NoDocString")
         self.assertTrue(isinstance(nodoc, classtype))
-        self.assertEquals("", nodoc.documentation)
+        self.assertEqual("", nodoc.documentation)
         withdoc = alg.getProperty("WithDocString")
         self.assertTrue(isinstance(withdoc, classtype))
-        self.assertEquals(alg._testdocstring, withdoc.documentation)
+        self.assertEqual(alg._testdocstring, withdoc.documentation)
 
     def test_alg_accepts_WorkspaceProperty_declaration(self):
         """Runs test for a general WorkspaceProperty

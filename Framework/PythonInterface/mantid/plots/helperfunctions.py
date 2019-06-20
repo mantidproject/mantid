@@ -50,6 +50,38 @@ def get_distribution(workspace, **kwargs):
     return bool(distribution), kwargs
 
 
+def get_normalize_by_bin_width(workspace, axes, **kwargs):
+    """
+    Determine whether or not the workspace should be plotted as a
+    distribution. If the workspace is a distribution return False, else,
+    if there is already a curves on the axes, return according to
+    whether those curves are distributions. Else go by the global
+    setting.
+    :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
+    :param axes: The axes being plotted on
+    :param pop: Bool. Set to True to remove 'normalize_by_bin_width' from 'kwargs'
+    """
+    distribution = kwargs.get('distribution', None)
+    if distribution or (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
+        return False, kwargs
+    elif distribution is False:
+        return True, kwargs
+    else:
+        try:
+            current_artists = axes.tracked_workspaces.values()
+        except AttributeError:
+            current_artists = None
+
+        if current_artists:
+            current_normalization = any(
+                [artist[0].is_normalized for artist in current_artists])
+            normalize_by_bin_width = current_normalization
+        else:
+            normalize_by_bin_width = mantid.kernel.config[
+                                        'graph1d.autodistribution'].lower() == 'on'
+    return normalize_by_bin_width, kwargs
+
+
 def get_normalization(md_workspace, **kwargs):
     """
     Gets the normalization flag of an MDHistoWorkspace. For workspaces
@@ -251,18 +283,15 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
     return dim_arrays, data, err
 
 
-def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False):
+def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, withDx=False):
     """
     Extract a single spectrum and process the data into a frequency
 
     :param workspace: a Workspace2D or an EventWorkspace
     :param wkspIndex: workspace index
-    :param distribution: flag to divide the data by bin width. It happens only
-        when this flag is False, the workspace contains histogram data, and
-        the mantid configuration is set up to divide such workspaces by bin
-        width. The same effect can be obtained by running the
-        :ref:`algm-ConvertToDistribution` algorithm
-
+    :param normalize_by_bin_width: flag to divide the data by bin width. The same
+        effect can be obtained by running the :ref:`algm-ConvertToDistribution`
+        algorithm
     :param withDy: if True, it will return the error in the "counts", otherwise None
     :param with Dx: if True, and workspace has them, it will return errors
         in the x coordinate, otherwise None
@@ -282,7 +311,7 @@ def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
         dx = workspace.readDx(wkspIndex)
 
     if workspace.isHistogramData():
-        if (not distribution) and (mantid.kernel.config['graph1d.autodistribution'] == 'On'):
+        if normalize_by_bin_width and not workspace.isDistribution():
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
@@ -391,7 +420,8 @@ def get_matrix_2d_ragged(workspace, distribution, histogram2D=False, transpose=F
     y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
     z = numpy.empty([num_hist, num_edges], dtype=numpy.float64)
     for i in range(num_hist):
-        centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(workspace, i, distribution=distribution, withDy=False, withDx=False)
+        centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(
+            workspace, i, normalize_by_bin_width=distribution, withDy=False, withDx=False)
         f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=numpy.nan)
         z[i] = f(x_centers)
     if histogram2D:
@@ -420,7 +450,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     Returns x,y,z 2D arrays
     '''
     try:
-        _ = workspace.blocksize()
+        workspace.blocksize()
     except RuntimeError:
         raise ValueError('The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead')
     x = workspace.extractX()
@@ -507,7 +537,7 @@ def get_data_uneven_flag(workspace, **kwargs):
     '''
     aligned = kwargs.pop('axisaligned', False)
     try:
-        _ = workspace.blocksize()
+        workspace.blocksize()
     except RuntimeError:
         aligned = True
     return aligned, kwargs
@@ -566,7 +596,7 @@ def get_sample_log(workspace, **kwargs):
 # ====================================================
 
 
-def get_axes_labels(workspace, indices=None):
+def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_latex=True):
     """
     Get axis labels from a Workspace2D or an MDHistoWorkspace
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
@@ -576,9 +606,12 @@ def get_axes_labels(workspace, indices=None):
     If MDWorkspace then the last element will be the values selected by the indices, to be set as title.
 
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+    :param indices:
+    :param normalize_by_bin_width: bool: Plotting workspace normalized by bin width
+    :param use_latex: bool: return y-unit label in Latex form
     """
     if isinstance(workspace, MultipleExperimentInfos):
-        axes = ['Intensity']
+        axes_labels = ['Intensity']
         title = ''
         if indices is None:
             dims = workspace.getNonIntegratedDimensions()
@@ -597,11 +630,12 @@ def get_axes_labels(workspace, indices=None):
             axis_unit = axis_unit.replace('DeltaE', 'meV')
             axis_unit = axis_unit.replace('Angstrom', r'$\AA$')
             axis_unit = axis_unit.replace('MomentumTransfer', r'$\AA^{-1}$')
-            axes.append('{0} ({1})'.format(axis_title, axis_unit))
-        axes.append(title.strip())
+            axes_labels.append('{0} ({1})'.format(axis_title, axis_unit))
+        axes_labels.append(title.strip())
     else:
-        '''For matrix workspaces, return a tuple of ``(YUnit, <other units>)``'''
-        axes = [workspace.YUnit()]  # TODO: deal with distribution
+        # For matrix workspaces, return a tuple of ``(YUnit, <other units>)``
+        axes_labels = [workspace.YUnitLabel(useLatex=use_latex,
+                                            plotAsDistribution=normalize_by_bin_width)]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()
@@ -609,5 +643,5 @@ def get_axes_labels(workspace, indices=None):
                 unit = '{} (${}$)'.format(unit.caption(), unit.symbol().latex())
             else:
                 unit = unit.caption()
-            axes.append(unit)
-    return tuple(axes)
+            axes_labels.append(unit)
+    return tuple(axes_labels)

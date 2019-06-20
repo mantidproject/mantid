@@ -1034,12 +1034,12 @@ public:
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
 
     locations = R"(<locations n-elements="-1" t="0.0" t-end="180.0" />)";
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
   }
 
   void testLocationsNotANumber() {
@@ -1069,7 +1069,7 @@ public:
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
   }
 };
 

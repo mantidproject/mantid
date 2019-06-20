@@ -100,20 +100,20 @@ std::string FitResolutionConvolvedModel::createFunctionString() const {
 /** Initialize the algorithm's properties.
  */
 void FitResolutionConvolvedModel::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       INPUT_WS_NAME, "", Direction::Input),
                   "The input MDEvent workspace");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       SIMULATED_NAME, "", Direction::Output),
                   "The simulated output workspace");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       OUTPUT_PARS, "", Direction::Output),
                   "The name of the TableWorkspace in which to store the final "
                   "fit parameters");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       OUTPUTCOV_MATRIX, "", Direction::Output),
                   "The name of the TableWorkspace in which to store the final "
                   "covariance matrix");

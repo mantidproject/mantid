@@ -23,7 +23,6 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -966,14 +965,20 @@ void InstrumentDefinitionParser::setValidityRange(
   }
 }
 
-PointingAlong axisNameToAxisType(std::string &input) {
+PointingAlong axisNameToAxisType(const std::string &label, std::string &input) {
   PointingAlong direction;
   if (input == "x") {
     direction = X;
   } else if (input == "y") {
     direction = Y;
-  } else {
+  } else if (input == "z") {
     direction = Z;
+  } else {
+    std::stringstream msg;
+    msg << "Cannot create \"" << label
+        << "\" with axis direction other than \"x\", \"y\", or \"z\", found \""
+        << input << "\"";
+    throw Kernel::Exception::InstrumentDefinitionError(msg.str());
   }
   return direction;
 }
@@ -1079,9 +1084,9 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     }
 
     // Convert to input types
-    PointingAlong alongBeam = axisNameToAxisType(s_alongBeam);
-    PointingAlong pointingUp = axisNameToAxisType(s_pointingUp);
-    PointingAlong thetaSign = axisNameToAxisType(s_thetaSign);
+    PointingAlong alongBeam = axisNameToAxisType("along-beam", s_alongBeam);
+    PointingAlong pointingUp = axisNameToAxisType("pointing-up", s_pointingUp);
+    PointingAlong thetaSign = axisNameToAxisType("theta-sign", s_thetaSign);
     Handedness handedness = s_handedness == "right" ? Right : Left;
 
     // Overwrite the default reference frame.
@@ -2682,7 +2687,7 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  auto physical = Kernel::make_unique<Instrument>(*m_instrument);
+  auto physical = std::make_unique<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
   m_instrument->setPhysicalInstrument(std::move(physical));
 

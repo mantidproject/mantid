@@ -29,12 +29,12 @@ RefRoi::RefRoi()
       m_nXPixel(0), m_nYPixel(0) {}
 
 void RefRoi::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<CommonBinsValidator>()),
                   "Workspace to calculate the ROI from");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Workspace containing the summed up region of interest");
   declareProperty("NXPixel", 304, "Number of pixels in the X direction",
                   Kernel::Direction::Input);

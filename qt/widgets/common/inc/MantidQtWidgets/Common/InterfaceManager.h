@@ -140,6 +140,8 @@ public:
   virtual ~InterfaceManager();
 
 private:
+  void notifyExistingInterfaces(UserSubWindow *newWindow);
+
   /// Handle to the Vates simple user interface factory
   static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface>
       *m_vatesGuiFactory;

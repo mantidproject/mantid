@@ -976,7 +976,7 @@ private:
       algToBeTested.initialize();
 
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
 
     // create dummy 2D-workspace
     Workspace2D_sptr localWorkspace2D =

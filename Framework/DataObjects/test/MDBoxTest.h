@@ -380,7 +380,8 @@ public:
     sc->setSplitThreshold(10);
     using MACROS_ARE_DUMB =
         MDBox<MDLeanEvent<3>, 3>; //...since they get confused by commas
-    TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()), std::invalid_argument);
+    TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()),
+                     const std::invalid_argument &);
   }
 
   void test_splitter() {

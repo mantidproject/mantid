@@ -614,7 +614,7 @@ public:
     AnalysisDataService::Instance().addOrReplace(wsName, ws00);
     auto effWS = idealEfficiencies(edges);
     // Rename F1 to something else.
-    auto axis = make_unique<TextAxis>(4);
+    auto axis = std::make_unique<TextAxis>(4);
     axis->setLabel(0, "__wrong_histogram_label");
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");
@@ -630,7 +630,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
     TS_ASSERT(!alg.isExecuted())
   }
 
@@ -659,7 +659,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
     TS_ASSERT(!alg.isExecuted())
   }
 
@@ -692,7 +692,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
     TS_ASSERT(!alg.isExecuted())
   }
 
@@ -718,7 +718,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS(
         alg.setPropertyValue("InputWorkspaces", "ws00, ws01, ws10, ws11"),
-        std::invalid_argument)
+        const std::invalid_argument &)
   }
 
 private:
@@ -743,7 +743,7 @@ private:
     ws->mutableE(2) = 0.015;
     ws->mutableY(3) = 0.04;
     ws->mutableE(3) = 0.03;
-    auto axis = make_unique<TextAxis>(4);
+    auto axis = std::make_unique<TextAxis>(4);
     axis->setLabel(0, "F1");
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");
@@ -765,7 +765,7 @@ private:
         create<Workspace2D>(nHist, Histogram(edges, counts));
     ws->mutableY(0) = 1.;
     ws->mutableY(1) = 1.;
-    auto axis = make_unique<TextAxis>(4);
+    auto axis = std::make_unique<TextAxis>(4);
     axis->setLabel(0, "F1");
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");

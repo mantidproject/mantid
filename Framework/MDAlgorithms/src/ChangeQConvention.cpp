@@ -37,7 +37,7 @@ DECLARE_ALGORITHM(ChangeQConvention)
 /** Initialize the algorithm's properties.
  */
 void ChangeQConvention::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::InOut),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 }

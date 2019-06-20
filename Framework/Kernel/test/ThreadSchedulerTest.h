@@ -7,12 +7,12 @@
 #ifndef MANTID_KERNEL_THREADSCHEDULERTEST_H_
 #define MANTID_KERNEL_THREADSCHEDULERTEST_H_
 
-#include <MantidKernel/System.h>
-#include <MantidKernel/Timer.h>
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
-#include <MantidKernel/Task.h>
-#include <MantidKernel/ThreadScheduler.h>
+#include "MantidKernel/Task.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 using namespace Mantid::Kernel;
 

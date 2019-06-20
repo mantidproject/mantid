@@ -617,7 +617,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto mockTreeManager = std::make_unique<MockTreeManager>();
     auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -694,7 +694,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto mockTreeManager = std::make_unique<MockTreeManager>();
     auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -771,7 +771,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    auto mockTreeManager = Mantid::Kernel::make_unique<MockTreeManager>();
+    auto mockTreeManager = std::make_unique<MockTreeManager>();
     auto *mockTreeManager_ptr = mockTreeManager.get();
     auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);

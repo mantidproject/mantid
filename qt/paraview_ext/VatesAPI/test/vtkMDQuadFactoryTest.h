@@ -9,7 +9,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
@@ -81,7 +81,7 @@ public:
     vtkMDQuadFactory factory(Mantid::VATES::VolumeNormalization);
     ITableWorkspace_sptr ws =
         boost::make_shared<Mantid::DataObjects::TableWorkspace>();
-    TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
+    TS_ASSERT_THROWS(factory.initialize(ws), const std::runtime_error &);
   }
 
   void testCreateWithoutInitaliseThrows() {
@@ -89,7 +89,8 @@ public:
 
     vtkMDQuadFactory factory(Mantid::VATES::VolumeNormalization);
     // initialize not called!
-    TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdate),
+                     const std::runtime_error &);
   }
 
   void testCreation() {

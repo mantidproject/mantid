@@ -85,7 +85,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def _create_workspace_for_reduction(self):
         """Create a workspace for the input/output to the reduction algorithm"""
-        in_ws_name = self.getProperty("InputWorkspace").value.getName()
+        in_ws_name = self.getProperty("InputWorkspace").value.name()
         self._ws_name = self.getPropertyValue("OutputWorkspace")
         CloneWorkspace(InputWorkspace=in_ws_name, OutputWorkspace=self._ws_name)
 

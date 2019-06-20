@@ -4,17 +4,16 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import os
+from __future__ import (absolute_import, unicode_literals)
+
 import sys
 import unittest
 
-os.environ["QT_API"] = "pyqt"  # noqa E402
-
 from matplotlib.figure import Figure
-
 from mantid import WorkspaceFactory, plots
 from mantid.py3compat import mock
-from Muon.GUI.Common.test_helpers import mock_widget
+from mantidqt.utils.qt.testing import GuiTest
+
 from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
@@ -37,14 +36,12 @@ def get_subPlot(name):
     subplot.addLine(label1, line1, ws1, 2)
     return subplot, ws1
 
-@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
-class PlottingViewHelperFunctionTests(unittest.TestCase):
+@unittest.skipIf(lambda: sys.platform=='win32'(),
+                 "Test segfaults on Windows and code will be removed soon")
+class PlottingViewHelperFunctionTests(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-
         self.view = PlotView()
-
         self.mock_func = mock.Mock(return_value=True)
         self.mock_args = [mock.Mock() for i in range(3)]
         self.mock_kwargs = {}
@@ -99,15 +96,15 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         # uses moveable_vline as this calls redo_layout, but has no other
         # functionality
         self.view.add_moveable_vline(*[mock.Mock() for i in range(4)])
-        self.assertEquals(self.view.figure.tight_layout.call_count, 1)
-        self.assertEquals(self.view.canvas.draw.call_count, 1)
+        self.assertEqual(self.view.figure.tight_layout.call_count, 1)
+        self.assertEqual(self.view.canvas.draw.call_count, 1)
 
     def test_redo_layout_with_plots_equal_to_zero(self):
         self.view.plots = []
         # uses moveable_vline as this calls redo_layout, but has no other
         # functionality
         self.view.add_moveable_vline(*[mock.Mock() for i in range(4)])
-        self.assertEquals(self.view.canvas.draw.call_count, 1)
+        self.assertEqual(self.view.canvas.draw.call_count, 1)
 
     def test_silent_checkbox_check(self):
         test_state = mock.Mock()
@@ -117,7 +114,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view.errors.setChecked.assert_called_once_with(test_state)
 
     def test_get_current_plot_name(self):
-        self.assertEquals(self.view._get_current_plot_name(), self.plot_name)
+        self.assertEqual(self.view._get_current_plot_name(), self.plot_name)
 
     def _common_set_plot_bounds(self, result):
         self.view._silent_checkbox_check = mock.Mock()
@@ -146,8 +143,8 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
     def common_set_bounds_else_statement(self, plot_name):
         self.view._set_bounds(plot_name)
-        self.assertEquals(self.view.x_axis_changer.clear_bounds.call_count, 1)
-        self.assertEquals(self.view.y_axis_changer.clear_bounds.call_count, 1)
+        self.assertEqual(self.view.x_axis_changer.clear_bounds.call_count, 1)
+        self.assertEqual(self.view.y_axis_changer.clear_bounds.call_count, 1)
 
     def test_set_bounds_when_not_new_plots(self):
         self.common_set_bounds_else_statement("")
@@ -156,7 +153,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.common_set_bounds_else_statement("")
 
     def test_get_current_plots(self):
-        self.assertEquals(
+        self.assertEqual(
             self.view._get_current_plots(),
             [self.plots_return_value])
 
@@ -203,18 +200,18 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
     def test_modify_errors_list_state_is_true(self):
         self.view._modify_errors_list(self.plot_name, True)
-        self.assertEquals(self.view.errors_list, set([self.plot_name]))
+        self.assertEqual(self.view.errors_list, set([self.plot_name]))
 
     def test_modify_errors_list_state_is_false(self):
         self.view.errors_list = set([self.plot_name])
         self.view._modify_errors_list(self.plot_name, False)
-        self.assertEquals(len(self.view.errors_list), 0)
+        self.assertEqual(len(self.view.errors_list), 0)
 
     def test_modify_errors_list_keyerror_thrown(self):
         test_set = set(["test"])
         self.view.errors_list = test_set
         self.view._modify_errors_list(self.plot_name, False)
-        self.assertEquals(self.view.errors_list, test_set)
+        self.assertEqual(self.view.errors_list, test_set)
 
     def test_errors_changed_all(self):
         mock_state = True
@@ -244,7 +241,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
         self.view._change_plot_errors(*args)
         self.view._modify_errors_list.assert_called_once_with(*args[::2])
-        self.assertEquals(
+        self.assertEqual(
             self.view.plot_storage[
                 self.plot_name].delete.call_count,
             1)
@@ -269,7 +266,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view._update_gridspec(new_plots)
         get_layout.assert_called_once_with(new_plots)
         self.view._set_positions.assert_called_once_with(get_layout())
-        self.assertEquals(self.view._update_plot_selector.call_count, 1)
+        self.assertEqual(self.view._update_plot_selector.call_count, 1)
 
     @mock.patch("Muon.GUI.ElementalAnalysis.Plotting.plotting_utils.get_layout")
     def test_update_gridspec_if_new_plots_and_last(self, get_layout):
@@ -280,25 +277,24 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
             self.mock_grid_pos, label=self.plot_name)
         self.plots_return_value.set_subplotspec.assert_called_once_with(
             self.mock_grid_pos)
-        self.assertEquals(self.view._update_plot_selector.call_count, 1)
+        self.assertEqual(self.view._update_plot_selector.call_count, 1)
 
     def test_gridspec_if_not_new_plots(self):
         self.view._update_plot_selector = mock.Mock()
         self.view._update_gridspec([])
-        self.assertEquals(self.view._update_plot_selector.call_count, 1)
+        self.assertEqual(self.view._update_plot_selector.call_count, 1)
 
     def test_update_plot_selector(self):
         self.view._update_plot_selector()
-        self.assertEquals(self.view.plot_selector.clear.call_count, 1)
+        self.assertEqual(self.view.plot_selector.clear.call_count, 1)
         self.view.plot_selector.addItems.assert_called_once_with(
             list(self.view.plots.keys()))
 
 
 @unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
-class PlottingViewPlotFunctionsTests(unittest.TestCase):
+class PlottingViewPlotFunctionsTests(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
 
         self.view = PlotView()
 
@@ -356,16 +352,16 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
             self.view.plot_workspace_errors(
                 self.plot_name,
                 self.mock_workspace)
-            self.assertEquals(error_bar.call_count, 1)
-            self.assertEquals(self.view._add_plotted_line.call_count, 1)
-            self.assertEquals(normal_plot.call_count, 1)
+            self.assertEqual(error_bar.call_count, 1)
+            self.assertEqual(self.view._add_plotted_line.call_count, 1)
+            self.assertEqual(normal_plot.call_count, 1)
 
     @mock.patch("mantid.plots.plotfunctions.plot")
     def test_plot_workspace(self, plot):
         self.view._add_plotted_line = mock.Mock()
         plot.return_value = tuple([mock.Mock()])
         self.view.plot_workspace(self.plot_name, self.mock_workspace)
-        self.assertEquals(plot.call_count, 1)
+        self.assertEqual(plot.call_count, 1)
 
     def test_get_subplot_raises_key_error(self):
         self.view.plots = {}
@@ -379,14 +375,14 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
             self.plots_return_value)
 
     def test_get_subplots(self):
-        self.assertEquals(self.view.get_subplots(), self.view.plots)
+        self.assertEqual(self.view.get_subplots(), self.view.plots)
 
     def test_add_subplot(self):
         self.view.get_subplot = mock.Mock(return_value=True)
         return_value = self.view.add_subplot(self.mock_name)
         self.view._update_gridspec.assert_called_once_with(
             len(self.view.plots) + 1, last=self.mock_name)
-        self.assertEquals(return_value, True)
+        self.assertEqual(return_value, True)
 
     def test_remove_subplot(self):
         self.view.plot_storage = {self.plot_name: get_subPlot(self.plot_name)}
@@ -397,7 +393,7 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
             self.plots_return_value)
         print(self.view.plots)
         for _dict in [self.view.plots, self.view.plot_storage]:
-            self.assertEquals(_dict, {})
+            self.assertEqual(_dict, {})
         self.view._update_gridspec.assert_called_once_with(
             len(self.view.plots))
 

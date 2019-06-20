@@ -46,44 +46,44 @@ void SetUB::init() {
   std::vector<double> zeroes(9, 0.), u0(3, 0), v0(3, 0);
   u0[0] = 1.;
   v0[1] = 1.;
-  this->declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                             "Workspace", "", Direction::InOut),
                         "An input workspace.");
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("a", 1.0, mustBePositive->clone(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "a", 1.0, mustBePositive->clone(), Direction::Input),
       "Lattice parameter a");
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("b", 1.0, mustBePositive->clone(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "b", 1.0, mustBePositive->clone(), Direction::Input),
       "Lattice parameter b");
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "c", 1.0, std::move(mustBePositive), Direction::Input),
       "Lattice parameter c");
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "alpha", 90.0, reasonableAngle->clone(), Direction::Input),
       "Lattice parameter alpha (degrees)");
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "beta", 90.0, reasonableAngle->clone(), Direction::Input),
       "Lattice parameter beta (degrees)");
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "gamma", 90.0, std::move(reasonableAngle), Direction::Input),
       "Lattice parameter gamma(degrees) ");
-  this->declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  this->declareProperty(std::make_unique<ArrayProperty<double>>(
                             "u", std::move(u0), mustBe3D->clone()),
                         "Vector along k_i, when goniometer is at 0");
   this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("v", std::move(v0),
-                                                 std::move(mustBe3D)),
+      std::make_unique<ArrayProperty<double>>("v", std::move(v0),
+                                              std::move(mustBe3D)),
       "In plane vector perpendicular to k_i, when goniometer is at 0");
-  this->declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  this->declareProperty(std::make_unique<ArrayProperty<double>>(
                             "UB", std::move(zeroes), threeVthree),
                         "UB Matrix");
-  this->declareProperty(make_unique<PropertyWithValue<int>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
                             "MDSampleNumber", EMPTY_INT(), Direction::Input),
                         "For an MD workspace, the sample number to wich to "
                         "attach an oriented lattice (starting from 0). No "

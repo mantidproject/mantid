@@ -37,6 +37,7 @@ public:
                                         int i) const = 0;
   virtual QString getLocalParameterTie(const QString &parName, int i) const = 0;
   virtual int getNumberOfDatasets() const = 0;
+  virtual QStringList getDatasetNames() const = 0;
   virtual void setLocalParameterValue(const QString &parName, int i,
                                       double value) = 0;
   virtual void setLocalParameterFixed(const QString &parName, int i,

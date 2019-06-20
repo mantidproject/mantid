@@ -35,7 +35,7 @@ public:
     double incidentTheta = 1;
     TS_ASSERT_THROWS(
         ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_kimin_equal_to_kimax_throws() {
@@ -46,7 +46,7 @@ public:
     double incidentTheta = 1;
     TS_ASSERT_THROWS(
         ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_kfmin_greater_than_kfmax_throws() {
@@ -57,7 +57,7 @@ public:
     double incidentTheta = 1;
     TS_ASSERT_THROWS(
         ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_kfmin_equal_to_kfmax_throws() {
@@ -68,7 +68,7 @@ public:
     double incidentTheta = 1;
     TS_ASSERT_THROWS(
         ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_incident_theta_negative() {
@@ -79,7 +79,7 @@ public:
     double incidentTheta = -0.001; // Negative
     TS_ASSERT_THROWS(
         ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta),
-        std::out_of_range);
+        const std::out_of_range &);
   }
 
   void test_incident_theta_too_large() {
@@ -90,7 +90,7 @@ public:
     double incidentTheta = 90.001; // Too large
     TS_ASSERT_THROWS(
         ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta),
-        std::out_of_range);
+        const std::out_of_range &);
   }
 
   void test_valid_construction_inputs() {

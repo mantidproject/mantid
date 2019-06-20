@@ -16,7 +16,7 @@ class AlgorithmPropertyTest(unittest.TestCase):
     def test_construction_with_name_produces_input_property(self):
         prop = AlgorithmProperty("TestProperty")
 
-        self.assertEquals(Direction.Input, prop.direction)
+        self.assertEqual(Direction.Input, prop.direction)
 
     def test_value_method_returns_an_algorithm_type(self):
         # load plugins to register CreateWorkspace

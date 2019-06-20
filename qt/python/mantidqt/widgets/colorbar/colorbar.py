@@ -15,6 +15,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colors import Normalize, SymLogNorm, PowerNorm
+from matplotlib import cm
 import numpy as np
 
 
@@ -30,7 +31,9 @@ class ColorbarWidget(QWidget):
         self.setWindowTitle("Colorbar")
         self.setMaximumWidth(200)
 
-        self.dval = QDoubleValidator()
+        self.cmap = QComboBox()
+        self.cmap.addItems(sorted(cm.cmap_d.keys()))
+        self.cmap.currentIndexChanged.connect(self.cmap_index_changed)
 
         self.cmin = QLineEdit()
         self.cmin_value = 0
@@ -45,8 +48,8 @@ class ColorbarWidget(QWidget):
         self.cmax_value = 1
         self.cmax.setMaximumWidth(100)
         self.cmax.editingFinished.connect(self.clim_changed)
-        self.cmin.setValidator(self.dval)
-        self.cmax.setValidator(self.dval)
+        self.cmin.setValidator(QDoubleValidator())
+        self.cmax.setValidator(QDoubleValidator())
         self.cmax_layout = QHBoxLayout()
         self.cmax_layout.addStretch()
         self.cmax_layout.addWidget(self.cmax)
@@ -85,6 +88,7 @@ class ColorbarWidget(QWidget):
 
         # layout
         self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.cmap)
         self.layout.addLayout(self.cmax_layout)
         self.layout.addWidget(self.canvas, stretch=1)
         self.layout.addLayout(self.cmin_layout)
@@ -96,9 +100,26 @@ class ColorbarWidget(QWidget):
         When a new plot is created this method should be called with the new mappable
         """
         self.ax.clear()
+        try: # Use current cmap
+            cmap = self.colorbar.get_cmap()
+        except AttributeError:
+            try: # else use viridis
+                cmap = cm.viridis
+            except AttributeError: # else default
+                cmap = None
         self.colorbar = Colorbar(ax=self.ax, mappable=mappable)
         self.cmin_value, self.cmax_value = self.colorbar.get_clim()
         self.update_clim_text()
+        self.cmap_changed(cmap)
+        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(self.colorbar.get_cmap().name))
+        self.redraw()
+
+    def cmap_index_changed(self):
+        self.cmap_changed(self.cmap.currentText())
+
+    def cmap_changed(self, name):
+        self.colorbar.set_cmap(name)
+        self.colorbar.mappable.set_cmap(name)
         self.redraw()
 
     def norm_changed(self):
@@ -113,7 +134,7 @@ class ColorbarWidget(QWidget):
             self.powerscale.hide()
             self.powerscale_label.hide()
         self.colorbar.mappable.set_norm(self.get_norm())
-        self.colorbarChanged.emit()
+        self.set_mappable(self.colorbar.mappable)
 
     def get_norm(self):
         """
@@ -163,9 +184,17 @@ class ColorbarWidget(QWidget):
             self.update_clim_text()
         else:
             if self.cmin.hasAcceptableInput():
-                self.cmin_value = float(self.cmin.text())
+                cmin = float(self.cmin.text())
+                if cmin < self.cmax_value:
+                    self.cmin_value = cmin
+                else: # reset values back
+                    self.update_clim_text()
             if self.cmax.hasAcceptableInput():
-                self.cmax_value = float(self.cmax.text())
+                cmax = float(self.cmax.text())
+                if cmax > self.cmin_value:
+                    self.cmax_value = cmax
+                else: #reset values back
+                    self.update_clim_text()
         self.colorbar.set_clim(self.cmin_value, self.cmax_value)
         self.redraw()
 

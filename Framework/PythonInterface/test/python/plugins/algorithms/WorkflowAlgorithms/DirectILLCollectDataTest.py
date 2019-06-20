@@ -48,7 +48,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         inWS = mtd[self._TEST_WS_NAME]
-        self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
+        self.assertEqual(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
         ys = outWS.extractY()
         originalYs = inWS.extractY()
         numpy.testing.assert_almost_equal(ys, originalYs[:-1, :] - self._BKG_LEVEL)
@@ -167,7 +167,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         inWS = mtd[self._TEST_WS_NAME]
-        self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
+        self.assertEqual(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
         xs = outWS.extractX()
         originalXs = inWS.extractX()
         numpy.testing.assert_almost_equal(xs, originalXs[:-1, :])
@@ -193,7 +193,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         eiWS = mtd[eiWSName]
         inWS = mtd[self._TEST_WS_NAME]
         E_i = inWS.run().getProperty('Ei').value
-        self.assertEquals(eiWS.readY(0)[0], E_i)
+        self.assertEqual(eiWS.readY(0)[0], E_i)
 
 
 if __name__ == '__main__':
