@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group, construct_empty_pair
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair

@@ -12,11 +12,6 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
                                                          get_pair_data_directory, get_group_asymmetry_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.contexts.fitting_context import FittingContext
-from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping

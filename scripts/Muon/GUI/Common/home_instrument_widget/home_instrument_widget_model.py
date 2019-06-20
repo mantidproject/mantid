@@ -11,8 +11,6 @@ from decimal import Decimal, InvalidOperation
 from mantid import api
 from mantid.api import ITableWorkspace
 
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-
 
 class InstrumentWidgetModel(object):
     """
