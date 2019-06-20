@@ -18,6 +18,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <atomic>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -260,32 +262,55 @@ void SolidAngle::exec() {
         std::make_unique<Wing>(componentInfo, detectorInfo, method, pixelArea);
   }
 
-  auto outputSpectrumInfo = outputWS->mutableSpectrumInfo();
-  size_t failCount{0};
+  std::atomic<size_t> failCount{0};
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
   // Loop over the histograms (detector spectra)
-  for (int j = 0; j < numberOfSpectra; ++j) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
+  for (int j = m_MinSpec; j <= m_MaxSpec; ++j) {
+    PARALLEL_START_INTERUPT_REGION
     outputWS->mutableX(j)[0] = inputWS->x(j).front();
     outputWS->mutableX(j)[1] = inputWS->x(j).back();
     outputWS->mutableE(j) = 0.;
     outputWS->mutableY(j) = 0.; // default value for not calculated
-    if (j >= m_MinSpec && j <= m_MaxSpec) {
-      if (spectrumInfo.hasDetectors(j)) {
-        double solidAngle = 0.0;
-        for (const auto detID : inputWS->getSpectrum(j).getDetectorIDs()) {
-          const auto index = detectorInfo.indexOf(detID);
-          if (!detectorInfo.isMasked(index) && !detectorInfo.isMonitor(index)) {
-            solidAngle += solidAngleCalculator->solidAngle(index);
-          }
+    if (spectrumInfo.hasDetectors(j)) {
+      double solidAngle = 0.0;
+      for (const auto detID : inputWS->getSpectrum(j).getDetectorIDs()) {
+        const auto index = detectorInfo.indexOf(detID);
+        if (!detectorInfo.isMasked(index) && !detectorInfo.isMonitor(index)) {
+          solidAngle += solidAngleCalculator->solidAngle(index);
         }
-        outputWS->mutableY(j)[0] = solidAngle;
-      } else {
-        ++failCount;
       }
+      outputWS->mutableY(j)[0] = solidAngle;
     } else {
-      // SpectrumInfo::setMasked is NOT threadsafe.
-      outputSpectrumInfo.setMasked(j, true);
+      ++failCount;
     }
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  } // loop over spectra
+  PARALLEL_CHECK_INTERUPT_REGION
+  g_log.warning() << "min max total" << m_MinSpec << " " << m_MaxSpec << " "
+                  << numberOfSpectra;
+
+  auto &outputSpectrumInfo = outputWS->mutableSpectrumInfo();
+  // Loop over the histograms (detector spectra)
+  for (int j = 0; j < m_MinSpec; ++j) {
+    outputWS->mutableX(j)[0] = inputWS->x(j).front();
+    outputWS->mutableX(j)[1] = inputWS->x(j).back();
+    outputWS->mutableE(j) = 0.;
+    outputWS->mutableY(j) = 0.; // default value for not calculated
+    // SpectrumInfo::setMasked is NOT threadsafe.
+    outputSpectrumInfo.setMasked(j, true);
+    prog.report();
+  } // loop over spectra
+
+  // Loop over the histograms (detector spectra)
+  for (int j = m_MaxSpec + 1; j < numberOfSpectra; ++j) {
+    outputWS->mutableX(j)[0] = inputWS->x(j).front();
+    outputWS->mutableX(j)[1] = inputWS->x(j).back();
+    outputWS->mutableE(j) = 0.;
+    outputWS->mutableY(j) = 0.; // default value for not calculated
+    // SpectrumInfo::setMasked is NOT threadsafe.
+    outputSpectrumInfo.setMasked(j, true);
     prog.report();
   } // loop over spectra
 
