@@ -22,11 +22,12 @@ QHash<QString, QVariant> defaultLineKwargs() {
 namespace MantidQt {
 namespace MantidWidgets {
 
-SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type, bool visible,
-                               bool infoOnly, const QColor &colour)
+SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
+                               double position, bool visible, bool infoOnly,
+                               const QColor &colour)
     : QObject(), m_plot(plot),
       m_singleMarker(std::make_unique<SingleMarker>(
-          m_plot->canvas(), colour.name(QColor::HexRgb),
+          m_plot->canvas(), colour.name(QColor::HexRgb), position,
           std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
           selectTypeAsQString(type), defaultLineKwargs())),
       m_visible(visible) {
@@ -66,37 +67,30 @@ QString SingleSelector::selectTypeAsQString(const SelectType &type) const {
                            "XSINGLE and YSINGLE.");
 }
 
-void SingleSelector::setRange(const std::pair<double, double> &range) {
-  setRange(range.first, range.second);
+void SingleSelector::setBounds(const std::pair<double, double> &bounds) {
+  setBounds(bounds.first, bounds.second);
 }
 
-void SingleSelector::setRange(const double min, const double max) {
-  m_singleMarker->setRange(min, max);
-  m_plot->replot();
-  emit selectionChanged(min, max);
+void SingleSelector::setBounds(const double min, const double max) {
+  m_singleMarker->setBounds(min, max);
 }
 
-std::pair<double, double> SingleSelector::getRange() const {
-  const auto range = m_singleMarker->getRange();
-  return std::make_pair(std::get<0>(range), std::get<1>(range));
+void SingleSelector::setLowerBound(const double min) {
+  m_singleMarker->setLowerBound(min);
 }
 
-void SingleSelector::setMinimum(const double min) {
-  m_singleMarker->setMinimum(min);
-  emit minValueChanged(min);
+void SingleSelector::setUpperBound(const double max) {
+  m_singleMarker->setUpperBound(max);
 }
 
-void SingleSelector::setMaximum(const double max) {
-  m_singleMarker->setMaximum(max);
-  emit maxValueChanged(max);
+void SingleSelector::setPosition(const double position) {
+  const auto positionChanged = m_singleMarker->setPosition(position);
+  if (positionChanged)
+    emit valueChanged(position);
 }
 
-double SingleSelector::getMinimum() const {
-  return m_singleMarker->getMinimum();
-}
-
-double SingleSelector::getMaximum() const {
-  return m_singleMarker->getMaximum();
+double SingleSelector::getPosition() const {
+  return m_singleMarker->getPosition();
 }
 
 void SingleSelector::setVisible(bool visible) {
@@ -125,8 +119,8 @@ void SingleSelector::handleMouseMove(const QPoint &point) {
 
   if (markerMoved) {
     m_plot->replot();
-    const auto range = getRange();
-    emit selectionChanged(range.first, range.second);
+    const auto newPosition = getPosition();
+    emit valueChanged(newPosition);
   }
 }
 

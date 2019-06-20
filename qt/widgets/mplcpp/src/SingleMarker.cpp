@@ -78,9 +78,14 @@ void SingleMarker::setColor(QString const &color) {
 /**
  * @brief Sets the position of the marker.
  * @param position The markers new position.
+ * @return True if the position has been changed.
  */
-void SingleMarker::setPosition(double position) {
-  callMethodNoCheck<void>(pyobj(), "set_position", position);
+bool SingleMarker::setPosition(double position) {
+  GlobalInterpreterLock lock;
+
+  auto const positionChanged =
+      Python::Object(pyobj().attr("set_position")(position));
+  return PyLong_AsLong(positionChanged.ptr()) > 0;
 }
 
 /**

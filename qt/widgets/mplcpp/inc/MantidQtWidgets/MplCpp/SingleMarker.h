@@ -32,7 +32,7 @@ public:
   void remove();
 
   void setColor(QString const &color);
-  void setPosition(double position);
+  bool setPosition(double position);
   double getPosition() const;
 
   void setBounds(double minimum, double maximum);

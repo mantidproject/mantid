@@ -26,23 +26,25 @@ public:
   enum SelectType { XSINGLE, YSINGLE };
 
   SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE,
-                 bool visible = true, bool infoOnly = false,
-                 const QColor &colour = Qt::black);
+                 double position = 0.0, bool visible = true,
+                 bool infoOnly = false, const QColor &colour = Qt::black);
 
   void setColour(const QColor &colour);
-  void setPosition(double position);
-  double getPosition() const;
 
-  void setBounds(double minimum, double maximum);
-  void setLowerBound(double minimum);
-  void setUpperBound(double maximum);
+  void setBounds(const std::pair<double, double> &bounds);
+  void setBounds(const double minimum, const double maximum);
+  void setLowerBound(const double minimum);
+  void setUpperBound(const double maximum);
+
+  void setPosition(const double position);
+  double getPosition() const;
 
   void setVisible(bool visible);
 
   void detach();
 
 signals:
-  void valueChanged(double min, double max);
+  void valueChanged(double position);
 
 private slots:
   void handleMouseDown(const QPoint &point);

@@ -648,9 +648,13 @@ class SingleMarker(QObject):
         """
         Sets the positions of the marker's
         :param position: The position of the marker in axes coords.
+        :return True if the value was changed.
         """
-        self.marker.set_position(position)
-        self.redraw()
+        if self.upper_bound > position > self.lower_bound:
+            self.marker.set_position(position)
+            self.redraw()
+            return True
+        return False
 
     def get_position(self):
         """
@@ -674,6 +678,8 @@ class SingleMarker(QObject):
         :param minimum: The minimum bound for the marker.
         """
         self.lower_bound = minimum
+        if self.lower_bound > self.get_position():
+            self.set_position(minimum)
 
     def set_upper_bound(self, maximum):
         """
@@ -681,6 +687,8 @@ class SingleMarker(QObject):
         :param maximum: The maximum bound for the marker.
         """
         self.upper_bound = maximum
+        if self.upper_bound < self.get_position():
+            self.set_position(maximum)
 
     def is_inside_bounds(self, x, y):
         """
