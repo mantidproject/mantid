@@ -93,7 +93,7 @@ includedRanges(const std::vector<double> &ranges,
   }
   // Sort the range edges keeping the information whether the edge
   // 'starts' or 'ends' a range.
-  enum class Edge { start, end };
+  enum class Edge { start = -1, end = 1};
   std::vector<std::pair<double, Edge>> edges(ranges.size());
   for (size_t i = 0; i < ranges.size(); ++i) {
     edges[i].first = ranges[i];
@@ -103,7 +103,7 @@ includedRanges(const std::vector<double> &ranges,
       edges.begin(), edges.end(),
       [](const std::pair<double, Edge> &p1, const std::pair<double, Edge> &p2) {
         if (p1.first == p2.first)
-          return p1.second == Edge::start;
+          return p1.second < p2.second;
         return p1.first < p2.first;
       });
   // If an 'end' edge is followed by a 'start', we have a new range. Everything
