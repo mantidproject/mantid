@@ -602,6 +602,126 @@ class PeakMarker(QObject):
         self.right_width.remove()
 
 
+class SingleMarker(QObject):
+    """
+        A marker used to mark out a vertical or horizontal line on a plot.
+    """
+    def __init__(self, canvas, color, position, lower_bound, higher_bound, marker_type='XSingle', line_style='-'):
+        """
+        Init the marker.
+        :param canvas: The MPL canvas.
+        :param color: An MPL colour value
+        :param position: The axes coordinate of the marker.
+        :param marker_type: Whether the SingleMarker is vertical or horizontal.
+        :param line_style: An MPL line style value.
+        """
+        super(RangeMarker, self).__init__()
+        self.lower_bound = lower_bound
+        self.higher_bound = higher_bound
+        self.marker_type = marker_type
+        if self.marker_type == 'XSingle':
+            self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
+        elif self.marker_type == 'YSingle':
+            self.marker = HorizontalMarker(canvas, color, position, line_style=line_style)
+
+    def redraw(self):
+        """
+        Redraw the single marker.
+        """
+        self.marker.redraw()
+
+    def remove(self):
+        """
+        Remove this marker from the canvas.
+        """
+        self.marker.remove()
+
+    def set_color(self, color):
+        """
+        Set the colour of the marker.
+        """
+        self.marker.set_color(color)
+
+    def set_position(self, position):
+        """
+        Sets the positions of the marker's
+        :param position: The position of the marker in axes coords.
+        """
+        self.marker.set_position(position)
+        self.redraw()
+
+    def get_position(self):
+        """
+        Gets the position of the marker
+        :return the position of the marker.
+        """
+        return self.marker.get_position()
+
+    def set_bounds(self, minimum, maximum):
+        """
+        Sets the bounds within which the marker is allowed to be moved.
+        :param minimum: The lower end of the marker position.
+        :param maximum: The higher end of the marker position.
+        """
+        self.set_lower_bound(minimum)
+        self.set_higher_bound(maximum)
+
+    def set_lower_bound(self, minimum):
+        """
+        Sets the minimum bound for the marker.
+        :param minimum: The minimum bound for the marker.
+        """
+        self.lower_bound = minimum
+
+    def set_higher_bound(self, maximum):
+        """
+        Sets the maximum bound for the marker.
+        :param maximum: The maximum bound for the marker.
+        """
+        self.higher_bound = maximum
+
+    def is_inside_bounds(self, x, y):
+        """
+        Determines if the axis coords are within the bounds specified.
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :return True if the axes coordinate is within the bounds.
+        """
+        if self.marker_type == 'XSingle' and (self.higher_bound < x < self.lower_bound):
+            return False
+        if self.marker_type == 'YSingle' and y is not None and (self.higher_bound < y < self.lower_bound):
+            return False
+        return True
+
+    def mouse_move_start(self, x, y):
+        """
+        Start moving this marker if (x, y) is above it. Ignore otherwise.
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        """
+        if self.is_inside_bounds(x, y) and self.marker.is_above(x, y):
+            self.marker.mouse_move_start(x, y)
+            QApplication.setOverrideCursor(self.marker.override_cursor(x, y))
+
+    def mouse_move(self, x, y=None):
+        """
+        Move this marker to a new position if movement had been started earlier by a call to mouse_move_start(x, y)
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :return: True if moved or False if stayed at the old position.
+        """
+        if self.is_inside_bounds(x, y) and self.marker.is_marker_moving():
+            return self.min_marker.mouse_move(x, y)
+        return False
+
+    def mouse_move_stop(self):
+        """
+        Stop moving.
+        """
+        self.marker.mouse_move_stop()
+        QApplication.restoreOverrideCursor()
+
+
 class RangeMarker(QObject):
     """
     A marker used to mark out a vertical or horizontal range using two markers which correspond to a minimum and
