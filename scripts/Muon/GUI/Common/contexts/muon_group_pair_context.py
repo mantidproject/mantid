@@ -99,6 +99,10 @@ class MuonGroupPairContext(object):
     def pairs(self):
         return self._pairs
 
+    def clear(self):
+        self.clear_groups()
+        self.clear_pairs()
+
     def clear_groups(self):
         self._groups = []
 

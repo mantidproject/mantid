@@ -365,6 +365,9 @@ class FittingContext(object):
             name for fit in self.fit_list for name in fit.log_names(filter_fn)
         ]
 
+    def clear(self):
+        self.fit_list = []
+
 
 # Private functions
 def _run(ws_name):

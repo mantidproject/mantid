@@ -31,7 +31,7 @@ class MuonContext(object):
         self.fitting_context = fitting_context
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
-        self.ads_observer = MuonContextADSObserver(self.remove_workspace_by_name)
+        self.ads_observer = MuonContextADSObserver(self.remove_workspace_by_name, self.clear_context)
 
         self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
 
@@ -92,12 +92,6 @@ class MuonContext(object):
                 if self._do_rebin():
                     name = get_pair_data_workspace_name(self, pair_name, run_as_string, rebin=True)
                     self.group_pair_context[pair_name].show_rebin(run, directory + name)
-
-    def ensure_all_required_data_loaded(self):
-        for run in self._data_context.current_runs:
-            if not self.data_context.get_loaded_data_for_run(run):
-                return False
-        return True
 
     def calculate_all_pairs(self):
         for run in self._data_context.current_runs:
@@ -262,3 +256,10 @@ class MuonContext(object):
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
+
+    def clear_context(self):
+        self.data_context.clear()
+        self.group_pair_context.clear()
+        self.phase_context.clear()
+        self.fitting_context.clear()
+        self.update_view_from_model_notifier.notify_subscribers()

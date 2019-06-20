@@ -34,3 +34,7 @@ class PhaseTableContext(object):
     def remove_workspace_by_name(self, workspace_name):
         self.phase_tables = [item for item in self.phase_tables if item.workspace_name != workspace_name]
         self.phase_quad = [item for item in self.phase_tables if item.workspace_name != workspace_name]
+
+    def clear(self):
+        self.phase_tables = []
+        self.phase_quad = []

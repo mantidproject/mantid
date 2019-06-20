@@ -224,6 +224,8 @@ class MuonDataContext(object):
     # ------------------------------------------------------------------------------------------------------------------
     def clear(self):
         self._loaded_data.clear()
+        self._current_runs = []
+        self._main_field_direction = ''
 
     def _base_run_name(self, run=None):
         """ e.g. EMU0001234 """
