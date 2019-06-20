@@ -93,7 +93,7 @@ includedRanges(const std::vector<double> &ranges,
   }
   // Sort the range edges keeping the information whether the edge
   // 'starts' or 'ends' a range.
-  enum class Edge { start = -1, end = 1};
+  enum class Edge { start = -1, end = 1 };
   std::vector<std::pair<double, Edge>> edges(ranges.size());
   for (size_t i = 0; i < ranges.size(); ++i) {
     edges[i].first = ranges[i];
