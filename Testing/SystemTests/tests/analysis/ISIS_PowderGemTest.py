@@ -42,6 +42,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
+generated_offset = os.path.join(calibration_dir, "19_1")
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
@@ -94,6 +95,31 @@ class FocusTest(systemtesting.MantidSystemTest):
             mantid.mtd.clear()
 
 
+class CreateCalTest(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+
+        self.focus_results = run_calibration()
+
+    def validate(self):
+        return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(generated_offset)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
+
 def _gen_required_files():
     required_run_numbers = ["83607", "83608",  # create_van : PDF mode
                             "83605", "83608_splined"]  # File to focus (Si)
@@ -136,6 +162,12 @@ def run_focus():
     return inst_object.focus(run_number=run_number, input_mode="Individual", vanadium_normalisation=True,
                              do_absorb_corrections=False, sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
+
+
+def run_calibration():
+    iron_run = 87618
+    inst_object = setup_inst_object(mode="PDF")
+    return inst_object.create_cal(run_number=iron_run)
 
 
 def setup_mantid_paths():
