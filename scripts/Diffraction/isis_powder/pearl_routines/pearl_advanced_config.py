@@ -93,7 +93,7 @@ long_mode_on_params = {
         (20300, 39990)   # Bank 14
     ],
     "monitor_spline_coefficient": 20,
-    "spline_coefficient": 60
+    "spline_coefficient": 5
 }
 
 calibration_params = {
