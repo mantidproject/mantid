@@ -8,7 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_ASCIISAVER_H
 #include "IAsciiSaver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include <string>
 #include <vector>
 
@@ -28,7 +28,7 @@ public:
 private:
   Mantid::API::IAlgorithm_sptr
   setUpSaveAlgorithm(std::string const &saveDirectory,
-                     Mantid::API::MatrixWorkspace_sptr workspace,
+                     Mantid::API::Workspace_sptr workspace,
                      std::vector<std::string> const &logParameters,
                      FileFormatOptions const &fileFormat) const;
 
@@ -37,8 +37,11 @@ private:
                                std::string const &name,
                                std::string const &extension) const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  workspace(std::string const &workspaceName) const;
+  Mantid::API::Workspace_sptr workspace(std::string const &workspaceName) const;
+  void save(Mantid::API::Workspace_sptr workspace,
+            std::string const &saveDirectory,
+            std::vector<std::string> const &logParameters,
+            FileFormatOptions const &fileFormat) const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
