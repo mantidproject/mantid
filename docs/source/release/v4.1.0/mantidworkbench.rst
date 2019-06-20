@@ -28,5 +28,6 @@ Bugfixes
 - Help documentation for the manage user directories interface now correctly displays when launched from the interface.
 - A Colorfill plot of a workspace with one spectrum plots correctly and no longer raises an error.
 - The units on the y-axis of distribution workspace plots have been corrected
+- Restore Default Layout no longer resizes the main window.
 
 :ref:`Release 4.1.0 <v4.1.0>`
