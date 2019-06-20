@@ -65,8 +65,9 @@ Features
 
 Auto Formatting
 ---------------
-With a formatter installed as an extension it is possible to format any open file in VSCode.
-It is recommended to use `Clang-Format <https://marketplace.visualstudio.com/items?itemName=xaver.clang-format>`_.
+It is required in the mantid project to format code using clang-format, this can be done
+in multiple ways but VSCode makes it easier. With a formatter installed as an extension 
+it is possible to format any open file in VSCode. It is recommended to use this `Clang-Format <https://marketplace.visualstudio.com/items?itemName=xaver.clang-format>`_ extension.
 It is possible to format your code using on save, type, paste and save timeout. To set
 when you want to format:
 - Open the File->Preferences->Settings menu
