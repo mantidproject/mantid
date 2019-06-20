@@ -12,7 +12,6 @@ from qtpy import QtCore
 
 Name = "Frequency_Domain_Analysis_2"
 
-
 if 'muon_freq' in globals():
     muon_freq = globals()['muon_freq']
     if not muon_freq.isHidden():

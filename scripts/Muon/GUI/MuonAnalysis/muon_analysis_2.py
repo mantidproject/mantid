@@ -97,6 +97,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         vertical_layout.addWidget(self.help_widget.view)
         central_widget.setLayout(vertical_layout)
 
+        flags = self.windowFlags() | QtCore.Qt.WA_DeleteOnClose
+        self.setWindowFlags(flags)
+
         self.setCentralWidget(central_widget)
         self.setWindowTitle("Muon Analysis")
 
@@ -257,4 +260,5 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
+        self.context.ads_observer = None
         super(MuonAnalysisGui, self).closeEvent(event)

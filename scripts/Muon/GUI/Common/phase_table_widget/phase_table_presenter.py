@@ -47,6 +47,7 @@ class PhaseTablePresenter(object):
     def update_view_from_model(self):
         self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
+        self.update_current_phase_tables()
         for key, item in self.context.phase_context.options_dict.items():
             setattr(self.view, key, item)
 

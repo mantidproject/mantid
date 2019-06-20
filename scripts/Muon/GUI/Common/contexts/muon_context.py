@@ -155,23 +155,8 @@ class MuonContext(object):
                 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
     def get_workspace_names_for_FFT_analysis(self, use_raw=True):
-        pair_names = list(self.group_pair_context.pair_names)
-        group_names = list(self.group_pair_context.group_names)
-        run_numbers = self.data_context.current_runs
-        workspace_options = []
-
-        for run in run_numbers:
-            workspace_options += self.phase_context.get_phase_quad(self.data_context.instrument, run_list_to_string(run))
-
-            for name in pair_names:
-                workspace_options.append(
-                    wsName.get_pair_data_workspace_name(self,
-                                                        str(name),
-                                                        run_list_to_string(run), not use_raw))
-            for group_name in group_names:
-                workspace_options.append(
-                    wsName.get_group_asymmetry_name(self, str(group_name), run_list_to_string(run),
-                                                    not use_raw))
+        workspace_options = self.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+                                                                     rebin=not use_raw)
         return workspace_options
 
     def get_detectors_excluded_from_default_grouping_tables(self):

@@ -16,6 +16,7 @@ from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.contexts.fitting_context import FittingContext
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
@@ -66,10 +67,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.gui_context = MuonGuiContext()
         self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
+        self.fitting_context = FittingContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
                                    muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
-                                   workspace_suffix=' FD')
+                                   workspace_suffix=' FD', fitting_context=self.fitting_context)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -88,6 +90,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         vertical_layout.addWidget(self.tabs)
         vertical_layout.addWidget(self.help_widget.view)
         central_widget.setLayout(vertical_layout)
+
+        flags = self.windowFlags() | QtCore.Qt.WA_DeleteOnClose
+        self.setWindowFlags(flags)
 
         self.setCentralWidget(central_widget)
         self.setWindowTitle("Frequency Domain Analysis")
@@ -223,4 +228,5 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
+        self.context.ads_observer = None
         super(FrequencyAnalysisGui, self).closeEvent(event)

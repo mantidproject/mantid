@@ -51,6 +51,8 @@ class FFTPresenterTest(GuiTest):
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
         self.context.group_pair_context.add_pair(pair=test_pair)
+        self.context.show_all_groups()
+        self.context.show_all_pairs()
 
         self.view.warning_popup = mock.MagicMock()
 
@@ -61,53 +63,56 @@ class FFTPresenterTest(GuiTest):
         self.presenter.getWorkspaceNames()
 
         self.assertEqual(retrieve_combobox_info(self.view.ws),
-                         ['MUSR22725; Pair Asym; test_pair; MA',
-                          'MUSR22725; Group; top; Asymmetry; MA', 'MUSR22725; Group; bkwd; Asymmetry; MA',
-                          'MUSR22725; Group; bottom; Asymmetry; MA', 'MUSR22725; Group; fwd; Asymmetry; MA'])
+                         ['MUSR22725; Group; top; Asymmetry; MA', 'MUSR22725; Group; bkwd; Asymmetry; MA',
+                          'MUSR22725; Group; bottom; Asymmetry; MA', 'MUSR22725; Group; fwd; Asymmetry; MA',
+                          'MUSR22725; Pair Asym; test_pair; MA'])
 
-        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Pair Asym; test_pair; MA',
-                                                                   'MUSR22725; Group; top; Asymmetry; MA',
+        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Group; top; Asymmetry; MA',
                                                                    'MUSR22725; Group; bkwd; Asymmetry; MA',
                                                                    'MUSR22725; Group; bottom; Asymmetry; MA',
-                                                                   'MUSR22725; Group; fwd; Asymmetry; MA'])
+                                                                   'MUSR22725; Group; fwd; Asymmetry; MA',
+                                                                   'MUSR22725; Pair Asym; test_pair; MA'])
 
     def test_handle_use_raw_data_changed_when_no_rebin_set(self):
         self.view.set_raw_checkbox_state(False)
 
         self.assertEqual(retrieve_combobox_info(self.view.ws),
-                         ['MUSR22725; Pair Asym; test_pair; MA',
-                          'MUSR22725; Group; top; Asymmetry; MA', 'MUSR22725; Group; bkwd; Asymmetry; MA',
-                          'MUSR22725; Group; bottom; Asymmetry; MA', 'MUSR22725; Group; fwd; Asymmetry; MA'])
+                         ['MUSR22725; Group; top; Asymmetry; MA', 'MUSR22725; Group; bkwd; Asymmetry; MA',
+                          'MUSR22725; Group; bottom; Asymmetry; MA', 'MUSR22725; Group; fwd; Asymmetry; MA',
+                          'MUSR22725; Pair Asym; test_pair; MA'])
 
-        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Pair Asym; test_pair; MA',
-                                                                   'MUSR22725; Group; top; Asymmetry; MA',
+        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Group; top; Asymmetry; MA',
                                                                    'MUSR22725; Group; bkwd; Asymmetry; MA',
                                                                    'MUSR22725; Group; bottom; Asymmetry; MA',
-                                                                   'MUSR22725; Group; fwd; Asymmetry; MA'])
+                                                                   'MUSR22725; Group; fwd; Asymmetry; MA',
+                                                                   'MUSR22725; Pair Asym; test_pair; MA'])
 
         self.view.warning_popup.assert_called_once_with('No rebin options specified')
 
     def test_handle_use_raw_data_changed_when_rebin_set(self):
         self.context.gui_context.update({'RebinType': 'Fixed', 'RebinFixed': 2})
+        self.context.show_all_groups()
+        self.context.show_all_pairs()
         self.view.set_raw_checkbox_state(False)
 
         self.assertEqual(retrieve_combobox_info(self.view.ws),
-                         ['MUSR22725; Pair Asym; test_pair; Rebin; MA',
-                          'MUSR22725; Group; top; Asymmetry; Rebin; MA', 'MUSR22725; Group; bkwd; Asymmetry; Rebin; MA',
+                         ['MUSR22725; Group; top; Asymmetry; Rebin; MA', 'MUSR22725; Group; bkwd; Asymmetry; Rebin; MA',
                           'MUSR22725; Group; bottom; Asymmetry; Rebin; MA',
-                          'MUSR22725; Group; fwd; Asymmetry; Rebin; MA'])
+                          'MUSR22725; Group; fwd; Asymmetry; Rebin; MA','MUSR22725; Pair Asym; test_pair; Rebin; MA'])
 
-        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Pair Asym; test_pair; Rebin; MA',
-                                                                   'MUSR22725; Group; top; Asymmetry; Rebin; MA',
+        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Group; top; Asymmetry; Rebin; MA',
                                                                    'MUSR22725; Group; bkwd; Asymmetry; Rebin; MA',
                                                                    'MUSR22725; Group; bottom; Asymmetry; Rebin; MA',
-                                                                   'MUSR22725; Group; fwd; Asymmetry; Rebin; MA'])
+                                                                   'MUSR22725; Group; fwd; Asymmetry; Rebin; MA',
+                                                                   'MUSR22725; Pair Asym; test_pair; Rebin; MA'])
 
     def test_get_pre_inputs_with_phase_quad(self):
         workspace_wrapper = mock.MagicMock()
         workspace_wrapper.workspace_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
         self.context.phase_context.add_phase_quad(workspace_wrapper)
         self.presenter.getWorkspaceNames()
+        index = self.view.ws.findText('MUSR22725_PhaseQuad_MUSR22725_phase_table')
+        self.view.ws.setCurrentIndex(index)
 
         self.assertEqual(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
                                                             'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table',
@@ -115,7 +120,8 @@ class FFTPresenterTest(GuiTest):
 
     def test_pre_inputs(self):
         self.presenter.getWorkspaceNames()
-        self.view.ws.setCurrentIndex(1)
+        index = self.view.ws.findText('MUSR22725; Group; top; Asymmetry; MA')
+        self.view.ws.setCurrentIndex(index)
 
         self.assertEquals(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
                                                             'InputWorkspace': 'MUSR22725; Group; top; Asymmetry; MA',
@@ -123,6 +129,9 @@ class FFTPresenterTest(GuiTest):
 
     def test_get_imaginary_pre_inputs(self):
         self.presenter.getWorkspaceNames()
+        index = self.view.Im_ws.findText('MUSR22725; Pair Asym; test_pair; MA')
+        self.view.Im_ws.setCurrentIndex(index)
+
         self.assertEqual(self.presenter.get_imaginary_inputs(),
                           {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
                            'InputWorkspace': 'MUSR22725; Pair Asym; test_pair; MA',
@@ -184,6 +193,8 @@ class FFTPresenterTest(GuiTest):
         workspace_wrapper.workspace_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
         self.context.phase_context.add_phase_quad(workspace_wrapper)
         self.presenter.getWorkspaceNames()
+        index = self.view.ws.findText('MUSR22725_PhaseQuad_MUSR22725_phase_table')
+        self.view.ws.setCurrentIndex(index)
 
         self.presenter.calculate_FFT()
 
