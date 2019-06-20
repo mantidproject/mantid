@@ -312,25 +312,26 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   unitPtr->setLabel("Time", "picoseconds");
 
   // Create a numeric axis to replace the default vertical one
-  API::Axis *const verticalAxisRe = new API::NumericAxis(nq);
-  API::Axis *const verticalAxisIm = new API::NumericAxis(nq);
-
-  wsRe->replaceAxis(1, verticalAxisRe);
-  wsIm->replaceAxis(1, verticalAxisIm);
+  auto verticalAxisRe = std::make_unique<API::NumericAxis>(nq);
+  auto verticalAxisIm = std::make_unique<API::NumericAxis>(nq);
+  auto verticalAxisReRaw = verticalAxisRe.get();
+  auto verticalAxisImRaw = verticalAxisIm.get();
+  wsRe->replaceAxis(1, std::move(verticalAxisRe));
+  wsIm->replaceAxis(1, std::move(verticalAxisIm));
 
   // Now set the axis values
   for (int i = 0; i < nq; ++i) {
-    verticalAxisRe->setValue(i, qvmod[i]);
-    verticalAxisIm->setValue(i, qvmod[i]);
+    verticalAxisReRaw->setValue(i, qvmod[i]);
+    verticalAxisImRaw->setValue(i, qvmod[i]);
   }
 
   // Set the axis units
-  verticalAxisRe->unit() =
+  verticalAxisReRaw->unit() =
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxisRe->title() = "|Q|";
-  verticalAxisIm->unit() =
+  verticalAxisReRaw->title() = "|Q|";
+  verticalAxisImRaw->unit() =
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxisIm->title() = "|Q|";
+  verticalAxisImRaw->title() = "|Q|";
 
   // Set the X axis title (for conversion to MD)
   wsRe->getAxis(0)->title() = "Energy transfer";

@@ -306,8 +306,9 @@ void readQyInto2DWorkspace(H5::DataSet &dataSet,
 
   // If axis 1 is spectra axis we need to convert it to numeric axes.
   if (workspace->getAxis(1)->isSpectra()) {
-    auto const newAxis = new Mantid::API::NumericAxis(dimInfo.dimSpectrumAxis);
-    workspace->replaceAxis(1, newAxis);
+    auto newAxis =
+        std::make_unique<Mantid::API::NumericAxis>(dimInfo.dimSpectrumAxis);
+    workspace->replaceAxis(1, std::move(newAxis));
   }
 
   // File Data Space

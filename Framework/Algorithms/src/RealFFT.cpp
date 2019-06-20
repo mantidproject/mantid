@@ -102,11 +102,11 @@ void RealFFT::exec() {
     bool odd = ySize % 2 != 0;
 
     outWS = WorkspaceFactory::Instance().create(inWS, 3, xOutSize, yOutSize);
-    auto tAxis = new API::TextAxis(3);
+    auto tAxis = std::make_unique<API::TextAxis>(3);
     tAxis->setLabel(0, "Real");
     tAxis->setLabel(1, "Imag");
     tAxis->setLabel(2, "Modulus");
-    outWS->replaceAxis(1, tAxis);
+    outWS->replaceAxis(1, std::move(tAxis));
 
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(ySize);
     boost::shared_array<double> data(new double[2 * ySize]);
@@ -155,9 +155,9 @@ void RealFFT::exec() {
     df = 1.0 / (dx * (yOutSize));
 
     outWS = WorkspaceFactory::Instance().create(inWS, 1, xOutSize, yOutSize);
-    auto tAxis = new API::TextAxis(1);
+    auto tAxis = std::make_unique<API::TextAxis>(1);
     tAxis->setLabel(0, "Real");
-    outWS->replaceAxis(1, tAxis);
+    outWS->replaceAxis(1, std::move(tAxis));
 
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(yOutSize);
 

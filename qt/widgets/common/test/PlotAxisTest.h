@@ -51,7 +51,7 @@ public:
   void test_NoUnit_On_Indexed_Axis_Prints_Default() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    ws->replaceAxis(1, new Mantid::API::NumericAxis(1));
+    ws->replaceAxis(1, std::make_unique<Mantid::API::NumericAxis>(1));
     TS_ASSERT_EQUALS("X axis", PlotAxis(*ws, 0).title());
     TS_ASSERT_EQUALS("Y axis", PlotAxis(*ws, 1).title());
   }
@@ -60,7 +60,7 @@ public:
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->getAxis(0)->setUnit("Empty");
-    ws->replaceAxis(1, new Mantid::API::NumericAxis(1));
+    ws->replaceAxis(1, std::make_unique<Mantid::API::NumericAxis>(1));
     ws->getAxis(1)->setUnit("Empty");
     TS_ASSERT_EQUALS("X axis", PlotAxis(*ws, 0).title());
     TS_ASSERT_EQUALS("Y axis", PlotAxis(*ws, 1).title());
@@ -73,7 +73,7 @@ public:
     auto *ax0 = ws->getAxis(0);
     ax0->setUnit("Empty");
     ax0->title() = "Custom title 1";
-    ws->replaceAxis(1, new Mantid::API::NumericAxis(1));
+    ws->replaceAxis(1, std::make_unique<Mantid::API::NumericAxis>(1));
     auto *ax1 = ws->getAxis(1);
     ax1->setUnit("Empty");
     ax1->title() = "Custom title 2";
@@ -85,7 +85,7 @@ public:
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->getAxis(0)->setUnit("TOF");
-    ws->replaceAxis(1, new Mantid::API::NumericAxis(1));
+    ws->replaceAxis(1, std::make_unique<Mantid::API::NumericAxis>(1));
     ws->getAxis(1)->setUnit("TOF");
     QString expected =
         MantidQt::API::toQStringInternal(L"Time-of-flight (\u03bcs)");
@@ -118,7 +118,7 @@ public:
   void test_SpectraAxis_Gives_Standard_Text() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    ws->replaceAxis(0, new Mantid::API::SpectraAxis(ws.get()));
+    ws->replaceAxis(0, std::make_unique<Mantid::API::SpectraAxis>(ws.get()));
     TS_ASSERT_EQUALS("Spectrum", PlotAxis(*ws, 0).title());
     TS_ASSERT_EQUALS("Spectrum", PlotAxis(*ws, 1).title());
   }

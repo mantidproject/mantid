@@ -103,18 +103,20 @@ public:
   void
   testSubscribeWithReplaceEqualsErrorIfExistsThrowsRegisteringMatchingClass() {
     TS_ASSERT_THROWS_NOTHING(
-        factory.subscribe("int", new Instantiator<int, int>));
-    TS_ASSERT_THROWS(factory.subscribe("int", new Instantiator<int, int>,
-                                       IntFactory::ErrorIfExists),
-                     const std::runtime_error &);
+        factory.subscribe("int", std::make_unique<Instantiator<int, int>>()));
+    TS_ASSERT_THROWS(
+        factory.subscribe("int", std::make_unique<Instantiator<int, int>>(),
+                          IntFactory::ErrorIfExists),
+        const std::runtime_error &);
     factory.unsubscribe("int");
   }
 
   void testSubscribeWithReplaceEqualsOverwriteCurrentReplacesMatchingClass() {
     TS_ASSERT_THROWS_NOTHING(
-        factory.subscribe("int", new Instantiator<int, int>));
-    TS_ASSERT_THROWS_NOTHING(factory.subscribe(
-        "int", new Instantiator<int, int>, IntFactory::OverwriteCurrent));
+        factory.subscribe("int", std::make_unique<Instantiator<int, int>>()));
+    TS_ASSERT_THROWS_NOTHING(
+        factory.subscribe("int", std::make_unique<Instantiator<int, int>>(),
+                          IntFactory::OverwriteCurrent));
 
     factory.unsubscribe("int");
   }

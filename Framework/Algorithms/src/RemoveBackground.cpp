@@ -157,16 +157,6 @@ BackgroundHelper::BackgroundHelper()
       m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
       m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
-/// Destructor
-BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
-
-/** The method deletes all units converter allocated*/
-void BackgroundHelper::deleteUnitsConverters() {
-  for (auto &unit : m_WSUnit) {
-    delete unit;
-    unit = nullptr;
-  }
-}
 
 /** Initialization method:
 *@param bkgWS    -- shared pointer to the workspace which contains background
@@ -210,13 +200,12 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
 
   m_spectrumInfo = &sourceWS->spectrumInfo();
 
-  // just in case.
-  this->deleteUnitsConverters();
   // allocate the array of units converters to avoid units reallocation within a
   // loop
-  m_WSUnit.assign(nThreads, nullptr);
+  m_WSUnit.clear();
+  m_WSUnit.reserve(nThreads);
   for (int i = 0; i < nThreads; i++) {
-    m_WSUnit[i] = WSUnit->clone();
+    m_WSUnit.emplace_back(std::unique_ptr<Kernel::Unit>(WSUnit->clone()));
   }
 
   m_singleValueBackground = false;
@@ -278,7 +267,7 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
     auto &YErrors = m_wkWS->e(nHist);
 
     // use thread-specific unit conversion class to avoid multithreading issues
-    Kernel::Unit *unitConv = m_WSUnit[threadNum];
+    Kernel::Unit *unitConv = m_WSUnit[threadNum].get();
     unitConv->initialize(L1, L2, twoTheta, m_Emode, m_Efix, delta);
 
     x_data[0] = XValues[0];

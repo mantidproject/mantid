@@ -24,7 +24,7 @@ namespace API {
 ParameterTie::ParameterTie(IFunction *funct, const std::string &parName,
                            const std::string &expr, bool isDefault)
     : ParameterReference(funct, funct->parameterIndex(parName), isDefault),
-      m_parser(new mu::Parser()), m_function1(funct) {
+      m_parser(std::make_unique<mu::Parser>()), m_function1(funct) {
   m_parser->DefineNameChars("0123456789_."
                             "abcdefghijklmnopqrstuvwxyz"
                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -41,7 +41,6 @@ ParameterTie::~ParameterTie() {
        it != m_varMap.end(); ++it) {
     delete it->first;
   }
-  delete m_parser;
 }
 
 /** Static callback function used by MuParser to initialize variables implicitly

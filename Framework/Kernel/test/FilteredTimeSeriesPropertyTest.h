@@ -28,24 +28,21 @@ public:
     const std::string name = "seriesName";
     auto source = createTestSeries(name);
     auto filter = createTestFilter();
-    const bool transferOwnership(true);
 
-    auto filtered =
-        FilteredTimeSeriesProperty<double>(source, *filter, transferOwnership);
-    TS_ASSERT_EQUALS(filtered.name(), source->name());
-
-    delete filter;
+    auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
+        std::move(source), filter);
+    TS_ASSERT_EQUALS(filtered->name(), name);
   }
 
   void
   test_Transferring_Ownership_Makes_Unfiltered_Property_Return_The_Original() {
-    const bool transferOwnership(true);
+    constexpr bool transferOwnership(true);
     doOwnershipTest(transferOwnership);
   }
 
   void
   test_Retaining_Ownership_With_Caller_Makes_Unfiltered_Property_A_Clone() {
-    const bool transferOwnership(false);
+    constexpr bool transferOwnership(false);
     doOwnershipTest(transferOwnership);
   }
 
@@ -54,8 +51,8 @@ public:
     auto source = createTestSeries("name");
     auto filter = createTestFilter();
 
-    auto filtered =
-        new FilteredTimeSeriesProperty<double>(source, *filter, true);
+    auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
+        std::move(source), filter);
 
     TS_ASSERT_EQUALS(filtered->size(), 2);
     TS_ASSERT_EQUALS(filtered->nthInterval(0).begin_str(),
@@ -69,9 +66,6 @@ public:
     TS_ASSERT_EQUALS(filtered->nthInterval(1).end_str(),
                      "2007-Nov-30 16:17:39");
     TS_ASSERT_EQUALS(filtered->nthValue(1), 4);
-
-    delete filtered;
-    delete filter;
   }
 
 private:
@@ -79,31 +73,33 @@ private:
     auto source = createTestSeries("name");
     auto filter = createTestFilter();
 
-    FilteredTimeSeriesProperty<double> *filtered(nullptr);
-    TS_ASSERT_THROWS_NOTHING(filtered = new FilteredTimeSeriesProperty<double>(
-                                 source, *filter, transferOwnership));
+    std::unique_ptr<FilteredTimeSeriesProperty<double>> filtered = nullptr;
 
     // Pointer comparison
     if (transferOwnership) {
-      TS_ASSERT_EQUALS(source, filtered->unfiltered());
+      auto copy = std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>(
+          source->clone());
+      TS_ASSERT_THROWS_NOTHING(
+          filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
+              std::move(source), filter));
+      source = std::move(copy);
     } else {
-      TS_ASSERT_DIFFERS(source, filtered->unfiltered());
+      TS_ASSERT_THROWS_NOTHING(
+          filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(
+              source.get(), filter));
+      TS_ASSERT_DIFFERS(source.get(), filtered->unfiltered());
     }
 
     // Object equality
     TS_ASSERT_EQUALS(*source,
                      *(filtered->unfiltered())); // Objects are considered equal
-
-    delete filtered;
-    delete filter;
-    if (!transferOwnership)
-      delete source;
   }
 
   /// Create the test source property
-  Mantid::Kernel::TimeSeriesProperty<double> *
+  std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>
   createTestSeries(const std::string &name) {
-    auto source = new Mantid::Kernel::TimeSeriesProperty<double>(name);
+    auto source =
+        std::make_unique<Mantid::Kernel::TimeSeriesProperty<double>>(name);
     source->addValue("2007-11-30T16:17:00", 1);
     source->addValue("2007-11-30T16:17:10", 2);
     source->addValue("2007-11-30T16:17:20", 3);
@@ -113,11 +109,11 @@ private:
   }
 
   /// Create test filter
-  Mantid::Kernel::TimeSeriesProperty<bool> *createTestFilter() {
-    auto filter = new Mantid::Kernel::TimeSeriesProperty<bool>("filter");
-    filter->addValue("2007-11-30T16:16:50", false);
-    filter->addValue("2007-11-30T16:17:25", true);
-    filter->addValue("2007-11-30T16:17:39", false);
+  Mantid::Kernel::TimeSeriesProperty<bool> createTestFilter() {
+    auto filter = Mantid::Kernel::TimeSeriesProperty<bool>("filter");
+    filter.addValue("2007-11-30T16:16:50", false);
+    filter.addValue("2007-11-30T16:17:25", true);
+    filter.addValue("2007-11-30T16:17:39", false);
     return filter;
   }
 };

@@ -7,8 +7,8 @@
 #include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SimpleJSON.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
-#include "MantidRemoteJobManagers/SimpleJSON.h"
 
 #include <fstream>
 

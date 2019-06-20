@@ -2821,7 +2821,7 @@ void InstrumentDefinitionParser::adjust(
           " appears at least twice. See www.mantidproject.org/IDF.");
 
     // create dummy component to hold coord. sys. of cuboid
-    CompAssembly *baseCoor = new CompAssembly(
+    auto baseCoor = std::make_unique<CompAssembly>(
         "base"); // dummy assembly used to get to end assembly if nested
     ICompAssembly *endComponent = nullptr; // end assembly, its purpose is to
                                            // hold the shape coordinate system
@@ -2830,27 +2830,23 @@ void InstrumentDefinitionParser::adjust(
     // and nested <location> elements
     // of pLoc
     std::string shapeTypeName =
-        getShapeCoorSysComp(baseCoor, pLoc, getTypeElement, endComponent);
+        getShapeCoorSysComp(baseCoor.get(), pLoc, getTypeElement, endComponent);
 
     // translate and rotate cuboid according to shape coordinate system in
     // endComponent
     std::string cuboidStr = translateRotateXMLcuboid(
         endComponent, getTypeElement[shapeTypeName], locationElementName);
 
-    delete baseCoor;
-
     // if <translate-rotate-combined-shape-to> is specified
     if (pTransRot) {
-      baseCoor = new CompAssembly("base");
+      baseCoor = std::make_unique<CompAssembly>("base");
 
-      setLocation(baseCoor, pTransRot, m_angleConvertConst);
+      setLocation(baseCoor.get(), pTransRot, m_angleConvertConst);
 
       // Translate and rotate shape xml string according to
       // <translate-rotate-combined-shape-to>
-      cuboidStr =
-          translateRotateXMLcuboid(baseCoor, cuboidStr, locationElementName);
-
-      delete baseCoor;
+      cuboidStr = translateRotateXMLcuboid(baseCoor.get(), cuboidStr,
+                                           locationElementName);
     }
 
     DOMParser pParser;

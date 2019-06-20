@@ -114,13 +114,13 @@ void SumOverlappingTubes::exec() {
   outputWS->setDistribution(false);
   outputWS->setSharedRun(m_workspaceList.front()->sharedRun());
 
-  const auto newAxis = new NumericAxis(m_heightAxis);
+  auto newAxis = std::make_unique<NumericAxis>(m_heightAxis);
   newAxis->setUnit("Label");
   auto yLabelUnit =
       boost::dynamic_pointer_cast<Kernel::Units::Label>(newAxis->unit());
   yLabelUnit->setLabel("Height", "m");
   newAxis->unit() = yLabelUnit;
-  outputWS->replaceAxis(1, newAxis);
+  outputWS->replaceAxis(1, std::move(newAxis));
 
   outputWS->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("Label");

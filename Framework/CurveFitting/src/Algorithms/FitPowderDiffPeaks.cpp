@@ -2431,13 +2431,13 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
   // 4. Set Axis label
   paramws->getAxis(0)->setUnit("dSpacing");
 
-  auto taxis = new TextAxis(4);
-  taxis->setLabel(0, "X0");
-  taxis->setLabel(1, "A");
-  taxis->setLabel(2, "B");
-  taxis->setLabel(3, "S");
+  auto tAxis = std::make_unique<TextAxis>(4);
+  tAxis->setLabel(0, "X0");
+  tAxis->setLabel(1, "A");
+  tAxis->setLabel(2, "B");
+  tAxis->setLabel(3, "S");
 
-  paramws->replaceAxis(1, taxis);
+  paramws->replaceAxis(1, std::move(tAxis));
 
   return paramws;
 }
