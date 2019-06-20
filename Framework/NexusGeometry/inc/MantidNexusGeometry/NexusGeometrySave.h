@@ -7,20 +7,27 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 
+
 #include "MantidNexusGeometry/DllConfig.h"
 #include <memory>
 #include <string>
 
 namespace Mantid {
 
+namespace Kernel {
+
+class ProgressBase;
+}
+
 namespace Geometry {
 class ComponentInfo;
 }
 
 namespace NexusGeometry {
+
 MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,
-               const std::string &fullPath);
+               const std::string &fullPath, Kernel::ProgressBase *reporter = nullptr);
 
 } // namespace NexusGeometry
 } // namespace Mantid
