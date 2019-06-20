@@ -18,16 +18,9 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static TestClassTest *createSuite() { return new TestClassTest(); }
-  static void destroySuite( TestClassTest *suite ) { delete suite; }
+  static void destroySuite(TestClassTest *suite) { delete suite; }
 
-
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
-  }
-
-
+  void test_Something() { TS_FAIL("You forgot to write a test!"); }
 };
-
 
 #endif /* MANTID_NEXUSGEOMETRY_TESTCLASSTEST_H_ */
