@@ -62,7 +62,6 @@ Usage
 Output:
 
 .. testoutput:: solidAngle
-    :options: +NORMALIZE_WHITESPACE
 
     Solid angle of Spectra 1 in Bank 1: 6.40e-08
     Solid angle of Spectra 101 in Bank 2: 1.60e-08
@@ -70,7 +69,6 @@ Output:
 **Example: BIOSANS**
 
 .. testcode:: biosans
-    :options: +NORMALIZE_WHITESPACE
 
    LoadEmptyInstrument(InstrumentName='BIOSANS', OutputWorkspace='BIOSANS')
    mainDet = SolidAngle(InputWorkspace='BIOSANS', OutputWorkspace='main_detector',
@@ -80,22 +78,21 @@ Output:
                         Method='VerticalWing',
                         StartWorkspaceIndex=49155-1, EndWorkspaceIndex=90114-1)
    # both are zero where nothing was calculated
-   print('Solid angle where main wasn't calculated: %.2e' % mainDet.readY(50000)[0])
-   print('Solid angle where wing wasn't calculated: %.2e' % wingDet.readY(500)[0])
+   print('Solid angle where main was not calculated: %.2e' % mainDet.readY(1)[0])
+   print('Solid angle where wing was not calculated: %.2e' % wingDet.readY(1)[0])
    # both have values where they were calculated
-   print('Solid angle where main was calculated: %.2e' % mainDet.readY(50000)[0])
-   print('Solid angle where wing was calculated: %.2e' % wingDet.readY(500)[0])
+   print('Solid angle where main was calculated: %.2e' % mainDet.readY(2)[0])
+   print('Solid angle where wing was calculated: %.2e' % wingDet.readY(49155)[0])
 
 
 Output:
 
-.. testoutput:: solidAngle
-    :options: +NORMALIZE_WHITESPACE
+.. testoutput:: biosans
 
-    Solid angle where main wasn't calculated: 0.00e+00
-    Solid angle where wing wasn't calculated: 0.00e+00
-    Solid angle where main was calculated: 3.12e-05
-    Solid angle where wing was calculated: 1.64e-05
+    Solid angle where main was not calculated: 0.00e+00
+    Solid angle where wing was not calculated: 0.00e+00
+    Solid angle where main was calculated: 2.64e-05
+    Solid angle where wing was calculated: 1.26e-05
 
 
 References
