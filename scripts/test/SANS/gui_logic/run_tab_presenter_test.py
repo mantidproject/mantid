@@ -456,7 +456,7 @@ class RunTabPresenterTest(unittest.TestCase):
         index = 0
         expected_table_index_model = TableIndexModel(*row)
         expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = True
+        expected_table_index_model.file_finding = False
 
         presenter.on_row_inserted(index, row)
 
@@ -493,7 +493,7 @@ class RunTabPresenterTest(unittest.TestCase):
         value = '74040'
         expected_table_index_model = TableIndexModel(*expected_row)
         expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = True
+        expected_table_index_model.file_finding = False
 
         presenter.on_data_changed(row, column, value, '')
 
@@ -519,17 +519,18 @@ class RunTabPresenterTest(unittest.TestCase):
         rows = [0, 2]
         expected_row_0 = TableIndexModel(*row_1)
         expected_row_0.id = 1
-        expected_row_0.file_finding = True
+        expected_row_0.file_finding = False
         expected_row_1 = TableIndexModel(*row_3)
         expected_row_1.id = 3
-        expected_row_1.file_finding = True
-
+        expected_row_1.file_finding = False
 
         presenter.on_rows_removed(rows)
 
         self.assertEqual(presenter._table_model.get_number_of_rows(), 2)
+
         model_row_0 = presenter._table_model.get_table_entry(0)
         self.assertEqual(model_row_0, expected_row_0)
+
         model_row_1 = presenter._table_model.get_table_entry(1)
         self.assertEqual(model_row_1, expected_row_1)
 
