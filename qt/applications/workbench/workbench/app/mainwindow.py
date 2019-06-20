@@ -303,7 +303,7 @@ class MainWindow(QMainWindow):
             on_triggered=self.setup_default_layouts,
             shortcut="Shift+F10", shortcut_context=Qt.ApplicationShortcut)
         action_save_user_layout = create_action(
-            self, "Set Custom Layout",
+            self, "Save Custom Layout",
             on_triggered=self.save_layout_settings,
             shortcut_context=Qt.ApplicationShortcut)
         action_load_user_layout = create_action(
