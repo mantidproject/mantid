@@ -9,7 +9,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+//#include <boost/filesystem/path.hpp>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -31,9 +31,14 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   if (reporter != nullptr) {
     reporter->report();
 
-  } else {
-    // reporter is null, should still execute.
-  }
+  } 
+
+  //save file to destination 'fullPath' WIP
+
 };
+
+//define HDF5FileTestUtility class here
+
+
 } // namespace NexusGeometry
 } // namespace Mantid
