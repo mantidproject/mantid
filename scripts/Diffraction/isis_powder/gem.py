@@ -12,6 +12,7 @@ from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping, gem_output, gem_calibration_algs
 from isis_powder.routines import absorb_corrections, common, instrument_settings, common_output
 
+
 class Gem(AbstractInst):
     def __init__(self, **kwargs):
         self._inst_settings = instrument_settings.InstrumentSettings(
