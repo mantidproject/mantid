@@ -24,8 +24,8 @@ class MuonContextTest(unittest.TestCase):
     def setUp(self):
         AnalysisDataService.clear()
         self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
-        self.load_result, self.run_number, self.filename, is_psi_data = load_workspace_from_filename(self.filepath)
-        self.assert_(not is_psi_data)
+        self.load_result, self.run_number, self.filename, psi_data = load_workspace_from_filename(self.filepath)
+        self.assert_(not psi_data)
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(load_data=self.loaded_data)
         self.gui_context = MuonGuiContext()

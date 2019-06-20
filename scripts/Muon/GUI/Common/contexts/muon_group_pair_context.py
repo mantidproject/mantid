@@ -22,11 +22,10 @@ def get_grouping_psi(workspace):
 
     for ii in range(0, workspace.getNumberHistograms()):
         sample_log_label_name = "Label Spectra " + str(ii)
-        sample_log_value = ""
         workspace_run = workspace.getRun()
         if workspace_run.hasProperty(sample_log_label_name):
             sample_log_value = workspace_run.getProperty(sample_log_label_name).value
-        grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+            grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
 
     return grouping_list, [], ''
 

@@ -79,8 +79,8 @@ class LoadFileWidgetPresenterMultipleFileModeTest(GuiTest):
 
     def mock_loading_multiple_files_from_browse(self, runs, workspaces, filenames):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value=filenames)
-        is_psi_data = [False] * len(filenames)
-        self.load_utils_patcher.side_effect = zip(workspaces, runs, filenames, is_psi_data)
+        psi_data = [False] * len(filenames)
+        self.load_utils_patcher.side_effect = zip(workspaces, runs, filenames, psi_data)
 
     def create_fake_workspace(self, name):
         workspace_mock = mock.MagicMock()

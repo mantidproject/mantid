@@ -50,11 +50,11 @@ class BrowseFileWidgetModel(object):
         failed_files = []
         for filename in self._filenames:
             try:
-                ws, run, filename, is_psi_data = load_utils.load_workspace_from_filename(filename)
+                ws, run, filename, psi_data = load_utils.load_workspace_from_filename(filename)
             except Exception as error:
                 failed_files += [(filename, error)]
                 continue
-            if not is_psi_data:
+            if not psi_data:
                 instrument_from_workspace = ws['OutputWorkspace'][0].workspace.getInstrument().getName()
             else:
                 # Load another instrument first

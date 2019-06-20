@@ -22,8 +22,8 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 def perform_psi_file_finder(self):
     file_path = FileFinder.findRuns('deltat_tdc_dolly_1529.bin')[0]
-    ws, run, filename, is_psi_data = load_utils.load_workspace_from_filename(file_path)
-    self.assert_(is_psi_data)
+    ws, run, filename, psi_data = load_utils.load_workspace_from_filename(file_path)
+    self.assert_(psi_data)
     self.data_context._loaded_data.remove_data(run=run)
     self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='PSI')
     self.data_context.current_runs = [[1529]]
@@ -38,8 +38,8 @@ def perform_psi_file_finder(self):
 def perform_musr_file_finder(self):
     ConfigService['default.instrument'] = 'MUSR'
     file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
-    ws, run, filename, is_psi_data = load_utils.load_workspace_from_filename(file_path)
-    self.assert_(not is_psi_data)
+    ws, run, filename, psi_data = load_utils.load_workspace_from_filename(file_path)
+    self.assert_(not psi_data)
     self.data_context._loaded_data.remove_data(run=run)
     self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
     self.data_context.current_runs = [[22725]]
