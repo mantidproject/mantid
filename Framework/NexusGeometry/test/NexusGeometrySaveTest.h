@@ -8,13 +8,14 @@
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <fstream>
+#include <iostream>
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-         
 
 using namespace Mantid::NexusGeometry;
 
@@ -34,11 +35,12 @@ public:
         Mantid::Kernel::V3D(1, 1, 1));
 
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-	
-	//test invalid path
-    std::string path = "invalid_path"; 
-    TS_ASSERT_THROWS(saveInstrument(*inst2.first, path), std::invalid_argument&);
 
+    // test valid path
+    std::string path = "C:\\Users\\mqi61253\\testfile.txt";
+
+    TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
+                     std::invalid_argument &);
   }
 };
 
