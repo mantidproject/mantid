@@ -36,8 +36,21 @@ public:
 
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    // test valid path
-    std::string path = "C:\\Users\\mqi61253\\testfile.txt";
+    std::string path = "invalid_path"; // valid path
+
+    TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
+                     std::invalid_argument &);
+  }
+
+  void test_providing_valid_path_throw_fails() {
+
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+        Mantid::Kernel::V3D(1, 1, 1));
+
+    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    std::string path = "C:\\Users\\mqi61253\\testfile.txt"; // valid path
 
     TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
                      std::invalid_argument &);

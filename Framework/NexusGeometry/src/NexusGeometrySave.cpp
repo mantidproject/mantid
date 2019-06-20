@@ -15,11 +15,18 @@ namespace NexusGeometry {
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath) {
   std::ifstream tmp(fullPath);
+  /*
   if (!tmp) {
     throw std::invalid_argument(
         "The path provided for the file saving is invalid: " +
         fullPath); // throw error message for invalid path.
-  };
+  }
+  */
+  if (!compInfo.hasDetectorInfo()) {
+    throw std::invalid_argument(
+        "The component has no detector info."); // thow error message when no
+                                                // detector info found.
+  }
 };
 } // namespace NexusGeometry
 } // namespace Mantid
