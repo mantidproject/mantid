@@ -22,6 +22,9 @@ namespace Python {
 using KwArgs = QHash<QString, QVariant>;
 
 Python::Object qHashToDict(const KwArgs &hash) {
+  auto mod = PyImport_ImportModule("qtpy.QtCore");
+  Py_DECREF(mod);
+
   auto *d = PyDict_New();
 
   if (!d)
