@@ -185,16 +185,19 @@ public:
 class MockSearcher : public ISearcher {
 public:
   MOCK_METHOD1(subscribe, void(SearcherSubscriber *notifyee));
-  MOCK_METHOD2(search, Mantid::API::ITableWorkspace_sptr(const std::string &,
-                                                         const std::string &));
-  MOCK_METHOD2(startSearchAsync,
-               bool(const std::string &, const std::string &));
+  MOCK_METHOD3(search,
+               Mantid::API::ITableWorkspace_sptr(const std::string &,
+                                                 const std::string &,
+                                                 SearchType searchType));
+  MOCK_METHOD3(startSearchAsync,
+               bool(const std::string &, const std::string &, SearchType));
   MOCK_CONST_METHOD0(searchInProgress, bool());
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
   MOCK_METHOD2(setSearchResultError, void(int, const std::string &));
   MOCK_METHOD0(reset, void());
-  MOCK_CONST_METHOD2(searchSettingsChanged,
-                     bool(const std::string &, const std::string &));
+  MOCK_CONST_METHOD3(searchSettingsChanged,
+                     bool(const std::string &, const std::string &,
+                          SearchType));
 };
 
 class MockRunNotifier : public IRunNotifier {

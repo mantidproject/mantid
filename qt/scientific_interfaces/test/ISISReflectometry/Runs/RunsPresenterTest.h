@@ -135,7 +135,8 @@ public:
     EXPECT_CALL(m_view, getSearchInstrument())
         .Times(1)
         .WillOnce(Return(instrument));
-    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument))
+    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument,
+                                              ISearcher::SearchType::MANUAL))
         .Times(1);
     presenter.notifySearch();
     verifyAndClear();
@@ -147,7 +148,7 @@ public:
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
         .WillOnce(Return(searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -157,7 +158,7 @@ public:
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
         .WillOnce(Return(m_searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(m_messageHandler,
@@ -172,7 +173,7 @@ public:
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
         .WillOnce(Return(m_searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -535,12 +536,14 @@ private:
   }
 
   void expectAutoreductionSettingsChanged() {
-    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _))
+    EXPECT_CALL(*m_searcher,
+                searchSettingsChanged(_, _, ISearcher::SearchType::AUTO))
         .WillOnce(Return(true));
   }
 
   void expectAutoreductionSettingsUnchanged() {
-    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _))
+    EXPECT_CALL(*m_searcher,
+                searchSettingsChanged(_, _, ISearcher::SearchType::AUTO))
         .WillOnce(Return(false));
   }
 
@@ -573,7 +576,8 @@ private:
     EXPECT_CALL(m_view, getSearchString())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(m_searchString));
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _,
+                                              ISearcher::SearchType::AUTO))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -581,7 +585,7 @@ private:
 
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
   }
 
   void expectGetValidSearchRowSelection() {

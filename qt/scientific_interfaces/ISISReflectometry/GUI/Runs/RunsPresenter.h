@@ -137,7 +137,7 @@ private:
   double m_thetaTolerance;
 
   /// searching
-  bool search();
+  bool search(ISearcher::SearchType searchType);
   void populateSearchResults(Mantid::API::ITableWorkspace_sptr results);
   bool searchInProgress() const;
   /// autoreduction

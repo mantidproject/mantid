@@ -107,7 +107,7 @@ RunsTable &RunsPresenter::mutableRunsTable() {
 void RunsPresenter::notifySearch() {
   m_searcher->reset();
   updateWidgetEnabledState();
-  search();
+  search(ISearcher::SearchType::MANUAL);
 }
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
@@ -186,7 +186,8 @@ bool RunsPresenter::resumeAutoreduction() {
 
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
-  if (m_searcher->searchSettingsChanged(searchString, instrument)) {
+  if (m_searcher->searchSettingsChanged(searchString, instrument,
+                                        ISearcher::SearchType::AUTO)) {
     // If there are unsaved changes, ask the user first
     auto ok = true;
     if (hasGroupsWithContent(runsTable().reductionJobs())) {
@@ -232,14 +233,14 @@ void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
  * there was a problem */
-bool RunsPresenter::search() {
+bool RunsPresenter::search(ISearcher::SearchType searchType) {
   auto const searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return false;
 
-  if (!m_searcher->startSearchAsync(searchString,
-                                    m_view->getSearchInstrument())) {
+  if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
+                                    searchType)) {
     m_messageHandler->giveUserCritical("Catalog login failed", "Error");
     return false;
   }
@@ -256,7 +257,7 @@ void RunsPresenter::checkForNewRuns() {
 
   // Initially we just need to start an ICat search and the reduction will be
   // run when the search completes
-  search();
+  search(ISearcher::SearchType::AUTO);
 }
 
 /** Run an autoreduction process based on the latest search results

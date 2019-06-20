@@ -29,17 +29,19 @@ public:
 
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
-  Mantid::API::ITableWorkspace_sptr
-  search(const std::string &text, const std::string &instrument) override;
-  bool startSearchAsync(const std::string &text,
-                        const std::string &instrument) override;
+  Mantid::API::ITableWorkspace_sptr search(const std::string &text,
+                                           const std::string &instrument,
+                                           SearchType searchType) override;
+  bool startSearchAsync(const std::string &text, const std::string &instrument,
+                        SearchType searchType) override;
   bool searchInProgress() const override;
   SearchResult const &getSearchResult(int index) const override;
   void setSearchResultError(int index,
                             const std::string &errorMessage) override;
   void reset() override;
   bool searchSettingsChanged(const std::string &text,
-                             const std::string &instrument) const override;
+                             const std::string &instrument,
+                             SearchType searchType) const override;
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
@@ -50,6 +52,7 @@ private:
   SearcherSubscriber *m_notifyee;
   std::string m_searchText;
   std::string m_instrument;
+  SearchType m_searchType;
   bool m_searchInProgress;
 
   bool hasActiveSession() const;
