@@ -114,6 +114,10 @@ void WorkspaceGroup::sortMembersByName() {
  */
 void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+  if (this == workspace.get()) {
+    g_log.warning("Can't add a workspace as a child of itself!\n");
+    return;
+  }
   const auto it =
       std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
   if (it == m_workspaces.end()) {
@@ -121,6 +125,28 @@ void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
   } else {
     g_log.warning() << "Workspace already exists in a WorkspaceGroup\n";
   }
+}
+
+/**
+ * Does this group or any of it's child groups contain the named workspace?
+ * @param wsName :: A string to compare
+ * @returns True if the name is part of this group, false otherwise
+ */
+bool WorkspaceGroup::containsInChildren(const std::string &wsName) const {
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+  for (const auto &workspace : m_workspaces) {
+    if (workspace->isGroup()) {
+      // Recursive containsInChildren search
+      const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+      if (group->containsInChildren(wsName)) {
+        return true;
+      }
+    } else {
+      if (workspace->getName() == wsName)
+        return true;
+    }
+  }
+  return false;
 }
 
 /**

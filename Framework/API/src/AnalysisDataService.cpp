@@ -151,7 +151,7 @@ void AnalysisDataServiceImpl::rename(const std::string &oldName,
 
   auto oldWorkspace = retrieve(oldName);
   auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(oldWorkspace);
-  if (group && group->contains(newName)) {
+  if (group && group->containsInChildren(newName)) {
     throw std::invalid_argument(
         "Unable to rename group as the new name matches its members");
   }
@@ -390,7 +390,7 @@ void AnalysisDataServiceImpl::verifyName(
     throw std::invalid_argument(error);
   }
 
-  if (group && group->contains(name)) {
+  if (group && group->containsInChildren(name)) {
     throw std::invalid_argument(
         "Unable to add group as name matches its members");
   }
