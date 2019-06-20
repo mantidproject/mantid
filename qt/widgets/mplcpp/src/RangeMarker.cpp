@@ -137,16 +137,7 @@ double RangeMarker::getMaximum() const {
  * @param y The y position of the mouse press in axes coords.
  */
 void RangeMarker::mouseMoveStart(double x, double y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y, false);
-}
-
-/**
- * @brief Notifies the relevant marker to start moving.
- * @param x The x position of the mouse press in pixels.
- * @param y The y position of the mouse press in pixels.
- */
-void RangeMarker::mouseMoveStart(int x, int y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y, true);
+  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
 }
 
 /**
@@ -166,21 +157,7 @@ void RangeMarker::mouseMoveStop() {
 bool RangeMarker::mouseMove(double x, double y) {
   GlobalInterpreterLock lock;
 
-  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y, false));
-  return PyLong_AsLong(movedPy.ptr()) > 0;
-}
-
-/**
- * @brief Notifies the relevant marker to start moving.
- * @param x The x position of the mouse press in pixels.
- * @param y The y position of the mouse press in pixels.
- * @return True if one of the VerticalMarker's within the RangeMarker has been
- * moved.
- */
-bool RangeMarker::mouseMove(int x, int y) {
-  GlobalInterpreterLock lock;
-
-  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y, true));
+  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y));
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 

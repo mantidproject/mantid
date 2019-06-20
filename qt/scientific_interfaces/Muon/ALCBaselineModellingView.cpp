@@ -154,7 +154,8 @@ void ALCBaselineModellingView::setSectionRow(
 
 void ALCBaselineModellingView::addSectionSelector(
     int index, IALCBaselineModellingView::SectionSelector values) {
-  RangeSelector *newSelector = new RangeSelector(m_ui.dataPlot);
+  RangeSelector *newSelector =
+      new RangeSelector(m_ui.dataPlot, RangeSelector::SelectType::YMINMAX);
 
   if (index % 3 == 0) {
     newSelector->setColour(Qt::blue);

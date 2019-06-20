@@ -41,10 +41,8 @@ public:
   double getMaximum() const;
 
   void mouseMoveStart(double x, double y);
-  void mouseMoveStart(int x, int y);
   void mouseMoveStop();
   bool mouseMove(double x, double y);
-  bool mouseMove(int x, int y);
 };
 
 } // namespace MplCpp

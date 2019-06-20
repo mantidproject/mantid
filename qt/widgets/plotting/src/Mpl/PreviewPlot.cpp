@@ -94,6 +94,14 @@ Widgets::MplCpp::FigureCanvasQt *PreviewPlot::canvas() const {
 }
 
 /**
+ * Converts the QPoint in pixels to axes coordinates
+ * @return The axes coordinates of the QPoint
+ */
+QPointF PreviewPlot::toDataCoords(const QPoint &point) const {
+  return m_canvas->toDataCoords(point);
+}
+
+/**
  * Add a line for a given spectrum to the plot
  * @param lineName A string label for the line
  * @param ws A MatrixWorkspace that contains the data

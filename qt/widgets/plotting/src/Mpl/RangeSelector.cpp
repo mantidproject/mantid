@@ -125,11 +125,14 @@ void RangeSelector::setColour(const QColor &colour) {
 }
 
 void RangeSelector::handleMouseDown(const QPoint &point) {
-  m_rangeMarker->mouseMoveStart(point.x(), point.y());
+  const auto dataCoords = m_plot->toDataCoords(point);
+  m_rangeMarker->mouseMoveStart(dataCoords.x(), dataCoords.y());
 }
 
 void RangeSelector::handleMouseMove(const QPoint &point) {
-  const auto markerMoved = m_rangeMarker->mouseMove(point.x(), point.y());
+  const auto dataCoords = m_plot->toDataCoords(point);
+  const auto markerMoved =
+      m_rangeMarker->mouseMove(dataCoords.x(), dataCoords.y());
 
   if (markerMoved) {
     m_plot->replot();

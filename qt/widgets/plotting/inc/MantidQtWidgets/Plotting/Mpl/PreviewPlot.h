@@ -53,6 +53,7 @@ public:
   void watchADS(bool on);
 
   Widgets::MplCpp::FigureCanvasQt *canvas() const;
+  QPointF toDataCoords(const QPoint &point) const;
 
   void addSpectrum(
       const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws,
