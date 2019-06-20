@@ -27,6 +27,9 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
+  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));
+
   int numDecimals = 6;
 
   // Property Trees
@@ -71,24 +74,24 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_propTrees["SymmPVPropTree"]->addProperty(m_properties["DeltaY"]);
 
   // Indicators for Y value at each EMin position
-  auto negativeEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
-      "NegativeEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
+  // auto negativeEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
+  //    "NegativeEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
   // negativeEMinYPos->setInfoOnly(true);
-  negativeEMinYPos->setColour(Qt::blue);
-  negativeEMinYPos->setMinimum(0.0);
+  // negativeEMinYPos->setColour(Qt::blue);
+  // negativeEMinYPos->setMinimum(0.0);
 
-  auto positiveEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
-      "PositiveEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
+  // auto positiveEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
+  //    "PositiveEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
   // positiveEMinYPos->setInfoOnly(true);
-  positiveEMinYPos->setColour(Qt::red);
-  positiveEMinYPos->setMinimum(0.0);
+  // positiveEMinYPos->setColour(Qt::red);
+  // positiveEMinYPos->setMinimum(0.0);
 
   // Indicator for centre of symmetry (x=0)
-  auto centreMarkRaw = m_uiForm.ppRawPlot->addRangeSelector(
-      "CentreMark", MantidWidgets::RangeSelector::XSINGLE);
+  // auto centreMarkRaw = m_uiForm.ppRawPlot->addRangeSelector(
+  //    "CentreMark", MantidWidgets::RangeSelector::XSINGLE);
   // centreMarkRaw->setInfoOnly(true);
-  centreMarkRaw->setColour(Qt::cyan);
-  centreMarkRaw->setMinimum(0.0);
+  // centreMarkRaw->setColour(Qt::cyan);
+  // centreMarkRaw->setMinimum(0.0);
 
   // Indicators for negative and positive X range values on X axis
   // The user can use these to move the X range
@@ -111,11 +114,11 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   positiveEPV->setColour(Qt::darkGreen);
 
   // Indicator for centre of symmetry (x=0)
-  auto centreMarkPV = m_uiForm.ppPreviewPlot->addRangeSelector(
-      "CentreMark", MantidWidgets::RangeSelector::XSINGLE);
+  // auto centreMarkPV = m_uiForm.ppPreviewPlot->addRangeSelector(
+  //    "CentreMark", MantidWidgets::RangeSelector::XSINGLE);
   // centreMarkPV->setInfoOnly(true);
-  centreMarkPV->setColour(Qt::cyan);
-  centreMarkPV->setMinimum(0.0);
+  // centreMarkPV->setColour(Qt::cyan);
+  // centreMarkPV->setMinimum(0.0);
 
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed

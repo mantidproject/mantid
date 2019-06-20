@@ -525,6 +525,7 @@ void Elwin::newInputFiles() {
   setInputWorkspace(inputWs);
 
   const auto range = getXRangeFromWorkspace(inputWs);
+
   setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"),
                    m_properties["IntegrationStart"],
                    m_properties["IntegrationEnd"], range);

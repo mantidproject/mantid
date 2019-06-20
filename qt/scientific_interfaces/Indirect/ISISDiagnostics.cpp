@@ -347,6 +347,7 @@ void ISISDiagnostics::handleNewFile() {
                    m_properties["BackgroundEnd"], limits, backgroundRange);
 
   m_uiForm.ppRawPlot->resizeX();
+  m_uiForm.ppRawPlot->replot();
 }
 
 /**

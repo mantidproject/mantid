@@ -64,7 +64,7 @@ PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
   m_magnifier = new QwtPlotMagnifier(plot->canvas());
 
   m_rangeSelector = new MantidWidgets::RangeSelector(m_plot);
-  m_rangeSelector->setLimits(-1e30, 1e30);
+  m_rangeSelector->setRange(-1e30, 1e30);
   m_rangeSelector->setMinimum(10);
   m_rangeSelector->setMaximum(990);
   connect(m_rangeSelector, SIGNAL(selectionChanged(double, double)), this,

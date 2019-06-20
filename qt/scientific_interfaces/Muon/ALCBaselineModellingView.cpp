@@ -71,7 +71,8 @@ ALCBaselineModellingView::sectionRow(int row) const {
 IALCBaselineModellingView::SectionSelector
 ALCBaselineModellingView::sectionSelector(int index) const {
   auto rangeSelector = m_rangeSelectors.find(index)->second;
-  return rangeSelector->getRange();
+  return std::make_pair(rangeSelector->getMinimum(),
+                        rangeSelector->getMaximum());
 }
 
 int ALCBaselineModellingView::noOfSectionRows() const {
@@ -171,7 +172,6 @@ void ALCBaselineModellingView::addSectionSelector(
   m_rangeSelectors[index] = newSelector;
 
   // Set initial values
-  newSelector->setLimits(values.first, values.second);
   newSelector->setRange(values.first, values.second);
   setSelectorValues(newSelector, values);
 
@@ -225,7 +225,8 @@ void ALCBaselineModellingView::setSelectorValues(
     values.first = values.second;
     values.second = tempSwapValue;
   }
-  selector->setLimits(values.first, values.second);
+  selector->setMinimum(values.first);
+  selector->setMaximum(values.second);
 }
 
 void ALCBaselineModellingView::help() {

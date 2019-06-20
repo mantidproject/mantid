@@ -497,7 +497,7 @@ QwtPlotCurve *SANSPlotSpecial::plotMiniplot(
   m_uiForm.plotWindow->replot();
 
   if (data) {
-    m_rangeSelector->setLimits(dataX.front(), dataX.back());
+    m_rangeSelector->setRange(dataX.front(), dataX.back());
   }
 
   return curve;

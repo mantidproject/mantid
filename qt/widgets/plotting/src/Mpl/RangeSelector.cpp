@@ -66,21 +66,6 @@ QString RangeSelector::selectTypeAsQString(const SelectType &type) const {
                            "XMINMAX and YMINMAX.");
 }
 
-void RangeSelector::setLimits(const std::pair<double, double> &limits) {
-  setLimits(limits.first, limits.second);
-}
-
-void RangeSelector::setLimits(const double min, const double max) {
-  // Not used for Mpl as limits are set when creating the range marker.
-  Q_UNUSED(min);
-  Q_UNUSED(max);
-}
-
-std::pair<double, double> RangeSelector::getLimits() const {
-  const auto limits = m_plot->getAxisRange();
-  return std::make_pair(std::get<0>(limits), std::get<1>(limits));
-}
-
 void RangeSelector::setRange(const std::pair<double, double> &range) {
   setRange(range.first, range.second);
 }
@@ -136,7 +121,8 @@ void RangeSelector::handleMouseMove(const QPoint &point) {
 
   if (markerMoved) {
     m_plot->replot();
-    emit selectionChanged(dataCoords.x(), dataCoords.y());
+    const auto range = getRange();
+    emit selectionChanged(range.first, range.second);
   }
 }
 

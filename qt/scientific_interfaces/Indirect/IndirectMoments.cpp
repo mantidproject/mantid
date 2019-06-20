@@ -141,6 +141,7 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
                        m_properties["EMax"], range);
   setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);
+  m_uiForm.ppRawPlot->replot();
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
@@ -153,8 +154,12 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
  * @param max :: The new value of the upper guide
  */
 void IndirectMoments::rangeChanged(double min, double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**

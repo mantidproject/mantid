@@ -36,10 +36,7 @@ public:
   ~RangeSelector() override{};
 
   void setRange(const std::pair<double, double> &range);
-  void setRange(double min, double max);
-  std::pair<double, double> getRange();
-  void setLimits(std::pair<double, double> range);
-  std::pair<double, double> getLimits() const;
+  std::pair<double, double> getRange() const;
 
   double getMinimum() { return m_min; }
   double getMaximum() { return m_max; }
@@ -55,7 +52,7 @@ signals:
   void selectionChangedLazy(double /*_t1*/, double /*_t2*/);
 
 public slots:
-  void setLimits(double /*min*/, double /*max*/);
+  void setRange(double min, double max);
   void setMinimum(double /*val*/); ///< outside setting of value
   void setMaximum(double /*val*/); ///< outside setting of value
   void reapply();                  ///< re-apply the range selector lines
