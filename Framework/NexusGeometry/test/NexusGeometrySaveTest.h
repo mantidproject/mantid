@@ -123,7 +123,7 @@ public:
 bool H5::H5Object::attrExists(const H5std_string &name)const <= check if
 attribute exists int H5::H5Object::getNumAttrs()const <= get number of
 attributes H5std_string H5::H5Object::getObjName()const <= return object name as
-string
+string.
 
 */
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
