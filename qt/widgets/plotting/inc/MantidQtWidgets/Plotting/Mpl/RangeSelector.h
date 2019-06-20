@@ -17,7 +17,7 @@ namespace MantidWidgets {
 class PreviewPlot;
 
 /**
- * Displays a two vertical lines for selecting a range on a previewplot
+ * Displays a two lines for selecting a range on a previewplot
  */
 class EXPORT_OPT_MANTIDQT_PLOTTING RangeSelector : public QObject {
   Q_OBJECT

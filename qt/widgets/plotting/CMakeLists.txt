@@ -27,6 +27,7 @@ set ( QWT_SRC_FILES
   src/Qwt/RangeSelector.cpp
   src/Qwt/SafeQwtPlot.cpp
   src/Qwt/SignalRange.cpp
+  src/Qwt/SingleSelector.cpp
 )
 
 set ( QWT_MOC_FILES
@@ -39,6 +40,7 @@ set ( QWT_MOC_FILES
   inc/MantidQtWidgets/Plotting/Qwt/DisplayCurveFit.h
   inc/MantidQtWidgets/Plotting/Qwt/PreviewPlot.h
   inc/MantidQtWidgets/Plotting/Qwt/SafeQwtPlot.h
+  inc/MantidQtWidgets/Plotting/Qwt/SingleSelector.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -142,6 +144,7 @@ set(MPL_SRC_FILES
     src/Mpl/PeakPicker.cpp
     src/Mpl/PreviewPlot.cpp
     src/Mpl/RangeSelector.cpp
+    src/Mpl/SingleSelector.cpp
 )
 
 set(MPL_MOC_FILES
@@ -149,6 +152,7 @@ set(MPL_MOC_FILES
     inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
     inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h
     inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
+    inc/MantidQtWidgets/Plotting/Mpl/SingleSelector.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
