@@ -920,17 +920,6 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
 }
 
 /**
- * Raw Pointer version of replaceAxis to allow it to work with python
- *
- * @param axisIndex :: The index of the axis to replace
- * @param newAxis :: A pointer to the new axis. The class will take ownership.
- */
-void MatrixWorkspace::pythonReplaceAxis(const std::size_t &axisIndex,
-                                        Axis *newAxis) {
-  replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
-}
-
-/**
  *  Whether the workspace contains common X bins with logarithmic spacing
  *  @return whether the workspace contains common X bins with log spacing
  */

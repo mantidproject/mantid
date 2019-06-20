@@ -227,6 +227,17 @@ std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
   return self.maskedBinsIndices(i);
 }
 
+/**
+ * Raw Pointer wrapper of replaceAxis to allow it to work with python
+ * @param self
+ * @param axisIndex :: The index of the axis to replace
+ * @param newAxis :: A pointer to the new axis. The class will take ownership.
+ */
+void pythonReplaceAxis(MatrixWorkspace &self, const std::size_t &axisIndex,
+                       Axis *newAxis) {
+  self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -330,7 +341,7 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("newVal")),
            "Set distribution flag. If True the workspace has been divided by "
            "the bin-width.")
-      .def("replaceAxis", &MatrixWorkspace::pythonReplaceAxis,
+      .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
            "Replaces one of the workspace's axes with the new one provided.")
 

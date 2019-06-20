@@ -413,7 +413,6 @@ public:
   int axes() const;
   virtual Axis *getAxis(const std::size_t &axisIndex) const;
   void replaceAxis(const std::size_t &axisIndex, std::unique_ptr<Axis> newAxis);
-  void pythonReplaceAxis(const std::size_t &axisIndex, Axis *newAxis);
 
   /// Will return the number of Axis currently stored in the workspace it is not
   /// always safe to assume it is just 2
