@@ -51,8 +51,8 @@ RangeSelector::getAxisRange(const SelectType &type) const {
   case SelectType::YMINMAX:
     return m_plot->getAxisRange(AxisID::YLeft);
   }
-  throw std::runtime_error(
-      "Incorrect SelectType provided. Select types are XMINMAX and YMINMAX.");
+  throw std::runtime_error("Incorrect SelectType provided. Select types are "
+                           "XMINMAX and YMINMAX.");
 }
 
 QString RangeSelector::selectTypeAsQString(const SelectType &type) const {
@@ -62,8 +62,8 @@ QString RangeSelector::selectTypeAsQString(const SelectType &type) const {
   case SelectType::YMINMAX:
     return "YMinMax";
   }
-  throw std::runtime_error(
-      "Incorrect SelectType provided. Select types are XMINMAX and YMINMAX.");
+  throw std::runtime_error("Incorrect SelectType provided. Select types are "
+                           "XMINMAX and YMINMAX.");
 }
 
 void RangeSelector::setLimits(const std::pair<double, double> &limits) {
@@ -98,12 +98,12 @@ std::pair<double, double> RangeSelector::getRange() const {
 
 void RangeSelector::setMinimum(const double min) {
   m_rangeMarker->setMinimum(min);
-  emit selectionChanged(min, m_rangeMarker->getMaximum());
+  emit minValueChanged(min);
 }
 
 void RangeSelector::setMaximum(const double max) {
   m_rangeMarker->setMaximum(max);
-  emit selectionChanged(m_rangeMarker->getMinimum(), max);
+  emit maxValueChanged(max);
 }
 
 double RangeSelector::getMinimum() const { return m_rangeMarker->getMinimum(); }
@@ -136,8 +136,7 @@ void RangeSelector::handleMouseMove(const QPoint &point) {
 
   if (markerMoved) {
     m_plot->replot();
-    const auto range = m_rangeMarker->getRange();
-    emit selectionChanged(std::get<0>(range), std::get<1>(range));
+    emit selectionChanged(dataCoords.x(), dataCoords.y());
   }
 }
 

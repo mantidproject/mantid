@@ -48,6 +48,8 @@ public:
 
 signals:
   void selectionChanged(double min, double max);
+  void minValueChanged(double min);
+  void maxValueChanged(double max);
 
 private slots:
   void handleMouseDown(const QPoint &point);
@@ -62,7 +64,7 @@ private:
 
   /// The preview plot containing the range selector
   PreviewPlot *m_plot;
-  /// The minimum marker
+  /// The range marker
   std::unique_ptr<MantidQt::Widgets::MplCpp::RangeMarker> m_rangeMarker;
   /// Is the marker visible or hidden
   bool m_visible;

@@ -671,7 +671,7 @@ class RangeMarker(QObject):
         :param minimum: The minimum of the range.
         """
         maximum = max([self.min_marker.get_position(), self.max_marker.get_position()])
-        self.set_x_range(minimum, maximum)
+        self.set_range(minimum, maximum)
 
     def set_maximum(self, maximum):
         """
@@ -679,7 +679,7 @@ class RangeMarker(QObject):
         :param maximum: The maximum of the range.
         """
         minimum = min([self.min_marker.get_position(), self.max_marker.get_position()])
-        self.set_x_range(minimum, maximum)
+        self.set_range(minimum, maximum)
 
     def get_minimum(self):
         """

@@ -114,7 +114,7 @@ void PeakMarker::deselect() { callMethodNoCheck<void>(pyobj(), "deselect"); }
  * @param y The y position of the mouse press in axes coords.
  */
 void PeakMarker::mouseMoveStart(double x, double y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y, false);
+  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
 }
 
 /**
@@ -134,7 +134,7 @@ void PeakMarker::mouseMoveStop() {
 bool PeakMarker::mouseMove(double x, double y) {
   GlobalInterpreterLock lock;
 
-  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y, false));
+  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y));
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
