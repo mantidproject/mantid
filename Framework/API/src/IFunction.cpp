@@ -71,7 +71,12 @@ IFunction::~IFunction() { m_attrs.clear(); }
  * Virtual copy constructor
  */
 boost::shared_ptr<IFunction> IFunction::clone() const {
-  return FunctionFactory::Instance().createInitialized(this->asString());
+  auto clonedFunction = FunctionFactory::Instance().createInitialized(this->asString());
+  for (size_t i = 0; i< this->nParams();i++){
+    double error = this->getError(i);
+    clonedFunction->setError(i, error);
+  }
+  return clonedFunction;
 }
 
 /**
