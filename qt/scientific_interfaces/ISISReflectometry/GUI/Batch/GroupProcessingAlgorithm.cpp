@@ -64,12 +64,12 @@ void updateGroupFromOutputProperties(IAlgorithm_sptr algorithm, Item &group) {
 }
 
 void updateParamsFromResolution(AlgorithmRuntimeProps &properties,
-                                boost::optional<double> resolution) {
+                                boost::optional<double> const &resolution) {
   if (!resolution.is_initialized())
     return;
 
   // Negate the resolution to give logarithmic binning
-  AlgorithmProperties::update("Params", -resolution.get(), properties);
+  AlgorithmProperties::update("Params", -(resolution.get()), properties);
 }
 
 void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
@@ -82,7 +82,7 @@ void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
 
 void updateGroupProperties(AlgorithmRuntimeProps &properties,
                            Group const &group) {
-  auto resolution = boost::optional<double>(boost::none);
+  auto resolution = boost::make_optional<double>(false, double());
 
   for (auto const &row : group.rows()) {
     if (!row.is_initialized())
