@@ -427,12 +427,13 @@ class MainWindow(QMainWindow):
 
     def save_layout_settings(self):
         """Save the current layout to configuration"""
-        CONF.set("Layout/Layout", self.saveState())
+        CONF.set("MainWindow/UserLayout", self.saveState())
 
     def load_layout_settings(self):
-        """Load a layout for the child widgets from the user config, if no user default exists load the default"""
+        """Load a layout for the child widgets from the user config, 
+        if no user default exists load the default"""
         try:
-            self.restoreState(CONF.get("Layout/Layout"))
+            self.restoreState(CONF.get("MainWindow/UserLayout"))
         except KeyError:
             self.setup_default_layouts()  # If user layout not found load default
 
