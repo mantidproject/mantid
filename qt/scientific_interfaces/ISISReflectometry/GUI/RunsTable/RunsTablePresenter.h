@@ -125,9 +125,14 @@ private:
                  std::string const &newValue);
   void updateWidgetEnabledState();
 
+  void pasteRowsAtRoots(
+      std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots);
+  void pasteRowsAtEnd();
+
   using UpdateCellFunc = void (*)(MantidWidgets::Batch::Cell &cell);
   using UpdateCellWithTooltipFunc = void (*)(MantidWidgets::Batch::Cell &cell,
                                              std::string const &tooltip);
+
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
                      UpdateCellFunc updateFunc);
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,

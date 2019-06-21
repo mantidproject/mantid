@@ -522,7 +522,7 @@ void RunsTablePresenter::notifyCutRowsRequested() {
 
   m_clipboard = m_view->jobs().selectedSubtrees();
   auto selected = m_view->jobs().selectedRowLocations();
-  if (!selected.empty()) {
+  if (m_clipboard.is_initialized()) {
     removeRowsAndGroupsFromView(selected);
     removeRowsFromModel(selected);
     m_view->jobs().clearSelection();
@@ -541,15 +541,31 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
   if (maybeReplacementRoots.is_initialized() && m_clipboard.is_initialized()) {
     auto &replacementRoots = maybeReplacementRoots.get();
     if (!replacementRoots.empty())
-      m_view->jobs().replaceRows(replacementRoots, m_clipboard.get());
+      pasteRowsAtRoots(replacementRoots);
     else
-      m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
-                                      m_clipboard.get());
+      pasteRowsAtEnd();
     notifyRowStateChanged();
     notifySelectionChanged();
-  } else {
-    m_view->invalidSelectionForPaste();
   }
+}
+
+void RunsTablePresenter::pasteRowsAtRoots(
+    std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
+  // Paste onto given locations. Only possible if the depth is the same.
+  if (containsGroups(replacementRoots) == containsGroups(m_clipboard.get()))
+    m_view->jobs().replaceRows(replacementRoots, m_clipboard.get());
+  else
+    m_view->invalidSelectionForPaste();
+}
+
+void RunsTablePresenter::pasteRowsAtEnd() {
+  // Paste rows into a group location at the end of the table. Only possible if
+  // the clipboard contains groups
+  if (containsGroups(m_clipboard.get()))
+    m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
+                                    m_clipboard.get());
+  else
+    m_view->invalidSelectionForPaste();
 }
 
 void RunsTablePresenter::forAllCellsAt(
