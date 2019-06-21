@@ -11,12 +11,14 @@
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
+using Mantid::API::IAlgorithm_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
 namespace { // unnamed namespace
@@ -239,6 +241,29 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
                            Slicing const &slicing) {
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
+
+boost::optional<double> getDouble(IAlgorithm_sptr algorithm,
+                                  std::string const &property) {
+  double result = algorithm->getProperty(property);
+  return result;
+}
+
+void updateRowFromOutputProperties(IAlgorithm_sptr algorithm, Item &item) {
+  auto &row = dynamic_cast<Row &>(item);
+
+  auto const iVsLam = AlgorithmProperties::getOutputWorkspace(
+      algorithm, "OutputWorkspaceWavelength");
+  auto const iVsQ =
+      AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
+  auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(
+      algorithm, "OutputWorkspaceBinned");
+  row.setOutputNames(std::vector<std::string>{iVsLam, iVsQ, iVsQBin});
+
+  auto qRange = RangeInQ(getDouble(algorithm, "MomentumTransferMin"),
+                         getDouble(algorithm, "MomentumTransferStep"),
+                         getDouble(algorithm, "MomentumTransferMax"));
+  row.setOutputQRange(qRange);
+}
 } // unnamed namespace
 
 /** Create a configured algorithm for processing a row. The algorithm
@@ -257,14 +282,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   // Set the algorithm properties from the model
   auto properties = createAlgorithmRuntimeProps(model, row);
 
-  // Store expected output property names. Must be in the correct order for
-  // Row::algorithmComplete
-  std::vector<std::string> outputWorkspaceProperties = {
-      "OutputWorkspaceWavelength", "OutputWorkspace", "OutputWorkspaceBinned"};
-
   // Return the configured algorithm
   auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
-      alg, properties, outputWorkspaceProperties, &row);
+      alg, properties, updateRowFromOutputProperties, &row);
   return jobAlgorithm;
 }
 

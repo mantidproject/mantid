@@ -12,38 +12,19 @@ namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
-using Mantid::API::Workspace_sptr;
 
 BatchJobAlgorithm::BatchJobAlgorithm(
     Mantid::API::IAlgorithm_sptr algorithm,
     MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
-    // cppcheck-suppress passedByValue
-    std::vector<std::string> outputWorkspaceProperties, Item *item)
+    UpdateFunction updateFunction, Item *item)
     : ConfiguredAlgorithm(algorithm, properties), m_item(item),
-      m_outputWorkspaceProperties(std::move(outputWorkspaceProperties)) {}
+      m_updateFunction(updateFunction) {}
 
 Item *BatchJobAlgorithm::item() { return m_item; }
 
-std::vector<std::string> BatchJobAlgorithm::outputWorkspaceNames() const {
-  auto workspaceNames = std::vector<std::string>();
-  for (auto const &property : m_outputWorkspaceProperties) {
-    workspaceNames.emplace_back(m_algorithm->getPropertyValue(property));
-  }
-  return workspaceNames;
-}
-
-std::map<std::string, Workspace_sptr>
-BatchJobAlgorithm::outputWorkspaceNameToWorkspace() const {
-  auto propertyToName = std::map<std::string, Workspace_sptr>();
-  for (auto const &property : m_outputWorkspaceProperties) {
-    auto workspaceName = m_algorithm->getPropertyValue(property);
-    if (!workspaceName.empty()) {
-      Workspace_sptr workspace = m_algorithm->getProperty(property);
-      if (workspace)
-        propertyToName[workspaceName] = workspace;
-    }
-  }
-  return propertyToName;
+void BatchJobAlgorithm::updateItem() {
+  if (m_item)
+    m_updateFunction(m_algorithm, *m_item);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

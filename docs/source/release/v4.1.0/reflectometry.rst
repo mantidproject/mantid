@@ -44,6 +44,7 @@ The Runs Table
   - Blue rows completed with an error - a tooltip will display the error message
   - Rows are also highlighted in blue if their mandatory output workspaces have been deleted - again, a tooltip will explain the issue
   - Renamed workspaces are now tracked, so that the row state is no longer reset if a mandatory output workspace is renamed
+  - Cells are greyed out when they have been populated from the algorithm outputs so that you can easily distinguish between inputs and outputs
 
 
 Bug fixes

@@ -7,6 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_ALGORITHMPROPERTIES_H_
 #define MANTID_CUSTOMINTERFACES_ALGORITHMPROPERTIES_H_
 
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/Strings.h"
 
 #include <boost/optional.hpp>
@@ -45,6 +46,9 @@ void update(std::string const &property, boost::optional<double> const &value,
 
 void updateFromMap(AlgorithmRuntimeProps &properties,
                    std::map<std::string, std::string> const &parameterMap);
+
+std::string getOutputWorkspace(Mantid::API::IAlgorithm_sptr algorithm,
+                               std::string const &property);
 
 template <typename VALUE_TYPE>
 void update(std::string const &property, std::vector<VALUE_TYPE> const &values,

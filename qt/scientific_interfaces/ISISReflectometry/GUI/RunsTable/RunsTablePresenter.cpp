@@ -312,7 +312,10 @@ std::vector<std::string> RunsTablePresenter::cellTextFromViewAt(
     MantidWidgets::Batch::RowLocation const &location) const {
   return map(m_view->jobs().cellsAt(location),
              [](MantidWidgets::Batch::Cell const &cell) -> std::string {
-               return cell.contentText();
+               if (cell.isOutput())
+                 return std::string();
+               else
+                 return cell.contentText();
              });
 }
 
@@ -365,8 +368,14 @@ void RunsTablePresenter::updateGroupName(
 }
 
 void RunsTablePresenter::updateRowField(
-    MantidWidgets::Batch::RowLocation const &itemIndex, int,
+    MantidWidgets::Batch::RowLocation const &itemIndex, int column,
     std::string const &, std::string const &) {
+  // User has edited the text so reset the output-value flag as it now contains
+  // an input
+  auto cell = m_view->jobs().cellAt(itemIndex, column);
+  cell.setInput();
+  m_view->jobs().setCellAt(itemIndex, column, cell);
+
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
   auto rowValidationResult =
@@ -516,11 +525,11 @@ void RunsTablePresenter::forAllCellsAt(
 
 void RunsTablePresenter::setRowStylingForItem(
     MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
-  forAllCellsAt(rowPath, clearStateStyling);
 
   switch (item.state()) {
   case State::ITEM_NOT_STARTED: // fall through
   case State::ITEM_STARTING:
+    forAllCellsAt(rowPath, clearStateStyling);
     break;
   case State::ITEM_RUNNING:
     forAllCellsAt(rowPath, applyRunningStateStyling);
@@ -555,9 +564,24 @@ void RunsTablePresenter::notifyRowStateChanged() {
 
       if (!row)
         forAllCellsAt(rowPath, applyInvalidStateStyling);
-      else
+      else {
         setRowStylingForItem(rowPath, *row);
+      }
 
+      ++rowIndex;
+    }
+    ++groupIndex;
+  }
+}
+
+void RunsTablePresenter::notifyRowOutputsChanged() {
+  int groupIndex = 0;
+  for (auto &group : m_model.reductionJobs().groups()) {
+    auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
+    int rowIndex = 0;
+    for (auto &row : group.rows()) {
+      auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+      m_jobViewUpdater.rowModified(groupOf(rowPath), rowOf(rowPath), *row);
       ++rowIndex;
     }
     ++groupIndex;
