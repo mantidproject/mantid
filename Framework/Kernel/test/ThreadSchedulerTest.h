@@ -33,15 +33,15 @@ public:
     void run() override {}
   };
 
-  void do_basic_test(ThreadScheduler *sc) {
+  void do_basic_test(std::unique_ptr<ThreadScheduler> sc) {
     ThreadSchedulerTest_numDestructed = 0;
     TS_ASSERT(!sc->getAborted());
     TS_ASSERT_EQUALS(std::string(sc->getAbortException().what()), "");
     TS_ASSERT_EQUALS(sc->size(), 0);
 
-    sc->push(new TaskDoNothing());
+    sc->push(std::make_shared<TaskDoNothing>());
     TS_ASSERT_EQUALS(sc->size(), 1);
-    sc->push(new TaskDoNothing());
+    sc->push(std::make_shared<TaskDoNothing>());
     TS_ASSERT_EQUALS(sc->size(), 2);
 
     // Clear empties the queue
@@ -50,20 +50,18 @@ public:
     TS_ASSERT_EQUALS(sc->size(), 0);
     // And deletes the tasks properly
     TS_ASSERT_EQUALS(ThreadSchedulerTest_numDestructed, 2);
-
-    delete sc;
   }
 
   void test_basic_ThreadSchedulerFIFO() {
-    do_basic_test(new ThreadSchedulerFIFO());
+    do_basic_test(std::make_unique<ThreadSchedulerFIFO>());
   }
 
   void test_basic_ThreadSchedulerLIFO() {
-    do_basic_test(new ThreadSchedulerLIFO());
+    do_basic_test(std::make_unique<ThreadSchedulerLIFO>());
   }
 
   void test_basic_ThreadSchedulerLargestCost() {
-    do_basic_test(new ThreadSchedulerLargestCost());
+    do_basic_test(std::make_unique<ThreadSchedulerLargestCost>());
   }
 
   //==================================================================================================
@@ -74,16 +72,19 @@ public:
     // Create and push them in order
     TaskDoNothing *tasks[4];
     for (size_t i = 0; i < 4; i++) {
-      tasks[i] = new TaskDoNothing(costs[i]);
-      sc->push(tasks[i]);
+      auto temp = std::make_shared<TaskDoNothing>(costs[i]);
+      sc->push(temp);
+      tasks[i] = temp.get();
     }
+    std::vector<std::shared_ptr<TaskDoNothing>> task(4, nullptr);
 
     // Pop them, and check that we get them in the order we expected
     for (size_t i = 0; i < 4; i++) {
-      TaskDoNothing *task = dynamic_cast<TaskDoNothing *>(sc->pop(0));
+
+      task[i] = std::dynamic_pointer_cast<TaskDoNothing>(sc->pop(0));
       size_t index = 0;
       for (index = 0; index < 4; index++)
-        if (task == tasks[index])
+        if (task[i]->cost() == tasks[index]->cost())
           break;
       TS_ASSERT_EQUALS(index, poppedIndices[i]);
     }
@@ -93,33 +94,30 @@ public:
 
     // And ThreadScheduler does not delete popped tasks in this way
     TS_ASSERT_EQUALS(ThreadSchedulerTest_numDestructed, 0);
-    for (auto &task : tasks) {
-      delete task;
-    }
   }
 
   void test_ThreadSchedulerFIFO() {
-    ThreadScheduler *sc = new ThreadSchedulerFIFO();
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerFIFO>();
     double costs[4] = {0, 1, 2, 3};
     size_t poppedIndices[4] = {0, 1, 2, 3};
-    do_test(sc, costs, poppedIndices);
-    delete sc;
+    do_test(sc.get(), costs, poppedIndices);
   }
 
   void test_ThreadSchedulerLIFO() {
-    ThreadScheduler *sc = new ThreadSchedulerLIFO();
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerLIFO>();
     double costs[4] = {0, 1, 2, 3};
     size_t poppedIndices[4] = {3, 2, 1, 0};
-    do_test(sc, costs, poppedIndices);
-    delete sc;
+    do_test(sc.get(), costs, poppedIndices);
   }
 
   void test_ThreadSchedulerLargestCost() {
-    ThreadScheduler *sc = new ThreadSchedulerLargestCost();
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerLargestCost>();
     double costs[4] = {1, 5, 2, -3};
     size_t poppedIndices[4] = {1, 2, 0, 3};
-    do_test(sc, costs, poppedIndices);
-    delete sc;
+    do_test(sc.get(), costs, poppedIndices);
   }
 };
 

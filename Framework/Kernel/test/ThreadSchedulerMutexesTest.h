@@ -41,8 +41,8 @@ public:
     ThreadSchedulerMutexes sc;
     auto mut1 = boost::make_shared<std::mutex>();
     auto mut2 = boost::make_shared<std::mutex>();
-    TaskWithMutex *task1 = new TaskWithMutex(mut1, 10.0);
-    TaskWithMutex *task2 = new TaskWithMutex(mut2, 9.0);
+    auto task1 = std::make_shared<TaskWithMutex>(mut1, 10.0);
+    auto task2 = std::make_shared<TaskWithMutex>(mut2, 9.0);
 
     sc.push(task1);
     TS_ASSERT_EQUALS(sc.size(), 1);
@@ -55,20 +55,20 @@ public:
     auto mut1 = boost::make_shared<std::mutex>();
     auto mut2 = boost::make_shared<std::mutex>();
     auto mut3 = boost::make_shared<std::mutex>();
-    TaskWithMutex *task1 = new TaskWithMutex(mut1, 10.0);
-    TaskWithMutex *task2 = new TaskWithMutex(mut1, 9.0);
-    TaskWithMutex *task3 = new TaskWithMutex(mut1, 8.0);
-    TaskWithMutex *task4 = new TaskWithMutex(mut2, 7.0);
-    TaskWithMutex *task5 = new TaskWithMutex(mut2, 6.0);
-    TaskWithMutex *task6 = new TaskWithMutex(mut3, 5.0);
-    TaskWithMutex *task7 =
-        new TaskWithMutex(boost::shared_ptr<std::mutex>(), 4.0);
+    auto task1 = std::make_shared<TaskWithMutex>(mut1, 10.0);
+    auto task2 = std::make_shared<TaskWithMutex>(mut1, 9.0);
+    auto task3 = std::make_shared<TaskWithMutex>(mut1, 8.0);
+    auto task4 = std::make_shared<TaskWithMutex>(mut2, 7.0);
+    auto task5 = std::make_shared<TaskWithMutex>(mut2, 6.0);
+    auto task6 = std::make_shared<TaskWithMutex>(mut3, 5.0);
+    auto task7 =
+        std::make_shared<TaskWithMutex>(boost::shared_ptr<std::mutex>(), 4.0);
     sc.push(task1);
     sc.push(task2);
     sc.push(task3);
     TS_ASSERT_EQUALS(sc.size(), 3);
 
-    Task *task;
+    std::shared_ptr<Task> task;
     // Run the first task. mut1 becomes busy
     task = sc.pop(0);
     TS_ASSERT_EQUALS(task, task1);
@@ -99,11 +99,11 @@ public:
     TS_ASSERT_EQUALS(sc.size(), 3);
 
     // Now we release task1, allowing task2 to come next
-    sc.finished(task1, 0);
+    sc.finished(task1.get(), 0);
     task = sc.pop(0);
     TS_ASSERT_EQUALS(task, task2);
     TS_ASSERT_EQUALS(sc.size(), 2);
-    sc.finished(task2, 0); // Have to complete task2 before task3 comes
+    sc.finished(task2.get(), 0); // Have to complete task2 before task3 comes
     task = sc.pop(0);
     TS_ASSERT_EQUALS(task, task3);
     TS_ASSERT_EQUALS(sc.size(), 1);
@@ -114,21 +114,13 @@ public:
     TS_ASSERT_EQUALS(sc.size(), 0);
     // (for this task, the thread pool would have to wait till the mutex is
     // released)
-
-    delete task1;
-    delete task2;
-    delete task3;
-    delete task4;
-    delete task5;
-    delete task6;
-    delete task7;
   }
 
   void test_clear() {
     ThreadSchedulerMutexes sc;
     for (size_t i = 0; i < 10; i++) {
-      TaskWithMutex *task =
-          new TaskWithMutex(boost::make_shared<std::mutex>(), 10.0);
+      std::shared_ptr<TaskWithMutex> task = std::make_shared<TaskWithMutex>(
+          boost::make_shared<std::mutex>(), 10.0);
       sc.push(task);
     }
     TS_ASSERT_EQUALS(sc.size(), 10);
@@ -145,14 +137,14 @@ public:
     auto mut1 = boost::make_shared<std::mutex>();
     size_t num = 500;
     for (size_t i = 0; i < num; i++) {
-      sc.push(new TaskWithMutex(mut1, 10.0));
+      sc.push(std::make_shared<TaskWithMutex>(mut1, 10.0));
     }
     // std::cout << tim0.elapsed() << " secs to push.\n";
     TS_ASSERT_EQUALS(sc.size(), num);
 
     Timer tim1;
     for (size_t i = 0; i < num; i++) {
-      delete sc.pop(0);
+      sc.pop(0);
     }
     // std::cout << tim1.elapsed() << " secs to pop.\n";
     TS_ASSERT_EQUALS(sc.size(), 0);
@@ -163,14 +155,15 @@ public:
     Timer tim0;
     size_t num = 500;
     for (size_t i = 0; i < num; i++) {
-      sc.push(new TaskWithMutex(boost::make_shared<std::mutex>(), 10.0));
+      sc.push(std::make_shared<TaskWithMutex>(boost::make_shared<std::mutex>(),
+                                              10.0));
     }
     // std::cout << tim0.elapsed() << " secs to push.\n";
     TS_ASSERT_EQUALS(sc.size(), num);
 
     Timer tim1;
     for (size_t i = 0; i < num; i++) {
-      delete sc.pop(0);
+      sc.pop(0);
     }
     // std::cout << tim1.elapsed() << " secs to pop.\n";
     TS_ASSERT_EQUALS(sc.size(), 0);

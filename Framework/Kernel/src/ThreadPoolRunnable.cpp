@@ -44,7 +44,7 @@ void ThreadPoolRunnable::clearWait() { m_waitSec = 0.0; }
  * as scheduled to it.
  */
 void ThreadPoolRunnable::run() {
-  Task *task;
+  std::shared_ptr<Task> task;
 
   // If there are no tasks yet, wait up to m_waitSec for them to come up
   while (m_scheduler->empty() && m_waitSec > 0.0) {
@@ -74,7 +74,7 @@ void ThreadPoolRunnable::run() {
       }
 
       // Tell the scheduler that we finished this task
-      m_scheduler->finished(task, m_threadnum);
+      m_scheduler->finished(task.get(), m_threadnum);
 
       // Report progress, if specified.
       if (m_prog)
@@ -85,7 +85,6 @@ void ThreadPoolRunnable::run() {
         mutex->unlock();
 
       // We now delete the task to free up memory
-      delete task;
     } else {
       // No appropriate task for this thread (perhaps a mutex is locked)
       // but there are more tasks.

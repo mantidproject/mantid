@@ -59,9 +59,10 @@ public:
     // Notifications turned off in AlgorithmFactory by default
     m_mockInheritingClass->observeUpdate();
 
-    Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm> *newAlg =
-        new Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>;
-    af.subscribe(newAlg);
+    std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newAlg =
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
+    af.subscribe(std::move(newAlg));
 
     TS_ASSERT(!m_mockInheritingClass->m_updateHandleCalled)
   }
@@ -71,9 +72,10 @@ public:
 
     af.enableNotifications();
 
-    Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm> *newAlg =
-        new Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>;
-    af.subscribe(newAlg);
+    std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newAlg =
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
+    af.subscribe(std::move(newAlg));
 
     TS_ASSERT(m_mockInheritingClass->m_updateHandleCalled)
   }

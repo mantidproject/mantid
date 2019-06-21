@@ -90,7 +90,7 @@ public:
     boost::shared_ptr<ILiveListener> l;
     auto product = boost::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
-                      new MockLiveListenerInstantiator{product});
+                      std::make_unique<MockLiveListenerInstantiator>(product));
 
     EXPECT_CALL(*product, setAlgorithm(testing::_))
         .Times(0); // variant of create below does not take an Algorithm. So we
@@ -115,7 +115,7 @@ public:
     boost::shared_ptr<ILiveListener> l;
     auto product = boost::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
-                      new MockLiveListenerInstantiator{product});
+                      std::make_unique<MockLiveListenerInstantiator>(product));
 
     EXPECT_CALL(*product, setAlgorithm(testing::_)).Times(1);
     EXPECT_CALL(*product, connect(testing::_))
@@ -135,7 +135,7 @@ public:
     boost::shared_ptr<ILiveListener> l;
     auto product = boost::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
-                      new MockLiveListenerInstantiator{product});
+                      std::make_unique<MockLiveListenerInstantiator>(product));
     EXPECT_CALL(*product, connect(testing::_))
         .WillOnce(testing::Return(false /*cannot connect*/));
     Kernel::ConfigService::Instance().setFacility("TEST");
@@ -157,7 +157,7 @@ public:
     boost::shared_ptr<ILiveListener> l;
     auto product = boost::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
-                      new MockLiveListenerInstantiator{product});
+                      std::make_unique<MockLiveListenerInstantiator>(product));
     // Make sure this method just throws.
     // Note that you can't even access the method unless you assign to a
     // DynamicFactory reference.

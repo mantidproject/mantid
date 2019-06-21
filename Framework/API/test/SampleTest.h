@@ -330,11 +330,11 @@ public:
     TS_ASSERT(
         dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML() != "");
 
-    sample.saveNexus(th.file, "sample");
+    sample.saveNexus(th.file.get(), "sample");
     th.reopenFile();
 
     Sample loaded;
-    loaded.loadNexus(th.file, "sample");
+    loaded.loadNexus(th.file.get(), "sample");
 
     TS_ASSERT_EQUALS(loaded.size(), 2);
     TS_ASSERT_EQUALS(loaded.getName(), sample.getName());
@@ -359,11 +359,11 @@ public:
 
     Sample sample;
 
-    sample.saveNexus(th.file, "sample");
+    sample.saveNexus(th.file.get(), "sample");
     th.reopenFile();
 
     Sample loaded;
-    loaded.loadNexus(th.file, "sample");
+    loaded.loadNexus(th.file.get(), "sample");
 
     TS_ASSERT(loaded.getName().empty());
   }

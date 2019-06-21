@@ -54,10 +54,10 @@ private:
                                            Direction::Input);
     in_ws->mutableRun().addLogData(testProperty);
 
-    NumericAxis *const newAxis = new NumericAxis(in_ws->getAxis(1)->length());
-    in_ws->replaceAxis(1, newAxis);
-    newAxis->unit() = boost::make_shared<Mantid::Kernel::Units::Degrees>();
+    auto newAxis = std::make_unique<NumericAxis>(in_ws->getAxis(1)->length());
 
+    newAxis->unit() = boost::make_shared<Mantid::Kernel::Units::Degrees>();
+    in_ws->replaceAxis(1, std::move(newAxis));
     auto alg = boost::make_shared<ConvertToReflectometryQ>();
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())

@@ -42,7 +42,7 @@ void DefaultEventLoader::load(LoadEventNexus *alg, EventWorkspaceCollection &ws,
 
   for (size_t i = bankRange.first; i < bankRange.second; i++) {
     if (bankNumEvents[i] > 0)
-      pool.schedule(new LoadBankFromDiskTask(
+      pool.schedule(std::make_shared<LoadBankFromDiskTask>(
           loader, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
           prog.get(), diskIOMutex, *scheduler, periodLog));
   }

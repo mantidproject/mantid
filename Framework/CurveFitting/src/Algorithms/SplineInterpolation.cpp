@@ -165,12 +165,12 @@ void SplineInterpolation::exec() {
   if (order > 0) {
     for (size_t i = 0; i < histNo; ++i) {
       derivs[i] = WorkspaceFactory::Instance().create(mws, order);
-      NumericAxis *vAxis = new NumericAxis(order);
+      auto vAxis = std::make_unique<NumericAxis>(order);
       for (size_t j = 0; j < order; ++j) {
         vAxis->setValue(j, static_cast<int>(j) + 1.);
         derivs[i]->setSharedX(j, mws->sharedX(0));
       }
-      derivs[i]->replaceAxis(1, vAxis);
+      derivs[i]->replaceAxis(1, std::move(vAxis));
     }
   }
 
@@ -269,8 +269,8 @@ SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr mws,
     outputWorkspace->setSharedX(i, mws->sharedX(0));
   }
   // use the vertical (spectrum) axis form the iws
-  Axis *vAxis = iws->getAxis(1)->clone(mws.get());
-  outputWorkspace->replaceAxis(1, vAxis);
+  auto vAxis = std::unique_ptr<Axis>(iws->getAxis(1)->clone(mws.get()));
+  outputWorkspace->replaceAxis(1, std::move(vAxis));
   return outputWorkspace;
 }
 

@@ -17,7 +17,7 @@
   RGM - 23 July 2012
   ******************************************************************/
 
-#include "MantidRemoteJobManagers/SimpleJSON.h"
+#include "MantidKernel/SimpleJSON.h"
 
 #include <algorithm> // for transform() function
 #include <map>
@@ -29,35 +29,15 @@ JSONValue::JSONValue(bool v) : m_type(JSONValue::BOOL), m_bool(v) {}
 JSONValue::JSONValue(double v) : m_type(JSONValue::NUMBER), m_num(v) {}
 
 JSONValue::JSONValue(const string &v) : m_type(JSONValue::STRING) {
-  mp_string = new string(v);
+  mp_string = std::make_unique<string>(v);
 }
 
 JSONValue::JSONValue(const JSONArray &v) : m_type(JSONValue::ARRAY) {
-  mp_array = new JSONArray(v);
+  mp_array = std::make_unique<JSONArray>(v);
 }
 
 JSONValue::JSONValue(const JSONObject &v) : m_type(JSONValue::OBJECT) {
-  mp_object = new JSONObject(v);
-}
-
-JSONValue::~JSONValue() {
-  switch (m_type) {
-  case JSONValue::STRING:
-    delete mp_string;
-    break;
-
-  case JSONValue::ARRAY:
-    delete mp_array;
-    break;
-
-  case JSONValue::OBJECT:
-    delete mp_object;
-    break;
-
-  default:
-    // Do nothing
-    break;
-  }
+  mp_object = std::make_unique<JSONObject>(v);
 }
 
 JSONValue::JSONValue(const JSONValue &v) {
@@ -75,24 +55,20 @@ JSONValue::JSONValue(const JSONValue &v) {
       throw(JSONCopyException("Failed to copy float"));
     break;
   case JSONValue::STRING:
-    mp_string = new string;
+    mp_string = std::make_unique<string>();
     if (!v.getValue(*mp_string)) {
-      delete mp_string; // Make sure we don't leak memory in the event of a
-                        // failure
       throw(JSONCopyException("Failed to copy string"));
     }
     break;
   case JSONValue::ARRAY:
-    mp_array = new JSONArray;
+    mp_array = std::make_unique<JSONArray>();
     if (!v.getValue(*mp_array)) {
-      delete mp_array;
       throw(JSONCopyException("Failed to copy array"));
     }
     break;
   case JSONValue::OBJECT:
-    mp_object = new JSONObject;
+    mp_object = std::make_unique<JSONObject>();
     if (!v.getValue(*mp_object)) {
-      delete mp_object;
       throw(JSONCopyException("Failed to copy object"));
     }
     break;
@@ -116,19 +92,17 @@ JSONValue &JSONValue::operator=(const JSONValue &v) {
   // complains if new variables are declared down inside a case statement)
   bool tBool;
   double tFloat;
-  std::string *tpString;
-  JSONArray *tpArray;
-  JSONObject *tpObject;
+  std::unique_ptr<std::string> tpString;
+  std::unique_ptr<JSONArray> tpArray;
+  std::unique_ptr<JSONObject> tpObject;
 
   switch (newType) {
   case JSONValue::NULLTYPE:
-    assignmentOpHelper();
     m_type = newType;
     break;
 
   case JSONValue::BOOL:
     if (v.getValue(tBool)) {
-      assignmentOpHelper();
       m_bool = tBool;
       m_type = newType;
     } else
@@ -137,7 +111,6 @@ JSONValue &JSONValue::operator=(const JSONValue &v) {
 
   case JSONValue::NUMBER:
     if (v.getValue(tFloat)) {
-      assignmentOpHelper();
       m_num = tFloat;
       m_type = newType;
     } else
@@ -145,38 +118,31 @@ JSONValue &JSONValue::operator=(const JSONValue &v) {
     break;
 
   case JSONValue::STRING:
-    tpString = new string;
+    tpString = std::make_unique<string>();
     if (v.getValue(*tpString)) {
-      assignmentOpHelper();
-      mp_string = tpString;
+      mp_string = std::move(tpString);
       m_type = newType;
     } else {
-      delete tpString; // Make sure we don't leak memory in the event of a
-                       // failure
       throw(JSONAssignmentException("Failed to assign string"));
     }
     break;
 
   case JSONValue::ARRAY:
-    tpArray = new JSONArray;
+    tpArray = std::make_unique<JSONArray>();
     if (v.getValue(*tpArray)) {
-      assignmentOpHelper();
-      mp_array = tpArray;
+      mp_array = std::move(tpArray);
       m_type = newType;
     } else {
-      delete tpArray;
       throw(JSONAssignmentException("Failed to assign array"));
     }
     break;
 
   case JSONValue::OBJECT:
-    tpObject = new JSONObject;
+    tpObject = std::make_unique<JSONObject>();
     if (v.getValue(*tpObject)) {
-      assignmentOpHelper();
-      mp_object = tpObject;
+      mp_object = std::move(tpObject);
       m_type = newType;
     } else {
-      delete tpObject;
       throw(JSONAssignmentException("Failed to assign object"));
     }
     break;
@@ -187,29 +153,6 @@ JSONValue &JSONValue::operator=(const JSONValue &v) {
   }
 
   return *this;
-}
-
-// A helper function for the assignment operator
-// Its job is to delete memory holding the current value (in cases  where it is
-// a
-// pointer, ie: strings, arrays & objects);
-// It assumed this will be called after the call to getValue() succeeds, but
-// before
-// the new value is copied in to the appropriate slot in the union.
-void JSONValue::assignmentOpHelper() {
-  switch (m_type) {
-  case JSONValue::STRING:
-    delete mp_string;
-    break;
-  case JSONValue::ARRAY:
-    delete mp_array;
-    break;
-  case JSONValue::OBJECT:
-    delete mp_object;
-    break;
-  default:
-    break; // do nothing
-  }
 }
 
 bool JSONValue::getValue(bool &v) const {
@@ -668,7 +611,6 @@ string readUntilCloseChar(istream &istr) {
       throw JSONParseException(
           "Stream unexpectedly ended without a closing char.");
     }
-
     if (!value.empty() || !isspace(next)) {
       // don't add white space to the start of the value string
       value += next;
@@ -689,8 +631,8 @@ void prettyPrint(const JSONObject &obj, std::ostream &ostr,
                  unsigned indentLevel) {
   // Prints keys/value pairs.  One pair per line  (Does not print opening or
   // closing braces...)
-  auto it = obj.begin();
-  while (it != obj.end()) {
+  auto it = obj.cbegin();
+  while (it != obj.cend()) {
     for (unsigned i = 0; i < indentLevel; i++) {
       ostr << "\t";
     }

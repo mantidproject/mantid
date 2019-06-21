@@ -384,12 +384,13 @@ std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
 }
 
 void FunctionFactoryImpl::subscribe(
-    const std::string &className, AbstractFactory *pAbstractFactory,
+    const std::string &className,
+    std::unique_ptr<AbstractFactory> pAbstractFactory,
     Kernel::DynamicFactory<IFunction>::SubscribeAction replace) {
   // Clear the cache, then do all the work in the base class method
   m_cachedFunctionNames.clear();
-  Kernel::DynamicFactory<IFunction>::subscribe(className, pAbstractFactory,
-                                               replace);
+  Kernel::DynamicFactory<IFunction>::subscribe(
+      className, std::move(pAbstractFactory), replace);
 }
 
 void FunctionFactoryImpl::unsubscribe(const std::string &className) {

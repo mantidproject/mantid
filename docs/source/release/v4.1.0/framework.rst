@@ -44,6 +44,11 @@ Improvements
 - :ref:`SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
 - :ref:`algm-FilterEvents` has a property `InformativeOutputNames` which changes the name of output workspace to include the start and end time of the slice.
 
+Instrument Definition Files
+###########################
+
+- A new attribute, name-count-increment, has been introduced to the <locations> tag which allows the auto-generated location names to be incremented by a user-defined amount.
+
 Bug fixes
 #########
 - :ref:`SetSample <algm-SetSample>` now correctly handles the Sample number density being passed as a string, before the algorithm would execute, but silently ignored the provided number density, the number density is now properly used.
