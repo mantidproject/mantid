@@ -125,7 +125,7 @@ class GeneralSettings(object):
     def fill_layout_display(self):
         self.view.layout_display.clear()
         layout_dict = self.get_layout_dict()
-        layout_list = layout_dict.keys()
+        layout_list = list(layout_dict.keys())
         layout_list.sort()
         for item in layout_list:
             self.view.layout_display.addItem(item)

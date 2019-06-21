@@ -426,7 +426,7 @@ class MainWindow(QMainWindow):
             layout_dict = CONF.get("MainWindow/user_layouts")
         except KeyError:
             layout_dict = {}
-        layout_keys = layout_dict.keys()
+        layout_keys = list(layout_dict.keys())
         layout_keys.sort()
         layout_options = []
         for item in layout_keys:
