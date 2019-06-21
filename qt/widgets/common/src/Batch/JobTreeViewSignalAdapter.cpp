@@ -33,6 +33,18 @@ void JobTreeViewSignalAdapter::notifyRowInserted(
   emit rowInserted(newRowLocation);
 }
 
+void JobTreeViewSignalAdapter::notifyAppendAndEditAtChildRowRequested() {
+  emit appendAndEditAtChildRowRequested();
+}
+
+void JobTreeViewSignalAdapter::notifyAppendAndEditAtRowBelowRequested() {
+  emit appendAndEditAtRowBelowRequested();
+}
+
+void JobTreeViewSignalAdapter::notifyEditAtRowAboveRequested() {
+  emit editAtRowAboveRequested();
+}
+
 void JobTreeViewSignalAdapter::notifyRemoveRowsRequested(
     std::vector<RowLocation> const &locationsOfRowsToRemove) {
   emit removeRowsRequested(locationsOfRowsToRemove);

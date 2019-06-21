@@ -27,6 +27,9 @@ public:
                                      std::string const &newValue) = 0;
   virtual void notifySelectionChanged() = 0;
   virtual void notifyRowInserted(RowLocation const &newRowLocation) = 0;
+  virtual void notifyAppendAndEditAtChildRowRequested() = 0;
+  virtual void notifyAppendAndEditAtRowBelowRequested() = 0;
+  virtual void notifyEditAtRowAboveRequested() = 0;
   virtual void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
   virtual void notifyCutRowsRequested() = 0;
@@ -56,6 +59,9 @@ public:
   virtual RowLocation appendChildRowOf(RowLocation const &parent) = 0;
   virtual RowLocation appendChildRowOf(RowLocation const &parentLocation,
                                        std::vector<Cell> const &rowText) = 0;
+  virtual void appendAndEditAtChildRow() = 0;
+  virtual void appendAndEditAtRowBelow() = 0;
+  virtual void editAtRowAbove() = 0;
 
   virtual void removeRowAt(RowLocation const &location) = 0;
   virtual void removeRows(std::vector<RowLocation> rowsToRemove) = 0;

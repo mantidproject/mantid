@@ -112,6 +112,22 @@ public:
 
     verifyAndClearExpectations();
   }
+
+  void testGroupNotDeletedWhenProcessing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsProcessing();
+    EXPECT_CALL(m_jobs, removeRowAt(_)).Times(0);
+    presenter.notifyDeleteGroupRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testGroupNotDeletedWhenAutoreducing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    expectIsAutoreducing();
+    EXPECT_CALL(m_jobs, removeRowAt(_)).Times(0);
+    presenter.notifyDeleteGroupRequested();
+    verifyAndClearExpectations();
+  }
 };
 
 #endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPDELETETEST_H_
