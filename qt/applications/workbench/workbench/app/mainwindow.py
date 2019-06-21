@@ -395,7 +395,7 @@ class MainWindow(QMainWindow):
 
         return interfaces
 
-    def _discover_cpp_interfaces(self, Interfaces):
+    def _discover_cpp_interfaces(self, interfaces):
         """Return a dictionary mapping a category to a set of named C++ interfaces"""
         cpp_interface_factory = UserSubWindowFactory.Instance()
         interface_names = cpp_interface_factory.keys()
@@ -404,12 +404,12 @@ class MainWindow(QMainWindow):
             if len(categories) == 0:
                 categories = ["General"]
             for category in categories:
-                if category in Interfaces.keys():
-                   Interfaces[category].append(name)
+                if category in interfaces.keys():
+                    interfaces[category].append(name)
                 else:
-                   Interfaces[category] = [name]
+                    interfaces[category] = [name]
 
-        return Interfaces
+        return interfaces
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
