@@ -109,6 +109,7 @@ class FittingTabModel(object):
         return output_workspace, output_parameters, function_object, output_status, output_chi
 
     def rename_members_of_fitted_workspace_group(self, group_workspace, inputworkspace_list, function, group_name):
+        self.context.ads_observer.observeRename(False)
         output_workspace_list = []
         for index, workspace_name in enumerate(group_workspace.getNames()):
             new_name, _ = self.create_fitted_workspace_name(inputworkspace_list[index], function, group_name)
@@ -117,6 +118,8 @@ class FittingTabModel(object):
             output_workspace_list.append(new_name)
             RenameWorkspace(InputWorkspace=workspace_name,
                             OutputWorkspace=new_name)
+
+        self.context.ads_observer.observeRename(True)
 
         return output_workspace_list
 
