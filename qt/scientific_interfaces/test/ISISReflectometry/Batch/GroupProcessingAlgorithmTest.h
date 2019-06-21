@@ -71,6 +71,64 @@ public:
     TS_ASSERT_EQUALS(result["OutputWorkspace"], "IvsQ_testQ1_testQ2");
   }
 
+  void testStitchParamsSetFromStitchingOptions() {
+    auto experiment = Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, false,
+        PolarizationCorrections(PolarizationCorrectionType::None),
+        FloodCorrections(FloodCorrectionType::Workspace), boost::none,
+        makeStitchOptions(), std::vector<PerThetaDefaults>());
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto group = makeGroupWithTwoRows();
+    auto result = createAlgorithmRuntimeProps(model, group);
+    TS_ASSERT_EQUALS(result["key1"], "value1");
+    TS_ASSERT_EQUALS(result["key2"], "value2");
+    TS_ASSERT_EQUALS(result.find("Params"), result.cend());
+  }
+
+  void testPerThetaDefaultsQResolutionUsedForParamsIfStitchingOptionsEmpty() {
+    auto experiment =
+        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                   SummationType::SumInLambda, false, false,
+                   PolarizationCorrections(PolarizationCorrectionType::None),
+                   FloodCorrections(FloodCorrectionType::Workspace),
+                   boost::none, std::map<std::string, std::string>(),
+                   makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto group = makeGroupWithTwoRows();
+    auto result = createAlgorithmRuntimeProps(model, group);
+    TS_ASSERT_EQUALS(result["Params"], "-0.010000");
+  }
+
+  void testQResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
+    auto experiment =
+        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                   SummationType::SumInLambda, false, false,
+                   PolarizationCorrections(PolarizationCorrectionType::None),
+                   FloodCorrections(FloodCorrectionType::Workspace),
+                   boost::none, std::map<std::string, std::string>(),
+                   makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto group = makeGroupWithTwoRowsWithMixedQResolutions();
+    auto result = createAlgorithmRuntimeProps(model, group);
+    TS_ASSERT_EQUALS(result["Params"], "-0.015000");
+  }
+
+  void
+  testQOutputResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
+    auto experiment =
+        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                   SummationType::SumInLambda, false, false,
+                   PolarizationCorrections(PolarizationCorrectionType::None),
+                   FloodCorrections(FloodCorrectionType::Workspace),
+                   boost::none, std::map<std::string, std::string>(),
+                   makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto group = makeGroupWithTwoRowsWithOutputQResolutions();
+    auto result = createAlgorithmRuntimeProps(model, group);
+    TS_ASSERT_EQUALS(result["Params"], "-0.016000");
+  }
+
 private:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;

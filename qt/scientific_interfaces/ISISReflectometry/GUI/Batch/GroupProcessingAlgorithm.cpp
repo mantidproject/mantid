@@ -38,11 +38,11 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
 
   // Get the list of input workspaces from the output of each row
   auto workspaces = std::vector<std::string>();
-  std::transform(group.rows().cbegin(), group.rows().cend(),
-                 std::back_inserter(workspaces),
-                 [](boost::optional<Row> const &row) -> std::string {
-                   return row->reducedWorkspaceNames().iVsQ();
-                 });
+  std::for_each(group.rows().cbegin(), group.rows().cend(),
+                [&workspaces](boost::optional<Row> const &row) -> void {
+                  if (row)
+                    workspaces.push_back(row->reducedWorkspaceNames().iVsQ());
+                });
   AlgorithmProperties::update("InputWorkspaces", workspaces, properties);
 
   // The stitched name is the row output names concatenated but without the
@@ -61,6 +61,53 @@ void updateGroupFromOutputProperties(IAlgorithm_sptr algorithm, Item &group) {
   auto const stitched =
       AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
   group.setOutputNames(std::vector<std::string>{stitched});
+}
+
+void updateParamsFromResolution(AlgorithmRuntimeProps &properties,
+                                boost::optional<double> const &resolution) {
+  if (!resolution.is_initialized())
+    return;
+
+  // Negate the resolution to give logarithmic binning
+  AlgorithmProperties::update("Params", -(resolution.get()), properties);
+}
+
+void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
+                                     PerThetaDefaults const *perThetaDefaults) {
+  if (!perThetaDefaults)
+    return;
+
+  updateParamsFromResolution(properties, perThetaDefaults->qRange().step());
+}
+
+void updateGroupProperties(AlgorithmRuntimeProps &properties,
+                           Group const &group) {
+  auto resolution = boost::make_optional<double>(false, double());
+
+  for (auto const &row : group.rows()) {
+    if (!row.is_initialized())
+      continue;
+
+    // Use the input Q step if provided, or the output Q step otherwise, if set
+    if (row->qRange().step().is_initialized())
+      resolution = row->qRange().step();
+    else if (row->qRangeOutput().step().is_initialized())
+      resolution = row->qRangeOutput().step();
+
+    // For now just use the first resolution found. Longer term it would be
+    // better to check that all rows have the same resolution and set a warning
+    // if not.
+    if (resolution.is_initialized())
+      break;
+  }
+
+  updateParamsFromResolution(properties, resolution);
+}
+
+void updateStitchProperties(
+    AlgorithmRuntimeProps &properties,
+    std::map<std::string, std::string> const &stitchParameters) {
+  AlgorithmProperties::updateFromMap(properties, stitchParameters);
 }
 } // unnamed namespace
 
@@ -88,8 +135,13 @@ AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model,
                                                   Group const &group) {
   auto properties = AlgorithmRuntimeProps();
   updateWorkspaceProperties(properties, group);
-  AlgorithmProperties::updateFromMap(properties,
-                                     model.experiment().stitchParameters());
+  // Set the rebin Params from the per theta defaults resolution, if given
+  updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
+  // Override the per theta defaults params with the group's rows' resolution,
+  // if given
+  updateGroupProperties(properties, group);
+  // Override the rebin Params from the user-specified stitch params, if given
+  updateStitchProperties(properties, model.experiment().stitchParameters());
   return properties;
 }
 } // namespace CustomInterfaces
