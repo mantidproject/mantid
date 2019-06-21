@@ -47,5 +47,3 @@ install ( FILES ${QT5_INSTALL_PREFIX}/lib/qscintilla2_qt5.dll DESTINATION bin )
 ###########################################################################
 install ( FILES ${QT5_INSTALL_PREFIX}/bin/QtWebEngineProcess.exe DESTINATION lib/qt5/bin )
 install ( DIRECTORY ${QT5_INSTALL_PREFIX}/resources DESTINATION lib/qt5 )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/qt/applications/workbench/resources.py.install
-          DESTINATION bin/workbench/app RENAME resources.py)
