@@ -8,7 +8,6 @@
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 using namespace MantidQt::API;
 
@@ -33,6 +32,7 @@ void IndirectInterface::settings() {
   m_settings->loadSettings();
   m_settings->show();
   m_settings->setFocus();
+  m_settings->setWindowModality(Qt::ApplicationModal);
 }
 
 void IndirectInterface::applySettings() {
@@ -50,9 +50,13 @@ IndirectInterface::getInterfaceSettings() const {
 }
 
 void IndirectInterface::manageUserDirectories() {
-  ManageUserDirectories *ad = new ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
+  if (!m_manageUserDirectories) {
+    m_manageUserDirectories = std::make_unique<ManageUserDirectories>(this);
+    m_manageUserDirectories->setAttribute(Qt::WA_DeleteOnClose, false);
+  }
+  m_manageUserDirectories->show();
+  m_manageUserDirectories->setFocus();
+  m_manageUserDirectories->setModal(true);
 }
 
 void IndirectInterface::showMessageBox(QString const &message) {
