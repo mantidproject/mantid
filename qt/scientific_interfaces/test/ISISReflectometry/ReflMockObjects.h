@@ -73,10 +73,6 @@ class MockBatchPresenter : public IBatchPresenter {
 public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyReductionPaused, void());
-  MOCK_METHOD2(notifyReductionCompletedForGroup,
-               void(GroupData const &, std::string const &));
-  MOCK_METHOD2(notifyReductionCompletedForRow,
-               void(GroupData const &, std::string const &));
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionCompleted, void());
@@ -88,6 +84,7 @@ public:
   MOCK_METHOD0(notifySettingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
 };
@@ -111,6 +108,7 @@ public:
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD0(percentComplete, int());
 };
 
 class MockEventPresenter : public IEventPresenter {
@@ -254,6 +252,7 @@ public:
   MockBatchJobRunner(){};
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());

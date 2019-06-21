@@ -7,6 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INSTRUMENTPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_INSTRUMENTPRESENTERTEST_H_
 
+#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentPresenter.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -253,7 +254,8 @@ public:
   }
 
   void testRestoreDefaultsNotifiesMainPresenter() {
-    auto defaultOptions = expectDefaults(makeModel());
+    auto defaultOptions =
+        expectDefaults(ModelCreationHelper::makeEmptyInstrument());
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_mainPresenter, notifyRestoreDefaultsRequested())
         .Times(AtLeast(1));
@@ -339,16 +341,6 @@ private:
   NiceMock<MockInstrumentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
 
-  Instrument makeModel() {
-    auto wavelengthRange = RangeInLambda(0.0, 0.0);
-    auto monitorCorrections = MonitorCorrections(
-        0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
-    auto detectorCorrections =
-        DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
-    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
-                      std::move(detectorCorrections));
-  }
-
   Instrument
   makeModelWithMonitorOptions(MonitorCorrections monitorCorrections) {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
@@ -380,7 +372,8 @@ private:
   makePresenter(std::unique_ptr<IInstrumentOptionDefaults> defaultOptions =
                     std::make_unique<MockInstrumentOptionDefaults>()) {
     auto presenter =
-        InstrumentPresenter(&m_view, makeModel(), std::move(defaultOptions));
+        InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(),
+                            std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }

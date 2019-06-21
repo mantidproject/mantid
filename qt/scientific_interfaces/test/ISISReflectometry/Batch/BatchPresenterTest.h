@@ -7,6 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERTEST_H_
 
+#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -17,6 +18,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 using testing::AtLeast;
 using testing::Mock;
@@ -35,18 +37,8 @@ public:
       : m_view(),
         m_jobRunner(nullptr), m_instruments{"INTER", "OFFSPEC", "POLREF",
                                             "SURF", "CRISP"},
-        m_tolerance(0.1),
-        m_experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                     SummationType::SumInLambda, false, false,
-                     PolarizationCorrections(PolarizationCorrectionType::None),
-                     FloodCorrections(FloodCorrectionType::Workspace),
-                     boost::none, std::map<std::string, std::string>(),
-                     std::vector<PerThetaDefaults>()),
-        m_instrument(
-            RangeInLambda(0.0, 0.0),
-            MonitorCorrections(0, true, RangeInLambda(0.0, 0.0),
-                               RangeInLambda(0.0, 0.0)),
-            DetectorCorrections(false, DetectorCorrectionType::VerticalShift)),
+        m_tolerance(0.1), m_experiment(makeEmptyExperiment()),
+        m_instrument(makeEmptyInstrument()),
         m_runsTable(m_instruments, 0.1, ReductionJobs()),
         m_slicing(), m_mockAlgorithmsList{
                          boost::make_shared<MockBatchJobAlgorithm>()} {
@@ -287,6 +279,16 @@ public:
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
     presenter.clearADSHandle();
+    verifyAndClear();
+  }
+
+  void testPercentCompleteIsRequestedFromJobRunner() {
+    auto presenter = makePresenter();
+    auto progress = 33;
+    EXPECT_CALL(*m_jobRunner, percentComplete())
+        .Times(1)
+        .WillOnce(Return(progress));
+    TS_ASSERT_EQUALS(presenter.percentComplete(), progress);
     verifyAndClear();
   }
 

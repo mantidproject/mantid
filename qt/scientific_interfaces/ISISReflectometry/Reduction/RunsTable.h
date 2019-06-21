@@ -32,10 +32,12 @@ public:
   std::vector<MantidWidgets::Batch::RowLocation> const &
   selectedRowLocations() const;
 
-  bool hasSelection() const;
   void setSelectedRowLocations(
       std::vector<MantidWidgets::Batch::RowLocation> selected);
-  template <typename T> bool isSelected(T const &item);
+  template <typename T>
+  bool isInSelection(T const &item,
+                     std::vector<MantidWidgets::Batch::RowLocation> const
+                         &selectedRowLocations) const;
   void resetState();
   void resetSkippedItems();
   boost::optional<Item &>
@@ -50,9 +52,13 @@ private:
   std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
 };
 
-template <typename T> bool RunsTable::isSelected(T const &item) {
+template <typename T>
+bool RunsTable::isInSelection(
+    T const &item,
+    std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations)
+    const {
   auto const path = m_reductionJobs.getPath(item);
-  return containsPath(m_selectedRowLocations, path);
+  return containsPath(selectedRowLocations, path);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

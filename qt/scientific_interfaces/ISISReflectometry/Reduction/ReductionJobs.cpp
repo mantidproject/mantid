@@ -10,6 +10,8 @@
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "RowLocation.h"
 #include <iostream>
+#include <numeric>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -21,7 +23,18 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs,
     return jobs.mutableGroups()[maybeGroupIndex.get()];
   else
     return jobs.appendGroup(Group(groupName));
-} // unnamed
+}
+
+/* Return the number of rows and groups that have processing or
+ * postprocessing associated with them */
+int countItems(ReductionJobs const &jobs,
+               Item::ItemCountFunction countFunction) {
+  auto const &groups = jobs.groups();
+  return std::accumulate(groups.cbegin(), groups.cend(), 0,
+                         [countFunction](int &count, Group const &group) {
+                           return count + (group.*countFunction)();
+                         });
+}
 } // namespace
 
 ReductionJobs::ReductionJobs( // cppcheck-suppress passedByValue
@@ -73,13 +86,13 @@ void ReductionJobs::removeAllGroups() {
 }
 
 void ReductionJobs::resetState() {
-  for (auto &group : m_groups)
-    group.resetState();
+  std::for_each(m_groups.begin(), m_groups.end(),
+                [](Group &group) { group.resetState(); });
 }
 
 void ReductionJobs::resetSkippedItems() {
-  for (auto &group : m_groups)
-    group.resetSkipped();
+  std::for_each(m_groups.begin(), m_groups.end(),
+                [](Group &group) { group.resetSkipped(); });
 }
 
 std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }
@@ -186,6 +199,17 @@ std::string groupName(ReductionJobs const &jobs, int groupIndex) {
   return jobs[groupIndex].name();
 }
 
+/* Return the percentage of items that have been completed */
+int percentComplete(ReductionJobs const &jobs) {
+  // If there's nothing to process we're 100% complete
+  auto const total = countItems(jobs, &Item::totalItems);
+  if (total == 0)
+    return 100;
+
+  auto const completed = countItems(jobs, &Item::completedItems);
+  return static_cast<int>(completed * 100 / total);
+}
+
 Group const &ReductionJobs::operator[](int index) const {
   return m_groups[index];
 }
@@ -256,31 +280,50 @@ ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return boost::none;
 }
 
-Group ReductionJobs::getGroupFromPath(
+Group const &ReductionJobs::getGroupFromPath(
     const MantidWidgets::Batch::RowLocation rowLocation) const {
   if (isGroupLocation(rowLocation)) {
-    // Is group
-    const auto path = rowLocation.path();
-    return m_groups[path[0]];
+    return groups()[groupOf(rowLocation)];
   } else {
     throw std::invalid_argument("Path given does not point to a group.");
   }
 }
 
-Row ReductionJobs::getRowFromPath(
+boost::optional<Row> const &ReductionJobs::getRowFromPath(
     const MantidWidgets::Batch::RowLocation rowLocation) const {
-  if (!isGroupLocation(rowLocation)) {
-    // Is Row
-    const auto path = rowLocation.path();
-    const auto group = m_groups[path[0]];
-    const auto row = group[path[1]];
-    if (row.is_initialized())
-      return row.get();
-    else
-      throw std::invalid_argument("Row is not initialised");
+  if (isRowLocation(rowLocation)) {
+    return groups()[groupOf(rowLocation)].rows()[rowOf(rowLocation)];
   } else {
     throw std::invalid_argument("Path given does not point to a row.");
   }
+}
+
+bool ReductionJobs::validItemAtPath(
+    const MantidWidgets::Batch::RowLocation rowLocation) const {
+  if (isGroupLocation(rowLocation))
+    return true;
+
+  return getRowFromPath(rowLocation).is_initialized();
+}
+
+Item const &ReductionJobs::getItemFromPath(
+    const MantidWidgets::Batch::RowLocation rowLocation) const {
+  if (isGroupLocation(rowLocation)) {
+    return getGroupFromPath(rowLocation);
+  } else {
+    auto &maybeRow = getRowFromPath(rowLocation);
+    if (!maybeRow.is_initialized())
+      throw std::invalid_argument("Attempted to access invalid row");
+    return maybeRow.get();
+  }
+}
+
+bool operator!=(ReductionJobs const &lhs, ReductionJobs const &rhs) {
+  return !(lhs == rhs);
+}
+
+bool operator==(ReductionJobs const &lhs, ReductionJobs const &rhs) {
+  return lhs.groups() == rhs.groups();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

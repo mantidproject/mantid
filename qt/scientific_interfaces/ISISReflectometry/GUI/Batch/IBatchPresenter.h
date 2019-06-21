@@ -45,6 +45,7 @@ public:
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
   virtual bool requestClose() const = 0;
+  virtual int percentComplete() const = 0;
 
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
 };

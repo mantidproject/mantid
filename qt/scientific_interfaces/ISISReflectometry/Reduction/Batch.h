@@ -32,9 +32,11 @@ public:
   RunsTable &mutableRunsTable();
   Slicing const &slicing() const;
 
-  bool hasSelection() const;
-  template <typename T> bool isSelected(T const &item) const;
-
+  std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
+  template <typename T>
+  bool isInSelection(T const &item,
+                     std::vector<MantidWidgets::Batch::RowLocation> const
+                         &selectedRowLocations) const;
   PerThetaDefaults const *defaultsForTheta(double thetaAngle) const;
   void resetState();
   void resetSkippedItems();
@@ -48,8 +50,11 @@ private:
   Slicing const &m_slicing;
 };
 
-template <typename T> bool Batch::isSelected(T const &item) const {
-  return m_runsTable.isSelected(item);
+template <typename T>
+bool Batch::isInSelection(T const &item,
+                          std::vector<MantidWidgets::Batch::RowLocation> const
+                              &selectedRowLocations) const {
+  return m_runsTable.isInSelection(item, selectedRowLocations);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

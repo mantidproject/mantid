@@ -7,9 +7,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_
 
+#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Common/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/Slicing.h"
+#include "../ReflMockObjects.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MockRunsTableView.h"
 
@@ -33,41 +35,6 @@ public:
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
   }
 
-  Row basicRow() {
-    return Row(std::vector<std::string>({"101", "102"}), 1.2,
-               TransmissionRunPair{"A", "B"}, RangeInQ(), boost::none, {},
-               ReductionWorkspaces({}, TransmissionRunPair()));
-  }
-
-  ReductionJobs twoEmptyGroupsModel() {
-    auto reductionJobs = ReductionJobs();
-    reductionJobs.appendGroup(Group("Group 1"));
-    reductionJobs.appendGroup(Group("Group 2"));
-    return reductionJobs;
-  }
-
-  ReductionJobs twoGroupsWithARowModel() {
-    auto reductionJobs = ReductionJobs();
-    auto group1 = Group("Group 1");
-    group1.appendRow(basicRow());
-    reductionJobs.appendGroup(std::move(group1));
-
-    auto group2 = Group("Group 2");
-    group2.appendRow(basicRow());
-    reductionJobs.appendGroup(std::move(group2));
-
-    return reductionJobs;
-  }
-
-  ReductionJobs oneGroupWithTwoRowsModel() {
-    auto reductionJobs = ReductionJobs();
-    auto group1 = Group("Group 1");
-    group1.appendRow(basicRow());
-    group1.appendRow(basicRow());
-    reductionJobs.appendGroup(std::move(group1));
-    return reductionJobs;
-  }
-
   RunsTablePresenterTest() : m_jobs(), m_view() {
     jobsViewIs(m_jobs, m_view);
     ON_CALL(m_jobs, cellsAt(_))
@@ -78,6 +45,7 @@ public:
   bool verifyAndClearExpectations() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
     return true;
   }
 
@@ -99,12 +67,7 @@ public:
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    Plotter plotter(nullptr);
-#else
-    Plotter plotter;
-#endif
-    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), plotter);
+    return makePresenter(view, ReductionJobs());
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, ReductionJobs jobs) {
@@ -113,11 +76,15 @@ public:
 #else
     Plotter plotter;
 #endif
-    return RunsTablePresenter(&view, {}, 0.01, std::move(jobs), plotter);
+    auto presenter =
+        RunsTablePresenter(&view, {}, 0.01, std::move(jobs), plotter);
+    presenter.acceptMainPresenter(&m_mainPresenter);
+    return presenter;
   }
 
 protected:
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   NiceMock<MockRunsTableView> m_view;
+  NiceMock<MockRunsPresenter> m_mainPresenter;
 };
 #endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_

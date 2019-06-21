@@ -40,7 +40,9 @@ set(TEST_FILES
     test/MuonAnalysisHelperTest.h
     test/MuonAnalysisResultTableCreatorTest.h
     test/RunMapTest.h
-    test/ISISReflectometry/Batch/BatchJobRunnerTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
     test/ISISReflectometry/Batch/BatchPresenterTest.h
     test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
     test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
@@ -53,6 +55,8 @@ set(TEST_FILES
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterMergeJobsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterProgressBarTest.h
     test/ISISReflectometry/Event/EventPresenterTest.h
     test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
     test/ISISReflectometry/Experiment/ExperimentOptionDefaultsTest.h
@@ -101,7 +105,9 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    GUITests)
 
 set(QT5_TEST_FILES     
-    test/ISISReflectometry/Batch/BatchJobRunnerTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
     test/ISISReflectometry/Batch/BatchPresenterTest.h
     test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
     test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h

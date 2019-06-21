@@ -337,6 +337,12 @@ bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
 
+int RunsPresenter::percentComplete() const {
+  if (!m_mainPresenter)
+    return 0;
+  return m_mainPresenter->percentComplete();
+}
+
 IRunsTablePresenter *RunsPresenter::tablePresenter() const {
   return m_tablePresenter.get();
 }

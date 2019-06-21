@@ -131,6 +131,7 @@ private:
                      std::string const &tooltip);
   void setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath,
                             Item const &item);
+  void updateProgressBar();
 
   bool isProcessing() const;
   bool isAutoreducing() const;

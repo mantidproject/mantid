@@ -20,6 +20,7 @@ RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
                              int defaultInstrumentIndex)
     : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
+  m_ui.progressBar->setRange(0, 100);
   m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
       QStringList({"Run(s)", "Angle", "First Transmission Run",
                    "Second Transmission Run", "Q min", "Q max", "dQ/Q", "Scale",
@@ -72,7 +73,7 @@ void RunsTableView::mustSelectGroup() {
 
 void RunsTableView::mustNotSelectGroup() {
   QMessageBox::critical(this, "Group Selected",
-                        "To delete rows you should not deselect any groups.");
+                        "To delete rows you should not select any groups.");
 }
 
 void RunsTableView::mustSelectGroupOrRow() {

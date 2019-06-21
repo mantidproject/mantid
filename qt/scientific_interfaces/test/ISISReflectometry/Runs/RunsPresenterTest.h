@@ -7,6 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 
+#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
 #include "../ReflMockObjects.h"
@@ -21,11 +22,13 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
+using testing::_;
 using testing::_;
 
 //=====================================================================================
@@ -271,6 +274,16 @@ public:
     verifyAndClear();
   }
 
+  void testPercentCompleteIsRequestedFromMainPresenter() {
+    auto presenter = makePresenter();
+    auto progress = 33;
+    EXPECT_CALL(m_mainPresenter, percentComplete())
+        .Times(1)
+        .WillOnce(Return(progress));
+    TS_ASSERT_EQUALS(presenter.percentComplete(), progress);
+    verifyAndClear();
+  }
+
   // TODO
   //  void testStartMonitor() {
   //    auto presenter = makePresenter();
@@ -340,17 +353,8 @@ private:
     return presenter;
   }
 
-  Row makeRowWithRun(std::string const &run) {
-    return Row(std::vector<std::string>{"12345"}, 0.5, TransmissionRunPair(),
-               RangeInQ(), boost::none, ReductionOptionsMap(),
-               ReductionWorkspaces(std::vector<std::string>{run},
-                                   TransmissionRunPair()));
-  }
-
   RunsTable makeRunsTableWithContent() {
-    auto rows = std::vector<boost::optional<Row>>{makeRowWithRun("12345")};
-    auto groups = std::vector<Group>{Group("Group 1", rows)};
-    auto reductionJobs = ReductionJobs(groups);
+    auto reductionJobs = oneGroupWithARowModel();
     return RunsTable(m_instruments, m_thetaTolerance, reductionJobs);
   }
 

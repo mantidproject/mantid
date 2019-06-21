@@ -46,13 +46,24 @@ public:
   boost::optional<Item &>
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
-  Group getGroupFromPath(const MantidWidgets::Batch::RowLocation path) const;
-  Row getRowFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  bool
+  validItemAtPath(const MantidWidgets::Batch::RowLocation rowLocation) const;
+  Group const &
+  getGroupFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  boost::optional<Row> const &
+  getRowFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  Item const &
+  getItemFromPath(const MantidWidgets::Batch::RowLocation path) const;
 
 private:
   std::vector<Group> m_groups;
   size_t m_groupNameSuffix;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionJobs const &lhs,
+                                               ReductionJobs const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionJobs const &lhs,
+                                               ReductionJobs const &rhs);
 
 void appendEmptyRow(ReductionJobs &jobs, int groupIndex);
 void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow);
@@ -70,6 +81,8 @@ void removeAllRowsAndGroups(ReductionJobs &jobs);
 bool setGroupName(ReductionJobs &jobs, int groupIndex,
                   std::string const &newValue);
 std::string groupName(ReductionJobs const &jobs, int groupIndex);
+
+int percentComplete(ReductionJobs const &jobs);
 
 void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
                        double thetaTolerance, std::string const &groupName,

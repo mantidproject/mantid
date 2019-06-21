@@ -6,11 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
 #define MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
+#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/RowProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 
 class RowProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
@@ -182,94 +185,5 @@ private:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
-
-  Row makeEmptyRow() {
-    return Row({}, 0.0, TransmissionRunPair(), RangeInQ(), boost::none,
-               ReductionOptionsMap(),
-               ReductionWorkspaces({}, TransmissionRunPair()));
-  }
-
-  Row makeRow(double theta = 0.5) {
-    return Row({}, theta, TransmissionRunPair(), RangeInQ(), boost::none,
-               ReductionOptionsMap(),
-               ReductionWorkspaces({}, TransmissionRunPair()));
-  }
-
-  Row makeRowWithMainCellsFilled(double theta = 0.5) {
-    return Row({"12345", "12346"}, theta, TransmissionRunPair("92345", "92346"),
-               RangeInQ(0.1, 0.09, 0.91), 2.2, ReductionOptionsMap(),
-               ReductionWorkspaces({"12345", "12346"},
-                                   TransmissionRunPair("92345", "92346")));
-  }
-
-  Row makeRowWithOptionsCellFilled(double theta, ReductionOptionsMap options) {
-    return Row({}, theta, TransmissionRunPair(), RangeInQ(), boost::none,
-               std::move(options),
-               ReductionWorkspaces({}, TransmissionRunPair()));
-  }
-
-  Experiment makeExperiment() {
-    return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample,
-                      SummationType::SumInQ, true, true,
-                      makePolarizationCorrections(), makeFloodCorrections(),
-                      makeTransmissionRunRange(), makeStitchOptions(),
-                      makePerThetaDefaultsWithTwoAnglesAndWildcard());
-  }
-
-  Instrument makeInstrument() {
-    return Instrument(makeWavelengthRange(), makeMonitorCorrections(),
-                      makeDetectorCorrections());
-  }
-
-  std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard() {
-    return std::vector<PerThetaDefaults>{
-        // wildcard row with no angle
-        PerThetaDefaults(boost::none, TransmissionRunPair("22345", "22346"),
-                         RangeInQ(0.007, 0.01, 1.1), 0.7,
-                         ProcessingInstructions("1")),
-        // two angle rows
-        PerThetaDefaults(0.5, TransmissionRunPair("22347", ""),
-                         RangeInQ(0.008, 0.02, 1.2), 0.8,
-                         ProcessingInstructions("2-3")),
-        PerThetaDefaults(
-            2.3,
-            TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
-                                std::vector<std::string>{"22358", "22359"}),
-            RangeInQ(0.009, 0.03, 1.3), 0.9, ProcessingInstructions("4-6"))};
-  }
-
-  std::map<std::string, std::string> makeStitchOptions() {
-    return std::map<std::string, std::string>{{"key1", "value1"},
-                                              {"key2", "value2"}};
-  }
-
-  PolarizationCorrections makePolarizationCorrections() {
-    return PolarizationCorrections(PolarizationCorrectionType::ParameterFile);
-  }
-
-  FloodCorrections makeFloodCorrections() {
-    return FloodCorrections(FloodCorrectionType::Workspace,
-                            boost::optional<std::string>("test_workspace"));
-  }
-
-  RangeInLambda makeTransmissionRunRange() { return RangeInLambda(7.5, 9.2); }
-
-  RangeInLambda makeWavelengthRange() { return RangeInLambda(2.3, 14.4); }
-
-  RangeInLambda makeMonitorBackgroundRange() {
-    return RangeInLambda(1.1, 17.2);
-  }
-
-  RangeInLambda makeMonitorIntegralRange() { return RangeInLambda(3.4, 10.8); }
-
-  MonitorCorrections makeMonitorCorrections() {
-    return MonitorCorrections(2, true, makeMonitorBackgroundRange(),
-                              makeMonitorIntegralRange());
-  }
-
-  DetectorCorrections makeDetectorCorrections() {
-    return DetectorCorrections(true,
-                               DetectorCorrectionType::RotateAroundSample);
-  }
 };
 #endif // MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_

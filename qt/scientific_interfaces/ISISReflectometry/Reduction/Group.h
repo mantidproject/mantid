@@ -45,6 +45,9 @@ public:
   void updateRow(int rowIndex, boost::optional<Row> const &row);
   bool allRowsAreValid() const;
 
+  int totalItems() const override;
+  int completedItems() const override;
+
   void resetState() override;
   void resetSkipped();
   void renameOutputWorkspace(std::string const &oldName,
@@ -87,6 +90,11 @@ void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
     }
   }
 }
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Group const &lhs,
+                                               Group const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Group const &lhs,
+                                               Group const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_GROUP_H_

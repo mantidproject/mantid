@@ -69,6 +69,7 @@ public:
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
+  int percentComplete() const override;
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;

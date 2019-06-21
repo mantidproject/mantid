@@ -21,10 +21,8 @@ getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto defaults = OptionDefaults(instrument);
 
   auto wavelengthRange =
-      RangeInLambda(defaults.getDoubleOrZero("WavelengthMin", "LambdaMin"),
-                    defaults.getDoubleOrZero("WavelengthMax", "LambdaMax"));
-  if (!wavelengthRange.bothSet())
-    throw std::invalid_argument("Min and max wavelength range must be set");
+      RangeInLambda(defaults.getValue<double>("WavelengthMin", "LambdaMin"),
+                    defaults.getValue<double>("WavelengthMax", "LambdaMax"));
   if (!wavelengthRange.isValid(false))
     throw std::invalid_argument("Invalid wavelength range");
 

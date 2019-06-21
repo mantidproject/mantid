@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -51,7 +52,7 @@ public:
 
     auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(1, groups.size());
-    TS_ASSERT_EQUALS("Group 2", groups[0].name());
+    TS_ASSERT_EQUALS("Test group 2", groups[0].name());
 
     verifyAndClearExpectations();
   }

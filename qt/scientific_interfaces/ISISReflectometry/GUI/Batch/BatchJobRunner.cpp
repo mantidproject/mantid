@@ -10,8 +10,30 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "RowProcessingAlgorithm.h"
 
+#include <numeric>
+
 namespace MantidQt {
 namespace CustomInterfaces {
+
+namespace { // unnamed
+
+int countItemsForLocation(
+    ReductionJobs const &jobs,
+    MantidWidgets::Batch::RowLocation const &location,
+    std::vector<MantidWidgets::Batch::RowLocation> const &locations,
+    Item::ItemCountFunction countFunction) {
+  if (!jobs.validItemAtPath(location))
+    return 0;
+
+  // Rows have a single processing step but we want to ignore them if their
+  // parent group is also in the selection or they will be counted twice.
+  if (isRowLocation(location) && containsPath(locations, {groupOf(location)}))
+    return 0;
+
+  auto const &item = jobs.getItemFromPath(location);
+  return (item.*countFunction)();
+}
+} // unnamed namespace
 
 using API::IConfiguredAlgorithm_sptr;
 
@@ -23,17 +45,60 @@ bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 
 bool BatchJobRunner::isAutoreducing() const { return m_isAutoreducing; }
 
+int BatchJobRunner::itemsInSelection(
+    Item::ItemCountFunction countFunction) const {
+  auto const &jobs = m_batch.runsTable().reductionJobs();
+  auto const &locations = m_rowLocationsToProcess;
+  return std::accumulate(
+      locations.cbegin(), locations.cend(), 0,
+      [&jobs, &locations, countFunction](
+          int &count, MantidWidgets::Batch::RowLocation const &location) {
+        return count +
+               countItemsForLocation(jobs, location, locations, countFunction);
+      });
+}
+
+int BatchJobRunner::percentComplete() const {
+  // If processing everything, get the percent from the whole table
+  if (m_processAll)
+    return MantidQt::CustomInterfaces::percentComplete(
+        m_batch.runsTable().reductionJobs());
+
+  // If processing a selection but there is nothing to process, return 100%
+  auto const totalItems = itemsInSelection(&Item::totalItems);
+  if (totalItems == 0)
+    return 100;
+
+  // Otherwise calculate the percentage of completed items in the selection
+  auto const completedItems = itemsInSelection(&Item::completedItems);
+  return completedItems * 100 / totalItems;
+}
+
 void BatchJobRunner::reductionResumed() {
+  // Cache the set of rows to process when the user starts a reduction
+  m_rowLocationsToProcess = m_batch.selectedRowLocations();
   m_isProcessing = true;
   // If the user has manually selected failed rows, reprocess them; otherwise
-  // skip them
-  m_reprocessFailed = m_batch.hasSelection();
-  // If we're autoreducing, or there are no selected rows, process everything
-  m_processAll = m_isAutoreducing || !m_batch.hasSelection();
+  // skip them. If we're autoreducing, or there are no selected rows, process
+  // everything
+  if (m_rowLocationsToProcess.empty()) {
+    // Nothing selected so process everything. Skip failed rows.
+    m_processAll = true;
+    m_reprocessFailed = false;
+  } else {
+    // User has manually selected items so only process the selection (unless
+    // autoreducing). Also reprocess failed items.
+    m_processAll = m_isAutoreducing;
+    m_reprocessFailed = !m_isAutoreducing;
+  }
+
   m_batch.resetSkippedItems();
 }
 
-void BatchJobRunner::reductionPaused() { m_isProcessing = false; }
+void BatchJobRunner::reductionPaused() {
+  m_isProcessing = false;
+  m_rowLocationsToProcess.clear();
+}
 
 void BatchJobRunner::autoreductionResumed() {
   m_isAutoreducing = true;
@@ -43,23 +108,26 @@ void BatchJobRunner::autoreductionResumed() {
   m_batch.resetSkippedItems();
 }
 
-void BatchJobRunner::autoreductionPaused() { m_isAutoreducing = false; }
+void BatchJobRunner::autoreductionPaused() {
+  m_isAutoreducing = false;
+  m_rowLocationsToProcess.clear();
+}
 
 void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
   m_reprocessFailed = reprocessFailed;
 }
 
 template <typename T> bool BatchJobRunner::isSelected(T const &item) {
-  return m_processAll || m_batch.isSelected(item);
+  return m_processAll || m_batch.isInSelection(item, m_rowLocationsToProcess);
 }
 
-bool BatchJobRunner::hasSelectedRows(Group const &group) {
+bool BatchJobRunner::hasSelectedRowsRequiringProcessing(Group const &group) {
   // If the group itself is selected, consider its rows to also be selected
-  if (m_processAll || isSelected(group))
-    return true;
+  auto processAllRowsInGroup = (m_processAll || isSelected(group));
 
   for (auto const &row : group.rows()) {
-    if (row && isSelected(row.get()))
+    if (row && (processAllRowsInGroup || isSelected(row.get())) &&
+        row->requiresProcessing(m_reprocessFailed))
       return true;
   }
 
@@ -70,50 +138,52 @@ bool BatchJobRunner::hasSelectedRows(Group const &group) {
  * groups in the table
  */
 std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
-  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   auto &groups =
       m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
-    // Process the rows in the group or, if there are no rows to process,
-    // postprocess the group. If that's also done, continue to the next group
-    if (hasSelectedRows(group) && group.requiresProcessing(m_reprocessFailed)) {
-      addAlgorithmsForProcessingRowsInGroup(group, algorithms);
-      return algorithms;
-    } else if (isSelected(group) &&
-               group.requiresPostprocessing(m_reprocessFailed)) {
-      addAlgorithmForPostprocessingGroup(group, algorithms);
-      return algorithms;
-    }
+    // If the group is selected, process all of its rows
+    if (isSelected(group) && group.requiresProcessing(m_reprocessFailed))
+      return algorithmsForProcessingRowsInGroup(group, true);
+    // If the group has rows that are selected, process the selected rows
+    if (hasSelectedRowsRequiringProcessing(group))
+      return algorithmsForProcessingRowsInGroup(group, false);
+    // If the group's requires postprocessing, do it
+    if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed))
+      return algorithmForPostprocessingGroup(group);
   }
-  return algorithms;
+  return std::deque<IConfiguredAlgorithm_sptr>();
 }
 
 /** Add the algorithms and related properties for postprocessing a group
  * @param group : the group to get the row algorithms for
- * @param algorithms : the list of configured algorithms to add this group to
- * @returns : true if algorithms were added, false if there was nothing to do
+ * @returns : the list of configured algorithms
  */
-void BatchJobRunner::addAlgorithmForPostprocessingGroup(
-    Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
+std::deque<IConfiguredAlgorithm_sptr>
+BatchJobRunner::algorithmForPostprocessingGroup(Group &group) {
   auto algorithm = createConfiguredAlgorithm(m_batch, group);
+  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   algorithms.emplace_back(std::move(algorithm));
+  return algorithms;
 }
 
 /** Add the algorithms and related properties for processing all the rows
  * in a group
  * @param group : the group to get the row algorithms for
- * @param algorithms : the list of configured algorithms to add this group's
- * rows to
- * @returns : true if algorithms were added, false if there was nothing to do
+ * @param processAll : if true, include all rows in the group;
+ * otherwise just include selected rows
+ * @returns : the list of configured algorithms
  */
-void BatchJobRunner::addAlgorithmsForProcessingRowsInGroup(
-    Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
+std::deque<IConfiguredAlgorithm_sptr>
+BatchJobRunner::algorithmsForProcessingRowsInGroup(Group &group,
+                                                   bool processAll) {
+  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
-    if (row && isSelected(row.get()) &&
-        row->requiresProcessing(m_reprocessFailed))
+    if (row && row->requiresProcessing(m_reprocessFailed) &&
+        (processAll || isSelected(row.get())))
       addAlgorithmForProcessingRow(row.get(), algorithms);
   }
+  return algorithms;
 }
 
 /** Add the algorithm and related properties for processing a row
