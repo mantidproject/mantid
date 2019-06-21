@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 import six
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
@@ -40,6 +39,9 @@ class GroupingTabPresenterTest(GuiTest):
 
         self.pairing_table_view = PairingTableView()
         self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.model)
+
+        self.grouping_table_view.warning_popup = mock.MagicMock()
+        self.pairing_table_view.warning_popup = mock.MagicMock()
 
         self.add_three_groups()
         self.add_two_pairs()

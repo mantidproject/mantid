@@ -8,22 +8,21 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from qtpy import QtCore, QtWidgets
 
 from Muon.GUI.Common.utilities import table_utils
 
 
-class ContextExampleView(QtGui.QWidget):
+class ContextExampleView(QtWidgets.QWidget):
 
     updateSignal = QtCore.pyqtSignal()
     groupChangedSignal = QtCore.pyqtSignal(object)
 
     def __init__(self, context, parent=None):
         super(ContextExampleView, self).__init__(parent)
-        self.grid = QtGui.QGridLayout(self)
+        self.grid = QtWidgets.QGridLayout(self)
 
-        self.table = QtGui.QTableWidget(self)
+        self.table = QtWidgets.QTableWidget(self)
         self.table.resize(800, 800)
         self.table.setRowCount(2)
         self.table.setColumnCount(4)
@@ -54,7 +53,7 @@ class ContextExampleView(QtGui.QWidget):
         self.alpha = table_utils.addDoubleToTable(self.table, "2.", 1, 3)
 
         # explicit update button
-        btn = QtGui.QPushButton("print context", self)
+        btn = QtWidgets.QPushButton("print context", self)
 
         # create grid
         self.grid.addWidget(self.table)
