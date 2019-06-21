@@ -7,11 +7,6 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <fstream>
-#include <gmock/gmock.h>
-#include <iostream>
-
 #include "H5cpp.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -19,9 +14,14 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <H5Object.h>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
+#include <gmock/gmock.h>
 
 using namespace Mantid::NexusGeometry;
 
+//---------------------------------------------------------------
 namespace {
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
@@ -30,6 +30,25 @@ public:
 };
 
 } // namespace
+
+//---------------------------------------------------------------------
+
+class HDF5FileTestUtility {
+
+public:
+  HDF5FileTestUtility(
+      std::string &inputPath); //H5::H5Object &object);
+
+  bool hasNxClass(std::string className, std::string HDF5Path) const;
+  bool objattrExists(const H5std_string str) const;
+  int numOfAttr() const;
+
+private:
+  std::string m_destination, m_className, m_HDF5Path;
+  H5::H5Object &m_obj; // imported namespace h5 from include header file
+};
+
+//-------------------------------------------------------------------
 
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
 public:
@@ -54,6 +73,20 @@ public:
                      std::invalid_argument &);
   }
 
+  void test_providing_no_path_throws() {
+
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+        Mantid::Kernel::V3D(1, 1, 1));
+
+    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    std::string path = ""; // path is empty string
+
+    TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
+                     std::invalid_argument &);
+  }
+
   void test_progress_reporting() {
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
@@ -69,9 +102,8 @@ public:
 
   // WIP-----------------------------------------------------
 
-  void test_nxinstrument_class_exists() {}
+  void test_nxinstrument_class_exists() {
 
-  /*
     // Instrument--------------------------------------
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
@@ -81,42 +113,22 @@ public:
     //--------------------------------------------------------------------
 
     // destination folder for outputfile-----------------------------------
-    std::string destinationFile = ""; // some path to save the hdf5 file
+    // std::string destinationFile = "f"; // some path to save the hdf5 file
 
-    saveInstrument(*inst2.first,
-                   destinationFile); //, progress); <-optional pointer
+    // saveInstrument(*inst2.first,
+    //               destinationFile); //, progress); <-optional pointer
 
     // Check file itself.
-    HDF5FileTestUtility tester(
-        destinationFile); // class that takes hdf5 file and tests that is has
-                          // attributes and classes (see provided links) among
-                          // other things
+    // HDF5FileTestUtility tester(
+    //   destinationFile); // class that takes hdf5 file and tests that is has
+    // attributes and classes (see provided links) among
+    // other things
 
-//    ASSERT_TRUE(tester.hasNxClass(
-  //      "NXinstrument", "/raw_data_1/instrument")); // goto arg1 in hdf5 file
-                                                    // and check if arg0 exists
+    //    ASSERT_TRUE(tester.hasNxClass(
+    //      "NXinstrument", "/raw_data_1/instrument")); // goto arg1 in hdf5
+    //      file
+    // and check if arg0 exists
   }
-};
-
-
-
-*/
-
-
-
-};
-
-// WIP
-class HDF5FileTestUtility {
-
-private:
-  std::string destination;
-
-public:
-  HDF5FileTestUtility(std::string inputPath);
-
-  bool hasNxClass(std::string className, std::string HDF5Path) const;
-  int numOfAttr() const;
 };
 
 /*
@@ -124,6 +136,6 @@ bool H5::H5Object::attrExists(const H5std_string &name)const <= check if
 attribute exists int H5::H5Object::getNumAttrs()const <= get number of
 attributes H5std_string H5::H5Object::getObjName()const <= return object name as
 string.
-
 */
+
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
