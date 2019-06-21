@@ -62,6 +62,7 @@ Bug Fixes
 - Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
 - Fixed a bug where the loaded workspace in Data Analysis doesn't update after being changed on a different
   interface.
+- Fixed a bug causing the errors calculated on Iqt to be too small towards the end of the spectra.
 
 
 Data Corrections Interface
