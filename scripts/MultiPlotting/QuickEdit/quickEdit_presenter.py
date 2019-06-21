@@ -40,6 +40,9 @@ class QuickEditPresenter(object):
     def all(self):
         return [self._view.plot_at_index(index) for index in range(1, self._view.number_of_plots())]
 
+    def set_to_all(self):
+        self._view.set_index(0)
+
     def set_plot_x_range(self, range):
         self._view.set_plot_x_range(range)
 
