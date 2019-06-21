@@ -20,9 +20,13 @@ class MockRunsView : public IRunsView {
 public:
   MOCK_METHOD1(subscribe, void(RunsViewSubscriber *));
   MOCK_METHOD1(subscribeTimer, void(RunsViewTimerSubscriber *));
+  MOCK_METHOD1(subscribeSearch, void(RunsViewSearchSubscriber *));
   MOCK_CONST_METHOD0(table, IRunsTableView *());
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
+  MOCK_METHOD0(resizeSearchResultsColumnsToContents, void());
+  MOCK_METHOD0(searchResults, ISearchModel const &());
+  MOCK_METHOD0(mutableSearchResults, ISearchModel &());
 
   MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
@@ -38,7 +42,6 @@ public:
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
   MOCK_METHOD0(clearProgress, void());
-  MOCK_METHOD1(loginFailed, void(std::string const &));
 
   MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
   MOCK_CONST_METHOD0(getAllSearchRows, std::set<int>());
@@ -51,15 +54,8 @@ public:
   MOCK_CONST_METHOD0(getMonitorAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
 
-  MOCK_METHOD0(startIcatSearch, void());
-  MOCK_METHOD0(noActiveICatSessions, void());
-  MOCK_METHOD0(missingRunsToTransfer, void());
-
   MOCK_METHOD0(startMonitor, void());
   MOCK_METHOD0(stopMonitor, void());
-
-  // Calls we don't care about
-  void showSearch(SearchModel_sptr) override{};
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

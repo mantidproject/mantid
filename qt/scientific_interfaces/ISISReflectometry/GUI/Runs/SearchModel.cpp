@@ -14,6 +14,38 @@ namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
 
+namespace { // unnamed
+
+bool runHasCorrectInstrument(std::string const &run,
+                             std::string const &instrument) {
+  // Return false if the run appears to be from another instruement
+  return (run.substr(0, instrument.size()) == instrument);
+}
+
+std::string trimRunName(std::string const &runFile,
+                        std::string const &instrument) {
+  // Trim the instrument prefix and ".raw" suffix
+  auto run = runFile;
+  run = run.substr(instrument.size(), run.size() - (instrument.size() + 4));
+
+  // Also get rid of any leading zeros
+  size_t numZeros = 0;
+  while (run[numZeros] == '0')
+    numZeros++;
+  run = run.substr(numZeros, run.size() - numZeros);
+
+  return run;
+}
+
+bool resultExists(SearchResult const &result,
+                  std::vector<SearchResult> const &runDetails) {
+  auto resultIter = std::find(runDetails.cbegin(), runDetails.cend(), result);
+  return resultIter != runDetails.cend();
+}
+} // unnamed namespace
+
+SearchModel::SearchModel() : m_runDetails() {}
+
 bool SearchModel::knownFileType(std::string const &filename) const {
   boost::regex pattern("raw$", boost::regex::icase);
   boost::smatch match; // Unused.
@@ -22,16 +54,6 @@ bool SearchModel::knownFileType(std::string const &filename) const {
 
 std::vector<SearchResult> const &SearchModel::results() const {
   return m_runDetails;
-}
-
-/**
-@param tableWorkspace : The table workspace to copy data from
-@param instrument : instrument name
-*/
-SearchModel::SearchModel(ITableWorkspace_sptr tableWorkspace,
-                         const std::string &instrument) {
-  if (tableWorkspace)
-    addDataFromTable(tableWorkspace, instrument);
 }
 
 void SearchModel::setError(int i, std::string const &error) {
@@ -47,43 +69,34 @@ void SearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
   for (size_t i = 0; i < tableWorkspace->rowCount(); ++i) {
     const std::string runFile = tableWorkspace->String(i, 0);
 
-    // If this isn't the right instrument, remove it
-    auto run = runFile;
-    if (run.substr(0, instrument.size()) != instrument) {
-      continue; // Don't show runs that appear to be from other instruments.
-    }
-
-    // It's a valid run, so let's trim the instrument prefix and ".raw"
-    // suffix
-    run = run.substr(instrument.size(), run.size() - (instrument.size() + 4));
-
-    // Let's also get rid of any leading zeros
-    size_t numZeros = 0;
-    while (run[numZeros] == '0')
-      numZeros++;
-    run = run.substr(numZeros, run.size() - numZeros);
+    if (!runHasCorrectInstrument(runFile, instrument))
+      continue;
 
     if (!knownFileType(runFile))
       continue;
 
-    // Ok, add the run details to the list
+    auto const run = trimRunName(runFile, instrument);
     const std::string description = tableWorkspace->String(i, 6);
     const std::string location = tableWorkspace->String(i, 1);
-    newRunDetails.emplace_back(run, description, location);
+    auto result = SearchResult(run, description, location);
+
+    if (!resultExists(result, m_runDetails))
+      newRunDetails.emplace_back(std::move(result));
   }
 
-  if (newRunDetails.empty()) {
+  mergeNewResults(newRunDetails);
+}
+
+void SearchModel::mergeNewResults(std::vector<SearchResult> const &source) {
+  if (source.empty())
     return;
-  }
 
   // To append, insert the new runs after the last element in the model
   const auto first = static_cast<int>(m_runDetails.size());
-  const auto last =
-      static_cast<int>(m_runDetails.size() + newRunDetails.size() - 1);
+  const auto last = static_cast<int>(m_runDetails.size() + source.size() - 1);
   beginInsertRows(QModelIndex(), first, last);
 
-  m_runDetails.insert(m_runDetails.end(), newRunDetails.begin(),
-                      newRunDetails.end());
+  m_runDetails.insert(m_runDetails.end(), source.begin(), source.end());
 
   endInsertRows();
 }
@@ -204,6 +217,5 @@ bool SearchModel::runHasError(const SearchResult &run) const {
 SearchResult const &SearchModel::getRowData(int index) const {
   return m_runDetails[index];
 }
-
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -29,12 +29,11 @@ using namespace MantidQt::Icons;
  */
 RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr), m_timerNotifyee(nullptr),
-      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()) {
+      m_searchNotifyee(nullptr), m_searchModel(),
+      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()),
+      m_timer() {
   initLayout();
-}
-void RunsView::loginFailed(std::string const &fullError) {
-  QMessageBox::critical(this, QString::fromStdString(fullError),
-                        "Login Failed!");
+  ui.tableSearchResults->setModel(&m_searchModel);
 }
 
 void RunsView::subscribe(RunsViewSubscriber *notifyee) {
@@ -43,6 +42,10 @@ void RunsView::subscribe(RunsViewSubscriber *notifyee) {
 
 void RunsView::subscribeTimer(RunsViewTimerSubscriber *notifyee) {
   m_timerNotifyee = notifyee;
+}
+
+void RunsView::subscribeSearch(RunsViewSearchSubscriber *notifyee) {
+  m_searchNotifyee = notifyee;
 }
 
 IRunsTableView *RunsView::table() const { return m_tableView; }
@@ -80,6 +83,9 @@ void RunsView::initLayout() {
   // Synchronize the slit calculator
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onInstrumentChanged(int)));
+  // Connect signal for when search algorithm completes
+  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(onSearchComplete()), Qt::UniqueConnection);
 
   // Synchronize the instrument selection widgets
   // Processing table in group 1
@@ -102,17 +108,6 @@ void RunsView::initLayout() {
   // connect(qDataProcessorWidget_2,
   //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
   //        SLOT(instrumentChanged(int)));
-}
-
-void RunsView::noActiveICatSessions() {
-  QMessageBox::information(
-      this, "Login Failed",
-      "Error Logging in: Please press 'Search' to try again.");
-}
-
-void RunsView::missingRunsToTransfer() {
-  QMessageBox::critical(this, "No runs selected",
-                        "Error: Please select at least one run to transfer.");
 }
 
 /**
@@ -233,33 +228,28 @@ void RunsView::setProgress(int progress) { ui.progressBar->setValue(progress); }
 void RunsView::clearProgress() { ui.progressBar->reset(); }
 
 /**
-Set a new model for search results
-@param model : the model to be attached to the search results
-*/
-void RunsView::showSearch(SearchModel_sptr model) {
-  m_searchModel = model;
-  ui.tableSearchResults->setModel(m_searchModel.get());
+ * Resize the search results table columns
+ */
+void RunsView::resizeSearchResultsColumnsToContents() {
   ui.tableSearchResults->resizeColumnsToContents();
 }
 
-/** Start an icat search
+/**
+ * Get the model containing the search results
  */
-void RunsView::startIcatSearch() {
-  m_algoRunner.get()->disconnect(); // disconnect any other connections
-  m_notifyee->notifySearch();
-  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(onSearchComplete()), Qt::UniqueConnection);
-}
+ISearchModel const &RunsView::searchResults() { return m_searchModel; }
+
+ISearchModel &RunsView::mutableSearchResults() { return m_searchModel; }
 
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
-void RunsView::onSearchComplete() { m_notifyee->notifyICATSearchComplete(); }
+void RunsView::onSearchComplete() { m_searchNotifyee->notifySearchComplete(); }
 
 /**
 This slot notifies the presenter that the "search" button has been pressed
 */
-void RunsView::on_actionSearch_triggered() { startIcatSearch(); }
+void RunsView::on_actionSearch_triggered() { m_notifyee->notifySearch(); }
 
 /**
 This slot conducts a search operation before notifying the presenter that the
@@ -311,8 +301,6 @@ void RunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
  */
 void RunsView::onInstrumentChanged(int index) {
   ui.textSearch->clear();
-  if (m_searchModel)
-    m_searchModel->clear();
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();

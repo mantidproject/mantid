@@ -21,6 +21,9 @@ struct SearchResult {
   std::string location;
   std::string issues;
 };
+
+bool operator==(SearchResult const &lhs, SearchResult const &rhs);
+bool operator!=(SearchResult const &lhs, SearchResult const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_SEARCHRESULT_H

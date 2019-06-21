@@ -45,6 +45,7 @@ public:
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
   virtual int percentComplete() const = 0;
+  virtual void notifySearchComplete() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

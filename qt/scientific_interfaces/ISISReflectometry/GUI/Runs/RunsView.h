@@ -12,6 +12,7 @@
 #include "IRunsView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "SearchModel.h"
 
 #include "ui_RunsWidget.h"
 #include <QBasicTimer>
@@ -31,9 +32,6 @@ class AlgorithmRunner;
 
 namespace CustomInterfaces {
 
-// Forward decs
-class SearchModel;
-
 using MantidWidgets::SlitCalculator;
 namespace DataProcessor = MantidWidgets::DataProcessor;
 
@@ -49,14 +47,17 @@ public:
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
+  void subscribeSearch(RunsViewSearchSubscriber *notifyee) override;
   IRunsTableView *table() const override;
 
   // Timer methods
   void startTimer(const int millisecs) override;
   void stopTimer() override;
 
-  // Connect the model
-  void showSearch(boost::shared_ptr<SearchModel> model) override;
+  // Search methods
+  void resizeSearchResultsColumnsToContents() override;
+  ISearchModel const &searchResults() override;
+  ISearchModel &mutableSearchResults() override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
@@ -75,7 +76,6 @@ public:
   void setProgressRange(int min, int max) override;
   void setProgress(int progress) override;
   void clearProgress() override;
-  void loginFailed(std::string const &fullError) override;
 
   // Accessor methods
   std::set<int> getSelectedSearchRows() const override;
@@ -88,11 +88,6 @@ public:
   getAlgorithmRunner() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const override;
-
-  // Start an ICAT search
-  void startIcatSearch() override;
-  void noActiveICatSessions() override;
-  void missingRunsToTransfer() override;
 
   // Live data monitor
   void startMonitor() override;
@@ -111,8 +106,9 @@ private:
 
   RunsViewSubscriber *m_notifyee;
   RunsViewTimerSubscriber *m_timerNotifyee;
+  RunsViewSearchSubscriber *m_searchNotifyee;
 
-  boost::shared_ptr<SearchModel> m_searchModel;
+  SearchModel m_searchModel;
 
   // the interface
   Ui::RunsWidget ui;

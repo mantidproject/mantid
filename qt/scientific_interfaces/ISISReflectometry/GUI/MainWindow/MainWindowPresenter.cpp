@@ -57,15 +57,5 @@ void MainWindowPresenter::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
                                                  QString("ISIS Reflectometry"));
 }
-
-/**
-   Tells the view to show the user the dialog for an algorithm
-   * @param pythonCode : [input] The algorithm as python code
-   * @return : Result of the execution
-   */
-std::string
-MainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
-  return m_view->runPythonAlgorithm(pythonCode);
-}
 } // namespace CustomInterfaces
 } // namespace MantidQt

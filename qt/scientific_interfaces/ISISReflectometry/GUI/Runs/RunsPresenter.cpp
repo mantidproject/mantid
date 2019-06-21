@@ -5,11 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
-#include "Autoreduction.h"
+#include "CatalogRunNotifier.h"
 #include "CatalogSearcher.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
-#include "GUI/Runs/IRunNotifier.h"
+#include "GUI/Common/IPythonRunner.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -51,28 +51,28 @@ namespace CustomInterfaces {
  * @param defaultInstrumentIndex The index of the instrument to have selected by
  * default.
  * @param messageHandler :: A handler to pass messages to the user
- * @param autoreduction :: [input] The autoreduction implementation
- * @param searcher :: [input] The search implementation
+ * @param pythonRunner :: [input] Interface for running python code
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
     int defaultInstrumentIndex, IMessageHandler *messageHandler,
-    IAutoreduction &autoreduction, ISearcher &searcher)
-    : m_autoreduction(autoreduction),
-      m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
+    IPythonRunner *pythonRunner)
+    : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
+      m_searcher(std::make_unique<CatalogSearcher>(pythonRunner, mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_searcher(searcher), m_instruments(instruments),
+      m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
-      m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
+      m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
   m_tablePresenter = makeRunsTablePresenter(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
   m_runNotifier->subscribe(this);
+  m_searcher->subscribe(this);
 
   updateViewWhenMonitorStopped();
 }
@@ -104,12 +104,19 @@ RunsTable &RunsPresenter::mutableRunsTable() {
    Used by the view to tell the presenter something has changed
 */
 
-void RunsPresenter::notifySearch() { search(); }
+void RunsPresenter::notifySearch() {
+  m_searcher->reset();
+  updateWidgetEnabledState();
+  search(ISearcher::SearchType::MANUAL);
+}
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
-void RunsPresenter::notifyICATSearchComplete() {
-  populateSearchResults();
+void RunsPresenter::notifySearchComplete() {
+  if (!isAutoreducing())
+    m_view->resizeSearchResultsColumnsToContents();
+
+  updateWidgetEnabledState();
 
   if (isAutoreducing())
     autoreduceNewRuns();
@@ -121,6 +128,7 @@ void RunsPresenter::notifyTransfer() {
 
 void RunsPresenter::notifyInstrumentChanged() {
   auto const instrumentName = m_view->getSearchInstrument();
+  m_searcher->reset();
   if (m_mainPresenter)
     m_mainPresenter->notifyInstrumentChanged(instrumentName);
 }
@@ -173,10 +181,14 @@ void RunsPresenter::reductionPaused() {
  * starts a search to check if there are new runs.
  */
 bool RunsPresenter::resumeAutoreduction() {
-  if (requireNewAutoreduction()) {
-    // If starting a brand new autoreduction, delete all rows / groups in
-    // existing table first.  We'll prompt the user to check it's ok to delete
-    // existing rows
+  auto const searchString = m_view->getSearchString();
+  auto const instrument = m_view->getSearchInstrument();
+
+  // Check if starting an autoreduction with new settings, reset the previous
+  // search results and clear the main table
+  if (m_searcher->searchSettingsChanged(searchString, instrument,
+                                        ISearcher::SearchType::AUTO)) {
+    // If there are unsaved changes, ask the user first
     auto ok = true;
     if (hasGroupsWithContent(runsTable().reductionJobs())) {
       ok = m_messageHandler->askUserYesNo(
@@ -184,10 +196,10 @@ bool RunsPresenter::resumeAutoreduction() {
       if (!ok)
         return false;
     }
+    m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
-  m_autoreduction.setupNewAutoreduction(m_view->getSearchString());
   checkForNewRuns();
   return true;
 }
@@ -200,7 +212,6 @@ void RunsPresenter::autoreductionResumed() {
 
 void RunsPresenter::autoreductionPaused() {
   m_runNotifier->stopPolling();
-  m_autoreduction.stop();
   m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
   tablePresenter()->autoreductionPaused();
@@ -213,7 +224,6 @@ void RunsPresenter::autoreductionCompleted() {
 }
 
 void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
-  m_instrumentChanged = true;
   m_view->setSearchInstrument(instrumentName);
   tablePresenter()->instrumentChanged(instrumentName);
 }
@@ -223,86 +233,19 @@ void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
  * there was a problem */
-bool RunsPresenter::search() {
+bool RunsPresenter::search(ISearcher::SearchType searchType) {
   auto const searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return false;
 
-  // This is breaking the abstraction provided by ISearcher, but provides a
-  // nice usability win
-  // If we're not logged into a catalog, prompt the user to do so
-  if (CatalogManager::Instance().getActiveSessions().empty()) {
-    try {
-      // TODO: replace python runner
-      // std::stringstream pythonSrc;
-      // pythonSrc << "try:\n";
-      // pythonSrc << "  algm = CatalogLoginDialog()\n";
-      // pythonSrc << "except:\n";
-      // pythonSrc << "  pass\n";
-      // m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
-    } catch (std::runtime_error &e) {
-      m_view->loginFailed(e.what());
-      return false;
-    }
-  }
-  std::string sessionId;
-  // check to see if we have any active sessions for ICAT
-  if (!CatalogManager::Instance().getActiveSessions().empty()) {
-    // we have an active session, so grab the ID
-    sessionId =
-        CatalogManager::Instance().getActiveSessions().front()->getSessionId();
-  } else {
-    // there are no active sessions, we return here to avoid an exception
-    m_view->noActiveICatSessions();
+  if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
+                                    searchType)) {
+    m_messageHandler->giveUserCritical("Catalog login failed", "Error");
     return false;
   }
-  auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
-  algSearch->initialize();
-  algSearch->setChild(true);
-  algSearch->setLogging(false);
-  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
-  algSearch->setProperty("Session", sessionId);
-  algSearch->setProperty("InvestigationId", searchString);
-  auto algRunner = m_view->getAlgorithmRunner();
-  algRunner->startAlgorithm(algSearch);
 
   return true;
-}
-
-/** Populates the search results table
- */
-void RunsPresenter::populateSearchResults() {
-  auto algRunner = m_view->getAlgorithmRunner();
-  IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
-  if (!searchAlg->isExecuted())
-    return;
-
-  // Get the results from the algorithm
-  ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
-
-  // Update the state and model
-  m_instrumentChanged = false;
-
-  if (shouldUpdateExistingSearchResults()) {
-    m_searchModel->addDataFromTable(results, m_view->getSearchInstrument());
-  } else {
-    // Create a new search results list and display it on the view
-    m_searchModel =
-        boost::make_shared<SearchModel>(results, m_view->getSearchInstrument());
-    m_view->showSearch(m_searchModel);
-  }
-}
-
-/** Determines whether to start a new autoreduction. Starts a new one if the
- * either the search number, transfer method or instrument has changed
- * @return : Boolean on whether to start a new autoreduction
- */
-bool RunsPresenter::requireNewAutoreduction() const {
-  bool searchNumChanged =
-      m_autoreduction.searchStringChanged(m_view->getSearchString());
-
-  return searchNumChanged || m_instrumentChanged;
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
@@ -314,14 +257,13 @@ void RunsPresenter::checkForNewRuns() {
 
   // Initially we just need to start an ICat search and the reduction will be
   // run when the search completes
-  m_view->startIcatSearch();
+  search(ISearcher::SearchType::AUTO);
 }
 
 /** Run an autoreduction process based on the latest search results
  */
 void RunsPresenter::autoreduceNewRuns() {
 
-  m_autoreduction.setSearchResultsExist();
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0)
@@ -338,6 +280,10 @@ bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
 
+bool RunsPresenter::searchInProgress() const {
+  return m_searcher->searchInProgress();
+}
+
 int RunsPresenter::percentComplete() const {
   if (!m_mainPresenter)
     return 0;
@@ -348,13 +294,6 @@ IRunsTablePresenter *RunsPresenter::tablePresenter() const {
   return m_tablePresenter.get();
 }
 
-bool RunsPresenter::shouldUpdateExistingSearchResults() const {
-  // Existing search results should be updated rather than replaced if
-  // autoreduction is running and has valid results
-  return m_searchModel && isAutoreducing() &&
-         m_autoreduction.searchResultsExist();
-}
-
 /** Check that the given rows are valid for a transfer and warn the user if not
  * @param rowsToTransfer : a set of row indices to transfer
  * @return : true if valid, false if not
@@ -363,7 +302,8 @@ bool RunsPresenter::validateRowsToTransfer(
     const std::set<int> &rowsToTransfer) {
   // Check that we have something to transfer
   if (rowsToTransfer.size() == 0) {
-    m_view->missingRunsToTransfer();
+    m_messageHandler->giveUserCritical(
+        "Please select at least one run to transfer.", "No runs selected");
     return false;
   }
   return true;
@@ -425,7 +365,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
     auto jobs = runsTable().reductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
-      auto &result = m_searchModel->getRowData(rowIndex);
+      auto const &result = m_searcher->getSearchResult(rowIndex);
       auto resultMetadata = metadataFromDescription(result.description);
       auto row = validateRowFromRunAndTheta(jobs, result.runNumber,
                                             resultMetadata.theta);
@@ -436,8 +376,8 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
         mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
                           resultMetadata.groupName, rowChanged);
       } else {
-        m_searchModel->setError(rowIndex,
-                                "Theta was not specified in the description.");
+        m_searcher->setSearchResultError(
+            rowIndex, "Theta was not specified in the description.");
       }
     }
 
@@ -454,9 +394,10 @@ void RunsPresenter::updateWidgetEnabledState() const {
 
   // Update components
   m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
-  m_view->setSearchTextEntryEnabled(!isAutoreducing());
-  m_view->setSearchButtonEnabled(!isAutoreducing());
-  m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing());
+  m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
+  m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
+  m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing() &&
+                                     !searchInProgress());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
   m_view->setTransferButtonEnabled(!isProcessing() && !isAutoreducing());
 }

@@ -13,6 +13,7 @@
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
+#include "ISearcher.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
@@ -30,10 +31,9 @@ class ProgressableView;
 namespace CustomInterfaces {
 
 // Forward decs
-class IAutoreduction;
 class IMessageHandler;
-class ISearcher;
-class SearchModel;
+class IPythonRunner;
+class ISearchModel;
 
 using MantidWidgets::ProgressableView;
 
@@ -52,6 +52,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
     : public IRunsPresenter,
       public RunsViewSubscriber,
       public RunNotifierSubscriber,
+      public SearcherSubscriber,
       public Mantid::API::AlgorithmObserver {
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
@@ -59,7 +60,7 @@ public:
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
                 int defaultInstrumentIndex, IMessageHandler *messageHandler,
-                IAutoreduction &autoreduction, ISearcher &searcher);
+                IPythonRunner *pythonRunner);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -93,7 +94,6 @@ public:
   void notifySearch() override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
-  void notifyICATSearchComplete() override;
   void notifyTransfer() override;
   void notifyInstrumentChanged() override;
   void notifyStartMonitor() override;
@@ -103,18 +103,19 @@ public:
   // RunNotifierSubscriber overrides
   void notifyCheckForNewRuns() override;
 
+  // SearcherSubscriber overrides
+  void notifySearchComplete() override;
+
 protected:
   IRunsTablePresenter *tablePresenter() const;
-  /// Information about the autoreduction process
-  IAutoreduction &m_autoreduction;
-  /// The search model
-  boost::shared_ptr<SearchModel> m_searchModel;
   /// The current transfer method
   std::string m_currentTransferMethod;
   /// The data processor presenters stored in a vector
   std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The run notifier implementation
   std::unique_ptr<IRunNotifier> m_runNotifier;
+  /// The search implementation
+  std::unique_ptr<ISearcher> m_searcher;
 
   std::string liveDataReductionOptions(const std::string &instrument);
 
@@ -127,26 +128,22 @@ private:
   IBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
   IMessageHandler *m_messageHandler;
-  /// The search implementation
-  ISearcher &m_searcher;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list
   int m_defaultInstrumentIndex;
-  /// Whether the instrument has been changed before a search was made with it
-  bool m_instrumentChanged;
   /// The name to use for the live data workspace
   Mantid::API::IAlgorithm_sptr m_monitorAlg;
   double m_thetaTolerance;
 
   /// searching
-  bool search();
-  void populateSearchResults();
+  bool search(ISearcher::SearchType searchType);
+  void populateSearchResults(Mantid::API::ITableWorkspace_sptr results);
+  bool searchInProgress() const;
   /// autoreduction
   bool requireNewAutoreduction() const;
   void checkForNewRuns();
   void autoreduceNewRuns();
-  bool shouldUpdateExistingSearchResults() const;
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer,

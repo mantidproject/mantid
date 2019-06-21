@@ -11,13 +11,13 @@
 #include "GUI/Batch/IBatchJobRunner.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
+#include "GUI/Common/IPythonRunner.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
 #include "GUI/Instrument/InstrumentOptionDefaults.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
-#include "GUI/Runs/IAutoreduction.h"
 #include "GUI/Runs/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearcher.h"
@@ -35,6 +35,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
@@ -51,7 +52,6 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
-  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   MOCK_METHOD0(newBatch, IBatchView *());
   MOCK_METHOD1(subscribe, void(MainWindowSubscriber *));
   MOCK_METHOD1(removeBatch, void(int));
@@ -62,7 +62,6 @@ public:
 
 class MockMainWindowPresenter : public IMainWindowPresenter {
 public:
-  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   MOCK_METHOD1(settingsChanged, void(int));
   bool isProcessing() const override { return false; }
 
@@ -111,6 +110,7 @@ public:
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
+  MOCK_METHOD0(notifySearchComplete, void());
 };
 
 class MockEventPresenter : public IEventPresenter {
@@ -184,7 +184,20 @@ public:
 
 class MockSearcher : public ISearcher {
 public:
-  MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
+  MOCK_METHOD1(subscribe, void(SearcherSubscriber *notifyee));
+  MOCK_METHOD3(search,
+               Mantid::API::ITableWorkspace_sptr(const std::string &,
+                                                 const std::string &,
+                                                 SearchType searchType));
+  MOCK_METHOD3(startSearchAsync,
+               bool(const std::string &, const std::string &, SearchType));
+  MOCK_CONST_METHOD0(searchInProgress, bool());
+  MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
+  MOCK_METHOD2(setSearchResultError, void(int, const std::string &));
+  MOCK_METHOD0(reset, void());
+  MOCK_CONST_METHOD3(searchSettingsChanged,
+                     bool(const std::string &, const std::string &,
+                          SearchType));
 };
 
 class MockRunNotifier : public IRunNotifier {
@@ -199,20 +212,16 @@ public:
   MOCK_METHOD0(notifyCheckForNewRuns, void());
 };
 
-class MockSearchModel : public SearchModel {
+class MockSearchModel : public ISearchModel {
 public:
-  MockSearchModel(std::string const &run, std::string const &description,
-                  std::string const &location)
-      : SearchModel(ITableWorkspace_sptr(), std::string()),
-        m_result(run, description, location) {}
-  ~MockSearchModel() override {}
-  MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
+  MOCK_METHOD2(addDataFromTable,
+               void(Mantid::API::ITableWorkspace_sptr, const std::string &));
+  MOCK_CONST_METHOD1(getRowData, SearchResult const &(int));
   MOCK_METHOD2(setError, void(int, std::string const &));
-
-  SearchResult const &getRowData(int) const override { return m_result; }
+  MOCK_METHOD0(clear, void());
 
 private:
-  SearchResult m_result;
+  SearchResult m_searchResult;
 };
 
 class MockMessageHandler : public IMessageHandler {
@@ -221,6 +230,11 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
+};
+
+class MockPythonRunner : public IPythonRunner {
+public:
+  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
 };
 
 /**** Saver ****/
@@ -232,19 +246,6 @@ public:
                           std::vector<std::string> const &,
                           FileFormatOptions const &));
   virtual ~MockAsciiSaver() = default;
-};
-
-/**** Autoreduction ****/
-class MockAutoreduction : public IAutoreduction {
-public:
-  MOCK_CONST_METHOD0(running, bool());
-  MOCK_CONST_METHOD1(searchStringChanged, bool(const std::string &));
-  MOCK_CONST_METHOD0(searchResultsExist, bool());
-  MOCK_METHOD0(setSearchResultsExist, void());
-
-  MOCK_METHOD1(setupNewAutoreduction, void(const std::string &));
-  MOCK_METHOD0(pause, bool());
-  MOCK_METHOD0(stop, void());
 };
 
 /**** Job runner ****/
