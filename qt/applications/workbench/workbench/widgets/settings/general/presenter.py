@@ -33,10 +33,13 @@ class GeneralSettings(object):
 
     def __init__(self, parent, view=None):
         self.view = view if view else GeneralSettingsView(parent, self)
+        self.parent = parent
         self.load_current_setting_values()
 
         self.setup_facilities_group()
         self.setup_checkbox_signals()
+
+        self.setup_layout_options()
 
         self.setup_confirmations()
 
@@ -112,3 +115,49 @@ class GeneralSettings(object):
 
     def action_show_invisible_workspaces(self, state):
         ConfigService.setString(self.SHOW_INVISIBLE_WORKSPACES, str(bool(state)))
+
+    def setup_layout_options(self):
+        self.fill_layout_display()
+        self.view.save_layout.clicked.connect(self.save_layout)
+        self.view.load_layout.clicked.connect(self.load_layout)
+        self.view.delete_layout.clicked.connect(self.delete_layout)
+
+    def fill_layout_display(self):
+        self.view.layout_display.clear()
+        layout_dict = self.get_layout_dict()
+        layout_list = layout_dict.keys()
+        layout_list.sort()
+        for item in layout_list:
+            self.view.layout_display.addItem(item)
+
+    def get_layout_dict(self):
+        try:
+            layout_list = CONF.get("MainWindow/user_layouts")
+        except KeyError:
+            layout_list = {}
+        return layout_list
+
+    def save_layout(self):
+        filename = self.view.new_layout_name.text()
+        layout_dict = self.get_layout_dict()
+        layout_dict[filename] = self.parent.saveState()
+        if filename == "":
+            pass
+        else:
+            CONF.set("MainWindow/user_layouts", layout_dict)
+        self.view.new_layout_name.clear()
+        self.fill_layout_display()
+        self.parent.populate_layout_menu()
+
+    def load_layout(self):
+        layout = self.view.layout_display.currentItem().text()
+        layout_dict = self.get_layout_dict()
+        self.parent.restoreState(layout_dict[layout])
+
+    def delete_layout(self):
+        layout = self.view.layout_display.currentItem().text()
+        layout_dict = self.get_layout_dict()
+        layout_dict.pop(layout, None)
+        CONF.set("MainWindow/user_layouts", layout_dict)
+        self.fill_layout_display()
+        self.parent.populate_layout_menu()

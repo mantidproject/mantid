@@ -18,7 +18,8 @@ Improvements
 - Mantid's offline help is now available in Workbench.
 - A colorfill plot of a workspace with logarithmic bins is plotted on a log scale.
 - You can now toggle the normalization of plots in Workbench from the plot's context menu
-- You can now set a default user layout from the view menu that will be loaded on startup.
+- You can now save, load and delete custom layouts from the settings menu with quick access to user layout in the view
+  menu.
 
 Bugfixes
 ########

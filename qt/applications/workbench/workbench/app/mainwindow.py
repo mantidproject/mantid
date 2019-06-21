@@ -163,6 +163,7 @@ class MainWindow(QMainWindow):
         self.file_menu_actions = None
         self.view_menu = None
         self.view_menu_actions = None
+        self.view_menu_layouts = None
         self.interfaces_menu = None
         self.help_menu = None
         self.help_menu_actions = None
@@ -238,7 +239,7 @@ class MainWindow(QMainWindow):
         self.readSettings(CONF)
         self.config_updated()
 
-        self.load_layout_settings()
+        self.setup_default_layouts()
         self.create_actions()
 
     def post_mantid_init(self):
@@ -302,17 +303,11 @@ class MainWindow(QMainWindow):
             self, "Restore Default Layout",
             on_triggered=self.setup_default_layouts,
             shortcut="Shift+F10", shortcut_context=Qt.ApplicationShortcut)
-        action_save_user_layout = create_action(
-            self, "Save Custom Layout",
-            on_triggered=self.save_layout_settings,
-            shortcut_context=Qt.ApplicationShortcut)
-        action_load_user_layout = create_action(
-            self, "Restore Custom Layout",
-            on_triggered=self.load_layout_settings,
-            shortcut="Shift+F11", shortcut_context=Qt.ApplicationShortcut)
 
-        self.view_menu_actions = [action_restore_default, action_save_user_layout, action_load_user_layout,
-                                  None] + self.create_widget_actions()
+        self.view_menu_layouts = self.view_menu.addMenu("&User Layouts")
+        self.populate_layout_menu()
+
+        self.view_menu_actions = [action_restore_default, None] + self.create_widget_actions()
 
         # help menu
         action_mantid_help = create_action(
@@ -425,17 +420,25 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Layout ---------------------------------
 
-    def save_layout_settings(self):
-        """Save the current layout to configuration"""
-        CONF.set("MainWindow/UserLayout", self.saveState())
-
-    def load_layout_settings(self):
-        """Load a layout for the child widgets from the user config,
-        if no user default exists load the default"""
+    def populate_layout_menu(self):
+        self.view_menu_layouts.clear()
         try:
-            self.restoreState(CONF.get("MainWindow/UserLayout"))
+            layout_dict = CONF.get("MainWindow/user_layouts")
         except KeyError:
-            self.setup_default_layouts()  # If user layout not found load default
+            layout_dict = {}
+        layout_keys = layout_dict.keys()
+        layout_keys.sort()
+        layout_options = []
+        for item in layout_keys:
+            layout_options.append(self.create_load_layout_action(item, layout_dict[item]))
+
+        add_actions(self.view_menu_layouts, layout_options)
+
+    def create_load_layout_action(self, layout_name, layout):
+        action_load_layout = create_action(
+            self, layout_name,
+            on_triggered=lambda: self.restoreState(layout))
+        return action_load_layout
 
     def prep_window_for_reset(self):
         """Function to reset all dock widgets to a state where they can be
