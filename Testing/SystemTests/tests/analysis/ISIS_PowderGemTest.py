@@ -110,6 +110,7 @@ class CreateCalTest(systemtesting.MantidSystemTest):
         self.focus_results = run_calibration()
 
     def validate(self):
+        self.tolerance = 1e-5
         return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
 
     def cleanup(self):
