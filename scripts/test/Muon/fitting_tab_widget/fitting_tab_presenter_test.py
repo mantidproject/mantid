@@ -14,6 +14,9 @@ from qtpy import QtWidgets
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
+EXAMPLE_TF_ASYMMETRY_FUNCTION = '(composite=ProductFunction,NumDeriv=false;name=FlatBackground,A0=1.02709;' \
+                                '(name=FlatBackground,A0=1,ties=(A0=1);name=ExpDecayOsc,A=0.2,Lambda=0.2,Frequency=0.1,Phi=0))' \
+                                ';name=ExpDecayMuon,A=0,Lambda=-2.19698,ties=(A=0,Lambda=-2.19698)'
 
 def retrieve_combobox_info(combo_box):
     output_list = []
@@ -37,6 +40,7 @@ class FittingTabPresenterTest(GuiTest):
         self.widget = FittingTabWidget(self.context, parent=None)
         self.presenter = self.widget.fitting_tab_presenter
         self.view = self.widget.fitting_tab_view
+        self.view.warning_popup = mock.MagicMock()
         self.presenter.model = mock.MagicMock()
         self.presenter.model.get_function_name.return_value = 'GausOsc'
 
@@ -331,6 +335,121 @@ class FittingTabPresenterTest(GuiTest):
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 
         self.assertEqual(self.view.function_name, 'test function')
+
+    def test_check_workspaces_are_tf_asymmetry_compliant(self):
+        list_of_lists_to_test = [
+            ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+             'MUSR22725; Group; fwd; Asymmetry'],
+            ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+             'MUSR22725; Pair; long; Asymmetry'],
+            ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+             'MUSR22725; PhaseQuad']
+        ]
+
+        expected_results = [True, False, False]
+
+        for workspace_list, expected_result in zip(list_of_lists_to_test, expected_results):
+            result = self.presenter.check_workspaces_are_tf_asymmetry_compliant(workspace_list)
+            self.assertEqual(result, expected_result)
+
+    def test_get_parameters_for_tf_function_calculation_for_turning_mode_on(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; Asymmetry']
+        self.view.tf_asymmetry_mode_checkbox.blockSignals(True)
+        self.view.tf_asymmetry_mode = True
+        self.view.tf_asymmetry_mode_checkbox.blockSignals(False)
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.selected_data = new_workspace_list
+
+        result = self.presenter.get_parameters_for_tf_function_calculation(fit_function)
+
+        self.assertEqual(result, {'InputFunction': fit_function, 'WorkspaceList': new_workspace_list,
+                                  'Mode': 'Construct'})
+
+    def test_get_parameters_for_tf_function_calculation_for_turning_mode_off(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; Asymmetry']
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.selected_data = new_workspace_list
+
+        result = self.presenter.get_parameters_for_tf_function_calculation(fit_function)
+
+        self.assertEqual(result, {'InputFunction': fit_function, 'WorkspaceList': new_workspace_list,
+                                  'Mode': 'Extract'})
+
+
+    def test_handle_asymmetry_mode_changed_reverts_changed_and_shows_error_if_non_pair_selected(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Pair; fwd; Long']
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.view.function_browser.setFunction(str(fit_function))
+        self.presenter.selected_data = new_workspace_list
+
+        self.view.tf_asymmetry_mode = True
+
+        self.view.warning_popup.assert_called_once_with('Can only fit groups in tf asymmetry mode and need a function defined')
+
+    def test_handle_asymmetry_mode_correctly_updates_function_for_a_single_fit(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry']
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function_2 = FunctionFactory.createInitialized('name=GausOsc,A=1.0,Sigma=2.5,Frequency=0.1,Phi=0')
+        self.view.function_browser.setFunction(str(fit_function))
+        self.presenter.selected_data = new_workspace_list
+        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+
+        self.view.tf_asymmetry_mode = True
+
+        self.assertEqual(str(self.view.fit_object), str(fit_function_2))
+        self.assertEqual([str(item) for item in self.presenter._fit_function], [str(fit_function_2)])
+
+    def test_handle_asymmetry_mode_correctly_updates_function_for_a_sequential_fit(self):
+        self.view.sequential_fit_radio.toggle()
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; fwd']
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function_2 = FunctionFactory.createInitialized('name=GausOsc,A=1.0,Sigma=2.5,Frequency=0.1,Phi=0')
+        self.view.function_browser.setFunction(str(fit_function))
+        self.presenter.selected_data = new_workspace_list
+        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+
+        self.view.tf_asymmetry_mode = True
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function], [str(fit_function_2)]*3)
+        self.assertEqual(str(self.view.fit_object), str(fit_function_2))
+
+    def test_handle_asymmetry_mode_correctly_updates_function_for_sumultaneous_fit(self):
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.view.function_browser.setFunction(str(fit_function))
+        self.view.simul_fit_radio.toggle()
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; fwd']
+        self.presenter.selected_data = new_workspace_list
+        fit_function_2 = self.view.fit_object.clone()
+        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+
+        self.view.tf_asymmetry_mode = True
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function], [str(fit_function_2)] * 3)
+        self.assertEqual(str(self.view.fit_object), str(fit_function_2))
+
+    def test_handle_tf_asymmetry_mode_succesfully_converts_back(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; fwd']
+        self.presenter.selected_data = new_workspace_list
+        self.view.function_browser.setFunction(EXAMPLE_TF_ASYMMETRY_FUNCTION)
+        self.view.tf_asymmetry_mode_checkbox.blockSignals(True)
+        self.view.tf_asymmetry_mode = True
+        self.presenter._tf_asymmetry_mode = True
+        self.view.tf_asymmetry_mode_checkbox.blockSignals(False)
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.model.calculate_tf_function.return_value = fit_function
+
+        self.view.tf_asymmetry_mode = False
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function], ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0',
+                                                                                'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0',
+                                                                                'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'])
+        self.assertEqual(str(self.view.fit_object), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_
 import mantid
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fit_workspace_directory
-from mantid.simpleapi import RenameWorkspace, CopyLogs
+from mantid.simpleapi import RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CopyLogs
 
 
 class FittingTabModel(object):
@@ -71,6 +71,8 @@ class FittingTabModel(object):
         return name, directory
 
     def do_simultaneous_fit(self, parameter_dict, global_parameters):
+        import pydevd
+        pydevd.settrace('localhost', port=5544, stdoutToServer=True, stderrToServer=True)
         fit_group_name = parameter_dict.pop('FitGroupName')
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared = \
             self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
@@ -86,6 +88,9 @@ class FittingTabModel(object):
             workspace_name = self.rename_members_of_fitted_workspace_group(output_workspace, parameter_dict['InputWorkspace'],
                                                                            parameter_dict['Function'],
                                                                            fit_group_name)
+        else:
+            workspace_name = [workspace_name]
+
         wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
                                                                 table_directory)
         self.add_fit_to_context(wrapped_parameter_workspace,
@@ -172,3 +177,6 @@ class FittingTabModel(object):
         self.context.fitting_context.add_fit_from_values(
             parameter_workspace, self.function_name,
             input_workspace, output_workspace_name, global_parameters)
+
+    def calculate_tf_function(self, algorithm_parameters):
+        return ConvertFitFunctionForMuonTFAsymmetry(StoreInADS=False, **algorithm_parameters)
