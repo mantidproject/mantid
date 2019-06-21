@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/SolidAngle.h"
@@ -223,6 +224,29 @@ private:
   std::string inputSpace;
   std::string outputSpace;
   enum { Nhist = 144 };
+};
+
+class SolidAngleTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    FrameworkManager::Instance();
+    m_creator.initialize();
+    m_creator.setProperty("NumBanks", 100);
+    m_creator.setProperty("BankPixelWidth", 200);
+    m_creator.setPropertyValue("OutputWorkspace", "__ws");
+    m_creator.execute();
+    m_testee.initialize();
+    MatrixWorkspace_sptr ws = m_creator.getProperty("OutputWorkspace");
+    m_testee.setPropertyValue("InputWorkspace", "__ws");
+    m_testee.setPropertyValue("OutputWorkspace", "__ws");
+  }
+  void testSolidAnglePerformance() {
+    TS_ASSERT_THROWS_NOTHING(m_testee.execute());
+  }
+
+private:
+  SolidAngle m_testee;
+  CreateSampleWorkspace m_creator;
 };
 
 #endif /*SOLIDANGLETEST_H_*/

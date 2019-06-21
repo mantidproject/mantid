@@ -118,7 +118,7 @@ struct Rectangle : public SolidAngleCalculator {
   double solidAngle(size_t index) const override {
     const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
     const double l2 = m_detectorInfo.l2(index);
-    Kernel::V3D scaleFactor = m_componentInfo.scaleFactor(index);
+    const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
         m_pixelArea * scaleFactor[0] * scaleFactor[1];
     return scaledPixelArea * cosTheta / (l2 * l2);
@@ -130,7 +130,7 @@ struct Tube : public SolidAngleCalculator {
   double solidAngle(size_t index) const override {
     const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
     const double l2 = m_detectorInfo.l2(index);
-    Kernel::V3D scaleFactor = m_componentInfo.scaleFactor(index);
+    const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
         m_pixelArea * scaleFactor[0] * scaleFactor[1];
     return scaledPixelArea * cosAlpha / (l2 * l2);
@@ -143,7 +143,7 @@ struct Wing : public SolidAngleCalculator {
     const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
     const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
     const double l2 = m_detectorInfo.l2(index);
-    Kernel::V3D scaleFactor = m_componentInfo.scaleFactor(index);
+    const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
         m_pixelArea * scaleFactor[0] * scaleFactor[1];
     return scaledPixelArea * cosAlpha * cosAlpha * cosAlpha /
