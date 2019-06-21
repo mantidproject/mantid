@@ -57,11 +57,9 @@ void SingleSelector::init() {
 
   m_singleMarker->setLineStyle(lineStyle);
   m_singleMarker->attach(m_plot);
-  m_singleMarker->setYValue(0.0);
+  m_singleMarker->setYValue(1.0);
 
-  m_markerMoving = false;
-
-  setPosition(100); // known starting values
+  setPosition(m_position);
 
   m_pen = new QPen();
   m_pen->setColor(Qt::blue);
@@ -90,16 +88,10 @@ bool SingleSelector::eventFilter(QObject *obj, QEvent *evn) {
       xPlusdx = m_plot->invTransform(QwtPlot::yLeft, p.y() + 3);
       break;
     }
-    if (isInsideBounds(x)) {
-      if (isMarkerMoving(x, xPlusdx)) {
-        m_markerMoving = true;
-        m_canvas->setCursor(m_moveCursor);
-        setPosition(x);
-        m_plot->replot();
-        return true;
-      } else {
-        return false;
-      }
+    if (isInsideBounds(x) && isMarkerMoving(x, xPlusdx)) {
+      m_markerMoving = true;
+      m_canvas->setCursor(m_moveCursor);
+      return true;
     } else {
       return false;
     }
@@ -133,16 +125,14 @@ bool SingleSelector::eventFilter(QObject *obj, QEvent *evn) {
     }
     break;
   }
-  case QEvent::MouseButtonRelease: // User has finished moving something
-                                   // (perhaps)
-  {
-    if (m_markerMoving) {
-      m_canvas->setCursor(Qt::PointingHandCursor);
-      m_markerMoving = false;
+  case QEvent::MouseButtonRelease: {
+    m_canvas->setCursor(Qt::PointingHandCursor);
+    m_markerMoving = false;
+
+    if (m_markerMoving)
       return true;
-    } else {
+    else
       return false;
-    }
     break;
   }
   default:
@@ -188,8 +178,10 @@ void SingleSelector::setLinePosition(const double position) {
   switch (m_type) {
   case XSINGLE:
     m_singleMarker->setValue(position, 1.0);
+    break;
   case YSINGLE:
     m_singleMarker->setValue(1.0, position);
+    break;
   }
   m_plot->replot();
 }
@@ -238,8 +230,7 @@ void SingleSelector::detach() { m_singleMarker->attach(nullptr); }
  * @return
  */
 bool SingleSelector::isMarkerMoving(double x, double xPlusdx) {
-  return true;
-  //(fabs(x - m_min) <= fabs(xPlusdx - x));
+  return (fabs(x - m_position) <= fabs(xPlusdx - x));
 }
 
 /**

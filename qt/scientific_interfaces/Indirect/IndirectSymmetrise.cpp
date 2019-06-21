@@ -105,21 +105,6 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   auto positiveERaw = m_uiForm.ppRawPlot->addRangeSelector("PositiveE");
   positiveERaw->setColour(Qt::darkGreen);
 
-  // Indicators for negative and positive X range values on X axis
-  auto negativeEPV = m_uiForm.ppPreviewPlot->addRangeSelector("NegativeE");
-  negativeEPV->setColour(Qt::darkGreen);
-
-  auto positiveEPV = m_uiForm.ppPreviewPlot->addRangeSelector("PositiveE");
-  positiveEPV->setColour(Qt::darkGreen);
-
-  // Indicator for centre of symmetry (x=0)
-  auto const xPreviewLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::XBottom);
-  auto centreMarkPV = m_uiForm.ppPreviewPlot->addSingleSelector(
-      "CentreMark", MantidWidgets::SingleSelector::XSINGLE, 0.0);
-  centreMarkPV->setColour(Qt::cyan);
-  centreMarkPV->setBounds(std::get<0>(xPreviewLimits),
-                          std::get<1>(xPreviewLimits));
-
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
@@ -514,25 +499,17 @@ void IndirectSymmetrise::previewAlgDone(bool error) {
 void IndirectSymmetrise::updateRangeSelectors(QtProperty *prop, double value) {
   auto negativeERaw = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
   auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
-  auto negativeEPV = m_uiForm.ppPreviewPlot->getRangeSelector("NegativeE");
-  auto positiveEPV = m_uiForm.ppPreviewPlot->getRangeSelector("PositiveE");
 
   value = fabs(value);
 
   if (prop == m_properties["EMin"]) {
     negativeERaw->setMaximum(-value);
     positiveERaw->setMinimum(value);
-
-    negativeEPV->setMinimum(-value);
-    positiveEPV->setMinimum(value);
   }
 
   if (prop == m_properties["EMax"]) {
     negativeERaw->setMinimum(-value);
     positiveERaw->setMaximum(value);
-
-    negativeEPV->setMaximum(-value);
-    positiveEPV->setMaximum(value);
   }
 }
 

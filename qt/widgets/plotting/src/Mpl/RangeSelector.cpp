@@ -72,10 +72,10 @@ void RangeSelector::setRange(const std::pair<double, double> &range) {
 
 void RangeSelector::setRange(const double min, const double max) {
   m_rangeMarker->setRange(min, max);
-  m_plot->replot();
   emit selectionChanged(min, max);
   emit minValueChanged(min);
   emit maxValueChanged(max);
+  m_plot->replot();
 }
 
 std::pair<double, double> RangeSelector::getRange() const {
@@ -86,11 +86,13 @@ std::pair<double, double> RangeSelector::getRange() const {
 void RangeSelector::setMinimum(const double min) {
   m_rangeMarker->setMinimum(min);
   emit minValueChanged(min);
+  m_plot->replot();
 }
 
 void RangeSelector::setMaximum(const double max) {
   m_rangeMarker->setMaximum(max);
   emit maxValueChanged(max);
+  m_plot->replot();
 }
 
 double RangeSelector::getMinimum() const { return m_rangeMarker->getMinimum(); }
@@ -112,21 +114,25 @@ void RangeSelector::setColour(const QColor &colour) {
 }
 
 void RangeSelector::handleMouseDown(const QPoint &point) {
-  const auto dataCoords = m_plot->toDataCoords(point);
-  m_rangeMarker->mouseMoveStart(dataCoords.x(), dataCoords.y());
+  if (m_visible) {
+    const auto dataCoords = m_plot->toDataCoords(point);
+    m_rangeMarker->mouseMoveStart(dataCoords.x(), dataCoords.y());
+  }
 }
 
 void RangeSelector::handleMouseMove(const QPoint &point) {
-  const auto dataCoords = m_plot->toDataCoords(point);
-  const auto markerMoved =
-      m_rangeMarker->mouseMove(dataCoords.x(), dataCoords.y());
+  if (m_visible) {
+    const auto dataCoords = m_plot->toDataCoords(point);
+    const auto markerMoved =
+        m_rangeMarker->mouseMove(dataCoords.x(), dataCoords.y());
 
-  if (markerMoved) {
-    const auto range = getRange();
-    emit selectionChanged(range.first, range.second);
-    emit minValueChanged(range.first);
-    emit maxValueChanged(range.second);
-    m_plot->replot();
+    if (markerMoved) {
+      const auto range = getRange();
+      emit selectionChanged(range.first, range.second);
+      emit minValueChanged(range.first);
+      emit maxValueChanged(range.second);
+      m_plot->replot();
+    }
   }
 }
 

@@ -110,19 +110,23 @@ void SingleSelector::setColour(const QColor &colour) {
 }
 
 void SingleSelector::handleMouseDown(const QPoint &point) {
-  const auto dataCoords = m_plot->toDataCoords(point);
-  m_singleMarker->mouseMoveStart(dataCoords.x(), dataCoords.y());
+  if (m_visible) {
+    const auto dataCoords = m_plot->toDataCoords(point);
+    m_singleMarker->mouseMoveStart(dataCoords.x(), dataCoords.y());
+  }
 }
 
 void SingleSelector::handleMouseMove(const QPoint &point) {
-  const auto dataCoords = m_plot->toDataCoords(point);
-  const auto markerMoved =
-      m_singleMarker->mouseMove(dataCoords.x(), dataCoords.y());
+  if (m_visible) {
+    const auto dataCoords = m_plot->toDataCoords(point);
+    const auto markerMoved =
+        m_singleMarker->mouseMove(dataCoords.x(), dataCoords.y());
 
-  if (markerMoved) {
-    m_plot->replot();
-    const auto newPosition = getPosition();
-    emit valueChanged(newPosition);
+    if (markerMoved) {
+      m_plot->replot();
+      const auto newPosition = getPosition();
+      emit valueChanged(newPosition);
+    }
   }
 }
 
