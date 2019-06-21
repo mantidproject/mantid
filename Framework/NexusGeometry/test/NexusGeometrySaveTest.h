@@ -33,23 +33,6 @@ public:
 
 //---------------------------------------------------------------------
 
-class HDF5FileTestUtility {
-
-public:
-  HDF5FileTestUtility(
-      std::string &inputPath); //H5::H5Object &object);
-
-  bool hasNxClass(std::string className, std::string HDF5Path) const;
-  bool objattrExists(const H5std_string str) const;
-  int numOfAttr() const;
-
-private:
-  std::string m_destination, m_className, m_HDF5Path;
-  H5::H5Object &m_obj; // imported namespace h5 from include header file
-};
-
-//-------------------------------------------------------------------
-
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -68,20 +51,6 @@ public:
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     std::string path = "invalid_path"; // valid path
-
-    TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
-                     std::invalid_argument &);
-  }
-
-  void test_providing_no_path_throws() {
-
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        Mantid::Kernel::V3D(1, 1, 1));
-
-    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    std::string path = ""; // path is empty string
 
     TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
                      std::invalid_argument &);
@@ -113,21 +82,28 @@ public:
     //--------------------------------------------------------------------
 
     // destination folder for outputfile-----------------------------------
-    // std::string destinationFile = "f"; // some path to save the hdf5 file
 
-    // saveInstrument(*inst2.first,
-    //               destinationFile); //, progress); <-optional pointer
+    std::string destinationFile =
+        "C:\\Users\\mqi61253\\WISH_Definition_10Panels.hdf5"; // some path to
+                                                              // save the hdf5
+                                                              // file
 
     // Check file itself.
-    // HDF5FileTestUtility tester(
-    //   destinationFile); // class that takes hdf5 file and tests that is has
-    // attributes and classes (see provided links) among
-    // other things
+
+    saveInstrument(*inst2.first,
+                   destinationFile); //, progress); <-optional pointer
+
+    // HDF5FileTestUtility tester(destinationFile);
+
+    /*
+    class that takes hdf5 file and tests that is has
+    attributes and classes (see provided links) among
+    other things
+        */
 
     //    ASSERT_TRUE(tester.hasNxClass(
     //      "NXinstrument", "/raw_data_1/instrument")); // goto arg1 in hdf5
-    //      file
-    // and check if arg0 exists
+    //      file and check if arg0 exists
   }
 };
 
