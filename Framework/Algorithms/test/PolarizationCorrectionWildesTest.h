@@ -619,7 +619,7 @@ public:
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
-    effWS->replaceAxis(1, axis.release());
+    effWS->replaceAxis(1, std::move(axis));
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -748,7 +748,7 @@ private:
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
-    ws->replaceAxis(1, axis.release());
+    ws->replaceAxis(1, std::move(axis));
     return ws;
   }
 
@@ -770,7 +770,7 @@ private:
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
-    ws->replaceAxis(1, axis.release());
+    ws->replaceAxis(1, std::move(axis));
     return ws;
   }
 

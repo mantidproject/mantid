@@ -1412,7 +1412,7 @@ void LeBailFit::createOutputDataWorkspace() {
   // 4. Set axis
   m_outputWS->getAxis(0)->setUnit("TOF");
 
-  API::TextAxis *tAxis = new API::TextAxis(nspec);
+  auto tAxis = std::make_unique<API::TextAxis>(nspec);
   tAxis->setLabel(0, "Data");
   tAxis->setLabel(1, "Calc");
   tAxis->setLabel(2, "Diff");
@@ -1432,7 +1432,7 @@ void LeBailFit::createOutputDataWorkspace() {
     }
   }
 
-  m_outputWS->replaceAxis(1, tAxis);
+  m_outputWS->replaceAxis(1, std::move(tAxis));
 }
 
 // ====================================== Random Walk Suite

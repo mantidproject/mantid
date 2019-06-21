@@ -401,8 +401,8 @@ public:
   virtual std::vector<signal_t> getErrorDataVector() const;
 
   /// Apply masking.
-  void
-  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override;
+  void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
+                        maskingRegion) override;
   /// Apply masking.
   void setMDMaskAt(const size_t &index, bool mask);
 

@@ -318,6 +318,8 @@
           <xs:attribute name="p-end"/>
           <xs:attribute name="rot-end"/>
           <xs:attribute name="n-elements"/>
+		  <xs:attribute name="name-count-start"/>
+		  <xs:attribute name="name-count-increment"/>
         </xs:complexType>
       </xs:element>
       <!--LOCATION ELEMENT-->

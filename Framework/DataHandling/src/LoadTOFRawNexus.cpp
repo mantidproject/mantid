@@ -108,40 +108,40 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
   bankNames.clear();
 
   // Create the root Nexus class
-  auto file = new ::NeXus::File(nexusfilename);
+  auto file = ::NeXus::File(nexusfilename);
 
   // Open the default data group 'entry'
-  file->openGroup(entry_name, "NXentry");
+  file.openGroup(entry_name, "NXentry");
   // Also pop into the instrument
-  file->openGroup("instrument", "NXinstrument");
+  file.openGroup("instrument", "NXinstrument");
 
   // Look for all the banks
-  std::map<std::string, std::string> entries = file->getEntries();
+  std::map<std::string, std::string> entries = file.getEntries();
   std::map<std::string, std::string>::iterator it;
   for (it = entries.begin(); it != entries.end(); ++it) {
     std::string name = it->first;
     if (name.size() > 4) {
       if (name.substr(0, 4) == "bank") {
         // OK, this is some bank data
-        file->openGroup(name, it->second);
+        file.openGroup(name, it->second);
 
         // -------------- Find the data field name ----------------------------
         if (m_dataField.empty()) {
-          std::map<std::string, std::string> dataEntries = file->getEntries();
+          std::map<std::string, std::string> dataEntries = file.getEntries();
           for (auto dataEntryIt = dataEntries.begin();
                dataEntryIt != dataEntries.end(); ++dataEntryIt) {
             if (dataEntryIt->second == "SDS") {
-              file->openData(dataEntryIt->first);
-              if (file->hasAttr("signal")) {
+              file.openData(dataEntryIt->first);
+              if (file.hasAttr("signal")) {
                 int signal = 0;
-                file->getAttr("signal", signal);
+                file.getAttr("signal", signal);
                 if (signal == m_signalNo) {
                   // That's the right signal!
                   m_dataField = dataEntryIt->first;
                   // Find the corresponding X axis
                   std::string axes;
                   m_assumeOldFile = false;
-                  if (!file->hasAttr("axes")) {
+                  if (!file.hasAttr("axes")) {
                     if (1 != m_signalNo) {
                       throw std::runtime_error(
                           "Your chosen signal number, " +
@@ -155,7 +155,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                   }
 
                   if (!m_assumeOldFile) {
-                    file->getAttr("axes", axes);
+                    file.getAttr("axes", axes);
                   }
 
                   std::vector<std::string> allAxes;
@@ -174,15 +174,15 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                   g_log.information()
                       << "Loading signal " << m_signalNo << ", " << m_dataField
                       << " with axis " << m_axisField << '\n';
-                  file->closeData();
+                  file.closeData();
                   break;
                 } // Data has a 'signal' attribute
               }   // Yes, it is a data field
-              file->closeData();
+              file.closeData();
             } // each entry in the group
           }
         }
-        file->closeGroup();
+        file.closeGroup();
       } // bankX name
     }
   } // each entry
@@ -198,16 +198,16 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
     if (name.size() > 4) {
       if (name.substr(0, 4) == "bank") {
         // OK, this is some bank data
-        file->openGroup(name, it->second);
-        const auto bankEntries = file->getEntries();
+        file.openGroup(name, it->second);
+        const auto bankEntries = file.getEntries();
 
         if (bankEntries.find("pixel_id") != bankEntries.end()) {
           bankNames.push_back(name);
 
           // Count how many pixels in the bank
-          file->openData("pixel_id");
-          std::vector<int64_t> dims = file->getInfo().dims;
-          file->closeData();
+          file.openData("pixel_id");
+          std::vector<int64_t> dims = file.getInfo().dims;
+          file.closeData();
 
           if (!dims.empty()) {
             const size_t newPixels = std::accumulate(
@@ -219,13 +219,13 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
           bankNames.push_back(name);
 
           // Get the number of pixels from the offsets arrays
-          file->openData("x_pixel_offset");
-          std::vector<int64_t> xdim = file->getInfo().dims;
-          file->closeData();
+          file.openData("x_pixel_offset");
+          std::vector<int64_t> xdim = file.getInfo().dims;
+          file.closeData();
 
-          file->openData("y_pixel_offset");
-          std::vector<int64_t> ydim = file->getInfo().dims;
-          file->closeData();
+          file.openData("y_pixel_offset");
+          std::vector<int64_t> ydim = file.getInfo().dims;
+          file.closeData();
 
           if (!xdim.empty() && !ydim.empty()) {
             m_numPixels += (xdim[0] * ydim[0]);
@@ -234,25 +234,23 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 
         if (bankEntries.find(m_axisField) != bankEntries.end()) {
           // Get the size of the X vector
-          file->openData(m_axisField);
-          std::vector<int64_t> dims = file->getInfo().dims;
+          file.openData(m_axisField);
+          std::vector<int64_t> dims = file.getInfo().dims;
           // Find the units, if available
-          if (file->hasAttr("units"))
-            file->getAttr("units", m_xUnits);
+          if (file.hasAttr("units"))
+            file.getAttr("units", m_xUnits);
           else
             m_xUnits = "microsecond"; // use default
-          file->closeData();
+          file.closeData();
           if (!dims.empty())
             m_numBins = dims[0] - 1;
         }
 
-        file->closeGroup();
+        file.closeGroup();
       } // bankX name
     }
   } // each entry
-  file->close();
-
-  delete file;
+  file.close();
 }
 
 /*for (std::vector<uint32_t>::iterator it = pixel_id.begin(); it !=
@@ -301,20 +299,20 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   m_fileMutex.lock();
 
   // Navigate to the point in the file
-  auto file = new ::NeXus::File(nexusfilename);
-  file->openGroup(entry_name, "NXentry");
-  file->openGroup("instrument", "NXinstrument");
-  file->openGroup(bankName, "NXdetector");
+  auto file = ::NeXus::File(nexusfilename);
+  file.openGroup(entry_name, "NXentry");
+  file.openGroup("instrument", "NXinstrument");
+  file.openGroup(bankName, "NXdetector");
 
   size_t m_numPixels = 0;
   std::vector<uint32_t> pixel_id;
 
   if (!m_assumeOldFile) {
     // Load the pixel IDs
-    file->readData("pixel_id", pixel_id);
+    file.readData("pixel_id", pixel_id);
     m_numPixels = pixel_id.size();
     if (m_numPixels == 0) {
-      file->close();
+      file.close();
       m_fileMutex.unlock();
       g_log.warning() << "Invalid pixel_id data in " << bankName << '\n';
       return;
@@ -323,12 +321,12 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     // Load the x and y pixel offsets
     std::vector<float> xoffsets;
     std::vector<float> yoffsets;
-    file->readData("x_pixel_offset", xoffsets);
-    file->readData("y_pixel_offset", yoffsets);
+    file.readData("x_pixel_offset", xoffsets);
+    file.readData("y_pixel_offset", yoffsets);
 
     m_numPixels = xoffsets.size() * yoffsets.size();
     if (0 == m_numPixels) {
-      file->close();
+      file.close();
       m_fileMutex.unlock();
       g_log.warning() << "Invalid (x,y) offsets in " << bankName << '\n';
       return;
@@ -340,7 +338,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
         bankNum = boost::lexical_cast<size_t>(bankName.substr(4));
         bankNum--;
       } else {
-        file->close();
+        file.close();
         m_fileMutex.unlock();
         g_log.warning() << "Invalid bank number for " << bankName << '\n';
         return;
@@ -370,7 +368,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
       iPart = m_numPixels - pixel_id.size();
     m_numPixels = pixel_id.size();
     if (m_numPixels == 0) {
-      file->close();
+      file.close();
       m_fileMutex.unlock();
       g_log.warning() << "No pixels from " << bankName << '\n';
       return;
@@ -378,10 +376,10 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   }
   // Load the TOF vector
   std::vector<float> tof;
-  file->readData(m_axisField, tof);
+  file.readData(m_axisField, tof);
   size_t m_numBins = tof.size() - 1;
   if (tof.size() <= 1) {
-    file->close();
+    file.close();
     m_fileMutex.unlock();
     g_log.warning() << "Invalid " << m_axisField << " data in " << bankName
                     << '\n';
@@ -393,20 +391,20 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   // Load the data. Coerce ints into double.
   std::string errorsField;
   std::vector<double> data;
-  file->openData(m_dataField);
-  file->getDataCoerce(data);
-  if (file->hasAttr("errors"))
-    file->getAttr("errors", errorsField);
-  file->closeData();
+  file.openData(m_dataField);
+  file.getDataCoerce(data);
+  if (file.hasAttr("errors"))
+    file.getAttr("errors", errorsField);
+  file.closeData();
 
   // Load the errors
   bool hasErrors = !errorsField.empty();
   std::vector<double> errors;
   if (hasErrors) {
     try {
-      file->openData(errorsField);
-      file->getDataCoerce(errors);
-      file->closeData();
+      file.openData(errorsField);
+      file.getDataCoerce(errors);
+      file.closeData();
     } catch (...) {
       g_log.information() << "Error loading the errors field, '" << errorsField
                           << "' for bank " << bankName
@@ -417,7 +415,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 
   // Have all the data I need
   m_fileMutex.unlock();
-  file->close();
+  file.close();
 
   for (size_t i = iPart; i < iPart + m_numPixels; i++) {
     // Find the workspace index for this detector
@@ -447,10 +445,9 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 /** @return the name of the entry that we will load */
 std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
   std::string entry_name = "entry";
-  auto file = new ::NeXus::File(filename);
-  std::map<std::string, std::string> entries = file->getEntries();
-  file->close();
-  delete file;
+  auto file = ::NeXus::File(filename);
+  std::map<std::string, std::string> entries = file.getEntries();
+  file.close();
 
   if (entries.empty())
     throw std::runtime_error("No entries in the NXS file!");

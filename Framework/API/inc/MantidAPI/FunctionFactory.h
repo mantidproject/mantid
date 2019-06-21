@@ -62,7 +62,7 @@ public:
   // Unhide the base class version (to satisfy the intel compiler)
   using Kernel::DynamicFactory<IFunction>::subscribe;
   void subscribe(const std::string &className,
-                 AbstractFactory *pAbstractFactory,
+                 std::unique_ptr<AbstractFactory> pAbstractFactory,
                  Kernel::DynamicFactory<IFunction>::SubscribeAction replace =
                      ErrorIfExists);
 

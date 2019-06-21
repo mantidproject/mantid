@@ -120,8 +120,9 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
 
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
       inWS, labels.size(), sharedInX->size(), inWS->blocksize());
-  auto axis1 = new TextAxis(labels.size());
-  outWS->replaceAxis(1, axis1);
+  auto axis1 = std::make_unique<TextAxis>(labels.size());
+  auto axis1Raw = axis1.get();
+  outWS->replaceAxis(1, std::move(axis1));
   outWS->getAxis(0)->setUnit(inWS->getAxis(0)->unit()->unitID());
 
   auto const x = inWS->points(0);
@@ -133,7 +134,7 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
       return calculatePolynomial(coefficients, v);
     });
     outWS->mutableY(i) = y;
-    axis1->setLabel(i, labels[i]);
+    axis1Raw->setLabel(i, labels[i]);
   }
 
   return outWS;

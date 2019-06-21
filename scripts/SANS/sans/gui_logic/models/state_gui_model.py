@@ -69,6 +69,14 @@ class StateGuiModel(object):
     def compatibility_mode(self, value):
         self.set_simple_element(element_id=OtherId.use_compatibility_mode, value=value)
 
+    @property
+    def event_slice_optimisation(self):
+        return self.get_simple_element(element_id=OtherId.use_event_slice_optimisation, default_value=False)
+
+    @event_slice_optimisation.setter
+    def event_slice_optimisation(self, value):
+        self.set_simple_element(element_id=OtherId.use_event_slice_optimisation, value=value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Save Options
     # ------------------------------------------------------------------------------------------------------------------

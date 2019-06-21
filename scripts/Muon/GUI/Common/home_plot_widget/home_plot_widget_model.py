@@ -62,7 +62,7 @@ class HomePlotWidgetModel(object):
             return
 
         self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True,
-                                plot_kwargs={'distribution': True})
+                                plot_kwargs={'distribution': True, 'zorder': 4})
 
     def remove_workpace_from_plot(self, workspace_name):
         """

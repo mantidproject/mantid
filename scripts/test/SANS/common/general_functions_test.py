@@ -5,21 +5,25 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-from mantid.kernel import (V3D, Quat)
+
 from mantid.api import AnalysisDataService, FrameworkManager
-from sans.common.general_functions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log,
+from mantid.kernel import (V3D, Quat)
+from mantid.py3compat import mock
+from sans.common.constants import (SANS2D, LOQ, LARMOR)
+from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
+                               SANSInstrument, DetectorType, SANSFacility, DataType)
+from sans.common.general_functions import (quaternion_to_angle_and_axis, create_managed_non_child_algorithm,
+                                           create_unmanaged_algorithm, add_to_sample_log,
                                            get_standard_output_workspace_name, sanitise_instrument_name,
                                            get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
                                            get_facility, parse_diagnostic_settings, get_transmission_output_name,
                                            get_output_name)
-from sans.common.constants import (SANS2D, LOQ, LARMOR)
-from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
-                               SANSInstrument, DetectorType, SANSFacility, DataType)
-from sans.test_helper.test_director import TestDirector
 from sans.state.data import StateData
+from sans.test_helper.test_director import TestDirector
 
 
 class SANSFunctionsTest(unittest.TestCase):
@@ -178,6 +182,15 @@ class SANSFunctionsTest(unittest.TestCase):
         output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB)
         # Assert
         self.assertEqual("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37",  output_workspace)
+
+    def test_that_can_switch_off_including_slice_limits_in_standard_output_workspace_name(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        # Act
+        output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB,
+                                                                 include_slice_limits=False)
+        # Assert
+        self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0" == output_workspace)
 
     def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace(self):
         # Arrange
@@ -541,6 +554,14 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertEqual(output_name, '12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
         self.assertEqual(group_output_name, '12345rear_1DPhi12.0_56.0')
 
+    @mock.patch("sans.common.general_functions.AlgorithmManager")
+    def test_that_can_create_versioned_managed_non_child_algorithms(self, alg_manager_mock):
+        create_managed_non_child_algorithm("TestAlg", version=2, **{"test_val": 5})
+        alg_manager_mock.create.assert_called_once_with("TestAlg", 2)
+
+        alg_manager_mock.reset_mock()
+        create_managed_non_child_algorithm("TestAlg", **{"test_val": 5})
+        alg_manager_mock.create.assert_called_once_with("TestAlg")
 
 if __name__ == '__main__':
     unittest.main()

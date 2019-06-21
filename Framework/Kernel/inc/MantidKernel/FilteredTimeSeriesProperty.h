@@ -25,8 +25,13 @@ class DLLExport FilteredTimeSeriesProperty
 public:
   /// Construct with a source time series & a filter property
   FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
-                             const TimeSeriesProperty<bool> &filterProp,
-                             const bool transferOwnership = false);
+                             const TimeSeriesProperty<bool> &filterProp);
+
+  /// Construct with a source time series to take ownership of & a filter
+  /// property
+  FilteredTimeSeriesProperty(
+      std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
+      const TimeSeriesProperty<bool> &filterProp);
   /// Destructor
   ~FilteredTimeSeriesProperty() override;
 
@@ -38,7 +43,7 @@ public:
 
 private:
   /// The original unfiltered property as an owned pointer
-  const TimeSeriesProperty<HeldType> *m_unfiltered;
+  std::unique_ptr<const TimeSeriesProperty<HeldType>> m_unfiltered;
 };
 
 } // namespace Kernel

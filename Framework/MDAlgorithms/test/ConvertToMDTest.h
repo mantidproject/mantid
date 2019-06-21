@@ -122,10 +122,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws2D =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
-    API::NumericAxis *pAxis = new API::NumericAxis(3);
+    auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("dSpacing");
 
-    ws2D->replaceAxis(0, pAxis);
+    ws2D->replaceAxis(0, std::move(pAxis));
 
     pAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
     pAlg->setPropertyValue("OutputWorkspace", "WS3DNoQ");
@@ -170,10 +170,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws2D =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
-    API::NumericAxis *pAxis = new API::NumericAxis(3);
+    auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("dSpacing");
 
-    ws2D->replaceAxis(0, pAxis);
+    ws2D->replaceAxis(0, std::move(pAxis));
 
     pAlg->setPropertyValue("OutputWorkspace", "WS3DmodQ");
     pAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
@@ -210,10 +210,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws2D =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
-    API::NumericAxis *pAxis = new API::NumericAxis(3);
+    auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("DeltaE");
 
-    ws2D->replaceAxis(0, pAxis);
+    ws2D->replaceAxis(0, std::move(pAxis));
 
     pAlg->setPropertyValue("OutputWorkspace", "WS5DQ3D");
     pAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
@@ -319,10 +319,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws2D =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
-    API::NumericAxis *pAxis = new API::NumericAxis(3);
+    auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("DeltaE");
 
-    ws2D->replaceAxis(0, pAxis);
+    ws2D->replaceAxis(0, std::move(pAxis));
 
     pAlg->setPropertyValue("OutputWorkspace", "WS5DQ3D");
     pAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
@@ -593,9 +593,9 @@ public:
 
   void test_EventNoUnitsConv() {
 
-    NumericAxis *pAxis0 = new NumericAxis(2);
+    auto pAxis0 = std::make_unique<API::NumericAxis>(2);
     pAxis0->setUnit("DeltaE");
-    inWsEv->replaceAxis(0, pAxis0);
+    inWsEv->replaceAxis(0, std::move(pAxis0));
 
     MDWSDescription WSD;
     std::vector<double> min(4, -1e+30), max(4, 1e+30);
@@ -629,9 +629,9 @@ public:
 
   void test_EventFromTOFConv() {
 
-    NumericAxis *pAxis0 = new NumericAxis(2);
+    auto pAxis0 = std::make_unique<API::NumericAxis>(2);
     pAxis0->setUnit("TOF");
-    inWsEv->replaceAxis(0, pAxis0);
+    inWsEv->replaceAxis(0, std::move(pAxis0));
 
     MDWSDescription WSD;
     std::vector<double> min(4, -1e+30), max(4, 1e+30);
@@ -666,9 +666,9 @@ public:
 
   void test_HistoFromTOFConv() {
 
-    NumericAxis *pAxis0 = new NumericAxis(2);
+    auto pAxis0 = std::make_unique<API::NumericAxis>(2);
     pAxis0->setUnit("TOF");
-    inWs2D->replaceAxis(0, pAxis0);
+    inWs2D->replaceAxis(0, std::move(pAxis0));
 
     MDWSDescription WSD;
     std::vector<double> min(4, -1e+30), max(4, 1e+30);
@@ -706,9 +706,9 @@ public:
 
   void test_HistoNoUnitsConv() {
 
-    NumericAxis *pAxis0 = new NumericAxis(2);
+    auto pAxis0 = std::make_unique<API::NumericAxis>(2);
     pAxis0->setUnit("DeltaE");
-    inWs2D->replaceAxis(0, pAxis0);
+    inWs2D->replaceAxis(0, std::move(pAxis0));
 
     MDWSDescription WSD;
     std::vector<double> min(4, -1e+30), max(4, 1e+30);

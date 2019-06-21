@@ -221,7 +221,7 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::popTask() {
   if (m_tasks.empty())
     return {nullptr};
   else {
-    std::unique_ptr<Task> task = std::make_unique<Task>(m_tasks.front());
+    auto task = std::make_unique<Task>(m_tasks.front());
     m_tasks.pop();
     return task;
   }

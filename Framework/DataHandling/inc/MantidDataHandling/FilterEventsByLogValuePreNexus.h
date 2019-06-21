@@ -186,7 +186,7 @@ private:
   Mantid::detid_t m_detid_max;
 
   /// Handles loading from the event file
-  Mantid::Kernel::BinaryFile<DasEvent> *m_eventFile;
+  std::unique_ptr<Mantid::Kernel::BinaryFile<DasEvent>> m_eventFile;
   std::size_t m_numEvents; ///< The number of events in the file
   std::size_t m_numPulses; ///< the number of pulses
   uint32_t m_numPixel;     ///< the number of pixels

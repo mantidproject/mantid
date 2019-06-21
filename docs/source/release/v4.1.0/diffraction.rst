@@ -31,6 +31,8 @@ Improvements
 
 - The Pearl scripts now automatically disable attenuation on long-mode.
 
+- The Pearl scripts now set now use a spline coefficient of 5 on long-mode due to the increased amount of noise.
+
 Bug Fixes
 #########
 

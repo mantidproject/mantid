@@ -141,7 +141,7 @@ void setAxesAndUnits(Workspace2D &outWS, const MatrixWorkspace &ws,
   } else {
     outVertAxis->setUnit(ws.getAxis(axisIndex)->unit()->unitID());
   }
-  outWS.replaceAxis(1, outVertAxis.release());
+  outWS.replaceAxis(1, std::move(outVertAxis));
 }
 
 /**

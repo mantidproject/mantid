@@ -53,11 +53,11 @@ public:
     th.createFile("OrientedLatticeTest.nxs");
     DblMatrix U(3, 3, true);
     OrientedLattice u(1, 2, 3, 90, 89, 88);
-    u.saveNexus(th.file, "lattice");
+    u.saveNexus(th.file.get(), "lattice");
     th.reopenFile();
 
     OrientedLattice u2;
-    u2.loadNexus(th.file, "lattice");
+    u2.loadNexus(th.file.get(), "lattice");
     // Was it reloaded correctly?
     TS_ASSERT_DELTA(u2.a(), 1.0, 1e-5);
     TS_ASSERT_DELTA(u2.b(), 2.0, 1e-5);

@@ -109,6 +109,7 @@ set(SRC_FILES
     src/DiffractionFocussing2.cpp
     src/DirectILLTubeBackground.cpp
     src/Divide.cpp
+    src/EQSANSCorrectFrame.cpp
     src/EQSANSResolution.cpp
     src/EQSANSTofStructure.cpp
     src/EditInstrumentGeometry.cpp
@@ -450,6 +451,7 @@ set(INC_FILES
     inc/MantidAlgorithms/DiffractionFocussing2.h
     inc/MantidAlgorithms/DirectILLTubeBackground.h
     inc/MantidAlgorithms/Divide.h
+    inc/MantidAlgorithms/EQSANSCorrectFrame.h
     inc/MantidAlgorithms/EQSANSResolution.h
     inc/MantidAlgorithms/EQSANSTofStructure.h
     inc/MantidAlgorithms/EditInstrumentGeometry.h
@@ -806,6 +808,7 @@ set(TEST_FILES
     DiffractionFocussingTest.h
     DirectILLTubeBackgroundTest.h
     DivideTest.h
+    EQSANSCorrectFrameTest.h
     EditInstrumentGeometryTest.h
     ElasticWindowTest.h
     EstimateDivergenceTest.h
