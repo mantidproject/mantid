@@ -67,8 +67,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.plots.plot(subplotName, ws, specNum=specNum)
 
     def remove_subplot(self, name):
-        if name == self.quickEdit.get_selection():
-            self.quickEdit.set_to_all()
         self.plots._remove_subplot(name)
 
     def get_subplots(self):

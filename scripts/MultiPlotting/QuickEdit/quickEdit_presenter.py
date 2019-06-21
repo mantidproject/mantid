@@ -57,6 +57,8 @@ class QuickEditPresenter(object):
 
     def rm_subplot(self, name):
         current = self._view.current_selection()
+        if current == name:
+           current = "All"
         to_remove = self._view.find_index(name)
         self._view.rm_subplot(to_remove)
         index = self._view.find_index(current)

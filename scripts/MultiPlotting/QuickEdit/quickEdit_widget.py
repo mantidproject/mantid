@@ -53,9 +53,6 @@ class QuickEditWidget(object):
             return self.get_subplots()
         return [name]
 
-    def set_to_all(self):
-        self._presenter.set_to_all()
-
     def set_plot_x_range(self, range):
         self._presenter.set_plot_x_range(range)
 

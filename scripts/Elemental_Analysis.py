@@ -27,4 +27,3 @@ else:
     Elemental_Analysis = ElementalAnalysisGui()
     Elemental_Analysis.resize(700, 700)
     Elemental_Analysis.show()
-
