@@ -27,7 +27,8 @@ createConfiguredAlgorithm(Batch const &model, Row &row);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL AlgorithmRuntimeProps
 createAlgorithmRuntimeProps(Batch const &model, Row const &row);
-
+MANTIDQT_ISISREFLECTOMETRY_DLL AlgorithmRuntimeProps
+createAlgorithmRuntimeProps(Batch const &model);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -198,6 +198,35 @@ QString convertMapToString(const std::map<QString, QString> &optionsMap,
   return result;
 }
 
+/** Convert an options map to a comma-separated list of key=value pairs
+ */
+std::string
+convertMapToString(const std::map<std::string, std::string> &optionsMap,
+                   const char separator, const bool quoteValues) {
+  std::string result;
+  bool first = true;
+
+  for (auto &kvp : optionsMap) {
+    if (kvp.second.empty())
+      continue;
+
+    if (!first)
+      result += separator;
+    else
+      first = false;
+
+    const auto key = kvp.first;
+    auto value = kvp.second;
+
+    if (quoteValues)
+      value = "'" + value + "'";
+
+    result += key + "=" + value;
+  }
+
+  return result;
+}
+
 std::string optionsToString(std::map<std::string, std::string> const &options) {
   if (!options.empty()) {
     std::ostringstream resultStream;

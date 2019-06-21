@@ -33,6 +33,10 @@ PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
                                        runsTable().thetaTolerance());
 }
 
+PerThetaDefaults const *Batch::wildcardDefaults() const {
+  return experiment().wildcardDefaults();
+}
+
 void Batch::resetState() { m_runsTable.resetState(); }
 
 void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }

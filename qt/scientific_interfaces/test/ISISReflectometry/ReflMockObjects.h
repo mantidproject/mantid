@@ -85,6 +85,7 @@ public:
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
+  MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
 };
@@ -273,6 +274,7 @@ public:
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms,
                std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
+  MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
 };
 
 class MockBatchJobAlgorithm : public IBatchJobAlgorithm,

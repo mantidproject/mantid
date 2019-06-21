@@ -313,6 +313,10 @@ int BatchPresenter::percentComplete() const {
   return m_jobRunner->percentComplete();
 }
 
+AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const {
+  return m_jobRunner->rowProcessingProperties();
+}
+
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   m_jobRunner->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowStateChanged();
