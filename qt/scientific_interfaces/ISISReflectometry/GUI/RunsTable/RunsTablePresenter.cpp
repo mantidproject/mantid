@@ -521,8 +521,10 @@ void RunsTablePresenter::notifyCutRowsRequested() {
     return;
 
   m_clipboard = m_view->jobs().selectedSubtrees();
-  if (m_clipboard.is_initialized()) {
-    m_view->jobs().removeRows(m_view->jobs().selectedRowLocations());
+  auto selected = m_view->jobs().selectedRowLocations();
+  if (!selected.empty()) {
+    removeRowsAndGroupsFromView(selected);
+    removeRowsFromModel(selected);
     m_view->jobs().clearSelection();
     ensureAtLeastOneGroupExists();
     notifySelectionChanged();
