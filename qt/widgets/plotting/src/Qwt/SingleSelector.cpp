@@ -15,18 +15,18 @@
 
 using namespace MantidQt::MantidWidgets;
 
-SingleSelector::SingleSelector(QwtPlot *plot, SelectType type, bool visible,
-                               bool infoOnly)
-    : QwtPlotPicker(plot->canvas()), m_type(type), m_position(0.0),
+SingleSelector::SingleSelector(QwtPlot *plot, SelectType type, double position,
+                               bool visible, bool infoOnly)
+    : QwtPlotPicker(plot->canvas()), m_type(type), m_position(position),
       m_lowerBound(0.0), m_upperBound(0.0), m_singleMarker(nullptr),
       m_plot(plot), m_canvas(plot->canvas()), m_markerMoving(false),
       m_visible(visible), m_pen(nullptr), m_moveCursor(nullptr) {
   init();
 }
 
-SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type, bool visible,
-                               bool infoOnly)
-    : QwtPlotPicker(plot->canvas()), m_type(type), m_position(0.0),
+SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
+                               double position, bool visible, bool infoOnly)
+    : QwtPlotPicker(plot->canvas()), m_type(type), m_position(position),
       m_lowerBound(0.0), m_upperBound(0.0), m_singleMarker(nullptr),
       m_plot(plot->getPlot()), m_canvas(plot->canvas()), m_markerMoving(false),
       m_visible(visible), m_pen(nullptr), m_moveCursor(nullptr) {
@@ -209,6 +209,19 @@ void SingleSelector::setVisible(bool visible) {
   m_plot->replot();
   m_visible = visible;
 }
+
+/**
+ * @brief Returns whether or not the selector is visible
+ * @return Trye if the selector is visible
+ */
+bool SingleSelector::isVisible() const { return m_visible; }
+
+/**
+ * @brief Returns the selector type
+ * @return The type of the range selector
+ * @return The type of the range selector
+ */
+SingleSelector::SelectType SingleSelector::getType() const { return m_type; }
 
 /**
  * @brief dettach the line objects marking the minimum and maximum from any plot

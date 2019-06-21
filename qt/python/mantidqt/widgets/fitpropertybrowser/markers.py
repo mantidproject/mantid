@@ -617,7 +617,7 @@ class SingleMarker(QObject):
         :param marker_type: Whether the SingleMarker is vertical or horizontal.
         :param line_style: An MPL line style value.
         """
-        super(RangeMarker, self).__init__()
+        super(SingleMarker, self).__init__()
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
         self.marker_type = marker_type
@@ -625,6 +625,8 @@ class SingleMarker(QObject):
             self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
         elif self.marker_type == 'YSingle':
             self.marker = HorizontalMarker(canvas, color, position, line_style=line_style)
+        else:
+            raise RuntimeError("Incorrect SingleMarker type provided. Types are XSingle or YSingle.")
 
     def redraw(self):
         """
@@ -697,10 +699,10 @@ class SingleMarker(QObject):
         :param y: An y mouse coordinate.
         :return True if the axes coordinate is within the bounds.
         """
-        if self.marker_type == 'XSingle' and (self.upper_bound < x < self.lower_bound):
-            return False
-        if self.marker_type == 'YSingle' and y is not None and (self.upper_bound < y < self.lower_bound):
-            return False
+        position = x if self.marker_type == 'XSingle' else y
+        if position is not None:
+            if position > self.upper_bound or position < self.lower_bound:
+                return False
         return True
 
     def mouse_move_start(self, x, y):
@@ -709,7 +711,7 @@ class SingleMarker(QObject):
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
         """
-        if self.is_inside_bounds(x, y) and self.marker.is_above(x, y):
+        if self.marker.is_above(x, y) and self.is_inside_bounds(x, y):
             self.marker.mouse_move_start(x, y)
             QApplication.setOverrideCursor(self.marker.override_cursor(x, y))
 
@@ -720,8 +722,8 @@ class SingleMarker(QObject):
         :param y: An y mouse coordinate.
         :return: True if moved or False if stayed at the old position.
         """
-        if self.is_inside_bounds(x, y) and self.marker.is_marker_moving():
-            return self.min_marker.mouse_move(x, y)
+        if self.marker.is_marker_moving() and self.is_inside_bounds(x, y):
+            return self.marker.mouse_move(x, y)
         return False
 
     def mouse_move_stop(self):
@@ -755,6 +757,8 @@ class RangeMarker(QObject):
         elif self.range_type == 'YMinMax':
             self.min_marker = HorizontalMarker(canvas, color, minimum, line_style=line_style)
             self.max_marker = HorizontalMarker(canvas, color, maximum, line_style=line_style)
+        else:
+            raise RuntimeError("Incorrect RangeMarker type provided. Types are XMinMax or YMinMax.")
 
     def redraw(self):
         """

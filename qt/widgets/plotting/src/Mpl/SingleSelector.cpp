@@ -85,8 +85,10 @@ void SingleSelector::setUpperBound(const double max) {
 
 void SingleSelector::setPosition(const double position) {
   const auto positionChanged = m_singleMarker->setPosition(position);
-  if (positionChanged)
+  if (positionChanged) {
+    m_plot->replot();
     emit valueChanged(position);
+  }
 }
 
 double SingleSelector::getPosition() const {

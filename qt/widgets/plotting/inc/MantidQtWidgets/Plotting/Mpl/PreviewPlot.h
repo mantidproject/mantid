@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/Mpl/SingleSelector.h"
 
 #include <Poco/NObserver.h>
 
@@ -69,6 +70,12 @@ public:
   addRangeSelector(const QString &name,
                    RangeSelector::SelectType type = RangeSelector::XMINMAX);
   RangeSelector *getRangeSelector(const QString &name) const;
+
+  SingleSelector *
+  addSingleSelector(const QString &name,
+                    SingleSelector::SelectType type = SingleSelector::XSINGLE,
+                    double position = 0.0);
+  SingleSelector *getSingleSelector(const QString &name) const;
 
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
@@ -128,6 +135,8 @@ private:
   QHash<QString, bool> m_lines;
   // Range selector widgets
   QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
+  // Single selector's
+  QMap<QString, MantidQt::MantidWidgets::SingleSelector *> m_singleSelectors;
 
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;

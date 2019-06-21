@@ -74,6 +74,8 @@ void RangeSelector::setRange(const double min, const double max) {
   m_rangeMarker->setRange(min, max);
   m_plot->replot();
   emit selectionChanged(min, max);
+  emit minValueChanged(min);
+  emit maxValueChanged(max);
 }
 
 std::pair<double, double> RangeSelector::getRange() const {
@@ -120,9 +122,11 @@ void RangeSelector::handleMouseMove(const QPoint &point) {
       m_rangeMarker->mouseMove(dataCoords.x(), dataCoords.y());
 
   if (markerMoved) {
-    m_plot->replot();
     const auto range = getRange();
     emit selectionChanged(range.first, range.second);
+    emit minValueChanged(range.first);
+    emit maxValueChanged(range.second);
+    m_plot->replot();
   }
 }
 

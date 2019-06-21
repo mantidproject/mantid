@@ -189,6 +189,34 @@ RangeSelector *PreviewPlot::getRangeSelector(const QString &name) const {
 }
 
 /**
+ * Add a single selector to a preview plot
+ * @param name The name to give the single selector
+ * @param type The type of the single selector
+ * @return The single selector
+ */
+SingleSelector *PreviewPlot::addSingleSelector(const QString &name,
+                                               SingleSelector::SelectType type,
+                                               double position) {
+  if (m_singleSelectors.contains(name))
+    throw std::runtime_error("SingleSelector already exists on PreviewPlot.");
+
+  m_singleSelectors[name] =
+      new MantidWidgets::SingleSelector(this, type, position);
+  return m_singleSelectors[name];
+}
+
+/**
+ * Gets a single selector from the PreviewPlot
+ * @param name The name of the single selector
+ * @return The single selector
+ */
+SingleSelector *PreviewPlot::getSingleSelector(const QString &name) const {
+  if (!m_singleSelectors.contains(name))
+    throw std::runtime_error("SingleSelector was not found on PreviewPlot.");
+  return m_singleSelectors[name];
+}
+
+/**
  * Set the range of the specified axis
  * @param range The new range
  * @param axisID An enumeration defining the axis

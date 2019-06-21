@@ -415,7 +415,6 @@ void ISISCalibration::setDefaultInstDetails(
  * Replots the raw data mini plot and the energy mini plot
  */
 void ISISCalibration::calPlotRaw() {
-
   QString filename = m_uiForm.leRunNo->getFirstFilename();
 
   // Don't do anything if the file we would plot has not changed
