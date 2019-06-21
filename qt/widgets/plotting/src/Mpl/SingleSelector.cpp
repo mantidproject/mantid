@@ -23,7 +23,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
-                               double position, bool visible, bool infoOnly,
+                               double position, bool visible,
                                const QColor &colour)
     : QObject(), m_plot(plot),
       m_singleMarker(std::make_unique<SingleMarker>(
@@ -31,7 +31,6 @@ SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
           std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
           selectTypeAsQString(type), defaultLineKwargs())),
       m_visible(visible) {
-  Q_UNUSED(infoOnly);
 
   m_plot->canvas()->draw();
 

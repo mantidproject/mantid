@@ -27,7 +27,7 @@ public:
 
   SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE,
                  double position = 0.0, bool visible = true,
-                 bool infoOnly = false, const QColor &colour = Qt::black);
+                 const QColor &colour = Qt::black);
 
   void setColour(const QColor &colour);
 

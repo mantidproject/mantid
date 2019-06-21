@@ -28,11 +28,9 @@ public:
   enum SelectType { XSINGLE, YSINGLE };
 
   SingleSelector(QwtPlot *plot, SelectType type = XSINGLE,
-                 double position = 0.0, bool visible = true,
-                 bool infoOnly = false);
+                 double position = 0.0, bool visible = true);
   SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE,
-                 double position = 0.0, bool visible = true,
-                 bool infoOnly = false);
+                 double position = 0.0, bool visible = true);
   ~SingleSelector() override{};
 
   void setColour(const QColor &colour);

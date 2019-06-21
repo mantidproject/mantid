@@ -16,7 +16,7 @@
 using namespace MantidQt::MantidWidgets;
 
 SingleSelector::SingleSelector(QwtPlot *plot, SelectType type, double position,
-                               bool visible, bool infoOnly)
+                               bool visible)
     : QwtPlotPicker(plot->canvas()), m_type(type), m_position(position),
       m_lowerBound(0.0), m_upperBound(0.0), m_singleMarker(nullptr),
       m_plot(plot), m_canvas(plot->canvas()), m_markerMoving(false),
@@ -25,7 +25,7 @@ SingleSelector::SingleSelector(QwtPlot *plot, SelectType type, double position,
 }
 
 SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
-                               double position, bool visible, bool infoOnly)
+                               double position, bool visible)
     : QwtPlotPicker(plot->canvas()), m_type(type), m_position(position),
       m_lowerBound(0.0), m_upperBound(0.0), m_singleMarker(nullptr),
       m_plot(plot->getPlot()), m_canvas(plot->canvas()), m_markerMoving(false),

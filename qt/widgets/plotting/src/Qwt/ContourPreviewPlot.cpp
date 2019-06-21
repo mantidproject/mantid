@@ -41,21 +41,6 @@ auto getValueFromSettings(QSettings const &settings, QString const &key,
   return settings.value(key, defaultValue);
 }
 
-QString getColourMapFile(QSettings const &settings) {
-  return getValueFromSettings(settings, "ColourmapFile", "").toString();
-}
-
-int getScaleType(QSettings const &settings) {
-  int scaleType = getValueFromSettings(settings, "ColourScale", -1).toInt();
-  if (scaleType == -1)
-    scaleType = getValueFromSettings(settings, "LogColourScale", 0).toInt();
-  return scaleType;
-}
-
-double getExponent(QSettings const &settings) {
-  return getValueFromSettings(settings, "PowerScaleExponent", 2.0).toDouble();
-}
-
 bool transparentZeros(QSettings const &settings) {
   return getValueFromSettings(settings, "TransparentZeros", 1).toInt();
 }
