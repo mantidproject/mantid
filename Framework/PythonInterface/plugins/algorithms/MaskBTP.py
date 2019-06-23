@@ -199,6 +199,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 raise ValueError("Out of range index for ARCS instrument bank numbers: {}".format(banknum))
             return '{}{}'.format(label, banknum)
         elif self.instname == 'SEQUOIA':
+            ToB = '' # top/bottom for short packs
             # there are only banks 23-26 in A row
             if self.bankmin[self.instname] <= banknum <= 37:
                 label = 'A'
@@ -208,15 +209,26 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             elif 37 < banknum <= 74:
                 label = 'B'
                 banknum = banknum - 37
-            elif 74 < banknum <= 113:
+            elif 74 < banknum <= 98:
                 label = 'C'
                 banknum = banknum-74
+            elif banknum==99:
+                label, banknum, ToB = 'C', 25, 'T'
+            elif banknum==100:
+                label, banknum, ToB = 'C', 26, 'T'
+            elif banknum==101:
+                label, banknum, ToB = 'C', 25, 'B'
+            elif banknum==102:
+                label, banknum, ToB = 'C', 26, 'B'
+            elif 102 < banknum <= 113:
+                label = 'C'
+                banknum = banknum-76
             elif 113 <banknum <= self.bankmax[self.instname]:
                 label = 'D'
                 banknum = banknum-113
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers: {}".format(banknum))
-            return '{}{}'.format(label, banknum)
+            return '{}{}{}'.format(label, banknum, ToB)
         elif self.instname == "WISH":
             return "panel" + "%02d" % banknum
         elif self.instname in ['CG2', 'EQ-SANS', 'REF_M']:
