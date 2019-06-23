@@ -212,14 +212,13 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             elif 74 < banknum <= 98:
                 label = 'C'
                 banknum = banknum-74
-            elif banknum==99:
-                label, banknum, ToB = 'C', 25, 'T'
-            elif banknum==100:
-                label, banknum, ToB = 'C', 26, 'T'
-            elif banknum==101:
-                label, banknum, ToB = 'C', 25, 'B'
-            elif banknum==102:
-                label, banknum, ToB = 'C', 26, 'B'
+            elif banknum in range(99, 102+1):
+                label = 'C'
+                d = {99: (25, 'T'),
+                     100: (26, 'T'),
+                     101: (25, 'B'),
+                     102: (26, 'B')}
+                banknum, ToB = d[banknum]
             elif 102 < banknum <= 113:
                 label = 'C'
                 banknum = banknum-76
