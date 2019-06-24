@@ -134,18 +134,16 @@ operator()(std::vector<std::string> const &cellText) {
   }
 }
 
-RowValidationResult validateRow(ReductionJobs const &,
-                                std::vector<std::string> const &cells) {
+RowValidationResult validateRow(std::vector<std::string> const &cells) {
   auto validate = RowValidator();
   RowValidationResult result = validate(cells);
   return result;
 }
 
-boost::optional<Row> validateRowFromRunAndTheta(ReductionJobs const &jobs,
-                                                std::string const &run,
+boost::optional<Row> validateRowFromRunAndTheta(std::string const &run,
                                                 std::string const &theta) {
   std::vector<std::string> cells = {run, theta, "", "", "", "", "", "", ""};
-  return validateRow(jobs, cells).validElseNone();
+  return validateRow(cells).validElseNone();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

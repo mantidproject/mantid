@@ -51,9 +51,8 @@ void RunsTableView::invalidSelectionForCopy() {
 }
 
 void RunsTableView::invalidSelectionForPaste() {
-  QMessageBox::critical(
-      this, "Bad selection for paste",
-      "Cannot paste rows at a different depth to the source.");
+  QMessageBox::critical(this, "Bad selection for paste",
+                        "Please ensure destination is the same depth and size");
 }
 
 void RunsTableView::invalidSelectionForCut() {

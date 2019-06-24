@@ -367,8 +367,8 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
       auto resultMetadata = metadataFromDescription(result.description);
-      auto row = validateRowFromRunAndTheta(jobs, result.runNumber,
-                                            resultMetadata.theta);
+      auto row =
+          validateRowFromRunAndTheta(result.runNumber, resultMetadata.theta);
       if (row.is_initialized()) {
         auto rowChanged = [](Row const &rowA, Row const &rowB) -> bool {
           return rowA.runNumbers() != rowB.runNumbers();

@@ -5,7 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Clipboard.h"
+#include "MantidQtWidgets/Common/Batch/Cell.h"
 #include "Reduction/RowLocation.h"
+#include "Reduction/ValidateRow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -74,6 +76,54 @@ void Clipboard::setGroupName(int rootIndex, std::string const &groupName) {
   // Groups have a single cell containing the name.
   auto const cellIndex = 0;
   return row.cells()[cellIndex].setContentText(groupName);
+}
+
+Group Clipboard::group(int rootIndex) const {
+
+  auto result = Group(groupName(rootIndex));
+  auto rowsToAdd = rows(rootIndex);
+  for (auto &row : rowsToAdd)
+    result.appendRow(row);
+  return result;
+}
+
+std::vector<boost::optional<Row>> Clipboard::rows() const {
+  auto result = std::vector<boost::optional<Row>>();
+  for (auto const &subtree : subtrees()) {
+    auto rowsToAdd = rows(subtree);
+    for (auto &row : rowsToAdd)
+      result.push_back(row);
+  }
+  return result;
+}
+
+std::vector<boost::optional<Row>> Clipboard::rows(int rootIndex) const {
+  return rows(subtrees()[rootIndex]);
+}
+
+std::vector<boost::optional<Row>>
+Clipboard::rows(MantidQt::MantidWidgets::Batch::Subtree const &subtree) const {
+  auto result = std::vector<boost::optional<Row>>();
+
+  for (auto const &row : subtree) {
+    // Skip the root item if it is a group
+    if (containsGroups(*this) && row.location().isRoot())
+      continue;
+
+    auto cells = std::vector<std::string>();
+    std::transform(row.cells().cbegin(), row.cells().cend(),
+                   std::back_inserter(cells),
+                   [](MantidQt::MantidWidgets::Batch::Cell const &cell) {
+                     return cell.contentText();
+                   });
+    auto validationResult = validateRow(cells);
+    if (validationResult.isValid())
+      result.push_back(validationResult.assertValid());
+    else
+      result.push_back(boost::none);
+  }
+
+  return result;
 }
 
 std::vector<MantidQt::MantidWidgets::Batch::Subtree> &

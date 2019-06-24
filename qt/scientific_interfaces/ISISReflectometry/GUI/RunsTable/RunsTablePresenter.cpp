@@ -435,8 +435,7 @@ void RunsTablePresenter::updateRowField(
 
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
-  auto rowValidationResult =
-      validateRow(m_model.reductionJobs(), cellTextFromViewAt(itemIndex));
+  auto rowValidationResult = validateRow(cellTextFromViewAt(itemIndex));
   updateRow(m_model.mutableReductionJobs(), groupIndex, rowIndex,
             rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
@@ -590,31 +589,83 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
     makePastedGroupNamesUnique(m_clipboard, replacementRoots,
                                m_model.reductionJobs());
     if (replacementRoots.empty())
-      pasteRowsAtEnd();
+      pasteGroupsAtEnd();
+    else if (containsGroups(m_clipboard) && containsGroups(replacementRoots))
+      pasteGroupsOntoGroups(replacementRoots);
+    else if (containsGroups(replacementRoots))
+      pasteRowsOntoGroup(replacementRoots);
     else
-      pasteRowsAtRoots(replacementRoots);
+      pasteRowsOntoRows(replacementRoots);
     notifyRowStateChanged();
     notifySelectionChanged();
   }
 }
 
-void RunsTablePresenter::pasteRowsAtRoots(
+void RunsTablePresenter::pasteRowsOntoRows(
     std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
-  // Paste onto given locations. Only possible if the depth is the same.
-  if (containsGroups(replacementRoots) == containsGroups(m_clipboard))
+  // Paste rows onto given locations. Only possible if the depth is the same.
+  // Also limit source and destination sizes to be equal for now for
+  // simplicity.
+  if (!containsGroups(replacementRoots) && !containsGroups(m_clipboard) &&
+      m_clipboard.size() == static_cast<int>(replacementRoots.size())) {
+    // Update view
     m_view->jobs().replaceRows(replacementRoots, m_clipboard.subtrees());
-  else
+    // Update model
+    auto &groups = m_model.mutableReductionJobs().mutableGroups();
+    auto replacementRows = m_clipboard.rows();
+    auto replacementRow = replacementRows.begin();
+    auto replacementPoint = replacementRoots.cbegin();
+    for (; replacementRow < replacementRows.end(),
+           replacementPoint < replacementRoots.cend();
+         ++replacementRow, ++replacementPoint) {
+      auto &group = groups[groupOf(*replacementPoint)];
+      auto &rows = group.mutableRows();
+      rows[rowOf(*replacementPoint)] = *replacementRow;
+    }
+  } else {
     m_view->invalidSelectionForPaste();
+  }
 }
 
-void RunsTablePresenter::pasteRowsAtEnd() {
+void RunsTablePresenter::pasteRowsOntoGroup(
+    std::vector<MantidWidgets::Batch::RowLocation> &) {
+  // Not currently supported
+  m_view->invalidSelectionForPaste();
+}
+
+void RunsTablePresenter::pasteGroupsOntoGroups(
+    std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
+  // Paste onto given locations. Only possible if the depth is the same.
+  if (containsGroups(replacementRoots) && containsGroups(m_clipboard) &&
+      static_cast<int>(replacementRoots.size()) == m_clipboard.size()) {
+    // Update view
+    m_view->jobs().replaceRows(replacementRoots, m_clipboard.subtrees());
+    // Update model
+    auto &groups = m_model.mutableReductionJobs().mutableGroups();
+    int clipboardIndex = 0;
+    for (auto const &replacementPoint : replacementRoots) {
+      groups[groupOf(replacementPoint)] = m_clipboard.group(clipboardIndex);
+      ++clipboardIndex;
+    }
+  } else {
+    m_view->invalidSelectionForPaste();
+  }
+}
+
+void RunsTablePresenter::pasteGroupsAtEnd() {
   // Paste rows into a group location at the end of the table. Only possible if
   // the clipboard contains groups
-  if (containsGroups(m_clipboard))
+  if (containsGroups(m_clipboard)) {
+    // Update view
     m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
                                     m_clipboard.subtrees());
-  else
+    // Update model
+    for (int rootIndex = 0; rootIndex < m_clipboard.size(); ++rootIndex) {
+      m_model.mutableReductionJobs().appendGroup(m_clipboard.group(rootIndex));
+    }
+  } else {
     m_view->invalidSelectionForPaste();
+  }
 }
 
 void RunsTablePresenter::forAllCellsAt(

@@ -45,11 +45,9 @@ private:
 
 using RowValidationResult = ValidationResult<Row, std::vector<int>>;
 
-RowValidationResult validateRow(ReductionJobs const &jobs,
-                                std::vector<std::string> const &cellText);
+RowValidationResult validateRow(std::vector<std::string> const &cellText);
 
-boost::optional<Row> validateRowFromRunAndTheta(ReductionJobs const &jobs,
-                                                std::string const &run,
+boost::optional<Row> validateRowFromRunAndTheta(std::string const &run,
                                                 std::string const &theta);
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -10,6 +10,7 @@
 
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
+#include "Reduction/Group.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,6 +37,9 @@ public:
   bool isGroupLocation(int rootIndex) const;
   std::string groupName(int rootIndex) const;
   void setGroupName(int rootIndex, std::string const &groupName);
+  Group group(int rootIndex) const;
+  std::vector<boost::optional<Row>> rows() const;
+  std::vector<boost::optional<Row>> rows(int rootIndex) const;
 
   std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &subtrees() const;
   std::vector<MantidQt::MantidWidgets::Batch::Subtree> &mutableSubtrees();
@@ -49,6 +53,9 @@ private:
       m_subtrees;
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
       m_subtreeRoots;
+
+  std::vector<boost::optional<Row>>
+  rows(MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
 };
 
 bool containsGroups(Clipboard const &clipboard);
