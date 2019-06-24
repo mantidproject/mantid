@@ -39,8 +39,14 @@ public:
 class HDF5FileTestUtility {
 
 public:
-  HDF5FileTestUtility(const std::string &fullPath)
-      : m_file(fullPath, H5F_ACC_RDONLY) {}
+  HDF5FileTestUtility(const std::string &fullPath) {
+    boost::filesystem::path tmp = fullPath;
+    if (!boost::filesystem::exists(tmp)) {
+      throw std::invalid_argument("no such file.\n");
+    } else {
+      m_file.openFile(fullPath, H5F_ACC_RDONLY);
+    }
+  }
 
   bool hasNxClass(const std::string &classType, const std::string &path) const {
 
@@ -64,23 +70,24 @@ class ScopedFileHandle {
 public:
   ScopedFileHandle(const std::string &name) {
 
-    
-    auto temp_dir = boost::filesystem::temp_directory_path();
-    auto temp_full_path = temp_dir /= name;
+    const auto temp_dir = boost::filesystem::temp_directory_path();
+    auto temp_full_path = temp_dir;
+    temp_full_path /= name;
 
-    // Check proposed location and throw std::invalid argument if file does not
-    // exist. otherwise set m_full_path to location.
-    (boost::filesystem::exists(temp_full_path))
-        ? m_full_path = temp_full_path
-        : throw std::invalid_argument("file does not exist.");
+    // Check proposed location and throw std::invalid argument if file does
+    // not exist. otherwise set m_full_path to location.
+
+    if (boost::filesystem::is_directory(temp_dir)) {
+      m_full_path = temp_full_path;
+    } else {
+      throw std::invalid_argument("directory does not exist.");
+    }
   }
 
-  std::string fullPath() const {
-    return m_full_path.generic_string();
-  }
+  std::string fullPath() const { return m_full_path.generic_string(); }
 
   ~ScopedFileHandle() {
-    // TODO delete the file.
+
     if (boost::filesystem::is_regular_file(m_full_path)) {
       boost::filesystem::remove(m_full_path);
     }
@@ -89,6 +96,8 @@ public:
 private:
   boost::filesystem::path m_full_path; // full path to file
 };
+
+class ExtensionValidation {};
 
 } // namespace
 
@@ -125,7 +134,8 @@ public:
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
     MockProgressBase progressRep;
     EXPECT_CALL(progressRep, doReport(testing::_)).Times(1);
-    std::string path = "C:\\Users\\mqi61253"; // test valid path
+    ScopedFileHandle test("testFile.nxs");
+    std::string path = test.fullPath(); 
     saveInstrument(*inst2.first, path, &progressRep);
     ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
@@ -144,42 +154,22 @@ public:
 
     // destination folder for outputfile-----------------------------------
 
-    /*
     ScopedFileHandle fileResource("WISH_Definition_10Panels.hdf5");
-        destinationFile = fileResource.fullPath();
-    */
+    std::string destinationFile = fileResource.fullPath();
 
-    std::string destinationFile =
-        "C:\\Users\\mqi61253\\WISH_Definition_10Panels.hdf5"; // some path to
-                                                              // save the hdf5
-                                                              // file
+    TS_ASSERT_THROWS(HDF5FileTestUtility tester(destinationFile),
+                     std::invalid_argument &);
 
-    // Check file itself.
-
-    // saveInstrument(*inst2.first,
-    //              destinationFile); //, progress); <-optional pointer
-
-    HDF5FileTestUtility tester(destinationFile);
+    // saveInstrument(*inst2.first, fileResource.fullPath());
 
     // RAII ScopedFileHanle
-
-    /*
-    class that takes hdf5 file and tests that is has
-    attributes and classes (see provided links) among
-    other things
-        */
-
-    ASSERT_TRUE(tester.hasNxClass(
-        "NXinstrument", "/raw_data_1/instrument")); // goto arg1 in hdf5
-    //      file and check if arg0 exists
+    //
+    // ASSERT_TRUE(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
   }
+
+ 
 };
 
-/*
-bool H5::H5Object::attrExists(const H5std_string &name)const <= check if
-attribute exists int H5::H5Object::getNumAttrs()const <= get number of
-attributes H5std_string H5::H5Object::getObjName()const <= return object name as
-string.
-*/
-
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
+
+// test if correct extensions nxs amd hdf5
