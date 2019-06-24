@@ -100,7 +100,7 @@ void makePastedGroupNamesUnique(
     Clipboard &clipboard,
     std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
     ReductionJobs const &jobs) {
-  for (auto rootIndex = 0; rootIndex < clipboard.size(); ++rootIndex) {
+  for (auto rootIndex = 0; rootIndex < clipboard.numberOfRoots(); ++rootIndex) {
     makePastedGroupNamesUnique(clipboard, rootIndex, replacementRoots, jobs);
   }
 }
@@ -607,12 +607,13 @@ void RunsTablePresenter::pasteRowsOntoRows(
   // Also limit source and destination sizes to be equal for now for
   // simplicity.
   if (!containsGroups(replacementRoots) && !containsGroups(m_clipboard) &&
-      m_clipboard.size() == static_cast<int>(replacementRoots.size())) {
+      m_clipboard.numberOfRoots() ==
+          static_cast<int>(replacementRoots.size())) {
     // Update view
     m_view->jobs().replaceRows(replacementRoots, m_clipboard.subtrees());
     // Update model
     auto &groups = m_model.mutableReductionJobs().mutableGroups();
-    auto replacementRows = m_clipboard.rows();
+    auto replacementRows = m_clipboard.createRowsForAllRoots();
     auto replacementRow = replacementRows.begin();
     auto replacementPoint = replacementRoots.cbegin();
     for (; replacementRow < replacementRows.end(),
@@ -637,14 +638,16 @@ void RunsTablePresenter::pasteGroupsOntoGroups(
     std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
   // Paste onto given locations. Only possible if the depth is the same.
   if (containsGroups(replacementRoots) && containsGroups(m_clipboard) &&
-      static_cast<int>(replacementRoots.size()) == m_clipboard.size()) {
+      static_cast<int>(replacementRoots.size()) ==
+          m_clipboard.numberOfRoots()) {
     // Update view
     m_view->jobs().replaceRows(replacementRoots, m_clipboard.subtrees());
     // Update model
     auto &groups = m_model.mutableReductionJobs().mutableGroups();
     int clipboardIndex = 0;
     for (auto const &replacementPoint : replacementRoots) {
-      groups[groupOf(replacementPoint)] = m_clipboard.group(clipboardIndex);
+      groups[groupOf(replacementPoint)] =
+          m_clipboard.createGroupForRoot(clipboardIndex);
       ++clipboardIndex;
     }
   } else {
@@ -660,8 +663,10 @@ void RunsTablePresenter::pasteGroupsAtEnd() {
     m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
                                     m_clipboard.subtrees());
     // Update model
-    for (int rootIndex = 0; rootIndex < m_clipboard.size(); ++rootIndex) {
-      m_model.mutableReductionJobs().appendGroup(m_clipboard.group(rootIndex));
+    for (int rootIndex = 0; rootIndex < m_clipboard.numberOfRoots();
+         ++rootIndex) {
+      m_model.mutableReductionJobs().appendGroup(
+          m_clipboard.createGroupForRoot(rootIndex));
     }
   } else {
     m_view->invalidSelectionForPaste();

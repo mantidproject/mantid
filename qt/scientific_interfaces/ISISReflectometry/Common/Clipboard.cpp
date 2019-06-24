@@ -26,7 +26,7 @@ bool Clipboard::isInitialized() const {
   return m_subtrees.is_initialized() && m_subtreeRoots.is_initialized();
 }
 
-int Clipboard::size() const {
+int Clipboard::numberOfRoots() const {
   if (!isInitialized())
     return 0;
 
@@ -37,7 +37,7 @@ int Clipboard::size() const {
 }
 
 bool Clipboard::isGroupLocation(int rootIndex) const {
-  if (!isInitialized() || rootIndex >= size())
+  if (!isInitialized() || rootIndex >= numberOfRoots())
     throw std::runtime_error("Attempted to access invalid value in clipboard");
 
   // Check if the root is a group
@@ -78,31 +78,38 @@ void Clipboard::setGroupName(int rootIndex, std::string const &groupName) {
   return row.cells()[cellIndex].setContentText(groupName);
 }
 
-Group Clipboard::group(int rootIndex) const {
+Group Clipboard::createGroupForRoot(int rootIndex) const {
+  if (!isGroupLocation(rootIndex))
+    throw std::runtime_error(
+        "Attempted to get group for non-group clipboard item");
 
   auto result = Group(groupName(rootIndex));
-  auto rowsToAdd = rows(rootIndex);
+  auto rowsToAdd = createRowsForRootChildren(rootIndex);
   for (auto &row : rowsToAdd)
     result.appendRow(row);
   return result;
 }
 
-std::vector<boost::optional<Row>> Clipboard::rows() const {
+std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
+  if (containsGroups(*this))
+    throw std::runtime_error("Attempted to get row for group clipboard item");
+
   auto result = std::vector<boost::optional<Row>>();
   for (auto const &subtree : subtrees()) {
-    auto rowsToAdd = rows(subtree);
+    auto rowsToAdd = createRowsForSubtree(subtree);
     for (auto &row : rowsToAdd)
       result.push_back(row);
   }
   return result;
 }
 
-std::vector<boost::optional<Row>> Clipboard::rows(int rootIndex) const {
-  return rows(subtrees()[rootIndex]);
+std::vector<boost::optional<Row>>
+Clipboard::createRowsForRootChildren(int rootIndex) const {
+  return createRowsForSubtree(subtrees()[rootIndex]);
 }
 
-std::vector<boost::optional<Row>>
-Clipboard::rows(MantidQt::MantidWidgets::Batch::Subtree const &subtree) const {
+std::vector<boost::optional<Row>> Clipboard::createRowsForSubtree(
+    MantidQt::MantidWidgets::Batch::Subtree const &subtree) const {
   auto result = std::vector<boost::optional<Row>>();
 
   for (auto const &row : subtree) {

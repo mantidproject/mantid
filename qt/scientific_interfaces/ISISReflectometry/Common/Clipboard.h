@@ -33,13 +33,12 @@ public:
           subtreeRoots);
 
   bool isInitialized() const;
-  int size() const;
+  int numberOfRoots() const;
   bool isGroupLocation(int rootIndex) const;
   std::string groupName(int rootIndex) const;
   void setGroupName(int rootIndex, std::string const &groupName);
-  Group group(int rootIndex) const;
-  std::vector<boost::optional<Row>> rows() const;
-  std::vector<boost::optional<Row>> rows(int rootIndex) const;
+  Group createGroupForRoot(int rootIndex) const;
+  std::vector<boost::optional<Row>> createRowsForAllRoots() const;
 
   std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &subtrees() const;
   std::vector<MantidQt::MantidWidgets::Batch::Subtree> &mutableSubtrees();
@@ -49,13 +48,22 @@ public:
   mutableSubtreeRoots();
 
 private:
+  // The subtrees for each of the roots. Note that the Rows here contain
+  // relative paths
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
       m_subtrees;
+  // The actual locations of the roots that were copied. This allows us to work
+  // out the actual paths that were copied and determine whether items are rows
+  // or groups in the reflectometry GUI sense. Note that these locations may
+  // not be valid in the table if other edits have been made so this should
+  // only be used for checking whether copied values were rows/groups.
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
       m_subtreeRoots;
 
   std::vector<boost::optional<Row>>
-  rows(MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
+  createRowsForRootChildren(int rootIndex) const;
+  std::vector<boost::optional<Row>> createRowsForSubtree(
+      MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
 };
 
 bool containsGroups(Clipboard const &clipboard);
