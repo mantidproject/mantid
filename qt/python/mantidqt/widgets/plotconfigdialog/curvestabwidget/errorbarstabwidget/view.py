@@ -73,6 +73,7 @@ class ErrorbarsTabWidgetView(QWidget):
         self.color_selector_widget.set_color(color)
 
     def set_fields_enabled(self, enable):
+        """Set field entry boxes to enabled/disabled"""
         self.width_spin_box.setEnabled(enable)
         self.capsize_spin_box.setEnabled(enable)
         self.cap_thickness_spin_box.setEnabled(enable)
@@ -80,12 +81,9 @@ class ErrorbarsTabWidgetView(QWidget):
         self.color_selector_widget.setEnabled(enable)
 
     def update_fields(self, curve_props):
-        try:
-            self.set_hide(curve_props.hide_errors)
-            self.set_width(curve_props.elinewidth)
-            self.set_capsize(curve_props.capsize)
-            self.set_cap_thickness(curve_props.capthick)
-            self.set_error_every(curve_props.errorevery)
-            self.set_color(curve_props.ecolor)
-        except AttributeError:
-            pass
+        self.set_hide(curve_props.hide_errors)
+        self.set_width(curve_props.elinewidth)
+        self.set_capsize(curve_props.capsize)
+        self.set_cap_thickness(curve_props.capthick)
+        self.set_error_every(curve_props.errorevery)
+        self.set_color(curve_props.ecolor)

@@ -8,6 +8,8 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from mantid.py3compat import encode_unicode_escape, decode_unicode_escape
+
 
 class AxProperties(dict):
     """
@@ -24,7 +26,7 @@ class AxProperties(dict):
     @classmethod
     def from_ax_object(cls, ax):
         props = dict()
-        props['title'] = ax.get_title().encode('unicode_escape')
+        props['title'] = encode_unicode_escape(ax.get_title())
         props['xlim'] = ax.get_xlim()
         props['xlabel'] = ax.get_xlabel()
         props['xscale'] = ax.get_xscale().title()
@@ -36,7 +38,7 @@ class AxProperties(dict):
     @classmethod
     def from_view(cls, view):
         props = dict()
-        props['title'] = view.get_title().decode('unicode_escape')
+        props['title'] = decode_unicode_escape(view.get_title())
         props['xlim'] = [view.get_xlower_limit(), view.get_xupper_limit()]
         props['xlabel'] = view.get_xlabel()
         props['xscale'] = view.get_xscale()

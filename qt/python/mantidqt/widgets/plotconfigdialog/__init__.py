@@ -57,14 +57,19 @@ def curve_in_figure(fig):
 
 
 def image_in_ax(ax):
-    if len(ax.images) > 0 or any(isinstance(collection, QuadMesh) for collection in ax.collections):
+    """Return True if there's an image in the Axes object"""
+    if len(ax.images) > 0 or any(isinstance(collection, QuadMesh)
+                                 for collection in ax.collections):
         return True
+    return False
 
 
 def image_in_figure(fig):
+    """Return True if there's an image in the Figure object"""
     for ax in fig.get_axes():
         if image_in_ax(ax):
             return True
+    return False
 
 
 def curve_in_ax(ax):
@@ -75,14 +80,19 @@ def curve_in_ax(ax):
 
 
 def line_in_ax(ax):
+    """Return True if there are any lines in the Axes object"""
     return len(ax.get_lines()) > 0
 
 
 def errorbars_in_ax(ax):
+    """
+    Return True if there are any ErrorbarContainers in the Axes object
+    """
     return any(isinstance(c, ErrorbarContainer) for c in ax.containers)
 
 
 def get_images_from_fig(fig):
+    """Return a list of images in the given Figure"""
     colorbar_images = get_colorbars_from_fig(fig)
     images = []
     for ax in fig.get_axes():
@@ -92,6 +102,7 @@ def get_images_from_fig(fig):
 
 
 def get_colorbars_from_fig(fig):
+    """Returns a list of the colorbar axes in the given Figure"""
     colorbar_imgs = []
     for ax in fig.get_axes():
         for img in get_images_from_ax(ax):
@@ -103,4 +114,5 @@ def get_colorbars_from_fig(fig):
 
 
 def get_images_from_ax(ax):
+    """Returns a list of image objects in the given Axes"""
     return ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)]

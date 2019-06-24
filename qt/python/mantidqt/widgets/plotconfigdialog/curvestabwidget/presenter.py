@@ -56,7 +56,8 @@ class CurvesTabWidgetPresenter:
         # No need to hide errors if they're already hidden
         if not view_props.hide:
             set_errorbars_hidden(curve, view_props.hide_errors)
-        self.get_selected_ax().legend().draggable()
+        if self.get_selected_ax().legend_:
+            self.get_selected_ax().legend().draggable()
 
     def close_tab(self):
         """Close the tab and set the view to None"""
