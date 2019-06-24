@@ -30,6 +30,7 @@ class GeneralSettings(object):
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
     PROMPT_SAVE_EDITOR_MODIFIED = 'project/prompt_save_editor_modified'
     PROMPT_SAVE_ON_CLOSE = 'project/prompt_save_on_close'
+    USER_LAYOUT = "MainWindow/user_layouts"
 
     def __init__(self, parent, view=None):
         self.view = view if view else GeneralSettingsView(parent, self)
@@ -132,34 +133,34 @@ class GeneralSettings(object):
 
     def get_layout_dict(self):
         try:
-            layout_list = CONF.get("MainWindow/user_layouts")
+            layout_list = CONF.get(self.USER_LAYOUT)
         except KeyError:
             layout_list = {}
         return layout_list
 
     def save_layout(self):
         filename = self.view.new_layout_name.text()
-        layout_dict = self.get_layout_dict()
-        layout_dict[filename] = self.parent.saveState()
-        if filename == "":
-            pass
-        else:
-            CONF.set("MainWindow/user_layouts", layout_dict)
-        self.view.new_layout_name.clear()
-        self.fill_layout_display()
-        self.parent.populate_layout_menu()
+        if filename != "":
+            layout_dict = self.get_layout_dict()
+            layout_dict[filename] = self.parent.saveState()
+            CONF.set(self.USER_LAYOUT, layout_dict)
+            self.view.new_layout_name.clear()
+            self.fill_layout_display()
+            self.parent.populate_layout_menu()
 
     def load_layout(self):
-        items = self.view.layout_display.currentItem()
-        if hasattr(items, "test"):
-            layout = self.view.layout_display.currentItem().text()
+        item = self.view.layout_display.currentItem()
+        if hasattr(item, "text"):
+            layout = item.text()
             layout_dict = self.get_layout_dict()
             self.parent.restoreState(layout_dict[layout])
 
     def delete_layout(self):
-        layout = self.view.layout_display.currentItem().text()
-        layout_dict = self.get_layout_dict()
-        layout_dict.pop(layout, None)
-        CONF.set("MainWindow/user_layouts", layout_dict)
-        self.fill_layout_display()
-        self.parent.populate_layout_menu()
+        item = self.view.layout_display.currentItem()
+        if hasattr(item, "text"):
+            layout = item.text()
+            layout_dict = self.get_layout_dict()
+            layout_dict.pop(layout, None)
+            CONF.set(self.USER_LAYOUT, layout_dict)
+            self.fill_layout_display()
+            self.parent.populate_layout_menu()
