@@ -7,17 +7,22 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
-#include "H5cpp.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <H5Object.h>
+
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <gmock/gmock.h>
+
+#include "H5cpp.h"
+#include <H5DataSet.h>
+#include <H5File.h>
+#include <H5Group.h>
+#include <H5Object.h>
 
 using namespace Mantid::NexusGeometry;
 
@@ -27,6 +32,28 @@ namespace {
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
+};
+
+class HDF5FileTestUtility {
+
+public:
+  HDF5FileTestUtility(const std::string &fullPath)
+      : m_file(fullPath, H5F_ACC_RDONLY) {}
+
+  bool hasNxClass(std::string className, std::string HDF5Path) const {
+
+    H5::Group parentGroup = m_file.openGroup(HDF5Path);
+    
+    for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
+      H5::Attribute attribute = parentGroup.openAttribute(i);
+
+      (attribute.getName() == className) ? true : false; //check if NXclass exists in group
+
+    }
+  }
+
+private:
+  H5::H5File m_file;
 };
 
 } // namespace
@@ -90,10 +117,10 @@ public:
 
     // Check file itself.
 
-    saveInstrument(*inst2.first,
-                   destinationFile); //, progress); <-optional pointer
+    // saveInstrument(*inst2.first,
+    //              destinationFile); //, progress); <-optional pointer
 
-    // HDF5FileTestUtility tester(destinationFile);
+    HDF5FileTestUtility tester(destinationFile);
 
     /*
     class that takes hdf5 file and tests that is has
