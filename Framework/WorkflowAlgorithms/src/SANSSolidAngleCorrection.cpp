@@ -27,6 +27,8 @@ using namespace DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
+namespace {
+
 /// Returns the angle between the sample-to-pixel vector and its
 /// projection on the X-Z plane.
 static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
@@ -44,6 +46,9 @@ static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
   return sampleDetVec.angle(inPlane);
 }
 
+} // namespace
+
+//----------------------------------------------------------------------------------------------
 void SANSSolidAngleCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");

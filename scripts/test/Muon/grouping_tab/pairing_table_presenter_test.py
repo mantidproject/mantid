@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 import six
@@ -216,10 +215,8 @@ class PairingTablePresenterTest(GuiTest):
         invalid_names = ["", "@", "name!", "+-"]
 
         for invalid_name in invalid_names:
-            print(self.view.get_table_contents())
             self.view.pairing_table.setCurrentCell(0, 0)
             self.view.pairing_table.item(0, 0).setText(invalid_name)
-            print(self.view.get_table_contents())
 
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_pair_0")
             self.assertIn("my_pair_0", self.model.pair_names)

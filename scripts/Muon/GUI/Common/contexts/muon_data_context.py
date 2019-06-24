@@ -178,6 +178,10 @@ class MuonDataContext(object):
         except AttributeError:
             # default to 1
             n_det = 1
+        if n_det == 0:
+            # The number of histograms commonly used for PSI data, in real data,
+            # very often the number of detectors == number of histograms
+            return self.current_workspace.getNumberHistograms()
         return n_det
 
     @property
