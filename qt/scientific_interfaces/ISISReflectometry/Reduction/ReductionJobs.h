@@ -29,7 +29,7 @@ public:
   Group &insertGroup(Group group, int beforeIndex);
   bool hasGroupWithName(std::string const &groupName) const;
   bool containsSingleEmptyGroup() const;
-  boost::optional<int> indexOfGroupWithName(std::string const &groupName);
+  boost::optional<int> indexOfGroupWithName(std::string const &groupName) const;
   void removeGroup(int index);
   void removeAllGroups();
   void resetState();

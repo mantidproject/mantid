@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #include "../Runs/IRunsPresenter.h"
+#include "Common/Clipboard.h"
 #include "Common/DllConfig.h"
 #include "GUI/Common/IPlotter.h"
 #include "IRunsTablePresenter.h"
@@ -149,8 +150,7 @@ private:
 
   IRunsTableView *m_view;
   RunsTable m_model;
-  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
-      m_clipboard;
+  Clipboard m_clipboard;
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;

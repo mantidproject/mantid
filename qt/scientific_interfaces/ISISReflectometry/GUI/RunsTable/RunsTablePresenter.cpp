@@ -59,13 +59,58 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
   cell.setBackgroundColor(Colour::WARNING);
   cell.setToolTip(errorMessage);
 }
+
+bool groupNameExists(
+    std::string const &groupName, ReductionJobs const &jobs,
+    std::vector<MantidWidgets::Batch::RowLocation> const &rootsToIgnore) {
+
+  // Check if the group name exists in the jobs
+  auto maybeExistingGroupIndex = jobs.indexOfGroupWithName(groupName);
+  if (!maybeExistingGroupIndex.is_initialized())
+    return false;
+
+  // If it exists but in one of the roots to ignore, return false
+  auto existingGroupLocation = MantidWidgets::Batch::RowLocation(
+      MantidWidgets::Batch::RowPath{maybeExistingGroupIndex.get()});
+  if (std::find(rootsToIgnore.cbegin(), rootsToIgnore.cend(),
+                existingGroupLocation) != rootsToIgnore.cend())
+    return false;
+
+  return true;
+}
+
+void makePastedGroupNamesUnique(
+    Clipboard &clipboard, int rootIndex,
+    std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
+    ReductionJobs const &jobs) {
+
+  if (!clipboard.isGroupLocation(rootIndex))
+    return;
+
+  // Recursively replace the group name until it is unique
+  auto groupName = clipboard.groupName(rootIndex);
+  while (groupNameExists(groupName, jobs, replacementRoots))
+    groupName.append(" (copy)");
+
+  // Set the new name
+  clipboard.setGroupName(rootIndex, groupName);
+}
+
+void makePastedGroupNamesUnique(
+    Clipboard &clipboard,
+    std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
+    ReductionJobs const &jobs) {
+  for (auto rootIndex = 0; rootIndex < clipboard.size(); ++rootIndex) {
+    makePastedGroupNamesUnique(clipboard, rootIndex, replacementRoots, jobs);
+  }
+}
 } // namespace
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
     double thetaTolerance, ReductionJobs jobs, const IPlotter &plotter)
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
-      m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
+      m_clipboard(), m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
 }
 
@@ -509,8 +554,9 @@ void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
 }
 
 void RunsTablePresenter::notifyCopyRowsRequested() {
-  m_clipboard = m_view->jobs().selectedSubtrees();
-  if (m_clipboard.is_initialized())
+  m_clipboard = Clipboard(m_view->jobs().selectedSubtrees(),
+                          m_view->jobs().selectedSubtreeRoots());
+  if (m_clipboard.isInitialized())
     m_view->jobs().clearSelection();
   else
     m_view->invalidSelectionForCopy();
@@ -520,9 +566,10 @@ void RunsTablePresenter::notifyCutRowsRequested() {
   if (isProcessing() || isAutoreducing())
     return;
 
-  m_clipboard = m_view->jobs().selectedSubtrees();
+  m_clipboard = Clipboard(m_view->jobs().selectedSubtrees(),
+                          m_view->jobs().selectedSubtreeRoots());
   auto selected = m_view->jobs().selectedRowLocations();
-  if (m_clipboard.is_initialized()) {
+  if (m_clipboard.isInitialized()) {
     removeRowsAndGroupsFromView(selected);
     removeRowsFromModel(selected);
     m_view->jobs().clearSelection();
@@ -538,12 +585,14 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
     return;
 
   auto maybeReplacementRoots = m_view->jobs().selectedSubtreeRoots();
-  if (maybeReplacementRoots.is_initialized() && m_clipboard.is_initialized()) {
+  if (maybeReplacementRoots.is_initialized() && m_clipboard.isInitialized()) {
     auto &replacementRoots = maybeReplacementRoots.get();
-    if (!replacementRoots.empty())
-      pasteRowsAtRoots(replacementRoots);
-    else
+    makePastedGroupNamesUnique(m_clipboard, replacementRoots,
+                               m_model.reductionJobs());
+    if (replacementRoots.empty())
       pasteRowsAtEnd();
+    else
+      pasteRowsAtRoots(replacementRoots);
     notifyRowStateChanged();
     notifySelectionChanged();
   }
@@ -552,8 +601,8 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
 void RunsTablePresenter::pasteRowsAtRoots(
     std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots) {
   // Paste onto given locations. Only possible if the depth is the same.
-  if (containsGroups(replacementRoots) == containsGroups(m_clipboard.get()))
-    m_view->jobs().replaceRows(replacementRoots, m_clipboard.get());
+  if (containsGroups(replacementRoots) == containsGroups(m_clipboard))
+    m_view->jobs().replaceRows(replacementRoots, m_clipboard.subtrees());
   else
     m_view->invalidSelectionForPaste();
 }
@@ -561,9 +610,9 @@ void RunsTablePresenter::pasteRowsAtRoots(
 void RunsTablePresenter::pasteRowsAtEnd() {
   // Paste rows into a group location at the end of the table. Only possible if
   // the clipboard contains groups
-  if (containsGroups(m_clipboard.get()))
+  if (containsGroups(m_clipboard))
     m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
-                                    m_clipboard.get());
+                                    m_clipboard.subtrees());
   else
     m_view->invalidSelectionForPaste();
 }
