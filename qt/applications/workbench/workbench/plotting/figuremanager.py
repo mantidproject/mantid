@@ -298,10 +298,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         # Get the bounds of the line
         line_ydata = container[0].get_ydata()
-        print(line_ydata)
         try:
             line_min = np.min(line_ydata)
-            print(line_min)
             line_max = np.max(line_ydata)
         except ValueError:
             # No y data
@@ -359,7 +357,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         max_bounds = []
 
         for container, cargs in zip(containers, creation_args):
-            print(cargs)
             if MantidAxKwargs.POST_CREATION_ARGS in cargs:
                 pcargs = cargs[MantidAxKwargs.POST_CREATION_ARGS]
                 if MantidAxKwargs.ERRORS_VISIBLE in pcargs:
