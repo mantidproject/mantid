@@ -236,7 +236,7 @@ class Abins(PythonAlgorithm):
                                      (prefix, atom_number, 1, num_atoms))
 
             # Final sanity check that everything in "atoms" field was understood
-            if len(atom_symbols) + len (atom_numbers) < len(self._atoms):
+            if len(atom_symbols) + len(atom_numbers) < len(self._atoms):
                 elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
                 numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
                 raise ValueError("Not all user atom selections ('atoms' option) were understood." +
@@ -281,9 +281,32 @@ class Abins(PythonAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
+    def _get_masses_table(self, num_atoms):
+        """
+        Collect masses associated with each element in self._extracted_ab_initio_data
+
+        :param num_atoms: Number of atoms in the system. (Saves time working out iteration.)
+        :type: int
+
+        :returns: Mass data in form ``{el1: [m1, ...], ... }``
+        """
+        masses = {}
+        for i in range(num_atoms):
+            symbol = self._extracted_ab_initio_data["atom_%s" % i]["symbol"]
+            mass = self._extracted_ab_initio_data["atom_%s" % i]["mass"]
+            if symbol not in masses:
+                masses[symbol] = set()
+            masses[symbol].add(mass)
+
+        # convert set to list to fix order
+        for s in masses:
+            masses[s] = sorted(list(set(masses[s])))
+
+        return masses
+
     def _create_workspaces(self, atoms_symbols=None, atom_numbers=None, s_data=None):
         """
-        Creates workspaces for all types of atoms. Creates both partial and total workspaces for all types of atoms.
+        Creates workspaces for all types of atoms. Creates both partial and total workspaces for given types of atoms.
 
         :param atoms_symbols: atom types (i.e. element symbols) for which S should be created.
         :type iterable of str:
@@ -297,6 +320,8 @@ class Abins(PythonAlgorithm):
 
         :returns: workspaces for list of atoms types, S for the particular type of atom
         """
+        from AbinsModules.AbinsConstants import MASS_EPS, ONLY_ONE_MASS
+
         s_data_extracted = s_data.extract()
 
         # Create appropriately-shaped arrays to be used in-place by _atom_type_s - avoid repeated slow instantiation
@@ -306,26 +331,14 @@ class Abins(PythonAlgorithm):
         temp_s_atom_data = np.copy(s_atom_data)
 
         num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
-
-        masses = {}
-        for i in range(num_atoms):
-            symbol = self._extracted_ab_initio_data["atom_%s" % i]["symbol"]
-            mass = self._extracted_ab_initio_data["atom_%s" % i]["mass"]
-            if symbol not in masses:
-                masses[symbol] = set()
-            masses[symbol].add(mass)
-
-        one_m = AbinsModules.AbinsConstants.ONLY_ONE_MASS
-        eps = AbinsModules.AbinsConstants.MASS_EPS
-        # convert set to list to fix order
-        for s in masses:
-            masses[s] = sorted(list(set(masses[s])))
+        masses = self._get_masses_table(num_atoms)
 
         result = []
 
         if atoms_symbols is not None:
             for symbol in atoms_symbols:
-                sub = len(masses[symbol]) > one_m or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > eps
+                sub = (len(masses[symbol]) > ONLY_ONE_MASS or
+                       abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS)
                 for m in masses[symbol]:
                     result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
                                                     element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
@@ -394,16 +407,16 @@ class Abins(PythonAlgorithm):
             information but is used in-place to save on time instantiating large arrays.
         :param substitution: True if isotope substitution and False otherwise
         """
+        from AbinsModules.AbinsConstants import MASS_EPS
+
         atom_workspaces = []
         s_atom_data.fill(0.0)
 
         element = Atom(symbol=element_symbol)
 
         for atom in range(num_atoms):
-
-            eps = AbinsModules.AbinsConstants.MASS_EPS
             if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == element_symbol and
-                    abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < eps):
+                    abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < MASS_EPS):
 
                 temp_s_atom_data.fill(0.0)
 
