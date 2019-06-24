@@ -13,7 +13,7 @@ from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
-from mantid.plots import MantidAxKwargs
+from mantid.plots import MantidAxPostCreationArgs
 
 try:
     from matplotlib.colors import to_hex
@@ -217,17 +217,17 @@ class PlotsSaver(object):
 
         # cargs may not have POST_CREATION_ARGS. Set visible to false if not, so plots can
         # be saved/loaded.
-        if MantidAxKwargs.POST_CREATION_ARGS not in cargs:
-            cargs[MantidAxKwargs.POST_CREATION_ARGS] = {MantidAxKwargs.ERRORS_VISIBLE: False,
-                                                        MantidAxKwargs.ERRORS_ADDED: False}
+        if MantidAxPostCreationArgs.POST_CREATION_ARGS not in cargs:
+            cargs[MantidAxPostCreationArgs.POST_CREATION_ARGS] = {MantidAxPostCreationArgs.ERRORS_VISIBLE: False,
+                                                        MantidAxPostCreationArgs.ERRORS_ADDED: False}
         if (cargs["function"] == "errorbar" or
-                cargs[MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_ADDED]):
+                cargs[MantidAxPostCreationArgs.POST_CREATION_ARGS][MantidAxPostCreationArgs.ERRORS_ADDED]):
             return {"exists": True,
                     "dashCapStyle": line.get_dash_capstyle(),
                     "dashJoinStyle": line.get_dash_joinstyle(),
                     "solidCapStyle": line.get_solid_capstyle(),
                     "solidJoinStyle": line.get_solid_joinstyle(),
-                    "visible": cargs[MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_VISIBLE]}
+                    "visible": cargs[MantidAxPostCreationArgs.POST_CREATION_ARGS][MantidAxPostCreationArgs.ERRORS_VISIBLE]}
         else:
             return {"exists": False}
 

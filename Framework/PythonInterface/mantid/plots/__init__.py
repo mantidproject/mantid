@@ -36,7 +36,7 @@ from matplotlib.table import Table
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
-from mantid.plots.utility import MantidAxKwargs, find_errorbar_container
+from mantid.plots.utility import MantidAxPostCreationArgs, find_errorbar_container
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D

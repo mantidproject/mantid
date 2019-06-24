@@ -13,7 +13,7 @@ from functools import partial
 from qtpy.QtWidgets import QMenu
 
 from mantid.plots import MantidAxes
-from mantid.plots.utility import MantidAxKwargs, find_errorbar_container
+from mantid.plots.utility import MantidAxPostCreationArgs, find_errorbar_container
 from mantid.simpleapi import mtd
 
 
@@ -144,7 +144,7 @@ class FigureErrorsManager(object):
         specNum = ax.creation_args[creation_args_index]["specNum"]
 
         # if a forced state is passed, use that for the error plotting
-        state_kwarg = {} if make_visible is None else {MantidAxKwargs.ERRORS_VISIBLE: make_visible}
+        state_kwarg = {} if make_visible is None else {MantidAxPostCreationArgs.ERRORS_VISIBLE: make_visible}
         # Plots the spectrum with errors on the same plot.
         # This will append it to the bottom of the `lines` and `containers` lists.
         # TODO remove capsize, this is just added for testing
@@ -164,14 +164,14 @@ class FigureErrorsManager(object):
         # delete the new kwargs
         del cargs[-1]
         # add a new key for project load to handle
-        cargs[creation_args_index][MantidAxKwargs.POST_CREATION_ARGS] = {
-            MantidAxKwargs.ERRORS_ADDED: True,
-            MantidAxKwargs.ERRORS_VISIBLE: True if make_visible is None else make_visible
+        cargs[creation_args_index][MantidAxPostCreationArgs.POST_CREATION_ARGS] = {
+            MantidAxPostCreationArgs.ERRORS_ADDED: True,
+            MantidAxPostCreationArgs.ERRORS_VISIBLE: True if make_visible is None else make_visible
         }
 
         # add the creation args default argument,
         # use the make_visible, or set to True by default
-        # cargs[creation_args_index][MantidAxKwargs.ERRORS_VISIBLE] =
+        # cargs[creation_args_index][MantidAxPostCreationArgs.ERRORS_VISIBLE] =
 
         # The swaps are done to pretend the line was replaced 'inplace'
         # this keeps the legend order the same.
@@ -295,10 +295,10 @@ class FigureErrorsManager(object):
             # updates the creation args state if the plot would be saved out
             if self._supported_ax(ax):
                 creation_args = ax.creation_args
-                if MantidAxKwargs.POST_CREATION_ARGS in creation_args[index]:
-                    creation_args[index][MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_VISIBLE] = new_state
+                if MantidAxPostCreationArgs.POST_CREATION_ARGS in creation_args[index]:
+                    creation_args[index][MantidAxPostCreationArgs.POST_CREATION_ARGS][MantidAxPostCreationArgs.ERRORS_VISIBLE] = new_state
                 else:
-                    creation_args[index][MantidAxKwargs.POST_CREATION_ARGS] = {MantidAxKwargs.ERRORS_VISIBLE: new_state}
+                    creation_args[index][MantidAxPostCreationArgs.POST_CREATION_ARGS] = {MantidAxPostCreationArgs.ERRORS_VISIBLE: new_state}
 
             error_line.set_visible(new_state)
 

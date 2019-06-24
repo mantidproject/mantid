@@ -17,7 +17,7 @@ import sys
 # 3rdparty imports
 from mantid.api import AnalysisDataServiceObserver
 from mantid.plots import MantidAxes
-from mantid.plots.utility import MantidAxKwargs
+from mantid.plots.utility import MantidAxPostCreationArgs
 from mantid.py3compat import text_type
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
@@ -357,10 +357,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         max_bounds = []
 
         for container, cargs in zip(containers, creation_args):
-            if MantidAxKwargs.POST_CREATION_ARGS in cargs:
-                pcargs = cargs[MantidAxKwargs.POST_CREATION_ARGS]
-                if MantidAxKwargs.ERRORS_VISIBLE in pcargs:
-                    if pcargs[MantidAxKwargs.ERRORS_VISIBLE]:
+            if MantidAxPostCreationArgs.POST_CREATION_ARGS in cargs:
+                pcargs = cargs[MantidAxPostCreationArgs.POST_CREATION_ARGS]
+                if MantidAxPostCreationArgs.ERRORS_VISIBLE in pcargs:
+                    if pcargs[MantidAxPostCreationArgs.ERRORS_VISIBLE]:
                         # Scale off errors
                         container_lower_bound, container_upper_bound = self.get_bounds_from_container(container, True)
                     else:

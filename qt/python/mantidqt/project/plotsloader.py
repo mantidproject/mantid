@@ -18,7 +18,7 @@ from matplotlib import axis, ticker  # noqa
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 # Constants set in workbench.plotting.functions but would cause backwards reliability
-from mantid.plots.utility import MantidAxKwargs
+from mantid.plots.utility import MantidAxPostCreationArgs
 from mantidqt.plotting.functions import pcolormesh
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
@@ -65,14 +65,14 @@ class PlotsLoader(object):
         for cargs in creation_args[0]:
             if "workspaces" in cargs:
                 workspace_name = cargs.pop('workspaces')
-                pcargs.append(cargs.pop(MantidAxKwargs.POST_CREATION_ARGS, {}))
+                pcargs.append(cargs.pop(MantidAxPostCreationArgs.POST_CREATION_ARGS, {}))
                 workspace = ADS.retrieve(workspace_name)
                 self.plot_func(workspace, ax, ax.figure, cargs)
 
         fem = FigureErrorsManager(ax.figure.canvas)
         for index, pcargs in enumerate(pcargs):
-            if MantidAxKwargs.ERRORS_ADDED in pcargs and pcargs[MantidAxKwargs.ERRORS_ADDED]:
-                if MantidAxKwargs.ERRORS_VISIBLE in pcargs and pcargs[MantidAxKwargs.ERRORS_VISIBLE]:
+            if MantidAxPostCreationArgs.ERRORS_ADDED in pcargs and pcargs[MantidAxPostCreationArgs.ERRORS_ADDED]:
+                if MantidAxPostCreationArgs.ERRORS_VISIBLE in pcargs and pcargs[MantidAxPostCreationArgs.ERRORS_VISIBLE]:
                     fem.show_error_bar_for(index)
                 else:
                     fem.hide_error_bar_for(index)

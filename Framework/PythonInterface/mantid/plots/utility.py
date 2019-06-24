@@ -20,7 +20,15 @@ class MantidAxType(Enum):
     SPECTRUM = 1
 
 
-class MantidAxKwargs(object):
+class MantidAxPostCreationArgs(Enum):
+    """
+    Defines axis arguments which are changed after the creation of an axes object,
+    for example error bar management options.
+
+    POST_CREATION_ARGS: The key for arguments which are edited after axes creation
+    ERRORS_VISIBLE: The key for if error bars should be visible on the plot
+    ERRORS_ADDED: The key for if errors have been added to the plot since creation
+    """
     POST_CREATION_ARGS = "post_creation_args"
     ERRORS_VISIBLE = "errors_visible"
     ERRORS_ADDED = "errors_added"
