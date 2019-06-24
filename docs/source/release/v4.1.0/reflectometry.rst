@@ -52,6 +52,11 @@ Bug fixes
 
 - Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
 	
+Removed
+#######
+
+- The ``Generate Notebook`` checkbox has been removed.
+
 Algorithms
 ----------
 
