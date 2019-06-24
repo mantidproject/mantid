@@ -40,21 +40,50 @@ public:
   HDF5FileTestUtility(const std::string &fullPath)
       : m_file(fullPath, H5F_ACC_RDONLY) {}
 
-  bool hasNxClass(std::string className, std::string HDF5Path) const {
+  bool hasNxClass(const std::string &classType, const std::string &path) const {
 
-    H5::Group parentGroup = m_file.openGroup(HDF5Path);
+    H5::Group parentGroup = m_file.openGroup(path);
+    H5::Attribute attribute = parentGroup.openAttribute("NX_class");
+
+	std::string readClass;
+    attribute.read(attribute.getDataType(), readClass);
+      return (readClass == classType)
+                 ? true
+                 : false; // check if NXclass exists in group
     
-    for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
-      H5::Attribute attribute = parentGroup.openAttribute(i);
-
-      (attribute.getName() == className) ? true : false; //check if NXclass exists in group
-
-    }
   }
 
 private:
   H5::H5File m_file;
 };
+
+/*
+
+// Gives a clean file destination and removes after if present.
+ class ScopedFileHandle {
+   private:
+   const std::string m_full_path; full path to file
+   public:
+   ScopedFileHandle(const std::string& name) {
+
+    std::string loc = // TODO obtain path to temp directory. See POCO::File
+    m_full_path = loc + name;
+
+        // Check proposed location and throw std::invalid argument if file does
+not exist.
+   }
+
+   std::string fullPath() const {
+      return m_full_path;
+   }
+
+   ~ScopedFileHandle(){
+      // TODO delete the file.
+   }
+
+ };
+
+*/
 
 } // namespace
 
@@ -110,6 +139,11 @@ public:
 
     // destination folder for outputfile-----------------------------------
 
+    /*
+    ScopedFileHandle fileResource("WISH_Definition_10Panels.hdf5");
+        destinationFile = fileResource.fullPath();
+    */
+
     std::string destinationFile =
         "C:\\Users\\mqi61253\\WISH_Definition_10Panels.hdf5"; // some path to
                                                               // save the hdf5
@@ -122,14 +156,16 @@ public:
 
     HDF5FileTestUtility tester(destinationFile);
 
+    // RAII ScopedFileHanle
+
     /*
     class that takes hdf5 file and tests that is has
     attributes and classes (see provided links) among
     other things
         */
 
-    //    ASSERT_TRUE(tester.hasNxClass(
-    //      "NXinstrument", "/raw_data_1/instrument")); // goto arg1 in hdf5
+    ASSERT_TRUE(tester.hasNxClass(
+        "NXinstrument", "/raw_data_1/instrument")); // goto arg1 in hdf5
     //      file and check if arg0 exists
   }
 };
