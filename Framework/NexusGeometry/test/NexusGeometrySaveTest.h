@@ -14,6 +14,8 @@
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
+#include <boost/filesystem.hpp>
+
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <gmock/gmock.h>
@@ -45,45 +47,48 @@ public:
     H5::Group parentGroup = m_file.openGroup(path);
     H5::Attribute attribute = parentGroup.openAttribute("NX_class");
 
-	std::string readClass;
+    std::string readClass;
     attribute.read(attribute.getDataType(), readClass);
-      return (readClass == classType)
-                 ? true
-                 : false; // check if NXclass exists in group
-    
+    return (readClass == classType) ? true
+                                    : false; // check if NXclass exists in group
   }
 
 private:
   H5::H5File m_file;
 };
 
-/*
-
 // Gives a clean file destination and removes after if present.
- class ScopedFileHandle {
-   private:
-   const std::string m_full_path; full path to file
-   public:
-   ScopedFileHandle(const std::string& name) {
 
-    std::string loc = // TODO obtain path to temp directory. See POCO::File
-    m_full_path = loc + name;
+class ScopedFileHandle {
 
-        // Check proposed location and throw std::invalid argument if file does
-not exist.
-   }
+public:
+  ScopedFileHandle(const std::string &name) {
 
-   std::string fullPath() const {
-      return m_full_path;
-   }
+    
+    auto temp_dir = boost::filesystem::temp_directory_path();
+    auto temp_full_path = temp_dir /= name;
 
-   ~ScopedFileHandle(){
-      // TODO delete the file.
-   }
+    // Check proposed location and throw std::invalid argument if file does not
+    // exist. otherwise set m_full_path to location.
+    (boost::filesystem::exists(temp_full_path))
+        ? m_full_path = temp_full_path
+        : throw std::invalid_argument("file does not exist.");
+  }
 
- };
+  std::string fullPath() const {
+    return m_full_path.generic_string();
+  }
 
-*/
+  ~ScopedFileHandle() {
+    // TODO delete the file.
+    if (boost::filesystem::is_regular_file(m_full_path)) {
+      boost::filesystem::remove(m_full_path);
+    }
+  }
+
+private:
+  boost::filesystem::path m_full_path; // full path to file
+};
 
 } // namespace
 
@@ -106,7 +111,7 @@ public:
 
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    std::string path = "invalid_path"; // valid path
+    std::string path = "invalid_path"; // test valid path
 
     TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
                      std::invalid_argument &);
@@ -120,7 +125,7 @@ public:
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
     MockProgressBase progressRep;
     EXPECT_CALL(progressRep, doReport(testing::_)).Times(1);
-    std::string path = "C:\\Users\\mqi61253"; // valid path
+    std::string path = "C:\\Users\\mqi61253"; // test valid path
     saveInstrument(*inst2.first, path, &progressRep);
     ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
