@@ -17,7 +17,7 @@ class SamplingImage(mimage.AxesImage):
                  filterrad=4.0,
                  resample=False,
                  **kwargs):
-        super().__init__(
+        super(SamplingImage, self).__init__(
             ax,
             cmap=cmap,
             norm=norm,
