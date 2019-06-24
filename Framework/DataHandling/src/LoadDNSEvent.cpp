@@ -113,10 +113,12 @@ void LoadDNSEvent::exec() {
     const auto instrumentParametersChopperChannels =
         outputWS->instrumentParameters().getType<int>("chopper", "channel");
     if (!instrumentParametersChopperChannels.empty()) {
-      chopperChannel = instrumentParametersChopperChannels.at(0);
+      chopperChannel =
+          static_cast<uint32_t>(instrumentParametersChopperChannels.at(0));
     } else {
-      g_log.error() << "There seems to be no chopper channel defined in the "
-                       "instrument definition. You must specify it manually.";
+      g_log.error() << "The instrument definition is missing a chopper channel."
+                       " You must specify it manually."
+                    << std::endl;
     }
   }
 
@@ -125,15 +127,17 @@ void LoadDNSEvent::exec() {
     const auto instrumentParametersMonitorChannels =
         outputWS->instrumentParameters().getType<int>("monitor", "channel");
     if (!instrumentParametersMonitorChannels.empty()) {
-      monitorChannel = instrumentParametersMonitorChannels.at(0);
+      monitorChannel =
+          static_cast<uint32_t>(instrumentParametersMonitorChannels.at(0));
     } else {
-      g_log.error() << "There seems to be no monitor channel defined in the "
-                       "instrument definition. You must specify it manually.";
+      g_log.error() << "The instrument definition is missing a monitor channel."
+                       " You must specify it manually."
+                    << std::endl;
     }
   }
 
-  g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
-  g_log.notice() << "MonitorChannel: " << monitorChannel << std::endl;
+  g_log.notice() << "ChopperChannel: " << chopperChannel
+                 << " MonitorChannel: " << monitorChannel << std::endl;
 
   FileByteStream file(static_cast<std::string>(fileName), endian::big);
 
@@ -141,7 +145,6 @@ void LoadDNSEvent::exec() {
   populate_EventWorkspace(outputWS, finalEventAccumulator);
 
   setProperty("OutputWorkspace", outputWS);
-  g_log.notice() << std::endl;
 }
 
 template <typename Vector, typename _Compare>
@@ -160,8 +163,6 @@ void LoadDNSEvent::populate_EventWorkspace(
   // Sort reversed (latest event first, most early event last):
   sortVector(finalEventAccumulator.triggerEvents,
              [](auto l, auto r) { return l.timestamp > r.timestamp; });
-
-  g_log.notice() << finalEventAccumulator.neutronEvents.size() << std::endl;
 
   std::atomic<uint64_t> oversizedChanelIndexCounterA(0);
   std::atomic<uint64_t> oversizedPosCounterA(0);
@@ -212,12 +213,14 @@ void LoadDNSEvent::populate_EventWorkspace(
     // PARALLEL_CHECK_INTERUPT_REGION
   }
 
-  g_log.notice() << "Bad chanel indices: " << oversizedChanelIndexCounterA
-                 << std::endl;
-  g_log.notice() << "Bad position values: " << oversizedPosCounterA
-                 << std::endl;
-  g_log.notice() << "Trigger Counter: "
-                 << finalEventAccumulator.triggerEvents.size() << std::endl;
+  if (oversizedChanelIndexCounterA > 0) {
+    g_log.warning() << "Bad chanel indices: " << oversizedChanelIndexCounterA
+                   << std::endl;
+  }
+  if (oversizedPosCounterA > 0) {
+    g_log.warning() << "Bad position values: " << oversizedPosCounterA
+                   << std::endl;
+  }
 }
 
 void LoadDNSEvent::runLoadInstrument(std::string instrumentName,
@@ -392,11 +395,6 @@ LoadDNSEvent::parse_File(FileByteStream &file, const std::string fileName) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
 
-  for (auto v : header) {
-    g_log.debug() << v;
-  }
-  g_log.debug() << std::endl;
-
   // check it is actually a mesytec psd listmode file:
   if (!startsWith(header, std::string("mesytec psd listmode data"))) {
     g_log.error() << "This seems not to be a mesytec psd listmode file: "
@@ -409,23 +407,18 @@ LoadDNSEvent::parse_File(FileByteStream &file, const std::string fileName) {
   const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 1;
   // Split File:
   std::vector<std::vector<uint8_t>> filechuncks = split_File(file, threadCount);
-  g_log.notice() << "filechuncks count = " << filechuncks.size() << std::endl;
+  g_log.debug() << "filechuncks count = " << filechuncks.size() << std::endl;
 
   std::vector<EventAccumulator> eventAccumulators(filechuncks.size());
   for (auto &evtAcc : eventAccumulators) {
     evtAcc.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
   }
 
-  g_log.notice()
-      << "evtAcc.neutronEvents.size() = "
-      << eventAccumulators[eventAccumulators.size() - 1].neutronEvents.size()
-      << std::endl;
-
   // parse individual file chuncks:
   PARALLEL_FOR_IF(USE_PARALLELISM)
   for (int i = 0; i < static_cast<int>(filechuncks.size()); ++i) {
     auto filechunck = filechuncks[static_cast<size_t>(i)];
-    g_log.notice() << "filechunck.size() = " << filechunck.size() << std::endl;
+    g_log.debug() << "filechunck.size() = " << filechunck.size() << std::endl;
     auto vbs = VectorByteStream(filechunck, file.endianess());
     parse_BlockList(vbs, eventAccumulators[static_cast<size_t>(i)]);
   }
