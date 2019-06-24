@@ -122,7 +122,6 @@ void LoadDNSEvent::exec() {
     }
   }
 
-
   if (monitorChannel == 0) {
     const auto instrumentParametersMonitorChannels =
         outputWS->instrumentParameters().getType<int>("monitor", "channel");
@@ -215,11 +214,11 @@ void LoadDNSEvent::populate_EventWorkspace(
 
   if (oversizedChanelIndexCounterA > 0) {
     g_log.warning() << "Bad chanel indices: " << oversizedChanelIndexCounterA
-                   << std::endl;
+                    << std::endl;
   }
   if (oversizedPosCounterA > 0) {
     g_log.warning() << "Bad position values: " << oversizedPosCounterA
-                   << std::endl;
+                    << std::endl;
   }
 }
 
