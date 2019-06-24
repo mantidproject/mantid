@@ -106,16 +106,32 @@ void LoadDNSEvent::exec() {
   const std::string fileName = getPropertyValue("InputFile");
   chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
   monitorChannel = static_cast<uint32_t>(getProperty("MonitorChannel"));
-  const auto chopperChannels =
-      outputWS->instrumentParameters().getType<int>("chopper", "channel");
-  const auto monitorChannels =
+  const auto instrParamMonitorChannels =
       outputWS->instrumentParameters().getType<int>("monitor", "channel");
-  chopperChannel = chopperChannel != 0
-                       ? chopperChannel
-                       : (chopperChannels.empty() ? 99 : chopperChannels.at(0));
-  monitorChannel = monitorChannel != 0
-                       ? monitorChannel
-                       : (monitorChannels.empty() ? 99 : monitorChannels.at(0));
+
+  if (chopperChannel == 0) {
+    const auto instrumentParametersChopperChannels =
+        outputWS->instrumentParameters().getType<int>("chopper", "channel");
+    if (!instrumentParametersChopperChannels.empty()) {
+      chopperChannel = instrumentParametersChopperChannels.at(0);
+    } else {
+      g_log.error() << "There seems to be no chopper channel defined in the "
+                       "instrument definition. You must specify it manually.";
+    }
+  }
+
+
+  if (monitorChannel == 0) {
+    const auto instrumentParametersMonitorChannels =
+        outputWS->instrumentParameters().getType<int>("monitor", "channel");
+    if (!instrumentParametersMonitorChannels.empty()) {
+      monitorChannel = instrumentParametersMonitorChannels.at(0);
+    } else {
+      g_log.error() << "There seems to be no monitor channel defined in the "
+                       "instrument definition. You must specify it manually.";
+    }
+  }
+
   g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
   g_log.notice() << "MonitorChannel: " << monitorChannel << std::endl;
 
