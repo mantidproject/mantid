@@ -150,9 +150,11 @@ class GeneralSettings(object):
         self.parent.populate_layout_menu()
 
     def load_layout(self):
-        layout = self.view.layout_display.currentItem().text()
-        layout_dict = self.get_layout_dict()
-        self.parent.restoreState(layout_dict[layout])
+        items = self.view.layout_display.currentItem()
+        if hasattr(items, "test"):
+            layout = self.view.layout_display.currentItem().text()
+            layout_dict = self.get_layout_dict()
+            self.parent.restoreState(layout_dict[layout])
 
     def delete_layout(self):
         layout = self.view.layout_display.currentItem().text()
