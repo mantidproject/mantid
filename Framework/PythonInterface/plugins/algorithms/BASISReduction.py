@@ -545,10 +545,10 @@ the first two hours"""
         Returns
         -------
         list
-            If _doIndiv is False, return a list of IntArrayProperty
-            objects. Each item is a pseudolist containing a set of runs to
-            be reduced together. if _doIndiv is True, return a list of
-            strings, each string is a run number.
+            Items of this list are lists. If `doIndiv` is True, each item
+            list is made up of a single run number. If `doIndiv` is False,
+            each item list is made up of several run numbers which are to
+            be reduced together.
         """
         run_list = []
         # ';' separates the runs into substrings. Each substring
@@ -557,9 +557,9 @@ the first two hours"""
         for rlval in rlvals:
             iap = IntArrayProperty('_get_runs_iap', rlval)  # substring split
             if doIndiv:
-                run_list.extend([[x] for x in iap.value])
+                run_list.extend([[str(x)] for x in iap.value])
             else:
-                run_list.append(iap.value)
+                run_list.append([str(x) for x in iap.value])
         return run_list
 
     def _make_run_name(self, run, useShort=True):
