@@ -311,8 +311,11 @@ class MantidAxes(Axes):
                 logger.warning("You are overlaying distribution and "
                                "non-distribution data!")
 
-    def artist_has_errorbars(self, artist):
+    def artists_workspace_has_errors(self, artist):
         """Check if the given artist's workspace has errors"""
+        if artist not in self.get_tracked_artists():
+            raise ValueError("Artist '{}' is not tracked and so does not have "
+                             "an associated workspace.".format(artist))
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
         if any(workspace.readE(workspace_index) != 0):

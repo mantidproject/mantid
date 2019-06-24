@@ -23,15 +23,3 @@ class AddedToSysPath:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.path = self.original_sys_path
-
-
-class BlockQSignals:
-    """Context manager to block QSignals from a QObject"""
-    def __init__(self, qobject):
-        self.qobject = qobject
-
-    def __enter__(self):
-        self.qobject.blockSignals(True)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.qobject.blockSignals(False)

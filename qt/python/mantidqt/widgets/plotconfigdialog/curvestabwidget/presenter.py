@@ -13,7 +13,7 @@ from matplotlib.lines import Line2D
 
 from mantid.plots import MantidAxes
 from mantid.plots.helperfunctions import get_data_from_errorbar_container
-from mantidqt.utils import BlockQSignals
+from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
     CurveProperties, set_curve_hidden, set_errorbars_hidden, curve_has_errors,
@@ -172,7 +172,7 @@ class CurvesTabWidgetPresenter:
         on the axes remove the axes entry from the 'select_axes_combo_box'. If
         no axes with curves remain close the tab and return True
         """
-        with BlockQSignals(self.view.select_curve_combo_box):
+        with block_signals(self.view.select_curve_combo_box):
             self.view.remove_select_curve_combo_box_selected_item()
             if self.view.select_curve_combo_box.count() == 0:
                 self.view.remove_select_axes_combo_box_selected_item()
@@ -230,7 +230,7 @@ class CurvesTabWidgetPresenter:
         Return False if there are no lines on the axes (this can occur
         when a user uses the "Remove Curve" button), else return True.
         """
-        with BlockQSignals(self.view.select_curve_combo_box):
+        with block_signals(self.view.select_curve_combo_box):
             self.view.select_curve_combo_box.clear()
         selected_ax = self.get_selected_ax()
         if not selected_ax:

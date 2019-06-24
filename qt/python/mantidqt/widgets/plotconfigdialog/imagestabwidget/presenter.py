@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.utils import BlockQSignals
+from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.view import ImagesTabWidgetView, SCALES
@@ -45,7 +45,7 @@ class ImagesTabWidgetPresenter:
         return self.image_names_dict[self.view.get_selected_image_name()]
 
     def populate_select_image_combo_box_and_update_view(self):
-        with BlockQSignals(self.view.select_image_combo_box):
+        with block_signals(self.view.select_image_combo_box):
             self._populate_select_image_combo_box()
         self.update_view()
 

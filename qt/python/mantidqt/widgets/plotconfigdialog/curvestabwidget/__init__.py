@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from __future__ import (absolute_import, unicode_literals)
+
 from matplotlib import rcParams
 from matplotlib.axes import ErrorbarContainer
 from matplotlib.lines import Line2D
@@ -118,12 +120,7 @@ def curve_has_errors(curve):
     ax = get_ax_from_curve(curve)
     if isinstance(ax, MantidAxes):
         try:
-            workspace, spec_num = ax.get_artists_workspace_and_spec_num(curve)
-            workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
-            if any(workspace.readE(workspace_index) != 0):
-                return True
-            else:
-                return False
+            return ax.artists_workspace_has_errors(curve)
         except ValueError:  # Value error raised if artist has no associated workspace
             return False
     if isinstance(curve, Line2D):
