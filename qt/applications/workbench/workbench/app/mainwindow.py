@@ -236,11 +236,10 @@ class MainWindow(QMainWindow):
         self.interface_manager = InterfaceManager()
 
         # uses default configuration as necessary
-        self.readSettings(CONF)
-        self.config_updated()
-
         self.setup_default_layouts()
         self.create_actions()
+        self.readSettings(CONF)
+        self.config_updated()
 
     def post_mantid_init(self):
         """Run any setup that requires mantid
