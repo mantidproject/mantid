@@ -292,8 +292,3 @@ class GeneralSettingsTest(GuiTest):
         mock_CONF.get.assert_has_calls(calls)
         mock_CONF.set.assert_called_once_with(presenter.USER_LAYOUT, {})
         mock_parent.populate_layout_menu.assert_called_once_with()
-
-
-
-
-
