@@ -137,9 +137,10 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         setters = ['set_title', 'set_xlower_limit', 'set_xupper_limit',
                    'set_ylower_limit', 'set_yupper_limit', 'set_xlabel',
                    'set_ylabel', 'set_xscale', 'set_yscale']
-        expected_vals = [self.title.encode('unicode_escape'), ax.get_xlim()[0],
-                         ax.get_xlim()[1], ax.get_ylim()[0], ax.get_ylim()[1],
-                         self.x_label, self.y_label, self.x_scale, self.y_scale]
+        expected_vals = [self.title.encode('unicode_escape').decode(),
+                         ax.get_xlim()[0], ax.get_xlim()[1], ax.get_ylim()[0],
+                         ax.get_ylim()[1], self.x_label, self.y_label,
+                         self.x_scale, self.y_scale]
         with mock.patch.object(presenter, 'view', new_view_mock):
             presenter.update_view()
             for setter, value in zip(setters, expected_vals):

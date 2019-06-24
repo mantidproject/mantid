@@ -243,7 +243,8 @@ class CurvesTabWidgetPresenter:
         for line in selected_ax.get_lines():
             self._update_selected_curve_name(line)
 
-        self.view.populate_select_curve_combo_box(self.curve_names_dict.keys())
+        self.view.populate_select_curve_combo_box(
+            sorted(self.curve_names_dict.keys(), key=lambda s: s.lower()))
         return True
 
     def _update_selected_curve_name(self, curve):

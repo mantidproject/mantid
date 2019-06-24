@@ -97,4 +97,5 @@ class ImagesTabWidgetPresenter:
         for img in get_images_from_fig(self.fig):
             self.image_names_dict = self.set_name_in_names_dict(
                 self.generate_image_name(img), img, self.image_names_dict)
-        self.view.populate_select_image_combo_box(self.image_names_dict.keys())
+        self.view.populate_select_image_combo_box(
+            sorted(self.image_names_dict.keys()))
