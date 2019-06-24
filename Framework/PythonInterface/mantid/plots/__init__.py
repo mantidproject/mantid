@@ -485,7 +485,11 @@ class MantidAxes(Axes):
                 workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
 
+            # If we are making the first plot on an axes object
+            # i.e. self.lines is empty, axes has default ylim values.
+            # Therefore we need to autoscale regardless of autoscale_on_update.
             if self.lines:
+                # Otherwise set autoscale to autoscale_on_update.
                 self.set_autoscaley_on(autoscale_on_update)
 
             artist = self.track_workspace_artist(
@@ -549,10 +553,6 @@ class MantidAxes(Axes):
 
             def _data_update(artists, workspace, new_kwargs=None):
                 if self.lines:
-                    # If we have at least one line, set autoscaling
-                    # based on autoscale_on_update flag.
-                    # If we have no lines currently, we want to autoscale
-                    # regardless
                     self.set_autoscaley_on(autoscale_on_update)
 
                 # errorbar with workspaces can only return a single container
