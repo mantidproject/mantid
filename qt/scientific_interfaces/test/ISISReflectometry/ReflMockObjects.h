@@ -98,7 +98,7 @@ public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
-  MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const&>));
+  MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(notifyRowOutputsChanged, void());
   MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD0(reductionResumed, void());
@@ -268,13 +268,14 @@ public:
                Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError,
                Item const &(MantidQt::API::IConfiguredAlgorithm_sptr,
-                                    std::string const &));
+                            std::string const &));
   MOCK_CONST_METHOD1(
       algorithmOutputWorkspacesToSave,
       std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
-  MOCK_METHOD1(notifyWorkspaceDeleted, boost::optional<Item const &> (std::string const &));
+  MOCK_METHOD1(notifyWorkspaceDeleted,
+               boost::optional<Item const &>(std::string const &));
   MOCK_METHOD2(notifyWorkspaceRenamed,
-               boost::optional<Item const &> (std::string const &,
+               boost::optional<Item const &>(std::string const &,
                                              std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms,

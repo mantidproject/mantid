@@ -200,7 +200,8 @@ AlgorithmRuntimeProps BatchJobRunner::rowProcessingProperties() const {
   return createAlgorithmRuntimeProps(m_batch);
 }
 
-Item const &BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
+Item const &
+BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   jobAlgorithm->item()->resetOutputs();
@@ -208,7 +209,8 @@ Item const &BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm
   return *jobAlgorithm->item();
 }
 
-Item const &BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
+Item const &
+BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
 
@@ -218,7 +220,7 @@ Item const &BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorith
 }
 
 Item const &BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
-                                     std::string const &message) {
+                                           std::string const &message) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto *item = jobAlgorithm->item();
@@ -264,7 +266,8 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
   return workspaces;
 }
 
-boost::optional<Item const &> BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
+boost::optional<Item const &>
+BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
   // Reset the state for the relevant row if the workspace was one of our
   // outputs
   auto item = m_batch.getItemWithOutputWorkspaceOrNone(wsName);
@@ -283,7 +286,7 @@ BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
   if (item.is_initialized()) {
     item->renameOutputWorkspace(oldName, newName);
     return boost::optional<Item const &>(item.get());
-    }
+  }
   return boost::none;
 }
 

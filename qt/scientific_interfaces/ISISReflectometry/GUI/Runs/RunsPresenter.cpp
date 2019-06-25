@@ -163,7 +163,7 @@ void RunsPresenter::notifyRowStateChanged() {
   tablePresenter()->notifyRowStateChanged();
 }
 
-void RunsPresenter::notifyRowStateChanged(boost::optional<Item const&> item) {
+void RunsPresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
   tablePresenter()->notifyRowStateChanged(item);
 }
 
@@ -171,7 +171,8 @@ void RunsPresenter::notifyRowOutputsChanged() {
   tablePresenter()->notifyRowOutputsChanged();
 }
 
-void RunsPresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
+void RunsPresenter::notifyRowOutputsChanged(
+    boost::optional<Item const &> item) {
   tablePresenter()->notifyRowOutputsChanged(item);
 }
 

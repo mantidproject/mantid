@@ -40,7 +40,7 @@ public:
   notifyWorkspaceDeleted(std::string const &wsName) = 0;
   virtual boost::optional<Item const &>
   notifyWorkspaceRenamed(std::string const &oldName,
-                                      std::string const &newName) = 0;
+                         std::string const &newName) = 0;
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   getAlgorithms() = 0;

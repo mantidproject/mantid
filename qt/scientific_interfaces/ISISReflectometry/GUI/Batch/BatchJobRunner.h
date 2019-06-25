@@ -41,7 +41,7 @@ public:
   Item const &algorithmComplete(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
   Item const &algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                      std::string const &message) override;
+                             std::string const &message) override;
 
   std::vector<std::string> algorithmOutputWorkspacesToSave(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
@@ -50,7 +50,7 @@ public:
   notifyWorkspaceDeleted(std::string const &wsName) override;
   boost::optional<Item const &>
   notifyWorkspaceRenamed(std::string const &oldName,
-                              std::string const &newName) override;
+                         std::string const &newName) override;
   void notifyAllWorkspacesDeleted() override;
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;
