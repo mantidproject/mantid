@@ -74,23 +74,23 @@ long_mode_on_params = {
     "monitor_integration_range": (6, 10),
     # raw_data_tof_cropping needs to be have smaller/larger values than the bank TOF cropping values or
     # you will get data that divides to 0 or inf
-    "raw_data_tof_cropping": (20280, 39995),
-    "vanadium_tof_cropping": (20295, 39993),
+    "raw_data_tof_cropping": (20280, 39000),
+    "vanadium_tof_cropping": (20295, 39000),
     "focused_cropping_values": [
-        (20300, 39990),  # Bank 1
-        (20300, 39990),  # Bank 2
-        (20300, 39990),  # Bank 3
-        (20300, 39990),  # Bank 4
-        (20300, 39990),  # Bank 5
-        (20300, 39990),  # Bank 6
-        (20300, 39990),  # Bank 7
-        (20300, 39990),  # Bank 8
-        (20300, 39990),  # Bank 9
-        (20300, 39990),  # Bank 10
-        (20300, 39990),  # Bank 11
-        (20300, 39990),  # Bank 12
-        (20300, 39990),  # Bank 13
-        (20300, 39990)   # Bank 14
+        (20300, 38830),  # Bank 1
+        (20300, 38830),  # Bank 2
+        (20300, 38830),  # Bank 3
+        (20300, 38830),  # Bank 4
+        (20300, 38830),  # Bank 5
+        (20300, 38830),  # Bank 6
+        (20300, 38830),  # Bank 7
+        (20300, 38830),  # Bank 8
+        (20300, 38830),  # Bank 9
+        (20300, 38830),  # Bank 10
+        (20300, 38830),  # Bank 11
+        (20300, 38830),  # Bank 12
+        (20300, 38830),  # Bank 13
+        (20300, 38830)   # Bank 14
     ],
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 5
