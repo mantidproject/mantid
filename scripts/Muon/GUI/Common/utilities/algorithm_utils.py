@@ -173,7 +173,8 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.setRethrows(True)
     alg.setProperties(parameters_dict)
     alg.execute()
-    return alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
+    return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value,\
+           alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
            alg.getProperty('ChiSquared').value
 
 

@@ -182,7 +182,7 @@ class FittingTabPresenter(object):
                 self.calculation_thread = self.create_thread(
                     calculation_function)
             elif fit_type == self.view.sequential_fit:
-                sequential_fit_parameters = self.get_multi_domain_tf_fit_parameters()
+                sequential_fit_parameters = self.get_sequential_tf_fit_parameters()
                 calculation_function = functools.partial(
                     self.model.do_sequential_tf_fit, sequential_fit_parameters, self.view.group_name)
                 self.calculation_thread = self.create_thread(
@@ -228,6 +228,27 @@ class FittingTabPresenter(object):
                    'EndX': self.end_x[self.view.get_index_for_start_end_times()],
                    'Minimizer': self.view.minimizer
                }
+
+    def get_sequential_tf_fit_parameters(self):
+        fit_group_name = self.model.get_function_name(self.view.fit_object)
+        workspace_name_list = []
+        for workspace in self.selected_data:
+            workspace_name, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(
+                workspace,
+                self.view.fit_object,
+                fit_group_name)
+            workspace_name_list.append(workspace_name)
+
+        return {
+            'InputFunction': self.view.fit_object,
+            'ReNormalizedWorkspaceList': self.selected_data,
+            'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
+                self.selected_data),
+            'OutputFitWorkspace': workspace_name_list,
+            'StartX': self.start_x[self.view.get_index_for_start_end_times()],
+            'EndX': self.end_x[self.view.get_index_for_start_end_times()],
+            'Minimizer': self.view.minimizer
+        }
 
     def handle_started(self):
         self.view.setEnabled(False)

@@ -45,17 +45,8 @@ class FittingTabModel(object):
         return output_workspace, output_parameters, function_object, output_status, output_chi
 
     def do_single_tf_fit(self, parameter_dict, output_workspace_group):
-        import pydevd
-        pydevd.settrace('localhost', port=5544, stdoutToServer=True, stderrToServer=True)
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
-        function_object, output_status, output_chi_squared = run_CalculateMuonAsymmetry(parameter_dict, alg)
-
-        fitting_parameters_table = mantid.api.AnalysisDataService.retrieve(
-            parameter_dict['OutputFitWorkspace'] + '_Parameters')
-        mantid.api.AnalysisDataService.remove(parameter_dict['OutputFitWorkspace'] + '_NormalisedCovarianceMatrix')
-
-        output_workspace = mantid.api.AnalysisDataService.retrieve(
-            parameter_dict['OutputFitWorkspace'] + '_Workspace')
+        output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared = run_CalculateMuonAsymmetry(parameter_dict, alg)
 
         workspace_name, workspace_directory = self.create_fitted_workspace_name(parameter_dict['ReNormalizedWorkspaceList'],
                                                                                 parameter_dict['InputFunction'],
@@ -73,17 +64,8 @@ class FittingTabModel(object):
 
     def do_simultaneous_tf_fit(self, parameter_dict, global_parameters, fit_group_name):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
-        function_object, output_status, output_chi_squared= run_CalculateMuonAsymmetry(parameter_dict, alg)
-
-        fitting_parameters_table = mantid.api.AnalysisDataService.retrieve(parameter_dict['OutputFitWorkspace'] + '_Parameters')
-        mantid.api.AnalysisDataService.remove(parameter_dict['OutputFitWorkspace'] + '_NormalisedCovarianceMatrix')
-
-        if len(parameter_dict['ReNormalizedWorkspaceList']) > 1:
-            output_workspace = mantid.api.AnalysisDataService.retrieve(
-                parameter_dict['OutputFitWorkspace'] + '_Workspaces')
-        else:
-            output_workspace = mantid.api.AnalysisDataService.retrieve(
-                parameter_dict['OutputFitWorkspace'] + '_Workspace')
+        output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared =\
+            run_CalculateMuonAsymmetry(parameter_dict, alg)
 
         workspace_name, workspace_directory = self.create_multi_domain_fitted_workspace_name(
             parameter_dict['ReNormalizedWorkspaceList'][0],
@@ -220,11 +202,13 @@ class FittingTabModel(object):
         output_status_list = []
         output_chi_squared_list = []
         function_object = parameter_dict['InputFunction']
-        for input_workspace, un_normalised_workspace in zip(parameter_dict['ReNormalizedWorkspaceList'],
-                                                            parameter_dict['UnNormalizedWorkspaceList']):
+        for input_workspace, un_normalised_workspace, fit_name in zip(parameter_dict['ReNormalizedWorkspaceList'],
+                                                                      parameter_dict['UnNormalizedWorkspaceList'],
+                                                                      parameter_dict['OutputFitWorkspace']):
             sub_parameter_dict = parameter_dict.copy()
             sub_parameter_dict['ReNormalizedWorkspaceList'] = input_workspace
             sub_parameter_dict['UnNormalizedWorkspaceList'] = un_normalised_workspace
+            sub_parameter_dict['OutputFitWorkspace'] = fit_name
             sub_parameter_dict['InputFunction'] = function_object
 
             function_object, output_status, output_chi_squared = self.do_single_tf_fit(sub_parameter_dict, output_workspace_group)
