@@ -117,7 +117,7 @@ public:
   }
   static void destroySuite(NexusGeometrySaveTest *suite) { delete suite; }
 
-  void test_providing_invalid_path_throws() { //deliberately fails
+  void test_providing_invalid_path_throws() { // deliberately fails
 
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
@@ -131,7 +131,47 @@ public:
                      std::invalid_argument &);
   }
 
+  void test_providing_valid_path_throws_nothing() {
+  
+	   auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+        Mantid::Kernel::V3D(1, 1, 1));
 
+    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    ScopedFileHandle fileResource(
+        "testIstrument.hdf5"); // creates a temp directory for the file.
+    std::string destinationFile = fileResource.fullPath();
+
+    TS_ASSERT_THROWS_NOTHING(saveInstrument(*inst2.first, destinationFile),
+                     std::invalid_argument &);
+
+  }
+
+  void test_nxinstrument_class_exists() {
+
+    // Instrument--------------------------------------
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+        Mantid::Kernel::V3D(1, 1, 1));
+
+    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    //--------------------------------------------------------------------
+
+    // destination folder for outputfile-----------------------------------
+
+    ScopedFileHandle fileResource(
+        "testIstrument.hdf5"); // creates a temp directory for the file.
+    std::string destinationFile = fileResource.fullPath();
+    saveInstrument(*inst2.first, destinationFile); // saves the instrument.
+
+    // HDF5FileTestUtility tester(destinationFile); //tests the file has the
+    // nx_class
+
+    // RAII ScopedFileHanle
+    //
+    // ASSERT_TRUE(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
+  }
 
   void test_progress_reporting() {
     /*
@@ -149,52 +189,21 @@ public:
     */
   }
 
-
   // WIP-----------------------------------------------------
-
-  void test_nxinstrument_class_exists() {
-
-	  /*
-    // Instrument--------------------------------------
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        Mantid::Kernel::V3D(1, 1, 1));
-
-    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    //--------------------------------------------------------------------
-
-    // destination folder for outputfile-----------------------------------
-
-    ScopedFileHandle fileResource("testIstrument.hdf5"); //creates a temp directory for the file.
-    std::string destinationFile = fileResource.fullPath(); 
-	saveInstrument(*inst2.first, fileResource.fullPath()); //saves the directory, creating the file
-    
-    //HDF5FileTestUtility tester(destinationFile); //tests the file has the nx_class
-
-    
-
-    // RAII ScopedFileHanle
-    //
-    // ASSERT_TRUE(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
-	*/
-
-  }
 
   void test_extension_validation() {
 
-	  /*
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        Mantid::Kernel::V3D(1, 1, 1));
+    /*
+auto instrument = ComponentCreationHelper::createMinimalInstrument(
+  Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+  Mantid::Kernel::V3D(1, 1, 1));
 
-    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    TS_ASSERT_THROWS(ScopedFileHandle test("testFile.abc"),
-                     std::invalid_argument &);
-      */
+TS_ASSERT_THROWS(ScopedFileHandle test("testFile.abc"),
+               std::invalid_argument &);
+*/
   }
-
 };
-
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
