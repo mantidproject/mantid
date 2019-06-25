@@ -13,7 +13,6 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 
@@ -500,15 +499,20 @@ std::vector<uint32_t> MeshObject::getTriangles() const { return m_triangles; }
 /**
  * get number of points
  */
-size_t MeshObject::numberOfVertices() const {
-  return static_cast<int>(m_vertices.size());
-}
+size_t MeshObject::numberOfVertices() const { return m_vertices.size(); }
 
 /**
  * get vertices
  */
 std::vector<double> MeshObject::getVertices() const {
   return MeshObjectCommon::getVertices(m_vertices);
+}
+
+/**
+ * get vertices in V3D form
+ */
+const std::vector<Kernel::V3D> &MeshObject::getV3Ds() const {
+  return m_vertices;
 }
 
 detail::ShapeInfo::GeometryShape MeshObject::shape() const {

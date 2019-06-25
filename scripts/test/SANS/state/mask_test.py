@@ -218,17 +218,17 @@ class StateMaskBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertTrue(len(state.bin_mask_general_start) == 2)
-        self.assertTrue(state.bin_mask_general_start[0] == start_time[0])
-        self.assertTrue(state.bin_mask_general_start[1] == start_time[1])
+        self.assertEqual(len(state.bin_mask_general_start),  2)
+        self.assertEqual(state.bin_mask_general_start[0],  start_time[0])
+        self.assertEqual(state.bin_mask_general_start[1],  start_time[1])
 
-        self.assertTrue(len(state.bin_mask_general_stop) == 2)
-        self.assertTrue(state.bin_mask_general_stop[0] == end_time[0])
-        self.assertTrue(state.bin_mask_general_stop[1] == end_time[1])
+        self.assertEqual(len(state.bin_mask_general_stop),  2)
+        self.assertEqual(state.bin_mask_general_stop[0],  end_time[0])
+        self.assertEqual(state.bin_mask_general_stop[1],  end_time[1])
 
         strip_mask = state.detectors[DetectorType.to_string(DetectorType.LAB)].single_vertical_strip_mask
-        self.assertTrue(len(strip_mask) == 3)
-        self.assertTrue(strip_mask[2] == 3)
+        self.assertEqual(len(strip_mask),  3)
+        self.assertEqual(strip_mask[2],  3)
 
 
 if __name__ == '__main__':

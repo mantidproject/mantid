@@ -34,6 +34,7 @@ Algorithms
 Improvements
 ############
 
+- :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` is extended to support reduction for the new inverted TOF option (BATS) of IN16B.
 - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` permits now passing parameter values as input properties.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` resolves between run with old and new DAS.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` permits now flux normalization by proton charge and run duration.
@@ -84,6 +85,7 @@ Data Reduction Interface
 Improvements
 ############
 - Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
+- Improved ISISEnergyTransfer by automatically loading the Detailed Balance from the sample logs if available.
 
 Bug Fixes
 #########

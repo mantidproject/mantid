@@ -52,6 +52,7 @@ add_dependencies(workbench workbench_resources mantidqt)
 set(TEST_FILES
     workbench/config/test/test_user.py
     workbench/test/test_import.py
+    workbench/plotting/test/test_figureinteraction.py
     workbench/plotting/test/test_figuremanager.py
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plugins/test/test_editor.py

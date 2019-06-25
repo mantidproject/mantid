@@ -28,10 +28,9 @@ TMDE(MDBox)::~MDBox() {
                                // workspace
     {
       if (this->m_BoxController->isFileBacked()) {
-        this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
+        this->m_BoxController->getFileIO()->objectDeleted(m_Saveable.get());
       }
     }
-    delete m_Saveable;
   }
 }
 //-----------------------------------------------------------------------------------------------
@@ -164,7 +163,7 @@ TMDE(void MDBox)::clear() {
   // used as free
   // if (this->m_BoxController->useWriteBuffer())
   if (m_Saveable)
-    this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
+    this->m_BoxController->getFileIO()->objectDeleted(m_Saveable.get());
 
   // Clear all contents
   this->m_signal = 0.0;
@@ -173,8 +172,10 @@ TMDE(void MDBox)::clear() {
   this->clearDataFromMemory();
 }
 
-TMDE(Kernel::ISaveable *MDBox)::getISaveable() { return m_Saveable; }
-TMDE(Kernel::ISaveable *MDBox)::getISaveable() const { return m_Saveable; }
+TMDE(Kernel::ISaveable *MDBox)::getISaveable() { return m_Saveable.get(); }
+TMDE(Kernel::ISaveable *MDBox)::getISaveable() const {
+  return m_Saveable.get();
+}
 
 //-----------------------------------------------------------------------------------------------
 /** Clear the data[] vector ONLY but does not change the file-backed settings.
@@ -276,7 +277,7 @@ TMDE(std::vector<MDE> &MDBox)::getEvents() {
 
     // Tell the to-write buffer to discard the object (when no longer busy) as
     // it has not been modified
-    this->m_BoxController->getFileIO()->toWrite(m_Saveable);
+    this->m_BoxController->getFileIO()->toWrite(m_Saveable.get());
     // else: do nothing if the events are already in memory.
     return data;
   }
@@ -305,7 +306,7 @@ TMDE(const std::vector<MDE> &MDBox)::getConstEvents() const {
 
     // Tell the to-write buffer to discard the object (when no longer busy) as
     // it has not been modified
-    this->m_BoxController->getFileIO()->toWrite(m_Saveable);
+    this->m_BoxController->getFileIO()->toWrite(m_Saveable.get());
     // else: do nothing if the events are already in memory.
     return data;
   }
@@ -871,7 +872,7 @@ TMDE(size_t MDBox)::addEvents(const std::vector<MDE> &events) {
 TMDE(void MDBox)::setFileBacked(const uint64_t fileLocation,
                                 const size_t fileSize, const bool markSaved) {
   if (!m_Saveable)
-    m_Saveable = new MDBoxSaveable(this);
+    m_Saveable = std::make_unique<MDBoxSaveable>(this);
 
   m_Saveable->setFilePosition(fileLocation, fileSize, markSaved);
 }
@@ -970,8 +971,7 @@ TMDE(void MDBox)::clearFileBacked(bool loadDiskBackedData) {
     if (loadDiskBackedData)
       m_Saveable->load();
     // tell disk buffer that there are no point of tracking this box any more.
-    this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
-    delete m_Saveable;
+    this->m_BoxController->getFileIO()->objectDeleted(m_Saveable.get());
     m_Saveable = nullptr;
   }
 }

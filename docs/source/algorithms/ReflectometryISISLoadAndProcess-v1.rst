@@ -20,6 +20,7 @@ The steps this algorithm performs are:
 - Optionally perform time-slicing of the input run.
 - Validate that the workspaces are the correct type.
 - Run ReflectometryReductionOneAuto to perform the reduction.
+- Group the TOF workspaces into a group called `TOF`
 
 Input runs and transmission runs are loaded if required, or existing workspaces are used if they are already in the ADS. When runs are loaded, they are named based on the run number with a ``TOF_`` or ``TRANS_`` prefix. To determine whether workspaces are already in the ADS, workspace names are matched based on the run number with or without this prefix. Other naming formats are not considered to match.
 
@@ -47,7 +48,7 @@ Output:
 
 .. testoutput:: ExSingleRun
 
-    Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460']
+    Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460']
 
 **Example: Sum multiple input runs**
 
@@ -62,7 +63,7 @@ Output:
 
 .. testoutput:: ExSumRuns
 
-    Workspaces in the ADS after reduction: ['IvsQ_13460+13462', 'IvsQ_binned_13460+13462', 'TOF_13460', 'TOF_13460+13462', 'TOF_13462']
+    Workspaces in the ADS after reduction: ['IvsQ_13460+13462', 'IvsQ_binned_13460+13462', 'TOF', 'TOF_13460', 'TOF_13460+13462', 'TOF_13462']
 
 **Example: Sum multiple transmission runs into a single input**
 
@@ -77,7 +78,7 @@ Output:
 
 .. testoutput:: ExSumTransmissionRuns
 
-   Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13463+13464', 'TRANS_13464']
+	Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13463+13464', 'TRANS_13464']
 
 **Example: Two separate transmission run inputs**
 
@@ -93,7 +94,7 @@ Output:
 
 .. testoutput:: ExCombineTransmissionRuns
 
-   Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464']
+   Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464']
 
 **Example: Slice input run**
 
@@ -108,7 +109,7 @@ Output:
 
 .. testoutput:: ExSliceRun
 
-   Workspaces in the ADS after reduction: ['IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3', 'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2', 'IvsQ_binned_38415_3', 'TOF_38415', 'TOF_38415_monitors', 'TOF_38415_sliced', 'TOF_38415_sliced_1', 'TOF_38415_sliced_2', 'TOF_38415_sliced_3']
+   Workspaces in the ADS after reduction: ['IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3', 'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2', 'IvsQ_binned_38415_3', 'TOF', 'TOF_38415', 'TOF_38415_monitors', 'TOF_38415_sliced', 'TOF_38415_sliced_0_210', 'TOF_38415_sliced_210_420', 'TOF_38415_sliced_420_610']
 
 .. seealso :: Algorithm :ref:`algm-ReflectometrySliceEventWorkspace`, :ref:`algm-ReflectometryReductionOneAuto` and the ``ISIS Reflectometry`` interface.
 

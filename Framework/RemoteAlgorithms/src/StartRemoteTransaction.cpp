@@ -8,7 +8,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/SimpleJSON.h"
 
 #include "MantidKernel/RemoteJobManager.h"
 

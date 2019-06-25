@@ -30,7 +30,7 @@ public:
     // Arrange
     const std::string wsName = "MD_HISTO_WS";
     auto ws = makeFakeMDHistoWorkspace(1.0, 4, 5, 1.0, 0.1, wsName);
-    auto workspaceProvider = Mantid::Kernel::make_unique<
+    auto workspaceProvider = std::make_unique<
         Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
 
     // Act + Assert
@@ -47,7 +47,7 @@ public:
     // Arrange
     const std::string wsName = "MD_EVENT_WS";
     auto ws = makeAnyMDEW<MDLeanEvent<3>, 3>(10, 0.0, 10.0, 1, wsName);
-    auto workspaceProvider = Mantid::Kernel::make_unique<
+    auto workspaceProvider = std::make_unique<
         Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
 
     // Act + Assert
@@ -69,7 +69,7 @@ public:
     boxController->setSplitTopInto(0, 10);
     boxController->setSplitTopInto(1, 20);
     boxController->setSplitTopInto(2, 30);
-    auto workspaceProvider = Mantid::Kernel::make_unique<
+    auto workspaceProvider = std::make_unique<
         Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
 
     // Act

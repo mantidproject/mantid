@@ -160,9 +160,6 @@ class RunTabPresenter(object):
         def on_sample_geometry_selection(self, show_geometry):
             self._presenter.on_sample_geometry_view_changed(show_geometry)
 
-        def on_compatibility_unchecked(self):
-            self._presenter.on_compatibility_unchecked()
-
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ProcessListener, self).__init__()
@@ -833,11 +830,6 @@ class RunTabPresenter(object):
         else:
             self._view.hide_geometry()
 
-    def on_compatibility_unchecked(self):
-        self.display_warning_box('Warning', 'Are you sure you want to uncheck compatibility mode?',
-                                 'Non-compatibility mode has known issues. DO NOT USE if applying bin masking'
-                                 ' to event workspaces.')
-
     def get_row_indices(self):
         """
         Gets the indices of row which are not empty.
@@ -1179,6 +1171,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("zero_error_free", state_model)
         self._set_on_state_model("save_types", state_model)
         self._set_on_state_model("compatibility_mode", state_model)
+        self._set_on_state_model("event_slice_optimisation", state_model)
         self._set_on_state_model("merge_scale", state_model)
         self._set_on_state_model("merge_shift", state_model)
         self._set_on_state_model("merge_scale_fit", state_model)

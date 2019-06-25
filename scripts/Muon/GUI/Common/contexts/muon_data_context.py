@@ -8,7 +8,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
-import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
@@ -17,25 +16,8 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
 from mantid.api import WorkspaceGroup
-from mantid.kernel import ConfigServiceImpl, ConfigService
+from mantid.kernel import ConfigService
 from Muon.GUI.Common.observer_pattern import Observable
-
-
-def get_default_grouping(workspace, instrument, main_field_direction):
-    parameter_name = "Default grouping file"
-    if instrument == "MUSR" or instrument == 'CHRONUS':
-        parameter_name += " - " + main_field_direction
-    try:
-        if isinstance(workspace, WorkspaceGroup):
-            grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
-        else:
-            grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
-    except IndexError:
-        return [], []
-    instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
-    filename = instrument_directory + grouping_file
-    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
-    return new_groups, new_pairs
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -83,9 +65,7 @@ class MuonDataContext(object):
     """
 
     # ADS base directory for all workspaces
-    base_directory = "Muon Data"
-
-    def __init__(self, load_data=MuonLoadData()):
+    def __init__(self, base_directory="Muon Data", load_data=MuonLoadData()):
         """
         Currently, only a single run is loaded into the Home/Grouping tab at once. This is held in the _current_data
         member. The load widget may load multiple runs at once, these are stored in the _loaded_data member.
@@ -102,6 +82,7 @@ class MuonDataContext(object):
 
         self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
         self.message_notifier = MuonDataContext.MessageNotifier(self)
+        self.base_directory = base_directory
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
@@ -191,6 +172,10 @@ class MuonDataContext(object):
         except AttributeError:
             # default to 1
             n_det = 1
+        if n_det == 0:
+            # The number of histograms commonly used for PSI data, in real data,
+            # very often the number of detectors == number of histograms
+            return self.current_workspace.getNumberHistograms()
         return n_det
 
     @property

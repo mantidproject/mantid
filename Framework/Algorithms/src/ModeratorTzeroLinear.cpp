@@ -52,7 +52,7 @@ const std::string ModeratorTzeroLinear::category() const {
 }
 
 void ModeratorTzeroLinear::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "The name of the input workspace, containing events and/or "
@@ -64,7 +64,7 @@ void ModeratorTzeroLinear::init() {
                   "TOF shift, units in microseconds. Overrides the value"
                   "stored in the instrument object");
   // declare the output workspace
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 

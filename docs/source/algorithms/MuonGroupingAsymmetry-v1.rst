@@ -64,9 +64,11 @@ Usage
 
     pre_processed_workspace = MuonPreProcess(InputWorkspace=input_workspace)
 
-    output_workspace = MuonGroupingAsymmetry(InputWorkspace=pre_processed_workspace,
+    output = MuonGroupingAsymmetry(InputWorkspace=pre_processed_workspace,
                                                        GroupName="fwd",
                                                        Grouping=[1])
+
+    output_workspace = output[0]
 
     print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))
     print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.readY(0)]))
@@ -107,10 +109,12 @@ Output:
     # This time we won't run MuonPreProcess, as we don't want to apply any pre-processing
     # and we already have a WorkspaceGroup
 
-    output_workspace = MuonGroupingAsymmetry(InputWorkspace=multi_period_data,
+    output = MuonGroupingAsymmetry(InputWorkspace=multi_period_data,
                                                        GroupName="fwd",
                                                        Grouping=[1, 2],
                                                        SummedPeriods=[1, 2])
+
+    output_workspace = output[0]
 
     # We have asked for periods 1+2, with each period summing detectors 1,2
     print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))

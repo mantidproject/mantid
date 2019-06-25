@@ -119,12 +119,12 @@ PDDetermineCharacterizations::validateInputs() {
 /// Initialize the algorithm's properties.
 void PDDetermineCharacterizations::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::Input, API::PropertyMode::Optional),
       "Workspace with logs to help identify frequency and wavelength");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
           CHAR_PROP_NAME, "", Direction::Input, API::PropertyMode::Optional),
       "Table of characterization information");
 
@@ -135,30 +135,30 @@ void PDDetermineCharacterizations::init() {
       " run to use. 0 to use value in table, -1 to not use.";
 
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("BackRun", "0"),
+      std::make_unique<Kernel::ArrayProperty<int32_t>>("BackRun", "0"),
       "Empty container" + defaultMsg);
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("NormRun", "0"),
+      std::make_unique<Kernel::ArrayProperty<int32_t>>("NormRun", "0"),
       "Normalization" + defaultMsg);
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("NormBackRun", "0"),
+      std::make_unique<Kernel::ArrayProperty<int32_t>>("NormBackRun", "0"),
       "Normalization background" + defaultMsg);
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("EmptyEnv", "0"),
+      std::make_unique<Kernel::ArrayProperty<int32_t>>("EmptyEnv", "0"),
       "Empty sample environment" + defaultMsg);
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("EmptyInstr", "0"),
+      std::make_unique<Kernel::ArrayProperty<int32_t>>("EmptyInstr", "0"),
       "Empty instrument" + defaultMsg);
 
   std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
                                                  "frequency", "skf1.speed"};
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
                       FREQ_PROP_NAME, std::move(defaultFrequencyNames)),
                   "Candidate log names for frequency");
 
   std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda",
                                                   "skf12.lambda"};
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
                       WL_PROP_NAME, std::move(defaultWavelengthNames)),
                   "Candidate log names for wave length");
 }
@@ -324,63 +324,62 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
 void PDDetermineCharacterizations::setDefaultsInPropManager() {
   if (!m_propertyManager->existsProperty("frequency")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<PropertyWithValue<double>>("frequency", 0.));
+        std::make_unique<PropertyWithValue<double>>("frequency", 0.));
   }
   if (!m_propertyManager->existsProperty("wavelength")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<PropertyWithValue<double>>("wavelength", 0.));
+        std::make_unique<PropertyWithValue<double>>("wavelength", 0.));
   }
 
   if (!m_propertyManager->existsProperty("bank")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<PropertyWithValue<int>>("bank", 1));
+        std::make_unique<PropertyWithValue<int>>("bank", 1));
   }
 
   if (!m_propertyManager->existsProperty("d_min")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<double>>("d_min"));
+        std::make_unique<ArrayProperty<double>>("d_min"));
   }
   if (!m_propertyManager->existsProperty("d_max")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<double>>("d_max"));
+        std::make_unique<ArrayProperty<double>>("d_max"));
   }
   if (!m_propertyManager->existsProperty("tof_min")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<PropertyWithValue<double>>("tof_min", 0.));
+        std::make_unique<PropertyWithValue<double>>("tof_min", 0.));
   }
   if (!m_propertyManager->existsProperty("tof_max")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<PropertyWithValue<double>>("tof_max", 0.));
+        std::make_unique<PropertyWithValue<double>>("tof_max", 0.));
   }
   if (!m_propertyManager->existsProperty("wavelength_min")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<PropertyWithValue<double>>("wavelength_min", 0.));
+        std::make_unique<PropertyWithValue<double>>("wavelength_min", 0.));
   }
   if (!m_propertyManager->existsProperty("wavelength_max")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<PropertyWithValue<double>>("wavelength_max", 0.));
+        std::make_unique<PropertyWithValue<double>>("wavelength_max", 0.));
   }
 
   if (!m_propertyManager->existsProperty("vanadium")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("vanadium", "0"));
+        std::make_unique<ArrayProperty<int32_t>>("vanadium", "0"));
   }
   if (!m_propertyManager->existsProperty("vanadium_background")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("vanadium_background",
-                                                    "0"));
+        std::make_unique<ArrayProperty<int32_t>>("vanadium_background", "0"));
   }
   if (!m_propertyManager->existsProperty("container")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("container", "0"));
+        std::make_unique<ArrayProperty<int32_t>>("container", "0"));
   }
   if (!m_propertyManager->existsProperty("empty_environment")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("empty_environment", "0"));
+        std::make_unique<ArrayProperty<int32_t>>("empty_environment", "0"));
   }
   if (!m_propertyManager->existsProperty("empty_instrument")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("empty_instrument", "0"));
+        std::make_unique<ArrayProperty<int32_t>>("empty_instrument", "0"));
   }
 }
 

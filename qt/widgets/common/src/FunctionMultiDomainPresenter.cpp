@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
@@ -25,7 +25,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
-    : m_view(view), m_model(make_unique<MultiDomainFunctionModel>()),
+    : m_view(view), m_model(std::make_unique<MultiDomainFunctionModel>()),
       m_editLocalParameterDialog(nullptr) {
   connect(m_view, SIGNAL(parameterChanged(const QString &)), this,
           SLOT(viewChangedParameter(const QString &)));

@@ -79,6 +79,8 @@ const std::string WIDTH("Width");
 const std::string HEIGHT("Height");
 /// Static Thick string
 const std::string THICK("Thick");
+/// Static Axis string
+const std::string AXIS("Axis");
 /// Static Center string
 const std::string CENTER("Center");
 /// Static Radius string
@@ -114,6 +116,22 @@ V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
 }
 
 /**
+ * Return the centre coordinates of the base of a cylinder given the
+ * coordinates of the centre of the cylinder
+ * @param cylCentre Coordinates of centre of the cylinder (X,Y,Z) (in metres)
+ * @param height Height of the cylinder (in metres)
+ * @param axis The height-axis of the cylinder
+ */
+V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
+                  const std::vector<double> &axis) {
+  using Kernel::V3D;
+  V3D axisVector = V3D{axis[0], axis[1], axis[2]};
+  axisVector.normalize();
+  return V3D(cylCentre[0], cylCentre[1], cylCentre[2]) -
+         axisVector * height * 0.5;
+}
+
+/**
  * Create the xml tag require for a given axis index
  * @param axisIdx Index 0,1,2 for the axis of a cylinder
  * @return A string containing the axis tag for this index
@@ -129,6 +147,18 @@ std::string axisXML(unsigned axisIdx) {
   default:
     return "";
   }
+}
+
+/**
+ * Create the xml tag require for a given axis
+ * @param axis 3D vector of double
+ * @return A string containing the axis tag representation
+ */
+std::string axisXML(const std::vector<double> &axis) {
+  std::ostringstream str;
+  str << "<axis x=\"" << axis[0] << "\" y=\"" << axis[1] << "\" z=\"" << axis[2]
+      << "\" /> ";
+  return str.str();
 }
 
 /**
@@ -257,19 +287,19 @@ void SetSample::init() {
   using Kernel::PropertyManagerProperty;
 
   // Inputs
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       PropertyNames::INPUT_WORKSPACE, "", Direction::InOut),
                   "A workspace whose sample properties will be updated");
-  declareProperty(Kernel::make_unique<PropertyManagerProperty>(
+  declareProperty(std::make_unique<PropertyManagerProperty>(
                       PropertyNames::GEOMETRY, Direction::Input),
                   "A dictionary of geometry parameters for the sample.");
-  declareProperty(Kernel::make_unique<PropertyManagerProperty>(
+  declareProperty(std::make_unique<PropertyManagerProperty>(
                       PropertyNames::MATERIAL, Direction::Input),
                   "A dictionary of material parameters for the sample. See "
                   "SetSampleMaterial for all accepted parameters");
   declareProperty(
-      Kernel::make_unique<PropertyManagerProperty>(PropertyNames::ENVIRONMENT,
-                                                   Direction::Input),
+      std::make_unique<PropertyManagerProperty>(PropertyNames::ENVIRONMENT,
+                                                Direction::Input),
       "A dictionary of parameters to configure the sample environment");
 }
 
@@ -308,8 +338,8 @@ void SetSample::exec() {
       // only add the volume if it isn't already specfied
       if (!materialArgs->existsProperty(VOLUME_ARG)) {
         materialArgs->declareProperty(
-            Kernel::make_unique<PropertyWithValue<double>>(VOLUME_ARG,
-                                                           sampleVolume));
+            std::make_unique<PropertyWithValue<double>>(VOLUME_ARG,
+                                                        sampleVolume));
       }
     }
     runChildAlgorithm("SetSampleMaterial", workspace, *materialArgs);
@@ -353,8 +383,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   for (auto &direc : environDirs) {
     direc = Poco::Path(direc).append("sampleenvironments").toString();
   }
-  auto finder =
-      Kernel::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
+  auto finder = std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);
@@ -556,18 +585,34 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
                  [](double val) { return val *= 0.01; });
   // XML needs center position of bottom base but user specifies center of
   // cylinder
-  const unsigned axisIdx = static_cast<unsigned>(refFrame.pointingUp());
-  const V3D baseCentre = cylBaseCentre(centre, height, axisIdx);
+  V3D baseCentre;
+  std::ostringstream XMLString;
+  if (args.existsProperty(ShapeArgs::AXIS)) {
+    const std::string axis = args.getPropertyValue(ShapeArgs::AXIS);
+    if (axis.length() == 1) {
+      const unsigned axisId = static_cast<unsigned>(std::stoi(axis));
+      XMLString << axisXML(axisId);
+      baseCentre = cylBaseCentre(centre, height, axisId);
+    } else {
+      const std::vector<double> axis =
+          getPropertyAsVectorDouble(args, ShapeArgs::AXIS);
+      XMLString << axisXML(axis);
+      baseCentre = cylBaseCentre(centre, height, axis);
+    }
+  } else {
+    const unsigned axisId = static_cast<unsigned>(refFrame.pointingUp());
+    XMLString << axisXML(axisId);
+    baseCentre = cylBaseCentre(centre, height, axisId);
+  }
 
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
                  << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
                  << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\" /> "
-                 << axisXML(axisIdx) << "<height val=\"" << height << "\" /> ";
+                 << XMLString.str() << "<height val=\"" << height << "\" /> ";
   if (hollow) {
     xmlShapeStream << "<inner-radius val=\"" << innerRadius << "\"/>"
                    << "<outer-radius val=\"" << outerRadius << "\"/>";
-
   } else {
     xmlShapeStream << "<radius val=\"" << outerRadius << "\"/>";
   }

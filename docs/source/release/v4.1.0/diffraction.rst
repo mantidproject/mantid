@@ -12,6 +12,10 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+New Algorithms
+##############
+- New algorithm :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` to save out a sample shape and environment as a single STL file, this can be used to save out pieces with a set rotation or scale, or to assemble multiple stl files into one for viewing purposes.
+
 Improvements
 ############
 
@@ -23,10 +27,20 @@ Improvements
 
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` has a new property, ``RemoveTemp``, which allows the user to inspect temporary workspaces is left unchecked.
 
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now correctly takes into account scale for translation. Rotation is now applied before translation to reduce confusion.
+
+- The Pearl scripts now automatically disable attenuation on long-mode.
+
+- The Pearl scripts now set now use a spline coefficient of 5 on long-mode due to the increased amount of noise.
+
+- The Pearl scripts now crop to a dspacing of 8 on long-mode to avoid negative values caused by noise after this point.
+
 Bug Fixes
 #########
 
 - HRPD Absorption corrections now correctly takes into account the thickness of the slab.
+
+- Pearl no longer produces an output of NaN when long-mode is changed after focusing.
 
 Engineering Diffraction
 -----------------------
@@ -58,24 +72,24 @@ New Algorithms
 ##############
 
 - New algorithm :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` to predict satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace or range of wavelength and DSpacing.
-
 - New algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` to index peaks with satellites and set modulation vectors and maximum order of satellite from input values.
 
 
 Improvements
 ############
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` will load satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
-
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` will save satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
-
 - :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>` finds UB matrix using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace.
-
 - :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
-
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` will integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
-
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
+- New TOPAZ instrument geometry for 2019B run cycle
+- Maximum order of modulated vectors is now available to python: ws.sample().getOrientedLattice().getMaxOrder()
 
+Bug Fixes
+#########
+
+- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now only calculates statistics for integer HKL (not satellite peaks) instead of combining. Statistics for satellite peaks will be added later.
 
 Imaging
 -------

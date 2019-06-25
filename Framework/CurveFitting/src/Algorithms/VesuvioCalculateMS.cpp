@@ -69,7 +69,7 @@ void VesuvioCalculateMS::init() {
   auto inputWSValidator = boost::make_shared<CompositeValidator>();
   inputWSValidator->add<WorkspaceUnitValidator>("TOF");
   inputWSValidator->add<SampleShapeValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, inputWSValidator),
                   "Input workspace to be corrected, in units of TOF.");
 
@@ -87,11 +87,11 @@ void VesuvioCalculateMS::init() {
 
   auto nonEmptyArray = boost::make_shared<ArrayLengthValidator<double>>();
   nonEmptyArray->setLengthMin(3);
-  declareProperty(
-      make_unique<ArrayProperty<double>>("AtomicProperties", nonEmptyArray),
-      "Atomic properties of masses within the sample. "
-      "The expected format is 3 consecutive values per mass: "
-      "mass(amu), cross-section (barns) & s.d of Compton profile.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("AtomicProperties",
+                                                          nonEmptyArray),
+                  "Atomic properties of masses within the sample. "
+                  "The expected format is 3 consecutive values per mass: "
+                  "mass(amu), cross-section (barns) & s.d of Compton profile.");
   setPropertyGroup("NoOfMasses", "Sample");
   setPropertyGroup("SampleDensity", "Sample");
   setPropertyGroup("AtomicProperties", "Sample");
@@ -115,12 +115,12 @@ void VesuvioCalculateMS::init() {
   setPropertyGroup("NumEventsPerRun", "Algorithm");
 
   // Outputs
-  declareProperty(make_unique<WorkspaceProperty<>>("TotalScatteringWS", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("TotalScatteringWS", "",
+                                                        Direction::Output),
                   "Workspace to store the calculated total scattering counts");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("MultipleScatteringWS", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("MultipleScatteringWS", "",
+                                            Direction::Output),
       "Workspace to store the calculated multiple scattering counts summed for "
       "all orders");
 }
@@ -137,14 +137,13 @@ void VesuvioCalculateMS::exec() {
   MatrixWorkspace_sptr multsc = WorkspaceFactory::Instance().create(m_inputWS);
 
   // Initialize random number generator
-  m_randgen = Kernel::make_unique<
-      CurveFitting::MSVesuvioHelper::RandomVariateGenerator>(
-      getProperty("Seed"));
+  m_randgen =
+      std::make_unique<CurveFitting::MSVesuvioHelper::RandomVariateGenerator>(
+          getProperty("Seed"));
 
   // Setup progress
   const size_t nhist = m_inputWS->getNumberHistograms();
-  m_progress =
-      Kernel::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   for (size_t i = 0; i < nhist; ++i) {
 
@@ -229,7 +228,7 @@ void VesuvioCalculateMS::cacheInputs() {
     throw std::invalid_argument(os.str());
   }
   const int natoms = nInputAtomProps / 3;
-  m_sampleProps = Kernel::make_unique<SampleComptonProperties>(natoms);
+  m_sampleProps = std::make_unique<SampleComptonProperties>(natoms);
   m_sampleProps->density = getProperty("SampleDensity");
 
   double totalMass(0.0); // total mass in grams

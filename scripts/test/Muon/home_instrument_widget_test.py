@@ -5,23 +5,23 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
+
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
 from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class HomeTabInstrumentPresenterTest(unittest.TestCase):
+class HomeTabInstrumentPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
         setup_context_for_tests(self)
         self.gui_variable_observer = Observer()
 
@@ -131,14 +131,14 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_steps_edit.editingFinished.emit()
 
         self.assertEqual(self.model._context.gui_context['RebinFixed'], '50')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'RebinFixed': '50'})
 
     def test_that_changeing_variable_rebin_updates_variable_binning_in_model(self):
         self.view.rebin_variable_edit.setText('1,5,21')
         self.view.rebin_variable_edit.editingFinished.emit()
 
         self.assertEqual(self.model._context.gui_context['RebinVariable'], '1,5,21')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'RebinVariable': '1,5,21'})
 
     def test_that_steps_only_accepts_a_single_integer(self):
         self.view.rebin_steps_edit.insert('1,0.1,70')
@@ -146,7 +146,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.rebin_steps_edit.text(), '')
         self.assertEqual(self.model._context.gui_context['RebinFixed'], '')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'RebinFixed': ''})
 
     def test_that_variable_rebin_only_accepts_a_valid_rebin_string(self):
         self.view.rebin_variable_edit.insert('1-0.1-80')
@@ -180,7 +180,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.dead_time_label_3.text(), self.presenter.dead_time_from_data_text([0.0]))
         self.assertEqual(self.model._data.current_data["DeadTimeTable"], None)
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'None'})
 
     def test_that_on_deadtime_data_selected_updates_with_no_loaded_data(self):
         self.view.dead_time_selector.setCurrentIndex(1)
@@ -196,7 +196,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.dead_time_selector.setCurrentIndex(1)
 
         self.assertEqual(self.view.dead_time_label_3.text(), 'From 0.001 to 0.003 (ave. 0.002)')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'FromFile'})
 
     @mock.patch(
         'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.get_table_workspace_names_from_ADS')
@@ -223,7 +223,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.dead_time_label_3.text(), "From 0.000 to 0.000 (ave. 0.000)")
         self.assertTrue(self.view.dead_time_file_selector.isHidden())
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'None'})
 
     def test_browse_button_displayed_when_from_other_file_selected(self):
         self.assertTrue(self.view.dead_time_browse_button.isHidden())
@@ -283,7 +283,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.dead_time_selector.currentIndex(), 2)
         self.view.warning_popup.assert_not_called()
         self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196_deadTimes')
-        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeTable': mock.ANY})
 
     def test_validate_variable_rebin_string_allows_single_number(self):
         result, message = self.model.validate_variable_rebin_string('0.034')

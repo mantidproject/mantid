@@ -117,13 +117,13 @@ const std::string PDLoadCharacterizations::category() const {
  */
 void PDLoadCharacterizations::init() {
   const auto exts = std::vector<std::string>({".txt"});
-  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filename", exts),
+  declareProperty(std::make_unique<MultipleFileProperty>("Filename", exts),
                   "Characterizations file");
-  declareProperty(make_unique<FileProperty>("ExpIniFilename", "",
-                                            FileProperty::OptionalLoad, "ini"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "ExpIniFilename", "", FileProperty::OptionalLoad, "ini"),
                   "(Optional) exp.ini file used at NOMAD");
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output for the information of characterizations and runs");
 
@@ -133,21 +133,21 @@ void PDLoadCharacterizations::init() {
   declareProperty("PrimaryFlightPath", EMPTY_DBL(),
                   "Primary flight path L1 of the powder diffractomer. ",
                   Direction::Output);
+  declareProperty(std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs",
+                                                           Direction::Output),
+                  "Spectrum Nos (note that it is not detector ID or workspace "
+                  "indices). The list must be either empty or have a size "
+                  "equal to input workspace's histogram number. ");
   declareProperty(
-      make_unique<ArrayProperty<int32_t>>("SpectrumIDs", Direction::Output),
-      "Spectrum Nos (note that it is not detector ID or workspace "
-      "indices). The list must be either empty or have a size "
-      "equal to input workspace's histogram number. ");
-  declareProperty(
-      make_unique<ArrayProperty<double>>("L2", Direction::Output),
+      std::make_unique<ArrayProperty<double>>("L2", Direction::Output),
       "Secondary flight (L2) paths for each detector.  Number of L2 "
       "given must be same as number of histogram.");
   declareProperty(
-      make_unique<ArrayProperty<double>>("Polar", Direction::Output),
+      std::make_unique<ArrayProperty<double>>("Polar", Direction::Output),
       "Polar angles (two thetas) for detectors. Number of 2theta "
       "given must be same as number of histogram.");
   declareProperty(
-      make_unique<ArrayProperty<double>>("Azimuthal", Direction::Output),
+      std::make_unique<ArrayProperty<double>>("Azimuthal", Direction::Output),
       "Azimuthal angles (out-of-plane) for detectors. "
       "Number of azimuthal angles given must be same as number of histogram.");
 }

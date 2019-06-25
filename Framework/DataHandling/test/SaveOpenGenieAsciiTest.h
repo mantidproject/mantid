@@ -84,7 +84,7 @@ private:
 
   std::unique_ptr<SaveOpenGenieAscii>
   createAlg(MatrixWorkspace_sptr ws, const std::string &tempFilePath) {
-    auto alg = Kernel::make_unique<SaveOpenGenieAscii>();
+    auto alg = std::make_unique<SaveOpenGenieAscii>();
     alg->initialize();
 
     alg->setProperty("InputWorkspace", ws);

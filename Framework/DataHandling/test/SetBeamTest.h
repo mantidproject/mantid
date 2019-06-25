@@ -100,7 +100,7 @@ public:
   //----------------------------------------------------------------------------
 private:
   Mantid::API::IAlgorithm_uptr createAlgorithm() {
-    auto alg = Mantid::Kernel::make_unique<SetBeam>();
+    auto alg = std::make_unique<SetBeam>();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();
@@ -113,12 +113,11 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
-    props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "Slit"), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Width", 1.0), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Height", 0.75), "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Slit"),
+                           "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Width", 1.0), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 0.75),
+                           "");
     return props;
   }
 };

@@ -12,7 +12,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/graph/adjacency_list.hpp>
@@ -475,7 +475,7 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
     if (!isRecording && !isAboveThreshold) {
       continue;
     } else if (!isRecording && isAboveThreshold) {
-      currentPeak = Mantid::Kernel::make_unique<PeakContainer>(y);
+      currentPeak = std::make_unique<PeakContainer>(y);
       currentPeak->startRecord(it);
       isRecording = true;
     } else if (isRecording && !isAboveThreshold) {

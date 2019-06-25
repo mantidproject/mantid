@@ -7,7 +7,6 @@
 #ifndef MANTID_MANTIDWIDGETS_BUILDSUBTREETEST_H
 #define MANTID_MANTIDWIDGETS_BUILDSUBTREETEST_H
 
-#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
@@ -31,7 +30,7 @@ public:
   static void destroySuite(BuildSubtreeItemsTest *suite) { delete suite; }
 
   std::unique_ptr<QStandardItemModel> emptyModel() const {
-    return Mantid::Kernel::make_unique<QStandardItemModel>();
+    return std::make_unique<QStandardItemModel>();
   }
 
   QtStandardItemTreeModelAdapter adapt(QStandardItemModel *model) {
@@ -52,7 +51,7 @@ public:
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree();
-    auto rootItem = Mantid::Kernel::make_unique<QStandardItem>();
+    auto rootItem = std::make_unique<QStandardItem>();
 
     build(positionRelativeToMainTree, 0, subtree);
 

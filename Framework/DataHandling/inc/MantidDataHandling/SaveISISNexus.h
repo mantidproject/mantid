@@ -7,13 +7,12 @@
 #ifndef MANTID_DATAHANDLING_SAVEISISNEXUS_H_
 #define MANTID_DATAHANDLING_SAVEISISNEXUS_H_
 
+#include "../../src/LoadRaw/isisraw2.h"
 #include "MantidAPI/Algorithm.h"
 
 #include <nexus/NeXusFile.hpp>
 
 #include <climits>
-
-class ISISRAW2;
 
 namespace Mantid {
 namespace DataHandling {
@@ -56,7 +55,7 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
 
-  ISISRAW2 *m_isisRaw;
+  ISISRAW2 m_isisRaw;
   NXhandle handle;
   FILE *rawFile;
   std::vector<int> monitorData;

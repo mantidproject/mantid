@@ -403,7 +403,7 @@ class SeqRefineProfile(object):
 
         # Group newly generated workspaces and add name to reposiotry
         if self._wsgroupCreated is True:
-            api.GroupWorkspaces(InputWorkspaces="%s, %s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname, self._wsgroupName),
+            api.GroupWorkspaces(InputWorkspaces="%s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname),
                                 OutputWorkspace=self._wsgroupName)
         else:
             wsgroup = AnalysisDataService.retrieve(self._wsgroupName)

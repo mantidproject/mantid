@@ -98,7 +98,7 @@ void Fit::initConcrete() {
   declareProperty("OutputCompositeMembers", false,
                   "If true and CreateOutput is true then the value of each "
                   "member of a Composite Function is also output.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "ConvolveMembers", false),
                   "If true and OutputCompositeMembers is true members of any "
                   "Convolution are output convolved\n"
@@ -273,7 +273,7 @@ void Fit::createOutput() {
     baseName += "_";
 
     declareProperty(
-        Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+        std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
             "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
         "The name of the TableWorkspace in which to store the final covariance "
         "matrix");
@@ -325,7 +325,7 @@ void Fit::createOutput() {
     // including error estimates if derivative of fitting function defined
 
     declareProperty(
-        Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+        std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
             "OutputParameters", "", Kernel::Direction::Output),
         "The name of the TableWorkspace in which to store the "
         "final fit parameters");

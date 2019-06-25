@@ -13,7 +13,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"

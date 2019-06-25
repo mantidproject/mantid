@@ -147,9 +147,9 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
   int nDims = static_cast<int>(this->m_bc->getNDims());
 
   bool group_exists;
-  m_File = MDBoxFlatTree::createOrOpenMDWSgroup(
+  m_File = std::unique_ptr<::NeXus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(
       m_fileName, nDims, m_EventsTypesSupported[m_EventType], m_ReadOnly,
-      group_exists);
+      group_exists));
 
   // we are in MD workspace Class  group now
   std::map<std::string, std::string> groupEntries;
@@ -491,8 +491,6 @@ void BoxControllerNeXusIO::closeFile() {
     m_File->closeGroup(); // close events group
     m_File->closeGroup(); // close workspace group
     m_File->close();      // close NeXus file
-
-    delete m_File;
     m_File = nullptr;
   }
 }

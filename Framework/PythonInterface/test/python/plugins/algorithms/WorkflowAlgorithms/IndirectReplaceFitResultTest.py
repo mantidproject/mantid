@@ -91,8 +91,8 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         self.assertEqual(self._result_group.getNumberOfEntries(), 1)
 
     def test_that_the_group_workspace_contains_the_workspace_with_the_correct_name(self):
-        self.assertEquals(len(self._result_group.getNames()), 1)
-        self.assertEquals(self._result_group.getNames()[0], self._input_name)
+        self.assertEqual(len(self._result_group.getNames()), 1)
+        self.assertEqual(self._result_group.getNames()[0], self._input_name)
 
     def test_that_the_workspaces_set_up_have_the_correct_names(self):
         self.assertEqual(self._input_workspace.name(), self._input_name)
@@ -107,11 +107,11 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
 
     def test_that_the_algorithm_will_create_an_output_group_with_two_workspaces_when_the_output_name_is_different(self):
         execute_algorithm(self._input_workspace, self._single_fit_workspace, self._output_name)
-        self.assertEquals(self._result_group.getNumberOfEntries(), 2)
+        self.assertEqual(self._result_group.getNumberOfEntries(), 2)
 
     def test_that_the_algorithm_will_create_an_output_group_with_one_workspace_when_the_output_name_is_the_same(self):
         execute_algorithm(self._input_workspace, self._single_fit_workspace, self._input_name)
-        self.assertEquals(self._result_group.getNumberOfEntries(), 1)
+        self.assertEqual(self._result_group.getNumberOfEntries(), 1)
 
     def test_that_the_algorithm_will_throw_when_given_a_single_fit_workspace_containing_more_than_one_fit(self):
         with self.assertRaises(RuntimeError):

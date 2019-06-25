@@ -43,7 +43,8 @@ This example is for converting a function.
    myFunc='name=LinearBackground,A0=3,A1=    4;name=LinearBackground,A0=0,A1=2;ties=(f0.A1=3, f0.A0=f1.A0)'
    ws = CreateWorkspace(DataX=[1,2,3,4,5,6,7],    DataY=[1,2,3,4,5,6],OutputWorkspace="Run; Group; a; Asym; #1")
 
-   TFFunc = ConvertFitFunctionForMuonTFAsymmetry(myFunc,tab,["Run; Group; a; Asym; #1"],"Construct")
+   TFFunc = ConvertFitFunctionForMuonTFAsymmetry(InputFunction=myFunc, NormalizationTable=tab,
+                                                 WorkspaceList=["Run; Group; a; Asym; #1"], Mode="Construct")
 
    # do a fit with new function
    fit =mantid.AlgorithmManager.create("Fit")
@@ -53,7 +54,8 @@ This example is for converting a function.
    fit.execute()
    fittedFunc = fit.getPropertyValue("Function")
 
-   returnFunc =    ConvertFitFunctionForMuonTFAsymmetry(str(fittedFunc),tab,["Run; Group; a; Asym; #1"],"Extract")
+   returnFunc =    ConvertFitFunctionForMuonTFAsymmetry(InputFunction=str(fittedFunc),NormalizationTable=tab,
+                                                        WorkspaceList=["Run; Group; a; Asym; #1"], Mode="Extract")
    # 0 iteration fit to get param table -> wont change function values
    fit_output =    Fit(Function=str(returnFunc),InputWorkspace=ws,MaxIterations=0,Output="return_params")
 

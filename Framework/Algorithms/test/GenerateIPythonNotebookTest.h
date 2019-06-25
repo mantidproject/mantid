@@ -20,7 +20,7 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAlgorithms/GenerateIPythonNotebook.h"
 #include "MantidAlgorithms/Power.h"
-#include "MantidKernel/make_unique.h"
+
 #include <Poco/File.h>
 
 using namespace Mantid;
@@ -41,14 +41,12 @@ public:
   }
 
   void init() override {
-    declareProperty(
-        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-            "InputWorkspace", "", Kernel::Direction::Input),
-        "A workspace with units of TOF");
-    declareProperty(
-        Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-            "OutputWorkspace", "", Kernel::Direction::Output),
-        "The name to use for the output workspace");
+    declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                        "InputWorkspace", "", Kernel::Direction::Input),
+                    "A workspace with units of TOF");
+    declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                        "OutputWorkspace", "", Kernel::Direction::Output),
+                    "The name to use for the output workspace");
     declareProperty("MissingProperty", "rubbish", Kernel::Direction::Input);
   };
   void exec() override{
@@ -160,7 +158,7 @@ public:
     // set up history for the algorithm which is presumably removed from Mantid
     auto ws = API::FrameworkManager::Instance().getWorkspace(wsName);
     API::WorkspaceHistory &history = ws->history();
-    auto pAlg = Mantid::Kernel::make_unique<NonExistingAlgorithm>();
+    auto pAlg = std::make_unique<NonExistingAlgorithm>();
     pAlg->initialize();
     history.addHistory(boost::make_shared<AlgorithmHistory>(
         API::AlgorithmHistory(pAlg.get())));

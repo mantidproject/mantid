@@ -26,7 +26,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void SelectCellOfType::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -58,11 +58,11 @@ void SelectCellOfType::init() {
   this->declareProperty("Apply", false, "Update UB and re-index the peaks");
   this->declareProperty("Tolerance", 0.12, "Indexing Tolerance");
 
-  this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "The number of indexed peaks if apply==true.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "The number of indexed peaks if apply==true.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "The average HKL indexing error if apply==true.");
 

@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
 #include <QHash>
+#include <QVariant>
 
 namespace MantidQt {
 namespace Widgets {

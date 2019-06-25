@@ -47,26 +47,27 @@ const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
 /** Initialize the algorithm's properties.
  */
 void RadiusSum::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input workspace.");
-  declareProperty(make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "An input workspace.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   auto twoOrThreeElements =
       boost::make_shared<ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Centre", std::move(myInput),
-                                                 std::move(twoOrThreeElements)),
+      std::make_unique<ArrayProperty<double>>("Centre", std::move(myInput),
+                                              std::move(twoOrThreeElements)),
       "Coordinate of the centre of the ring");
 
   auto nonNegative = boost::make_shared<BoundedValidator<double>>();
   nonNegative->setLower(0);
   declareProperty("MinRadius", 0.0, nonNegative->clone(),
                   "Length of the inner ring. Default=0");
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MaxRadius", std::numeric_limits<double>::max(),
                       std::move(nonNegative)),
                   "Length of the outer ring. Default=ImageSize.");
@@ -86,7 +87,7 @@ void RadiusSum::init() {
                   "If 2, the normalization will be divided by "
                   "the quadratic value of the ring for each "
                   "radius.");
-  setPropertySettings(normOrder, Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings(normOrder, std::make_unique<VisibleWhenProperty>(
                                      normBy, IS_EQUAL_TO, "1"));
 
   const char *groupNorm = "Normalization";
@@ -626,11 +627,11 @@ void RadiusSum::setUpOutputWorkspace(const std::vector<double> &values) {
   // for instrument related, the axis Y (1) continues to be the same.
   // it is necessary to change only the axis X. We have to change it to radius.
   if (inputWorkspaceHasInstrumentAssociated(inputWS)) {
-    API::Axis *const horizontal = new API::NumericAxis(xSize);
+    auto horizontal = std::make_unique<API::NumericAxis>(xSize);
     auto labelX = UnitFactory::Instance().create("Label");
     boost::dynamic_pointer_cast<Units::Label>(labelX)->setLabel("Radius");
     horizontal->unit() = labelX;
-    outputWS->replaceAxis(0, horizontal);
+    outputWS->replaceAxis(0, std::move(horizontal));
   }
 
   setProperty("OutputWorkspace", outputWS);

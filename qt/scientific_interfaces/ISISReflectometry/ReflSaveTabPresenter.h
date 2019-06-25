@@ -10,7 +10,7 @@
 #include "DllConfig.h"
 #include "IReflAsciiSaver.h"
 #include "IReflSaveTabPresenter.h"
-#include <MantidKernel/ConfigPropertyObserver.h>
+#include "MantidKernel/ConfigPropertyObserver.h"
 #include <boost/optional.hpp>
 #include <memory>
 #include <string>

@@ -799,6 +799,11 @@
   <instrument name="LTF">
     <technique>Muon spectroscopy</technique>
   </instrument>
+
+  <!-- Added to allow general PSI instrument for Muon -->
+  <instrument name="PSI">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
 </facility>
 
 <!--  Reactor Orphee (France) -->

@@ -22,7 +22,7 @@ using namespace API;
 
 void MaskDetectorsInShape::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "The input workspace");
   declareProperty("ShapeXML", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),

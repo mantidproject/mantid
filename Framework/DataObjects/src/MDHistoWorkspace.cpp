@@ -17,7 +17,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/scoped_array.hpp>
@@ -329,7 +329,7 @@ MDHistoWorkspace::getVertexesArray(size_t linearIndex,
       numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
   // The output vertexes coordinates
-  auto out = Kernel::make_unique<coord_t[]>(numDimensions * numVertices);
+  auto out = std::make_unique<coord_t[]>(numDimensions * numVertices);
   for (size_t i = 0; i < numVertices; ++i) {
     size_t outIndex = i * numDimensions;
     // Offset the 0th box by the position of this linear index, in each
@@ -457,7 +457,7 @@ MDHistoWorkspace::createIterators(
     if (function)
       clonedFunction = new Mantid::Geometry::MDImplicitFunction(*function);
 
-    out.push_back(Kernel::make_unique<MDHistoWorkspaceIterator>(
+    out.push_back(std::make_unique<MDHistoWorkspaceIterator>(
         this, clonedFunction, begin, end));
   }
   return out;
@@ -1292,7 +1292,7 @@ Does not perform any clearing. Multiple calls are compounded.
 @param maskingRegion : Implicit function defining mask region.
 */
 void MDHistoWorkspace::setMDMasking(
-    Mantid::Geometry::MDImplicitFunction *maskingRegion) {
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) {
   if (maskingRegion != nullptr) {
     for (size_t i = 0; i < this->getNPoints(); ++i) {
       // If the function masks the point, then mask it, otherwise leave it as it
@@ -1301,7 +1301,6 @@ void MDHistoWorkspace::setMDMasking(
         this->setMDMaskAt(i, true);
       }
     }
-    delete maskingRegion;
   }
 }
 
