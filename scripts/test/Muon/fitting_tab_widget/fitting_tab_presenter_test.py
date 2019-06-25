@@ -18,6 +18,7 @@ EXAMPLE_TF_ASYMMETRY_FUNCTION = '(composite=ProductFunction,NumDeriv=false;name=
                                 '(name=FlatBackground,A0=1,ties=(A0=1);name=ExpDecayOsc,A=0.2,Lambda=0.2,Frequency=0.1,Phi=0))' \
                                 ';name=ExpDecayMuon,A=0,Lambda=-2.19698,ties=(A=0,Lambda=-2.19698)'
 
+
 def retrieve_combobox_info(combo_box):
     output_list = []
     for i in range(combo_box.count()):
@@ -86,9 +87,11 @@ class FittingTabPresenterTest(GuiTest):
 
         self.presenter.model.do_single_fit.assert_called_once_with(
             {'Function': mock.ANY, 'InputWorkspace': 'Input Workspace Name',
-             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint', 'FitGroupName': 'Fitting Results'})
+             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint',
+             'FitGroupName': 'Fitting Results'})
 
-        self.assertEqual(str(self.presenter.model.do_single_fit.call_args[0][0]['Function']), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.assertEqual(str(self.presenter.model.do_single_fit.call_args[0][0]['Function']),
+                         'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 
     def test_get_parameters_for_single_fit_returns_correctly(self):
         self.presenter.selected_data = ['Input Workspace Name']
@@ -208,7 +211,8 @@ class FittingTabPresenterTest(GuiTest):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Group; fwd; Asymmetry']
         self.presenter.selected_data = new_workspace_list
-        self.presenter.context.get_names_of_workspaces_to_fit = mock.MagicMock(return_value=['MUSR22725; Group; top; Asymmetry'])
+        self.presenter.context.get_names_of_workspaces_to_fit = mock.MagicMock(
+            return_value=['MUSR22725; Group; top; Asymmetry'])
 
         self.view.simul_fit_radio.toggle()
 
@@ -303,7 +307,8 @@ class FittingTabPresenterTest(GuiTest):
 
         self.view.parameter_display_combo.setCurrentIndex(1)
 
-        self.assertEqual(self.view.function_browser.getFitFunctionString(), 'name=GausOsc,A=0.6,Sigma=0.6,Frequency=0.6,Phi=0')
+        self.assertEqual(self.view.function_browser.getFitFunctionString(),
+                         'name=GausOsc,A=0.6,Sigma=0.6,Frequency=0.6,Phi=0')
         self.assertEqual(self.view.fit_status_success_failure.text(), 'Failure: failure with message')
 
     def test_get_first_good_data_for_workspace_retrieves_correct_first_good_data(self):
@@ -377,7 +382,6 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual(result, {'InputFunction': fit_function, 'WorkspaceList': new_workspace_list,
                                   'Mode': 'Extract'})
 
-
     def test_handle_asymmetry_mode_changed_reverts_changed_and_shows_error_if_non_pair_selected(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Pair; fwd; Long']
@@ -387,7 +391,8 @@ class FittingTabPresenterTest(GuiTest):
 
         self.view.tf_asymmetry_mode = True
 
-        self.view.warning_popup.assert_called_once_with('Can only fit groups in tf asymmetry mode and need a function defined')
+        self.view.warning_popup.assert_called_once_with(
+            'Can only fit groups in tf asymmetry mode and need a function defined')
 
     def test_handle_asymmetry_mode_correctly_updates_function_for_a_single_fit(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry']
@@ -414,7 +419,7 @@ class FittingTabPresenterTest(GuiTest):
 
         self.view.tf_asymmetry_mode = True
 
-        self.assertEqual([str(item) for item in self.presenter._fit_function], [str(fit_function_2)]*3)
+        self.assertEqual([str(item) for item in self.presenter._fit_function], [str(fit_function_2)] * 3)
         self.assertEqual(str(self.view.fit_object), str(fit_function_2))
 
     def test_handle_asymmetry_mode_correctly_updates_function_for_sumultaneous_fit(self):
@@ -446,10 +451,43 @@ class FittingTabPresenterTest(GuiTest):
 
         self.view.tf_asymmetry_mode = False
 
-        self.assertEqual([str(item) for item in self.presenter._fit_function], ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0',
-                                                                                'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0',
-                                                                                'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'])
+        self.assertEqual([str(item) for item in self.presenter._fit_function],
+                         ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0',
+                          'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0',
+                          'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'])
         self.assertEqual(str(self.view.fit_object), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+    # def test_handle_fit_with_tf_asymmetry_mode_calls_CalculateMuonAsymmetry(self):
+    #     self.view.sequential_fit_radio.toggle()
+    #     new_workspace_list = ['MUSR22725; Group; top; Asymmetry']
+    #     fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+    #     fit_function_2 = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
+    #     self.view.function_browser.setFunction(str(fit_function))
+    #     self.presenter.selected_data = new_workspace_list
+    #     self.presenter.model.calculate_tf_function.return_value = fit_function_2
+    #     self.view.tf_asymmetry_mode = True
+    #
+    #     self.presenter.handle_fit_clicked()
+
+    def test_get_parameters_for_tf_single_fit_calculation(self):
+        self.context.group_pair_context.get_unormalisised_workspace_list = mock.MagicMock(return_value=
+                                                                                          [
+                                                                                              '__MUSR22725; Group; top; Asymmetry_unnorm',
+                                                                                              '__MUSR22725; Group; bottom; Asymmetry_unnorm',
+                                                                                              '__MUSR22725; Group; fwd; Asymmetry_unnorm'])
+
+        result = self.presenter.get_parameters_for_tf_single_fit_calculation()
+
+        self.assertEqual(result, {'EndX': 15.0,
+                                  'InputFunction': None,
+                                  'Minimizer': None,
+                                  'OutputFitWorkspace': 'OutputFitWorkspace',
+                                  'ReNormalizedWorkspaceList': [],
+                                  'StartX': 0.0,
+                                  'UnNormalizedWorkspaceList': ['__MUSR22725; Group; top; Asymmetry_unnorm',
+                                                                '__MUSR22725; Group; bottom; Asymmetry_unnorm',
+                                                                '__MUSR22725; Group; fwd; Asymmetry_unnorm']}
+                         )
 
 
 if __name__ == '__main__':

@@ -124,6 +124,12 @@ class FittingTabPresenter(object):
         self.update_fit_status_information_in_view()
 
     def handle_fit_clicked(self):
+        if self._tf_asymmetry_mode:
+            self.perform_tf_asymmetry_fit()
+        else:
+            self.perform_standard_fit()
+
+    def perform_standard_fit(self):
         fit_type = self.view.fit_type
 
         try:
@@ -156,6 +162,72 @@ class FittingTabPresenter(object):
             self.calculation_thread.start()
         except ValueError as error:
             self.view.warning_popup(error)
+
+    def perform_tf_asymmetry_fit(self):
+        fit_type = self.view.fit_type
+
+        try:
+            if fit_type == self.view.single_fit:
+                single_fit_parameters = self.get_parameters_for_tf_single_fit_calculation()
+                calculation_function = functools.partial(
+                    self.model.do_single_tf_fit, single_fit_parameters, self.view.group_name)
+                self.calculation_thread = self.create_thread(
+                    calculation_function)
+            elif fit_type == self.view.simultaneous_fit:
+                simultaneous_fit_parameters = self.get_multi_domain_tf_fit_parameters()
+                global_parameters = self.view.get_global_parameters()
+                calculation_function = functools.partial(
+                    self.model.do_simultaneous_tf_fit,
+                    simultaneous_fit_parameters, global_parameters, self.view.group_name)
+                self.calculation_thread = self.create_thread(
+                    calculation_function)
+            elif fit_type == self.view.sequential_fit:
+                sequential_fit_parameters = self.get_multi_domain_tf_fit_parameters()
+                calculation_function = functools.partial(
+                    self.model.do_sequential_tf_fit, sequential_fit_parameters, self.view.group_name)
+                self.calculation_thread = self.create_thread(
+                    calculation_function)
+
+            self.calculation_thread.threadWrapperSetUp(self.handle_started,
+                                                       self.handle_finished,
+                                                       self.handle_error)
+            self.calculation_thread.start()
+        except ValueError as error:
+            self.view.warning_popup(error)
+
+    def get_parameters_for_tf_single_fit_calculation(self):
+        fit_group_name = self.model.get_function_name(self.view.fit_object)
+        workspace, workspace_directory = self.model.create_fitted_workspace_name(self.view.display_workspace,
+                                                                                 self.view.fit_object,
+                                                                                 fit_group_name)
+
+        return {
+            'InputFunction': self.view.fit_object,
+            'ReNormalizedWorkspaceList': self.view.display_workspace,
+            'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
+                [self.view.display_workspace])[0],
+            'OutputFitWorkspace': workspace,
+            'StartX': self.start_x[0],
+            'EndX': self.end_x[0],
+            'Minimizer': self.view.minimizer
+        }
+
+    def get_multi_domain_tf_fit_parameters(self):
+        fit_group_name = self.model.get_function_name(self.view.fit_object)
+        workspace, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(self.view.display_workspace,
+                                                                                              self.view.fit_object,
+                                                                                              fit_group_name)
+
+        return {
+                   'InputFunction': self.view.fit_object,
+                   'ReNormalizedWorkspaceList': self.selected_data,
+                   'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
+                       self.selected_data),
+                   'OutputFitWorkspace': workspace,
+                   'StartX': self.start_x[self.view.get_index_for_start_end_times()],
+                   'EndX': self.end_x[self.view.get_index_for_start_end_times()],
+                   'Minimizer': self.view.minimizer
+               }
 
     def handle_started(self):
         self.view.setEnabled(False)
@@ -224,10 +296,8 @@ class FittingTabPresenter(object):
             try:
                 tf_function = self.model.calculate_tf_function(tf_asymmetry_parameters)
             except RuntimeError:
-                self.view.warning_popup('The input function was not of the form N*(1+f)+A*exp(-lambda*t),'
-                                        ' clearing functions instead')
-                self.view.function_browser.clear()
-                return
+                self.view.warning_popup('The input function was not of the form N*(1+f)+A*exp(-lambda*t)')
+                return tf_asymmetry_parameters['InputFunction']
             return tf_function
 
         groups_only = self.check_workspaces_are_tf_asymmetry_compliant(self.selected_data)
@@ -254,7 +324,7 @@ class FittingTabPresenter(object):
                 self._fit_function[index] = new_function.clone()
         else:
             new_function = calculate_tf_fit_function(self.view.fit_object)
-            self._fit_function = [new_function] * len(self.selected_data)
+            self._fit_function = [new_function.clone()] * len(self.selected_data)
 
         self.view.function_browser.blockSignals(True)
         self.view.function_browser.clear()
@@ -383,6 +453,7 @@ class FittingTabPresenter(object):
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
         mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
+        workspace_list = [self.view.display_workspace] if self.view.fit_type == self.view.single_fit else self.selected_data
         return {'InputFunction': fit_function,
-                'WorkspaceList': self.selected_data,
+                'WorkspaceList': workspace_list,
                 'Mode': mode}
