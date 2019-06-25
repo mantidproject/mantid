@@ -34,6 +34,11 @@ Usage
 .. testcode:: GetEiT0atSNS
     
     w=Load('ADARAMonitors.nxs')
+    run.setStartAndEndTime(
+        DateAndTime("2015-01-27T11:00:00"),
+        DateAndTime("2015-01-27T11:57:51")
+    )
+    LoadInstrument(Workspace=w,InstrumentName='SEQUOIA',RewriteSpectraMap=False)
     LoadInstrument(Workspace=w,InstrumentName='SEQUOIA',RewriteSpectraMap=False)
     AddSampleLog(Workspace=w,LogName='vChTrans',LogText='1',LogType='Number Series')
     AddSampleLog(Workspace=w,LogName='EnergyRequest',LogText='20',LogType='Number Series')
