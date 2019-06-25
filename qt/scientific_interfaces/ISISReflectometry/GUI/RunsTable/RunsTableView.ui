@@ -76,16 +76,6 @@
             </widget>
           </item>
           <item>
-            <widget class="QCheckBox" name="notebookCheckbox">
-              <property name="toolTip">
-                <string>Whether to generate a python notebook when performing a reduction</string>
-              </property>
-              <property name="text">
-                <string>Output Notebook</string>
-              </property>
-            </widget>
-          </item>
-          <item>
             <widget class="QPushButton" name="processButton">
               <property name="toolTip">
                 <string>Begin reducing the data in the table</string>
