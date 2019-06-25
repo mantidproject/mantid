@@ -499,9 +499,6 @@ void RunsTablePresenter::notifyRemoveRowsRequested(
 }
 
 void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
-  if (isProcessing() || isAutoreducing())
-    return;
-
   removeAllRowsAndGroupsFromModel();
   removeAllRowsAndGroupsFromView();
   ensureAtLeastOneGroupExists();
