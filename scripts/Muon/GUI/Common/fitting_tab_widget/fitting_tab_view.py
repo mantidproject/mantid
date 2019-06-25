@@ -255,9 +255,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, True, 3)
 
-        table_utils.setRowName(self.fit_options_table, 4, "Evaluate Function As")
-        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 4, ['CentrePoint', 'Histogram'])
-
-        table_utils.setRowName(self.fit_options_table, 5, "TF Asymmetry Mode")
+        table_utils.setRowName(self.fit_options_table, 4, "TF Asymmetry Mode")
         self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, False, 5)
+            self.fit_options_table, False, 4)
+
+        table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
+        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 5, ['CentrePoint', 'Histogram'])

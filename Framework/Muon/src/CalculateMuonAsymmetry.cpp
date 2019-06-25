@@ -276,52 +276,51 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   API::IFunction_sptr tmp = fit->getProperty("Function");
   setProperty("OutputFunction", tmp);
 
-  API::ITableWorkspace_sptr parameterTable = fit->getProperty("OutputParameters");
+  API::ITableWorkspace_sptr parameterTable =
+      fit->getProperty("OutputParameters");
   API::Workspace_sptr outputWorkspace;
-  if(wsNames.size() > 1) {
-    API::WorkspaceGroup_sptr outputWorkspaceGroup = fit->getProperty("OutputWorkspace");
+  if (wsNames.size() > 1) {
+    API::WorkspaceGroup_sptr outputWorkspaceGroup =
+        fit->getProperty("OutputWorkspace");
     outputWorkspace = outputWorkspaceGroup;
-    }
-  else {
-  API::MatrixWorkspace_sptr outputWorkspaceMatrix = fit->getProperty("OutputWorkspace");
-  outputWorkspace = outputWorkspaceMatrix;
+  } else {
+    API::MatrixWorkspace_sptr outputWorkspaceMatrix =
+        fit->getProperty("OutputWorkspace");
+    outputWorkspace = outputWorkspaceMatrix;
   }
 
-  API::ITableWorkspace_sptr outputNormalisedCovarianceMatrix = fit->getProperty("OutputNormalisedCovarianceMatrix");
+  API::ITableWorkspace_sptr outputNormalisedCovarianceMatrix =
+      fit->getProperty("OutputNormalisedCovarianceMatrix");
 
   declareProperty(
-        std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-            "OutputParameters", "", Kernel::Direction::Output),
-        "The name of the TableWorkspace in which to store the "
-        "final fit parameters");
-  setPropertyValue("OutputParameters",
-                     output + "_Parameters");
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "OutputParameters", "", Kernel::Direction::Output),
+      "The name of the TableWorkspace in which to store the "
+      "final fit parameters");
+  setPropertyValue("OutputParameters", output + "_Parameters");
+
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
+                  "The name of the matrix in which to store the "
+                  "final fit results");
+  if (outputWorkspace->isGroup()) {
+    setPropertyValue("OutputWorkspace", output + "_Workspaces");
+  } else {
+    setPropertyValue("OutputWorkspace", output + "_Workspace");
+  }
 
   declareProperty(
-        std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-            "OutputWorkspace", "", Kernel::Direction::Output),
-        "The name of the matrix in which to store the "
-        "final fit results");
-  if (outputWorkspace->isGroup()){
-  setPropertyValue("OutputWorkspace",
-                     output + "_Workspaces");
-                     } else {
-                     setPropertyValue("OutputWorkspace",
-                     output + "_Workspace");
-                     }
-
-  declareProperty(
-        std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-            "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
-        "The name of the TableWorkspace in which to store the final covariance "
-        "matrix");
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "OutputNormalisedCovarianceMatrix", "", Kernel::Direction::Output),
+      "The name of the TableWorkspace in which to store the final covariance "
+      "matrix");
   setPropertyValue("OutputNormalisedCovarianceMatrix",
-                     output + "_NormalisedCovarianceMatrix");
-
+                   output + "_NormalisedCovarianceMatrix");
 
   setProperty("OutputParameters", parameterTable);
   setProperty("OutputWorkspace", outputWorkspace);
-  setProperty("OutputNormalisedCovarianceMatrix", outputNormalisedCovarianceMatrix);
+  setProperty("OutputNormalisedCovarianceMatrix",
+              outputNormalisedCovarianceMatrix);
 
   try {
     if (wsNames.size() == 1) {
