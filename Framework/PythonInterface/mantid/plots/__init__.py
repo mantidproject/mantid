@@ -17,7 +17,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from collections import Iterable
 
-from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
@@ -641,9 +640,21 @@ class MantidAxes(Axes):
                                                            **kwargs)
                 self.containers.insert(orig_idx, container_new)
                 self.containers.pop()
-                orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
-                for artist_orig, artist_new in zip(orig_flat, new_flat):
-                    artist_new.update_from(artist_orig)
+
+                # Update joining line
+                if container_new[0] and container_orig[0]:
+                    container_new[0].update_from(container_orig[0])
+                # Update caps
+                for orig_caps, new_caps in zip(container_orig[1], container_new[1]):
+                    new_caps.update_from(orig_caps)
+                # Update bars
+                for orig_bars, new_bars in zip(container_orig[2], container_new[2]):
+                    new_bars.update_from(orig_bars)
+
+                # Re-plotting in the config dialog will assign this attr
+                if hasattr(container_orig, 'errorevery'):
+                    setattr(container_new, 'errorevery', container_orig.errorevery)
+
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
                 self.set_autoscaley_on(True)
