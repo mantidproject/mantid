@@ -37,6 +37,7 @@ public:
   MOCK_METHOD1(doReport, void(const std::string &));
 };
 
+// tests that attributes are in file. 
 class HDF5FileTestUtility {
 
 public:
@@ -57,15 +58,15 @@ public:
     std::string readClass;
     attribute.read(attribute.getDataType(), readClass);
     return (readClass == classType) ? true
-                                    : false; // check if NXclass exists in group
+                                    : false; 
   }
 
 private:
   H5::H5File m_file;
 };
 
-// Gives a clean file destination and removes after if present.
-
+// Gives a clean file destination and removes the file when handle is out of
+// scope.
 class ScopedFileHandle {
 
 public:
@@ -77,17 +78,13 @@ public:
 
     // Check proposed location and throw std::invalid argument if file does
     // not exist. otherwise set m_full_path to location.
-    const auto ext = boost::filesystem::path(name).extension();
-    if ((ext != ".nxs") && (ext != ".hdf5")) {
 
-      throw std::invalid_argument("invalid extension for file: " +
-                                  ext.generic_string());
-    }
     if (boost::filesystem::is_directory(temp_dir)) {
       m_full_path = temp_full_path;
 
     } else {
-      throw std::invalid_argument("directory does not exist: ");
+      throw std::invalid_argument("failed to load temp directory: " +
+                                  temp_dir.generic_string());
     }
   }
 
@@ -95,6 +92,7 @@ public:
 
   ~ScopedFileHandle() {
 
+    // file is removed at end of file handle's lifetime
     if (boost::filesystem::is_regular_file(m_full_path)) {
       boost::filesystem::remove(m_full_path);
     }
@@ -109,6 +107,12 @@ private:
 //---------------------------------------------------------------------
 
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
+
+private:
+  std::pair<std::unique_ptr<Mantid::Geometry::ComponentInfo>,
+            std::unique_ptr<Mantid::Geometry::DetectorInfo>>
+      m_instrument;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -117,70 +121,70 @@ public:
   }
   static void destroySuite(NexusGeometrySaveTest *suite) { delete suite; }
 
-  void test_providing_invalid_path_throws() { // deliberately fails
-
+  NexusGeometrySaveTest() {
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
         Mantid::Kernel::V3D(1, 1, 1));
 
-    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    m_instrument =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+  }
+
+  void test_providing_invalid_path_throws() { // deliberately fails
 
     std::string path = "invalid_path"; // test invalid path
 
-    TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
+    TS_ASSERT_THROWS(saveInstrument(*m_instrument.first, path),
                      std::invalid_argument &);
   }
 
-  void test_nxinstrument_class_exists() {
-
-    // Instrument--------------------------------------
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        Mantid::Kernel::V3D(1, 1, 1));
-
-    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    //--------------------------------------------------------------------
-
-    // destination folder for outputfile-----------------------------------
-
-    ScopedFileHandle fileResource(
-        "testIstrument.hdf5"); // creates a temp directory for the file.
-    std::string destinationFile = fileResource.fullPath();
-    saveInstrument(*inst2.first, destinationFile); // saves the instrument.
-
-    HDF5FileTestUtility tester(destinationFile); // tests the file has the
-
-    ASSERT_TRUE(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
-    ASSERT_TRUE(tester.hasNxClass("NXentry", "/raw_data_1"));
-  }
+ 
 
   void test_progress_reporting() {
 
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        Mantid::Kernel::V3D(1, 1, 1));
-
-    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
     MockProgressBase progressRep;
     EXPECT_CALL(progressRep, doReport(testing::_)).Times(1);
     ScopedFileHandle test("testFile.hdf5");
     std::string path = test.fullPath();
-    saveInstrument(*inst2.first, path, &progressRep);
-    ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&progressRep));
+    saveInstrument(*m_instrument.first, path, &progressRep);
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
-
-  // WIP-----------------------------------------------------
 
   void test_extension_validation() {
 
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        Mantid::Kernel::V3D(1, 1, 1));
+    ScopedFileHandle fileResource(
+        "testIstrument.abc"); // creates a temp directory for the file.
+    std::string destinationFile = fileResource.fullPath();
 
-    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    TS_ASSERT_THROWS(ScopedFileHandle test("testFile.abc"),
+    // TODO the following should not be tested. but saveInstrument should be.
+    TS_ASSERT_THROWS(saveInstrument(*m_instrument.first, destinationFile),
                      std::invalid_argument &);
+  }
+
+   void test_nxinstrument_class_exists() {
+
+    ScopedFileHandle fileResource(
+        "testIstrument.hdf5"); // creates a temp directory for the file.
+    std::string destinationFile = fileResource.fullPath();
+    saveInstrument(*m_instrument.first,
+                   destinationFile); // saves the instrument.
+
+    HDF5FileTestUtility tester(
+        destinationFile); // tests the file has given attributes.
+
+    ASSERT_TRUE(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
+    ASSERT_TRUE(tester.hasNxClass("NXentry", "/raw_data_1"));
+
+  }
+
+  void test_instrument_has_name() {
+    ScopedFileHandle scopedFile("instrument.hdf5");
+    saveInstrument(*m_instrument.first, scopedFile.fullPath());
+
+    HDF5FileTestUtility testUtility(scopedFile.fullPath());
+    // TS_ASSERT(testUtility.hasDataSet("/raw_data1/instrument/name", NX_CHAR));
+
+    // TODO write hasDataSet in HDF5FileTestUtility
   }
 };
 

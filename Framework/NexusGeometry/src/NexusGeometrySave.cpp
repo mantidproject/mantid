@@ -31,30 +31,39 @@ void writeStrAttribute(H5::Group &grp, const std::string &nexusClass,
   attribute.write(attrType, nexusType);
 }
 
+// saves the instrument to file.
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
                     Kernel::ProgressBase *reporter) {
 
   boost::filesystem::path tmp(fullPath);
+
+  // check the directory for the file is valid.
   if (!boost::filesystem::is_directory(tmp.root_directory())) {
     throw std::invalid_argument(
         "The path provided for saving the file is invalid: " + fullPath + "\n");
   }
 
+  // check the file itself has valid extensions.
+  const auto ext = boost::filesystem::path(tmp).extension();
+  if ((ext != ".nxs") && (ext != ".hdf5")) {
+
+    throw std::invalid_argument("invalid extension for file: " +
+                                ext.generic_string());
+  }
+
+  // check if the component has detector info.
   if (!compInfo.hasDetectorInfo()) {
     throw std::invalid_argument("The component has no detector info.\n");
   }
 
+  // does reporting if optional reporter exists.
   if (reporter != nullptr) {
     reporter->report();
   }
 
-  // auto compName = compInfo.name(0);	//potentially dead code
-  // auto allComps = compInfo.componentsInSubtree(compInfo.root());
-  // //potentially dead code
-
-  const hsize_t dims = 5;
-  int ndims = 1;
+  // create parent 'raw_data_1' and child 'instrument' group with NX_class
+  // attributes of type NXentry and NXinstrument, then write to file.
 
   const std::string parentNexusClassName = "NX_class"; // class name
   const std::string parentNexusClassType = "NXentry";  // class type
@@ -62,13 +71,13 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   const std::string childNexusClassName = "NX_class";     // class name
   const std::string childNexusClassType = "NXinstrument"; // class type
 
-  H5::H5File file(fullPath, H5F_ACC_TRUNC);          // create h5 file
-  H5::Group group = file.createGroup("/raw_data_1"); // create group in file
+  H5::H5File file(fullPath, H5F_ACC_TRUNC); // create h5 file
 
-  H5::Group subGroup = group.createGroup("instrument");
+  H5::Group parentGroup = file.createGroup("/raw_data_1");  //create parent group in file.
+  H5::Group childGroup = parentGroup.createGroup("instrument"); //create child group in parent.
 
-  writeStrAttribute(group, parentNexusClassName, parentNexusClassType);
-  writeStrAttribute(subGroup, childNexusClassName, childNexusClassType);
+  writeStrAttribute(parentGroup, parentNexusClassName, parentNexusClassType); //write attributes to parent.
+  writeStrAttribute(childGroup, childNexusClassName, childNexusClassType); //write attributes to child.
 
   file.close();
 
@@ -76,5 +85,3 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
 } // namespace NexusGeometry
 } // namespace Mantid
-
-
