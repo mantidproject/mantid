@@ -22,6 +22,12 @@ Data reduction
 #. Open ``Interfaces`` > ``SANS`` > ``SANS v2``
 #. Choose ``Load User File``; from the ISIS sample data in the ``loqdemo`` folder, choose ``Maskfile.txt``
 #. Choose ``Load Batch File``; from the ISIS sample data in the `loqdemo` folder, choose ``batch_mode_reduction.csv``
+#. In the ``Runs`` tab:
+    - Check that the ``Insert``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and ``Erase`` icons work as expected on table rows
+    - Create multiple rows in the table with different data e.g. one row with an output name, one row without
+    - Click the ``Export Table`` button and save the table as a csv file
+    - Click ``Load Batch file`` and select the newly saved table. All columns up to ``Output Name`` should have been saved and loaded
+    - Re-load the original batch file
 #. In the ``Settings`` tab:
     - Go to ``Mask``
     - Click ``Display Mask``
@@ -50,11 +56,7 @@ Data reduction
     - In the plot you should end up with multiple lines plotted
     - Check the ``Multi-period`` box
     - 6 additional columns should appear in the table
-    - Check that the ``Insert``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and ``Erase`` icons work as expected
-    - Create multiple rows in the table with different data e.g. one row with an output name, one row without
-    - Click the ``Export Table`` button and save the table as a csv file
-    - Click ``Load Batch file`` and select the newly saved table. This should load without issue and the table look the same as when you saved it
-    - Re-load the original batch file
+    - Delete all rows and re-load the batch file as previously
 #. In the ``Settings`` tab
     - In the ``General, Scale, Event Slice, Sample`` sub-tab, set ``Reduction Mode`` to ``Merged``
     - Return to the ``Runs`` tab
