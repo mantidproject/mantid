@@ -103,9 +103,6 @@ void BatchPresenter::notifyAutoreductionCompleted() {
 void BatchPresenter::notifyBatchComplete(bool error) {
   UNUSED_ARG(error);
 
-  // Make sure views are up to date with any changes in state
-  m_runsPresenter->notifyRowStateChanged();
-
   // Continue processing the next batch of algorithms, if there is more to do
   auto algorithms = m_jobRunner->getAlgorithms();
   if (algorithms.size() > 0) {
@@ -120,19 +117,20 @@ void BatchPresenter::notifyBatchCancelled() {
   reductionPaused();
   // We also stop autoreduction if the user has cancelled
   autoreductionPaused();
-  m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::notifyAlgorithmStarted(
     IConfiguredAlgorithm_sptr algorithm) {
-  m_jobRunner->algorithmStarted(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged();
+  auto const &item = m_jobRunner->algorithmStarted(algorithm);
+  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::notifyAlgorithmComplete(
     IConfiguredAlgorithm_sptr algorithm) {
-  m_jobRunner->algorithmComplete(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged();
+  auto const &item = m_jobRunner->algorithmComplete(algorithm);
+  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowStateChanged(item);
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
@@ -144,8 +142,9 @@ void BatchPresenter::notifyAlgorithmComplete(
 
 void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm,
                                           std::string const &message) {
-  m_jobRunner->algorithmError(algorithm, message);
-  m_runsPresenter->notifyRowStateChanged();
+  auto const &item = m_jobRunner->algorithmError(algorithm, message);
+  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowStateChanged(item);
 }
 
 /** Start processing the next batch of algorithms.
@@ -156,6 +155,7 @@ bool BatchPresenter::startBatch(
   m_view->clearAlgorithmQueue();
   m_view->setAlgorithmQueue(std::move(algorithms));
   m_view->executeAlgorithmQueue();
+  m_runsPresenter->notifyRowStateChanged();
   return true;
 }
 
@@ -332,6 +332,7 @@ void BatchPresenter::renameHandle(const std::string &oldName,
 
 void BatchPresenter::clearADSHandle() {
   m_jobRunner->notifyAllWorkspacesDeleted();
+  m_runsPresenter->notifyRowOutputsChanged();
   m_runsPresenter->notifyRowStateChanged();
 }
 } // namespace CustomInterfaces

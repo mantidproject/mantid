@@ -263,10 +263,11 @@ public:
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
   MOCK_METHOD1(algorithmStarted,
-               void(MantidQt::API::IConfiguredAlgorithm_sptr));
+               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete,
-               void(MantidQt::API::IConfiguredAlgorithm_sptr));
-  MOCK_METHOD2(algorithmError, void(MantidQt::API::IConfiguredAlgorithm_sptr,
+               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_METHOD2(algorithmError,
+               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr,
                                     std::string const &));
   MOCK_CONST_METHOD1(
       algorithmOutputWorkspacesToSave,

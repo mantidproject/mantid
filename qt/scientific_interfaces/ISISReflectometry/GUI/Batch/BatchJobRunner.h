@@ -36,11 +36,11 @@ public:
 
   void setReprocessFailedItems(bool reprocessFailed) override;
 
-  void
+  Item const &
   algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  void algorithmComplete(
+  Item const &algorithmComplete(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+  Item const &algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
                       std::string const &message) override;
 
   std::vector<std::string> algorithmOutputWorkspacesToSave(
