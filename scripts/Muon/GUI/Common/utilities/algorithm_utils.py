@@ -174,8 +174,8 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.setProperties(parameters_dict)
     alg.execute()
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value,\
-           alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
-           alg.getProperty('ChiSquared').value
+        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
+        alg.getProperty('ChiSquared').value
 
 
 def run_AppendSpectra(ws1, ws2):
