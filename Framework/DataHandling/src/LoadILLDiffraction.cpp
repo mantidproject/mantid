@@ -212,7 +212,7 @@ void LoadILLDiffraction::loadDataScan() {
   }
 
   resolveInstrument();
-  resolveScanType();  
+  resolveScanType();
   computeThetaOffset();
 
   std::string start_time = firstEntry.getString("start_time");
