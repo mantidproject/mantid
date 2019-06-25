@@ -216,6 +216,8 @@ void BatchPresenter::autoreductionResumed() {
   m_experimentPresenter->autoreductionResumed();
   m_instrumentPresenter->autoreductionResumed();
   m_runsPresenter->autoreductionResumed();
+
+  m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::pauseAutoreduction() {
@@ -238,6 +240,7 @@ void BatchPresenter::autoreductionPaused() {
 
 void BatchPresenter::autoreductionCompleted() {
   m_runsPresenter->autoreductionCompleted();
+  m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
