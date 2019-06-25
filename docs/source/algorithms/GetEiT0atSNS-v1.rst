@@ -35,6 +35,7 @@ Usage
     
     w=Load('ADARAMonitors.nxs')
     run=w.getRun()
+    from mantid.kernel import DateAndTime
     run.setStartAndEndTime(
         DateAndTime("2015-01-27T11:00:00"),
         DateAndTime("2015-01-27T11:57:51")
