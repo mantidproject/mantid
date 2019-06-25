@@ -58,10 +58,10 @@ const std::string ELE_SIZE("ElementSize"); // is not used
 } // namespace
 
 void HRPDSlabCanAbsorption::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP,
-                                                   "", Direction::Input));
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WKSP,
-                                                   "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+      PropertyNames::INPUT_WKSP, "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+      PropertyNames::OUTPUT_WKSP, "", Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
