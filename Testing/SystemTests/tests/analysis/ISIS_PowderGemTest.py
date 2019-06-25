@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import systemtesting
 import shutil
+import platform
 
 import mantid.simpleapi as mantid
 from mantid import config
@@ -46,7 +47,6 @@ generated_offset = os.path.join(calibration_dir, "19_1")
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
-
     calibration_results = None
     existing_config = config['datasearch.directories']
 
@@ -58,7 +58,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return self.calibration_results.name(),\
+        return self.calibration_results.name(), \
                "ISIS_Powder-GEM-VanSplined_83608_offsets_2011_cycle111b.cal.nxs"
 
     def cleanup(self):
@@ -71,7 +71,6 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
 
 class FocusTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config['datasearch.directories']
 
@@ -96,7 +95,6 @@ class FocusTest(systemtesting.MantidSystemTest):
 
 
 class CreateCalTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config['datasearch.directories']
 
@@ -111,7 +109,10 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
-        return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
+        if _current_os_has_gsl_lvl2():
+            return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
+        else:
+            return self.focus_results.name(), "ISIS_Powder-GEM87618_groupedGSAS1.nxs"
 
     def cleanup(self):
         try:
@@ -191,4 +192,9 @@ def _try_delete(path):
         else:
             os.remove(path)
     except OSError:
-        print ("Could not delete output file at: ", path)
+        print("Could not delete output file at: ", path)
+
+
+def _current_os_has_gsl_lvl2():
+    """ Check whether the current OS should be running GSLv2 """
+    return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''
