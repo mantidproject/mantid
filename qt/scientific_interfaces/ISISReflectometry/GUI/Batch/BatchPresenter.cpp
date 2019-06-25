@@ -155,7 +155,6 @@ bool BatchPresenter::startBatch(
   m_view->clearAlgorithmQueue();
   m_view->setAlgorithmQueue(std::move(algorithms));
   m_view->executeAlgorithmQueue();
-  m_runsPresenter->notifyRowStateChanged();
   return true;
 }
 

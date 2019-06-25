@@ -212,7 +212,10 @@ void RunsTablePresenter::updateWidgetEnabledState() {
                            !processing && !autoreducing);
 }
 
-void RunsTablePresenter::reductionResumed() { updateWidgetEnabledState(); }
+void RunsTablePresenter::reductionResumed() { 
+  notifyRowStateChanged();
+  updateWidgetEnabledState();
+}
 
 void RunsTablePresenter::reductionPaused() { updateWidgetEnabledState(); }
 
