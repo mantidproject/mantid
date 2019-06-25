@@ -100,6 +100,7 @@ public:
   MOCK_METHOD0(notifyRowStateChanged, void());
   MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(notifyRowOutputsChanged, void());
+  MOCK_METHOD1(notifyRowOutputsChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(resumeAutoreduction, bool());
