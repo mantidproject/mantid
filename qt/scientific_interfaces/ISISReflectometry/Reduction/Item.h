@@ -31,7 +31,7 @@ public:
   std::string message() const;
   virtual bool requiresProcessing(bool reprocessFailed) const;
 
-  virtual void resetState();
+  virtual void resetState(bool resetChildren = true);
   virtual void setSkipped(bool skipped);
   virtual void renameOutputWorkspace(std::string const &oldName,
                                      std::string const &newName) = 0;

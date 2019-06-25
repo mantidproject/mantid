@@ -31,6 +31,8 @@ public:
   virtual void notifyReductionResumed() = 0;
   virtual void notifyReductionPaused() = 0;
   virtual void notifyRowStateChanged() = 0;
+  virtual void notifyRowStateChanged(boost::optional<Item const &> item) = 0;
+  virtual void notifyRowOutputsChanged(boost::optional<Item const &> item) = 0;
   virtual void notifyRowOutputsChanged() = 0;
 
   virtual void reductionPaused() = 0;

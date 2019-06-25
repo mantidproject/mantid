@@ -619,6 +619,15 @@ void RunsTablePresenter::notifyRowStateChanged() {
   }
 }
 
+void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
+  if (!item)
+    return;
+
+  updateProgressBar();
+  auto const path = m_model.reductionJobs().getPath(item.get());
+  setRowStylingForItem(path, item.get());
+}
+
 void RunsTablePresenter::notifyRowOutputsChanged() {
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
@@ -631,6 +640,15 @@ void RunsTablePresenter::notifyRowOutputsChanged() {
     }
     ++groupIndex;
   }
+}
+
+void RunsTablePresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
+  if (!item.is_initialized() || item->isGroup())
+    return;
+  
+  auto const &row = dynamic_cast<Row const &>(item.get());
+  auto const path = m_model.reductionJobs().getPath(row);
+  m_jobViewUpdater.rowModified(groupOf(path), rowOf(path), row);
 }
 
 bool RunsTablePresenter::isProcessing() const {

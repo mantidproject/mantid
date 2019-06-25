@@ -214,6 +214,13 @@ Group const &ReductionJobs::operator[](int index) const {
   return m_groups[index];
 }
 
+MantidWidgets::Batch::RowPath ReductionJobs::getPath(Item const &item) const {
+  if (item.isGroup())
+    return getPath(dynamic_cast<Group const &>(item));
+  else
+    return getPath(dynamic_cast<Row const &>(item));
+}
+
 MantidWidgets::Batch::RowPath ReductionJobs::getPath(Group const &group) const {
   // Find this group in the groups list
   auto groupIter = std::find_if(m_groups.cbegin(), m_groups.cend(),

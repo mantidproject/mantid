@@ -46,8 +46,10 @@ public:
   std::vector<std::string> algorithmOutputWorkspacesToSave(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
 
-  void notifyWorkspaceDeleted(std::string const &wsName) override;
-  void notifyWorkspaceRenamed(std::string const &oldName,
+  boost::optional<Item const &>
+  notifyWorkspaceDeleted(std::string const &wsName) override;
+  boost::optional<Item const &>
+  notifyWorkspaceRenamed(std::string const &oldName,
                               std::string const &newName) override;
   void notifyAllWorkspacesDeleted() override;
 

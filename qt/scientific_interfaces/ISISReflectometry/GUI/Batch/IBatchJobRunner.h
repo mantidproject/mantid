@@ -36,8 +36,10 @@ public:
                  std::string const &message) = 0;
   virtual std::vector<std::string> algorithmOutputWorkspacesToSave(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const = 0;
-  virtual void notifyWorkspaceDeleted(std::string const &wsName) = 0;
-  virtual void notifyWorkspaceRenamed(std::string const &oldName,
+  virtual boost::optional<Item const &>
+  notifyWorkspaceDeleted(std::string const &wsName) = 0;
+  virtual boost::optional<Item const &>
+  notifyWorkspaceRenamed(std::string const &oldName,
                                       std::string const &newName) = 0;
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>

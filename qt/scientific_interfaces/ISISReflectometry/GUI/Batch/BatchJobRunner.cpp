@@ -261,20 +261,27 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
   return workspaces;
 }
 
-void BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
+boost::optional<Item const &> BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
   // Reset the state for the relevant row if the workspace was one of our
   // outputs
   auto item = m_batch.getItemWithOutputWorkspaceOrNone(wsName);
-  if (item)
-    item->resetState();
+  if (item.is_initialized()) {
+    item->resetState(false);
+    return boost::optional<Item const &>(item.get());
+  }
+  return boost::none;
 }
 
-void BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
-                                            std::string const &newName) {
+boost::optional<Item const &>
+BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
+                                       std::string const &newName) {
   // Update the workspace name in the model, if it is one of our outputs
   auto item = m_batch.getItemWithOutputWorkspaceOrNone(oldName);
-  if (item)
+  if (item.is_initialized()) {
     item->renameOutputWorkspace(oldName, newName);
+    return boost::optional<Item const &>(item.get());
+    }
+  return boost::none;
 }
 
 void BatchJobRunner::notifyAllWorkspacesDeleted() {

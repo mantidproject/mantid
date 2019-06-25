@@ -84,8 +84,11 @@ boost::optional<int> Group::indexOfRowWithTheta(double theta,
 
 void Group::setName(std::string const &name) { m_name = name; }
 
-void Group::resetState() {
+void Group::resetState(bool resetChildren) {
   Item::resetState();
+  if (!resetChildren)
+    return;
+
   for (auto &row : m_rows)
     if (row)
       row->resetState();

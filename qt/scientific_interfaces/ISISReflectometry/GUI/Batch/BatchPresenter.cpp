@@ -318,14 +318,16 @@ AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const {
 }
 
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
-  m_jobRunner->notifyWorkspaceDeleted(wsName);
-  m_runsPresenter->notifyRowStateChanged();
+  auto const item = m_jobRunner->notifyWorkspaceDeleted(wsName);
+  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName,
                                   const std::string &newName) {
-  m_jobRunner->notifyWorkspaceRenamed(oldName, newName);
-  m_runsPresenter->notifyRowStateChanged();
+  auto const item = m_jobRunner->notifyWorkspaceRenamed(oldName, newName);
+  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::clearADSHandle() {

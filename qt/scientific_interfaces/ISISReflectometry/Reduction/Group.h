@@ -48,7 +48,7 @@ public:
   int totalItems() const override;
   int completedItems() const override;
 
-  void resetState() override;
+  void resetState(bool resetChildren = true) override;
   void resetSkipped();
   void renameOutputWorkspace(std::string const &oldName,
                              std::string const &newName) override;
