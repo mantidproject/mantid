@@ -24,7 +24,6 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -124,19 +123,19 @@ DECLARE_ALGORITHM(ReflectometryReductionOne2)
 void ReflectometryReductionOne2::init() {
 
   // Input workspace
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Run to reduce.");
 
   initReductionProperties();
 
   // ThetaIn
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
                   "Angle in degrees");
 
   // Processing instructions
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
                       boost::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
@@ -144,14 +143,14 @@ void ReflectometryReductionOne2::init() {
                   "the detectors of interest. See GroupDetectors for details.");
 
   // Minimum wavelength
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMin", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum in angstroms");
 
   // Maximum wavelength
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMax", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
@@ -169,14 +168,14 @@ void ReflectometryReductionOne2::init() {
   // Init properties for diagnostics
   initDebugProperties();
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "Output Workspace IvsQ.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
-                                                   "", Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "OutputWorkspaceWavelength", "", Direction::Output,
+                      PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
 }
 
@@ -520,6 +519,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("Params", getPropertyValue("Params"));
     alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
     alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+    alg->setProperty("ScaleRHSWorkspace",
+                     getPropertyValue("ScaleRHSWorkspace"));
     alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
     alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
     alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));

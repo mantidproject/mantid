@@ -66,8 +66,8 @@ const std::string CreateSampleWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateSampleWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
   std::vector<std::string> typeOptions{"Histogram", "Event"};
   declareProperty("WorkspaceType", "Histogram",
@@ -118,7 +118,7 @@ void CreateSampleWorkspace::init() {
   std::vector<std::string> functionOptions;
   functionOptions.reserve(m_preDefinedFunctionmap.size());
   for (const auto &preDefinedFunction : m_preDefinedFunctionmap) {
-    functionOptions.push_back(preDefinedFunction.first);
+    functionOptions.emplace_back(preDefinedFunction.first);
   }
   declareProperty("Function", "One Peak",
                   boost::make_shared<StringListValidator>(functionOptions),

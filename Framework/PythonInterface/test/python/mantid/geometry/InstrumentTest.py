@@ -11,6 +11,7 @@ from mantid.kernel import DateAndTime
 from mantid.geometry import(Detector, Instrument, ObjComponent, ReferenceFrame)
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
+
 class InstrumentTest(unittest.TestCase):
 
     __testws = None
@@ -54,7 +55,7 @@ class InstrumentTest(unittest.TestCase):
     def test_baseInstrument_Can_Be_Retrieved(self):
         inst = self.__testws.getInstrument()
         base_inst = inst.getBaseInstrument()
-        self.assertEquals("testInst", base_inst.getName())
+        self.assertEqual("testInst", base_inst.getName())
 
 if __name__ == '__main__':
     unittest.main()

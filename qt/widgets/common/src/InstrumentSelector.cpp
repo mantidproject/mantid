@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//------------------------------------------------------
-// Includes
-//------------------------------------------------------
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
@@ -14,12 +11,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 
-#include <QMessageBox>
-
-#include <Poco/AutoPtr.h>
-#include <Poco/NObserver.h>
-#include <Poco/Notification.h>
-#include <Poco/NotificationCenter.h>
 #include <set>
 
 namespace {
@@ -29,10 +20,6 @@ Mantid::Kernel::Logger g_log("InstrumentSelector");
 namespace MantidQt {
 namespace MantidWidgets {
 using namespace Mantid::Kernel;
-
-//------------------------------------------------------
-// Public member functions
-//------------------------------------------------------
 
 /**
  * Default constructor
@@ -172,8 +159,8 @@ void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
 
   const auto &instruments = m_currentFacility->instruments();
   std::set<std::string> alphabetizedNames;
-  for (auto itr = instruments.cbegin(); itr != instruments.cend(); ++itr) {
-    alphabetizedNames.insert(itr->name());
+  for (const auto &instrument : instruments) {
+    alphabetizedNames.insert(instrument.name());
   }
   for (const auto &name_std_str : alphabetizedNames) {
     QString name = QString::fromStdString(name_std_str);

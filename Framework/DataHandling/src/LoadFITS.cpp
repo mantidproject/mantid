@@ -116,16 +116,16 @@ void LoadFITS::init() {
 
   exts2.emplace_back(".*");
 
-  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filename", exts),
+  declareProperty(std::make_unique<MultipleFileProperty>("Filename", exts),
                   "The name of the input file (note that you can give "
                   "multiple file names separated by commas).");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
       "OutputWorkspace", "", Kernel::Direction::Output));
 
   declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("LoadAsRectImg", false,
-                                                   Kernel::Direction::Input),
+      std::make_unique<Kernel::PropertyWithValue<bool>>(
+          "LoadAsRectImg", false, Kernel::Direction::Input),
       "If enabled (not by default), the output Workspace2D will have "
       "one histogram per row and one bin per pixel, such that a 2D "
       "color plot (color fill plot) will display an image.");
@@ -147,9 +147,9 @@ void LoadFITS::init() {
                   Kernel::Direction::Input);
 
   declareProperty(
-      Kernel::make_unique<FileProperty>(g_HEADER_MAP_NAME, "",
-                                        FileProperty::OptionalDirectory, "",
-                                        Kernel::Direction::Input),
+      std::make_unique<FileProperty>(g_HEADER_MAP_NAME, "",
+                                     FileProperty::OptionalDirectory, "",
+                                     Kernel::Direction::Input),
       "A file mapping header key names to non-standard names [line separated "
       "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX] - do not use "
       "this if you want to keep compatibility with standard FITS files.");
@@ -771,12 +771,12 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
   size_t height = fileInfo.axisPixelLengths[1] / binSize;
   if (loadAsRectImg) {
     // width/X axis
-    auto axw = new Mantid::API::NumericAxis(width + 1);
+    auto axw = std::make_unique<Mantid::API::NumericAxis>(width + 1);
     axw->title() = "width";
     for (size_t i = 0; i < width + 1; i++) {
       axw->setValue(i, static_cast<double>(i) * cmpp);
     }
-    ws->replaceAxis(0, axw);
+    ws->replaceAxis(0, std::move(axw));
     // "cm" width label unit
     boost::shared_ptr<Kernel::Units::Label> unitLbl =
         boost::dynamic_pointer_cast<Kernel::Units::Label>(
@@ -785,12 +785,12 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
     ws->getAxis(0)->unit() = unitLbl;
 
     // height/Y axis
-    auto axh = new Mantid::API::NumericAxis(height);
+    auto axh = std::make_unique<Mantid::API::NumericAxis>(height);
     axh->title() = "height";
     for (size_t i = 0; i < height; i++) {
       axh->setValue(i, static_cast<double>(i) * cmpp);
     }
-    ws->replaceAxis(1, axh);
+    ws->replaceAxis(1, std::move(axh));
     // "cm" height label unit
     unitLbl = boost::dynamic_pointer_cast<Kernel::Units::Label>(
         UnitFactory::Instance().create("Label"));

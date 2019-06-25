@@ -312,25 +312,26 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   unitPtr->setLabel("Time", "picoseconds");
 
   // Create a numeric axis to replace the default vertical one
-  API::Axis *const verticalAxisRe = new API::NumericAxis(nq);
-  API::Axis *const verticalAxisIm = new API::NumericAxis(nq);
-
-  wsRe->replaceAxis(1, verticalAxisRe);
-  wsIm->replaceAxis(1, verticalAxisIm);
+  auto verticalAxisRe = std::make_unique<API::NumericAxis>(nq);
+  auto verticalAxisIm = std::make_unique<API::NumericAxis>(nq);
+  auto verticalAxisReRaw = verticalAxisRe.get();
+  auto verticalAxisImRaw = verticalAxisIm.get();
+  wsRe->replaceAxis(1, std::move(verticalAxisRe));
+  wsIm->replaceAxis(1, std::move(verticalAxisIm));
 
   // Now set the axis values
   for (int i = 0; i < nq; ++i) {
-    verticalAxisRe->setValue(i, qvmod[i]);
-    verticalAxisIm->setValue(i, qvmod[i]);
+    verticalAxisReRaw->setValue(i, qvmod[i]);
+    verticalAxisImRaw->setValue(i, qvmod[i]);
   }
 
   // Set the axis units
-  verticalAxisRe->unit() =
+  verticalAxisReRaw->unit() =
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxisRe->title() = "|Q|";
-  verticalAxisIm->unit() =
+  verticalAxisReRaw->title() = "|Q|";
+  verticalAxisImRaw->unit() =
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxisIm->title() = "|Q|";
+  verticalAxisImRaw->title() = "|Q|";
 
   // Set the X axis title (for conversion to MD)
   wsRe->getAxis(0)->title() = "Energy transfer";
@@ -354,18 +355,18 @@ void LoadSassena::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   const std::vector<std::string> exts{".h5", ".hd5"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, exts),
                   "A Sassena file");
   // Declare the OutputWorkspace property
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the group workspace to be created.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                       "TimeUnit", 1.0, Kernel::Direction::Input),
                   "The Time unit in between data points, in picoseconds. "
                   "Default is 1.0 picosec.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "SortByQVectors", true, Kernel::Direction::Input),
                   "Sort structure factors by increasing momentum transfer?");
 }

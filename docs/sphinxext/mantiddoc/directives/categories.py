@@ -20,6 +20,7 @@ import posixpath
 from six import iteritems, itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
+ALG_CATEGORY_PAGE_TEMPLATE = "algorithmcategories.html"
 # relative to the directory containing the source file
 CATEGORIES_DIR = "categories"
 
@@ -102,8 +103,14 @@ class Category(LinkItem):
     subcategories = None
     # Relative path for the final html to be written. \ separators are converted to /
     html_path = None
+    # The section of the documentation that this category resides in aglorithms, concepts etc
+    section = None
+    # The file path to a file that contains the category
+    src_path = None
+    # Additional text
+    additional_text = None
 
-    def __init__(self, name, docname):
+    def __init__(self, name, docname, src_path):
         """
         Create a named category that is referenced from the given document.
 
@@ -111,8 +118,9 @@ class Category(LinkItem):
           name (str): The name of the category
           docname (str): Relative path to document from root directory
         """
+        self.src_path = to_unix_style_path(src_path)
         docname = to_unix_style_path(docname)
-
+        self.section = docname.lower().split("/")[0]
         dirpath, filename = posixpath.split(docname)
         html_dir = dirpath + "/" + CATEGORIES_DIR
         self.html_path = html_dir + "/" + to_unix_style_path(name) + ".html"
@@ -189,7 +197,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
         Returns:
           list: A list of strings containing the required categories
         """
-        category_list = ["Algorithms"]
+        category_list = ["Algorithm Index"]
         alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
         for cat in alg_cats:
             # double up the category separators so they are not treated as escape characters
@@ -258,7 +266,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
                 else:
                     break
                 # remove the last item
-                subcat = Category(categ_name, env.docname) #create the category with the full name
+                subcat = Category(categ_name, env.docname, env.doc2path(env.docname)) #create the category with the full name
                 subcat.name=categs.pop() # and then replace it with the last token of the name
                 parent_category = r"\\".join(categs)
 
@@ -284,9 +292,9 @@ class CategoriesDirective(AlgorithmBaseDirective):
     #end def
 
     def register_category(self, categ_name, env):
-        category = Category(categ_name, env.docname)
+        category = Category(categ_name, env.docname, env.doc2path(env.docname))
         if categ_name not in env.categories:
-            category = Category(categ_name, env.docname)
+            category = Category(categ_name, env.docname, env.doc2path(env.docname))
             env.categories[categ_name] = category
         else:
             category = env.categories[categ_name]
@@ -343,14 +351,20 @@ def create_category_pages(app):
         context["title"] = category.name
 
         #get parent category
-        if "\\" in category.name:
-            categs = category.name.split("\\")
+        if "/" in category.name:
+            categs = category.name.split("/")
             categs.pop()
             parent_category = r"\\".join(categs)
             parent_category_link = "../" + categs[-1] + ".html"
             parent_category = "<b>Category:</b> <a href='{0}'>{1}</a>"\
                 .format(parent_category_link,parent_category)
             context["parentcategory"] = parent_category
+        else:
+            #this is a top level cetegory
+            if category.section == 'algorithms':
+                #create a parent category link back to the top level page
+                context["parentcategory"] = "<b>Category:</b> <a href='{0}'>{1}</a>"\
+                    .format('../index.html','Algorithms')
 
         # sort subcategories & pages alphabetically
         context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name)
@@ -371,12 +385,87 @@ def create_category_pages(app):
             # index in document directory
             document_dir = posixpath.dirname(category_html_dir)
             category_html_path_noext = posixpath.join(document_dir, 'index')
-            context['outpath'] = category_html_path_noext + '.html'
+            context['outpath'] = category_html_path_noext + '.html'        
             yield (category_html_path_noext, context, template)
+      
+    #create the top level algorithm category
+    yield create_top_algorithm_category(categories)
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------
+def create_top_algorithm_category(categories):
+    """
+    Returns a tuple of (category_name, context, "category.html")
+    for a top level algorithm category page
 
+    Arguments:
+      categories: the full list of categories
+    """
+    # jinja2 html template
+    template = ALG_CATEGORY_PAGE_TEMPLATE
+
+    # create a Top level algorithms category page
+    # Initialise the lists
+    all_top_categories = []
+    category_src_dir = ''
+    # If the category is a top category it will not contain "\\"
+    for top_name, top_category in iteritems(categories):
+        #Add all the top level categories
+        if "\\" not in top_name and top_category.section == 'algorithms':
+            #get additional text for each category
+            #if is exists it is in src_path/caterories/name.txt
+            alg_src_dir = posixpath.dirname(top_category.src_path)
+            category_src_dir = posixpath.join(alg_src_dir, 'categories')
+            category_text_path = posixpath.join(category_src_dir, top_name) + '.txt'
+            if os.path.isfile(category_text_path):
+                with open(category_text_path) as f:
+                    top_category.additional_text = f.read()
+            else:
+                top_category.additional_text = ''
+            all_top_categories.append(top_category)
+    
+    #split the full list into subsections
+    general_categories = all_top_categories
+    technique_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'techniquecategories') + '.txt')
+    facility_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'facilitycategories') + '.txt')
+    hidden_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'hiddencategories') + '.txt')
+    
+    # create the page
+    top_context = {}
+    top_html_path_noext = ""
+    top_category_html_path_noext = posixpath.join('algorithms', 'index')
+    top_context['outpath'] = top_category_html_path_noext + '.html'
+    #set the content
+    top_context["text_page"] = "algorithm_categories.html"
+    top_context["pages"] = []
+    top_context["generalcategories"] = sorted(general_categories, key = lambda x: x.name)
+    top_context["techniquecategories"] = sorted(technique_categories, key = lambda x: x.name)
+    top_context["facilitycategories"] = sorted(facility_categories, key = lambda x: x.name)
+    top_context["title"] = "Algorithm Contents"
+    top_html_path_noext = posixpath.join('algorithms', 'index')
+    return (top_html_path_noext, top_context, template)
+
+def extract_matching_categories(input_categories,filepath):
+    """
+    Extract entries with a name matching that included the supplied file.
+    the extracted entries are removed from the input list.
+    The extracted values are returned as a list.
+
+    Arguments:
+      input_categories : The input list of categories
+      filepath : The path to the file of names to be extracted
+    """
+    extracted_list = []
+    name_list = []
+    if os.path.isfile(filepath):
+        with open(filepath) as f:
+            name_list = [line.strip() for line in f]
+      
+        extracted_list = [category for category in input_categories if category.name in name_list]
+        #overwrite input_categories
+        input_categories[:] = [category for category in input_categories if category.name not in name_list] 
+    
+    return extracted_list
 def purge_categories(app, env, docname):
     """
     Purge information about the given document name from the tracked algorithms

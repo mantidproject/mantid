@@ -10,8 +10,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/LogFilter.h"
 
-#include <boost/lexical_cast.hpp>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -23,13 +21,13 @@ using namespace API;
 using namespace DataObjects;
 
 void NormaliseByCurrent::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "RecalculatePCharge", false, Kernel::Direction::Input),
                   "Re-integrates the proton charge. This will modify the "
                   "gd_prtn_chrg. Does nothing for multi-period data");
@@ -55,8 +53,7 @@ double NormaliseByCurrent::extractCharge(
 
   int nPeriods = 0;
   try {
-    Property *nPeriodsProperty = run.getLogData("nperiods");
-    nPeriods = boost::lexical_cast<int>(nPeriodsProperty->value());
+    nPeriods = run.getPropertyValueAsType<int>("nperiods");
   } catch (Exception::NotFoundError &) {
     g_log.information() << "No nperiods property. If this is multi-period "
                            "data, then you will be normalising against the "
@@ -78,15 +75,16 @@ double NormaliseByCurrent::extractCharge(
     } else {
       throw Exception::NotFoundError(
           "Proton charge log (proton_charge_by_period) not found for this "
-          "multiperiod data workspace",
+          "multiperiod data workspace (" +
+              inputWS->getName() + ")",
           "proton_charge_by_period");
     }
 
     if (charge == 0) {
       throw std::domain_error("The proton charge found for period number " +
                               std::to_string(periodNumber) +
-                              " in the input workspace "
-                              "run information is zero. When applying "
+                              " in the input workspace (" + inputWS->getName() +
+                              ") run information is zero. When applying "
                               "NormaliseByCurrent on multiperiod data, a "
                               "non-zero value is required for every period in "
                               "the proton_charge_by_period log.");
@@ -100,13 +98,15 @@ double NormaliseByCurrent::extractCharge(
       charge = inputWS->run().getProtonCharge();
     } catch (Exception::NotFoundError &) {
       g_log.error() << "The proton charge is not set for the run attached to "
-                       "this workspace\n";
+                       "the workspace(" +
+                           inputWS->getName() + ")\n";
       throw;
     }
 
     if (charge == 0) {
-      throw std::domain_error("The proton charge found in the input workspace "
-                              "run information is zero");
+      throw std::domain_error(
+          "The proton charge found in the input workspace (" +
+          inputWS->getName() + ") run information is zero");
     }
   }
   return charge;

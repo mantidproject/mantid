@@ -302,7 +302,7 @@ def get_isis_nexus_info(file_name):
     :return: if the file was a Nexus file and the number of periods.
     """
     try:
-        with h5.File(file_name) as h5_file:
+        with h5.File(file_name, 'r') as h5_file:
             keys = list(h5_file.keys())
             is_isis_nexus = RAW_DATA_1 in keys
             if is_isis_nexus:
@@ -338,7 +338,7 @@ def get_instrument_name_for_isis_nexus(file_name):
                                         |--instrument|
                                                      |--name
     """
-    with h5.File(file_name) as h5_file:
+    with h5.File(file_name, 'r') as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
@@ -359,7 +359,7 @@ def get_top_level_nexus_entry(file_name, entry_name):
     :param entry_name: the entry name
     :return:
     """
-    with h5.File(file_name) as h5_file:
+    with h5.File(file_name, 'r') as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
@@ -385,7 +385,7 @@ def get_event_mode_information(file_name):
                                     |--some_group|
                                                  |--Attribute: NX_class = NXevent_data
     """
-    with h5.File(file_name) as h5_file:
+    with h5.File(file_name, 'r') as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
@@ -405,7 +405,7 @@ def get_geometry_information_isis_nexus(file_name):
     :param file_name:
     :return: height, width, thickness, shape
     """
-    with h5.File(file_name) as h5_file:
+    with h5.File(file_name, 'r') as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
@@ -438,7 +438,7 @@ def get_geometry_information_isis_nexus(file_name):
 
 
 def get_date_and_run_number_added_nexus(file_name):
-    with h5.File(file_name) as h5_file:
+    with h5.File(file_name, 'r') as h5_file:
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
         logs = first_entry["logs"]
@@ -534,7 +534,7 @@ def get_added_nexus_information(file_name):  # noqa
 
     if has_added_suffix(file_name):
         try:
-            with h5.File(file_name) as h5_file:
+            with h5.File(file_name, 'r') as h5_file:
                 # Get all mantid_workspace_X keys
                 keys = list(h5_file.keys())
                 top_level_keys = get_all_keys_for_top_level(keys)
@@ -594,7 +594,7 @@ def get_geometry_information_isis_added_nexus(file_name):
     :param file_name: the file name
     :return: height, width, thickness, shape
     """
-    with h5.File(file_name) as h5_file:
+    with h5.File(file_name, 'r') as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]

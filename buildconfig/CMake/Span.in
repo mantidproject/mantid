@@ -1,0 +1,11 @@
+cmake_minimum_required ( VERSION 3.5 )
+include( ExternalProject )
+
+ExternalProject_Add(span
+  GIT_REPOSITORY "https://github.com/tcbrindle/span.git"
+  GIT_TAG "e9cf0809c9b8b9ecd06db782dc631f138fab4ee8"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+)

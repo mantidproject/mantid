@@ -10,7 +10,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Expression.h"
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -51,8 +50,8 @@ public:
 
   void testMismatchedBrackets() {
     Expression expr;
-    TS_ASSERT_THROWS(expr.parse("b*(c+a"), std::runtime_error);
-    TS_ASSERT_THROWS(expr.parse("b*c+a)"), std::runtime_error);
+    TS_ASSERT_THROWS(expr.parse("b*(c+a"), const std::runtime_error &);
+    TS_ASSERT_THROWS(expr.parse("b*c+a)"), const std::runtime_error &);
   }
 
   void testFunctions() {
@@ -248,10 +247,10 @@ public:
     TS_ASSERT_EQUALS(e12[1].name(), "%%");
 
     Expression e13(bin_ops1, un_ops1);
-    TS_ASSERT_THROWS(e13.parse("x==%%"), std::runtime_error);
+    TS_ASSERT_THROWS(e13.parse("x==%%"), const std::runtime_error &);
 
     Expression e14(bin_ops1, un_ops1);
-    TS_ASSERT_THROWS(e14.parse("x==%% "), std::runtime_error);
+    TS_ASSERT_THROWS(e14.parse("x==%% "), const std::runtime_error &);
 
     std::vector<std::string> bin_ops2{"-", "--"};
     std::unordered_set<std::string> un_ops2{"-", "--"};
@@ -325,7 +324,7 @@ public:
     TS_ASSERT_EQUALS(expression[0][0][0].name(), "1");
 
     Expression e1;
-    TS_ASSERT_THROWS(e1.parse("---1"), std::runtime_error);
+    TS_ASSERT_THROWS(e1.parse("---1"), const std::runtime_error &);
   }
 
   void testRemoveBrackets() {
@@ -403,15 +402,16 @@ public:
   void testEndOnOperator() {
     {
       Expression expression;
-      TS_ASSERT_THROWS(expression.parse("x+y+z +  "), std::runtime_error);
+      TS_ASSERT_THROWS(expression.parse("x+y+z +  "),
+                       const std::runtime_error &);
     }
     {
       Expression expression;
-      TS_ASSERT_THROWS(expression.parse("x*z-"), std::runtime_error);
+      TS_ASSERT_THROWS(expression.parse("x*z-"), const std::runtime_error &);
     }
     {
       Expression expression;
-      TS_ASSERT_THROWS(expression.parse("x*z="), std::runtime_error);
+      TS_ASSERT_THROWS(expression.parse("x*z="), const std::runtime_error &);
     }
     {
       Expression expression;

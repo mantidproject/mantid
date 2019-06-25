@@ -111,12 +111,12 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=1)
 
         prog_reporter.report("Loading Files")
-        self._workspace_names, self._chopped_data = load_files(self._data_files,
-                                                               ipf_filename=self._ipf_filename,
-                                                               spec_min=self._spectra_range[0],
-                                                               spec_max=self._spectra_range[1],
-                                                               sum_files=self._sum_files,
-                                                               load_opts=load_opts)
+        self._workspace_names, self._chopped_data, _ = load_files(self._data_files,
+                                                                  ipf_filename=self._ipf_filename,
+                                                                  spec_min=self._spectra_range[0],
+                                                                  spec_max=self._spectra_range[1],
+                                                                  sum_files=self._sum_files,
+                                                                  load_opts=load_opts)
 
         prog_reporter.resetNumSteps(len(self._workspace_names), 0.0, 1.0)
 

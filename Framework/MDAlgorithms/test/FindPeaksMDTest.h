@@ -244,7 +244,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("PeakFindingStrategy", "NumberOfEventsNormalization"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SignalThresholdFactor", 1.3));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
     AnalysisDataService::Instance().remove("MDEWS");
   }

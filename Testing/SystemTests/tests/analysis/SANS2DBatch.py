@@ -67,7 +67,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(systemtesting.MantidSystemTest):
         BatchReduce(csv_file, 'nxs', plotresults=False)
 
     def validate(self):
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')
         return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
@@ -100,7 +100,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrection(systemtesting.MantidSystemTest):
         Load(Filename = self._final_output, OutputWorkspace=self._final_workspace)
 
     def validate(self):
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')

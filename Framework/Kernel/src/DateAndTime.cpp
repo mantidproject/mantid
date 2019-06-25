@@ -8,7 +8,6 @@
 
 #include <boost/date_time/date.hpp>
 #include <boost/date_time/time.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <cmath>
 #include <exception>

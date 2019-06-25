@@ -18,7 +18,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -705,10 +705,10 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
     for (const auto &filename : filenames) {
       for (const auto &searchPath : searchPaths) {
         try {
-          Poco::Path path(searchPath, filename + extension);
-          Poco::File file(path);
+          const Poco::Path filePath(searchPath, filename + extension);
+          const Poco::File file(filePath);
           if (file.exists())
-            return path.toString();
+            return filePath.toString();
 
         } catch (Poco::Exception &) { /* File does not exist, just carry on. */
         }
@@ -736,13 +736,14 @@ FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
   // Search the archive
   if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
-    std::string path = getArchivePath(archs, filenames, exts);
+    const std::string archivePath = getArchivePath(archs, filenames, exts);
     try {
-      if (!path.empty() && Poco::File(path).exists()) {
-        return path;
+      if (!archivePath.empty() && Poco::File(archivePath).exists()) {
+        return archivePath;
       }
     } catch (std::exception &e) {
-      g_log.error() << "Cannot open file " << path << ": " << e.what() << '\n';
+      g_log.error() << "Cannot open file " << archivePath << ": " << e.what()
+                    << '\n';
       return "";
     }
 

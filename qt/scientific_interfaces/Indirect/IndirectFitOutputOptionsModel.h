@@ -10,6 +10,7 @@
 #include "IIndirectFitOutputOptionsModel.h"
 
 #include "DllConfig.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -34,6 +35,8 @@ public:
 
   void removePDFWorkspace() override;
 
+  bool
+  isSelectedGroupPlottable(std::string const &selectedGroup) const override;
   bool isResultGroupPlottable() const override;
   bool isPDFGroupPlottable() const override;
 
@@ -52,6 +55,10 @@ public:
 
   bool isResultGroupSelected(std::string const &selectedGroup) const override;
 
+  void replaceFitResult(std::string const &inputName,
+                        std::string const &singleFitName,
+                        std::string const &outputName) override;
+
 private:
   void plotResult(Mantid::API::WorkspaceGroup_const_sptr groupWorkspace,
                   std::string const &plotType);
@@ -67,6 +74,12 @@ private:
 
   void plotPDF(Mantid::API::MatrixWorkspace_const_sptr workspace,
                std::string const &plotType);
+
+  void replaceFitResult(Mantid::API::MatrixWorkspace_sptr inputWorkspace,
+                        Mantid::API::MatrixWorkspace_sptr singleFitWorkspace,
+                        std::string const &outputName);
+  void setOutputAsResultWorkspace(Mantid::API::IAlgorithm_sptr algorithm);
+  void setResultWorkspace(std::string const &groupName);
 
   Mantid::API::WorkspaceGroup_sptr m_resultGroup;
   Mantid::API::WorkspaceGroup_sptr m_pdfGroup;

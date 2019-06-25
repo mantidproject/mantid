@@ -43,6 +43,10 @@ public:
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
 
+  virtual std::string tabName() const = 0;
+
+  virtual bool hasResolution() const = 0;
+
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
   bool isRangeCurrentlySelected(std::size_t dataIndex,
@@ -120,12 +124,12 @@ public slots:
 protected:
   IndirectFittingModel *fittingModel() const;
 
-  void setSampleWSSuffices(const QStringList &suffices);
-  void setSampleFBSuffices(const QStringList &suffices);
-  void setResolutionWSSuffices(const QStringList &suffices);
-  void setResolutionFBSuffices(const QStringList &suffices);
-
   void run() override;
+
+  void setSampleWSSuffixes(const QStringList &suffices);
+  void setSampleFBSuffixes(const QStringList &suffices);
+  void setResolutionWSSuffixes(const QStringList &suffices);
+  void setResolutionFBSuffixes(const QStringList &suffices);
 
   void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -134,11 +138,13 @@ protected:
 
   virtual void setRunIsRunning(bool running) = 0;
   virtual void setRunEnabled(bool enable) = 0;
+  void setEditResultVisible(bool visible);
 
 signals:
   void functionChanged();
-  void parameterChanged(const Mantid::API::IFunction *);
+  void parameterChanged(const Mantid::API::IFunction * /*_t1*/);
   void customBoolChanged(const QString &key, bool value);
+  void updateAvailableFitTypes();
 
 protected slots:
 
@@ -199,6 +205,10 @@ private:
   virtual void setupFitTab() = 0;
   bool validate() override;
 
+  void setFileExtensionsByName(bool filter) override;
+  void setSampleSuffixes(std::string const &tab, bool filter);
+  void setResolutionSuffixes(std::string const &tab, bool filter);
+
   void connectDataAndPlotPresenters();
   void connectSpectrumAndPlotPresenters();
   void connectFitBrowserAndPlotPresenter();
@@ -206,8 +216,7 @@ private:
   void connectDataAndFitBrowserPresenters();
 
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
-  void plotSpectrum(std::string const &workspaceName, std::size_t const &index,
-                    bool errorBars);
+  void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
 
   std::string getOutputBasename() const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;

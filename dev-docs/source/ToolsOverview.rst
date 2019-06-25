@@ -4,6 +4,14 @@
 Tools Overview
 ==============
 
+.. toctree::
+   :hidden:
+
+   AlgorithmProfiler
+
+.. contents:: Contents
+   :local:
+
 Creating classes: class_maker.py
 --------------------------------
 
@@ -42,6 +50,11 @@ This python script is located in in /buildconfig/. It will delete a
 class from one subproject. CMakeList.txt is adjusted. For details, run:
 
 ``buildconfig/delete_class.py --help``
+
+Profiling an algorithm
+----------------------
+
+On Linux the build can be configured to generated algorithm profiling information. See :doc:`AlgorithmProfiler <AlgorithmProfiler>` for more details.
 
 Leak checking etc
 -----------------
@@ -178,3 +191,127 @@ Linux only. Install it from your distro's repository.
 
 Wonder Shaper allows the user to limit the bandwidth of one or more network adapters. This is useful for debugging
 issues when a network interface is still active but very slow. More details can be found at http://xmodulo.com/limit-network-bandwidth-linux.html.
+
+Convert Wiki Docs to Sphinx
+---------------------------
+
+``wiki2rst`` reads in mediawiki formatted webpages and converts them to ``.rst`` files, for use 
+in ``Sphinx``. The code attempts to take all images and internal links and re-create the 
+documentation structure in the ``Sphinx`` format. 
+
+Use
+~~~
+
+- Having added ``mantid`` to your Python path ``wiki2rst`` is run by:
+
+.. code::
+
+    python wiki2rst.py -o <output_file.rst> <url_extension>
+
+- The ``<url_extension>`` is the part of the url after the main address (``https://www.mantidproject.org/``).
+- There are several additional options:
+	- ``--index_url`` change the name of the main url address
+	- ``--images-dir`` set a relative location for the images directory
+	- ``--ref-link`` give a reference link
+	- ``--ref-link-prefix`` give a link prefix
+	- ``--add_handle`` add a handle for linking to the page
+	- ``--page_handle`` the page handle to use [default page name]
+	- ``--add_heading`` add a heading to the page (uses the page name)
+
+Clang-tidy
+----------
+
+Clang-tidy is a set of tools which allows a developer to detect and fix code which does not follow current best practices,
+such as unused parameters or not using range-based for loops. Primarily this is used for modernising C++ code.
+
+The full list of clang-tidy checks can be seen `here <https://clang.llvm.org/extra/clang-tidy/checks/list.html>`_.
+
+Installing
+~~~~~~~~~~
+
+Mantid does not come packaged with clang-tidy; each developer must download it themselves. Windows users can utilise clang-tidy support for Visual Studio.
+For other operating systems, Mantid provides clang-tidy functionality through cmake.
+
+- **Ubuntu**: Run ``sudo apt-get install clang-tidy`` in the command line.
+- **Windows**: Download the `Visual Studio extension <https://marketplace.visualstudio.com/items?itemName=caphyon.ClangPowerTools>`_. Windows can operate clang-tidy from Visual Studio alone and so do not need to touch cmake.
+
+For non-Ubuntu systems, download the latest clang-tidy `pre-compiled binary <http://releases.llvm.org/download.html>`_. Windows users should add to path when prompted.
+
+Visual Studio
+~~~~~~~~~~~~~
+
+Once you have installed the clang-tidy extension, Visual Studio will have additional options under ``Tools -> Options -> Clang Power Tools``.
+Here you can select which checks to run via a checkbox or by supplying a custom check string. For example::
+
+    -*,modernize-*
+
+will disable basic default checks (``-*``) and run all conversions to modern C++ (``modernize-*``), such as converting to range-based for loops or using the auto keyword.
+Other settings *should* not require alteration for clang-tidy to work.
+
+To run clang-tidy, right click on a target and highlight ``Clang Power Tools``. You will have a number of options. ``Tidy`` will highlight code which fails one of the checks, whereas
+``Tidy fix`` will automatically change your code.
+
+*Note: clang-tidy does not work on* **ALL BUILD** *so it is necessary to select a subtarget.*
+
+Cmake
+~~~~~
+
+In the cmake gui, find the ``CLANG_TIDY_EXE`` parameter. If you are a non-Linux developer, you may have to manually point to your clang-tidy install.
+Configure, and check the cmake log for the message `clang-tidy found`. If the `clang-tidy not found` warning was posted instead then it has not worked.
+
+Once you have clang-tidy, there are several relevant parameters you will want to change:
+
+- ``ENABLE_CLANG_TIDY`` will turn on clang-tidy support.
+- ``CLANG_TIDY_CHECKS`` is a semi-colon separated list of checks for clang-tidy to carry out. This defaults to all ``modernize-`` checks.
+- ``APPLY_CLANG_TIDY_FIX`` will automatically change the code whenever a check has returned a result. The behaviour of ``ENABLE_CLANG_TIDY`` without this checked is to highlight issues only.
+
+Configure the build to check that your selected options are reflected in ``CMAKE_CXX_CLANG_TIDY``, and then generate.
+When you next build, clang-tidy will perform the selected checks on the code included in the target.
+
+*Note: There is a known issue that clang-tidy is only being applied to certain directories within* ``Framework`` *and* ``Mantidplot``.
+
+Options
+~~~~~~~
+
+Some clang-tidy checks have optional arguments. For example, ``modernize-loop-convert``, which changes loops to range-based,
+assigns a riskiness to each loop and can accept a ``MinConfidence`` argument to determine which risk levels to address.
+
+Adding the optional arguments is clunky and will rarely be required, so it has not been directly added to Mantid's cmake setup.
+To add optional arguments, add the following onto the end of ``CLANG_TIDY_CHECKS``::
+
+    ;-config={CheckOptions: [ {key: check-to-choose-option.option-name, value: option-value} ]}
+
+For example, to convert all loops classified as *risky* or above, we would append::
+
+    ;-config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
+
+CMake-format
+---------------------
+
+`CMake-format <https://github.com/cheshirekow/cmake_format/>`__ is a tool which is used to format individual ``CMakeLists.txt`` to make them easier to read. 
+The package can be installed using ``pip install cmake_format`` or ``sudo pip install cmake_format``.
+
+To use cmake-format on a specific ``CMakeLists.txt`` file in the command line run 
+
+.. code::
+
+	python -m cmake_format -c /path/to/mantid/.cmake-format.json -i /path/to/CMakeLists.txt
+	
+This will format the file using the config file ``.cmake-format.json`` which can be found in the root of the mantid directory.
+
+There is an official Visual Studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format>`__.
+
+To format on all the CMakeLists run the following from within the mantid source folder:
+
+.. code::
+
+	import os
+
+	dir = os.getcwd()
+	for path, subdirs, files in os.walk(dir):
+		for file in files:
+			if file.endswith("CMakeLists.txt"):
+				cmakefile = os.path.join(path, file)
+				print("Formatting " + cmakefile)
+				os.system('python -m cmake_format -c ' + os.path.join(dir, '.cmake-format.json') +' -i ' + cmakefile)
+

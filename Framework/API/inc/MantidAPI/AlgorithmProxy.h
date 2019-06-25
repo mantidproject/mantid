@@ -149,10 +149,12 @@ public:
   /// setting the child end progress
   void setChildEndProgress(const double endProgress) const override;
 
-  /** @name String serialization */
+  /** @name Serialization */
   //@{
   /// Serialize an object to a string
   std::string toString() const override;
+  /// Serialize as a json value
+  Json::Value toJson() const override;
   //@}
 
 private:

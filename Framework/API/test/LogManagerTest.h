@@ -17,6 +17,7 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -36,7 +37,9 @@ public:
     return "getDefault() is not implemented in this class";
   }
   std::string value() const override { return "Nothing"; }
+  Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &) override { return ""; }
+  std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
   std::string setDataItem(const boost::shared_ptr<DataItem>) override {
     return "";
@@ -82,7 +85,7 @@ public:
     TS_ASSERT(!pp->name().compare("Test"));
     TS_ASSERT(dynamic_cast<ConcreteProperty *>(pp));
     TS_ASSERT_THROWS(pp = runInfo.getProperty("NotThere"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
 
     std::vector<Property *> props = runInfo.getProperties();
     TS_ASSERT(!props.empty());
@@ -103,7 +106,7 @@ public:
   void testStartTime() {
     LogManager runInfo;
     // Nothing there yet
-    TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
     // Add run_start and see that get picked up
     const std::string run_start("2013-12-19T13:38:00");
     auto run_start_prop =
@@ -122,7 +125,7 @@ public:
     TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
     // And back to failure if they're both that
     run_start_prop->setValue(epoch);
-    TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
 
     // Set run_start back to valid value and make start_time contain nonsense
     run_start_prop->setValue(run_start);
@@ -134,17 +137,17 @@ public:
     TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
     // Now make run_start something invalid
     run_start_prop->setValue("notADate");
-    TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
     // And check things if it's the wrong property type
     runInfo.removeProperty("run_start");
     addTimeSeriesEntry(runInfo, "run_start", 4.44);
-    TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
   }
 
   void testEndTime() {
     LogManager runInfo;
     // Nothing there yet
-    TS_ASSERT_THROWS(runInfo.endTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.endTime(), const std::runtime_error &);
     // Add run_end and see that get picked up
     const std::string run_end("2013-12-19T13:38:00");
     auto run_end_prop = new PropertyWithValue<std::string>("run_end", run_end);
@@ -167,11 +170,11 @@ public:
     TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(run_end));
     // Now make run_end something invalid
     run_end_prop->setValue("notADate");
-    TS_ASSERT_THROWS(runInfo.endTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.endTime(), const std::runtime_error &);
     // And check things if it's the wrong property type
     runInfo.removeProperty("run_end");
     addTimeSeriesEntry(runInfo, "run_end", 4.44);
-    TS_ASSERT_THROWS(runInfo.endTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.endTime(), const std::runtime_error &);
   }
 
   void testMemory() {
@@ -199,7 +202,7 @@ public:
   void test_GetTimeSeriesProperty_Throws_When_Log_Does_Not_Exist() {
     LogManager runInfo;
     TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>("not_a_log"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void
@@ -209,13 +212,13 @@ public:
     runInfo.addProperty(name, 5.6); // Standard double property
 
     TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_GetPropertyAsType_Throws_When_Property_Does_Not_Exist() {
     LogManager runInfo;
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<double>("not_a_log"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void test_GetPropertyAsType_Returns_Expected_Value_When_Type_Is_Correct() {
@@ -235,7 +238,7 @@ public:
     runInfo.addProperty("double_prop", 6.7); // Standard double property
 
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_GetPropertyAsSingleValue_SingleValue_DoubleType() {
@@ -292,13 +295,13 @@ public:
     const std::string name = "T_prop";
     runInfo.addProperty<double>(name, 1.0);
     TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_GetPropertyAsSingleInteger_Throws_for_nonexistant_property() {
     LogManager runInfo;
     TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue("T_prop"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void test_GetPropertyAsSingleValue_TimeSeries_DoubleType() {
@@ -331,7 +334,7 @@ public:
     runInfo.addProperty<std::string>(name, "hello"); // not a number
 
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -342,7 +345,7 @@ public:
     runInfo.addProperty<bool>(name, value); // Adds a bool property
 
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -481,7 +484,7 @@ public:
     addTimeSeriesEntry(run1, "omega", 78.9);
     addTimeSeriesEntry(run1, "proton_charge", 78.9);
 
-    run1.saveNexus(th.file, "logs");
+    run1.saveNexus(th.file.get(), "logs");
     th.file->openGroup("logs", "NXgroup");
     th.file->makeGroup("junk_to_ignore", "NXmaterial");
     th.file->makeGroup("more_junk_to_ignore", "NXsample");
@@ -489,7 +492,7 @@ public:
     // ---- Now re-load the same and compare ------
     th.reopenFile();
     LogManager run2;
-    run2.loadNexus(th.file, "logs");
+    run2.loadNexus(th.file.get(), "logs");
     TS_ASSERT(run2.hasProperty("double_series"));
     TS_ASSERT(run2.hasProperty("int_val"));
     TS_ASSERT(run2.hasProperty("string_val"));
@@ -499,8 +502,8 @@ public:
     // Reload without opening the group (for backwards-compatible reading of old
     // files)
     LogManager run3;
-    th.file->openGroup("logs", "NXgroup");
-    run3.loadNexus(th.file, "");
+    th.file.get()->openGroup("logs", "NXgroup");
+    run3.loadNexus(th.file.get(), "");
     TS_ASSERT(run3.hasProperty("double_series"));
     TS_ASSERT(run3.hasProperty("int_val"));
     TS_ASSERT(run3.hasProperty("string_val"));
@@ -516,7 +519,7 @@ public:
     th.reopenFile();
     th.file->openGroup("sample", "NXsample");
     LogManager run3;
-    run3.loadNexus(th.file, "");
+    run3.loadNexus(th.file.get(), "");
   }
 
 private:

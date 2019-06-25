@@ -48,7 +48,7 @@ const std::string NRCalculateSlitResolution::summary() const {
 /** Initialize the algorithm's properties.
  */
 void NRCalculateSlitResolution::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "Workspace to calculate the instrument resolution of.");

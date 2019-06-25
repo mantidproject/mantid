@@ -9,12 +9,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
-#include <MantidKernel/FunctionTask.h>
-#include <MantidKernel/ProgressText.h>
-#include <MantidKernel/ThreadPool.h>
-#include <MantidKernel/Timer.h>
+#include "MantidKernel/Timer.h"
 
 #include <Poco/Thread.h>
 
@@ -100,7 +100,8 @@ public:
     if (depth < 4) {
       // Add ten tasks (one level deeper)
       for (size_t i = 0; i < 10; i++) {
-        m_scheduler->push(new TaskThatAddsTasks(m_scheduler, depth + 1));
+        m_scheduler->push(
+            std::make_shared<TaskThatAddsTasks>(m_scheduler, depth + 1));
       }
     } else {
       // Lock to ensure you don't step on yourself.
@@ -131,7 +132,7 @@ public:
     for (int i = 0; i < 16; i++) {
       double cost = i; // time is exactly i
       // Bind to a member function of mywaster
-      p.schedule(new FunctionTask(
+      p.schedule(std::make_shared<FunctionTask>(
           boost::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost));
     }
 
@@ -147,7 +148,7 @@ public:
   void test_schedule() {
     ThreadPool p;
     TS_ASSERT_EQUALS(threadpooltest_check, 0);
-    p.schedule(new FunctionTask(threadpooltest_function));
+    p.schedule(std::make_shared<FunctionTask>(threadpooltest_function));
     TS_ASSERT_EQUALS(threadpooltest_check, 0);
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_check, 12);
@@ -184,7 +185,7 @@ public:
                  new MyTestProgress(0.0, 1.0, 10, this));
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(new FunctionTask(threadpooltest_function, cost));
+      p.schedule(std::make_shared<FunctionTask>(threadpooltest_function, cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     // The test reporter was called
@@ -207,7 +208,7 @@ public:
     Poco::Thread::sleep(40);
 
     // Now you add the task
-    p.schedule(new FunctionTask(threadpooltest_function));
+    p.schedule(std::make_shared<FunctionTask>(threadpooltest_function));
 
     // Simulate doing more work (this allows the task to run)
     Poco::Thread::sleep(40);
@@ -218,7 +219,7 @@ public:
     // Reset and try again. The threads are still waiting, it has been less than
     // 1 second.
     threadpooltest_check = 0;
-    p.schedule(new FunctionTask(threadpooltest_function));
+    p.schedule(std::make_shared<FunctionTask>(threadpooltest_function));
     Poco::Thread::sleep(40);
     TS_ASSERT_EQUALS(threadpooltest_check, 12);
 
@@ -241,7 +242,7 @@ public:
 
     // But it takes too long before the task is actually added
     Poco::Thread::sleep(100);
-    p.schedule(new FunctionTask(threadpooltest_function));
+    p.schedule(std::make_shared<FunctionTask>(threadpooltest_function));
     Poco::Thread::sleep(30);
     // So the task has not run, since the threads exited before!
     TS_ASSERT_EQUALS(threadpooltest_check, 0);
@@ -260,14 +261,14 @@ public:
   void test_schedule_resume_tasks() {
     ThreadPool p; // Makes a default scheduler
     threadpooltest_check = 0;
-    p.schedule(new FunctionTask(threadpooltest_function));
+    p.schedule(std::make_shared<FunctionTask>(threadpooltest_function));
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     // Ok, the task did execute.
     TS_ASSERT_EQUALS(threadpooltest_check, 12);
 
     // Now we reset.
     threadpooltest_check = 0;
-    p.schedule(new FunctionTask(threadpooltest_function));
+    p.schedule(std::make_shared<FunctionTask>(threadpooltest_function));
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_check, 12);
   }
@@ -279,8 +280,8 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(
-          new FunctionTask(boost::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(
+          boost::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -298,8 +299,8 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(
-          new FunctionTask(boost::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(
+          boost::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -316,8 +317,8 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(
-          new FunctionTask(boost::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(
+          boost::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -340,7 +341,7 @@ public:
     mywaster.total = 0;
     boost::shared_ptr<std::mutex> lastMutex;
     for (size_t i = 0; i <= num; i++) {
-      Task *task = new FunctionTask(
+      auto task = std::make_shared<FunctionTask>(
           boost::bind(&TimeWaster::add_to_number, &mywaster, i),
           static_cast<double>(i));
       // Create a new mutex every 1000 tasks. This is more relevant to the
@@ -386,7 +387,7 @@ public:
   void do_StressTest_TasksThatCreateTasks(ThreadScheduler *sched) {
     ThreadPool *p = new ThreadPool(sched, 0);
     // Create the first task, depth 0, that will recursively create 10000
-    TaskThatAddsTasks *task = new TaskThatAddsTasks(sched, 0);
+    auto task = std::make_shared<TaskThatAddsTasks>(sched, 0);
     p->schedule(task);
 
     // Reset the total
@@ -429,10 +430,10 @@ public:
     ThreadPool p(new ThreadSchedulerFIFO(), 1); // one core
     ThreadPoolTest_TaskThatThrows_counter = 0;
     for (int i = 0; i < 10; i++) {
-      p.schedule(new TaskThatThrows());
+      p.schedule(std::make_shared<TaskThatThrows>());
     }
     // joinAll rethrows
-    TS_ASSERT_THROWS(p.joinAll(), std::runtime_error);
+    TS_ASSERT_THROWS(p.joinAll(), const std::runtime_error &);
     // And only one of the tasks actually ran (since we're on one core)
     TS_ASSERT_EQUALS(ThreadPoolTest_TaskThatThrows_counter, 1);
   }

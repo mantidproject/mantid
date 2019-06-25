@@ -13,6 +13,12 @@ from mantid.api import *
 import numpy as np
 
 
+def workspaces_have_same_size(workspaces):
+    first_size = len(workspaces[0].readY(0))
+    differently_sized_workspaces = [workspace for workspace in workspaces[1:] if len(workspace.readY(0)) != first_size]
+    return len(differently_sized_workspaces) == 0
+
+
 def _normalize_by_index(workspace, index):
     """
     Normalize each spectra of the specified workspace by the
@@ -150,8 +156,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         # Perform the ElasticWindow algorithms
         for input_ws in self._input_workspaces:
-            logger.information('Running ElasticWindow for workspace: {}'.format(input_ws.getName()))
-            progress.report('ElasticWindow for workspace: {}'.format(input_ws.getName()))
+            logger.information('Running ElasticWindow for workspace: {}'.format(input_ws.name()))
+            progress.report('ElasticWindow for workspace: {}'.format(input_ws.name()))
 
             q_workspace, q2_workspace = ElasticWindow(InputWorkspace=input_ws,
                                                       IntegrationRangeStart=self._integration_range_start,
@@ -168,7 +174,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q2_workspaces.append(q2_workspace)
 
             # Get the run number
-            run_no = getInstrRun(input_ws.getName())[1]
+            run_no = getInstrRun(input_ws.name())[1]
             run_numbers.append(run_no)
 
             # Get the sample environment unit
@@ -186,6 +192,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q_workspace = q_workspaces[0]
             q2_workspace = q2_workspaces[0]
         else:
+            if not workspaces_have_same_size(q_workspaces) or not workspaces_have_same_size(q2_workspaces):
+                raise RuntimeError('The ElasticWindow algorithm produced differently sized workspaces. Please check '
+                                   'the input files are compatible.')
             q_workspace = _append_all(q_workspaces)
             q2_workspace = _append_all(q2_workspaces)
 
@@ -246,7 +255,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         """
         from IndirectCommon import getInstrRun
 
-        instr, run_number = getInstrRun(workspace.getName())
+        instr, run_number = getInstrRun(workspace.name())
 
         pad_num = config.getInstrument(instr).zeroPadding(int(run_number))
         zero_padding = '0' * (pad_num - len(run_number))

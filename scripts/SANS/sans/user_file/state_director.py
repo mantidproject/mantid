@@ -279,7 +279,6 @@ class StateDirectorISIS(object):
         self._set_up_normalize_to_monitor_state(user_file_items)
         self._set_up_calculate_transmission(user_file_items)
         self._set_up_wavelength_and_pixel_adjustment(user_file_items)
-        self._set_up_show_transmission(user_file_items)
 
         # Convert to Q state
         self._set_up_convert_to_q_state(user_file_items)
@@ -1282,14 +1281,11 @@ class StateDirectorISIS(object):
             use_compatibility_mode = use_compatibility_mode[-1]
             self._compatibility_builder.set_use_compatibility_mode(use_compatibility_mode)
 
-    def _set_up_show_transmission(self, user_file_items):
-        if OtherId.show_transmission in user_file_items:
-            show_transmission = user_file_items[OtherId.show_transmission]
-            check_if_contains_only_one_element(show_transmission, OtherId.show_transmission)
-            show_transmission = show_transmission[-1]
-            self._adjustment_builder.set_show_transmission(show_transmission)
-        else:
-            self._adjustment_builder.set_show_transmission(True)
+        if OtherId.use_event_slice_optimisation in user_file_items:
+            use_event_slice_optimisation = user_file_items[OtherId.use_event_slice_optimisation]
+            check_if_contains_only_one_element(use_event_slice_optimisation, OtherId.use_event_slice_optimisation)
+            use_event_slice_optimisation = use_event_slice_optimisation[-1]
+            self._compatibility_builder.set_use_event_slice_optimisation(use_event_slice_optimisation)
 
     def _set_up_save(self, user_file_items):
         if OtherId.save_types in user_file_items:

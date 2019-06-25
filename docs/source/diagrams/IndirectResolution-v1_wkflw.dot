@@ -12,7 +12,7 @@ digraph IndirectResolution {
     InputFiles
     Instrument
     Analyser
-    Refelction
+    Reflection
     DetectorRange
     BackgroundRange
     RebinParam
@@ -22,17 +22,19 @@ digraph IndirectResolution {
 
   subgraph algorithms {
     $algorithm_style
+	ISISIndirectEnergyTransferWrapper
     ISISIndirectEnergyTransfer
     Scale
     CalculateFlatBackground
     Rebin
   }
 
-  InputFiles                  -> ISISIndirectEnergyTransfer
-  Instrument                  -> ISISIndirectEnergyTransfer
-  Analyser                    -> ISISIndirectEnergyTransfer
-  Refelction                  -> ISISIndirectEnergyTransfer
-  DetectorRange               -> ISISIndirectEnergyTransfer
+  InputFiles                  -> ISISIndirectEnergyTransferWrapper
+  Instrument                  -> ISISIndirectEnergyTransferWrapper
+  Analyser                    -> ISISIndirectEnergyTransferWrapper
+  Reflection                  -> ISISIndirectEnergyTransferWrapper
+  DetectorRange               -> ISISIndirectEnergyTransferWrapper
+  ISISIndirectEnergyTransferWrapper -> ISISIndirectEnergyTransfer
   ISISIndirectEnergyTransfer  -> ScaleFactorIsOne
   ScaleFactorIsOne            -> Scale [label="No"]
   ScaleFactor                 -> Scale

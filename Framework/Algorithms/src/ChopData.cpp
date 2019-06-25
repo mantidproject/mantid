@@ -30,10 +30,10 @@ void ChopData::init() {
   wsVal->add<WorkspaceUnitValidator>("TOF");
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, wsVal),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsVal),
                   "Name of the input workspace to be split.");
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name for the WorkspaceGroup that will be created.");
 
@@ -69,7 +69,7 @@ void ChopData::exec() {
   if (rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() &&
       monitorWi != EMPTY_INT()) {
 
-    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops * 2);
+    progress = std::make_unique<Progress>(this, 0.0, 1.0, chops * 2);
 
     // Select the spectrum that is to be used to compare the sections of the
     // workspace
@@ -103,7 +103,7 @@ void ChopData::exec() {
       prelow = nlow->first;
     }
   } else {
-    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops);
+    progress = std::make_unique<Progress>(this, 0.0, 1.0, chops);
   }
 
   int wsCounter{1};
@@ -114,7 +114,7 @@ void ChopData::exec() {
     size_t indexLow, indexHigh;
 
     try {
-      indexLow = inputWS->binIndexOf(stepDiff);
+      indexLow = inputWS->yIndexOfX(stepDiff);
       if (indexLow < (nBins + 1)) {
         indexLow++;
       }
@@ -127,7 +127,7 @@ void ChopData::exec() {
     }
 
     try {
-      indexHigh = inputWS->binIndexOf((i + 1) * step);
+      indexHigh = inputWS->yIndexOfX((i + 1) * step);
     } catch (std::out_of_range &) {
       indexHigh = nBins;
     }
@@ -164,8 +164,8 @@ void ChopData::exec() {
     name << output << "_" << wsCounter;
     std::string wsname = name.str();
 
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        wsname, wsname, Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(wsname, wsname,
+                                                          Direction::Output));
     setProperty(wsname, workspace);
     ++wsCounter;
 

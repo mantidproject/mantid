@@ -103,10 +103,10 @@ void export_ComponentInfo() {
            "Returns True if a sample is present.")
 
       .def("source", &ComponentInfo::source, arg("self"),
-           "Returns the source component.")
+           "Returns the source component index.")
 
-      .def("sample", &ComponentInfo::source, arg("self"),
-           "Returns the sample component.")
+      .def("sample", &ComponentInfo::sample, arg("self"),
+           "Returns the sample component index.")
 
       .def("sourcePosition", &ComponentInfo::sourcePosition, arg("self"),
            "Returns the source position.")

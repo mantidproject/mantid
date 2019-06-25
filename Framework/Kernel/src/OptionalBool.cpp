@@ -5,6 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Exception.h"
+
+#include <json/value.h>
 
 #include <ostream>
 #include <utility>
@@ -12,9 +15,10 @@
 namespace Mantid {
 namespace Kernel {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
+const std::string OptionalBool::StrUnset = "Unset";
+const std::string OptionalBool::StrFalse = "False";
+const std::string OptionalBool::StrTrue = "True";
+
 OptionalBool::OptionalBool() : m_arg(Unset) {}
 
 OptionalBool::OptionalBool(bool arg) { m_arg = arg ? True : False; }
@@ -35,15 +39,9 @@ std::ostream &operator<<(std::ostream &os, OptionalBool const &object) {
 std::istream &operator>>(std::istream &istream, OptionalBool &object) {
   std::string result;
   istream >> result;
-
   object.m_arg = OptionalBool::strToEmumMap()[result];
-
   return istream;
 }
-
-const std::string OptionalBool::StrUnset = "Unset";
-const std::string OptionalBool::StrFalse = "False";
-const std::string OptionalBool::StrTrue = "True";
 
 std::map<std::string, OptionalBool::Value> OptionalBool::strToEmumMap() {
   return {{StrUnset, OptionalBool::Unset},
@@ -58,6 +56,16 @@ std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
     map.emplace(oppositePair.second, oppositePair.first);
   }
   return map;
+}
+
+/**
+ * Encode an OptionalBool as a Json::Value. Throws as it's not clear how to
+ * serialize this type.
+ * @return A new Json::Value
+ */
+Json::Value encodeAsJson(const OptionalBool & /*unused*/) {
+  throw Exception::NotImplementedError(
+      "encodeAsJson not implemented for OptionalBool type");
 }
 
 } // namespace Kernel

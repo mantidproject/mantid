@@ -33,8 +33,8 @@ std::string const NONRAGGED{"Common Bins"};
 bool isXSorted(Mantid::API::MatrixWorkspace const &ws) {
   int unsorted{0};
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(ws))
-  for (int64_t i = 0; static_cast<size_t>(i) < ws.getNumberHistograms(); ++i) {
-    auto const &Xs = ws.x(static_cast<size_t>(i));
+  for (int64_t i = 0; i < static_cast<int64_t>(ws.getNumberHistograms()); ++i) {
+    auto const &Xs = ws.x(i);
     if (!std::is_sorted(Xs.cbegin(), Xs.cend())) {
       PARALLEL_ATOMIC
       ++unsorted;
@@ -122,13 +122,13 @@ std::vector<std::string> const MaskNonOverlappingBins::seeAlso() const {
 /** Initialize the algorithm's properties.
  */
 void MaskNonOverlappingBins::init() {
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::INPUT_WS, "", Kernel::Direction::Input),
                   "A workspace to mask.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::OUTPUT_WS, "", Kernel::Direction::Output),
                   "The masked workspace.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::COMPARISON_WS, "", Kernel::Direction::Input),
                   "A workspace to compare the InputWorkspace's binning to.");
   declareProperty(Prop::MASK_PARTIAL, false,

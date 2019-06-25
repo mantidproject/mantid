@@ -28,8 +28,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
-#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
+#include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
+#include "MantidQtWidgets/Plotting/Qwt/qwt_compat.h"
 #include <QVarLengthArray>
 
 #include "ApplicationWindow.h"
@@ -42,6 +42,7 @@
 #include "Grid.h"
 #include "ImageMarker.h"
 #include "LegendWidget.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "PatternBox.h"
 #include "PlotCurve.h"
 #include "QwtBarCurve.h"
@@ -57,7 +58,6 @@
 #include "TitlePicker.h"
 #include "VectorCurve.h"
 #include "cursors.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include "Mantid/ErrorBarSettings.h"
 #include "Mantid/MantidMDCurve.h"
@@ -65,8 +65,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtWorkspaceSpectrumData.h"
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 

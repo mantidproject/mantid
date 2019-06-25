@@ -39,7 +39,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/make_unique.h"
 
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -78,25 +77,30 @@ public:
 };
 // SAX content handler for grapping stuff quickly from IDF
 class myContentHandler : public Poco::XML::ContentHandler {
-  void startElement(const XMLString &, const XMLString &localName,
-                    const XMLString &, const Attributes &attrList) override {
-    if (localName == "instrument") {
+  void startElement(const XMLString & /*uri*/, const XMLString &localName,
+                    const XMLString & /*qname*/,
+                    const Attributes &attrList) override {
+    if (localName == "instrument" || localName == "parameter-file") {
       throw DummyException(
           static_cast<std::string>(attrList.getValue("", "valid-from")),
           static_cast<std::string>(attrList.getValue("", "valid-to")));
     }
   }
-  void endElement(const XMLString &, const XMLString &,
-                  const XMLString &) override {}
+  void endElement(const XMLString & /*uri*/, const XMLString & /*localName*/,
+                  const XMLString & /*qname*/) override {}
   void startDocument() override {}
   void endDocument() override {}
-  void characters(const XMLChar[], int, int) override {}
-  void endPrefixMapping(const XMLString &) override {}
-  void ignorableWhitespace(const XMLChar[], int, int) override {}
-  void processingInstruction(const XMLString &, const XMLString &) override {}
-  void setDocumentLocator(const Locator *) override {}
-  void skippedEntity(const XMLString &) override {}
-  void startPrefixMapping(const XMLString &, const XMLString &) override {}
+  void characters(const XMLChar /*ch*/[], int /*start*/,
+                  int /*length*/) override {}
+  void endPrefixMapping(const XMLString & /*prefix*/) override {}
+  void ignorableWhitespace(const XMLChar /*ch*/[], int /*start*/,
+                           int /*length*/) override {}
+  void processingInstruction(const XMLString & /*target*/,
+                             const XMLString & /*data*/) override {}
+  void setDocumentLocator(const Locator * /*loc*/) override {}
+  void skippedEntity(const XMLString & /*name*/) override {}
+  void startPrefixMapping(const XMLString & /*prefix*/,
+                          const XMLString & /*uri*/) override {}
 };
 
 } // namespace
@@ -519,7 +523,7 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
   if (m_spectrumInfo)
     m_spectrumDefinitionNeedsUpdate.clear();
   m_spectrumDefinitionNeedsUpdate.resize(count, 1);
-  m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(count);
+  m_spectrumInfo = std::make_unique<Beamline::SpectrumInfo>(count);
   m_spectrumInfoWrapper = nullptr;
 }
 
@@ -557,7 +561,8 @@ void ExperimentInfo::setDetectorGrouping(
  * implementation throws, since no grouping information for update is available
  * when grouping comes from a call to `cacheDetectorGroupings`. This method is
  * overridden in MatrixWorkspace. */
-void ExperimentInfo::updateCachedDetectorGrouping(const size_t) const {
+void ExperimentInfo::updateCachedDetectorGrouping(
+    const size_t /*unused*/) const {
   throw std::runtime_error("ExperimentInfo::updateCachedDetectorGrouping: "
                            "Cannot update -- grouping information not "
                            "available");
@@ -674,6 +679,9 @@ Run &ExperimentInfo::mutableRun() {
 void ExperimentInfo::setSharedRun(Kernel::cow_ptr<Run> run) {
   m_run = std::move(run);
 }
+
+/// Return the cow ptr of the run
+Kernel::cow_ptr<Run> ExperimentInfo::sharedRun() { return m_run; }
 
 /**
  * Get an experimental log either by log name or by type, e.g.
@@ -934,6 +942,119 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
   }
 }
 
+/** Compile a list of files in compliance with name pattern-matching, file
+ * format, and date-stamp constraints
+ *
+ * Ideally, the valid-from and valid-to of any valid file should encapsulate
+ * argument date. If this is not possible, then the file with the most recent
+ * valid-from stamp is selected.
+ *
+ * @param prefix :: the name of a valid file must begin with this pattern
+ * @param fileFormats :: the extension of a valid file must be one of these
+ * formats
+ * @param directoryNames :: search only in these directories
+ * @param date :: the valid-from and valid-to of a valid file should encapsulate
+ * this date
+ * @return list of absolute paths for each valid file
+ */
+std::vector<std::string> ExperimentInfo::getResourceFilenames(
+    const std::string &prefix, const std::vector<std::string> &fileFormats,
+    const std::vector<std::string> &directoryNames, const std::string &date) {
+
+  if (date.empty()) {
+    // Just use the current date
+    g_log.debug() << "No date specified, using current date and time.\n";
+    const std::string now =
+        Types::Core::DateAndTime::getCurrentTime().toISO8601String();
+    // Recursively call this method, but with all parameters.
+    return ExperimentInfo::getResourceFilenames(prefix, fileFormats,
+                                                directoryNames, now);
+  }
+
+  // Join all the file formats into a single string
+  std::stringstream ss;
+  ss << "(";
+  for (size_t i = 0; i < fileFormats.size(); ++i) {
+    if (i != 0)
+      ss << "|";
+    ss << fileFormats[i];
+  }
+  ss << ")";
+  const std::string allFileFormats = ss.str();
+
+  const boost::regex regex(prefix + ".*\\." + allFileFormats,
+                           boost::regex_constants::icase);
+  Poco::DirectoryIterator end_iter;
+  DateAndTime d(date);
+
+  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
+  // recently starting file, if none match
+  DateAndTime refDateGoodFile(
+      "1900-01-31 23:59:00"); // used to help determine the most recently
+
+  // Two files could have the same `from` date so multimap is required.
+  // Sort with newer dates placed at the beginning
+  std::multimap<DateAndTime, std::string, std::greater<DateAndTime>>
+      matchingFiles;
+  bool foundFile = false;
+  std::string mostRecentFile; // path to the file with most recent "valid-from"
+  for (const auto &directoryName : directoryNames) {
+    // Iterate over the directories from user ->etc ->install, and find the
+    // first beat file
+    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
+         ++dir_itr) {
+
+      const auto &filePath = dir_itr.path();
+      if (!filePath.isFile())
+        continue;
+
+      const std::string &l_filenamePart = filePath.getFileName();
+      if (regex_match(l_filenamePart, regex)) {
+        const auto &pathName = filePath.toString();
+        g_log.debug() << "Found file: '" << pathName << "'\n";
+
+        std::string validFrom, validTo;
+        getValidFromTo(pathName, validFrom, validTo);
+        g_log.debug() << "File '" << pathName << " valid dates: from '"
+                      << validFrom << "' to '" << validTo << "'\n";
+        // Use default valid "from" and "to" dates if none were found.
+        DateAndTime to, from;
+        if (validFrom.length() > 0)
+          from.setFromISO8601(validFrom);
+        else
+          from = refDate;
+        if (validTo.length() > 0)
+          to.setFromISO8601(validTo);
+        else
+          to.setFromISO8601("2100-01-01T00:00:00");
+
+        if (from <= d && d <= to) {
+          foundFile = true;
+          matchingFiles.insert(
+              std::pair<DateAndTime, std::string>(from, pathName));
+        }
+        // Consider the most recent file in the absence of matching files
+        if (!foundFile && (from >= refDate)) {
+          refDate = from;
+          mostRecentFile = pathName;
+        }
+      }
+    }
+  }
+
+  // Retrieve the file names only
+  std::vector<std::string> pathNames;
+  if (!matchingFiles.empty()) {
+    pathNames.reserve(matchingFiles.size());
+    for (auto &elem : matchingFiles)
+      pathNames.emplace_back(std::move(elem.second));
+  } else {
+    pathNames.emplace_back(std::move(mostRecentFile));
+  }
+
+  return pathNames;
+}
+
 /** A given instrument may have multiple definition files associated with it.
  *This method returns a file name which identifies a given instrument definition
  *for a given instrument.
@@ -959,91 +1080,28 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
 std::string
 ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
                                       const std::string &date) {
-  if (date.empty()) {
-    // Just use the current date
-    g_log.debug() << "No date specified, using current date and time.\n";
-    const std::string now =
-        Types::Core::DateAndTime::getCurrentTime().toISO8601String();
-    // Recursively call this method, but with both parameters.
-    return ExperimentInfo::getInstrumentFilename(instrumentName, now);
-  }
-
+  const std::vector<std::string> validFormats = {"xml", "nxs", "hdf5"};
   g_log.debug() << "Looking for instrument file for " << instrumentName
                 << " that is valid on '" << date << "'\n";
   // Lookup the instrument (long) name
-  std::string instrument(
+  const std::string instrument(
       Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
   // Get the instrument directories for instrument file search
   const std::vector<std::string> &directoryNames =
       Kernel::ConfigService::Instance().getInstrumentDirectories();
 
-  const boost::regex regex(instrument + "_Definition.*\\.(xml|nxs|hdf5)",
-                           boost::regex_constants::icase);
-  Poco::DirectoryIterator end_iter;
-  DateAndTime d(date);
-  bool foundGoodFile =
-      false; // True if we have found a matching file (valid at the given date)
-  std::string mostRecentInstFile; // store most recently starting matching
-                                  // instrument file if found, else most
-                                  // recently starting instrument file.
-  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
-                                              // recently starting instrument
-                                              // file, if none match
-  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
-                                                      // the most recently
-                                                      // starting matching
-                                                      // instrument file
-  for (const auto &directoryName : directoryNames) {
-    // This will iterate around the directories from user ->etc ->install, and
-    // find the first beat file
-    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
-         ++dir_itr) {
-
-      const auto &filePath = dir_itr.path();
-      if (!filePath.isFile())
-        continue;
-
-      const std::string &l_filenamePart = filePath.getFileName();
-      if (regex_match(l_filenamePart, regex)) {
-        const auto &pathName = filePath.toString();
-        g_log.debug() << "Found file: '" << pathName << "'\n";
-        std::string validFrom, validTo;
-        getValidFromTo(pathName, validFrom, validTo);
-        g_log.debug() << "File '" << pathName << " valid dates: from '"
-                      << validFrom << "' to '" << validTo << "'\n";
-
-        // Use default valid "from" and "to" dates if none were found.
-        DateAndTime to, from;
-        if (validFrom.length() > 0)
-          from.setFromISO8601(validFrom);
-        else
-          from = refDate;
-        if (validTo.length() > 0)
-          to.setFromISO8601(validTo);
-        else
-          to.setFromISO8601("2100-01-01T00:00:00");
-
-        if (from <= d && d <= to) {
-          if (from > refDateGoodFile) { // We'd found a matching file more
-                                        // recently starting than any other
-                                        // matching file found
-            foundGoodFile = true;
-            refDateGoodFile = from;
-            mostRecentInstFile = pathName;
-          }
-        }
-        if (!foundGoodFile && (from >= refDate)) { // Use most recently starting
-                                                   // file, in case we don't
-                                                   // find a matching file.
-          refDate = from;
-          mostRecentInstFile = pathName;
-        }
-      }
-    }
+  // matching files sorted with newest files coming first
+  const std::vector<std::string> matchingFiles = getResourceFilenames(
+      instrument + "_Definition", validFormats, directoryNames, date);
+  std::string instFile;
+  if (!matchingFiles.empty()) {
+    instFile = matchingFiles[0];
+    g_log.debug() << "Instrument file selected is " << instFile << '\n';
+  } else {
+    g_log.debug() << "No instrument file found\n";
   }
-  g_log.debug() << "Instrument file selected is " << mostRecentInstFile << '\n';
-  return mostRecentInstFile;
+  return instFile;
 }
 
 /** Return a const reference to the DetectorInfo object.
@@ -1075,7 +1133,7 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
       cacheDefaultDetectorGrouping();
     if (!m_spectrumInfoWrapper) {
       static_cast<void>(detectorInfo());
-      m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(
+      m_spectrumInfoWrapper = std::make_unique<SpectrumInfo>(
           *m_spectrumInfo, *this, m_parmap->mutableDetectorInfo());
     }
   }
@@ -1132,7 +1190,7 @@ ComponentInfo &ExperimentInfo::mutableComponentInfo() {
 void ExperimentInfo::setSpectrumDefinitions(
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
   if (spectrumDefinitions) {
-    m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(
+    m_spectrumInfo = std::make_unique<Beamline::SpectrumInfo>(
         std::move(spectrumDefinitions));
     m_spectrumDefinitionNeedsUpdate.resize(0);
     m_spectrumDefinitionNeedsUpdate.resize(m_spectrumInfo->size(), 0);
@@ -1380,6 +1438,14 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
     } else {
       // Really create the instrument
       instr = parser.parseXML(nullptr);
+      // Parse the instrument tree (internally create ComponentInfo and
+      // DetectorInfo). This is an optimization that avoids duplicate parsing
+      // of the instrument tree when loading multiple workspaces with the same
+      // instrument. As a consequence less time is spent and less memory is
+      // used. Note that this is only possible since the tree in `instrument`
+      // will not be modified once we add it to the IDS.
+      instr->parseTreeAndCacheBeamline();
+
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instr);
     }

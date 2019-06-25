@@ -33,7 +33,6 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
@@ -66,9 +65,9 @@ using IntArray_shared = boost::shared_array<int>;
 // Struct to contain spectrum information.
 struct SpectraInfo {
   // Number of spectra
-  int nSpectra;
+  int nSpectra{0};
   // Do we have any spectra
-  bool hasSpectra;
+  bool hasSpectra{false};
   // Contains spectrum numbers for each workspace index
   IntArray_shared spectraNumbers;
   // Index of the detector in the workspace.
@@ -77,15 +76,6 @@ struct SpectraInfo {
   IntArray_shared detectorCount;
   // Detector list contains a list of all of the detector numbers
   IntArray_shared detectorList;
-
-  SpectraInfo() : nSpectra(0), hasSpectra(false) {}
-
-  SpectraInfo(int _nSpectra, bool _hasSpectra, IntArray_shared _spectraNumbers,
-              IntArray_shared _detectorIndex, IntArray_shared _detectorCount,
-              IntArray_shared _detectorList)
-      : nSpectra(_nSpectra), hasSpectra(_hasSpectra),
-        spectraNumbers(_spectraNumbers), detectorIndex(_detectorIndex),
-        detectorCount(_detectorCount), detectorList(_detectorList) {}
 };
 
 // Helper typdef.
@@ -99,57 +89,57 @@ using SpectraInfo_optional = boost::optional<SpectraInfo>;
  * @return
  */
 SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
+  SpectraInfo spectraInfo;
   // Instrument information
   NXInstrument inst = mtd_entry.openNXInstrument("instrument");
   if (!inst.containsGroup("detector")) {
     logger.information() << "Detector block not found. The workspace will not "
                             "contain any detector information.\n";
-    return SpectraInfo();
+    return spectraInfo;
   }
 
   // Populate the spectra-detector map
   NXDetector detgroup = inst.openNXDetector("detector");
 
+  // Spectra block - Contains spectrum numbers for each workspace index
+  // This might not exist so wrap and check. If it doesn't exist create a
+  // default mapping
+  try {
+    NXInt spectra_block = detgroup.openNXInt("spectra");
+    spectra_block.load();
+    spectraInfo.spectraNumbers = spectra_block.sharedBuffer();
+    spectraInfo.nSpectra = spectra_block.dim0();
+    spectraInfo.hasSpectra = true;
+  } catch (std::runtime_error &) {
+    spectraInfo.hasSpectra = false;
+  }
+
   // Read necessary arrays from the file
   // Detector list contains a list of all of the detector numbers. If it not
   // present then we can't update the spectra
   // map
-  boost::shared_array<int> detectorList;
   try {
     NXInt detlist_group = detgroup.openNXInt("detector_list");
     detlist_group.load();
-    detectorList = detlist_group.sharedBuffer();
+    spectraInfo.detectorList = detlist_group.sharedBuffer();
   } catch (std::runtime_error &) {
     logger.information() << "detector_list block not found. The workspace will "
                             "not contain any detector information.\n";
-    return SpectraInfo();
+    return spectraInfo;
   }
 
   // Detector count contains the number of detectors associated with each
   // spectra
   NXInt det_count = detgroup.openNXInt("detector_count");
   det_count.load();
-  boost::shared_array<int> detectorCount = det_count.sharedBuffer();
+  spectraInfo.detectorCount = det_count.sharedBuffer();
   // Detector index - contains the index of the detector in the workspace
   NXInt det_index = detgroup.openNXInt("detector_index");
   det_index.load();
-  int nspectra = det_index.dim0();
-  boost::shared_array<int> detectorIndex = det_index.sharedBuffer();
+  spectraInfo.nSpectra = det_index.dim0();
+  spectraInfo.detectorIndex = det_index.sharedBuffer();
 
-  // Spectra block - Contains spectrum numbers for each workspace index
-  // This might not exist so wrap and check. If it doesn't exist create a
-  // default mapping
-  bool have_spectra(true);
-  boost::shared_array<int> spectra;
-  try {
-    NXInt spectra_block = detgroup.openNXInt("spectra");
-    spectra_block.load();
-    spectra = spectra_block.sharedBuffer();
-  } catch (std::runtime_error &) {
-    have_spectra = false;
-  }
-  return SpectraInfo(nspectra, have_spectra, spectra, detectorIndex,
-                     detectorCount, detectorList);
+  return spectraInfo;
 }
 
 /**
@@ -208,10 +198,9 @@ void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
   const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "The name of the Nexus file to read, as a full or relative path.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
@@ -229,7 +218,7 @@ void LoadNexusProcessed::init() {
                   "Number of first spectrum to read.");
   declareProperty("SpectrumMax", static_cast<int>(Mantid::EMPTY_INT()),
                   mustBePositive, "Number of last spectrum to read.");
-  declareProperty(make_unique<ArrayProperty<int>>("SpectrumList"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", static_cast<int>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
@@ -239,8 +228,8 @@ void LoadNexusProcessed::init() {
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
+                                                Direction::Input),
       "For multiperiod workspaces. Copy instrument, parameter and x-data "
       "rather than loading it directly for each workspace. Y, E and log "
       "information is always loaded.");
@@ -464,10 +453,9 @@ void LoadNexusProcessed::exec() {
       // complicated to bother with.
       bAccelleratedMultiPeriodLoading =
           bIsMultiPeriod && bFastMultiPeriod && !m_list;
-      tempMatrixWorkspace->mutableRun().clearLogs(); // Strip out any loaded
-                                                     // logs. That way we don't
-                                                     // pay for copying that
-                                                     // information around.
+      // Strip out any loaded logs. That way we don't pay for copying that
+      // information around.
+      tempMatrixWorkspace->mutableRun().clearLogs();
     }
 
     if (bAccelleratedMultiPeriodLoading) {
@@ -477,8 +465,7 @@ void LoadNexusProcessed::exec() {
     }
 
     for (int p = 1; p <= nWorkspaceEntries; ++p) {
-      std::ostringstream os;
-      os << p;
+      const auto indexStr = std::to_string(p);
 
       // decide what the workspace should be called
       std::string wsName = buildWorkspaceName(names[p], base_name, p);
@@ -493,23 +480,23 @@ void LoadNexusProcessed::exec() {
       */
       if (bAccelleratedMultiPeriodLoading) {
         local_workspace = doAccelleratedMultiPeriodLoading(
-            root, basename + os.str(), tempMatrixWorkspace, nWorkspaceEntries,
+            root, basename + indexStr, tempMatrixWorkspace, nWorkspaceEntries,
             p);
       } else // Fall-back for generic loading
       {
         const double nWorkspaceEntries_d =
             static_cast<double>(nWorkspaceEntries);
         local_workspace =
-            loadEntry(root, basename + os.str(),
+            loadEntry(root, basename + indexStr,
                       static_cast<double>(p - 1) / nWorkspaceEntries_d,
                       1. / nWorkspaceEntries_d);
       }
 
-      declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
-          prop_name + os.str(), wsName, Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
+          prop_name + indexStr, wsName, Direction::Output));
 
       wksp_group->addWorkspace(local_workspace);
-      setProperty(prop_name + os.str(), local_workspace);
+      setProperty(prop_name + indexStr, local_workspace);
     }
 
     // The group is the root property value
@@ -523,7 +510,7 @@ void LoadNexusProcessed::exec() {
 /**
  * Decides what to call a child of a group workspace.
  *
- * This function builds the workspace name bsed on either a workspace name
+ * This function builds the workspace name based on either a workspace name
  * which was stored in the file or the base name.
  *
  * @param name :: The name loaded from the file (possibly the empty string if
@@ -552,8 +539,6 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
       // if the name property wasn't defined just use <OutputWorkspaceName>_n
       wsName = baseName + index;
     }
-
-    wsName = baseName + index;
   }
 
   correctForWorkspaceNameClash(wsName);
@@ -1218,6 +1203,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peakWS->getPeak(i).setPeakShape(peakShape);
       }
     }
+    // After all columns read set IntHKL
+    for (int r = 0; r < numberPeaks; r++) {
+      V3D intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(),
+                       peakWS->getPeak(r).getL());
+      peakWS->getPeak(r).setIntHKL(intHKL);
+    }
   }
 
   return boost::static_pointer_cast<API::Workspace>(peakWS);
@@ -1542,17 +1533,19 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
   // Setting a unit onto a TextAxis makes no sense.
   if (unit2 == "TextAxis") {
-    auto newAxis = new Mantid::API::TextAxis(nspectra);
-    local_workspace->replaceAxis(1, newAxis);
+    auto newAxis = std::make_unique<Mantid::API::TextAxis>(nspectra);
+    local_workspace->replaceAxis(1, std::move(newAxis));
   } else if (unit2 != "spectraNumber") {
     try {
-      auto *newAxis = (verticalHistogram) ? new API::BinEdgeAxis(nspectra + 1)
-                                          : new API::NumericAxis(nspectra);
-      local_workspace->replaceAxis(1, newAxis);
-      newAxis->unit() = UnitFactory::Instance().create(unit2);
+      auto newAxis = (verticalHistogram)
+                         ? std::make_unique<API::BinEdgeAxis>(nspectra + 1)
+                         : std::make_unique<API::NumericAxis>(nspectra);
+      auto newAxisRaw = newAxis.get();
+      local_workspace->replaceAxis(1, std::move(newAxis));
+      newAxisRaw->unit() = UnitFactory::Instance().create(unit2);
       if (unit2 == "Label") {
         auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-            newAxis->unit());
+            newAxisRaw->unit());
         auto ax = wksp_cls.openNXDouble("axis2");
         label->setLabel(ax.attributes("caption"), ax.attributes("label"));
       }
@@ -1661,11 +1654,13 @@ void LoadNexusProcessed::readInstrumentGroup(
       spec.setSpectrumNo(spectrum);
       ++index;
 
-      int start = spectraInfo.detectorIndex[i - 1];
-      int end = start + spectraInfo.detectorCount[i - 1];
-      spec.setDetectorIDs(
-          std::set<detid_t>(spectraInfo.detectorList.get() + start,
-                            spectraInfo.detectorList.get() + end));
+      if (spectraInfo.detectorIndex) {
+        const int start = spectraInfo.detectorIndex[i - 1];
+        const int end = start + spectraInfo.detectorCount[i - 1];
+        spec.setDetectorIDs(
+            std::set<detid_t>(spectraInfo.detectorList.get() + start,
+                              spectraInfo.detectorList.get() + end));
+      }
     }
   }
 }

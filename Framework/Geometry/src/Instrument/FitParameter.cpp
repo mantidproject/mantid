@@ -215,9 +215,9 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   f.setResultUnit(values[9]);
 
   if (values.size() > 10) {
-    std::stringstream str(values[10]);
+    std::stringstream lookupTableStream(values[10]);
     Kernel::Interpolation lookupTable;
-    str >> lookupTable;
+    lookupTableStream >> lookupTable;
     f.setLookUpTable(lookupTable);
   }
 

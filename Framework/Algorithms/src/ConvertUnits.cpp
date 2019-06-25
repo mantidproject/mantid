@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -39,10 +38,10 @@ using namespace HistogramData;
 void ConvertUnits::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
 
@@ -237,7 +236,7 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
 
   // Rebin the data to common bins if requested, and if necessary
   bool alignBins = getProperty("AlignBins");
-  if (alignBins && !WorkspaceHelpers::commonBoundaries(*outputWS))
+  if (alignBins && !outputWS->isCommonBins())
     outputWS = this->alignBins(outputWS);
 
   // If appropriate, put back the bin width division into Y/E.
@@ -255,9 +254,7 @@ void ConvertUnits::setupMemberVariables(
     const API::MatrixWorkspace_const_sptr inputWS) {
   m_numberOfSpectra = inputWS->getNumberHistograms();
   // In the context of this algorithm, we treat things as a distribution if
-  // the
-  // flag is set
-  // AND the data are not dimensionless
+  // the flag is set AND the data are not dimensionless
   m_distribution = inputWS->isDistribution() && !inputWS->YUnit().empty();
   // Check if its an event workspace
   m_inputEvents =
@@ -339,31 +336,25 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
                                                // create the output workspace
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
   // See if the workspace has common bins - if so the X vector can be common
-  // First a quick check using the validator
-  CommonBinsValidator sameBins;
-  bool commonBoundaries = false;
-  if (sameBins.isValid(inputWS).empty()) {
-    commonBoundaries = WorkspaceHelpers::commonBoundaries(*inputWS);
-    // Only do the full check if the quick one passes
-    if (commonBoundaries) {
-      // Calculate the new (common) X values
-      for (auto &x : outputWS->mutableX(0)) {
-        x = factor * std::pow(x, power);
-      }
-
-      auto xVals = outputWS->sharedX(0);
-
-      PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
-      for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
-        PARALLEL_START_INTERUPT_REGION
-        outputWS->setX(j, xVals);
-        prog.report("Convert to " + m_outputUnit->unitID());
-        PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-      if (!m_inputEvents) // if in event mode the work is done
-        return outputWS;
+  const bool commonBoundaries = inputWS->isCommonBins();
+  if (commonBoundaries) {
+    // Calculate the new (common) X values
+    for (auto &x : outputWS->mutableX(0)) {
+      x = factor * std::pow(x, power);
     }
+
+    auto xVals = outputWS->sharedX(0);
+
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
+    for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
+      PARALLEL_START_INTERUPT_REGION
+      outputWS->setX(j, xVals);
+      prog.report("Convert to " + m_outputUnit->unitID());
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+    if (!m_inputEvents) // if in event mode the work is done
+      return outputWS;
   }
 
   EventWorkspace_sptr eventWS =
@@ -497,8 +488,11 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       // try and get the value from the run parameters
       const API::Run &run = inputWS->run();
       if (run.hasProperty("Ei")) {
-        Kernel::Property *prop = run.getProperty("Ei");
-        efixedProp = boost::lexical_cast<double, std::string>(prop->value());
+        try {
+          efixedProp = run.getPropertyValueAsType<double>("Ei");
+        } catch (Kernel::Exception::NotFoundError &) {
+          throw std::runtime_error("Cannot retrieve Ei value from the logs");
+        }
       } else {
         if (needEfixed) {
           throw std::invalid_argument(
@@ -660,7 +654,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
   bool isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
-  if (WorkspaceHelpers::commonBoundaries(*WS) && !isInputEvents) {
+  if (WS->isCommonBins() && !isInputEvents) {
     auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(),
                                                         WS->x(0).crend());
     for (size_t j = 0; j < numberOfSpectra; ++j) {
@@ -737,13 +731,13 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
 
     result = create<MatrixWorkspace>(*workspace, BinEdges(bins));
 
-    for (size_t i = 0; i < numSpec; ++i) {
-      auto &X = workspace->x(i);
-      auto &Y = workspace->y(i);
-      auto &E = workspace->e(i);
-      result->mutableX(i).assign(X.begin() + first, X.end());
-      result->mutableY(i).assign(Y.begin() + first, Y.end());
-      result->mutableE(i).assign(E.begin() + first, E.end());
+    for (size_t wsIndex = 0; wsIndex < numSpec; ++wsIndex) {
+      auto &X = workspace->x(wsIndex);
+      auto &Y = workspace->y(wsIndex);
+      auto &E = workspace->e(wsIndex);
+      result->mutableX(wsIndex).assign(X.begin() + first, X.end());
+      result->mutableY(wsIndex).assign(Y.begin() + first, Y.end());
+      result->mutableE(wsIndex).assign(E.begin() + first, E.end());
     }
   } else if (emode == "Indirect") {
     // Now the indirect instruments. In this case we could want to keep a

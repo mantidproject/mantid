@@ -12,7 +12,8 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/make_unique.h"
+
+#include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
@@ -21,6 +22,7 @@
 #include <H5Cpp.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
+#include <boost/regex.hpp>
 #include <numeric>
 #include <tuple>
 #include <type_traits>
@@ -58,7 +60,6 @@ const H5std_string ROTATION = "rotation";
 const H5std_string VECTOR = "vector";
 const H5std_string UNITS = "units";
 // Radians and degrees
-const H5std_string DEGREES = "degrees";
 const static double PI = 3.1415926535;
 const static double DEGREES_IN_SEMICIRCLE = 180;
 // Nexus shape types
@@ -74,6 +75,12 @@ struct Face {
   Eigen::Vector3d v3;
   Eigen::Vector3d v4;
 };
+
+bool isDegrees(const H5std_string &units) {
+  using boost::regex;
+  // Nexus format inexact on acceptable rotation unit definitions
+  return regex_match(units, regex("deg(rees)?", regex::icase));
+}
 
 template <typename T, typename R>
 std::vector<R> convertVector(const std::vector<T> &toConvert) {
@@ -147,10 +154,24 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   // Open data set
   DataSet data = group.openDataSet(dataset);
   auto dataType = data.getDataType();
-  auto nCharacters = dataType.getSize();
-  std::vector<char> value(nCharacters);
-  data.read(value.data(), dataType, data.getSpace());
-  return std::string(value.begin(), value.end());
+  // Use a different read method if the string is of variable length type
+  if (dataType.isVariableStr()) {
+    H5std_string buffer;
+    // Need to check for old versions of hdf5
+    if (Hdf5Version::checkVariableLengthStringSupport()) {
+      data.read(buffer, dataType, data.getSpace());
+    } else {
+      throw std::runtime_error("NexusGeometryParser::get1DStringDataset: Only "
+                               "versions 1.8.16 + of hdf5 support the variable "
+                               "string feature");
+    }
+    return buffer;
+  } else {
+    auto nCharacters = dataType.getSize();
+    std::vector<char> value(nCharacters);
+    data.read(value.data(), dataType, data.getSpace());
+    return std::string(value.begin(), value.end());
+  }
 }
 
 /** Open subgroups of parent group
@@ -418,7 +439,7 @@ getTransformations(const H5File &file, const Group &detectorGroup) {
       transforms = translation * transforms;
     } else if (transformType == ROTATION) {
       double angle = magnitude;
-      if (transformUnits == DEGREES) {
+      if (isDegrees(transformUnits)) {
         // Convert angle from degrees to radians
         angle *= PI / DEGREES_IN_SEMICIRCLE;
       }
@@ -749,7 +770,7 @@ std::string NexusGeometryParser::getMangledName(const std::string &fileName,
   std::string mangledName = instName;
   if (!fileName.empty()) {
     std::string checksum =
-        Mantid::Kernel::ChecksumHelper::sha1FromFile(fileName, false);
+        Mantid::Kernel::ChecksumHelper::sha1FromString(fileName);
     mangledName += checksum;
   }
   return mangledName;

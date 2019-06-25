@@ -8,7 +8,6 @@
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include <QDesignerFormEditorInterface>
 #include <QtPlugin>
-#include <iostream>
 
 using namespace MantidQt::MantidWidgets;
 

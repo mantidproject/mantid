@@ -25,11 +25,11 @@ DECLARE_ALGORITHM(CorrectToFile)
 const double CorrectToFile::LOAD_TIME = 0.5;
 
 void CorrectToFile::init() {
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "WorkspaceToCorrect", "", Kernel::Direction::Input),
                   "Name of the input workspace");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Load),
                   "The file containing the correction factors");
 
   std::vector<std::string> propOptions =
@@ -44,7 +44,7 @@ void CorrectToFile::init() {
   declareProperty("WorkspaceOperation", "Divide",
                   boost::make_shared<Kernel::StringListValidator>(operations),
                   "Allowed values: Divide, Multiply (default is divide)");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Name of the output workspace to store the results in");
 }
@@ -55,8 +55,7 @@ void CorrectToFile::exec() {
   // This workspace is loaded from the RKH compatible file
   MatrixWorkspace_sptr rkhInput = loadInFile(getProperty("Filename"));
   // Only create the output workspace if it's not the same as the input one
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  outputWS = create<HistoWorkspace>(*toCorrect);
+  MatrixWorkspace_sptr outputWS = create<HistoWorkspace>(*toCorrect);
   const std::string operation = getProperty("WorkspaceOperation");
 
   if (getPropertyValue("FirstColumnValue") == "SpectrumNumber") {

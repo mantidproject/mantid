@@ -12,14 +12,14 @@ from __future__ import absolute_import
 from collections import Counter, namedtuple
 
 import qtpy
-from mock import Mock, patch, call
+from mantid.py3compat.mock import Mock, patch, call
 import unittest
 
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
 from mantid.api import AlgorithmFactoryImpl
-from mantidqt.utils.qt.test import select_item_in_combo_box, select_item_in_tree, GuiTest
+from mantidqt.utils.qt.testing import select_item_in_combo_box, select_item_in_tree, GuiTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
@@ -36,6 +36,10 @@ mock_get_algorithm_descriptors.return_value = [
                             category='Stuff', alias=''),
     AlgorithmDescriptorMock(name='DoStuff', version=2,
                             category='Stuff', alias=''),
+    AlgorithmDescriptorMock(name='ComesFirst', version=1,
+                            category="Sorted", alias=''),
+    AlgorithmDescriptorMock(name='GoesSecond', version=1,
+                            category="Sorted", alias='')
 ]
 
 empty_mock_get_algorithm_descriptors = Mock()
@@ -63,6 +67,10 @@ class ModelTest(unittest.TestCase):
         model = AlgorithmSelectorModel(None, include_hidden=True)
         model.get_algorithm_data()
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
+
+
+createDialogFromName_func_name = ('mantidqt.interfacemanager.InterfaceManager.'
+                                  'createDialogFromName')
 
 
 @patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
@@ -140,22 +148,48 @@ class WidgetTest(GuiTest):
         widget = AlgorithmSelectorWidget()
         self._select_in_tree(widget, 'DoStuff v.2')
         widget.search_box.lineEdit().setText('abc')
-        self.assertTrue(widget.get_selected_algorithm() is None)
+        self.assertEqual(widget.get_selected_algorithm(), None)
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
-    def test_execute_on_click(self):
-        with patch('mantidqt.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+    def test_run_dialog_opens_on_execute_button_click(self):
+        with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             widget.execute_button.click()
             createDialog.assert_called_once_with('DoStuff', 2)
 
-    def test_execute_on_return_press(self):
-        with patch('mantidqt.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+    def test_run_dialog_opens_on_return_press(self):
+        with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             QTest.keyClick(widget.search_box, Qt.Key_Return)
             createDialog.assert_called_once_with('DoStuff', 2)
+
+    def test_run_dialog_opens_on_double_click(self):
+        with patch(createDialogFromName_func_name) as createDialog:
+            widget = AlgorithmSelectorWidget()
+            self._select_in_tree(widget, 'Load v.1')
+            selected_item = widget.tree.selectedItems()[0]
+            item_pos = widget.tree.visualItemRect(selected_item).center()
+            QTest.mouseDClick(widget.tree.viewport(), Qt.LeftButton,
+                              Qt.NoModifier, pos=item_pos)
+            createDialog.assert_called_once_with('Load', 1)
+
+    def test_sorting_of_algorithms(self):
+        widget = AlgorithmSelectorWidget()
+        model = AlgorithmSelectorModel(None)
+        top_level = []
+
+        widget._add_tree_items(top_level, model.get_algorithm_data()[1])
+
+        self.assertEqual(top_level[0].text(0), "Data")
+        self.assertEqual(top_level[1].text(0), "Sorted")
+        self.assertEqual(top_level[2].text(0), "Stuff")
+        self.assertEqual(top_level[3].text(0), "Transform")
+
+        second_level = top_level[1].takeChildren()
+        self.assertEqual(second_level[0].text(0), "ComesFirst v.1")
+        self.assertEqual(second_level[1].text(0), "GoesSecond v.1")
 
     def test_refresh(self):
         # Set a mock to return an empty descriptor list
@@ -167,7 +201,7 @@ class WidgetTest(GuiTest):
         # put back the original
         AlgorithmFactoryImpl.getDescriptors = getDescriptors_orig
         widget.refresh()
-        self.assertEqual(3, widget.tree.topLevelItemCount())
+        self.assertEqual(4, widget.tree.topLevelItemCount())
 
 
 if __name__ == '__main__':

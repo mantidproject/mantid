@@ -9,10 +9,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/make_unique.h"
+
+#include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/regex.hpp>
+#include <numeric>
 
 namespace Mantid {
 using namespace Types::Core;
@@ -30,6 +32,20 @@ template <typename TYPE>
 TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name)
     : Property(name, typeid(std::vector<TimeValueUnit<TYPE>>)), m_values(),
       m_size(), m_propSortedFlag(), m_filterApplied() {}
+
+/**
+ * Constructor
+ * @param name :: The name to assign to the property
+ * @param times :: A vector of DateAndTime objects
+ * @param values :: A vector of TYPE
+ */
+template <typename TYPE>
+TimeSeriesProperty<TYPE>::TimeSeriesProperty(
+    const std::string &name, const std::vector<Types::Core::DateAndTime> &times,
+    const std::vector<TYPE> &values)
+    : TimeSeriesProperty(name) {
+  addValues(times, values);
+}
 
 /// Virtual destructor
 template <typename TYPE> TimeSeriesProperty<TYPE>::~TimeSeriesProperty() {}
@@ -54,6 +70,9 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
   auto times = timeSeriesProperty->timesAsVector();
   // Shift the time
   for (auto it = times.begin(); it != times.end(); ++it) {
+    // There is a known issue which can cause cloneWithTimeShift to be called
+    // with a large (~9e+9 s) shift. Actual shifting is capped to be ~4.6e+19
+    // seconds in DateAndTime::operator+=
     (*it) += timeShift;
   }
   timeSeriesProperty->clear();
@@ -83,7 +102,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
   TYPE v0 = it->value();
 
   it++;
-  auto timeSeriesDeriv = Kernel::make_unique<TimeSeriesProperty<double>>(
+  auto timeSeriesDeriv = std::make_unique<TimeSeriesProperty<double>>(
       this->name() + "_derivative");
   timeSeriesDeriv->reserve(this->m_values.size() - 1);
   for (; it != m_values.end(); it++) {
@@ -235,7 +254,7 @@ bool TimeSeriesProperty<TYPE>::operator!=(const Property &right) const {
  * Set name of the property
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::setName(const std::string name) {
+void TimeSeriesProperty<TYPE>::setName(const std::string &name) {
   m_name = name;
 }
 
@@ -843,7 +862,8 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
  */
 template <>
 void TimeSeriesProperty<std::string>::makeFilterByValue(
-    std::vector<SplittingInterval> &, double, double, double, bool) const {
+    std::vector<SplittingInterval> & /*split*/, double /*min*/, double /*max*/,
+    double /*TimeTolerance*/, bool /*centre*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
                                        "is not implemented for string "
                                        "properties");
@@ -907,8 +927,8 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(
  */
 template <>
 void TimeSeriesProperty<std::string>::expandFilterToRange(
-    std::vector<SplittingInterval> &, double, double,
-    const TimeInterval &) const {
+    std::vector<SplittingInterval> & /*split*/, double /*min*/, double /*max*/,
+    const TimeInterval & /*range*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
                                        "is not implemented for string "
                                        "properties");
@@ -987,7 +1007,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
  */
 template <>
 double TimeSeriesProperty<std::string>::averageValueInFilter(
-    const TimeSplitterType &) const {
+    const TimeSplitterType & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
                                        "implemented for string properties");
@@ -1059,7 +1079,7 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(
 template <>
 std::pair<double, double>
 TimeSeriesProperty<std::string>::averageAndStdDevInFilter(
-    const TimeSplitterType &) const {
+    const TimeSplitterType & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
@@ -1437,10 +1457,23 @@ std::map<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMap() const {
  * @return Nothing in this case
  */
 template <typename TYPE>
-std::string TimeSeriesProperty<TYPE>::setValue(const std::string &) {
+std::string TimeSeriesProperty<TYPE>::setValue(const std::string & /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from a "
                                        "std::string");
+}
+
+/**
+ * Set the property from a Json value. Throws a NotImplementedError
+ *  @throw Exception::NotImplementedError Not yet implemented
+ * @return Nothing in this case
+ */
+template <typename TYPE>
+std::string
+TimeSeriesProperty<TYPE>::setValueFromJson(const Json::Value & /*unused*/) {
+  throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
+                                       "Cannot extract TimeSeries from a "
+                                       "Json::Value");
 }
 
 /**
@@ -1448,8 +1481,8 @@ std::string TimeSeriesProperty<TYPE>::setValue(const std::string &) {
  * @return Nothing in this case
  */
 template <typename TYPE>
-std::string
-TimeSeriesProperty<TYPE>::setDataItem(const boost::shared_ptr<DataItem>) {
+std::string TimeSeriesProperty<TYPE>::setDataItem(
+    const boost::shared_ptr<DataItem> /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from "
                                        "DataItem");
@@ -1949,6 +1982,14 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
     }
     size_t nvalues = m_filterQuickRef.empty() ? m_values.size()
                                               : m_filterQuickRef.back().second;
+    // The filter logic can end up with the quick ref having a duplicate of the
+    // last time and value at the end if the last filter time is past the log
+    // time See "If it is out of upper boundary, still record it.  but make the
+    // log entry to mP.size()+1" in applyFilter
+    // Make the log seem the full size
+    if (nvalues == m_values.size() + 1) {
+      --nvalues;
+    }
     m_size = static_cast<int>(nvalues);
   }
 }
@@ -2006,10 +2047,11 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
   out.maximum = raw_stats.maximum;
   if (this->size() > 0) {
     const auto &intervals = this->getSplittingIntervals();
-    double duration_sec = 0.0;
-    for (const auto &interval : intervals) {
-      duration_sec += interval.duration();
-    }
+    const double duration_sec =
+        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                        [](double sum, const auto &interval) {
+                          return sum + interval.duration();
+                        });
     out.duration = duration_sec;
     const auto time_weighted = this->timeAverageValueAndStdDev();
     out.time_mean = time_weighted.first;
@@ -2297,6 +2339,13 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
   // 6. Re-count size
   countSize();
+
+  if (name() == "proton_charge") {
+    for (const auto &item : m_filterQuickRef) {
+      std::cerr << "first=" << item.first << ",  second=" << item.second
+                << "\n";
+    }
+  }
 }
 
 /*
@@ -2438,6 +2487,16 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   saveTimeVector(file);
   file->closeGroup();
 }
+
+/**
+ * @returns the value as a Json object. The string representation is
+ * used as the underlying type
+ */
+template <typename TYPE>
+Json::Value TimeSeriesProperty<TYPE>::valueAsJson() const {
+  return Json::Value(value());
+}
+
 /** Calculate constant step histogram of the time series data.
  * @param tMin    -- minimal time to include in histogram
  * @param tMax    -- maximal time to constrain the histogram data

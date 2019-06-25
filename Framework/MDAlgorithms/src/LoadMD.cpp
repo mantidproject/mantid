@@ -33,7 +33,6 @@
 #include "MantidMDAlgorithms/SetMDFrame.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <iostream>
 #include <nexus/NeXusException.hpp>
 #include <vector>
 
@@ -84,36 +83,39 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadMD::init() {
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                     ".nxs"),
       "The name of the Nexus file to load, as a full or relative path");
 
   declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
+      std::make_unique<Kernel::PropertyWithValue<bool>>("MetadataOnly", false),
       "Load Box structure and other metadata without events. The "
       "loaded workspace will be empty and not file-backed.");
 
   declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("BoxStructureOnly", false),
+      std::make_unique<Kernel::PropertyWithValue<bool>>("BoxStructureOnly",
+                                                        false),
       "Load partial information about the boxes and events. Redundant property "
       "currently equivalent to MetadataOnly");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
-                  "Set to true to load the data only on demand.");
-  setPropertySettings("FileBackEnd", make_unique<EnabledWhenProperty>(
+  declareProperty(
+      std::make_unique<PropertyWithValue<bool>>("FileBackEnd", false),
+      "Set to true to load the data only on demand.");
+  setPropertySettings("FileBackEnd", std::make_unique<EnabledWhenProperty>(
                                          "MetadataOnly", IS_EQUAL_TO, "0"));
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("Memory", -1),
+      std::make_unique<PropertyWithValue<double>>("Memory", -1),
       "For FileBackEnd only: the amount of memory (in MB) to allocate to the "
       "in-memory cache.\n"
       "If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings("Memory", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Memory", std::make_unique<EnabledWhenProperty>(
                                     "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }
@@ -295,7 +297,7 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
   try {
     m_file->getSlab(data, start, size);
   } catch (...) {
-    std::cout << " start: " << start[0] << " size: " << size[0] << '\n';
+    g_log.debug() << " start: " << start[0] << " size: " << size[0] << '\n';
   }
   m_file->closeData();
 }
@@ -503,7 +505,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 ": this is not possible.");
 
   CPUTimer tim;
-  auto prog = make_unique<Progress>(this, 0.0, 1.0, 100);
+  auto prog = std::make_unique<Progress>(this, 0.0, 1.0, 100);
 
   prog->report("Opening file.");
   std::string title;

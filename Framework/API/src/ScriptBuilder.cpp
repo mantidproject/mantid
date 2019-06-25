@@ -38,11 +38,13 @@ const std::string COMMENT_ALG = "Comment";
 ScriptBuilder::ScriptBuilder(
     boost::shared_ptr<HistoryView> view, std::string versionSpecificity,
     bool appendTimestamp, std::vector<std::string> ignoreTheseAlgs,
-    std::vector<std::vector<std::string>> ignoreTheseAlgProperties)
+    std::vector<std::vector<std::string>> ignoreTheseAlgProperties,
+    bool appendExecCount)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
       m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs),
-      m_propertiesToIgnore(ignoreTheseAlgProperties) {}
+      m_propertiesToIgnore(ignoreTheseAlgProperties),
+      m_execCount(appendExecCount) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -109,6 +111,14 @@ void ScriptBuilder::createStringForAlg(
   os << buildAlgorithmString(*algHistory);
   if (m_timestampCommands) {
     os << " # " << algHistory->executionDate().toISO8601String();
+  }
+
+  if (m_execCount) {
+    if (m_timestampCommands) {
+      os << " execCount: " << algHistory->execCount();
+    } else {
+      os << " # execCount: " << algHistory->execCount();
+    }
   }
 
   os << "\n";

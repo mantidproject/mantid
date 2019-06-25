@@ -99,6 +99,7 @@ endif ()
 
 # directives similar to linux for conda framework-only build
 set ( BIN_DIR bin )
+set ( WORKBENCH_BIN_DIR bin )
 set ( ETC_DIR etc )
 set ( LIB_DIR lib )
 set ( PLUGINS_DIR plugins )
@@ -119,6 +120,7 @@ if ( ENABLE_MANTIDPLOT )
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
+set ( BUNDLES ${INBUNDLE} MantidWorkbench.app/)
 
 # Copy the launcher script to the correct location
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/Mantid_osx_launcher.in

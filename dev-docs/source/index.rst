@@ -109,6 +109,7 @@ Tools
    FlowchartCreation
    VisualStudioBuildImpact
    GettingStartedWithPyCharm
+   VSCode
    Eclipse
 
 :doc:`ToolsOverview`
@@ -125,6 +126,9 @@ Tools
 
 :doc:`GettingStartedWithPyCharm`
    Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
+
+:doc:`VSCode`
+   Guide to using VSCode for C++ with Mantid.
 
 :doc:`Eclipse`
    Guide to setting up Eclipse on Ubuntu
@@ -179,6 +183,7 @@ GUI Development
    GUIDesignGuidelines
    MVPTutorial/index
    QtDesignerForPython
+   MantidUsedIconsTable
 
 :doc:`GUIDesignGuidelines`
    Gives some guidelines to consider when developing a new graphical user interface.
@@ -188,6 +193,25 @@ GUI Development
 
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
+
+:doc:`MantidUsedIconsTable`
+   The currently used Icons in Mantid and what they are used for.
+
+=========
+Workbench
+=========
+
+The workbench is the new PyQt-based GUI that will be the primary interface for
+interacting with the mantid framework. The plotting is provided by
+`matplotlib <https://matplotlib.org/>`_. It will eventually replace MantidPlot.
+
+.. toctree::
+   :hidden:
+
+   Workbench/index
+
+:doc:`Workbench Documentation <Workbench/index>`
+   The Index of the workbench specific files.
 
 ===================
 Component Overviews
@@ -205,10 +229,10 @@ Component Overviews
    ISISSANSReductionBackend
    LoadAlgorithmHook
    Logging
+   MatplotlibInCpp
    MultiThreadingInAlgorithms
    PythonVSCppAlgorithms
    RemoteJobSubmissionAPI
    Widgets/Plotting
-   Workbench
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation

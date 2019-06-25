@@ -36,7 +36,7 @@ class MuonLoadData:
         nouns.
         """
         self.params = []
-        self.defaults = {"run": 0, "workspace": [], "filename": ""}
+        self.defaults = {"run": [0], "workspace": [], "filename": "", 'instrument': ''}
 
     def __iter__(self):
         self._n = -1
@@ -99,7 +99,7 @@ class MuonLoadData:
 
         for entries in self.params:
             matching_parameters = [entries.get(key) == kwargs.get(key) for key in entries]
-            if sum(matching_parameters) > 0:
+            if sum(matching_parameters) >= len(kwargs):
                 matches.append(True)
             else:
                 matches.append(False)
@@ -128,6 +128,12 @@ class MuonLoadData:
         if self.num_items() > 0:
             return self.params[-1]
         else:
-            ret = {key: None for key in self.params.keys()}
+            ret = self.defaults
             ret["workspace"] = load_utils.empty_loaded_data()
             return ret
+
+    def get_main_field_direction(self, **kwargs):
+        if self.get_data(**kwargs):
+            return self.get_data(**kwargs)['workspace']['MainFieldDirection']
+        else:
+            return None

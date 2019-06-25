@@ -38,11 +38,11 @@ using namespace HistogramData;
  *
  */
 void Integration::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace to integrate.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The input workspace to integrate.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The output workspace with the results of the integration.");
 
   declareProperty("RangeLower", EMPTY_DBL(),
@@ -59,9 +59,9 @@ void Integration::init() {
   declareProperty("IncludePartialBins", false,
                   "If true then partial bins from the beginning and end of the "
                   "input range are also included in the integration.");
-  declareProperty(make_unique<ArrayProperty<double>>("RangeLowerList"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("RangeLowerList"),
                   "A list of lower integration limits (as X values).");
-  declareProperty(make_unique<ArrayProperty<double>>("RangeUpperList"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("RangeUpperList"),
                   "A list of upper integration limits (as X values).");
 }
 
@@ -268,7 +268,8 @@ void Integration::exec() {
         sumF = std::accumulate(F.begin() + distmin, F.begin() + distmax, 0.0);
         if (distmin > 0)
           Fmin = F[distmin - 1];
-        Fmax = F[distmax];
+        Fmax = F[static_cast<std::size_t>(distmax) < F.size() ? distmax
+                                                              : F.size() - 1];
       }
       if (!is_distrib) {
         // Sum the Y, and sum the E in quadrature
@@ -427,12 +428,10 @@ std::map<std::string, std::string> Integration::validateInputs() {
     }
   }
   if (!isEmpty(minRange)) {
-    for (const auto x : maxRanges) {
-      if (x < minRange) {
-        issues["RangeUpperList"] =
-            "RangeUpperList has a value lower than RangeLower.";
-        break;
-      }
+    if (std::any_of(maxRanges.cbegin(), maxRanges.cend(),
+                    [minRange](const auto x) { return x < minRange; })) {
+      issues["RangeUpperList"] =
+          "RangeUpperList has a value lower than RangeLower.";
     }
   }
   return issues;

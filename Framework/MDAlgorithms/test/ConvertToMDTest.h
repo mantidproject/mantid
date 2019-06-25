@@ -89,7 +89,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pAlg->initialize())
     TS_ASSERT(pAlg->isInitialized())
 
-    TSM_ASSERT_EQUALS("algorithm should have 25 properties", 25,
+    TSM_ASSERT_EQUALS("algorithm should have 26 properties", 26,
                       (size_t)(pAlg->getProperties().size()));
   }
 
@@ -109,7 +109,7 @@ public:
         pAlg->setPropertyValue("OutputWorkspace", "EnergyTransferND"));
     // unknown Q-dimension trows
     TS_ASSERT_THROWS(pAlg->setPropertyValue("QDimensions", "unknownQ"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // correct Q-dimension fine
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "|Q|"));
     // additional dimensions requested -- fine
@@ -122,10 +122,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws2D =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
-    API::NumericAxis *pAxis = new API::NumericAxis(3);
+    auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("dSpacing");
 
-    ws2D->replaceAxis(0, pAxis);
+    ws2D->replaceAxis(0, std::move(pAxis));
 
     pAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
     pAlg->setPropertyValue("OutputWorkspace", "WS3DNoQ");
@@ -170,10 +170,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws2D =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
-    API::NumericAxis *pAxis = new API::NumericAxis(3);
+    auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("dSpacing");
 
-    ws2D->replaceAxis(0, pAxis);
+    ws2D->replaceAxis(0, std::move(pAxis));
 
     pAlg->setPropertyValue("OutputWorkspace", "WS3DmodQ");
     pAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
@@ -210,10 +210,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws2D =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
-    API::NumericAxis *pAxis = new API::NumericAxis(3);
+    auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("DeltaE");
 
-    ws2D->replaceAxis(0, pAxis);
+    ws2D->replaceAxis(0, std::move(pAxis));
 
     pAlg->setPropertyValue("OutputWorkspace", "WS5DQ3D");
     pAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
@@ -319,10 +319,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws2D =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
-    API::NumericAxis *pAxis = new API::NumericAxis(3);
+    auto pAxis = std::make_unique<API::NumericAxis>(3);
     pAxis->setUnit("DeltaE");
 
-    ws2D->replaceAxis(0, pAxis);
+    ws2D->replaceAxis(0, std::move(pAxis));
 
     pAlg->setPropertyValue("OutputWorkspace", "WS5DQ3D");
     pAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
@@ -444,7 +444,7 @@ public:
   }
 
   ConvertToMDTest() {
-    pAlg = Mantid::Kernel::make_unique<Convert2AnyTestHelper>();
+    pAlg = std::make_unique<Convert2AnyTestHelper>();
     Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
         createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
@@ -572,6 +572,9 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr inWs2D;
   Mantid::API::MatrixWorkspace_sptr inWsEv;
 
+  Mantid::MDAlgorithms::ConvertToMD convertAlgDefault;
+  Mantid::MDAlgorithms::ConvertToMD convertAlgIndexed;
+
   WorkspaceCreationHelper::MockAlgorithm reporter;
 
   boost::shared_ptr<ConvToMDBase> pConvMethods;
@@ -590,9 +593,9 @@ public:
 
   void test_EventNoUnitsConv() {
 
-    NumericAxis *pAxis0 = new NumericAxis(2);
+    auto pAxis0 = std::make_unique<API::NumericAxis>(2);
     pAxis0->setUnit("DeltaE");
-    inWsEv->replaceAxis(0, pAxis0);
+    inWsEv->replaceAxis(0, std::move(pAxis0));
 
     MDWSDescription WSD;
     std::vector<double> min(4, -1e+30), max(4, 1e+30);
@@ -626,9 +629,9 @@ public:
 
   void test_EventFromTOFConv() {
 
-    NumericAxis *pAxis0 = new NumericAxis(2);
+    auto pAxis0 = std::make_unique<API::NumericAxis>(2);
     pAxis0->setUnit("TOF");
-    inWsEv->replaceAxis(0, pAxis0);
+    inWsEv->replaceAxis(0, std::move(pAxis0));
 
     MDWSDescription WSD;
     std::vector<double> min(4, -1e+30), max(4, 1e+30);
@@ -660,11 +663,12 @@ public:
         "Time to complete: <EventWSType,Q3D,Indir,ConvFromTOF,CrystType>: " +
         boost::lexical_cast<std::string>(sec) + " sec");
   }
+
   void test_HistoFromTOFConv() {
 
-    NumericAxis *pAxis0 = new NumericAxis(2);
+    auto pAxis0 = std::make_unique<API::NumericAxis>(2);
     pAxis0->setUnit("TOF");
-    inWs2D->replaceAxis(0, pAxis0);
+    inWs2D->replaceAxis(0, std::move(pAxis0));
 
     MDWSDescription WSD;
     std::vector<double> min(4, -1e+30), max(4, 1e+30);
@@ -702,9 +706,9 @@ public:
 
   void test_HistoNoUnitsConv() {
 
-    NumericAxis *pAxis0 = new NumericAxis(2);
+    auto pAxis0 = std::make_unique<API::NumericAxis>(2);
     pAxis0->setUnit("DeltaE");
-    inWs2D->replaceAxis(0, pAxis0);
+    inWs2D->replaceAxis(0, std::move(pAxis0));
 
     MDWSDescription WSD;
     std::vector<double> min(4, -1e+30), max(4, 1e+30);
@@ -740,6 +744,26 @@ public:
         boost::lexical_cast<std::string>(sec) + " sec");
   }
 
+  void test_EventFromTOFConvBuildTreeDefault() { convertAlgDefault.execute(); }
+
+  void test_EventFromTOFConvBuildTreeIndexed() { convertAlgIndexed.execute(); }
+
+  static void setUpConvAlg(Mantid::MDAlgorithms::ConvertToMD &convAlg,
+                           const std::string &type, const std::string &inName) {
+    static uint32_t cnt = 0;
+    std::vector<int> splits(3, 2);
+    convAlg.initialize();
+    convAlg.setProperty("SplitInto", splits);
+    convAlg.setProperty("SplitThreshold", 10);
+    convAlg.setPropertyValue("InputWorkspace", inName);
+    convAlg.setPropertyValue("OutputWorkspace", std::to_string(cnt++) + "_ws");
+    convAlg.setProperty("QDimensions", "Q3D");
+    convAlg.setProperty("dEAnalysisMode", "Elastic");
+    convAlg.setProperty("Q3DFrames", "Q_lab");
+    convAlg.setProperty("ConverterType", type);
+    convAlg.setRethrows(true);
+  }
+
   ConvertToMDTestPerformance() : Rot(3, 3) {
     numHist = 100 * 100;
     size_t nEvents = 1000;
@@ -758,7 +782,7 @@ public:
     inWs2D->mutableRun().addProperty("Ei", 12., "meV", true);
     API::AnalysisDataService::Instance().addOrReplace("TestMatrixWS", inWs2D);
 
-    auto pAlg = Mantid::Kernel::make_unique<PreprocessDetectorsToMD>();
+    auto pAlg = std::make_unique<PreprocessDetectorsToMD>();
     pAlg->initialize();
 
     pAlg->setPropertyValue("InputWorkspace", "TestMatrixWS");
@@ -795,8 +819,25 @@ public:
     Rot.toRotation();
 
     // this will be used to display progress
-    pMockAlgorithm =
-        Mantid::Kernel::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
+    pMockAlgorithm = std::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
+
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "CreateSampleWorkspace");
+    alg->initialize();
+    alg->setProperty("WorkspaceType", "Event");
+    alg->setProperty("Function", "Flat background");
+    alg->setProperty("XMin", 10000.0);
+    alg->setProperty("XMax", 100000.0);
+    alg->setProperty("NumEvents", 1000);
+    alg->setProperty("BankPixelWidth", 20);
+    alg->setProperty("Random", false);
+    std::string inWsSampleName = "dummy";
+    alg->setPropertyValue("OutputWorkspace", inWsSampleName);
+    alg->setRethrows(true);
+    alg->execute();
+
+    setUpConvAlg(convertAlgDefault, "Default", inWsSampleName);
+    setUpConvAlg(convertAlgIndexed, "Indexed", inWsSampleName);
   }
 };
 

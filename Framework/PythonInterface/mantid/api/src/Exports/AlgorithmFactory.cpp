@@ -114,9 +114,10 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   }
   boost::python::object classType(handle<>(borrowed(classObject)));
   // Takes ownership of instantiator and replaces any existing algorithm
+  std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> temp =
+      std::make_unique<PythonObjectInstantiator<Algorithm>>(classType);
   auto descr =
-      self.subscribe(new PythonObjectInstantiator<Algorithm>(classType),
-                     AlgorithmFactoryImpl::OverwriteCurrent);
+      self.subscribe(std::move(temp), AlgorithmFactoryImpl::OverwriteCurrent);
 
   // Python algorithms cannot yet act as loaders so remove any registered ones
   // from the FileLoaderRegistry
@@ -170,6 +171,8 @@ void export_AlgorithmFactory() {
            (arg("self"), arg("name"), arg("version")),
            "Returns the highest version of the named algorithm. Throws "
            "ValueError if no algorithm can be found")
+      .def("enableNotifications", &AlgorithmFactoryImpl::enableNotifications)
+      .def("disableNotifications", &AlgorithmFactoryImpl::disableNotifications)
 
       .def("Instance", &AlgorithmFactory::Instance,
            return_value_policy<reference_existing_object>(),

@@ -86,7 +86,7 @@ public:
     const double lambdaBefore(2.5), lambdaAfter(3.5);
     const V3D endPos(0.7, 0.7, 1.4);
     TS_ASSERT_THROWS(mcabs.calculate(rng, endPos, lambdaBefore, lambdaAfter),
-                     std::runtime_error)
+                     const std::runtime_error &)
   }
 
 private:

@@ -36,6 +36,7 @@
 #include "Folder.h"
 #include "FunctionCurve.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "MyParser.h"
 #include "PatternBox.h"
 #include "PenStyleBox.h"
@@ -46,10 +47,9 @@
 #include "SymbolBox.h"
 #include "Table.h"
 #include "VectorCurve.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateTime>

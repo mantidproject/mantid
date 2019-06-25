@@ -86,11 +86,10 @@ FileEventDataListener::~FileEventDataListener() {
   if (AnalysisDataService::Instance().doesExist(m_tempWSname)) {
     AnalysisDataService::Instance().remove(m_tempWSname);
   }
-  // Don't leak memory
-  delete m_chunkload;
 }
 
-bool FileEventDataListener::connect(const Poco::Net::SocketAddress &) {
+bool FileEventDataListener::connect(
+    const Poco::Net::SocketAddress & /*address*/) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }
@@ -147,7 +146,6 @@ boost::shared_ptr<Workspace> FileEventDataListener::extractData() {
   // Remove the workspace from the ADS now we've extracted it
   AnalysisDataService::Instance().remove(m_tempWSname);
   // Delete the ActiveResult to signify that we're done with it.
-  delete m_chunkload;
   m_chunkload = nullptr;
   // Kick off the loading of the next chunk (unless we're at the end of the
   // file)
@@ -179,7 +177,8 @@ void FileEventDataListener::loadChunk() {
   }
   m_loader->setPropertyValue("OutputWorkspace",
                              m_tempWSname); // Goes into 'hidden' workspace
-  m_chunkload = new Poco::ActiveResult<bool>(m_loader->executeAsync());
+  m_chunkload =
+      std::make_unique<Poco::ActiveResult<bool>>(m_loader->executeAsync());
 }
 
 } // namespace LiveData

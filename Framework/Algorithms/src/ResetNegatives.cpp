@@ -35,18 +35,18 @@ const std::string ResetNegatives::category() const {
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::Algorithm::init()
 void ResetNegatives::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
   declareProperty(
       "AddMinimum", true,
       "Add the minimum value of the spectrum to bring it up to zero.");
   declareProperty("ResetValue", 0.,
                   "Reset negative values to this number (default=0)");
-  setPropertySettings("ResetValue", make_unique<EnabledWhenProperty>(
+  setPropertySettings("ResetValue", std::make_unique<EnabledWhenProperty>(
                                         "AddMinimum", IS_NOT_DEFAULT));
 }
 
@@ -77,12 +77,12 @@ void ResetNegatives::exec() {
     g_log.information() << "No values are negative. Copying InputWorkspace to "
                            "OutputWorkspace\n";
     if (inputWS != outputWS) {
-      IAlgorithm_sptr alg =
+      IAlgorithm_sptr clone =
           this->createChildAlgorithm("CloneWorkspace", .1, 1.);
-      alg->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
-      alg->executeAsChildAlg();
+      clone->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
+      clone->executeAsChildAlg();
 
-      Workspace_sptr temp = alg->getProperty("OutputWorkspace");
+      Workspace_sptr temp = clone->getProperty("OutputWorkspace");
       setProperty("OutputWorkspace",
                   boost::dynamic_pointer_cast<MatrixWorkspace>(temp));
     }

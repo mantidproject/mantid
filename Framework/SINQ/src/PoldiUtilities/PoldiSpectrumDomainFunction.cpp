@@ -274,13 +274,13 @@ void PoldiSpectrumDomainFunction::beforeDecoratedFunctionSet(
  */
 std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(
     const PoldiAbstractChopper_sptr &chopper) {
+  const auto zeroOffset = chopper->zeroOffset();
   const std::vector<double> &chopperSlitTimes = chopper->slitTimes();
   std::vector<double> offsets;
   offsets.reserve(chopperSlitTimes.size());
-  for (double chopperSlitTime : chopperSlitTimes) {
-    offsets.push_back(chopperSlitTime + chopper->zeroOffset());
+  for (const double chopperSlitTime : chopperSlitTimes) {
+    offsets.emplace_back(chopperSlitTime + zeroOffset);
   }
-
   return offsets;
 }
 

@@ -88,11 +88,15 @@ public:
 
   std::string value() const override;
 
+  Json::Value valueAsJson() const override;
+
   bool isValueSerializable() const override;
 
   std::string getDefault() const override;
 
   std::string setValue(const std::string &value) override;
+
+  std::string setValueFromJson(const Json::Value &value) override;
 
   std::string
   setDataItem(const boost::shared_ptr<Kernel::DataItem> value) override;

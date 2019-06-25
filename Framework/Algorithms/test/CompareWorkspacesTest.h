@@ -657,8 +657,8 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
         WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    Mantid::API::Axis *const newAxis = new Mantid::API::NumericAxis(2);
-    ws2->replaceAxis(1, newAxis);
+    auto newAxis = std::make_unique<Mantid::API::NumericAxis>(2);
+    ws2->replaceAxis(1, std::move(newAxis));
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -732,14 +732,15 @@ public:
         WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     // Put numeric axes on these workspaces as checkAxes won't test values on
     // spectra axes
-    Axis *newAxisWS1 = new NumericAxis(ws1local->getAxis(1)->length());
+    auto newAxisWS1 =
+        std::make_unique<NumericAxis>(ws1local->getAxis(1)->length());
     newAxisWS1->setValue(0, 1);
     newAxisWS1->setValue(1, 2);
-    Axis *newAxisWS2 = new NumericAxis(ws2->getAxis(1)->length());
+    auto newAxisWS2 = std::make_unique<NumericAxis>(ws2->getAxis(1)->length());
     newAxisWS2->setValue(0, 1);
     newAxisWS2->setValue(1, 2);
-    ws1local->replaceAxis(1, newAxisWS1);
-    ws2->replaceAxis(1, newAxisWS2);
+    ws1local->replaceAxis(1, std::move(newAxisWS1));
+    ws2->replaceAxis(1, std::move(newAxisWS2));
 
     // Check that it's all good
     TS_ASSERT((Mantid::API::equals(ws1local, ws2)));
@@ -1007,6 +1008,33 @@ public:
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
         "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Log mismatch");
+  }
+
+  void testSameLogsButInDifferentOrder() {
+    MatrixWorkspace_sptr ws1 =
+        WorkspaceCreationHelper::create2DWorkspace123(1, 1);
+    MatrixWorkspace_sptr ws2 = ws1->clone();
+    ws1->mutableRun().addProperty("property1", 1);
+    ws1->mutableRun().addProperty("property2", 2);
+    // Add same properties to ws2 but in reverse order.
+    ws2->mutableRun().addProperty("property2", 2);
+    ws2->mutableRun().addProperty("property1", 1);
+    CompareWorkspaces compare;
+    compare.initialize();
+    compare.setChild(true);
+    compare.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace1", ws1))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws2))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckType", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckAxes", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckSpectraMap", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckInstrument", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckMasking", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckSample", true))
+    TS_ASSERT_THROWS_NOTHING(compare.execute())
+    TS_ASSERT(compare.isExecuted())
+    const bool workspacesMatch = compare.getProperty("Result");
+    TS_ASSERT(workspacesMatch)
   }
 
   void test_Input_With_Two_Groups_That_Are_The_Same_Matches() {

@@ -29,7 +29,7 @@
 
 #include <boost/weak_ptr.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/ActiveMethod.h>
 #include <Poco/ActiveResult.h>
 #include <Poco/NotificationCenter.h>
@@ -105,7 +105,7 @@ Algorithm::Algorithm()
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
       m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
-      m_communicator(Kernel::make_unique<Parallel::Communicator>()) {}
+      m_communicator(std::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {}
@@ -487,17 +487,10 @@ void Algorithm::unlockWorkspaces() {
 }
 
 //---------------------------------------------------------------------------------------------
-/** The actions to be performed by the algorithm on a dataset. This method is
- *  invoked for top level algorithms by the application manager.
- *  This method invokes exec() method.
- *  For Child Algorithms either the execute() method or exec() method
- *  must be EXPLICITLY invoked by the parent algorithm.
- *
- *  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be
- *executed
- *  @return true if executed successfully.
+/** Invoced internally in execute()
  */
-bool Algorithm::execute() {
+
+bool Algorithm::executeInternal() {
   Timer timer;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
@@ -956,36 +949,35 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
 /** De-serializes the algorithm from a string
  *
  * @param input :: An input string in the format. The format is
- *        AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is
- *not found the
- *        highest found is used.
+ * AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is
+ * not found the highest found is used.
  * @return A pointer to a managed algorithm object
+ * @throws std::runtime_error if the algorithm cannot be created
  */
 IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
   ::Json::Value root;
   ::Json::Reader reader;
-
   if (reader.parse(input, root)) {
-    const std::string algName = root["name"].asString();
-    int version = 0;
-    try {
-      version = root["version"].asInt();
-    } catch (std::runtime_error &) {
-      // do nothing - the next test will catch it
-    }
-    if (version == 0)
-      version = -1;
-
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged(algName, version);
-    alg->initialize();
-
-    // get properties
-    alg->setProperties(root["properties"]);
-    return alg;
+    return fromJson(root);
   } else {
     throw std::runtime_error("Cannot create algorithm, invalid string format.");
   }
+}
+
+/**
+ * De-serializes the algorithm from a Json object
+ * @param serialized A reference to Json::Value that contains a serialized
+ * algorithm object
+ * @return A new algorithm object
+ * @throws std::runtime_error if the algorithm cannot be created
+ */
+IAlgorithm_sptr Algorithm::fromJson(const Json::Value &serialized) {
+  const std::string algName = serialized["name"].asString();
+  const int version = serialized.get("version", -1).asInt();
+  auto alg = AlgorithmManager::Instance().createUnmanaged(algName, version);
+  alg->initialize();
+  alg->setProperties(serialized["properties"]);
+  return alg;
 }
 
 //-------------------------------------------------------------------------
@@ -1631,7 +1623,7 @@ Poco::ActiveResult<bool> Algorithm::executeAsync() {
  * @param i :: Unused argument
  * @return true if executed successfully.
  */
-bool Algorithm::executeAsyncImpl(const Poco::Void &) {
+bool Algorithm::executeAsyncImpl(const Poco::Void & /*unused*/) {
   AsyncFlagHolder running(m_runningAsync);
   return this->execute();
 }
@@ -1921,7 +1913,7 @@ const Parallel::Communicator &Algorithm::communicator() const {
 
 /// Sets the (MPI) communicator of the algorithm.
 void Algorithm::setCommunicator(const Parallel::Communicator &communicator) {
-  m_communicator = Kernel::make_unique<Parallel::Communicator>(communicator);
+  m_communicator = std::make_unique<Parallel::Communicator>(communicator);
 }
 
 //---------------------------------------------------------------------------

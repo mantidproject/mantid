@@ -475,7 +475,7 @@
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Save</string>
+              <string>Save Result</string>
              </property>
             </widget>
            </item>
@@ -498,7 +498,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

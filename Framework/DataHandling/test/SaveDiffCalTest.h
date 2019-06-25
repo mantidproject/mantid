@@ -46,12 +46,22 @@ public:
     return ComponentCreationHelper::createTestInstrumentCylindrical(NUM_BANK);
   }
 
-  GroupingWorkspace_sptr createGrouping(Instrument_sptr instr) {
+  GroupingWorkspace_sptr createGrouping(Instrument_sptr instr,
+                                        bool single = true) {
     GroupingWorkspace_sptr groupWS =
         boost::make_shared<GroupingWorkspace>(instr);
-    groupWS->setValue(1, 12);
-    groupWS->setValue(2, 23);
-    groupWS->setValue(3, 45);
+    if (single) {
+      // set all of the groups to one
+      size_t numHist = groupWS->getNumberHistograms();
+      for (size_t i = 0; i < numHist; ++i) {
+        const auto &detIds = groupWS->getDetectorIDs(i);
+        groupWS->setValue(*(detIds.begin()), 1);
+      }
+    } else {
+      groupWS->setValue(1, 12);
+      groupWS->setValue(2, 23);
+      groupWS->setValue(3, 45);
+    }
     return groupWS;
   }
 
@@ -93,7 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", FILENAME));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -110,7 +120,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", FILENAME));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", calWS));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

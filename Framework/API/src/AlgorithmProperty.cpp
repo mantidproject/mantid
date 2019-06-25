@@ -10,6 +10,8 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Algorithm.h"
 
+#include <json/value.h>
+
 namespace Mantid {
 namespace API {
 
@@ -29,29 +31,20 @@ AlgorithmProperty::AlgorithmProperty(const std::string &propName,
                                      unsigned int direction)
     : Kernel::PropertyWithValue<HeldType>(propName, HeldType(), validator,
                                           direction),
-      m_algStr("") {}
-
-/**
- * Copy constructor
- */
-AlgorithmProperty::AlgorithmProperty(const AlgorithmProperty &rhs)
-    : Kernel::PropertyWithValue<HeldType>(rhs) {}
-
-/**
- * Copy-Assignment operator
- */
-AlgorithmProperty &AlgorithmProperty::operator=(const AlgorithmProperty &rhs) {
-  if (&rhs != this) {
-    Kernel::PropertyWithValue<HeldType>::operator=(rhs);
-  }
-  return *this;
-}
+      m_algmStr() {}
 
 /**
  * Return the algorithm as string
  * @returns The algorithm serialized as a string
  */
-std::string AlgorithmProperty::value() const { return m_algStr; }
+std::string AlgorithmProperty::value() const { return m_algmStr; }
+
+/**
+ * @return A Json::Value objectValue encoding the algorithm
+ */
+Json::Value AlgorithmProperty::valueAsJson() const {
+  return (*this)()->toJson();
+}
 
 /**
  * Get the default
@@ -67,19 +60,44 @@ std::string AlgorithmProperty::getDefault() const { return ""; }
  * contain the error
  */
 std::string AlgorithmProperty::setValue(const std::string &value) {
+  try {
+    return setBaseValue(Algorithm::fromString(value));
+  } catch (std::exception &exc) {
+    return exc.what();
+  }
+}
+
+/**
+ * Set the value of the algorithm property from a Json value
+ * @param value A reference
+ * @return An empty string if the value is valid, otherwise the string will
+ * contain the error
+ */
+std::string AlgorithmProperty::setValueFromJson(const Json::Value &value) {
+  try {
+    return setBaseValue(Algorithm::fromJson(value));
+  } catch (std::exception &exc) {
+    return exc.what();
+  }
+}
+
+/**
+ * Set the value from the algorithm pointer
+ * @param algm
+ * @return An empty string if the value is valid, otherwise the string will
+ * contain the error
+ */
+std::string
+AlgorithmProperty::setBaseValue(const AlgorithmProperty::HeldType &algm) {
   std::string message;
   try {
-    Kernel::PropertyWithValue<IAlgorithm_sptr>::m_value =
-        Algorithm::fromString(value);
-  } catch (Kernel::Exception::NotFoundError &e) {
-    message = e.what();
-  } catch (std::runtime_error &e) {
+    Kernel::PropertyWithValue<IAlgorithm_sptr>::m_value = algm;
+  } catch (std::exception &e) {
     message = e.what();
   }
 
   if (message.empty()) {
-    m_algStr = value;
-    // Check against validators
+    m_algmStr = algm->toString();
     return isValid();
   } else
     return message;

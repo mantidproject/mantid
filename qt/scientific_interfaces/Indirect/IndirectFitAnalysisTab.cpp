@@ -13,7 +13,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -52,10 +52,10 @@ void updateParameters(
 void updateAttributes(
     IFunction_sptr function, std::vector<std::string> const &attributeNames,
     std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
-  for (auto i = 0u; i < attributeNames.size(); ++i) {
-    auto const value = attributes.find(attributeNames[i]);
+  for (const auto &attributeName : attributeNames) {
+    auto const value = attributes.find(attributeName);
     if (value != attributes.end())
-      function->setAttribute(attributeNames[i], value->second);
+      function->setAttribute(attributeName, value->second);
   }
 }
 
@@ -130,7 +130,7 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
   connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
-          SLOT(updateAvailableFitTypes()));
+          SIGNAL(updateAvailableFitTypes()));
 
   connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this,
           SLOT(plotSelectedSpectra()));
@@ -273,21 +273,20 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 }
 
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter = Mantid::Kernel::make_unique<IndirectFitPlotPresenter>(
-      m_fittingModel.get(), view);
+  m_plotPresenter =
+      std::make_unique<IndirectFitPlotPresenter>(m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
     IndirectSpectrumSelectionView *view) {
-  m_spectrumPresenter =
-      Mantid::Kernel::make_unique<IndirectSpectrumSelectionPresenter>(
-          m_fittingModel.get(), view);
+  m_spectrumPresenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
+      m_fittingModel.get(), view);
 }
 
 void IndirectFitAnalysisTab::setOutputOptionsView(
     IIndirectFitOutputOptionsView *view) {
   m_outOptionsPresenter =
-      Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(view);
+      std::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(
@@ -300,20 +299,46 @@ void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
   m_dataPresenter->loadSettings(settings);
 }
 
-void IndirectFitAnalysisTab::setSampleWSSuffices(const QStringList &suffices) {
+void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
+  auto const tab = tabName();
+  setSampleSuffixes(tab, filter);
+  if (hasResolution())
+    setResolutionSuffixes(tab, filter);
+}
+
+void IndirectFitAnalysisTab::setSampleSuffixes(std::string const &tab,
+                                               bool filter) {
+  QStringList const noSuffixes{""};
+  setSampleWSSuffixes(filter ? getSampleWSSuffixes(tab) : noSuffixes);
+  setSampleFBSuffixes(filter ? getSampleFBSuffixes(tab) : getExtensions(tab));
+  m_dataPresenter->setMultiInputSampleWSSuffixes();
+  m_dataPresenter->setMultiInputSampleFBSuffixes();
+}
+
+void IndirectFitAnalysisTab::setResolutionSuffixes(std::string const &tab,
+                                                   bool filter) {
+  QStringList const noSuffixes{""};
+  setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tab) : noSuffixes);
+  setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tab)
+                                 : getExtensions(tab));
+  m_dataPresenter->setMultiInputResolutionWSSuffixes();
+  m_dataPresenter->setMultiInputResolutionFBSuffixes();
+}
+
+void IndirectFitAnalysisTab::setSampleWSSuffixes(const QStringList &suffices) {
   m_dataPresenter->setSampleWSSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setSampleFBSuffices(const QStringList &suffices) {
+void IndirectFitAnalysisTab::setSampleFBSuffixes(const QStringList &suffices) {
   m_dataPresenter->setSampleFBSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setResolutionWSSuffices(
+void IndirectFitAnalysisTab::setResolutionWSSuffixes(
     const QStringList &suffices) {
   m_dataPresenter->setResolutionWSSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setResolutionFBSuffices(
+void IndirectFitAnalysisTab::setResolutionFBSuffixes(
     const QStringList &suffices) {
   m_dataPresenter->setResolutionFBSuffices(suffices);
 }
@@ -398,12 +423,12 @@ void IndirectFitAnalysisTab::setDataTableExclude(const std::string &exclude) {
 }
 
 void IndirectFitAnalysisTab::setBrowserStartX(double startX) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->setStartX(startX);
 }
 
 void IndirectFitAnalysisTab::setBrowserEndX(double endX) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->setEndX(endX);
 }
 
@@ -453,7 +478,7 @@ void IndirectFitAnalysisTab::tableEndXChanged(double endX,
   }
 }
 
-void IndirectFitAnalysisTab::tableExcludeChanged(const std::string &,
+void IndirectFitAnalysisTab::tableExcludeChanged(const std::string & /*unused*/,
                                                  std::size_t dataIndex,
                                                  std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum))
@@ -793,7 +818,7 @@ void IndirectFitAnalysisTab::updateAttributeValues(
  * Updates the attribute values in the the fit property browser.
  */
 void IndirectFitAnalysisTab::updateFitBrowserAttributeValues() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->updateAttributes();
 }
 
@@ -848,7 +873,7 @@ void IndirectFitAnalysisTab::updateParameterValues(
 }
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->updateParameters();
 }
 
@@ -878,7 +903,7 @@ void IndirectFitAnalysisTab::plotSelectedSpectra() {
 void IndirectFitAnalysisTab::plotSelectedSpectra(
     std::vector<SpectrumToPlot> const &spectra) {
   for (auto const &spectrum : spectra)
-    plotSpectrum(spectrum.first, spectrum.second, true);
+    plotSpectrum(spectrum.first, spectrum.second);
   m_outOptionsPresenter->clearSpectraToPlot();
 }
 
@@ -889,10 +914,9 @@ void IndirectFitAnalysisTab::plotSelectedSpectra(
  * @errorBars :: true if you want error bars to be plotted
  */
 void IndirectFitAnalysisTab::plotSpectrum(std::string const &workspaceName,
-                                          std::size_t const &index,
-                                          bool errorBars) {
+                                          std::size_t const &index) {
   IndirectTab::plotSpectrum(QString::fromStdString(workspaceName),
-                            static_cast<int>(index), errorBars);
+                            static_cast<int>(index));
 }
 
 /**
@@ -998,7 +1022,8 @@ void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
     m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
 
   m_outOptionsPresenter->setPlotEnabled(
-      enable && m_outOptionsPresenter->isResultGroupPlottable());
+      enable && m_outOptionsPresenter->isSelectedGroupPlottable());
+  m_outOptionsPresenter->setEditResultEnabled(enable);
   m_outOptionsPresenter->setSaveEnabled(enable);
 }
 
@@ -1017,6 +1042,14 @@ void IndirectFitAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
   } else
     m_outOptionsPresenter->removePDFWorkspace();
   m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enablePDFOptions);
+}
+
+/**
+ * Sets the visiblity of the output options Edit Result button
+ * @param visible :: true to make the edit result button visible
+ */
+void IndirectFitAnalysisTab::setEditResultVisible(bool visible) {
+  m_outOptionsPresenter->setEditResultVisible(visible);
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
@@ -1082,6 +1115,7 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   if (isFit)
     m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
   m_outOptionsPresenter->setPlotEnabled(isFit);
+  m_outOptionsPresenter->setEditResultEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }
 

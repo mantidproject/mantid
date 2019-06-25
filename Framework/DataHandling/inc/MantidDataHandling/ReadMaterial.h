@@ -16,6 +16,7 @@ class Material;
 }
 namespace DataHandling {
 using ValidationErrors = std::map<std::string, std::string>;
+
 /**
     This class contains code for interpreting a material input for
    SetSampleMaterial, validating the parameters before sending them on to
@@ -43,6 +44,10 @@ public:
     double unitCellVolume = EMPTY_DBL();
     /// The sample mass density to set, defaults to EMPTY_DBL()
     double sampleMassDensity = EMPTY_DBL();
+    /// The sample mass to set, defaults to EMPTY_DBL()
+    double sampleMass = EMPTY_DBL();
+    /// The sample volume to set, defaults to EMPTY_DBL()
+    double sampleVolume = EMPTY_DBL();
     /// The coherent scattering cross section to set, defaults to EMPTY_DBL()
     double coherentXSection = EMPTY_DBL();
     /// The incoherent scattering cross section to set, defaults to EMPTY_DBL()
@@ -51,6 +56,9 @@ public:
     double attenuationXSection = EMPTY_DBL();
     /// The total scattering cross section to set, defaults to EMPTY_DBL()
     double scatteringXSection = EMPTY_DBL();
+    /// A flag indicating the unit of sampleNumberDensity
+    Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
+        Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
   };
   /**
    * Validate the parameters to build the material from, this returns
@@ -84,8 +92,10 @@ private:
   void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
                    const int massNumber);
 
-  void setNumberDensity(const double rho_m, const double rho,
-                        const double zParameter, const double unitCellVolume);
+  void
+  setNumberDensity(const double rho_m, const double rho,
+                   const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
+                   const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
                          double attenuationXSection, double scatteringXSection);
 

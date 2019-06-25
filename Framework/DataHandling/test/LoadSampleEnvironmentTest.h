@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 19 properties here", 19,
+    TSM_ASSERT_EQUALS("should be 23 properties here", 23,
                       (size_t)(alg.getProperties().size()));
   }
 
@@ -45,14 +45,14 @@ public:
     LoadSampleEnvironment alg;
     alg.initialize();
     alg.setProperty("TranslationVector", "5,5,15");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
-    alg.translate(environmentMesh);
+
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    alg.translate(environmentMesh, ScaleUnits::metres);
     auto translatedVertices = environmentMesh->getVertices();
-    double arrayToMatch[] = {0,  0, 0,  10, 10, 0,  10, 0,  0,  0, 10, 0,
-                             10, 0, 30, 10, 10, 30, 0,  10, 30, 0, 0,  30};
-    std::vector<double> vectorToMatch =
-        std::vector<double>(std::begin(arrayToMatch), std::end(arrayToMatch));
+
+    std::vector<double> vectorToMatch = {0,  0,  0,  10, 10, 0, 10, 0,
+                                         0,  0,  10, 0,  10, 0, 30, 10,
+                                         10, 30, 0,  10, 30, 0, 0,  30};
     TS_ASSERT(translatedVertices == vectorToMatch);
   }
 
@@ -60,44 +60,132 @@ public:
     LoadSampleEnvironment alg;
     alg.initialize();
     alg.setProperty("TranslationVector", "-1,0,1,0,0,0,0,1");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
-    TS_ASSERT_THROWS(alg.translate(environmentMesh), std::invalid_argument &);
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    TS_ASSERT_THROWS(alg.translate(environmentMesh, ScaleUnits::metres),
+                     const std::invalid_argument &);
   }
 
-  void testRotate() {
+  void testGenerateXRotation() {
     LoadSampleEnvironment alg;
     alg.initialize();
-    alg.setProperty("RotationMatrix", "0,-1,0,1,0,0,0,0,1");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
+    alg.setProperty("XDegrees", 90.0);
+    auto rotationMatrix = alg.generateXRotation();
+    std::vector<double> vectorToMatch = {1, 0, 0, 0, 0, -1, 0, 1, 0};
+    compareMatrix(vectorToMatch, rotationMatrix);
+  }
+
+  void testGenerateYRotation() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("YDegrees", 90.0);
+    auto rotationMatrix = alg.generateYRotation();
+    std::vector<double> vectorToMatch = {0, 0, 1, 0, 1, 0, -1, 0, 0};
+    compareMatrix(vectorToMatch, rotationMatrix);
+  }
+
+  void testGenerateZRotation() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("ZDegrees", 90.0);
+    auto rotationMatrix = alg.generateZRotation();
+    std::vector<double> vectorToMatch = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+    compareMatrix(vectorToMatch, rotationMatrix);
+  }
+
+  void testGenerateRotationMatrix() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("XDegrees", 90.0);
+    alg.setProperty("YDegrees", 60.0);
+    alg.setProperty("ZDegrees", 30.0);
+    auto rotationMatrix = alg.generateMatrix();
+    std::vector<double> vectorToMatch = {0.4330127,  0.7500000, 0.5000000,
+                                         0.2500000,  0.4330127, -0.8660254,
+                                         -0.8660254, 0.5000000, 0.0000000};
+    compareMatrix(vectorToMatch, rotationMatrix);
+  }
+
+  void testXRotation() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("XDegrees", "45");
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
     alg.rotate(environmentMesh);
-    auto rotatedVertices = environmentMesh->getVertices();
-    double arrayToMatch[] = {5, -5, -15, -5, 5, -15, 5,  5,  -15, -5, -5, -15,
-                             5, 5,  15,  -5, 5, 15,  -5, -5, 15,  5,  -5, 15};
-    std::vector<double> vectorToMatch =
-        std::vector<double>(std::begin(arrayToMatch), std::end(arrayToMatch));
-    TS_ASSERT(rotatedVertices == vectorToMatch);
+    std::vector<double> rotatedVertices = environmentMesh->getVertices();
+    std::vector<double> vectorToMatch = {
+        -5, 7.07106,    -14.142136, 5,  14.142136,  -7.07106,
+        5,  7.07106,    -14.142136, -5, 14.142136,  -7.07106,
+        5,  -14.142136, 7.07106,    5,  -7.07106,   14.142136,
+        -5, -7.07106,   14.142136,  -5, -14.142136, 7.07106};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
   }
-
-  void testRotateFailWrongSize() {
+  void testYRotation() {
     LoadSampleEnvironment alg;
     alg.initialize();
-    alg.setProperty("RotationMatrix", "-1,0,1,0,0,0,0,1");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
-    TS_ASSERT_THROWS(alg.rotate(environmentMesh), std::invalid_argument);
+    alg.setProperty("YDegrees", "90");
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    alg.rotate(environmentMesh);
+    std::vector<double> rotatedVertices = environmentMesh->getVertices();
+    std::vector<double> vectorToMatch = {-15, -5,  5,  -15, 5,  -5, -15, -5,
+                                         -5,  -15, 5,  5,   15, -5, -5,  15,
+                                         5,   -5,  15, 5,   5,  15, -5,  5};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
   }
 
-  void testRotateFailInvalidMatrix() {
+  void testZRotation() {
     LoadSampleEnvironment alg;
     alg.initialize();
-    alg.setProperty("RotationMatrix", "6,1,1,4,-2,5,2,8,7");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
-    TS_ASSERT_THROWS(alg.rotate(environmentMesh), std::invalid_argument);
+    alg.setProperty("ZDegrees", "180");
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    alg.rotate(environmentMesh);
+    std::vector<double> rotatedVertices = environmentMesh->getVertices();
+    std::vector<double> vectorToMatch = {5,   5,  -15, -5,  -5, -15, -5, 5,
+                                         -15, 5,  -5,  -15, -5, 5,   15, -5,
+                                         -5,  15, 5,   -5,  15, 5,   5,  15};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
   }
 
+  void testMultiRotation() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("XDegrees", "70");
+    alg.setProperty("YDegrees", "20");
+    alg.setProperty("ZDegrees", "35");
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    alg.rotate(environmentMesh);
+    std::vector<double> rotatedVertices = environmentMesh->getVertices();
+    std::vector<double> vectorToMatch = {
+        -13.70635, 5.52235,   -7.52591,  -5.33788,  15.55731,  -2.11589,
+        -6.00884,  10.91220,  -10.94611, -13.03539, 10.16745,  1.30430,
+        13.03539,  -10.16745, -1.30430,  13.70635,  -5.52235,  7.52591,
+        6.00884,   -10.91220, 10.94611,  5.33788,   -15.55731, 2.11589};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
+  }
+
+  void testTranslateAndRotate() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("YDegrees", "90");
+    alg.setProperty("TranslationVector", "0,0,15");
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
+    alg.rotate(environmentMesh);
+    alg.translate(environmentMesh, ScaleUnits::metres);
+    std::vector<double> rotatedVertices = environmentMesh->getVertices();
+    std::vector<double> vectorToMatch = {-15, -5,  20, -15, 5,  10, -15, -5,
+                                         10,  -15, 5,  20,  15, -5, 10,  15,
+                                         5,   10,  15, 5,   20, 15, -5,  20};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
+  }
   void testSetMaterial() {
     LoadSampleEnvironment alg;
     alg.initialize();
@@ -120,22 +208,60 @@ public:
     MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
     const auto &sample(ws->sample());
     const Geometry::SampleEnvironment environment = sample.getEnvironment();
-    const auto can = environment.container();
-    const auto material = can->material();
+    const auto &can = environment.getContainer();
+    const auto &material = can.material();
     TSM_ASSERT_EQUALS(("expected elements"), environment.nelements(), 1);
-    TS_ASSERT(can->hasValidShape());
+    TS_ASSERT(can.hasValidShape());
     TS_ASSERT_EQUALS(environment.name(), "testName");
     TS_ASSERT_EQUALS(material.numberDensity(), 1);
     TS_ASSERT_EQUALS(material.name(), "");
+  }
+
+  void testSetMaterialNumberDensityInFormulaUnits() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    constexpr int nvectors{2}, nbins{10};
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
+                                                                     nbins);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", path))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "outputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("EnvironmentName", "testName"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SetMaterial", true))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ChemicalFormula", "Al2 O3"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SampleNumberDensity", 0.23))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("NumberDensityUnit", "Formula Units"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
+    const auto &material =
+        ws->sample().getEnvironment().getContainer().material();
+    TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12);
   }
 
 private:
   // load a cube into a meshobject
   std::unique_ptr<MeshObject> loadCube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto loader = LoadBinaryStl(path);
+    constexpr ScaleUnits unit = ScaleUnits::metres;
+    auto loader = LoadBinaryStl(path, unit);
     auto cube = loader.readStl();
     return cube;
+  }
+
+  void compareMatrix(const std::vector<double> &vectorToMatch,
+                     const Kernel::Matrix<double> &rotationMatrix) {
+    auto checkVector = rotationMatrix.getVector();
+    for (size_t i = 0; i < 9; ++i) {
+      TS_ASSERT_DELTA(checkVector[i], vectorToMatch[i], 1e-7);
+    }
   }
 };
 

@@ -7,18 +7,17 @@
 #include "JumpFit.h"
 #include "JumpFitDataPresenter.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <string>
 
@@ -46,21 +45,20 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  setFitDataPresenter(Mantid::Kernel::make_unique<JumpFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
       m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+
+  setEditResultVisible(false);
 }
 
 void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
-
-  setSampleWSSuffices({"_Result"});
-  setSampleFBSuffices({"_Result.nxs"});
 
   addFunctions(getWidthFunctions());
   addFunctions(getEISFFunctions());
@@ -72,6 +70,8 @@ void JumpFit::setupFitTab() {
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
   connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateAvailableFitTypes()));
+  connect(this, SIGNAL(updateAvailableFitTypes()), this,
           SLOT(updateAvailableFitTypes()));
 }
 

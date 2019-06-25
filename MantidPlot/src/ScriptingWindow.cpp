@@ -11,10 +11,10 @@
 #include "ApplicationWindow.h"
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "ScriptingEnv.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
@@ -76,7 +76,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
   initMenus();
   readSettings();
 
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
   setWindowTitle("MantidPlot: " + env->languageName() + " Window");
 
 #ifdef Q_OS_MAC

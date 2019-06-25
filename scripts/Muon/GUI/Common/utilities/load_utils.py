@@ -16,6 +16,7 @@ from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+import copy
 
 
 class LoadUtils(object):
@@ -31,6 +32,10 @@ class LoadUtils(object):
             self.setUp(tmpWS)
         else:
             raise RuntimeError("No data loaded. \n Please load data using Muon Analysis")
+
+    @property
+    def version(self):
+        return 1
 
     def setUp(self, tmpWS):
         # get everything from the ADS
@@ -179,7 +184,7 @@ def load_dead_time_from_filename(filename):
     :param filename: The full path to the .nxs file.
     :return: The name of the workspace in the ADS.
     """
-    loaded_data, run, _ = load_workspace_from_filename(filename)
+    loaded_data, run, _, __ = load_workspace_from_filename(filename)
 
     if is_workspace_group(loaded_data["OutputWorkspace"]):
         dead_times = loaded_data["DataDeadTimeTable"][0]
@@ -201,10 +206,10 @@ def load_workspace_from_filename(filename,
                                  input_properties=DEFAULT_INPUTS,
                                  output_properties=DEFAULT_OUTPUTS):
     try:
-        alg = create_load_algorithm(filename, input_properties)
+        alg, psi_data = create_load_algorithm(filename, input_properties)
         alg.execute()
     except:
-        alg = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
+        alg, psi_data = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
         alg.execute()
 
     workspace = alg.getProperty("OutputWorkspace").value
@@ -213,18 +218,29 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
+        if not psi_data:
+            load_result["DataDeadTimeTable"] = copy.copy(load_result["DeadTimeTable"][0])
+            load_result["DeadTimeTable"] = None
+            load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+        else:
+            load_result["DataDeadTimeTable"] = None
+            load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
-
-    load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
-    load_result["DeadTimeTable"] = None
+        if not psi_data:
+            load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+            load_result["DeadTimeTable"] = None
+            load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+        else:
+            load_result["DataDeadTimeTable"] = None
+            load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
 
     filename = alg.getProperty("Filename").value
 
-    return load_result, run, filename
+    return load_result, run, filename, psi_data
 
 
 def empty_loaded_data():
@@ -232,13 +248,20 @@ def empty_loaded_data():
 
 
 def create_load_algorithm(filename, property_dictionary):
-    alg = mantid.AlgorithmManager.create("LoadMuonNexus")
+    # Assume if .bin it is a PSI file
+    psi_data = False
+    if ".bin" in filename:
+        alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
+        psi_data = True
+    else:
+        alg = mantid.AlgorithmManager.create("LoadMuonNexus")
+        alg.setProperties(property_dictionary)
+
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperty("Filename", filename)
-    alg.setProperties(property_dictionary)
-    return alg
+    return alg, psi_data
 
 
 def _get_algorithm_properties(alg, property_dict):
@@ -255,27 +278,24 @@ def get_table_workspace_names_from_ADS():
 
 
 def combine_loaded_runs(model, run_list):
-    return_ws = model._loaded_data_store.get_data(run=run_list[0])["workspace"]
+    return_ws = model._loaded_data_store.get_data(run=[run_list[0]])["workspace"]
     running_total = []
 
     for index, workspace in enumerate(return_ws["OutputWorkspace"]):
         running_total.append(workspace.workspace)
 
         for run in run_list[1:]:
-            ws = model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"][index].workspace
+            ws = model._loaded_data_store.get_data(run=[run])["workspace"]["OutputWorkspace"][index].workspace
             running_total[index] = algorithm_utils.run_Plus({
                 "LHSWorkspace": running_total[index],
                 "RHSWorkspace": ws,
                 "AllowDifferentNumberSpectra": False}
             )
-            # remove the single loaded filename
-
-    for run in run_list:
-        model._loaded_data_store.remove_data(run=run)
 
     return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
+    model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._data_context.instrument)
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
-                                      filename="Co-added")
+                                      filename="Co-added", instrument=model._data_context.instrument)
 
 
 def flatten_run_list(run_list):
@@ -293,4 +313,7 @@ def flatten_run_list(run_list):
 
 
 def exception_message_for_failed_files(failed_file_list):
-    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
+    message = "Could not load the following files : \n "
+    for failure in failed_file_list:
+        message += '{} ; {}'.format(os.path.split(failure[0])[-1], failure[1])
+    return message

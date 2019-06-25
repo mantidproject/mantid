@@ -53,8 +53,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
-                                                                     group),
+          std::make_unique<GenericDataProcessorPresenter>(whitelist, group),
           parent) {}
 
 /** Delegating constructor
@@ -67,10 +66,9 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
                                            QWidget *parent, int group)
-    : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, algorithm, group),
-          parent) {}
+    : QDataProcessorWidget(std::make_unique<GenericDataProcessorPresenter>(
+                               whitelist, algorithm, group),
+                           parent) {}
 
 /** Delegating constructor: pre-processing, no post-processing
  * @param whitelist :: [input] The white list
@@ -85,7 +83,7 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
                                            QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+          std::make_unique<GenericDataProcessorPresenter>(
               whitelist, preprocessMap.asMap(), algorithm, group),
           parent) {}
 
@@ -100,10 +98,9 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
-    : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, algorithm, postprocessor, group),
-          parent) {}
+    : QDataProcessorWidget(std::make_unique<GenericDataProcessorPresenter>(
+                               whitelist, algorithm, postprocessor, group),
+                           parent) {}
 
 /** Delegating constructor: pre-processing, post-processing
  * @param whitelist :: [input] The white list
@@ -118,11 +115,10 @@ QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const PreprocessMap &preprocessMap,
     const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
-    : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, preprocessMap.asMap(), algorithm, postprocessor,
-              group),
-          parent) {}
+    : QDataProcessorWidget(std::make_unique<GenericDataProcessorPresenter>(
+                               whitelist, preprocessMap.asMap(), algorithm,
+                               postprocessor, group),
+                           parent) {}
 
 /** Destructor
  */
@@ -165,8 +161,8 @@ void QDataProcessorWidget::addActions(
 
   // Put the commands in the toolbar
   for (auto &command : commands) {
-    m_commands.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
-        ui.rowToolBar, std::move(command)));
+    m_commands.push_back(
+        std::make_unique<QtCommandAdapter>(ui.rowToolBar, std::move(command)));
   }
 
   // Add actions to context menu
@@ -387,8 +383,8 @@ void QDataProcessorWidget::saveSettings(
     const std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
-  for (auto it = options.begin(); it != options.end(); ++it)
-    settings.setValue(it->first, it->second);
+  for (const auto &option : options)
+    settings.setValue(option.first, option.second);
   settings.endGroup();
 }
 
@@ -400,8 +396,8 @@ void QDataProcessorWidget::loadSettings(std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
   QStringList keys = settings.childKeys();
-  for (auto it = keys.begin(); it != keys.end(); ++it)
-    options[*it] = settings.value(*it);
+  for (auto &key : keys)
+    options[key] = settings.value(key);
   settings.endGroup();
 }
 
@@ -440,8 +436,8 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (auto group = groups.begin(); group != groups.end(); ++group) {
-    selectionModel->select(ui.viewTable->model()->index((*group), 0),
+  for (const auto &group : groups) {
+    selectionModel->select(ui.viewTable->model()->index(group, 0),
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
   }
@@ -458,8 +454,8 @@ void QDataProcessorWidget::setInstrumentList(const QString &instruments,
   ui.comboProcessInstrument->clear();
 
   QStringList instrList = instruments.split(",");
-  for (auto it = instrList.begin(); it != instrList.end(); ++it) {
-    ui.comboProcessInstrument->addItem((*it).trimmed());
+  for (auto &instrument : instrList) {
+    ui.comboProcessInstrument->addItem(instrument.trimmed());
   }
 
   int index =
@@ -510,10 +506,10 @@ std::map<int, std::set<int>> QDataProcessorWidget::getSelectedChildren() const {
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
-      if (it->parent().isValid()) {
-        int children = it->row();
-        int parent = it->parent().row();
+    for (auto &selectedRow : selectedRows) {
+      if (selectedRow.parent().isValid()) {
+        int children = selectedRow.row();
+        int parent = selectedRow.parent().row();
         rows[parent].insert(children);
       }
     }
@@ -530,9 +526,9 @@ std::set<int> QDataProcessorWidget::getSelectedParents() const {
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
-      if (!it->parent().isValid()) {
-        parents.insert(it->row());
+    for (auto &selectedRow : selectedRows) {
+      if (!selectedRow.parent().isValid()) {
+        parents.insert(selectedRow.row());
       }
     }
   }
@@ -650,8 +646,8 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
 
   for (auto it = runs.constBegin(); it != runs.constEnd(); ++it) {
     QStringList map = (*it).split(",");
-    for (auto jt = map.begin(); jt != map.end(); ++jt) {
-      QStringList pair = (*jt).split(":");
+    for (auto &jt : map) {
+      QStringList pair = jt.split(":");
 
       // The entry can be of the for "key:value" or of the form "key:" if
       // nothing is to be set in the column.

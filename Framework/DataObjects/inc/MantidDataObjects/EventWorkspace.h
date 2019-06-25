@@ -72,7 +72,10 @@ public:
   // Get the number of histograms. aka the number of pixels or detectors.
   std::size_t getNumberHistograms() const override;
 
-  EventList &getSpectrum(const size_t index) override;
+  EventList &getSpectrum(const size_t index) override {
+    invalidateCommonBinsFlag();
+    return getSpectrumWithoutInvalidation(index);
+  }
   const EventList &getSpectrum(const size_t index) const override;
 
   //------------------------------------------------------------
@@ -161,13 +164,15 @@ private:
     return new EventWorkspace(storageMode());
   }
 
+  EventList &getSpectrumWithoutInvalidation(const size_t index) override;
+
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.
    */
-  std::vector<EventList *> data;
+  std::vector<std::unique_ptr<EventList>> data;
 
   /// Container for the MRU lists of the event lists contained.
-  mutable EventWorkspaceMRU *mru;
+  mutable std::unique_ptr<EventWorkspaceMRU> mru;
 };
 
 /// shared pointer to the EventWorkspace class

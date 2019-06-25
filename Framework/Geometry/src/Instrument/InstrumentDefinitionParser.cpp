@@ -23,7 +23,6 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -966,14 +965,20 @@ void InstrumentDefinitionParser::setValidityRange(
   }
 }
 
-PointingAlong axisNameToAxisType(std::string &input) {
+PointingAlong axisNameToAxisType(const std::string &label, std::string &input) {
   PointingAlong direction;
   if (input == "x") {
     direction = X;
   } else if (input == "y") {
     direction = Y;
-  } else {
+  } else if (input == "z") {
     direction = Z;
+  } else {
+    std::stringstream msg;
+    msg << "Cannot create \"" << label
+        << "\" with axis direction other than \"x\", \"y\", or \"z\", found \""
+        << input << "\"";
+    throw Kernel::Exception::InstrumentDefinitionError(msg.str());
   }
   return direction;
 }
@@ -1079,9 +1084,9 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     }
 
     // Convert to input types
-    PointingAlong alongBeam = axisNameToAxisType(s_alongBeam);
-    PointingAlong pointingUp = axisNameToAxisType(s_pointingUp);
-    PointingAlong thetaSign = axisNameToAxisType(s_thetaSign);
+    PointingAlong alongBeam = axisNameToAxisType("along-beam", s_alongBeam);
+    PointingAlong pointingUp = axisNameToAxisType("pointing-up", s_pointingUp);
+    PointingAlong thetaSign = axisNameToAxisType("theta-sign", s_thetaSign);
     Handedness handedness = s_handedness == "right" ? Right : Left;
 
     // Overwrite the default reference frame.
@@ -1225,10 +1230,11 @@ void InstrumentDefinitionParser::appendAssembly(
           InstrumentDefinitionParser::getParentComponent(pElem);
 
       // check if this location is in the exclude list
-      auto it = find(excludeList.cbegin(), excludeList.cend(),
-                     InstrumentDefinitionParser::getNameOfLocationElement(
-                         pElem, pParentElem));
-      if (it == excludeList.end()) {
+      auto inExcluded =
+          find(excludeList.cbegin(), excludeList.cend(),
+               InstrumentDefinitionParser::getNameOfLocationElement(
+                   pElem, pParentElem));
+      if (inExcluded == excludeList.end()) {
 
         std::string typeName =
             (InstrumentDefinitionParser::getParentComponent(pElem))
@@ -2021,11 +2027,9 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Make the shape defined in 1st argument face the position in the second
- *argument,
- *  by rotating the z-axis of the component passed in 1st argument so that it
- *points in the
- *  direction: from the position (as specified 2nd argument) to the component
- *(1st argument).
+ * argument, by rotating the z-axis of the component passed in 1st argument so
+ * that it points in the direction: from the position (as specified 2nd
+ * argument) to the component (1st argument).
  *
  *  @param in ::  Component to be rotated
  *  @param facingPoint :: position to face
@@ -2036,31 +2040,33 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
 
   // vector from facing object to component we want to rotate
   Kernel::V3D facingDirection = pos - facingPoint;
-  facingDirection.normalize();
-
-  if (facingDirection.norm() == 0.0)
+  const auto facingDirLength = facingDirection.norm();
+  if (facingDirLength == 0.0)
     return;
+  facingDirection /= facingDirLength;
 
   // now aim to rotate shape such that the z-axis of of the object we want to
-  // rotate
-  // points in the direction of facingDirection. That way the XY plane faces
-  // the
-  // 'facing object'.
-  Kernel::V3D z = Kernel::V3D(0, 0, 1);
+  // rotate points in the direction of facingDirection. That way the XY plane
+  // faces the 'facing object'.
+  constexpr Kernel::V3D z(0, 0, 1);
   Kernel::Quat R = in->getRotation();
   R.inverse();
   R.rotate(facingDirection);
 
   Kernel::V3D normal = facingDirection.cross_prod(z);
-  normal.normalize();
+  const auto normalLength = normal.norm();
+  if (normalLength == 0.) {
+    normal = normalize(-facingDirection);
+  } else {
+    normal /= normalLength;
+  }
   double theta = (180.0 / M_PI) * facingDirection.angle(z);
 
   if (normal.norm() > 0.0)
     in->rotate(Kernel::Quat(-theta, normal));
   else {
     // To take into account the case where the facing direction is in the
-    // (0,0,1)
-    // or (0,0,-1) direction.
+    // (0,0,1) or (0,0,-1) direction.
     in->rotate(Kernel::Quat(-theta, Kernel::V3D(0, 1, 0)));
   }
 }
@@ -2404,8 +2410,8 @@ void InstrumentDefinitionParser::setLogfile(
       Poco::AutoPtr<NodeList> pNLpoint = pLookUp->getElementsByTagName("point");
       unsigned long numberPoint = pNLpoint->length();
 
-      for (unsigned long i = 0; i < numberPoint; i++) {
-        Element *pPoint = static_cast<Element *>(pNLpoint->item(i));
+      for (unsigned long j = 0; j < numberPoint; j++) {
+        Element *pPoint = static_cast<Element *>(pNLpoint->item(j));
         double x = attrToDouble(pPoint, "x");
         double y = attrToDouble(pPoint, "y");
         interpolation->addPoint(x, y);
@@ -2681,7 +2687,7 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  auto physical = Kernel::make_unique<Instrument>(*m_instrument);
+  auto physical = std::make_unique<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
   m_instrument->setPhysicalInstrument(std::move(physical));
 
@@ -2815,7 +2821,7 @@ void InstrumentDefinitionParser::adjust(
           " appears at least twice. See www.mantidproject.org/IDF.");
 
     // create dummy component to hold coord. sys. of cuboid
-    CompAssembly *baseCoor = new CompAssembly(
+    auto baseCoor = std::make_unique<CompAssembly>(
         "base"); // dummy assembly used to get to end assembly if nested
     ICompAssembly *endComponent = nullptr; // end assembly, its purpose is to
                                            // hold the shape coordinate system
@@ -2824,27 +2830,23 @@ void InstrumentDefinitionParser::adjust(
     // and nested <location> elements
     // of pLoc
     std::string shapeTypeName =
-        getShapeCoorSysComp(baseCoor, pLoc, getTypeElement, endComponent);
+        getShapeCoorSysComp(baseCoor.get(), pLoc, getTypeElement, endComponent);
 
     // translate and rotate cuboid according to shape coordinate system in
     // endComponent
     std::string cuboidStr = translateRotateXMLcuboid(
         endComponent, getTypeElement[shapeTypeName], locationElementName);
 
-    delete baseCoor;
-
     // if <translate-rotate-combined-shape-to> is specified
     if (pTransRot) {
-      baseCoor = new CompAssembly("base");
+      baseCoor = std::make_unique<CompAssembly>("base");
 
-      setLocation(baseCoor, pTransRot, m_angleConvertConst);
+      setLocation(baseCoor.get(), pTransRot, m_angleConvertConst);
 
       // Translate and rotate shape xml string according to
       // <translate-rotate-combined-shape-to>
-      cuboidStr =
-          translateRotateXMLcuboid(baseCoor, cuboidStr, locationElementName);
-
-      delete baseCoor;
+      cuboidStr = translateRotateXMLcuboid(baseCoor.get(), cuboidStr,
+                                           locationElementName);
     }
 
     DOMParser pParser;
@@ -3007,6 +3009,16 @@ InstrumentDefinitionParser::convertLocationsElement(
         Strings::strip(pElem->getAttribute("name-count-start")));
   }
 
+  int nameCountIncrement(1);
+  if (pElem->hasAttribute("name-count-increment")) {
+    nameCountIncrement = boost::lexical_cast<int>(
+        Strings::strip(pElem->getAttribute("name-count-increment")));
+
+    if (nameCountIncrement <= 0)
+      throw Exception::InstrumentDefinitionError(
+          "name-count-increment must be greater than zero.");
+  }
+
   // A list of numeric attributes which are allowed to have corresponding -end
   std::set<std::string> rangeAttrs = {"x", "y", "z", "r", "t", "p", "rot"};
 
@@ -3065,7 +3077,9 @@ InstrumentDefinitionParser::convertLocationsElement(
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      pLoc->setAttribute("name", name + std::to_string(nameCountStart + i));
+      pLoc->setAttribute(
+          "name",
+          name + std::to_string(nameCountStart + (i * nameCountIncrement)));
     }
 
     // Copy values of all the attributes set

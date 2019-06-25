@@ -81,9 +81,6 @@ double ModeratorChopperResolution::energyWidth(const double deltaE) const {
  * Store required caches
  */
 void ModeratorChopperResolution::initCaches() {
-  Instrument_const_sptr instr = m_observation.experimentInfo().getInstrument();
-  IComponent_const_sptr source = instr->getSource();
-
   m_modChopDist = m_observation.moderatorToFirstChopperDistance();
   m_chopSampleDist = m_observation.firstChopperToSampleDistance();
 }

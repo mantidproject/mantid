@@ -254,7 +254,7 @@ public:
     // just declare so we can have test of exception handling
     vector<double> y;
 
-    TS_ASSERT_THROWS(getMomentsAboutOrigin(x, y), std::out_of_range);
+    TS_ASSERT_THROWS(getMomentsAboutOrigin(x, y), const std::out_of_range &);
 
     // now calculate the y-values
     for (size_t i = 0; i < numX; ++i) {

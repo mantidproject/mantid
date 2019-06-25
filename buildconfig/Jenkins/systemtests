@@ -99,5 +99,10 @@ default_save_directory=${WORKSPACE}/build/Testing/SystemTests/scripts/
 find ${default_save_directory} -name "*-mismatch*" -delete
 
 # Run
+NTHREADS=${BUILD_THREADS:?}
+MAXTHREADS=12
+if [ ${NTHREADS} -gt ${MAXTHREADS} ]; then
+  NTHREADS=${MAXTHREADS}
+fi
 PKGDIR=${WORKSPACE}/build
-${X11_RUNNER} "${X11_RUNNER_ARGS}" python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${BUILD_THREADS:?} $EXTRA_ARGS
+${X11_RUNNER} "${X11_RUNNER_ARGS}" python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${NTHREADS} $EXTRA_ARGS

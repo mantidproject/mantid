@@ -11,9 +11,11 @@
 
 #include "DllConfig.h"
 #include "IALCBaselineModellingView.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include "ui_ALCBaselineModellingView.h"
+
+class QSignalMapper;
 
 #include <qwt_plot_curve.h>
 

@@ -140,7 +140,7 @@ public:
         detectorInfo.detector(detectorInfo.indexOf(413256));
     TS_ASSERT_EQUALS(ptrDetLast.getID(), 413256);
     TS_ASSERT_EQUALS(ptrDetLast.getName(), "pixel");
-    TS_ASSERT_THROWS(detectorInfo.indexOf(413257), std::out_of_range);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(413257), const std::out_of_range &);
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst =
@@ -324,7 +324,7 @@ public:
     TS_ASSERT_EQUALS(ptrDet1.getID(), 1);
     TS_ASSERT_DELTA(ptrDet1.getPos().X(), 0.0000, 0.0001);
     TS_ASSERT_DELTA(ptrDet1.getPos().Y(), 0.0000, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -4.7390, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -3.2500, 0.0001);
 
     const auto &ptrDet2 = detectorInfo.detector(detectorInfo.indexOf(4816));
     TS_ASSERT_EQUALS(ptrDet2.getName(), "tall He3 element");
@@ -387,7 +387,7 @@ public:
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[0]);
     TS_ASSERT_EQUALS(2, detectorInfo.detectorIDs()[1]);
     TS_ASSERT_EQUALS(10707511, detectorInfo.detectorIDs()[778244]);
-    TS_ASSERT_THROWS(detectorInfo.indexOf(778245), std::out_of_range);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(778245), const std::out_of_range &);
   }
 
   /// Test the Nexus geometry loader from LOKI name
@@ -544,7 +544,7 @@ public:
                      V3D(3, 3, 0));
     // Note that one of the physical pixels doesn't exist in the neutronic
     // space
-    TS_ASSERT_THROWS(detectorInfo.indexOf(1004), std::out_of_range);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(1004), const std::out_of_range &);
     TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1005)),
                      V3D(4, 3, 0));
 
@@ -850,7 +850,7 @@ public:
 
   void test_WISH() { doTest("WISH_Definition.xml", 1); }
 
-  void test_BASIS() { doTest("BASIS_Definition_0-20130119.xml", 5); }
+  void test_BASIS() { doTest("BASIS_Definition_0-2013.xml", 5); }
 
   void test_CNCS() { doTest("CNCS_Definition.xml", 5); }
 

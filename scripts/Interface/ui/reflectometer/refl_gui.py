@@ -52,7 +52,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
 
     def show_deprecation_warning(self):
         logger.warning("""
-The ISIS Reflectometry (Old) interface has been deprecated and will be removed from Mantid in March 2019
+The ISIS Reflectometry (Old) interface has been deprecated and will be removed from Mantid in July 2019
 We recommend you use ISIS Reflectometry instead, If this is not possible contact the development team using the "Help->Ask For Help" menu.
 """)
 
@@ -707,7 +707,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
     def __checked_row_stiched(self, row):
         return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
 
-    def _process(self):  # noqa: C901
+    def _process(self):
         """
         Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
         """
@@ -720,15 +720,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
             rowIndexes = []
             for idx in rows:
                 rowIndexes.append(idx.row())
-            if not len(rowIndexes):
-                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',
-                                                   "This will process all rows in the table. Continue?",
-                                                   QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-                if reply == QtGui.QMessageBox.No:
-                    logger.notice("Cancelled!")
-                    willProcess = False
-                else:
-                    rowIndexes = range(self.tableMain.rowCount())
+            rowIndexes, willProcess = self._row_check(rowIndexes, willProcess)
             if willProcess:
                 for row in rowIndexes:  # range(self.tableMain.rowCount()):
                     runno = []
@@ -794,74 +786,10 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
 
-                        # Check secondary and tertiary theta_in columns, if they're
-                        # blank and their corresponding run columns are set, fill them.
-                        for run_col in [5, 10]:
-                            tht_col = run_col + 1
-                            run_val = str(self.tableMain.item(row, run_col).text())
-                            tht_val = str(self.tableMain.item(row, tht_col).text())
-                            if run_val and not tht_val:
-                                Load(Filename=run_val, OutputWorkspace="_run")
-                                loadedRun = mtd["_run"]
-                                tht_val = getLogValue(loadedRun, "Theta")
-                                if tht_val:
-                                    self.tableMain.item(row, tht_col).setText(str(tht_val))
+                        self._check_theta_columns(row)
 
-                        # Populate runlist
-                        first_wq = None
-                        for i in range(0, len(runno)):
-                            theta, qmin, qmax, _wlam, wqBinnedAndScaled, _wqUnBinnedAndUnScaled = \
-                                self._do_run(runno[i], row, i)
-                            if not first_wq:
-                                first_wq = wqBinnedAndScaled  # Cache the first Q workspace
-                            theta = round(theta, 3)
-                            qmin = round(qmin, 3)
-                            qmax = round(qmax, 3)
-                            wksp.append(wqBinnedAndScaled.name())
-                            if self.tableMain.item(row, i * 5 + 1).text() == '':
-                                item = QtGui.QTableWidgetItem()
-                                item.setText(str(theta))
-                                self.tableMain.setItem(row, i * 5 + 1, item)
-                            if self.tableMain.item(row, i * 5 + 3).text() == '':
-                                item = QtGui.QTableWidgetItem()
-                                item.setText(str(qmin))
-                                self.tableMain.setItem(row, i * 5 + 3, item)
-                                overlapLow.append(qmin)
-                            if self.tableMain.item(row, i * 5 + 4).text() == '':
-                                item = QtGui.QTableWidgetItem()
-                                item.setText(str(qmax))
-                                self.tableMain.setItem(row, i * 5 + 4, item)
-                                overlapHigh.append(qmax)
-                            if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
-                                wksp[i] = first_wq.name()
-                            if self.__checked_row_stiched(row):
-                                if len(runno) == 1:
-                                    logger.notice("Nothing to combine for processing row : " + str(row))
-                                else:
-                                    w1 = getWorkspace(wksp[0])
-                                    w2 = getWorkspace(wksp[-1])
-                                    if len(runno) == 2:
-                                        outputwksp = runno[0] + '_' + runno[1][3:]
-                                    else:
-                                        outputwksp = runno[0] + '_' + runno[-1][3:]
-                                    # get Qmax
-                                    if self.tableMain.item(row, i * 5 + 4).text() == '':
-                                        overlapHigh = 0.3 * max(w1.readX(0))
-
-                                    Qmin = min(w1.readX(0))
-                                    Qmax = max(w2.readX(0))
-                                    if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
-                                        Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
-                                    if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
-                                        Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
-                                    if Qmax > _overallQMax:
-                                        _overallQMax = Qmax
-                                    if Qmin < _overallQMin:
-                                        _overallQMin = Qmin
-
-                                    combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh,
-                                                     _overallQMin, _overallQMax, -dqq, 1, keep=True,
-                                                     scale_right=self.__scale_right)
+                        overlapHigh = self._populate_runlist(_overallQMax, _overallQMin, dqq, overlapHigh, overlapLow,
+                                                             row, runno, wksp)
 
                         # Enable the plot button
                         plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
@@ -876,6 +804,95 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
         except:
             self.statusMain.clearMessage()
             raise
+
+    def _check_theta_columns(self, row):
+        # Check secondary and tertiary theta_in columns, if they're
+        # blank and their corresponding run columns are set, fill them.
+        for run_col in [5, 10]:
+            tht_col = run_col + 1
+            run_val = str(self.tableMain.item(row, run_col).text())
+            tht_val = str(self.tableMain.item(row, tht_col).text())
+            if run_val and not tht_val:
+                Load(Filename=run_val, OutputWorkspace="_run")
+                loadedRun = mtd["_run"]
+                tht_val = getLogValue(loadedRun, "Theta")
+                if tht_val:
+                    self.tableMain.item(row, tht_col).setText(str(tht_val))
+
+    def _row_check(self, rowIndexes, willProcess):
+        if not len(rowIndexes):
+            reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',
+                                               "This will process all rows in the table. Continue?",
+                                               QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.No:
+                logger.notice("Cancelled!")
+                willProcess = False
+            else:
+                rowIndexes = range(self.tableMain.rowCount())
+        return rowIndexes, willProcess
+
+    def _populate_runlist(self, _overallQMax, _overallQMin, dqq, overlapHigh, overlapLow, row, runno, wksp):
+        # Populate runlist
+        first_wq = None
+        for i in range(0, len(runno)):
+            theta, qmin, qmax, _wlam, wqBinnedAndScaled, _wqUnBinnedAndUnScaled = \
+                self._do_run(runno[i], row, i)
+            if not first_wq:
+                first_wq = wqBinnedAndScaled  # Cache the first Q workspace
+            theta = round(theta, 3)
+            qmin = round(qmin, 3)
+            qmax = round(qmax, 3)
+            wksp.append(wqBinnedAndScaled.name())
+            if self.tableMain.item(row, i * 5 + 1).text() == '':
+                item = QtGui.QTableWidgetItem()
+                item.setText(str(theta))
+                self.tableMain.setItem(row, i * 5 + 1, item)
+            if self.tableMain.item(row, i * 5 + 3).text() == '':
+                item = QtGui.QTableWidgetItem()
+                item.setText(str(qmin))
+                self.tableMain.setItem(row, i * 5 + 3, item)
+                overlapLow.append(qmin)
+            if self.tableMain.item(row, i * 5 + 4).text() == '':
+                item = QtGui.QTableWidgetItem()
+                item.setText(str(qmax))
+                self.tableMain.setItem(row, i * 5 + 4, item)
+                overlapHigh.append(qmax)
+            if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
+                wksp[i] = first_wq.name()
+            overlapHigh = self._check_stiched_row(_overallQMax, _overallQMin, dqq, i, overlapHigh,
+                                                  overlapLow, row, runno, wksp)
+        return overlapHigh
+
+    def _check_stiched_row(self, _overallQMax, _overallQMin, dqq, i, overlapHigh, overlapLow, row, runno, wksp):
+        if self.__checked_row_stiched(row):
+            if len(runno) == 1:
+                logger.notice("Nothing to combine for processing row : " + str(row))
+            else:
+                w1 = getWorkspace(wksp[0])
+                w2 = getWorkspace(wksp[-1])
+                if len(runno) == 2:
+                    outputwksp = runno[0] + '_' + runno[1][3:]
+                else:
+                    outputwksp = runno[0] + '_' + runno[-1][3:]
+                # get Qmax
+                if self.tableMain.item(row, i * 5 + 4).text() == '':
+                    overlapHigh = 0.3 * max(w1.readX(0))
+
+                Qmin = min(w1.readX(0))
+                Qmax = max(w2.readX(0))
+                if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
+                    Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
+                if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
+                    Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
+                if Qmax > _overallQMax:
+                    _overallQMax = Qmax
+                if Qmin < _overallQMin:
+                    _overallQMin = Qmin
+
+                combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh,
+                                 _overallQMin, _overallQMax, -dqq, 1, keep=True,
+                                 scale_right=self.__scale_right)
+        return overlapHigh
 
     def _plot(self, plotbutton):
         """
@@ -983,7 +1000,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
                 name += '_' + str(t)
         return name
 
-    def _do_run(self, runno, row, which):  # noqa: C901
+    def _do_run(self, runno, row, which):
         """
         Run quick on the given run and row
         """
@@ -991,16 +1008,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
         # Formulate a WS Name for the processed transmission run.
         transrun_named = self.__name_trans(transrun)
         # Look for existing transmission workspaces that match the name
-        transmission_ws = None
-        if mtd.doesExist(transrun_named):
-            if isinstance(mtd[transrun_named], WorkspaceGroup):
-                unit = mtd[transrun_named][0].getAxis(0).getUnit().unitID()
-            else:
-                unit = mtd[transrun_named].getAxis(0).getUnit().unitID()
-
-            if unit == "Wavelength":
-                logger.notice('Reusing transmission workspace ' + transrun_named)
-                transmission_ws = mtd[transrun_named]
+        transmission_ws = self.check_existing_transmission(transrun_named)
 
         angle_str = str(self.tableMain.item(row, which * 5 + 1).text())
 
@@ -1015,27 +1023,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
                                          accumulation=self.live_method)
         wlam, wq, th, wqBinned = None, None, None, None
 
-        # Only make a transmission workspace if we need one.
-        if transrun and not transmission_ws:
-            converter = ConvertToWavelength(transrun)
-            size = converter.get_ws_list_size()
-            out_ws_name = transrun_named
-            if size == 1:
-                trans1 = converter.get_workspace_from_list(0)
-
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1,
-                                                                  OutputWorkspace=out_ws_name,
-                                                                  Params=0.02, StartOverlap=10.0, EndOverlap=12.0,
-                                                                  Version=1)
-            elif size == 2:
-                trans1 = converter.get_workspace_from_list(0)
-                trans2 = converter.get_workspace_from_list(1)
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1,
-                                                                  OutputWorkspace=out_ws_name,
-                                                                  SecondTransmissionRun=trans2, Params=0.02,
-                                                                  StartOverlap=10.0, EndOverlap=12.0, Version=1)
-            else:
-                raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
+        transmission_ws = self._make_transmission_workspace(transmission_ws, transrun, transrun_named)
 
         # Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
         ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
@@ -1060,71 +1048,11 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
             # If we're dealing with a workspace group, we'll manually map execution over each group member
             # We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
-                wqGroupBinned = []
-                wqGroup = []
-                wlamGroup = []
-                thetaGroup = []
-                group_trans_ws = transmission_ws
-                for i in range(0, ws.size()):
-                    # If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
-                    if isinstance(transmission_ws, WorkspaceGroup):
-                        group_trans_ws = transmission_ws[i]
-
-                    alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
-                    alg.initialize()
-                    alg.setProperty("InputWorkspace", ws[i])
-                    if group_trans_ws:
-                        alg.setProperty("FirstTransmissionRun", group_trans_ws)
-                    if angle is not None:
-                        alg.setProperty("ThetaIn", angle)
-                    alg.setProperty("OutputWorkspaceBinned", runno + '_IvsQ_binned_' + str(i + 1))
-                    alg.setProperty("OutputWorkspace", runno + '_IvsQ_' + str(i + 1))
-                    alg.setProperty("OutputWorkspaceWavelength", runno + '_IvsLam_' + str(i + 1))
-                    alg.setProperty("ScaleFactor", factor)
-                    if Qstep is not None:
-                        alg.setProperty("MomentumTransferStep", Qstep)
-                    if Qmin is not None:
-                        alg.setProperty("MomentumTransferMin", Qmin)
-                    if Qmax is not None:
-                        alg.setProperty("MomentumTransferMax", Qmax)
-                    alg.execute()
-                    wqBinned = mtd[runno + '_IvsQ_binned_' + str(i + 1)]
-                    wq = mtd[runno + '_IvsQ_' + str(i + 1)]
-                    wlam = mtd[runno + '_IvsLam_' + str(i + 1)]
-                    th = alg.getProperty("ThetaIn").value
-
-                    wqGroupBinned.append(wqBinned)
-                    wqGroup.append(wq)
-                    wlamGroup.append(wlam)
-                    thetaGroup.append(th)
-
-                wqBinned = GroupWorkspaces(InputWorkspaces=wqGroupBinned, OutputWorkspace=runno + '_IvsQ_binned')
-                wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno + '_IvsQ')
-                wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno + '_IvsLam')
-                th = thetaGroup[0]
+                th, wlam, wq, wqBinned = self._process_workspace_group(Qmax, Qmin, Qstep, angle, factor, runno, th, transmission_ws, wlam,
+                                                                       wq, wqBinned, ws)
             else:
-                alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
-                alg.initialize()
-                alg.setProperty("InputWorkspace", ws)
-                if transmission_ws:
-                    alg.setProperty("FirstTransmissionRun", transmission_ws)
-                if angle is not None:
-                    alg.setProperty("ThetaIn", angle)
-                alg.setProperty("OutputWorkspaceBinned", runno + '_IvsQ_binned')
-                alg.setProperty("OutputWorkspace", runno + '_IvsQ')
-                alg.setProperty("OutputWorkspaceWavelength", runno + '_IvsLam')
-                alg.setProperty("ScaleFactor", factor)
-                if Qstep is not None:
-                    alg.setProperty("MomentumTransferStep", Qstep)
-                if Qmin is not None:
-                    alg.setProperty("MomentumTransferMin", Qmin)
-                if Qmax is not None:
-                    alg.setProperty("MomentumTransferMax", Qmax)
-                alg.execute()
-                wqBinned = mtd[runno + '_IvsQ_binned']
-                wq = mtd[runno + '_IvsQ']
-                wlam = mtd[runno + '_IvsLam']
-                th = alg.getProperty("ThetaIn").value
+                th, wlam, wq, wqBinned = self._process_workspace(Qmax, Qmin, Qstep, angle, factor, runno, th, transmission_ws, wlam, wq,
+                                                                 wqBinned, ws)
 
             cleanup()
         else:
@@ -1153,6 +1081,114 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
 
         return th, qmin, qmax, wlam, wqBinned, wq
+
+    def _make_transmission_workspace(self, transmission_ws, transrun, transrun_named):
+        # Only make a transmission workspace if we need one.
+        if transrun and not transmission_ws:
+            converter = ConvertToWavelength(transrun)
+            size = converter.get_ws_list_size()
+            out_ws_name = transrun_named
+            if size == 1:
+                trans1 = converter.get_workspace_from_list(0)
+
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1,
+                                                                  OutputWorkspace=out_ws_name,
+                                                                  Params=0.02, StartOverlap=10.0, EndOverlap=12.0,
+                                                                  Version=1)
+            elif size == 2:
+                trans1 = converter.get_workspace_from_list(0)
+                trans2 = converter.get_workspace_from_list(1)
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1,
+                                                                  OutputWorkspace=out_ws_name,
+                                                                  SecondTransmissionRun=trans2, Params=0.02,
+                                                                  StartOverlap=10.0, EndOverlap=12.0, Version=1)
+            else:
+                raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
+        return transmission_ws
+
+    def _process_workspace(self, Qmax, Qmin, Qstep, angle, factor, runno, th, transmission_ws, wlam, wq, wqBinned, ws):
+        alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+        alg.initialize()
+        alg.setProperty("Debug", True)
+        alg.setProperty("InputWorkspace", ws)
+        if transmission_ws:
+            alg.setProperty("FirstTransmissionRun", transmission_ws)
+        if angle is not None:
+            alg.setProperty("ThetaIn", angle)
+        alg.setProperty("OutputWorkspaceBinned", runno + '_IvsQ_binned')
+        alg.setProperty("OutputWorkspace", runno + '_IvsQ')
+        alg.setProperty("OutputWorkspaceWavelength", runno + '_IvsLam')
+        alg.setProperty("ScaleFactor", factor)
+        if Qstep is not None:
+            alg.setProperty("MomentumTransferStep", Qstep)
+        if Qmin is not None:
+            alg.setProperty("MomentumTransferMin", Qmin)
+        if Qmax is not None:
+            alg.setProperty("MomentumTransferMax", Qmax)
+        alg.execute()
+        wqBinned = mtd[runno + '_IvsQ_binned']
+        wq = mtd[runno + '_IvsQ']
+        wlam = mtd[runno + '_IvsLam']
+        th = alg.getProperty("ThetaIn").value
+        return th, wlam, wq, wqBinned
+
+    def _process_workspace_group(self, Qmax, Qmin, Qstep, angle, factor, runno, th, transmission_ws, wlam, wq, wqBinned, ws):
+        wqGroupBinned = []
+        wqGroup = []
+        wlamGroup = []
+        thetaGroup = []
+        group_trans_ws = transmission_ws
+        for i in range(0, ws.size()):
+            # If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
+            if isinstance(transmission_ws, WorkspaceGroup):
+                group_trans_ws = transmission_ws[i]
+
+            alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+            alg.initialize()
+            alg.setProperty("Debug", True)
+            alg.setProperty("InputWorkspace", ws[i])
+            if group_trans_ws:
+                alg.setProperty("FirstTransmissionRun", group_trans_ws)
+            if angle is not None:
+                alg.setProperty("ThetaIn", angle)
+            alg.setProperty("OutputWorkspaceBinned", runno + '_IvsQ_binned_' + str(i + 1))
+            alg.setProperty("OutputWorkspace", runno + '_IvsQ_' + str(i + 1))
+            alg.setProperty("OutputWorkspaceWavelength", runno + '_IvsLam_' + str(i + 1))
+            alg.setProperty("ScaleFactor", factor)
+            if Qstep is not None:
+                alg.setProperty("MomentumTransferStep", Qstep)
+            if Qmin is not None:
+                alg.setProperty("MomentumTransferMin", Qmin)
+            if Qmax is not None:
+                alg.setProperty("MomentumTransferMax", Qmax)
+            alg.execute()
+            wqBinned = mtd[runno + '_IvsQ_binned_' + str(i + 1)]
+            wq = mtd[runno + '_IvsQ_' + str(i + 1)]
+            wlam = mtd[runno + '_IvsLam_' + str(i + 1)]
+            th = alg.getProperty("ThetaIn").value
+
+            wqGroupBinned.append(wqBinned)
+            wqGroup.append(wq)
+            wlamGroup.append(wlam)
+            thetaGroup.append(th)
+        wqBinned = GroupWorkspaces(InputWorkspaces=wqGroupBinned, OutputWorkspace=runno + '_IvsQ_binned')
+        wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno + '_IvsQ')
+        wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno + '_IvsLam')
+        th = thetaGroup[0]
+        return th, wlam, wq, wqBinned
+
+    def check_existing_transmission(self, transrun_named):
+        transmission_ws = None
+        if mtd.doesExist(transrun_named):
+            if isinstance(mtd[transrun_named], WorkspaceGroup):
+                unit = mtd[transrun_named][0].getAxis(0).getUnit().unitID()
+            else:
+                unit = mtd[transrun_named].getAxis(0).getUnit().unitID()
+
+            if unit == "Wavelength":
+                logger.notice('Reusing transmission workspace ' + transrun_named)
+                transmission_ws = mtd[transrun_named]
+        return transmission_ws
 
     def _save_table_contents(self, filename):
         """

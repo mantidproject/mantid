@@ -17,7 +17,7 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include <Poco/Path.h>
 
@@ -98,8 +98,7 @@ private:
   std::unique_ptr<Mantid::LiveData::KafkaHistoStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return Mantid::Kernel::make_unique<KafkaHistoStreamDecoder>(broker, "", "",
-                                                                "", "");
+    return std::make_unique<KafkaHistoStreamDecoder>(broker, "", "", "", "");
   }
 
   // Start decoding and wait until we have gathered enough data to test

@@ -75,8 +75,8 @@ const std::string SetSpecialCoordinates::category() const {
  */
 void SetSpecialCoordinates::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                Direction::InOut),
+      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                     Direction::InOut),
       "An input/output workspace. The new log will be added to it. Important "
       "Note: This has now only an effect on PeaksWorkspaces. MDEvent and "
       "MDHisto worksapces are not affaceted by this algorithm");
@@ -92,7 +92,7 @@ void SetSpecialCoordinates::init() {
 }
 
 bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
-    Workspace_sptr inWS, SpecialCoordinateSystem) {
+    Workspace_sptr inWS, SpecialCoordinateSystem /*unused*/) {
   bool written = false;
   if (auto mdEventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
@@ -104,7 +104,7 @@ bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
 }
 
 bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
-    Workspace_sptr inWS, SpecialCoordinateSystem) {
+    Workspace_sptr inWS, SpecialCoordinateSystem /*unused*/) {
   bool written = false;
   if (auto mdHistoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "

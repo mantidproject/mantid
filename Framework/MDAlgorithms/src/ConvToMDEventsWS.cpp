@@ -4,6 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidMDAlgorithms/ConvToMDEventsWS.h"
 
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
@@ -123,20 +124,34 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   // Get the box controller
   Mantid::API::BoxController_sptr bc =
       m_OutWSWrapper->pWorkspace()->getBoxController();
-  size_t lastNumBoxes = bc->getTotalNumMDBoxes();
-  size_t nEventsInWS = m_OutWSWrapper->pWorkspace()->getNPoints();
+
+  // if any property dimension is outside of the data range requested, the job
+  // is done;
+  if (!m_QConverter->calcGenericVariables(m_Coord, m_NDims))
+    return;
+
+  appendEventsFromInputWS(pProgress, bc);
+
+  pProgress->report();
+
+  /// Set the special coordinate system flag on the output workspace.
+  m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
+}
+
+void ConvToMDEventsWS::appendEventsFromInputWS(
+    API::Progress *pProgress, const API::BoxController_sptr &bc) {
   // Is the access to input events thread-safe?
   // bool MultiThreadedAdding = m_EventWS->threadSafe();
   // preprocessed detectors insure that each detector has its own spectra
-  size_t nValidSpectra = m_NSpectra;
-
+  size_t lastNumBoxes = bc->getTotalNumMDBoxes();
+  size_t nEventsInWS = m_OutWSWrapper->pWorkspace()->getNPoints();
   //--->>> Thread control stuff
   Kernel::ThreadSchedulerFIFO *ts(nullptr);
 
   int nThreads(m_NumThreads);
   if (nThreads < 0)
     nThreads = 0; // negative m_NumThreads correspond to all cores used, 0 no
-                  // threads and positive number -- nThreads requested;
+  // threads and positive number -- nThreads requested;
   bool runMultithreaded = false;
   if (m_NumThreads != 0) {
     runMultithreaded = true;
@@ -145,20 +160,15 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
     ts = new Kernel::ThreadSchedulerFIFO();
     // it will initiate thread pool with number threads or machine's cores (0 in
     // tp constructor)
-    pProgress->resetNumSteps(nValidSpectra, 0, 1);
+    pProgress->resetNumSteps(m_NSpectra, 0, 1);
   }
   Kernel::ThreadPool tp(ts, nThreads, new API::Progress(*pProgress));
   //<<<--  Thread control stuff
 
-  // if any property dimension is outside of the data range requested, the job
-  // is done;
-  if (!m_QConverter->calcGenericVariables(m_Coord, m_NDims))
-    return;
-
   size_t eventsAdded = 0;
-  for (size_t wi = 0; wi < nValidSpectra; wi++) {
+  for (size_t wi = 0; wi < m_NSpectra; wi++) {
 
-    size_t nConverted = this->conversionChunk(wi);
+    size_t nConverted = conversionChunk(wi);
     eventsAdded += nConverted;
     nEventsInWS += nConverted;
     // Keep a running total of how many events we've added
@@ -192,11 +202,6 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
 
   // Recount totals at the end.
   m_OutWSWrapper->pWorkspace()->refreshCache();
-  // m_OutWSWrapper->refreshCentroid();
-  pProgress->report();
-
-  /// Set the special coordinate system flag on the output workspace.
-  m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
 }
 
 } // namespace MDAlgorithms

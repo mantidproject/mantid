@@ -92,8 +92,8 @@ private:
   void setSampleLogs();
   void computeThetaOffset();
 
-  double
-      m_offsetTheta; ///< the 2theta offset for D20 to account for dead pixels
+  ///< the 2theta offset for D20 to account for dead pixels
+  double m_offsetTheta{0.};
   size_t m_sizeDim1; ///< size of dim1, number of tubes (D2B) or the whole
                      /// detector (D20)
   size_t m_sizeDim2; ///< size of dim2, number of pixels (1 for D20!)

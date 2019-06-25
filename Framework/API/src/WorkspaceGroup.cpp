@@ -39,11 +39,13 @@ WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
  * group
  */
 const std::string WorkspaceGroup::toString() const {
-  std::string descr = this->id() + "\n";
+  const std::string firstLine = this->id() + "\n";
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  for (const auto &workspace : m_workspaces) {
-    descr += " -- " + workspace->getName() + '\n';
-  }
+  const auto descr =
+      std::accumulate(m_workspaces.cbegin(), m_workspaces.cend(), firstLine,
+                      [](const auto &string, const auto &workspace) {
+                        return string + " -- " + workspace->getName() + '\n';
+                      });
   return descr;
 }
 
@@ -112,13 +114,39 @@ void WorkspaceGroup::sortMembersByName() {
  */
 void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  // check it's not there already
-  auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
+  if (this == workspace.get()) {
+    g_log.warning("Can't add a workspace as a child of itself!\n");
+    return;
+  }
+  const auto it =
+      std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
   if (it == m_workspaces.end()) {
     m_workspaces.push_back(workspace);
   } else {
     g_log.warning() << "Workspace already exists in a WorkspaceGroup\n";
   }
+}
+
+/**
+ * Does this group or any of it's child groups contain the named workspace?
+ * @param wsName :: A string to compare
+ * @returns True if the name is part of this group, false otherwise
+ */
+bool WorkspaceGroup::containsInChildren(const std::string &wsName) const {
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+  for (const auto &workspace : m_workspaces) {
+    if (workspace->isGroup()) {
+      // Recursive containsInChildren search
+      const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+      if (group->containsInChildren(wsName)) {
+        return true;
+      }
+    } else {
+      if (workspace->getName() == wsName)
+        return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -128,11 +156,10 @@ void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
  */
 bool WorkspaceGroup::contains(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  for (const auto &workspace : m_workspaces) {
-    if (workspace->getName() == wsName)
-      return true;
-  }
-  return false;
+  return std::any_of(m_workspaces.cbegin(), m_workspaces.cend(),
+                     [&wsName](const auto &workspace) {
+                       return workspace->getName() == wsName;
+                     });
 }
 
 /**
@@ -161,11 +188,11 @@ void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> &memberList) const {
  * vector is being iterated over.
  */
 std::vector<std::string> WorkspaceGroup::getNames() const {
-  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   std::vector<std::string> out;
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   out.reserve(m_workspaces.size());
   for (const auto &workspace : m_workspaces) {
-    out.push_back(workspace->getName());
+    out.emplace_back(workspace->getName());
   }
   return out;
 }
@@ -177,12 +204,8 @@ std::vector<std::string> WorkspaceGroup::getNames() const {
  */
 Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  if (index >= this->size()) {
-    std::ostringstream os;
-    os << "WorkspaceGroup - index out of range. Requested=" << index
-       << ", current size=" << this->size();
-    throw std::out_of_range(os.str());
-  }
+  if (index >= this->size())
+    this->throwIndexOutOfRangeError(static_cast<int>(index));
   return m_workspaces[index];
 }
 
@@ -194,13 +217,16 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  for (const auto &workspace : m_workspaces) {
-    if (workspace->getName() == wsName) {
-      return workspace;
-    }
+  const auto found = std::find_if(m_workspaces.cbegin(), m_workspaces.cend(),
+                                  [&wsName](const auto &workspace) {
+                                    return workspace->getName() == wsName;
+                                  });
+  if (found == m_workspaces.cend()) {
+    throw std::out_of_range("Workspace " + wsName +
+                            " not contained in the group");
+  } else {
+    return *found;
   }
-  throw std::out_of_range("Workspace " + wsName +
-                          " not contained in the group");
 }
 
 /** Return all workspaces in the group as one call for thread safety
@@ -237,6 +263,18 @@ void WorkspaceGroup::print() const {
     g_log.debug() << "Workspace name in group vector =  "
                   << workspace->getName() << '\n';
   }
+}
+
+/*
+ * Throws an out of range error for an out of range index
+ * @param index The out of range index to be printed
+ * @throws out_of_range error
+ */
+void WorkspaceGroup::throwIndexOutOfRangeError(int index) const {
+  std::ostringstream os;
+  os << "WorkspaceGroup - index out of range. Requested=" << index
+     << ", current size=" << this->size();
+  throw std::out_of_range(os.str());
 }
 
 /**

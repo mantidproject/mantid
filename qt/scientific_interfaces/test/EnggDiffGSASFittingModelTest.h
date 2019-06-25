@@ -146,7 +146,7 @@ public:
   void test_getRwp() {
     TestEnggDiffGSASFittingModel model;
 
-    const RunLabel valid(123, 1);
+    const RunLabel valid("123", 1);
     const double rwp = 75.5;
     model.addRwpValue(valid, rwp);
 
@@ -155,7 +155,7 @@ public:
     TS_ASSERT(retrievedRwp);
     TS_ASSERT_EQUALS(rwp, *retrievedRwp);
 
-    const RunLabel invalid(456, 2);
+    const RunLabel invalid("456", 2);
     TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(invalid));
     TS_ASSERT_EQUALS(retrievedRwp, boost::none);
   }
@@ -163,7 +163,7 @@ public:
   void test_getGamma() {
     TestEnggDiffGSASFittingModel model;
 
-    const RunLabel valid(123, 1);
+    const RunLabel valid("123", 1);
     const double gamma = 75.5;
     model.addGammaValue(valid, gamma);
 
@@ -172,7 +172,7 @@ public:
     TS_ASSERT(retrievedGamma);
     TS_ASSERT_EQUALS(gamma, *retrievedGamma);
 
-    const RunLabel invalid(456, 2);
+    const RunLabel invalid("456", 2);
     TS_ASSERT_THROWS_NOTHING(retrievedGamma = model.getGamma(invalid));
     TS_ASSERT_EQUALS(retrievedGamma, boost::none);
   }
@@ -180,7 +180,7 @@ public:
   void test_getSigma() {
     TestEnggDiffGSASFittingModel model;
 
-    const RunLabel valid(123, 1);
+    const RunLabel valid("123", 1);
     const double sigma = 75.5;
     model.addSigmaValue(valid, sigma);
 
@@ -189,7 +189,7 @@ public:
     TS_ASSERT(retrievedSigma);
     TS_ASSERT_EQUALS(sigma, *retrievedSigma);
 
-    const RunLabel invalid(456, 2);
+    const RunLabel invalid("456", 2);
     TS_ASSERT_THROWS_NOTHING(retrievedSigma = model.getSigma(invalid));
     TS_ASSERT_EQUALS(retrievedSigma, boost::none);
   }
@@ -202,7 +202,7 @@ public:
 
     TestEnggDiffGSASFittingModel model;
 
-    const RunLabel valid(123, 1);
+    const RunLabel valid("123", 1);
     TS_ASSERT_THROWS_NOTHING(model.addLatticeParamTable(valid, table));
 
     // auto retrievedTable = model.getLatticeParams(123, 1);
@@ -223,7 +223,7 @@ public:
     TS_ASSERT_EQUALS(b, expectedB);
     TS_ASSERT_EQUALS(c, expectedC);
 
-    const RunLabel invalid(456, 2);
+    const RunLabel invalid("456", 2);
     TS_ASSERT_THROWS_NOTHING(retrievedTable = model.getLatticeParams(invalid));
     TS_ASSERT_EQUALS(retrievedTable, boost::none);
   }
@@ -233,7 +233,7 @@ public:
     // is used properly. It tests that, given that the algorithm is used
     // properly, results are added to the appropriate maps in the model
     TestEnggDiffGSASFittingModel model;
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
 
     API::MatrixWorkspace_sptr inputWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
@@ -262,7 +262,7 @@ public:
     // is used properly. It tests that, given that the algorithm is used
     // properly, results are added to the appropriate maps in the model
     TestEnggDiffGSASFittingModel model;
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
 
     API::MatrixWorkspace_sptr inputWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);

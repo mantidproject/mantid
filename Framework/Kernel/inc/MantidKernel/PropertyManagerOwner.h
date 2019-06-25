@@ -41,17 +41,23 @@ public:
   void declareProperty(std::unique_ptr<Property> p,
                        const std::string &doc = "") override;
 
+  // Function to declare properties (i.e. store them)
+  void declareOrReplaceProperty(std::unique_ptr<Property> p,
+                                const std::string &doc = "") override;
+
   using IPropertyManager::declareProperty;
 
   // Sets all the declared properties from
   void setProperties(const std::string &propertiesJson,
                      const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>()) override;
+                         std::unordered_set<std::string>(),
+                     bool createMissing = false) override;
 
   // Sets all the declared properties from a json object
   void setProperties(const ::Json::Value &jsonValue,
                      const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>()) override;
+                         std::unordered_set<std::string>(),
+                     bool createMissing = false) override;
 
   // sets all the declared properties using a simple string format
   void setPropertiesWithString(
@@ -61,6 +67,8 @@ public:
 
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
+  void setPropertyValueFromJson(const std::string &name,
+                                const Json::Value &value) override;
   void setPropertyOrdinal(const int &index, const std::string &value) override;
 
   /// Make m_properties point to the same PropertyManager as po.

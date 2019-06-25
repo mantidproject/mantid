@@ -6,20 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+
 from Muon.GUI.Common.load_widget.load_view import LoadView
 
-from Muon.GUI.Common import mock_widget
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
-
-class LoadViewTest(unittest.TestCase):
+class LoadViewTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-
         self.view = LoadView()
         self.slot = mock.Mock()
         self.view.load_button = mock.Mock()

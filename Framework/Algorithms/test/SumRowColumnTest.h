@@ -41,7 +41,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(summer.setPropertyValue("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(summer.setPropertyValue("OutputWorkspace", "nowt"))
 
-    TS_ASSERT_THROWS(summer.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(summer.execute(), const std::runtime_error &)
     TS_ASSERT(!summer.isExecuted())
   }
 

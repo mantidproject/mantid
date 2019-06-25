@@ -8,8 +8,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Material.h"
 
-#include <iostream>
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -76,6 +74,14 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
       result["SampleMassDensity"] =
           "Cannot give SampleMassDensity with SampleNumberDensity set";
     }
+    bool canCalculateMassDensity =
+        ((!isEmpty(params.sampleMass)) && (!isEmpty(params.sampleVolume)));
+    if (canCalculateMassDensity) {
+      result["SampleMassDensity"] =
+          "Cannot give SampleMassDensity with SampleNumberDensity set";
+      result["SampleMassDensity"] =
+          "Cannot give SampleMassDensity with SampleNumberDensity set";
+    }
   }
   return result;
 }
@@ -88,8 +94,17 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
  */
 void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
   setMaterial(params.chemicalSymbol, params.atomicNumber, params.massNumber);
-  setNumberDensity(params.sampleMassDensity, params.sampleNumberDensity,
-                   params.zParameter, params.unitCellVolume);
+
+  // calculate the mass density if it wasn't provided
+  double massDensity = params.sampleMassDensity;
+  if (isEmpty(massDensity)) {
+    if (!(isEmpty(params.sampleMass) || isEmpty(params.sampleVolume)))
+      massDensity = params.sampleMass / params.sampleVolume;
+  }
+
+  setNumberDensity(massDensity, params.sampleNumberDensity,
+                   params.numberDensityUnit, params.zParameter,
+                   params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
                     params.attenuationXSection, params.scatteringXSection);
 }
@@ -113,9 +128,10 @@ void ReadMaterial::setMaterial(const std::string chemicalSymbol,
   }
 }
 
-void ReadMaterial::setNumberDensity(const double rho_m, const double rho,
-                                    const double zParameter,
-                                    const double unitCellVolume) {
+void ReadMaterial::setNumberDensity(
+    const double rho_m, const double rho,
+    Kernel::MaterialBuilder::NumberDensityUnit rhoUnit, const double zParameter,
+    const double unitCellVolume) {
   if (!isEmpty(rho_m))
     builder.setMassDensity(rho_m);
   if (isEmpty(rho)) {
@@ -125,6 +141,7 @@ void ReadMaterial::setNumberDensity(const double rho_m, const double rho,
     }
   } else {
     builder.setNumberDensity(rho);
+    builder.setNumberDensityUnit(rhoUnit);
   }
 }
 

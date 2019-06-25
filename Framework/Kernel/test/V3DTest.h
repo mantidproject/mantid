@@ -213,15 +213,6 @@ public:
     TS_ASSERT_EQUALS(d[1], 2.0);
     TS_ASSERT_EQUALS(d[2], 3.0);
   }
-  void testOperatorBracketNonConstThrows() {
-    TS_ASSERT_THROWS(a[-1], std::runtime_error &);
-    TS_ASSERT_THROWS(a[3], std::runtime_error &);
-  }
-  void testOperatorBracketConstThrows() {
-    const Mantid::Kernel::V3D d(1.0, 2.0, 3.0);
-    TS_ASSERT_THROWS(d[-1], std::runtime_error &);
-    TS_ASSERT_THROWS(d[3], std::runtime_error &);
-  }
   void testNorm() {
     a(1.0, -5.0, 8.0);
     TS_ASSERT_EQUALS(a.norm(), sqrt(90.0));
@@ -237,6 +228,10 @@ public:
     TS_ASSERT_EQUALS(b[0], 1.0 / sqrt(3.0));
     TS_ASSERT_EQUALS(b[1], 1.0 / sqrt(3.0));
     TS_ASSERT_EQUALS(b[2], 1.0 / sqrt(3.0));
+  }
+  void testNormalizeZeroLengthVectorThrows() {
+    V3D zeroLength;
+    TS_ASSERT_THROWS_ANYTHING(zeroLength.normalize());
   }
   void testScalarProduct() {
     a(1.0, 2.0, 1.0);
@@ -397,6 +392,20 @@ public:
     TS_ASSERT(a == V3D(-1.0, -2.0, -4.0));
   }
 
+  void test_nullVector() {
+    constexpr V3D null;
+    TS_ASSERT(null.nullVector());
+    constexpr V3D nonNull(0.1, 0., 0.);
+    TS_ASSERT(!nonNull.nullVector())
+  }
+  void test_unitVector() {
+    constexpr V3D null;
+    TS_ASSERT(!null.unitVector())
+    constexpr V3D unit(1.0, 0., 0.);
+    TS_ASSERT(unit.unitVector())
+    constexpr V3D longVector(0.5, -0.5, 0.5);
+    TS_ASSERT(!longVector.unitVector())
+  }
   void test_toString() {
     V3D a(1, 2, 3);
     TS_ASSERT_EQUALS(a.toString(), "1 2 3");
@@ -409,10 +418,10 @@ public:
     NexusTestHelper th(true);
     th.createFile("V3DTest.nxs");
     V3D a(1, 2, 3);
-    a.saveNexus(th.file, "vector");
+    a.saveNexus(th.file.get(), "vector");
     th.reopenFile();
     V3D b;
-    b.loadNexus(th.file, "vector");
+    b.loadNexus(th.file.get(), "vector");
     TS_ASSERT_EQUALS(a, b);
   }
 
@@ -459,7 +468,7 @@ public:
 
   void test_toCrystllographic() {
     V3D a0;
-    TS_ASSERT_THROWS(a0.toMillerIndexes(), std::invalid_argument);
+    TS_ASSERT_THROWS(a0.toMillerIndexes(), const std::invalid_argument &);
 
     V3D a1(0.1, 0.2, 5);
     TS_ASSERT_THROWS_NOTHING(a1.toMillerIndexes());
@@ -516,14 +525,6 @@ public:
     TS_ASSERT_DELTA(-9, a8[0], 1.e-2);
     TS_ASSERT_DELTA(1, a8[1], 1.e-2);
     TS_ASSERT_DELTA(-18, a8[2], 1.e-2);
-
-    /*    V3D a9(-3,5,-6);
-     a9.normalize();
-     TS_ASSERT_THROWS_NOTHING(a9.toMillerIndexes(0.1));
-
-     TS_ASSERT_DELTA(-3,a9[0],1.e-3);
-     TS_ASSERT_DELTA( 5,a9[1],1.e-3);
-     TS_ASSERT_DELTA(-6,a9[2],1.e-3);*/
   }
 
   void test_directionAngles_cubic_default() {
@@ -560,6 +561,20 @@ public:
     TS_ASSERT_DELTA(acos(3.0 / modv2) * 180 / M_PI, angles[1], 1e-6);
     TS_ASSERT_DELTA(acos(4.0 / modv2) * 180 / M_PI, angles[2], 1e-6);
   }
+
+  void test_normalize() {
+    constexpr V3D v(-2.3, 5.0, -7.1);
+    const V3D normalized = normalize(v);
+    TS_ASSERT_DELTA(normalized.norm(), 1., 1e-12)
+    TS_ASSERT_DELTA(v.scalar_prod(normalized) / v.norm(), 1., 1e-12)
+  }
+
+  void test_normalize_nullVector_throws() {
+    constexpr V3D nullVector;
+    TS_ASSERT_THROWS_EQUALS(
+        normalize(nullVector), const std::runtime_error &e, e.what(),
+        std::string("Unable to normalize a zero length vector."))
+  }
 };
 
 //---------------------------------------------------------------------------
@@ -584,7 +599,7 @@ public:
     m_rotx[2][2] = cos(theta);
     m_rotx[2][1] = sin(theta);
 
-    m_sampleSize = 100000000;
+    m_sampleSize = 1000000000;
   }
 
   void testRotate() {

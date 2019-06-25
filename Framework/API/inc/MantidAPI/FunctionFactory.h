@@ -56,11 +56,13 @@ public:
 
   /// Query available functions based on the template type
   template <typename FunctionType>
-  const std::vector<std::string> &getFunctionNames() const;
+  std::vector<std::string> getFunctionNames() const;
+  /// Get function names that can be used by generic fitting GUIs
+  std::vector<std::string> getFunctionNamesGUI() const;
   // Unhide the base class version (to satisfy the intel compiler)
   using Kernel::DynamicFactory<IFunction>::subscribe;
   void subscribe(const std::string &className,
-                 AbstractFactory *pAbstractFactory,
+                 std::unique_ptr<AbstractFactory> pAbstractFactory,
                  Kernel::DynamicFactory<IFunction>::SubscribeAction replace =
                      ErrorIfExists);
 
@@ -113,7 +115,7 @@ private:
  * @returns A vector of the names of the functions matching the template type
  */
 template <typename FunctionType>
-const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
+std::vector<std::string> FunctionFactoryImpl::getFunctionNames() const {
   std::lock_guard<std::mutex> _lock(m_mutex);
 
   const std::string soughtType(typeid(FunctionType).name());

@@ -90,12 +90,12 @@ public:
   /// Set new bounding rect.
   virtual void setBoundingRect(const RectF &rect);
   /// will the shape be selected if clicked at a point? By default return false.
-  virtual bool selectAt(const QPointF &) const { return false; }
+  virtual bool selectAt(const QPointF & /*unused*/) const { return false; }
   /// is a point inside the shape (closed line)? By default return false.
-  virtual bool contains(const QPointF &) const { return false; }
+  virtual bool contains(const QPointF & /*unused*/) const { return false; }
   /// is a point "masked" by the shape. Only filled regions of a shape mask a
   /// point
-  virtual bool isMasked(const QPointF &) const;
+  virtual bool isMasked(const QPointF & /*p*/) const;
   /// Set border color.
   virtual void setColor(const QColor &color) { m_color = color; }
   /// Get border color.
@@ -128,6 +128,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save settings for the widget tab to a project file
   virtual std::string saveToProject() const;
+  virtual std::string type() const { return "base"; }
 
   // --- Properties. for gui interaction --- //
 
@@ -164,10 +165,13 @@ protected:
   virtual size_t getShapeNControlPoints() const { return 0; }
   // returns position of a shape specific control point, 0 < i <
   // getShapeNControlPoints()
-  virtual QPointF getShapeControlPoint(size_t) const { return QPointF(); }
+  virtual QPointF getShapeControlPoint(size_t /*unused*/) const {
+    return QPointF();
+  }
   // sets position of a shape specific control point, 0 < i <
   // getShapeNControlPoints()
-  virtual void setShapeControlPoint(size_t, const QPointF &) {}
+  virtual void setShapeControlPoint(size_t /*unused*/,
+                                    const QPointF & /*unused*/) {}
   // make sure the bounding box is correct
   virtual void resetBoundingRect() {}
 
@@ -187,6 +191,9 @@ private:
   /// Instantiate specifc shapes from a type string
   static Shape2D *loadShape2DFromType(const std::string &type,
                                       const std::string &lines);
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 /**
@@ -215,6 +222,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "ellipse"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -241,6 +249,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "rectangle"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -277,10 +286,11 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "ring"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
-  void addToPath(QPainterPath &) const override {}
+  void addToPath(QPainterPath & /*path*/) const override {}
   void refit() override;
   void resetBoundingRect() override;
   size_t getShapeNControlPoints() const override { return 4; }
@@ -312,6 +322,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "free"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -322,6 +333,8 @@ private:
   RectF getPolygonBoundingRect() const;
   QPolygonF m_polygon;    ///< Implements the shape.
   QPainterPath m_outline; ///< Object to draw the shape's border.
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

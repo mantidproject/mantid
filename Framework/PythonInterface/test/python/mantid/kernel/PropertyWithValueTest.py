@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
+from mantid.kernel import Property, StringPropertyWithValue
 from testhelpers import create_algorithm, run_algorithm
 import numpy as np
 import sys
@@ -28,6 +29,12 @@ class PropertyWithValueTest(unittest.TestCase):
             self.__class__._mask_dets = create_algorithm("MaskDetectors")
             self.__class__._mask_dets.initialize()
 
+    def test_construction_by_name(self):
+        prop = StringPropertyWithValue("testprop", "default")
+        self.assertTrue(isinstance(prop, Property))
+        self.assertEqual(prop.name, "testprop")
+        self.assertEqual(prop.value, "default")
+
     def test_value_setting_as_string_gives_expected_value_for_correct_type(self):
         prop = self.__class__._integration.getProperty("RangeLower")
         prop.valueAsStr = "15.5"
@@ -36,7 +43,7 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_type_str_is_not_empty(self):
         rangeLower=self.__class__._integration.getProperty("RangeLower")
-        self.assertTrue(len(rangeLower.type) > 0)
+        self.assertGreater(len(rangeLower.type), 0)
 
     def test_getproperty_value_returns_derived_type(self):
         data = [1.0,2.0,3.0]
@@ -46,12 +53,12 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_set_property_int(self):
         self._integration.setProperty("StartWorkspaceIndex", 5)
-        self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
+        self.assertEqual(self._integration.getProperty("StartWorkspaceIndex").value, 5)
 
     def test_set_int_property_python_long_py2(self):
         if sys.version_info[0] < 3:
             self._integration.setProperty("StartWorkspaceIndex", long(5))
-            self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
+            self.assertEqual(self._integration.getProperty("StartWorkspaceIndex").value, 5)
         else:
             pass
 
@@ -63,28 +70,28 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_set_property_bool(self):
         self._integration.setProperty("IncludePartialBins", True)
-        self.assertEquals(self._integration.getProperty("IncludePartialBins").value, True)
+        self.assertEqual(self._integration.getProperty("IncludePartialBins").value, True)
 
     def test_set_property_succeeds_with_python_int_lists(self):
         value = [2,3,4,5,6]
         self._mask_dets.setProperty("WorkspaceIndexList", value) #size_t
         idx_list = self._mask_dets.getProperty("WorkspaceIndexList").value
-        self.assertEquals(len(idx_list), 5)
+        self.assertEqual(len(idx_list), 5)
         for i in range(5):
-            self.assertEquals(idx_list[i], i+2)
+            self.assertEqual(idx_list[i], i+2)
         value.append(7)
 
         self._mask_dets.setProperty("DetectorList", value) #integer
         det_list = self._mask_dets.getProperty("DetectorList").value
-        self.assertEquals(len(det_list), 6)
+        self.assertEqual(len(det_list), 6)
         for i in range(6):
-            self.assertEquals(det_list[i], i+2)
+            self.assertEqual(det_list[i], i+2)
 
     def test_set_array_property_with_single_item_correct_type_suceeds(self):
         self._mask_dets.setProperty("WorkspaceIndexList", 10)
 
         val =  self._mask_dets.getProperty("WorkspaceIndexList").value
-        self.assertEquals(10, val)
+        self.assertEqual(10, val)
 
     def test_set_property_succeeds_with_python_float_lists(self):
         rebin = AlgorithmManager.createUnmanaged("Rebin")
@@ -92,9 +99,9 @@ class PropertyWithValueTest(unittest.TestCase):
         input = [0.5,1.0,5.5]
         rebin.setProperty('Params',input)
         params = rebin.getProperty('Params').value
-        self.assertEquals(len(params), 3)
+        self.assertEqual(len(params), 3)
         for i in range(3):
-            self.assertEquals(params[i], input[i])
+            self.assertEqual(params[i], input[i])
 
     def test_set_property_raises_type_error_when_a_list_contains_multiple_types(self):
         values = [2,3,4.0,5,6]
@@ -117,25 +124,25 @@ class PropertyWithValueTest(unittest.TestCase):
         det_list_prop = self._mask_dets.getProperty("DetectorList")
         one_to_five = "1,2,3,4,5"
         det_list_prop.valueAsStr = one_to_five
-        self.assertEquals(det_list_prop.valueAsPrettyStr(0,False), one_to_five)
-        self.assertEquals(det_list_prop.valueAsPrettyStr(), "1-5")
+        self.assertEqual(det_list_prop.valueAsPrettyStr(0,False), one_to_five)
+        self.assertEqual(det_list_prop.valueAsPrettyStr(), "1-5")
 
         two_ranges =  "1,2,3,4,5,6,8,9,10"
         det_list_prop.valueAsStr = two_ranges
-        self.assertEquals(det_list_prop.valueAsPrettyStr(0,False), two_ranges)
-        self.assertEquals(det_list_prop.valueAsPrettyStr(), "1-6,8-10")
+        self.assertEqual(det_list_prop.valueAsPrettyStr(0,False), two_ranges)
+        self.assertEqual(det_list_prop.valueAsPrettyStr(), "1-6,8-10")
 
         long_list = ",".join(str(x) for x in range(1,100))
         det_list_prop.valueAsStr = long_list
-        self.assertEquals(det_list_prop.valueAsPrettyStr(0,False), long_list)
-        self.assertEquals(det_list_prop.valueAsPrettyStr(0,True), "1-99")
-        self.assertEquals(det_list_prop.valueAsPrettyStr(40,True), "1-99")
+        self.assertEqual(det_list_prop.valueAsPrettyStr(0,False), long_list)
+        self.assertEqual(det_list_prop.valueAsPrettyStr(0,True), "1-99")
+        self.assertEqual(det_list_prop.valueAsPrettyStr(40,True), "1-99")
         result = det_list_prop.valueAsPrettyStr(40,False)
-        self.assertEquals(result.startswith("1,2,3,"), True)
-        self.assertEquals(result.endswith("98,99"), True)
+        self.assertEqual(result.startswith("1,2,3,"), True)
+        self.assertEqual(result.endswith("98,99"), True)
 
         # Check the dtype return value
-        self.assertEquals(det_list_prop.dtype(), "i")
+        self.assertEqual(det_list_prop.dtype(), "i")
 
     def _do_vector_double_numpy_test(self, int_type=False):
         create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')
@@ -146,18 +153,18 @@ class PropertyWithValueTest(unittest.TestCase):
             datax = np.arange(10.0)
         create_ws.setProperty('DataX', datax)
         x_values = create_ws.getProperty('DataX').value
-        self.assertEquals(len(x_values), 10)
+        self.assertEqual(len(x_values), 10)
         for i in range(10):
-            self.assertEquals(x_values[i], i)
+            self.assertEqual(x_values[i], i)
 
     def _do_vector_int_numpy_test(self, property_name, dtype=None):
         # Use the maskdetectors alg
         indices = np.arange(6,dtype=dtype)
         self._mask_dets.setProperty(property_name, indices)
         prop_values = self._mask_dets.getProperty(property_name).value
-        self.assertEquals(len(prop_values), 6)
+        self.assertEqual(len(prop_values), 6)
         for i in range(6):
-            self.assertEquals(prop_values[i], i)
+            self.assertEqual(prop_values[i], i)
 
     def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
         # Minor hole with int64 as that technically can't be converted to an int32 without precision loss

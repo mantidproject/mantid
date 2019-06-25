@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSqw.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -16,6 +16,7 @@ using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
+Mantid::Kernel::Logger g_log("S(Q,w)");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -122,23 +123,20 @@ void IndirectSqw::run() {
     m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
   }
 
-  auto const eFixed = getInstrumentDetails()["Efixed"];
+  auto const eFixed = getInstrumentDetail("Efixed").toStdString();
 
   auto sqwAlg = AlgorithmManager::Instance().create("SofQW");
   sqwAlg->initialize();
-
-  BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
-  if (rebinInEnergy)
-    sqwInputProps["InputWorkspace"] = eRebinWsName.toStdString();
-  else
-    sqwInputProps["InputWorkspace"] = sampleWsName.toStdString();
-
   sqwAlg->setProperty("OutputWorkspace", sqwWsName.toStdString());
   sqwAlg->setProperty("QAxisBinning", rebinString.toStdString());
   sqwAlg->setProperty("EMode", "Indirect");
-  sqwAlg->setProperty("EFixed", eFixed.toStdString());
+  sqwAlg->setProperty("EFixed", eFixed);
   sqwAlg->setProperty("Method", "NormalisedPolygon");
   sqwAlg->setProperty("ReplaceNaNs", true);
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
+  sqwInputProps["InputWorkspace"] =
+      rebinInEnergy ? eRebinWsName.toStdString() : sampleWsName.toStdString();
 
   m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
 
@@ -180,7 +178,7 @@ void IndirectSqw::sqwAlgDone(bool error) {
 }
 
 void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 
@@ -190,20 +188,40 @@ void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
  * Creates a colour 2D plot of the data
  */
 void IndirectSqw::plotRqwContour() {
+  auto &ads = AnalysisDataService::Instance();
   if (m_uiForm.dsSampleInput->isValid()) {
     auto const sampleName =
         m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-    auto const outputName =
-        sampleName.substr(0, sampleName.size() - 4) + "_rqw";
 
-    convertToSpectrumAxis(sampleName, outputName);
+    if (ads.doesExist(sampleName)) {
+      auto const outputName =
+          sampleName.substr(0, sampleName.size() - 4) + "_rqw";
 
-    auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
-    if (rqwWorkspace)
-      m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+      try {
+        convertToSpectrumAxis(sampleName, outputName);
+        if (ads.doesExist(outputName)) {
+          auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
+          if (rqwWorkspace)
+            m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+        }
+      } catch (std::exception const &ex) {
+        g_log.warning(ex.what());
+        showMessageBox("Invalid file. Please load a valid reduced workspace.");
+      }
+    }
+
   } else {
-    emit showMessageBox("Invalid filename.");
+    emit showMessageBox("Invalid file. Please load a valid reduced workspace.");
   }
+}
+
+void IndirectSqw::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Sqw");
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                               : getExtensions(tabName));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                               : noSuffixes);
 }
 
 void IndirectSqw::runClicked() { runTab(); }

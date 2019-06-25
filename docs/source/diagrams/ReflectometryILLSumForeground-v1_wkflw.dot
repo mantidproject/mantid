@@ -6,7 +6,7 @@ digraph ReflectometryILLSumForeground {
     $param_style
     input               [label="InputWorkspace"]
     output              [label="OutputWorkspace"]
-    direct              [label="DirectBeamWorkspace"]
+    direct              [label="DirectLineWorkspace"]
     l_direct_foreground [label="DirectForegroundWorkspace"]
     q_direct_foreground [label="DirectForegroundWorkspace"]
     l_foreground_centre [label="Foreground\ncentre"]

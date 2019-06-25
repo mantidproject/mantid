@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 
-class TransformView(QtGui.QWidget):
+class TransformView(QtWidgets.QWidget):
 
     """
     Creates the view for the transformation tab.
@@ -21,7 +21,7 @@ class TransformView(QtGui.QWidget):
         super(TransformView, self).__init__(parent)
         # set selector
         self.selection = selectorView
-        self.Layout = QtGui.QGridLayout()
+        self.Layout = QtWidgets.QGridLayout()
         self.Layout.addWidget(self.selection, 1, 0)
         # add the transform widgets to the tab
         self.methods = groupedViews
@@ -30,7 +30,7 @@ class TransformView(QtGui.QWidget):
         self.setLayout(self.Layout)
         self.hideAll()
         methods = list(self.methods.keys())
-        self.show(methods[0])
+        self.showMethod(methods[0])
 
     def getLayout(self):
         return self.grid
@@ -42,7 +42,7 @@ class TransformView(QtGui.QWidget):
         for key in self.methods:
             self.methods[key].hide()
 
-    def show(self, name):
+    def showMethod(self, name):
         self.methods[name].show()
 
     def getView(self, name):

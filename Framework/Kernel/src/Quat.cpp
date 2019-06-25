@@ -36,11 +36,9 @@ Quat::Quat() : w(1), a(0), b(0), c(0) {}
  * @param des :: the destination position
  */
 Quat::Quat(const V3D &src, const V3D &des) {
+  const V3D v = Kernel::normalize(src + des);
 
-  V3D v = (src + des);
-  v.normalize();
-
-  V3D cross = v.cross_prod(des);
+  const V3D cross = v.cross_prod(des);
 
   if (cross.nullVector()) {
     w = 1.;
@@ -120,8 +118,7 @@ void Quat::setAngleAxis(const double _deg, const V3D &_axis) {
   double deg2rad = M_PI / 180.0;
   w = cos(0.5 * _deg * deg2rad);
   double s = sin(0.5 * _deg * deg2rad);
-  V3D temp(_axis);
-  temp.normalize();
+  const V3D temp = Kernel::normalize(_axis);
   a = s * temp[0];
   b = s * temp[1];
   c = s * temp[2];
@@ -213,27 +210,31 @@ void Quat::operator()(const V3D &rX, const V3D &rY, const V3D &rZ) {
   (void)rZ; // Avoid compiler warning
 
   // These are the original axes
-  V3D oX = V3D(1., 0., 0.);
-  V3D oY = V3D(0., 1., 0.);
+  constexpr V3D oX = V3D(1., 0., 0.);
+  constexpr V3D oY = V3D(0., 1., 0.);
 
   // Axis that rotates X
-  V3D ax1 = oX.cross_prod(rX);
-  // Rotation angle from oX to rX
-  double angle1 = oX.angle(rX);
-
+  const V3D ax1 = oX.cross_prod(rX);
   // Create the first quaternion
-  Quat Q1(angle1 * 180.0 / M_PI, ax1);
-
+  Quat Q1;
+  if (!ax1.nullVector()) {
+    // Rotation angle from oX to rX
+    const double angle1 = oX.angle(rX);
+    Q1.setAngleAxis(angle1 * 180.0 / M_PI, ax1);
+  }
   // Now we rotate the original Y using Q1
   V3D roY = oY;
   Q1.rotate(roY);
   // Find the axis that rotates oYr onto rY
-  V3D ax2 = roY.cross_prod(rY);
-  double angle2 = roY.angle(rY);
-  Quat Q2(angle2 * 180.0 / M_PI, ax2);
+  const V3D ax2 = roY.cross_prod(rY);
+  Quat Q2;
+  if (!ax2.nullVector()) {
+    const double angle2 = roY.angle(rY);
+    Q2.setAngleAxis(angle2 * 180.0 / M_PI, ax2);
+  }
 
   // Final = those two rotations in succession; Q1 is done first.
-  Quat final = Q2 * Q1;
+  const Quat final = Q2 * Q1;
 
   // Set it
   this->operator()(final);
@@ -581,7 +582,7 @@ void Quat::setQuat(const Kernel::DblMatrix &rMat) {
  * @param Index :: the index of the value required 0=w, 1=a, 2=b, 3=c
  * @returns a double of the value requested
  */
-const double &Quat::operator[](const int Index) const {
+double Quat::operator[](const int Index) const {
   switch (Index) {
   case 0:
     return w;

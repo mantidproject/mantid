@@ -5,17 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import Muon.GUI.Common.utilities.load_utils as utils
-import sys
 import os
+import unittest
+
 from mantid import simpleapi, ConfigService
 from mantid.api import AnalysisDataService, ITableWorkspace
 
-import unittest
-
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
 
 def create_simple_workspace(data_x, data_y, run_number=0):
     alg = simpleapi.AlgorithmManager.create("CreateWorkspace")
@@ -29,6 +24,7 @@ def create_simple_workspace(data_x, data_y, run_number=0):
     ws = alg.getProperty("OutputWorkspace").value
     ws.getRun().addProperty('run_number', run_number, 'NonDim', True)
     return ws
+
 
 class MuonFileUtilsTest(unittest.TestCase):
     def test_get_run_from_multi_period_data(self):
@@ -72,10 +68,10 @@ class MuonFileUtilsTest(unittest.TestCase):
 
     def test_load_workspace_from_filename_for_existing_file(self):
         filename = 'MUSR00022725.nsx'
-        load_result, run, filename = utils.load_workspace_from_filename(filename)
+        load_result, run, filename, _ = utils.load_workspace_from_filename(filename)
 
         self.assertEqual(load_result['DeadTimeTable'], None)
-        self.assertEqual(load_result['FirstGoodData'], 0.656)
+        self.assertEqual(load_result['FirstGoodData'], 0.11)
         self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
         self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
         self.assertEqual(run, 22725)

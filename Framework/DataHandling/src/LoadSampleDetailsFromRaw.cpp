@@ -30,13 +30,13 @@ DECLARE_ALGORITHM(LoadSampleDetailsFromRaw)
  * Initialize the algorithm
  */
 void LoadSampleDetailsFromRaw::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The sample details are attached to this workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The sample details are attached to this workspace.");
   const std::vector<std::string> exts{"raw", ".s*"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The raw file containing the sample geometry information.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The raw file containing the sample geometry information.");
 }
 
 /**
@@ -52,20 +52,20 @@ void LoadSampleDetailsFromRaw::exec() {
     throw Exception::FileError("Unable to open File:", filename);
   }
 
-  auto isis_raw = new ISISRAW2;
-  isis_raw->ioRAW(file, true);
+  auto isis_raw = ISISRAW2();
+  isis_raw.ioRAW(file, true);
   fclose(file);
 
   // Pick out the geometry information
-  data_ws->mutableSample().setGeometryFlag(isis_raw->spb.e_geom);
+  data_ws->mutableSample().setGeometryFlag(isis_raw.spb.e_geom);
   data_ws->mutableSample().setThickness(
-      static_cast<double>(isis_raw->spb.e_thick));
+      static_cast<double>(isis_raw.spb.e_thick));
   data_ws->mutableSample().setHeight(
-      static_cast<double>(isis_raw->spb.e_height));
-  data_ws->mutableSample().setWidth(static_cast<double>(isis_raw->spb.e_width));
+      static_cast<double>(isis_raw.spb.e_height));
+  data_ws->mutableSample().setWidth(static_cast<double>(isis_raw.spb.e_width));
 
   g_log.debug() << "Raw file sample details:\n"
-                << "\tsample geometry flag: " << isis_raw->spb.e_geom << "\n"
+                << "\tsample geometry flag: " << isis_raw.spb.e_geom << "\n"
                 << "\tsample thickness: "
                 << data_ws->mutableSample().getThickness() << "\n"
                 << "\tsample height: " << data_ws->mutableSample().getHeight()
@@ -73,8 +73,6 @@ void LoadSampleDetailsFromRaw::exec() {
                 << "\tsample width: " << data_ws->mutableSample().getWidth()
                 << '\n';
 
-  // Free the used memory
-  delete isis_raw;
   // Not much happens really
   progress(1.);
 }

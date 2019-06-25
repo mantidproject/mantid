@@ -12,11 +12,12 @@ import Muon.GUI.Common.utilities.load_utils as load_utils
 class LoadRunWidgetModel(object):
     """Stores info on all currently loaded workspaces"""
 
-    def __init__(self, loaded_data_store=MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         # Used with load thread
         self._filenames = []
 
         self._loaded_data_store = loaded_data_store
+        self._data_context = context.data_context
         self._current_run = None
 
     def remove_previous_data(self):
@@ -31,12 +32,12 @@ class LoadRunWidgetModel(object):
         failed_files = []
         for filename in self._filenames:
             try:
-                ws, run, filename = load_utils.load_workspace_from_filename(filename)
-            except Exception:
-                failed_files += [filename]
+                ws, run, filename, _ = load_utils.load_workspace_from_filename(filename)
+            except Exception as error:
+                failed_files += [(filename, error)]
                 continue
-            self._loaded_data_store.remove_data(run=run)
-            self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
+            self._loaded_data_store.remove_data(run=[run])
+            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename, instrument=self._data_context.instrument)
         if failed_files:
             message = load_utils.exception_message_for_failed_files(failed_files)
             raise ValueError(message)
@@ -70,3 +71,21 @@ class LoadRunWidgetModel(object):
     @property
     def loaded_runs(self):
         return self._loaded_data_store.get_parameter("run")
+
+    @property
+    def instrument(self):
+        return self._data_context.instrument
+
+    @property
+    def current_runs(self):
+        return self._data_context.current_runs
+
+    @current_runs.setter
+    def current_runs(self, value):
+        self._data_context.current_runs = value
+
+    def get_latest_loaded_run(self):
+        return self._loaded_data_store.get_latest_data()['run']
+
+    def get_data(self, run):
+        return self._loaded_data_store.get_data(run=run, instrument=self._data_context.instrument)

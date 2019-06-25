@@ -25,7 +25,7 @@ public:
                                     QWidget *parent = nullptr);
   ~PeaksViewerOverlayDialog() override;
 
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent * /*unused*/) override;
   void reject() override;
 
 private slots:

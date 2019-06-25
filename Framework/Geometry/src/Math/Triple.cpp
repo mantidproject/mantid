@@ -61,27 +61,27 @@ Triple<T>::~Triple()
 {}
 
 template <typename T>
-int Triple<T>::operator==(const Triple<T> &A) const
+bool Triple<T>::operator==(const Triple<T> &A) const
 /**
   Operator== all components must be equal
 */
 {
-  return (first != A.first || second != A.second || third != A.third) ? 0 : 1;
+  return (first == A.first && second == A.second && third == A.third);
 }
 
 template <typename T>
-int Triple<T>::operator!=(const Triple<T> &A) const
+bool Triple<T>::operator!=(const Triple<T> &A) const
 /**
   Operator!= any component is not equal
   @param A :: Other object to compare
   @return this!=A
 */
 {
-  return (first == A.first && second == A.second && third == A.third) ? 0 : 1;
+  return !(*this == A);
 }
 
 template <typename T>
-int Triple<T>::operator<(const Triple<T> &A) const
+bool Triple<T>::operator<(const Triple<T> &A) const
 /**
   Operator< takes first to last precidence.
   @param A :: Triple to compare
@@ -89,20 +89,20 @@ int Triple<T>::operator<(const Triple<T> &A) const
 */
 {
   if (first > A.first)
-    return 0;
+    return false;
   if (first < A.first)
-    return 1;
+    return true;
   if (second > A.second)
-    return 0;
+    return false;
   if (second < A.second)
-    return 1;
+    return true;
   if (third >= A.third)
-    return 0;
-  return 1;
+    return false;
+  return true;
 }
 
 template <typename T>
-int Triple<T>::operator>(const Triple<T> &A) const
+bool Triple<T>::operator>(const Triple<T> &A) const
 /**
   Operator> takes first to last precidence.
   Uses operator<  to obtain value.
@@ -212,27 +212,27 @@ DTriple<F, S, T>::~DTriple()
 {}
 
 template <typename F, typename S, typename T>
-int DTriple<F, S, T>::operator==(const DTriple<F, S, T> &A) const
+bool DTriple<F, S, T>::operator==(const DTriple<F, S, T> &A) const
 /**
   Operator== all components must be equal
   @param A :: Object to compare
   @return A==*this
 */
 {
-  return (first != A.first || second != A.second || third != A.third) ? 0 : 1;
+  return (first == A.first && second == A.second && third == A.third);
 }
 
 template <typename F, typename S, typename T>
-int DTriple<F, S, T>::operator!=(const DTriple<F, S, T> &A) const
+bool DTriple<F, S, T>::operator!=(const DTriple<F, S, T> &A) const
 /**
   Operator!= any component is not equal
 */
 {
-  return (first == A.first && second == A.second && third == A.third) ? 0 : 1;
+  return !(*this == A);
 }
 
 template <typename F, typename S, typename T>
-int DTriple<F, S, T>::operator<(const DTriple<F, S, T> &A) const
+bool DTriple<F, S, T>::operator<(const DTriple<F, S, T> &A) const
 /**
   Operator< takes first to last precidence.
   @param A :: Triple to compare
@@ -240,20 +240,20 @@ int DTriple<F, S, T>::operator<(const DTriple<F, S, T> &A) const
 */
 {
   if (first > A.first)
-    return 0;
+    return false;
   if (first < A.first)
-    return 1;
+    return true;
   if (second > A.second)
-    return 0;
+    return false;
   if (second < A.second)
-    return 1;
+    return true;
   if (third >= A.third)
-    return 0;
-  return 1;
+    return false;
+  return true;
 }
 
 template <typename F, typename S, typename T>
-int DTriple<F, S, T>::operator>(const DTriple<F, S, T> &A) const
+bool DTriple<F, S, T>::operator>(const DTriple<F, S, T> &A) const
 /**
   Operator> takes first to last precidence.
   @param A :: Triple to compare

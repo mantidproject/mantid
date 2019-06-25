@@ -225,32 +225,13 @@ void FindReplaceDialog::replaceAll() {
     boxReplace->addItem(replaceString);
   }
 
-  int line(-1), index(-1), prevLine(-1), prevIndex(-1);
   bool regex = boxRegex->isChecked();
   bool cs = boxCaseSensitive->isChecked();
   bool whole = boxWholeWords->isChecked();
   bool wrap = boxWrapAround->isChecked();
   bool backward = boxSearchBackwards->isChecked();
-  // Mark this as a set of actions that can be undone as one
-  m_editor->beginUndoAction();
-  bool found = m_editor->findFirst(searchString, regex, cs, whole, wrap,
-                                   !backward, 0, 0);
-  // If find first fails then there is nothing to replace
-  if (!found) {
-    QMessageBox::information(this, "MantidPlot - Find and Replace",
-                             "No matches found in current document.");
-  }
-
-  while (found) {
-    m_editor->replace(replaceString);
-    m_editor->getCursorPosition(&prevLine, &prevIndex);
-    found = m_editor->findNext();
-    m_editor->getCursorPosition(&line, &index);
-    if (line < prevLine || (line == prevLine && index <= prevIndex)) {
-      break;
-    }
-  }
-  m_editor->endUndoAction();
+  m_editor->replaceAll(searchString, replaceString, regex, cs, whole, wrap,
+                       !backward);
 }
 
 /**

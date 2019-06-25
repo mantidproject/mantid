@@ -30,7 +30,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <iostream>
 
 using namespace std;
 
@@ -172,13 +171,13 @@ void LoadSpiceXML2DDet::init() {
   exts.push_back(".xml");
   exts.push_back(".bin");
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::FileAction::Load,
-                                exts),
+      std::make_unique<FileProperty>("Filename", "",
+                                     FileProperty::FileAction::Load, exts),
       "XML file name for one scan including 2D detectors counts from SPICE");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "Name of output matrix workspace. "
       "Output workspace will be an X by Y Workspace2D if instrument "
       "is not loaded. ");
@@ -189,7 +188,7 @@ void LoadSpiceXML2DDet::init() {
       "By default, the name is 'Detector'");
 
   declareProperty(
-      make_unique<ArrayProperty<size_t>>("DetectorGeometry"),
+      std::make_unique<ArrayProperty<size_t>>("DetectorGeometry"),
       "A size-2 unsigned integer array [X, Y] for detector geometry. "
       "Such that the detector contains X x Y pixels."
       "If the input data is a binary file, input for DetectorGeometry will be "
@@ -202,15 +201,15 @@ void LoadSpiceXML2DDet::init() {
       "HFIR's HB3A will be loaded if InstrumentFileName is not specified.");
 
   declareProperty(
-      make_unique<FileProperty>("InstrumentFilename", "",
-                                FileProperty::OptionalLoad, ".xml"),
+      std::make_unique<FileProperty>("InstrumentFilename", "",
+                                     FileProperty::OptionalLoad, ".xml"),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Note Filename or "
       "InstrumentName must be specified but not both.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "SpiceTableWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Name of TableWorkspace loaded from SPICE scan file by LoadSpiceAscii.");
 
@@ -884,8 +883,6 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
       throw std::runtime_error(errss.str());
     }
 
-    // Split line
-    std::vector<std::string> veccounts;
     boost::split(veccounts, line, boost::algorithm::is_any_of(" \t"));
 
     // check number of counts per column should not exceeds number of pixels

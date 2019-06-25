@@ -7,10 +7,10 @@
 #include "ConvFit.h"
 #include "ConvFitDataPresenter.h"
 
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -41,22 +41,19 @@ ConvFit::ConvFit(QWidget *parent)
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
 
-  setFitDataPresenter(Mantid::Kernel::make_unique<ConvFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<ConvFitDataPresenter>(
       m_convFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+
+  setEditResultVisible(true);
 }
 
 void ConvFit::setupFitTab() {
   setDefaultPeakType("Lorentzian");
   setConvolveMembers(true);
-
-  setSampleWSSuffices({"_red", "_sqw"});
-  setSampleFBSuffices({"_red.nxs", "_sqw.nxs", "_sqw.dave"});
-  setResolutionWSSuffices({"_res", "_red", "_sqw"});
-  setResolutionFBSuffices({"_res.nxs", "_red.nxs", "_sqw.nxs", "_sqw.dave"});
 
   // Initialise fitTypeStrings
   m_fitStrings["None"] = "";

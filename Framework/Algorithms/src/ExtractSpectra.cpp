@@ -56,11 +56,11 @@ const std::string ExtractSpectra::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ExtractSpectra::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The input workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name of the output workspace");
 
   declareProperty("XMin", EMPTY_DBL(),
@@ -84,13 +84,13 @@ void ExtractSpectra::init() {
       "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
       "The index number of the last entry in the Workspace to be loaded\n"
       "(default: last entry in the Workspace)");
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "A comma-separated list of individual workspace indices to "
                   "read.  Only used if\n"
                   "explicitly set. The WorkspaceIndexList is only used if the "
                   "DetectorList is empty.");
 
-  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "A comma-separated list of individual detector IDs to read.  "
                   "Only used if\n"
                   "explicitly set. When specifying the WorkspaceIndexList and "
@@ -105,7 +105,7 @@ void ExtractSpectra::init() {
 void ExtractSpectra::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
   m_histogram = m_inputWorkspace->isHistogramData();
-  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
+  m_commonBoundaries = m_inputWorkspace->isCommonBins();
   this->checkProperties();
 
   if (m_workspaceIndexList.empty()) {
@@ -278,10 +278,10 @@ void ExtractSpectra::checkProperties() {
     }
     m_croppingInX = true;
   }
-  if (!m_commonBoundaries)
+  if (!m_commonBoundaries) {
     m_minX = 0;
-  if (!m_commonBoundaries)
     m_maxX = static_cast<int>(m_inputWorkspace->x(0).size());
+  }
 
   // The hierarchy of inputs is (one is being selected):
   // 1. DetectorList

@@ -4,6 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
 
 
 class DetectorsPresenter(object):
@@ -16,3 +17,6 @@ class DetectorsPresenter(object):
 
     def setStateQuietly(self, name, state):
         self.view.setStateQuietly(name, state)
+
+    def getNames(self):
+        return self.view.widgets.keys()

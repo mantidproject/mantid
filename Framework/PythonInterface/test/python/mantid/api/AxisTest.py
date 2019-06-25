@@ -29,16 +29,16 @@ class AxisTest(unittest.TestCase):
 
     def test_axis_meta_data(self):
         yAxis = self._test_ws.getAxis(1)
-        self.assertEquals(yAxis.length(), 3)
-        self.assertEquals(len(yAxis), yAxis.length())
-        self.assertEquals(yAxis.title(), "")
+        self.assertEqual(yAxis.length(), 3)
+        self.assertEqual(len(yAxis), yAxis.length())
+        self.assertEqual(yAxis.title(), "")
 
     def test_axis_unit(self):
         xAxis =  self._test_ws.getAxis(0)
         xunit = xAxis.getUnit()
-        self.assertEquals(xunit.unitID(), "TOF")
-        self.assertEquals(xunit.caption(), "Time-of-flight")
-        self.assertEquals(xunit.label(), "microsecond")
+        self.assertEqual(xunit.unitID(), "TOF")
+        self.assertEqual(xunit.caption(), "Time-of-flight")
+        self.assertEqual(xunit.label(), "microsecond")
 
     def test_axis_unit_can_be_replaced(self):
         datY=[1,2,3]
@@ -53,22 +53,22 @@ class AxisTest(unittest.TestCase):
 
         unitx = ws.getAxis(0).getUnit()
         unity = ws.getAxis(1).getUnit()
-        self.assertEquals("Time",unitx.caption())
-        self.assertEquals("ns",unitx.label())
-        self.assertEquals("Temperature",unity.caption())
-        self.assertEquals("K",unity.label())
+        self.assertEqual("Time",unitx.caption())
+        self.assertEqual("ns",unitx.label())
+        self.assertEqual("Temperature",unity.caption())
+        self.assertEqual("K",unity.label())
 
     def test_value_axis(self):
         yAxis = self._test_ws.getAxis(1)
         for i in range(1,4): # Not including 4
-            self.assertEquals(yAxis.getValue(i-1), i)
+            self.assertEqual(yAxis.getValue(i-1), i)
 
     def test_extract_numerical_axis_values_to_numpy(self):
         yAxis = self._test_ws.getAxis(1)
         values = yAxis.extractValues()
         self.assertTrue(isinstance(values, np.ndarray))
         for index, value in enumerate(values):
-            self.assertEquals(value, index + 1)
+            self.assertEqual(value, index + 1)
 
     def test_extract_string_axis_values_to_list(self):
         data = [1.,2.,3.]
@@ -81,7 +81,7 @@ class AxisTest(unittest.TestCase):
         values = txtAxis.extractValues()
         self.assertTrue(isinstance(values, list))
         for index, value in enumerate(values):
-            self.assertEquals(value, axis_values[index])
+            self.assertEqual(value, axis_values[index])
 
 if __name__ == '__main__':
     unittest.main()

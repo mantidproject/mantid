@@ -93,7 +93,7 @@ public:
   void test_ThreadPool_ParallelLogging() {
     ThreadPool tp;
     for (int i = 0; i < 1000; i++)
-      tp.schedule(new FunctionTask(
+      tp.schedule(std::make_shared<FunctionTask>(
           boost::bind(&LoggerTest::doLogInParallel, &*this, i)));
     tp.joinAll();
   }

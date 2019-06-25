@@ -6,14 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTTOOLS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTTOOLS_H_
-
-//----------------------
-// Includes
-//----------------------
-#include "IndirectToolsTab.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectTools.h"
+
+#include "IndirectInterface.h"
+#include "IndirectToolsTab.h"
+
+#include "MantidKernel/ConfigService.h"
 
 #include <Poco/NObserver.h>
 
@@ -27,7 +25,7 @@ the interface window and
 @author Samuel Jackson, STFC
 */
 
-class DLLExport IndirectTools : public MantidQt::API::UserSubWindow {
+class DLLExport IndirectTools : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -49,18 +47,14 @@ public: // public constructor, destructor and functions
 private slots:
   /// Slot for clicking on the run button
   void runClicked();
-  /// Slot for clicking on the hlep button
-  void helpClicked();
-  /// Slot for clicking on the manage directories button
-  void manageUserDirectories();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
 
 private:
+  std::string documentationPage() const override;
+
   /// Load default interface settings for each tab
   void loadSettings();
   /// Called upon a close event.
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent * /*unused*/) override;
   /// Handle POCO event
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);

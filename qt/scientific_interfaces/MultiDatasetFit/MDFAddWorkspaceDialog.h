@@ -26,10 +26,12 @@ public:
 private slots:
   void accept() override;
   void reject() override;
-  void workspaceNameChanged(const QString &);
+  void workspaceNameChanged(const QString & /*wsName*/);
   void selectAllSpectra(int state);
 
 private:
+  QStringList availableWorkspaces() const;
+  void findCommonMaxIndex(const QString &wsName);
   /// Name of the selected workspace
   QString m_workspaceName;
   /// Selected workspace index

@@ -36,15 +36,15 @@ using namespace DataObjects;
  *
  */
 void InterpolatingRebin::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace containing the input data");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace containing the input data");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to give the output workspace");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally "
@@ -82,7 +82,8 @@ void InterpolatingRebin::exec() {
       create<MatrixWorkspace>(*inputW, BinEdges(ntcnew));
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
-    outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));
+    outputW->replaceAxis(
+        1, std::unique_ptr<Axis>(inputW->getAxis(1)->clone(outputW.get())));
   outputW->setDistribution(true);
 
   // this calculation requires a distribution workspace but deal with the

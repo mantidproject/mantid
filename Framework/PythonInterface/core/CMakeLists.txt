@@ -1,54 +1,72 @@
-###########################################################################
-# Core Python/C++ code used by all layers accessing the Python C API.
-# It contains functionality such as classes for GIL management, conversion
-# of Python errors to exceptions etc.
-#
-# It should not link to any other Mantid libraries.
-###########################################################################
-set ( SRC_FILES
-  src/Converters/NDArrayTypeIndex.cpp
-  src/Converters/WrapWithNDArray.cpp
-  src/ErrorHandling.cpp
-  src/GlobalInterpreterLock.cpp
-  src/NDArray.cpp
-  src/ReleaseGlobalInterpreterLock.cpp
-  src/WrapperHelpers.cpp
-)
+# Core Python/C++ code used by all layers accessing the Python C API. It
+# contains functionality such as classes for GIL management, conversion of
+# Python errors to exceptions etc.
 
-set ( INC_FILES
-  inc/MantidPythonInterface/core/Converters/NDArrayTypeIndex.h
-  inc/MantidPythonInterface/core/Converters/VectorToNDArray.h
-  inc/MantidPythonInterface/core/Converters/WrapWithNDArray.h
-  inc/MantidPythonInterface/core/CallMethod.h
-  inc/MantidPythonInterface/core/DllConfig.h
-  inc/MantidPythonInterface/core/ErrorHandling.h
-  inc/MantidPythonInterface/core/GlobalInterpreterLock.h
-  inc/MantidPythonInterface/core/NDArray.h
-  inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
-  inc/MantidPythonInterface/core/VersionCompat.h
-  inc/MantidPythonInterface/core/WrapperHelpers.h
-)
+# It should not link to any other Mantid libraries.
+
+set(SRC_FILES
+    src/Converters/CloneToNDArray.cpp
+    src/Converters/DateAndTime.cpp
+    src/Converters/NDArrayTypeIndex.cpp
+    src/Converters/NumpyFunctions.cpp
+    src/Converters/WrapWithNDArray.cpp
+    src/ErrorHandling.cpp
+    src/GlobalInterpreterLock.cpp
+    src/NDArray.cpp
+    src/ReleaseGlobalInterpreterLock.cpp
+    src/WrapperHelpers.cpp)
+
+set(INC_FILES
+    inc/MantidPythonInterface/core/Converters/CloneToNDArray.h
+    inc/MantidPythonInterface/core/Converters/DateAndTime.h
+    inc/MantidPythonInterface/core/Converters/NDArrayTypeIndex.h
+    inc/MantidPythonInterface/core/Converters/ToPyList.h
+    inc/MantidPythonInterface/core/Converters/NumpyFunctions.h
+    inc/MantidPythonInterface/core/Converters/VectorToNDArray.h
+    inc/MantidPythonInterface/core/Converters/WrapWithNDArray.h
+    inc/MantidPythonInterface/core/CallMethod.h
+    inc/MantidPythonInterface/core/DllConfig.h
+    inc/MantidPythonInterface/core/ErrorHandling.h
+    inc/MantidPythonInterface/core/GlobalInterpreterLock.h
+    inc/MantidPythonInterface/core/NDArray.h
+    inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
+    inc/MantidPythonInterface/core/VersionCompat.h
+    inc/MantidPythonInterface/core/WrapperHelpers.h
+    inc/MantidPythonInterface/core/WrapPython.h)
 
 # Add the target for this directory
-set ( _target_name PythonInterfaceCore )
-add_library ( ${_target_name} ${SRC_FILES} ${INC_FILES} )
-target_include_directories( ${_target_name} PUBLIC inc )
+set(_target_name PythonInterfaceCore)
+add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
+target_include_directories(${_target_name} PUBLIC inc)
+target_include_directories(${_target_name} SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 # Set the name of the generated library
-set_target_properties ( ${_target_name} PROPERTIES OUTPUT_NAME MantidPythonInterfaceCore
-  COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE )
+set_target_properties(${_target_name}
+                      PROPERTIES OUTPUT_NAME
+                                 MantidPythonInterfaceCore
+                                 COMPILE_DEFINITIONS
+                                 IN_MANTID_PYTHONINTERFACE_CORE)
 
 # Dependencies
-target_link_libraries ( ${_target_name} PRIVATE
-  ${TCMALLOC_LIBRARIES_LINKTIME} Types ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries(${_target_name}
+                      PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+                              Types
+                              ${Boost_LIBRARIES}
+                              ${PYTHON_LIBRARIES})
 
 # Add to the 'Framework/Python' group in MSVS
-set_property ( TARGET ${_target_name} PROPERTY FOLDER "MantidFramework/Python" )
+set_property(TARGET ${_target_name} PROPERTY FOLDER "MantidFramework/Python")
 
 # rpath settings
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( ${_target_name} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS" )
-elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-  set_target_properties ( ${_target_name} PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}" )
-endif ()
+if(OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties(${_target_name}
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set_target_properties(${_target_name}
+                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif()
 
-mtd_install_targets( TARGETS PythonInterfaceCore INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR} )
+mtd_install_targets(TARGETS
+                    PythonInterfaceCore
+                    INSTALL_DIRS
+                    ${LIB_DIR}
+                    ${WORKBENCH_LIB_DIR})

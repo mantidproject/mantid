@@ -100,7 +100,7 @@ public:
         "Should have thrown exception on use of create rather than "
         "createunwrapped.",
         Mantid::API::ImplicitFunctionParserFactory::Instance().create(""),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 };
 

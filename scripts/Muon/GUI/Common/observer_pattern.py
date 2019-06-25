@@ -51,3 +51,43 @@ class Observable(object):
     def notify_subscribers(self, arg=None, **kwargs):
         for observer in self._subscribers:
             observer.update(self, arg, **kwargs)
+
+
+class GenericObserver(Observer):
+    """
+    General purpose observer wrapping a Python callable.
+    """
+    def __init__(self, callback):
+        """
+        Initialize the observer
+        :param callback: A Python callable called when update() is called. It
+        should take no arguments
+        """
+        super(GenericObserver, self).__init__()
+        self.callback = callback
+
+    def update(self, observable, arg):
+        """
+        Called to notify the observer that something has happened. This implementation
+        just calls the registered callback
+        :param observable: A reference to the observable object (unused)
+        :param arg: Argument delivered from the Observable (unused)
+        """
+        self.callback()
+
+
+class GenericObserverWithArgPassing(Observer):
+    def __init__(self, callback):
+        Observer.__init__(self)
+        self.callback = callback
+
+    def update(self, observable, arg):
+        self.callback(arg)
+
+
+class GenericObservable(Observable):
+    def __init__(self):
+        Observable.__init__(self)
+
+    def notify_subscribers(self, *args, **kwargs):
+        Observable.notify_subscribers(self, *args)

@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <QMessageBox>
+#include <QStringList>
 #include <QTableWidget>
 
 namespace {
@@ -72,20 +73,20 @@ void DataController::addWorkspace() {
       }
 
       if (!matrixWorkspaces.empty()) {
-        for (auto iws = matrixWorkspaces.begin(); iws != matrixWorkspaces.end();
-             ++iws) {
-          auto name = QString::fromStdString((**iws).getName());
-          for (auto i = indices.begin(); i != indices.end(); ++i) {
-            addWorkspaceSpectrum(name, *i, **iws);
+        QStringList datasetNames;
+        for (auto &matrixWorkspace : matrixWorkspaces) {
+          auto name = QString::fromStdString((*matrixWorkspace).getName());
+          for (auto &index : indices) {
+            addWorkspaceSpectrum(name, index, *matrixWorkspace);
+            datasetNames << name + " (" + QString::number(index) + ")";
           }
         }
-        emit spectraAdded(
-            static_cast<int>(indices.size() * matrixWorkspaces.size()));
+        emit spectraAdded(datasetNames);
         emit dataTableUpdated();
       }
     } else {
       QMessageBox::warning(
-          owner(), "MantidPlot - Warning",
+          owner(), "Mantid - Warning",
           QString("Workspace \"%1\" doesn't exist.").arg(wsName));
     }
   }
@@ -136,8 +137,8 @@ void DataController::removeSelectedSpectra() {
   if (ranges.isEmpty())
     return;
   QList<int> rows;
-  for (auto range = ranges.begin(); range != ranges.end(); ++range) {
-    for (int row = range->topRow(); row <= range->bottomRow(); ++row) {
+  for (auto &range : ranges) {
+    for (int row = range.topRow(); row <= range.bottomRow(); ++row) {
       rows.push_back(row);
     }
   }
@@ -234,7 +235,9 @@ std::pair<double, double> DataController::getFittingRange(int i) const {
 }
 
 /// Inform the others that a dataset was updated.
-void DataController::updateDataset(int row, int) { emit dataSetUpdated(row); }
+void DataController::updateDataset(int row, int /*unused*/) {
+  emit dataSetUpdated(row);
+}
 
 /// Object's parent cast to MultiDatasetFit.
 MultiDatasetFit *DataController::owner() const {

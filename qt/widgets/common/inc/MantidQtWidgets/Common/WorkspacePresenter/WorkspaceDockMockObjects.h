@@ -8,10 +8,10 @@
 #define MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H
 
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
-#include <MantidAPI/Workspace.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h>
+
+#include "MantidAPI/Workspace.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
@@ -51,7 +51,8 @@ public:
                void(IWorkspaceDockView::SortCriteria criteria,
                     IWorkspaceDockView::SortDirection direction));
   MOCK_CONST_METHOD0(getSaveFileType, SaveFileType());
-  MOCK_METHOD1(saveWorkspace, void(SaveFileType type));
+  MOCK_METHOD2(saveWorkspace,
+               void(const std::string &wsName, SaveFileType type));
   MOCK_METHOD1(saveWorkspaces, void(const StringList &wsNames));
   MOCK_METHOD1(
       updateTree,

@@ -6,14 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
-
-//----------------------
-// Includes
-//----------------------
-#include "IndirectSimulationTab.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectSimulation.h"
+
+#include "IndirectInterface.h"
+#include "IndirectSimulationTab.h"
+
+#include "MantidKernel/ConfigService.h"
 
 #include <Poco/NObserver.h>
 
@@ -27,7 +25,7 @@ namespace CustomInterfaces {
   @author Samuel Jackson, STFC
   */
 
-class DLLExport IndirectSimulation : public MantidQt::API::UserSubWindow {
+class DLLExport IndirectSimulation : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -46,19 +44,13 @@ public: // public constructor, destructor and functions
   /// Setup tab UI
   void initLayout() override;
 
-private slots:
-  /// Slot for clicking on the help button
-  void helpClicked();
-  /// Slot for clicking on the manage directories button
-  void manageUserDirectories();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
-
 private:
+  std::string documentationPage() const override;
+
   /// Load default interface settings for each tab
   void loadSettings();
   /// Called upon a close event.
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);

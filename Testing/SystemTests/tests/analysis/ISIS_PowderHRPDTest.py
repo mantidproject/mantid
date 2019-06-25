@@ -61,7 +61,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
-        return self.calibration_results.getName(), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
+        return self.calibration_results.name(), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
 
     def cleanup(self):
         try:
@@ -90,7 +90,7 @@ class FocusTest(systemtesting.MantidSystemTest):
             self.tolerance = 0.4
         else:
             self.tolerance = 0.05
-        return self.focus_results.getName(), "HRPD66063_focused.nxs"
+        return self.focus_results.name(), "HRPD66063_focused.nxs"
 
     def cleanup(self):
         try:

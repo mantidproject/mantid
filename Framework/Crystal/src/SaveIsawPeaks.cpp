@@ -8,9 +8,11 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Strings.h"
@@ -33,7 +35,7 @@ DECLARE_ALGORITHM(SaveIsawPeaks)
 /** Initialize the algorithm's properties.
  */
 void SaveIsawPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
@@ -43,12 +45,12 @@ void SaveIsawPeaks::init() {
                   "If false, new file (default).");
 
   const std::vector<std::string> exts{".peaks", ".integrate"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, exts),
-                  "Path to an ISAW-style peaks or integrate file to save.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
+      "Path to an ISAW-style peaks or integrate file to save.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace2D>>(
+      std::make_unique<WorkspaceProperty<Workspace2D>>(
           "ProfileWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An optional Workspace2D of profiles from integrating cylinder.");
 
@@ -105,6 +107,8 @@ void SaveIsawPeaks::exec() {
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
+    if (p.getIntMNP() != V3D(0, 0, 0))
+      m_isModulatedStructure = true;
     int run = p.getRunNumber();
     int bank = 0;
     std::string bankName = p.getBankName();
@@ -126,6 +130,11 @@ void SaveIsawPeaks::exec() {
     // Save in the map
     runMap[run][bank].push_back(i);
   }
+  if (m_isModulatedStructure)
+    header =
+        "2   SEQN    H    K    L    M    N    P     COL      ROW     CHAN      "
+        "  L2   2_THETA        AZ         WL         D      IPK "
+        "      INTI    SIGI  RFLG";
 
   if (!inst)
     throw std::runtime_error(
@@ -184,7 +193,10 @@ void SaveIsawPeaks::exec() {
     // For now, this allows the proper instrument to be loaded back after
     // saving.
     Types::Core::DateAndTime expDate = inst->getValidFromDate() + 1.0;
-    out << expDate.toISO8601String() << '\n';
+    out << expDate.toISO8601String();
+    if (m_isModulatedStructure)
+      out << " MOD";
+    out << '\n';
 
     out << "6         L1    T0_SHIFT\n";
     out << "7 " << std::setw(10);
@@ -341,18 +353,35 @@ void SaveIsawPeaks::exec() {
           Peak &p = peaks[wi];
 
           // Sequence (run) number
+          std::string firstNumber = "3";
+          if (m_isModulatedStructure) {
+            firstNumber = "9";
+          }
           if (renumber) {
-            out << "3" << std::setw(7) << sequenceNumber;
+            out << firstNumber << std::setw(7) << sequenceNumber;
             sequenceNumber++;
           } else {
-            out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
+            out << firstNumber << std::setw(7)
+                << p.getPeakNumber() + appendPeakNumb;
           }
 
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention
-          out << std::setw(5) << Utils::round(qSign * p.getH()) << std::setw(5)
-              << Utils::round(qSign * p.getK()) << std::setw(5)
-              << Utils::round(qSign * p.getL());
+          if (m_isModulatedStructure) {
+            V3D mod = p.getIntMNP();
+            auto intHKL = p.getIntHKL();
+            out << std::setw(5) << Utils::round(qSign * intHKL.X())
+                << std::setw(5) << Utils::round(qSign * intHKL.Y())
+                << std::setw(5) << Utils::round(qSign * intHKL.Z());
+
+            out << std::setw(5) << Utils::round(qSign * mod[0]) << std::setw(5)
+                << Utils::round(qSign * mod[1]) << std::setw(5)
+                << Utils::round(qSign * mod[2]);
+          } else {
+            out << std::setw(5) << Utils::round(qSign * p.getH())
+                << std::setw(5) << Utils::round(qSign * p.getK())
+                << std::setw(5) << Utils::round(qSign * p.getL());
+          }
 
           // Row/column
           out << std::setw(8) << std::fixed << std::setprecision(2)
@@ -535,6 +564,12 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     ysize = first->getDistance(*last);
   }
 }
-
+void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign,
+                                 std::vector<double> offset) {
+  for (size_t i = 0; i < 3; i++) {
+    out << std::setw(12) << std::fixed << std::setprecision(6)
+        << qSign * offset[i] << " ";
+  }
+}
 } // namespace Crystal
 } // namespace Mantid

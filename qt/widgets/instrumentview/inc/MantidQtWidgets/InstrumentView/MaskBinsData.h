@@ -17,6 +17,15 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+/// Range of x values to mask in a spectrum. (Using MaskBins)
+struct BinMask {
+  BinMask(double s = 0.0, double e = 0.0) : start(s), end(e) {}
+  double start;
+  double end;
+  std::vector<size_t> spectra;
+};
+
 /**
 Class for storing information on masked bins in a workspace.
 */
@@ -34,14 +43,9 @@ public:
   std::string saveToProject() const;
 
 private:
-  /// Range of x values to mask in a spectrum. (Using MaskBins)
-  struct BinMask {
-    BinMask(double s = 0.0, double e = 0.0) : start(s), end(e) {}
-    double start;
-    double end;
-    std::vector<size_t> spectra;
-  };
   QList<BinMask> m_masks;
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 } // namespace MantidWidgets

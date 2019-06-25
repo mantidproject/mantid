@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFFunctionPlotData.h"
-#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
+#include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 #include "MultiDatasetFit.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -108,15 +108,15 @@ void MDFFunctionPlotData::updateFunction(const Mantid::API::IFunction &fun) {
   }
   // Copy the attributes
   auto attributes = fun.getAttributeNames();
-  for (auto attr = attributes.begin(); attr != attributes.end(); ++attr) {
-    auto value = fun.getAttribute(*attr);
-    m_function->setAttribute(*attr, value);
+  for (auto &attribute : attributes) {
+    auto value = fun.getAttribute(attribute);
+    m_function->setAttribute(attribute, value);
   }
   // Copy the parameters
   for (size_t i = 0; i < fun.nParams(); ++i) {
-    auto name = fun.parameterName(i);
-    auto value = fun.getParameter(i);
-    m_function->setParameter(name, value);
+    const auto paramName = fun.parameterName(i);
+    const auto paramValue = fun.getParameter(i);
+    m_function->setParameter(paramName, paramValue);
   }
 }
 

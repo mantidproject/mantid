@@ -9,6 +9,21 @@
 Description
 -----------
 
+Manipulating the data with constants
+####################################
+
+There are three properties which will modify the data after it is
+reduced: ``PushDataPositive``, ``ScaleData``, ``OffsetData``. These
+options are all performed on the data after all other operations. They
+will be done as
+
+.. math:: wksp = ScaleData * wksp + OffsetData
+
+followed by :ref:`ResetNegatives <algm-ResetNegatives>` with
+``AddMinimum`` being ``True`` if
+``PushDataPositive='AddMinimum'``. :ref:`ResetNegatives
+<algm-ResetNegatives>` is not run when ``PushDataPositive='None'``.
+
 About Filter Wall
 #################
 

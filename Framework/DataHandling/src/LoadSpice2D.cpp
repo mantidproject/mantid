@@ -27,7 +27,7 @@
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -38,7 +38,6 @@
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -119,7 +118,6 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
       throw Kernel::Exception::FileError("Unable to parse File (" +
                                              descriptor.filename() + ")",
                                          e.displayText());
-
     } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse File:",
                                          descriptor.filename());
@@ -138,10 +136,10 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadSpice2D::init() {
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input xml file to load");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the Output workspace");
 
@@ -170,8 +168,9 @@ void LoadSpice2D::exec() {
 
   setInputPropertiesAsMemberProperties();
   setTimes();
+  const std::vector<std::string> tags_to_ignore{"Detector", "DetectorWing"};
   std::map<std::string, std::string> metadata =
-      m_xmlHandler.get_metadata("Detector");
+      m_xmlHandler.get_metadata(tags_to_ignore);
 
   setSansSpiceXmlFormatVersion(metadata);
   setWavelength(metadata);
@@ -283,7 +282,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     from_string<double>(m_dwavelength, s, std::dec);
 
     // 20160720: New wavelength will be a ratio
-    // HUGLY HACK! Comparing dates...
+    // UGLY HACK! Comparing dates...
     DateAndTime changingDate("2016-06-13 00:00:00");
     if (m_startTime >= changingDate) {
       g_log.debug() << "Using wavelength spread as a ratio" << '\n';
@@ -377,9 +376,6 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
   m_workspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("Wavelength");
   m_workspace->setYUnit("");
-  API::Workspace_sptr workspace =
-      boost::static_pointer_cast<API::Workspace>(m_workspace);
-  // setProperty("OutputWorkspace", workspace);
 
   int specID = 0;
   // Store monitor counts in the beggining
@@ -469,7 +465,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
   std::vector<double> trapDiametersInUse;
   trapDiametersInUse.reserve(trapIndexInUse.size());
   for (auto index : trapIndexInUse) {
-    trapDiametersInUse.push_back(trapDiameters[index]);
+    trapDiametersInUse.emplace_back(trapDiameters[index]);
   }
 
   g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size()

@@ -18,9 +18,6 @@ def run_MuonPreProcess(parameter_dict):
     the input dictionary of {proeprty_name:property_value} pairs.
     Returns the calculated workspace.
     """
-    muon_logger.notice("Pre-process : " + str({key: val for key, val in parameter_dict.items() if key != "InputWorkspace"}))
-    if "DeadTimeTable" in parameter_dict.keys():
-        muon_logger.notice("DTC : " + str(type(parameter_dict["DeadTimeTable"]), parameter_dict["DeadTimeTable"].toDict()))
     alg = mantid.AlgorithmManager.create("MuonPreProcess")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
@@ -39,6 +36,7 @@ def run_MuonGroupingCounts(parameter_dict):
     alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperties(parameter_dict)
     alg.execute()
@@ -58,6 +56,115 @@ def run_MuonPairingAsymmetry(parameter_dict):
     alg.setProperties(parameter_dict)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value
+
+
+def run_MuonGroupingAsymmetry(parameter_dict):
+    """
+    Apply the MuonGroupingCounts algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated workspace.
+    """
+    alg = mantid.AlgorithmManager.create("MuonGroupingAsymmetry")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_CalMuonDetectorPhases(parameter_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("DataFitted", "__NotUsed")
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("DetectorTable").value, alg.getProperty('DataFitted').value
+
+
+def run_PhaseQuad(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_PaddingAndApodization(parameters_dict):
+    alg = mantid.AlgorithmManager.create("PaddingAndApodization")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_FFT(parameters_dict):
+    alg = mantid.AlgorithmManager.create("FFT")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_MuonMaxent(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperty("OutputPhaseTable", "__NotUsedPhase")
+    alg.setProperty("OutputDeadTimeTable", "__NotUsedDead")
+    alg.setProperty("ReconstructedSpectra", "__NotUsedRecon")
+    alg.setProperty("PhaseConvergenceTable", "__NotUsedConverge")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_Fit(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty('CreateOutput', True)
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    alg.setProperties(pruned_parameter_dict)
+    alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
+    alg.setProperty('StartX', parameters_dict['StartX'])
+    alg.setProperty('EndX', parameters_dict['EndX'])
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputParameters").value, alg.getProperty(
+        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+
+
+def run_simultaneous_Fit(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty('CreateOutput', True)
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    alg.setProperties(pruned_parameter_dict)
+
+    for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
+        index_str = '_' + str(index) if index else ''
+        alg.setProperty('InputWorkspace' + index_str, input_workspace)
+        alg.setProperty('StartX' + index_str, parameters_dict['StartX'][index])
+        alg.setProperty('EndX' + index_str, parameters_dict['EndX'][index])
+
+    alg.execute()
+
+    return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
+        alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
 
 
 def run_AppendSpectra(ws1, ws2):

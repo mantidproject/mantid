@@ -77,7 +77,7 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup),
                         "{0} should be a group workspace".format(wsgroup.getName()))
 
-        self.assertEquals(wsgroup.getNumberOfEntries(),nentries,
+        self.assertEqual(wsgroup.getNumberOfEntries(),nentries,
                           "{0} should contain {1} workspaces".format(wsgroup.getName(),nentries))
 
         item = wsgroup.getItem(0)
@@ -90,10 +90,10 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
         self.assertEqual(item.getAxis(0).getUnit().unitID(), "DeltaE",
                          "{0} should have DeltaE units in X-axis".format(name))
 
-        self.assertEquals(item.getNumberHistograms(),nspectra,
+        self.assertEqual(item.getNumberHistograms(),nspectra,
                           "{0} should contain {1} spectra".format(name,nspectra))
 
-        self.assertEquals(item.blocksize(), nbins,
+        self.assertEqual(item.blocksize(), nbins,
                           "{0} should contain {1} bins".format(name, nbins))
 
         self.assertTrue(item.getSampleDetails(),

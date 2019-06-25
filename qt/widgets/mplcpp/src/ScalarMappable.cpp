@@ -17,6 +17,7 @@ using Mantid::PythonInterface::Converters::WrapReadOnly;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::NDArray;
 using Mantid::PythonInterface::callMethodNoCheck;
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {
@@ -42,6 +43,7 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const Colormap &cmap)
   // The internal array needs to be set to some iterable but apparently
   // it is not used:
   // https://stackoverflow.com/questions/28801803/matplotlib-scalarmappable-why-need-to-set-array-if-norm-set
+  GlobalInterpreterLock lock;
   pyobj().attr("set_array")(Python::NewRef(Py_BuildValue("()")));
 }
 

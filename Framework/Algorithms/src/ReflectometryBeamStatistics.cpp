@@ -23,7 +23,7 @@ namespace {
 namespace Prop {
 const std::string DETECTOR_RESOLUTION{"DetectorResolution"};
 const std::string DIRECT_FOREGROUND{"DirectForeground"};
-const std::string DIRECT_WS{"DirectBeamWorkspace"};
+const std::string DIRECT_WS{"DirectLineWorkspace"};
 const std::string FIRST_SLIT_NAME{"FirstSlitName"};
 const std::string FIRST_SLIT_SIZE_LOG{"FirstSlitSizeSampleLog"};
 const std::string PIXEL_SIZE{"PixelSize"};
@@ -42,21 +42,21 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryBeamStatistics)
 
-const std::string ReflectometryBeamStatistics::LogEntry::BEAM_RMS_VARIATION{
-    "beam_stats.beam_rms_variation"};
-const std::string ReflectometryBeamStatistics::LogEntry::BENT_SAMPLE{
-    "beam_stats.bent_sample"};
+const std::string ReflectometryBeamStatistics::LogEntry::BEAM_RMS_VARIATION(
+    "beam_stats.beam_rms_variation");
+const std::string ReflectometryBeamStatistics::LogEntry::BENT_SAMPLE(
+    "beam_stats.bent_sample");
 const std::string
-    ReflectometryBeamStatistics::LogEntry::FIRST_SLIT_ANGULAR_SPREAD{
-        "beam_stats.first_slit_angular_spread"};
+    ReflectometryBeamStatistics::LogEntry::FIRST_SLIT_ANGULAR_SPREAD(
+        "beam_stats.first_slit_angular_spread");
 const std::string
-    ReflectometryBeamStatistics::LogEntry::INCIDENT_ANGULAR_SPREAD{
-        "beam_stats.incident_angular_spread"};
-const std::string ReflectometryBeamStatistics::LogEntry::SAMPLE_WAVINESS{
-    "beam_stats.sample_waviness"};
+    ReflectometryBeamStatistics::LogEntry::INCIDENT_ANGULAR_SPREAD(
+        "beam_stats.incident_angular_spread");
+const std::string ReflectometryBeamStatistics::LogEntry::SAMPLE_WAVINESS(
+    "beam_stats.sample_waviness");
 const std::string
-    ReflectometryBeamStatistics::LogEntry::SECOND_SLIT_ANGULAR_SPREAD{
-        "beam_stats.second_slit_angular_spread"};
+    ReflectometryBeamStatistics::LogEntry::SECOND_SLIT_ANGULAR_SPREAD(
+        "beam_stats.second_slit_angular_spread");
 
 /** Give the gap between the two slits, in meters.
  *
@@ -112,7 +112,7 @@ void ReflectometryBeamStatistics::init() {
   auto mandatoryString =
       boost::make_shared<Kernel::MandatoryValidator<std::string>>();
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::REFLECTED_WS, "", Kernel::Direction::InOut),
       "A reflected beam workspace.");
   declareProperty(Prop::REFLECTED_FOREGROUND, std::vector<int>(),
@@ -120,7 +120,7 @@ void ReflectometryBeamStatistics::init() {
                   "A list of three workspace indices [start, beam centre, end] "
                   "defining the reflected foreground.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::DIRECT_WS, "", Kernel::Direction::InOut),
       "A direct beam workspace.");
   declareProperty(Prop::DIRECT_FOREGROUND, std::vector<int>(),

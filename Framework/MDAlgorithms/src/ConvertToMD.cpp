@@ -30,6 +30,7 @@
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
+#include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
@@ -48,19 +49,19 @@ DECLARE_ALGORITHM(ConvertToMD)
 
 void ConvertToMD::init() {
   ConvertToMDParent::init();
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output *MDEventWorkspace*.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("OverwriteExisting", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("OverwriteExisting", true,
+                                                Direction::Input),
       "By default  (\"1\"), existing Output Workspace will be replaced. Select "
       "false (\"0\") if you want to add new events to the workspace, which "
       "already exist. "
       "\nChoosing \"0\" can be very inefficient for file-based workspaces");
 
-  declareProperty(make_unique<ArrayProperty<double>>("MinValues"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("MinValues"),
                   "It has to be N comma separated values, where N is the "
                   "number of dimensions of the target workspace. Values "
                   "smaller then specified here will not be added to "
@@ -72,7 +73,7 @@ void ConvertToMD::init() {
   // TODO:    " If a minimal target workspace range is higher then the one
   // specified here, the target workspace range will be used instead " );
 
-  declareProperty(make_unique<ArrayProperty<double>>("MaxValues"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("MaxValues"),
                   "A list of the same size and the same units as MinValues "
                   "list. Values higher or equal to the specified by "
                   "this list will be ignored");
@@ -87,8 +88,8 @@ void ConvertToMD::init() {
   mustBeMoreThan1->setLower(1);
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1,
-                                          mustBeMoreThan1),
+      std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1,
+                                               mustBeMoreThan1),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 0 = no splitting, "
       "1 = one level of splitting, etc. \n Be careful using this since it can "
@@ -100,17 +101,17 @@ void ConvertToMD::init() {
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false,
+                                                Direction::Input),
       "This option causes a split of the top level, i.e. level0, of 50 for the "
       "first four dimensions.");
 
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                     ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
-  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
                                       "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
@@ -118,6 +119,15 @@ void ConvertToMD::init() {
                   "will create the specified file in addition to an output "
                   "workspace. The workspace will load data from the file on "
                   "demand in order to reduce memory use.");
+
+  std::vector<std::string> converterType{"Default", "Indexed"};
+
+  auto loadTypeValidator =
+      boost::make_shared<StringListValidator>(converterType);
+  declareProperty("ConverterType", "Default", loadTypeValidator,
+                  "[Default, Indexed], indexed is the experimental type that "
+                  "can speedup the conversion process"
+                  "for the big files using the indexing.");
 }
 //----------------------------------------------------------------------------------------------
 
@@ -128,11 +138,32 @@ int ConvertToMD::version() const { return 1; }
 std::map<std::string, std::string> ConvertToMD::validateInputs() {
   std::map<std::string, std::string> result;
 
+  const std::string treeBuilderType = this->getProperty("ConverterType");
+  const bool topLevelSplittingChecked = this->getProperty("TopLevelSplitting");
+  std::vector<int> split_into = this->getProperty("SplitInto");
   const std::string filename = this->getProperty("Filename");
   const bool fileBackEnd = this->getProperty("FileBackEnd");
 
   if (fileBackEnd && filename.empty()) {
     result["Filename"] = "Filename must be given if FileBackEnd is required.";
+  }
+
+  if (treeBuilderType.find("Indexed") != std::string::npos) {
+    if (fileBackEnd)
+      result["ConverterType"] += "No file back end implemented "
+                                 "for indexed version of algorithm. ";
+
+    if (topLevelSplittingChecked)
+      result["ConverterType"] +=
+          "The usage of top level splitting is "
+          "not possible for indexed version of algorithm. ";
+
+    bool validSplitInfo = ConvToMDEventsWSIndexing::isSplitValid(split_into);
+    if (!validSplitInfo)
+      result["ConverterType"] +=
+          "The split parameter should be the same for"
+          " all dimensions and be equal the power of 2"
+          " (2 ,4, 8, 16,..) for indexed version of algorithm. ";
   }
 
   std::vector<double> minVals = this->getProperty("MinValues");
@@ -250,7 +281,11 @@ void ConvertToMD::exec() {
   // get pointer to appropriate  ConverttToMD plugin from the CovertToMD plugins
   // factory, (will throw if logic is wrong and ChildAlgorithm is not found
   // among existing)
-  ConvToMDSelector AlgoSelector;
+  ConvToMDSelector::ConverterType convType =
+      getPropertyValue("ConverterType") == "Indexed"
+          ? ConvToMDSelector::INDEXED
+          : ConvToMDSelector::DEFAULT;
+  ConvToMDSelector AlgoSelector(convType);
   this->m_Convertor = AlgoSelector.convSelector(m_InWS2D, this->m_Convertor);
 
   bool ignoreZeros = getProperty("IgnoreZeroSignals");

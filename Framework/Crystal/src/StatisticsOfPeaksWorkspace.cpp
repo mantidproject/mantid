@@ -39,60 +39,64 @@ StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() {
 /** Initialize the algorithm's properties.
  */
 void StatisticsOfPeaksWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> propOptions;
   propOptions.reserve(2 * m_pointGroups.size() + 5);
-  for (auto &pointGroup : m_pointGroups)
-    propOptions.push_back(pointGroup->getSymbol());
-  for (auto &pointGroup : m_pointGroups)
-    propOptions.push_back(pointGroup->getName());
+  std::transform(m_pointGroups.cbegin(), m_pointGroups.cend(),
+                 std::back_inserter(propOptions),
+                 [](const auto &group) { return group->getSymbol(); });
+  std::transform(m_pointGroups.cbegin(), m_pointGroups.cend(),
+                 std::back_inserter(propOptions),
+                 [](const auto &group) { return group->getName(); });
   // Scripts may have Orthorhombic misspelled from past bug in PointGroupFactory
-  propOptions.push_back("222 (Orthorombic)");
-  propOptions.push_back("mm2 (Orthorombic)");
-  propOptions.push_back("2mm (Orthorombic)");
-  propOptions.push_back("m2m (Orthorombic)");
-  propOptions.push_back("mmm (Orthorombic)");
+  propOptions.emplace_back("222 (Orthorombic)");
+  propOptions.emplace_back("mm2 (Orthorombic)");
+  propOptions.emplace_back("2mm (Orthorombic)");
+  propOptions.emplace_back("m2m (Orthorombic)");
+  propOptions.emplace_back("mmm (Orthorombic)");
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
-  std::vector<ReflectionCondition_sptr> reflectionConditions =
+  const std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();
   centeringOptions.reserve(2 * reflectionConditions.size());
-  for (auto &reflectionCondition : reflectionConditions)
-    centeringOptions.push_back(reflectionCondition->getSymbol());
-  for (auto &reflectionCondition : reflectionConditions)
-    centeringOptions.push_back(reflectionCondition->getName());
+  std::transform(reflectionConditions.cbegin(), reflectionConditions.cend(),
+                 std::back_inserter(centeringOptions),
+                 [](const auto &condition) { return condition->getSymbol(); });
+  std::transform(reflectionConditions.cbegin(), reflectionConditions.cend(),
+                 std::back_inserter(centeringOptions),
+                 [](const auto &condition) { return condition->getName(); });
   declareProperty("LatticeCentering", centeringOptions[0],
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  std::vector<std::string> sortTypes{"ResolutionShell", "Bank", "RunNumber",
-                                     "Overall"};
+  const std::vector<std::string> sortTypes{"ResolutionShell", "Bank",
+                                           "RunNumber", "Overall"};
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
                   "Sort the peaks by resolution shell in d-Spacing(default), "
                   "bank, run number, or only overall statistics.");
-  std::vector<std::string> equivTypes{"Mean", "Median"};
+  const std::vector<std::string> equivTypes{"Mean", "Median"};
   declareProperty("EquivalentIntensities", equivTypes[0],
                   boost::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "SigmaCritical", 3.0, Direction::Input),
                   "Removes peaks whose intensity deviates more than "
                   "SigmaCritical from the mean (or median).");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
       "Output Equivalent Intensities");
   declareProperty("WeightedZScore", false,

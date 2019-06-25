@@ -33,7 +33,7 @@ class SampleLogs(object):
         self.plot_logs()
 
     def doubleClicked(self, i):
-        """When a log is doubleCliked, print the log, later this should
+        """When a log is doubleClicked, print the log, later this should
         display the data in a table workspace or something
         """
         self.print_selected_logs()

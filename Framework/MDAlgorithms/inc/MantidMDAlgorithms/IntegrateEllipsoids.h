@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_H_
-#define MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_H_
+#ifndef MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_with_Satellites_H_
+#define MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_with_Satellites_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"

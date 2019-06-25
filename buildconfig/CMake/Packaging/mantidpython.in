@@ -34,14 +34,14 @@ fi
 
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
-    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ "$@"@WRAPPER_POSTFIX@
+    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
 elif [ -n "$1" ] && [ -n "$2" ] && [ "$1" = "-n" ]; then
     ranks=$2
     shift 2
-    set -- mpirun -n $ranks @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ "$@"@WRAPPER_POSTFIX@
+    set -- mpirun -n $ranks @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
 else
     IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
-    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ -c "${IPYTHON_STARTUP}" "$@"@WRAPPER_POSTFIX@
+    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ @PYTHON_ARGS@ -c "${IPYTHON_STARTUP}" "$@"@WRAPPER_POSTFIX@
 fi
 
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \

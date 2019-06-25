@@ -20,6 +20,7 @@ using Mantid::PythonInterface::Converters::WrapReadOnly;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
 using Mantid::PythonInterface::callMethodNoCheck;
+using namespace MantidQt::Widgets::Common;
 
 namespace {
 /**
@@ -56,6 +57,57 @@ std::tuple<double, double> limitsToTuple(const Python::Object &axes,
 Axes::Axes(Python::Object obj) : InstanceHolder(std::move(obj), "plot") {}
 
 /**
+ * Clear all artists from the axes
+ */
+void Axes::clear() { callMethodNoCheck<void>(pyobj(), "clear"); }
+
+/**
+ * Apply an operation to each artist in the given container
+ * @param containerAttr The name of the container attribute
+ * @param op An operation to apply to each artist in the contain
+ */
+void Axes::forEachArtist(const char *containerAttr, const ArtistOperation &op) {
+  GlobalInterpreterLock lock;
+  try {
+    auto container = pyobj().attr(containerAttr);
+    auto containerLength = Python::Len(container);
+    for (decltype(containerLength) i = 0; i < containerLength; ++i) {
+      op(Artist{container[i]});
+    }
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
+}
+
+/**
+ * Remove any artists in the container with a matching label. If none are found
+ * then this is a no-op.
+ * @param containerAttr The name of the container attribute
+ * @param label The label of the artists to remove
+ */
+void Axes::removeArtists(const char *containerAttr, const QString label) {
+  GlobalInterpreterLock lock;
+  const auto lineNameAsUnicode =
+      Python::NewRef(PyUnicode_FromString(label.toLatin1().constData()));
+  try {
+    const auto container = pyobj().attr(containerAttr);
+    auto containerLength = Python::Len(container);
+    decltype(containerLength) index(0);
+    while (index < containerLength) {
+      Artist artist{container[index]};
+      if (lineNameAsUnicode == artist.pyobj().attr("get_label")()) {
+        artist.remove();
+        containerLength = Python::Len(container);
+      } else {
+        index++;
+      }
+    }
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
+}
+
+/**
  * @brief Set the X-axis label
  * @param label String for the axis label
  */
@@ -77,6 +129,47 @@ void Axes::setYLabel(const char *label) {
  */
 void Axes::setTitle(const char *label) {
   callMethodNoCheck<void, const char *>(pyobj(), "set_title", label);
+}
+
+/**
+ * (Re-)generate a legend on the axes
+ * @param draggable If true the legend will be draggable
+ * @return An artist object representing the legend
+ */
+Artist Axes::legend(const bool draggable) {
+  GlobalInterpreterLock lock;
+  Artist legend{pyobj().attr("legend")()};
+  legend.pyobj().attr("draggable")(draggable);
+  return legend;
+}
+
+/**
+ * @return The legend instance if exists. None otherwise.
+ */
+Artist Axes::legendInstance() const {
+  GlobalInterpreterLock lock;
+  return Artist{pyobj().attr("legend_")};
+}
+
+/**
+ * @brief Take the data and draw a single Line2D on the axes
+ * @param xdata A vector containing the X data
+ * @param ydata A vector containing the Y data
+ * @param format A format string accepted by matplotlib.axes.Axes.plot.
+ * @param label A label for the line
+ * @return A new Line2D object that owns the xdata, ydata vectors. If the
+ * return value is not captured the line will be automatically removed from
+ * the canvas as the vector data will be destroyed.
+ */
+Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
+                  const QString format, const QString label) {
+  GlobalInterpreterLock lock;
+  auto line2d =
+      plot(std::move(xdata), std::move(ydata), format.toLatin1().constData());
+  if (!label.isEmpty()) {
+    line2d.pyobj().attr("set_label")(label.toLatin1().constData());
+  }
+  return line2d;
 }
 
 /**
@@ -111,7 +204,6 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
   try {
     return Line2D{pyobj().attr("plot")(xarray, yarray, format)[0],
                   std::move(xdata), std::move(ydata)};
-
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();
   }
@@ -131,7 +223,7 @@ Artist Axes::text(double x, double y, QString text,
   auto args =
       Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
   auto kwargs = Python::NewRef(
-      Py_BuildValue("(ss)", "horizontalalignment", horizontalAlignment));
+      Py_BuildValue("{ss}", "horizontalalignment", horizontalAlignment));
   return Artist(pyobj().attr("text")(*args, **kwargs));
 }
 

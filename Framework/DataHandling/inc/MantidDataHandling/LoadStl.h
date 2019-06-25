@@ -6,9 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADSTL_H_
 #define MANTID_DATAHANDLING_LOADSTL_H_
+#include "MantidDataHandling/LoadSampleShape.h"
+#include "MantidDataHandling/LoadShape.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
+
 #include <boost/functional/hash.hpp>
 #include <functional>
 #include <unordered_set>
@@ -40,12 +43,16 @@ struct V3DTrueComparator {
   }
 };
 
-class DLLExport LoadStl {
+class DLLExport LoadStl : public LoadShape {
 public:
-  LoadStl(std::string filename) : m_filename(filename), m_setMaterial(false) {}
-  LoadStl(std::string filename, ReadMaterial::MaterialParameters params)
-      : m_filename(filename), m_setMaterial(true), m_params(params) {}
+  LoadStl(std::string filename, ScaleUnits scaleType)
+      : LoadShape(scaleType), m_filename(filename), m_setMaterial(false) {}
+  LoadStl(std::string filename, ScaleUnits scaleType,
+          ReadMaterial::MaterialParameters params)
+      : LoadShape(scaleType), m_filename(filename), m_setMaterial(true),
+        m_params(params) {}
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
+  virtual ~LoadStl() = default;
 
 protected:
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;
@@ -53,8 +60,6 @@ protected:
   const std::string m_filename;
   bool m_setMaterial;
   ReadMaterial::MaterialParameters m_params;
-  std::vector<uint32_t> m_triangle;
-  std::vector<Kernel::V3D> m_verticies;
   std::unordered_set<std::pair<Kernel::V3D, uint32_t>, HashV3DPair,
                      V3DTrueComparator>
       vertexSet;

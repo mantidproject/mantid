@@ -40,15 +40,15 @@ public:
   explicit InputController(QObject *parent, bool contextAllowed = true);
   ~InputController() override {}
 
-  virtual void mousePressEvent(QMouseEvent *) {}
-  virtual void mouseMoveEvent(QMouseEvent *) {}
-  virtual void mouseReleaseEvent(QMouseEvent *) {}
-  virtual void wheelEvent(QWheelEvent *) {}
-  virtual void keyPressEvent(QKeyEvent *) {}
-  virtual void enterEvent(QEvent *) {}
-  virtual void leaveEvent(QEvent *) {}
+  virtual void mousePressEvent(QMouseEvent * /*unused*/) {}
+  virtual void mouseMoveEvent(QMouseEvent * /*unused*/) {}
+  virtual void mouseReleaseEvent(QMouseEvent * /*unused*/) {}
+  virtual void wheelEvent(QWheelEvent * /*unused*/) {}
+  virtual void keyPressEvent(QKeyEvent * /*unused*/) {}
+  virtual void enterEvent(QEvent * /*unused*/) {}
+  virtual void leaveEvent(QEvent * /*unused*/) {}
   /// To be called after the owner widget has drawn its content
-  virtual void onPaint(QPainter &) {}
+  virtual void onPaint(QPainter & /*unused*/) {}
   /// To be called when this controller takes control of the input. By default
   /// emits enabled() signal.
   virtual void onEnabled() { emit enabled(); }
@@ -79,10 +79,10 @@ class EXPORT_OPT_MANTIDQT_COMMON InputController3DMove
 
 public:
   InputController3DMove(QObject *parent);
-  void mousePressEvent(QMouseEvent *) override;
-  void mouseMoveEvent(QMouseEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *) override;
-  void wheelEvent(QWheelEvent *) override;
+  void mousePressEvent(QMouseEvent * /*unused*/) override;
+  void mouseMoveEvent(QMouseEvent * /*unused*/) override;
+  void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
+  void wheelEvent(QWheelEvent * /*unused*/) override;
 
 signals:
   /// Init zooming. x and y is the zoom starting point on the screen.
@@ -114,14 +114,14 @@ class EXPORT_OPT_MANTIDQT_COMMON InputControllerPick : public InputController {
 
 public:
   InputControllerPick(QObject *parent);
-  void mousePressEvent(QMouseEvent *) override;
-  void mouseMoveEvent(QMouseEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *) override;
+  void mousePressEvent(QMouseEvent * /*unused*/) override;
+  void mouseMoveEvent(QMouseEvent * /*unused*/) override;
+  void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
 
 signals:
-  void pickPointAt(int, int);
-  void touchPointAt(int, int);
-  void setSelection(const QRect &);
+  void pickPointAt(int /*_t1*/, int /*_t2*/);
+  void touchPointAt(int /*_t1*/, int /*_t2*/);
+  void setSelection(const QRect & /*_t1*/);
   void finishSelection();
 
 private:
@@ -138,11 +138,11 @@ class EXPORT_OPT_MANTIDQT_COMMON InputControllerDrawShape
 
 public:
   InputControllerDrawShape(QObject *parent);
-  void mousePressEvent(QMouseEvent *) override;
-  void mouseMoveEvent(QMouseEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *) override;
-  void keyPressEvent(QKeyEvent *) override;
-  void leaveEvent(QEvent *) override;
+  void mousePressEvent(QMouseEvent * /*unused*/) override;
+  void mouseMoveEvent(QMouseEvent * /*unused*/) override;
+  void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
+  void keyPressEvent(QKeyEvent * /*unused*/) override;
+  void leaveEvent(QEvent * /*unused*/) override;
 
 signals:
   /// Deselect all selected shapes
@@ -152,23 +152,23 @@ signals:
                 const QColor &fillColor);
   /// Resize the current shape by moving the right-bottom control point to a
   /// location on the screen
-  void moveRightBottomTo(int, int);
+  void moveRightBottomTo(int /*_t1*/, int /*_t2*/);
   /// Select a shape or a conrol point at a location on the screen.
-  void selectAt(int, int);
+  void selectAt(int /*_t1*/, int /*_t2*/);
   /// Select a shape with ctrl key pressed at a location on the screen.
-  void selectCtrlAt(int, int);
+  void selectCtrlAt(int /*_t1*/, int /*_t2*/);
   /// Move selected shape or a control point by a displacement vector.
-  void moveBy(int, int);
+  void moveBy(int /*_t1*/, int /*_t2*/);
   /// Sent when the mouse is moved to a new position with the buttons up
-  void touchPointAt(int, int);
+  void touchPointAt(int /*_t1*/, int /*_t2*/);
   /// Remove the selected shapes
   void removeSelectedShapes();
   /// Restore the cursor to its default image
   void restoreOverrideCursor();
   /// Update the rubber band selection
-  void setSelection(const QRect &);
+  void setSelection(const QRect & /*_t1*/);
   /// Rubber band selection is done
-  void finishSelection(const QRect &);
+  void finishSelection(const QRect & /*_t1*/);
 
 public slots:
   void startCreatingShape2D(const QString &type, const QColor &borderColor,
@@ -193,12 +193,12 @@ class EXPORT_OPT_MANTIDQT_COMMON InputControllerMoveUnwrapped
 
 public:
   InputControllerMoveUnwrapped(QObject *parent);
-  void mousePressEvent(QMouseEvent *) override;
-  void mouseMoveEvent(QMouseEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *) override;
+  void mousePressEvent(QMouseEvent * /*unused*/) override;
+  void mouseMoveEvent(QMouseEvent * /*unused*/) override;
+  void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
 
 signals:
-  void setSelectionRect(const QRect &);
+  void setSelectionRect(const QRect & /*_t1*/);
   void zoom();
   void resetZoom();
   void unzoom();
@@ -217,13 +217,13 @@ class EXPORT_OPT_MANTIDQT_COMMON InputControllerDraw : public InputController {
 public:
   InputControllerDraw(QObject *parent);
   ~InputControllerDraw() override;
-  void mousePressEvent(QMouseEvent *) override;
-  void mouseMoveEvent(QMouseEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *) override;
-  void wheelEvent(QWheelEvent *) override;
+  void mousePressEvent(QMouseEvent * /*unused*/) override;
+  void mouseMoveEvent(QMouseEvent * /*unused*/) override;
+  void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
+  void wheelEvent(QWheelEvent * /*unused*/) override;
 
-  void enterEvent(QEvent *) override;
-  void leaveEvent(QEvent *) override;
+  void enterEvent(QEvent * /*unused*/) override;
+  void leaveEvent(QEvent * /*unused*/) override;
 
 protected:
   int cursorSize() const { return m_size; }
@@ -257,10 +257,10 @@ class EXPORT_OPT_MANTIDQT_COMMON InputControllerSelection
 public:
   InputControllerSelection(QObject *parent, QPixmap *icon);
   ~InputControllerSelection() override;
-  void onPaint(QPainter &) override;
+  void onPaint(QPainter & /*unused*/) override;
 
 signals:
-  void selection(const QRect &);
+  void selection(const QRect & /*_t1*/);
 
 private:
   void drawCursor(QPixmap *cursor) override;
@@ -283,8 +283,8 @@ public:
   InputControllerDrawAndErase(QObject *parent);
 
 signals:
-  void draw(const QPolygonF &);
-  void erase(const QPolygonF &);
+  void draw(const QPolygonF & /*_t1*/);
+  void erase(const QPolygonF & /*_t1*/);
   void addShape(const QPolygonF &poly, const QColor &borderColor,
                 const QColor &fillColor);
 

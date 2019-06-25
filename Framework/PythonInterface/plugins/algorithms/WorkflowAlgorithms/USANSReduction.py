@@ -39,8 +39,7 @@ class USANSReduction(PythonAlgorithm):
         return "Perform USANS data reduction"
 
     def PyInit(self):
-        arrvalidator = IntArrayBoundedValidator()
-        arrvalidator.setLower(0)
+        arrvalidator = IntArrayBoundedValidator(lower=0)
         self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator,
                                               direction=Direction.Input), "Runs to reduce")
         self.declareProperty("EmptyRun", '', "Run number for the empty run")

@@ -31,6 +31,7 @@ class SampleLogsView(QSplitter):
 
         self.setWindowTitle("{} sample logs".format(name))
         self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # Create sample log table
         self.table = QTableView()
@@ -88,6 +89,10 @@ class SampleLogsView(QSplitter):
         self.resize(1200,800)
         self.show()
 
+    def closeEvent(self, event):
+        self.deleteLater()
+        super(SampleLogsView, self).closeEvent(event)
+
     def tableMenu(self, event):
         """Right click menu for table, can plot or print selected logs"""
         menu = QMenu(self)
@@ -123,7 +128,6 @@ class SampleLogsView(QSplitter):
             ax.plot(ws,
                     LogName=log_text,
                     label=log_text,
-                    marker='.',
                     FullTime=not self.full_time.isChecked(),
                     ExperimentInfo=exp)
 

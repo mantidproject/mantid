@@ -194,5 +194,31 @@ class LoadDNSLegacyTest(unittest.TestCase):
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
+    def test_LoadWavelength(self):
+        outputWorkspaceName = "LoadDNSLegacyTest_Test8"
+        filename = "dn134011vana.d_dat"
+        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='no',
+                                 OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable,
+                                 Wavelength=5.7)
+
+        self.assertTrue(alg_test.isExecuted())
+
+        # Verify some values
+        ws = AnalysisDataService.retrieve(outputWorkspaceName)
+        # dimensions
+        self.assertEqual(24, ws.getNumberHistograms())
+        self.assertEqual(2,  ws.getNumDims())
+        # data array
+        self.assertEqual(31461, ws.readY(1))
+        self.assertEqual(13340, ws.readY(23))
+        self.assertAlmostEqual(5.7, ws.readX(1)[0], 3)
+        self.assertAlmostEqual(5.7, ws.readX(23)[0], 3)
+        # sample logs
+        run = ws.getRun()
+        self.assertEqual(5.7, run.getProperty('wavelength').value)
+        self.assertAlmostEqual(2.51782, run.getProperty('Ei').value, 3)
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
+        return
+
 if __name__ == '__main__':
     unittest.main()

@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 
 import mantid.simpleapi as mantid
+from Muon.GUI.Common.validate_errors import validateToErrors
 
 
 class MaxEntWrapper(object):
@@ -27,8 +28,8 @@ class MaxEntWrapper(object):
         """
         store the data in the wrapper for later
         """
-        self.phaseTable = inputs.get("phaseTable",None)
-        self.maxent = inputs.get("maxent",None)
+        self.phaseTable = inputs.get("phaseTable", None)
+        self.maxent = inputs.get("maxent", None)
         self.model.setRun(inputs["Run"])
 
     def execute(self):
@@ -73,6 +74,7 @@ class MaxEntModel(object):
         for name, value in iteritems(inputs):
             self.alg.setProperty(name, value)
         self.alg.setRethrows(True)
+        validateToErrors(self.alg)
         self.alg.execute()
         self.addOutput(inputs, self.alg, "OutputWorkspace")
         self.addOutput(inputs, self.alg, "OutputPhaseTable")
@@ -92,7 +94,8 @@ class MaxEntModel(object):
 
         for name, value in iteritems(inputs):
             self.alg.setProperty(name, value)
-        if inputs["InputWorkspace"] != "MuonAnalysis":
+        # check for version 1
+        if inputs["InputWorkspace"] != "MuonAnalysis" and "MuonAnalysisGrouped" in inputs["InputWorkspace"]:
             raise ValueError(
                 "Cannot currently generate phase table from this data using CalMuonDetectorPhases")
         self.alg.execute()
@@ -103,6 +106,7 @@ class MaxEntModel(object):
         self.alg = None
 
     def addOutput(self, inputs, alg, name):
+
         if name in inputs:
             mantid.AnalysisDataService.addOrReplace(
                 inputs[name],
@@ -113,7 +117,6 @@ class MaxEntModel(object):
             group = mantid.AnalysisDataService.retrieve(self.run)
         else:
             mantid.GroupWorkspaces(OutputWorkspace=self.run)
-
         group.add(inputs[name])
 
     def cancel(self):

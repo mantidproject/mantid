@@ -36,13 +36,13 @@ PointByPointVCorrection::~PointByPointVCorrection() = default;
 
 void PointByPointVCorrection::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputW1", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputW1", "", Direction::Input),
       "Name of the Sample workspace.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputW2", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputW2", "", Direction::Input),
       "Name of the Vanadium workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name of the output workspace.");
 }
 
@@ -125,8 +125,8 @@ void PointByPointVCorrection::exec() {
     //       to sometimes fail.  Maybe this is some compiler bug to do with
     //       using bind2nd within the parrallel macros.
     for (double &rY : resultY) {
-      rY *= factor; // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i
-                    // S_i/v_i*Dlam_i)
+      // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
+      rY *= factor;
     }
 
     // Finally get the normalized errors

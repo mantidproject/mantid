@@ -112,13 +112,13 @@ public:
 
   void test_lessThanTwoPeaksThrows() {
     TS_ASSERT_THROWS(doTest(1, "1", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_zeroBasedIndexingThrows() {
     TS_ASSERT_THROWS(
         doTest(1, "0, 1, 2", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void test_colinearPeaksThrows() {
@@ -134,7 +134,7 @@ public:
 
     TS_ASSERT_THROWS(doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0,
                             105.071, 90.0),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     // Restore master. peaks workspace.
     m_masterPeaks = temp;

@@ -30,24 +30,28 @@ def find_basedir(project, subproject):
 
 #======================================================================================
 def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
-    """ Read the LINES of a file. Find first "set ( cmake_tag",
+    """ Read the LINES of a file. Find first "set(cmake_tag",
     read all the lines to get all the files,
     add your new line,
     sort them,
     rewrite. Only touches first section found to avoid messing up any other set
     sections in the rest of the file
     """
-    search_for1 = "set ( " + cmake_tag
-    search_for2 = "set (" + cmake_tag
+    search1 = "set(" + cmake_tag
+    search2_first_line = "set("
+    search2_second_line = cmake_tag
+
     # List of files in the thingie
     files = []
     lines_before = []
     lines_after = []
     section_num = 0
     section_processed = False
+    previous_line = ""
     for line in lines:
-        if line.strip().startswith(search_for1): section_num = 1
-        if line.strip().startswith(search_for2): section_num = 1
+        if line.strip().startswith(search1): section_num = 1
+        if previous_line.strip().startswith(search2_first_line) and line.strip().startswith(search2_second_line):
+            section_num = 1
 
         if section_num == 0:
             # These are the lines before
@@ -56,8 +60,11 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
             #this is a line with the name of a file
             line = line.strip()
             # Take off the tag
-            if line.startswith(search_for1): line = line[len(search_for1):].strip()
-            if line.startswith(search_for2): line = line[len(search_for2):].strip()
+            if line.startswith(search1): line = line[len(search1):].strip()
+            if line.startswith(search2_second_line):
+                line = line[len(search2_second_line):].strip()
+                # remove set( from lines_before
+                lines_before.pop()
             # Did we reach the last one?
             if line.endswith(")"):
                 section_num = 2
@@ -69,11 +76,12 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
         else:
             # These are lines after
             lines_after.append(line)
+        previous_line = line
 
     # Add the new file to the list of files
     if len(add_this_line) > 0:
         files.append(add_this_line)
-    # Use a set to keep only unique linese
+    # Use a set to keep only unique lines
     files = set(files)
 
     # Remove an entry from the cmake list
@@ -89,10 +97,10 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     files.sort()
 
     lines = lines_before
-    lines.append("set ( " + cmake_tag)
+    lines.append("set(" + cmake_tag)
     for file in files:
-        lines.append("\t" + file)
-    lines.append(")") # close the parentheses
+        lines.append("    " + file)
+    lines[-1] += ")" # close the parentheses
     lines += lines_after
 
     return lines

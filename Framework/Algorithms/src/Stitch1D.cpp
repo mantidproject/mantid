@@ -107,10 +107,9 @@ void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
     // Copy over the data
     auto &sourceY = source->mutableY(i);
     auto &sourceE = source->mutableE(i);
-
-    for (int i = a1; i < a2; ++i) {
-      sourceY[i] = 0;
-      sourceE[i] = 0;
+    for (int binIndex = a1; binIndex < a2; ++binIndex) {
+      sourceY[binIndex] = 0;
+      sourceE[binIndex] = 0;
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -123,43 +122,43 @@ void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
  */
 void Stitch1D::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "LHSWorkspace", "", Direction::Input),
                   "LHS input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "RHSWorkspace", "", Direction::Input),
                   "RHS input workspace, must be same type as LHSWorkspace "
                   "(histogram or point data).");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output stitched workspace.");
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start overlap x-value in units of x-axis.");
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "End overlap x-value in units of x-axis.");
-  declareProperty(make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "Params", boost::make_shared<RebinParamsValidator>(true)),
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
+                                                Direction::Input),
       "Scaling either with respect to LHS workspace or RHS workspace");
-  declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "UseManualScaleFactor", false, Direction::Input),
                   "True to use a provided value for the scale factor.");
   auto manualScaleFactorValidator =
       boost::make_shared<BoundedValidator<double>>();
   manualScaleFactorValidator->setLower(0);
   manualScaleFactorValidator->setExclusive(true);
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "ManualScaleFactor", 1.0, manualScaleFactorValidator,
                       Direction::Input),
                   "Provided value for the scale factor.");
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
                   "The actual used value for the scaling factor.");
 }
@@ -446,8 +445,8 @@ MatrixWorkspace_sptr Stitch1D::singleValueWS(const double val) {
 boost::tuple<int, int>
 Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
                               MatrixWorkspace_sptr &workspace) {
-  int a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
-  int a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
+  int a1 = static_cast<int>(workspace->yIndexOfX(startOverlap));
+  int a2 = static_cast<int>(workspace->yIndexOfX(endOverlap));
   if (a1 == a2) {
     throw std::runtime_error("The Params you have provided for binning yield a "
                              "workspace in which start and end overlap appear "
@@ -588,11 +587,11 @@ void Stitch1D::exec() {
     auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
     auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
     if (scaleRHS) {
-      auto scaleRHS = lhsOverlapIntegrated / rhsOverlapIntegrated;
-      scaleWorkspace(rhs, scaleRHS, rhsWS);
+      auto scalingFactors = lhsOverlapIntegrated / rhsOverlapIntegrated;
+      scaleWorkspace(rhs, scalingFactors, rhsWS);
     } else {
-      auto scaleLHS = rhsOverlapIntegrated / lhsOverlapIntegrated;
-      scaleWorkspace(lhs, scaleLHS, lhsWS);
+      auto scalingFactors = rhsOverlapIntegrated / lhsOverlapIntegrated;
+      scaleWorkspace(lhs, scalingFactors, lhsWS);
     }
   }
   // Provide log information about the scale factors used in the calculations.

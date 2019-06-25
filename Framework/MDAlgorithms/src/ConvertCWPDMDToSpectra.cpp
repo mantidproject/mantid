@@ -34,25 +34,25 @@ const double BIGNUMBER = 1.0E100;
 
 void ConvertCWPDMDToSpectra::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputMonitorWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores monitor "
                   "counts from a constant-wave powder diffraciton experiment.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("BinningParams"),
+      std::make_unique<ArrayProperty<double>>("BinningParams"),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
       "pairs.\n"
       "Negative width values indicate logarithmic binning.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace for reduced data.");
 
@@ -75,7 +75,7 @@ void ConvertCWPDMDToSpectra::init() {
   declareProperty("ScaleFactor", 1.0,
                   "Scaling factor on the normalized counts.");
 
-  declareProperty(make_unique<ArrayProperty<int>>("ExcludedDetectorIDs"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("ExcludedDetectorIDs"),
                   "A comma separated list of integers to indicate the IDs of "
                   "the detectors that will be excluded from binning.");
 
@@ -548,7 +548,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       // add signal
       if (xindex < 0) {
         // Out of left boundary
-        int32_t detid = mditer->getInnerDetectorID(iev);
+        int32_t innerDetid = mditer->getInnerDetectorID(iev);
         uint16_t runid = mditer->getInnerRunIndex(iev);
         g_log.debug() << "Event is out of user-specified range by "
                       << (outx - vecx.front()) << ", xindex = " << xindex
@@ -556,11 +556,11 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
                       << " out of left boundeary [" << vecx.front() << ", "
                       << vecx.back() << "]. dep pos = " << detpos.X() << ", "
                       << detpos.Y() << ", " << detpos.Z() << ", Run = " << runid
-                      << ", DetectorID = " << detid << "\n";
+                      << ", DetectorID = " << innerDetid << "\n";
         continue;
       } else if (xindex >= static_cast<int>(vecy.size())) {
         // Out of right boundary
-        int32_t detid = mditer->getInnerDetectorID(iev);
+        int32_t innerDetid = mditer->getInnerDetectorID(iev);
         uint16_t runid = mditer->getInnerRunIndex(iev);
         g_log.debug() << "Event is out of user-specified range "
                       << "xindex = " << xindex << ", " << unitbit << " = "
@@ -569,7 +569,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
                       << detpos.Y() << ", " << detpos.Z()
                       << "; sample pos = " << samplepos.X() << ", "
                       << samplepos.Y() << ", " << samplepos.Z()
-                      << ", Run = " << runid << ", DetectorID = " << detid
+                      << ", Run = " << runid << ", DetectorID = " << innerDetid
                       << "\n";
         continue;
       } else {

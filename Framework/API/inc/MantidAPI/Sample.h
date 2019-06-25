@@ -60,11 +60,12 @@ public:
   /** @name Material properties.*/
   //@{
   /// Return the material (convenience method)
-  const Kernel::Material getMaterial() const;
+  const Kernel::Material &getMaterial() const;
   //@}
 
   /** @name Access the environment information */
   //@{
+  bool hasEnvironment() const;
   /// Get a reference to the sample's environment
   const Geometry::SampleEnvironment &getEnvironment() const;
   /// Set the environment used to contain the sample

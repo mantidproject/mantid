@@ -31,11 +31,11 @@ const std::string CreateTransmissionWorkspaceAuto2::summary() const {
  */
 void CreateTransmissionWorkspaceAuto2::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
@@ -52,7 +52,7 @@ void CreateTransmissionWorkspaceAuto2::init() {
                   Direction::Input);
 
   // Processing instructions
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern of spectrum numbers to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
@@ -69,7 +69,7 @@ void CreateTransmissionWorkspaceAuto2::init() {
   // Properties for stitching transmission runs
   initStitchProperties();
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output transmission workspace in wavelength.");
 }

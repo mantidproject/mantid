@@ -10,7 +10,7 @@
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/MplCpp/Cycler.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
-#include "MantidQtWidgets/MplCpp/Zoomer.h"
+#include "MantidQtWidgets/MplCpp/PanZoomTool.h"
 #include <QWidget>
 #include <list>
 
@@ -44,6 +44,7 @@ public:
   QColor getCurveColor(const QString &label) const;
   bool isYLogScale() const;
   void replot();
+
 public slots:
   void clearCurve();
   void setYLogScale();
@@ -52,9 +53,11 @@ public slots:
   // Required to match the interface with MiniPlotQwt but matplotlib
   // handles this for us so it is a noop
   void recalcAxisDivs() {}
+  void zoomOutOnPlot();
+
 signals:
   void showContextMenu();
-  void clickedAt(double, double);
+  void clickedAt(double /*_t1*/, double /*_t2*/);
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
@@ -63,10 +66,6 @@ private:
   bool handleMousePressEvent(QMouseEvent *evt);
   bool handleMouseReleaseEvent(QMouseEvent *evt);
 
-private slots:
-  void onHomeClicked();
-
-private: // data
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   QPushButton *m_homeBtn;
   std::list<Widgets::MplCpp::Line2D> m_lines;
@@ -75,7 +74,7 @@ private: // data
   QString m_xunit;
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
-  Widgets::MplCpp::Zoomer m_zoomer;
+  Widgets::MplCpp::PanZoomTool m_zoomTool;
   QPoint m_mousePressPt;
 };
 } // namespace MantidWidgets

@@ -10,7 +10,7 @@
 #include "../PlotCurve.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidQwtWorkspaceData.h"
 
 class Graph;
 class ErrorBarSettings;

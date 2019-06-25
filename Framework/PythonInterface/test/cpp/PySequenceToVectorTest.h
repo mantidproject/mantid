@@ -54,7 +54,7 @@ public:
     using PySequenceToVectorInt = PySequenceToVector<int>;
     std::vector<int> cvector;
     TS_ASSERT_THROWS(cvector = PySequenceToVectorInt(testlist)(),
-                     boost::python::error_already_set);
+                     const boost::python::error_already_set &);
   }
 
   /// Creates a python list where all of the types are the same

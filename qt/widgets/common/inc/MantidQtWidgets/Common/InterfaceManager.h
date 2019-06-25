@@ -116,6 +116,11 @@ public:
   /// @param name of interface to show help for
   void showCustomInterfaceHelp(const QString &name);
 
+  /// @param url of web page to open in browser
+  void showWebPage(const QString &url);
+
+  void closeHelpWindow();
+
   /**
    * Registration function for the help window factory.
    * @param factory the factory instance
@@ -135,6 +140,8 @@ public:
   virtual ~InterfaceManager();
 
 private:
+  void notifyExistingInterfaces(UserSubWindow *newWindow);
+
   /// Handle to the Vates simple user interface factory
   static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface>
       *m_vatesGuiFactory;

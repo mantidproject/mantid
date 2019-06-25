@@ -41,22 +41,20 @@ void Regroup::init() {
   auto wsVal = boost::make_shared<CompositeValidator>();
   wsVal->add<API::HistogramValidator>();
   wsVal->add<API::CommonBinsValidator>();
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsVal),
                   "The input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of regrouping.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>()),
       "The new approximate bin boundaries in the form: x1,dx1,x2,dx2,...,xn");
 }
 
 /** Executes the regroup algorithm
- *
- *  @throw runtime_error Thrown if
  */
 void Regroup::exec() {
   // retrieve the properties
@@ -65,15 +63,9 @@ void Regroup::exec() {
   // Get the input workspace
   MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
-  // can work only if all histograms have the same boundaries
-  if (!API::WorkspaceHelpers::commonBoundaries(*inputW)) {
-    g_log.error("Histograms with different boundaries");
-    throw std::runtime_error("Histograms with different boundaries");
-  }
+  const bool dist = inputW->isDistribution();
 
-  bool dist = inputW->isDistribution();
-
-  int histnumber = static_cast<int>(inputW->getNumberHistograms());
+  const int histnumber = static_cast<int>(inputW->getNumberHistograms());
   HistogramData::BinEdges XValues_new(0);
   auto &XValues_old = inputW->x(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old

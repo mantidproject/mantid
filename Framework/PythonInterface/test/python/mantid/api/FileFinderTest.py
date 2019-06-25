@@ -16,13 +16,13 @@ class FileFinderTest(unittest.TestCase):
 
     def test_full_path_returns_an_absolute_path_and_the_files_exists(self):
         path = FileFinder.getFullPath("CNCS_7860_event.nxs")
-        self.assertTrue(len(path) > 0)
+        self.assertGreater(len(path), 0)
         # We can't be sure what the full path is in general but it should certainly exist!
         self.assertTrue(os.path.exists(path))
 
     def test_find_runs_returns_absolute_paths_of_given_runs(self):
         runs = FileFinder.findRuns("CNCS7860")
-        self.assertTrue(len(runs) == 1)
+        self.assertEqual(len(runs),  1)
         # We can't be sure what the full path is in general but it should certainly exist!
         self.assertTrue(os.path.exists(runs[0]))
 
@@ -32,11 +32,11 @@ class FileFinderTest(unittest.TestCase):
             FileFinder.findRuns("CNCS7860", [".nxs", ".txt"], useExtsOnly=True)
         except Exception as e:
             if type(e).__name__ == "ArgumentError":
-                self.assertFalse(True, "Expected findRuns to accept a list of strings and a bool as input."
-                                       " {} error was raised with message {}".format(type(e).__name__, str(e)))
+                self.fail("Expected findRuns to accept a list of strings and a bool as input."
+                          " {} error was raised with message {}".format(type(e).__name__, str(e)))
         else:
             # Confirm that it works as above
-            self.assertTrue(len(runs) == 1)
+            self.assertEqual(len(runs),  1)
             self.assertTrue(os.path.exists(runs[0]))
 
 

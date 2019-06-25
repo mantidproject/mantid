@@ -20,7 +20,7 @@ namespace Geometry {
   Models a Container is used to hold a sample in the beam. It gets most
   of its functionality from wrapped Geometry::IObject but can also hold a
   definition of what the sample geometry itself would be. If the sample shape
-  definition is set then we term this a constriained sample geometry.
+  definition is set then we term this a constrained sample geometry.
 */
 class MANTID_GEOMETRY_DLL Container final : public IObject {
 public:
@@ -35,6 +35,8 @@ public:
   IObject_sptr createSampleShape(const ShapeArgs &args) const;
 
   void setSampleShape(const std::string &sampleShapeXML);
+
+  const IObject &getShape() const { return *m_shape; }
 
   bool isValid(const Kernel::V3D &p) const override {
     return m_shape->isValid(p);
@@ -84,10 +86,18 @@ public:
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 
+  detail::ShapeInfo::GeometryShape shape() const override {
+    return m_shape->shape();
+  }
+
+  const detail::ShapeInfo &shapeInfo() const override {
+    return m_shape->shapeInfo();
+  }
+
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &myradius,
-                     double &myheight) const override {
-    m_shape->GetObjectGeom(type, vectors, myradius, myheight);
+                     std::vector<Kernel::V3D> &vectors, double &innerRadius,
+                     double &radius, double &height) const override {
+    m_shape->GetObjectGeom(type, vectors, innerRadius, radius, height);
   }
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
     return m_shape->getGeometryHandler();
@@ -96,7 +106,7 @@ public:
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
 
-  const Kernel::Material material() const override {
+  const Kernel::Material &material() const override {
     return m_shape->material();
   }
   void setID(const std::string &id);

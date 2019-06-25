@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSPRESENTER_H_
 
 #include "IIndirectFitOutputOptionsView.h"
+#include "IndirectEditResultsDialog.h"
 #include "IndirectFitOutputOptionsModel.h"
 
 #include "DllConfig.h"
@@ -36,15 +37,17 @@ public:
 
   void removePDFWorkspace();
 
-  bool isResultGroupPlottable();
-  bool isPDFGroupPlottable();
+  bool isSelectedGroupPlottable() const;
 
   void setPlotting(bool plotting);
   void setPlotEnabled(bool enable);
+  void setEditResultEnabled(bool enable);
   void setSaveEnabled(bool enable);
 
   void clearSpectraToPlot();
   std::vector<SpectrumToPlot> getSpectraToPlot() const;
+
+  void setEditResultVisible(bool visible);
 
 signals:
   void plotSpectra();
@@ -53,6 +56,9 @@ private slots:
   void setAvailablePlotOptions(std::string const &selectedGroup);
   void plotResult();
   void saveResult();
+  void editResult();
+  void replaceSingleFitResult();
+  void closeEditResultDialog();
 
 private:
   void setUpPresenter();
@@ -60,8 +66,17 @@ private:
   void plotResult(std::string const &selectedGroup);
   void setSaving(bool saving);
 
+  std::unique_ptr<IndirectEditResultsDialog>
+  getEditResultsDialog(QWidget *parent) const;
+  void setEditingResult(bool editing);
+
+  void replaceSingleFitResult(std::string const &inputName,
+                              std::string const &singleBinName,
+                              std::string const &outputName);
+
   void displayWarning(std::string const &message);
 
+  std::unique_ptr<IndirectEditResultsDialog> m_editResultsDialog;
   std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
   IIndirectFitOutputOptionsView *m_view;
 };

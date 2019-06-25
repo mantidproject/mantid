@@ -61,7 +61,7 @@ struct FunctionData {
  * @return A value for the constraint
  */
 double evaluateConstraint(const DblMatrix &cmatrix, const size_t index,
-                          const size_t, const double *x) {
+                          const size_t /*unused*/, const double *x) {
   assert(index < cmatrix.numRows());
   const double *row = cmatrix[index];
 
@@ -136,7 +136,6 @@ int relstopX(const std::vector<double> &xvOld, const gsl_vector *xvNew,
 void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
   assert(numParameters() == xv.size());
 
-  OptimizerResult ret = Success;
   double ICM(HUGE_VAL), minf_penalty(HUGE_VAL), rho(0.0);
   double fcur(0.0), minf(HUGE_VAL), penalty(0.0);
   std::vector<double> xcur(xv), lambda(numEqualityConstraints(), 0),
@@ -207,7 +206,7 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
     if ((feasible &&
          (!minfIsFeasible || penalty <= minf_penalty || fcur < minf)) ||
         (!minfIsFeasible && penalty <= minf_penalty)) {
-      ret = Success;
+      OptimizerResult ret = Success;
       if (feasible) {
         if (relstop(minf, fcur, FTOL_REL, FTOL_ABS))
           ret = FTolReached;
@@ -222,7 +221,6 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
         break;
     }
     if (ICM == 0.0) {
-      ret = FTolReached;
       break;
     }
   } while (auglagIters < m_maxIter);

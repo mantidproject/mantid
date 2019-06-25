@@ -1,50 +1,57 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
 import six
-from PyQt4 import QtGui
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, MuonGroup
-
+from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
-
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
-
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common import mock_widget
-
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, MuonGroup
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 
 
-class GroupingTabPresenterTest(unittest.TestCase):
+class GroupingTabPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.loaded_data = MuonLoadData()
+        self.data_context = MuonDataContext(self.loaded_data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
 
-        self.context = MuonDataContext()
-        self.model = GroupingTabModel(data=self.context)
+        self.model = GroupingTabModel(context=self.context)
 
-        self.grouping_table_view = GroupingTableView(parent=self.obj)
+        self.grouping_table_view = GroupingTableView()
         self.grouping_table_widget = GroupingTablePresenter(self.grouping_table_view, self.model)
 
-        self.pairing_table_view = PairingTableView(parent=self.obj)
+        self.pairing_table_view = PairingTableView()
         self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.model)
+
+        self.grouping_table_view.warning_popup = mock.MagicMock()
+        self.pairing_table_view.warning_popup = mock.MagicMock()
 
         self.add_three_groups()
         self.add_two_pairs()
 
-        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view, parent=self.obj)
+        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view)
         self.presenter = GroupingTabPresenter(self.view, self.model,
                                               self.grouping_table_widget,
                                               self.pairing_table_widget)
 
+        self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
         self.view.display_warning_box = mock.MagicMock()
         self.grouping_table_view.warning_popup = mock.MagicMock()
         self.pairing_table_view.warning_popup = mock.MagicMock()
@@ -84,8 +91,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
         pair_name = "pair_0"
 
-        self.assertEqual(self.context.pairs[pair_name].forward_group, "fwd")
-        self.assertEqual(self.context.pairs[pair_name].backward_group, "bwd")
+        self.assertEqual(self.group_context[pair_name].forward_group, "fwd")
+        self.assertEqual(self.group_context[pair_name].backward_group, "bwd")
 
     def test_that_clear_button_clears_model_and_view(self):
         self.view.clear_grouping_button.clicked.emit(True)
@@ -101,7 +108,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
                   MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
         pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
-        mock_load.return_value = (groups, pairs, 'description')
+        mock_load.return_value = (groups, pairs, 'description', 'pair1')
 
         self.view.load_grouping_button.clicked.emit(True)
 
@@ -117,7 +124,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         with mock.patch(
                 "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs
-            mock_load.return_value = (groups, pairs, 'description')
+            mock_load.return_value = (groups, pairs, 'description', 'pair1')
             self.view.load_grouping_button.clicked.emit(True)
 
             six.assertCountEqual(self, self.model.group_names, ["grp1", "grp2"])
@@ -135,7 +142,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         with mock.patch(
                 "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs
-            mock_load.return_value = (groups, pairs, 'description')
+            mock_load.return_value = (groups, pairs, 'description', 'pair1')
             self.view.load_grouping_button.clicked.emit(True)
 
             self.view.display_warning_box.assert_called_once_with('Invalid detectors in group grp2')
@@ -156,15 +163,16 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.assertEqual(mock_save.call_args[0][-1], "grouping.xml")
 
     def test_update_all_calculates_groups_and_pairs(self):
-        self.presenter.update_thread = mock.MagicMock()
-        self.view.update_button.clicked.emit(True)
+        self.presenter.handle_update_all_clicked()
 
         self.presenter.update_thread.threadWrapperSetUp.assert_called_once_with(self.presenter.disable_editing,
-                                                                                self.presenter.enable_editing,
-                                                                                self.view.display_warning_box)
+                                                                                self.presenter.handle_update_finished,
+                                                                                self.presenter.error_callback)
         self.presenter.update_thread.start.assert_called_once_with()
 
     def test_removing_group_removes_linked_pairs(self):
+        self.group_context.clear_pairs()
+        self.group_context.clear_groups()
         self.add_three_groups()
         self.add_two_pairs()
 

@@ -10,8 +10,9 @@ from setuptools import find_packages, setup
 # The most basic setup possible to be able to use setup.py develop
 setup(
     name='mantidqt', # must match what is required by workbench setup.py
+    install_requires=['mantid'],
     version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
     packages=find_packages(exclude=['*.test']),
-    package_data={'mantidqt': ['dialogs/*.ui']},
+    package_data={'': ['*.ui']},
     @SETUPTOOLS_BUILD_COMMANDS_USE@
 )

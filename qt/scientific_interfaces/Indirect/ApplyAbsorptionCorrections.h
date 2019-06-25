@@ -21,8 +21,6 @@ public:
   ~ApplyAbsorptionCorrections();
 
 private slots:
-  /// Handles the geometry being changed
-  void handleGeometryChange(int index);
   /// Handles a new sample being loaded
   void newSample(const QString &dataName);
   /// Handles a new container being loaded
@@ -47,6 +45,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   std::size_t getOutWsNumberOfSpectra() const;
   Mantid::API::MatrixWorkspace_const_sptr

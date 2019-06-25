@@ -9,9 +9,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
 
@@ -33,7 +32,6 @@ void AbortRemoteJob::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
-  auto nullValidator = boost::make_shared<NullValidator>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()

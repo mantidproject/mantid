@@ -45,7 +45,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_cow.h"
-#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <sstream>
@@ -64,8 +63,7 @@ using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps)
-    : m_Progress(
-          Mantid::Kernel::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
+    : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
@@ -160,7 +158,7 @@ Workspace2D_sptr create1DWorkspaceFib(int size, bool isHisto) {
   return retVal;
 }
 
-Workspace2D_sptr create2DWorkspace(int nhist, int numBoundaries) {
+Workspace2D_sptr create2DWorkspace(size_t nhist, size_t numBoundaries) {
   return create2DWorkspaceBinned(nhist, numBoundaries);
 }
 
@@ -185,11 +183,12 @@ Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
 Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 
   Workspace2D_sptr outputWS = create2DWorkspaceBinned(nHist, nBins);
-  auto const newAxis = new NumericAxis(nHist);
-  outputWS->replaceAxis(1, newAxis);
-  newAxis->unit() = boost::make_shared<Units::Degrees>();
+  auto newAxis = std::make_unique<NumericAxis>(nHist);
+  auto newAxisRaw = newAxis.get();
+  outputWS->replaceAxis(1, std::move(newAxis));
+  newAxisRaw->unit() = boost::make_shared<Units::Degrees>();
   for (int i = 0; i < nHist; ++i) {
-    newAxis->setValue(i, i + 1);
+    newAxisRaw->setValue(i, i + 1);
   }
 
   return outputWS;
@@ -315,16 +314,12 @@ WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist, int nBins,
 /** Create a 2D workspace with this many histograms and bins.
  * Filled with Y = 2.0 and E = M_SQRT2w
  */
-Workspace2D_sptr create2DWorkspaceBinned(int nhist, int numVals, double x0,
-                                         double deltax) {
+Workspace2D_sptr create2DWorkspaceBinned(size_t nhist, size_t numVals,
+                                         double x0, double deltax) {
   BinEdges x(numVals + 1, LinearGenerator(x0, deltax));
   Counts y(numVals, 2);
   CountStandardDeviations e(numVals, M_SQRT2);
-  auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(nhist, createHisto(true, y, e));
-  for (int i = 0; i < nhist; i++)
-    retVal->setBinEdges(i, x);
-  return retVal;
+  return create<Workspace2D>(nhist, Histogram(x, y, e));
 }
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
@@ -374,12 +369,9 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
   }
 }
 
-//================================================================================================================
 /**
- * Create a test workspace with a fully defined instrument
  * Each spectra will have a cylindrical detector defined 2*cylinder_radius away
- * from the centre of the
- * previous.
+ * from the centre of the previous.
  * Data filled with: Y: 2.0, E: M_SQRT2, X: nbins of width 1 starting at 0
  * The flag hasDx is responsible for creating dx values or not
  */
@@ -392,14 +384,14 @@ Workspace2D_sptr create2DWorkspaceWithFullInstrument(
   }
 
   Workspace2D_sptr space;
+  // A 1:1 spectra is created by default
   if (isHistogram)
-    space = create2DWorkspaceBinned(
-        nhist, nbins, hasDx); // A 1:1 spectra is created by default
+    space = create2DWorkspaceBinned(nhist, nbins, hasDx);
   else
     space =
         create2DWorkspace123(nhist, nbins, false, std::set<int64_t>(), hasDx);
-  space->setTitle(
-      "Test histogram"); // actually adds a property call run_title to the logs
+  // actually adds a property called run_title to the logs
+  space->setTitle("Test histogram");
   space->getAxis(0)->setUnit("TOF");
   space->setYUnit("Counts");
 
@@ -487,12 +479,12 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   // Set the X axes
   const auto &xVals = ws->x(0);
   const size_t xSize = xVals.size();
-  auto ax0 = new NumericAxis(xSize);
+  auto ax0 = std::make_unique<NumericAxis>(xSize);
   ax0->setUnit("dSpacing");
   for (size_t i = 0; i < xSize; i++) {
     ax0->setValue(i, xVals[i]);
   }
-  ws->replaceAxis(0, ax0);
+  ws->replaceAxis(0, std::move(ax0));
 
   // re-assign detector IDs to the rectangular detector
   const auto detIds = inst->getDetectorIDs();
@@ -532,78 +524,6 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
   }
 
   return ws;
-}
-
-/** Adds a component to an instrument
- *
- * @param instrument :: instrument to which the component will be added
- * @param position :: position of the component
- * @param name :: name of the component
- * @return a component pointer
- */
-ObjComponent *addComponent(Instrument_sptr &instrument, const V3D &position,
-                           const std::string &name) {
-  ObjComponent *component = new ObjComponent(name);
-  component->setPos(position);
-  instrument->add(component);
-  return component;
-}
-
-/** Adds a source to an instrument
- *
- * @param instrument :: instrument to which the source will be added
- * @param position :: position of the source
- * @param name :: name of the source
- */
-void addSource(Instrument_sptr &instrument, const V3D &position,
-               const std::string &name) {
-  auto source = addComponent(instrument, position, name);
-  instrument->markAsSource(source);
-}
-
-/** Adds a sample to an instrument
- *
- * @param instrument :: instrument to which the sample will be added
- * @param position :: position of the sample
- * @param name :: name of the sample
- */
-void addSample(Instrument_sptr &instrument, const V3D &position,
-               const std::string &name) {
-  auto sample = addComponent(instrument, position, name);
-  instrument->markAsSamplePos(sample);
-}
-
-/** Adds a monitor to an instrument
- *
- * @param instrument :: instrument to which the monitor will be added
- * @param position :: position of the monitor
- * @param ID :: identification number of the monitor
- * @param name :: name of the monitor
- */
-void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
-                const std::string &name) {
-  Detector *monitor = new Detector(name, ID, nullptr);
-  monitor->setPos(position);
-  instrument->add(monitor);
-  instrument->markAsMonitor(monitor);
-}
-
-/** Adds a detector to an instrument
- *
- * @param instrument :: instrument to which the detector will be added
- * @param position :: position of the detector
- * @param ID :: identification number of the detector
- * @param name :: name of the detector
- */
-void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
-                 const std::string &name) {
-  // Where 0.01 is half detector width etc.
-  Detector *detector = new Detector(
-      name, ID, ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03),
-      nullptr);
-  detector->setPos(position);
-  instrument->add(detector);
-  instrument->markAsDetector(detector);
 }
 
 /** Creates a binned 2DWorkspace with title and TOF x-axis and counts y-axis
@@ -652,12 +572,16 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       PointingAlong::Y, PointingAlong::X, Handedness::Left, "0,0,0"));
 
-  addSource(instrument, sourcePos, "source");
-  addMonitor(instrument, monitorPos, 1, "Monitor");
-  addSample(instrument, samplePos, "some-surface-holder");
-  addDetector(instrument, detectorPos, 2, "point-detector");
-  auto slit1 = addComponent(instrument, slit1Pos, "slit1");
-  auto slit2 = addComponent(instrument, slit2Pos, "slit2");
+  InstrumentCreationHelper::addSource(instrument, sourcePos, "source");
+  InstrumentCreationHelper::addMonitor(instrument, monitorPos, 1, "Monitor");
+  InstrumentCreationHelper::addSample(instrument, samplePos,
+                                      "some-surface-holder");
+  InstrumentCreationHelper::addDetector(instrument, detectorPos, 2,
+                                        "point-detector");
+  auto slit1 =
+      InstrumentCreationHelper::addComponent(instrument, slit1Pos, "slit1");
+  auto slit2 =
+      InstrumentCreationHelper::addComponent(instrument, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, 2, nBins, deltaX);
   workspace->setInstrument(instrument);
@@ -701,19 +625,23 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
       PointingAlong::Y /*up*/, PointingAlong::X /*along*/, Handedness::Left,
       "0,0,0"));
 
-  addSource(instrument, sourcePos, "source");
-  addSample(instrument, samplePos, "some-surface-holder");
-  addMonitor(instrument, monitorPos, 1, "Monitor");
+  InstrumentCreationHelper::addSource(instrument, sourcePos, "source");
+  InstrumentCreationHelper::addSample(instrument, samplePos,
+                                      "some-surface-holder");
+  InstrumentCreationHelper::addMonitor(instrument, monitorPos, 1, "Monitor");
 
   const int nDet = nSpectra - 1;
   const double minY = detectorCenterPos.Y() - detSize * (nDet - 1) / 2.;
   for (int i = 0; i < nDet; ++i) {
     const double y = minY + i * detSize;
     const V3D pos{detectorCenterPos.X(), y, detectorCenterPos.Z()};
-    addDetector(instrument, pos, i + 2, "point-detector");
+    InstrumentCreationHelper::addDetector(instrument, pos, i + 2,
+                                          "point-detector");
   }
-  auto slit1 = addComponent(instrument, slit1Pos, "slit1");
-  auto slit2 = addComponent(instrument, slit2Pos, "slit2");
+  auto slit1 =
+      InstrumentCreationHelper::addComponent(instrument, slit1Pos, "slit1");
+  auto slit2 =
+      InstrumentCreationHelper::addComponent(instrument, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
@@ -733,13 +661,14 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
 
-  addSource(instrument, sourcePosition, "source");
-  addSample(instrument, samplePosition, "sample");
+  InstrumentCreationHelper::addSource(instrument, sourcePosition, "source");
+  InstrumentCreationHelper::addSample(instrument, samplePosition, "sample");
 
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
-    addDetector(instrument, detectorPositions[i], i, buffer.str());
+    InstrumentCreationHelper::addDetector(instrument, detectorPositions[i], i,
+                                          buffer.str());
 
     // Link it to the workspace
     workspace->getSpectrum(i).addDetectorID(i);
@@ -890,7 +819,7 @@ EventWorkspace_sptr createRandomEventWorkspace(size_t numbins, size_t numpixels,
   retVal->initialize(numpixels, numbins, numbins - 1);
 
   // and X-axis for references:
-  auto pAxis0 = new NumericAxis(numbins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numbins);
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
   HistogramData::BinEdges axis(numbins, LinearGenerator(0.0, bin_delta));
@@ -913,7 +842,7 @@ EventWorkspace_sptr createRandomEventWorkspace(size_t numbins, size_t numpixels,
     events.addDetectorID(detid_t(i));
   }
   retVal->setAllX(axis);
-  retVal->replaceAxis(0, pAxis0);
+  retVal->replaceAxis(0, std::move(pAxis0));
 
   return retVal;
 }
@@ -1029,8 +958,7 @@ void addTSPEntry(Run &runInfo, std::string name, double val) {
  */
 void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c) {
-  auto latt =
-      Mantid::Kernel::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
+  auto latt = std::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
   ws->mutableSample().setOrientedLattice(latt.release());
 }
 
@@ -1063,16 +991,15 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
 
   Mantid::API::MatrixWorkspace_sptr ws =
       createGroupedWorkspace2DWithRingsAndBoxes(rHist, 10, 0.1);
-  auto pAxis0 = new NumericAxis(numBins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numBins);
   for (size_t i = 0; i < numBins; i++) {
     double dE = -1.0 + static_cast<double>(i) * 0.8;
     pAxis0->setValue(i, dE);
   }
   pAxis0->setUnit("DeltaE");
-  ws->replaceAxis(0, pAxis0);
+  ws->replaceAxis(0, std::move(pAxis0));
   if (has_oriented_lattice) {
-    auto latt =
-        Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+    auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt.release());
 
     addTSPEntry(ws->mutableRun(), "phi", 0);
@@ -1137,7 +1064,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   }
 
   // set axis, correspondent to the X-values
-  auto pAxis0 = new NumericAxis(numBins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numBins);
   const auto &E_transfer = ws->x(0);
   for (size_t i = 0; i < numBins; i++) {
     double E = 0.5 * (E_transfer[i] + E_transfer[i + 1]);
@@ -1146,11 +1073,10 @@ createProcessedInelasticWS(const std::vector<double> &L2,
 
   pAxis0->setUnit("DeltaE");
 
-  ws->replaceAxis(0, pAxis0);
+  ws->replaceAxis(0, std::move(pAxis0));
 
   // define oriented lattice which requested for processed ws
-  auto latt =
-      Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+  auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
   ws->mutableSample().setOrientedLattice(latt.release());
 
   ws->mutableRun().addProperty(
@@ -1265,8 +1191,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   HistogramData::BinEdges x1{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
 
   // Create a numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new NumericAxis(numY);
-  outputWS->replaceAxis(1, verticalAxis);
+  auto verticalAxis = std::make_unique<NumericAxis>(numY);
 
   // Now set the axis values
   for (int i = 0; i < numHist; ++i) {
@@ -1279,6 +1204,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set the 'y' axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   verticalAxis->title() = "|Q|";
+  outputWS->replaceAxis(1, std::move(verticalAxis));
 
   // Set the X axis title (for conversion to MD)
   outputWS->getAxis(0)->title() = "Energy transfer";

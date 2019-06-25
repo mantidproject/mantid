@@ -275,7 +275,7 @@ class RebinType(object):
 #  SaveType
 # --------------------------
 @string_convertible
-@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus")
+@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus", "NoType")
 class SaveType(object):
     """
     Defines the save types available
@@ -400,3 +400,14 @@ class RowState(object):
     Defines the entries of a batch reduction file.
     """
     pass
+
+
+# ------------------------------
+# Binning Types for AddRuns
+# -------------------------------
+@string_convertible
+@serializable_enum("SaveAsEventData", "Custom", "FromMonitors")
+class BinningType(object):
+    """
+    Defines the types of binning when adding runs together
+    """

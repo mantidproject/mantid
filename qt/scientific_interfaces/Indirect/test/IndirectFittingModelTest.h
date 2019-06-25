@@ -207,7 +207,7 @@ public:
     std::string const spectraString("");
 
     TS_ASSERT_THROWS(model->addWorkspace("WorkspaceName", spectraString),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void
@@ -231,6 +231,18 @@ public:
 
     TS_ASSERT_EQUALS(model->getWorkspace(0), workspace1);
     TS_ASSERT_EQUALS(model->getWorkspace(1), workspace2);
+  }
+
+  void
+  test_that_hasWorkspace_returns_true_when_the_model_contains_a_workspace() {
+    auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
+    TS_ASSERT(model->hasWorkspace("WorkspaceName"));
+  }
+
+  void
+  test_that_hasWorkspace_returns_false_when_the_model_does_not_contain_a_workspace() {
+    auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
+    TS_ASSERT(!model->hasWorkspace("WrongName"));
   }
 
   void
@@ -301,7 +313,7 @@ public:
 
     model->setExcludeRegion("0,1,3,4", 0, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,3.0,4.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
 
   void
@@ -330,7 +342,7 @@ public:
 
     model->setExcludeRegion("0,1,6,4", 0, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,4.0,6.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,4.000,6.000");
   }
 
   void
@@ -502,7 +514,7 @@ public:
 
   void test_that_getNumberOfSpectra_throws_if_dataIndex_is_out_of_range() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
-    TS_ASSERT_THROWS(model->getNumberOfSpectra(1), std::runtime_error);
+    TS_ASSERT_THROWS(model->getNumberOfSpectra(1), const std::runtime_error &);
   }
 
   void
@@ -592,7 +604,7 @@ public:
 
     model->setExcludeRegion("0,1,3,4", 3, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,3.0,4.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
 
   void
@@ -609,7 +621,7 @@ public:
   void
   test_that_removeWorkspace_throws_when_provided_an_out_of_range_dataIndex() {
     auto model = createModelWithMultipleWorkspaces(3, "Ws1", "Ws2");
-    TS_ASSERT_THROWS(model->removeWorkspace(2), std::runtime_error);
+    TS_ASSERT_THROWS(model->removeWorkspace(2), const std::runtime_error &);
   }
 
   void test_that_clearWorkspaces_will_empty_the_fittingData() {

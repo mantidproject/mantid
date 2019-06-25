@@ -94,14 +94,14 @@ const std::string FindReflectometryLines2::summary() const {
 /// Initialize the algorithm's properties.
 void FindReflectometryLines2::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input),
       "A reflectometry workspace.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output,
           API::PropertyMode::Optional),
-      "A workspaced containing the fractional workspace index of "
+      "A workspace containing the fractional workspace index of "
       "the line centre.");
   declareProperty(Prop::LINE_CENTRE, EMPTY_DBL(),
                   "The fractional workspace index of the line centre",

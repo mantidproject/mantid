@@ -366,7 +366,7 @@ public:
                      PointGroup::CrystalSystem::Triclinic);
 
     TS_ASSERT_THROWS(getCrystalSystemFromString("DoesNotExist"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
                          PointGroup::CrystalSystem::Cubic)),
@@ -415,7 +415,7 @@ public:
                      PointGroup::LatticeSystem::Triclinic);
 
     TS_ASSERT_THROWS(getLatticeSystemFromString("DoesNotExist"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
                          PointGroup::LatticeSystem::Cubic)),

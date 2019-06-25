@@ -32,7 +32,7 @@ public:
     boost::shared_ptr<FacilityInfo> another;
     TS_ASSERT_THROWS(another = createCRInfoInMinimalFacility(
                          "<computeResource fooAtt=\"barVal\"/>"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT(!another);
   }
 
@@ -44,7 +44,7 @@ public:
                               "</computeResource>";
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT(!fac);
   }
 
@@ -56,7 +56,7 @@ public:
                               "</compResource>";
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
-                     Poco::XML::XMLException);
+                     const Poco::XML::XMLException &);
     TS_ASSERT(!fac);
   }
 
@@ -78,8 +78,6 @@ public:
     TS_ASSERT_EQUALS(cri.size(), 1);
 
     ComputeResourceInfo cr = fac->computeResInfos().front();
-    TS_ASSERT_THROWS(ComputeResourceInfo fail = fac->computeResource(scarfName),
-                     Mantid::Kernel::Exception::NotFoundError);
     ComputeResourceInfo cr2 = fac->computeResource(fermiName);
     TS_ASSERT_EQUALS(cr, cr2);
     TS_ASSERT_EQUALS(cr, cri.front());
@@ -105,58 +103,8 @@ public:
 
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(fermi),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
-    TS_ASSERT(!fac);
-  }
-
-  void test_normalSCARF() {
-    const std::string scarf = "<computeResource name=\"" + scarfName +
-                              "\" jobmanagertype=\"" + scarfType +
-                              "\">"
-                              "<baseURL>" +
-                              scarfURL +
-                              "</baseURL>"
-                              "</computeResource>";
-
-    boost::shared_ptr<FacilityInfo> fac;
-    TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(scarf));
-    TS_ASSERT(fac);
-    TS_ASSERT_EQUALS(fac->name(), this->testFacilityName);
-    std::vector<ComputeResourceInfo> cri;
-    TS_ASSERT_THROWS_NOTHING(cri = fac->computeResInfos());
-    TS_ASSERT_EQUALS(cri.size(), 1);
-
-    ComputeResourceInfo cr = fac->computeResInfos().front();
-    TS_ASSERT_THROWS(ComputeResourceInfo fail =
-                         fac->computeResource("inexistent!"),
-                     Mantid::Kernel::Exception::NotFoundError);
-    ComputeResourceInfo cr2 = fac->computeResource(scarfName);
-    TS_ASSERT_EQUALS(cr, cr2);
-    TS_ASSERT_EQUALS(cri.front(), cr);
-    TS_ASSERT_EQUALS(cri.front(), cr2);
-    TS_ASSERT_EQUALS(scarfName, cr.name());
-    TS_ASSERT_EQUALS(scarfName, cr2.name());
-    TS_ASSERT_EQUALS(scarfURL, cr.baseURL());
-    TS_ASSERT_EQUALS(scarfURL, cr2.baseURL());
-    TS_ASSERT_EQUALS(scarfType, cr.remoteJobManagerType());
-    TS_ASSERT_EQUALS(scarfType, cr2.remoteJobManagerType());
-    TS_ASSERT_EQUALS(fac->name(), cr.facility().name());
-    TS_ASSERT_EQUALS(fac->name(), cr2.facility().name());
-  }
-
-  void test_brokenSCARF() {
-    const std::string type = "SCARFLSFJobManager";
-    const std::string err = "<computeResource foo=\"" + scarfName +
-                            "\" jobmanagertype=\"" + type +
-                            "\">"
-                            "<URL>" +
-                            scarfURL +
-                            "</URL>"
-                            "</computeResource>";
-    boost::shared_ptr<FacilityInfo> fac;
-    TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(err),
-                     std::runtime_error);
     TS_ASSERT(!fac);
   }
 
@@ -261,9 +209,6 @@ private:
 
   static const std::string fermiName;
   static const std::string fermiURL;
-  static const std::string scarfName;
-  static const std::string scarfURL;
-  static const std::string scarfType;
 };
 
 const std::string ComputeResourceInfoTest::simpleInstStr =
@@ -279,9 +224,5 @@ const std::string ComputeResourceInfoTest::testFacilityName = "ATestFacility";
 const std::string ComputeResourceInfoTest::fermiURL =
     "https://fermi.ornl.gov/MantidRemote";
 const std::string ComputeResourceInfoTest::fermiName = "Fermi";
-const std::string ComputeResourceInfoTest::scarfURL =
-    "https://portal.scarf.rl.ac.uk";
-const std::string ComputeResourceInfoTest::scarfName = "SCARF@STFC";
-const std::string ComputeResourceInfoTest::scarfType = "SCARFLSFJobManager";
 
 #endif // COMPUTERESOURCEINFOTEST_H_

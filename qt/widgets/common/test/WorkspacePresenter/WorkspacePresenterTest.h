@@ -11,11 +11,11 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceDockMockObjects.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 
-#include <MantidAPI/AlgorithmManager.h>
-#include <MantidAPI/AnalysisDataService.h>
-#include <MantidAPI/FrameworkManager.h>
-#include <MantidAPI/WorkspaceGroup.h>
-#include <MantidTestHelpers/WorkspaceCreationHelper.h>
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <algorithm>
 #include <boost/make_shared.hpp>
@@ -445,8 +445,12 @@ public:
     using SaveFileType = IWorkspaceDockView::SaveFileType;
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::Nexus);
 
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspace()).WillOnce(Return(ws1));
     EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::Nexus))
+    EXPECT_CALL(*mockView.get(),
+                saveWorkspace(ws1->getName(), SaveFileType::Nexus))
         .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
@@ -457,9 +461,12 @@ public:
   void testSaveSingleWorkspaceASCIIv1() {
     using SaveFileType = IWorkspaceDockView::SaveFileType;
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCIIv1);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspace()).WillOnce(Return(ws1));
     EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::ASCIIv1))
+    EXPECT_CALL(*mockView.get(),
+                saveWorkspace(ws1->getName(), SaveFileType::ASCIIv1))
         .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
@@ -471,8 +478,12 @@ public:
     using SaveFileType = IWorkspaceDockView::SaveFileType;
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCII);
 
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspace()).WillOnce(Return(ws1));
     EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::ASCII))
+    EXPECT_CALL(*mockView.get(),
+                saveWorkspace(ws1->getName(), SaveFileType::ASCII))
         .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);

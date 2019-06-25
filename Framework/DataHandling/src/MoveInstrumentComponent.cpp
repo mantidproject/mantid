@@ -29,7 +29,7 @@ MoveInstrumentComponent::MoveInstrumentComponent() {}
 void MoveInstrumentComponent::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
@@ -113,8 +113,8 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  const auto &componentInfo =
-      inputW ? inputW->componentInfo() : inputP->componentInfo();
+  auto &componentInfo =
+      inputW ? inputW->mutableComponentInfo() : inputP->mutableComponentInfo();
   auto compIndex = componentInfo.indexOf(comp->getComponentID());
   if (ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo,
                                                       compIndex)) {
@@ -131,13 +131,7 @@ void MoveInstrumentComponent::exec() {
     position += comp->getPos();
 
   const auto componentId = comp->getComponentID();
-  if (inputW) {
-    auto &componentInfo = inputW->mutableComponentInfo();
-    componentInfo.setPosition(componentInfo.indexOf(componentId), position);
-  } else if (inputP) {
-    auto &componentInfo = inputP->mutableComponentInfo();
-    componentInfo.setPosition(componentInfo.indexOf(componentId), position);
-  }
+  componentInfo.setPosition(componentInfo.indexOf(componentId), position);
 }
 
 } // namespace DataHandling

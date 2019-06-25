@@ -131,7 +131,7 @@ public:
     TS_ASSERT_DELTA(mat.numberDensity(), 0.0410414, 0.001);
   }
 
-  void test_Number_Set_By_AtomicNumber_ZParameter_And_Cell_Volume() {
+  void test_Number_Density_Set_By_AtomicNumber_ZParameter_And_Cell_Volume() {
     MaterialBuilder builder;
     auto mat = builder.setName("Nickel")
                    .setAtomicNumber(28)
@@ -142,44 +142,57 @@ public:
     TS_ASSERT_DELTA(mat.numberDensity(), 0.0237154, 0.001);
   }
 
+  void test_Number_Density_By_Formula_Unit() {
+    MaterialBuilder builder;
+    const auto material =
+        builder.setName("Strange oxide")
+            .setFormula("Al2 O3")
+            .setNumberDensity(0.23)
+            .setNumberDensityUnit(
+                MaterialBuilder::NumberDensityUnit::FormulaUnits)
+            .build();
+    TS_ASSERT_DELTA(material.numberDensity(), (2. + 3.) * 0.23, 1e-12)
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Empty_Name_Throws_Error_When_Set() {
     MaterialBuilder builder;
-    TS_ASSERT_THROWS(builder.setName(""), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.setName(""), const std::invalid_argument &);
   }
 
   void test_Invalid_Formula_Throws_Error_When_Set() {
     MaterialBuilder builder;
-    TS_ASSERT_THROWS(builder.setFormula(""), std::invalid_argument);
-    TS_ASSERT_THROWS(builder.setFormula("Al-2"), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.setFormula(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(builder.setFormula("Al-2"), const std::invalid_argument &);
   }
 
   void test_Setting_Neither_ChemicalFormula_And_AtomicNumber_Throws_Error() {
     MaterialBuilder builder;
-    TS_ASSERT_THROWS(builder.setName("Nickel").build(), std::runtime_error);
+    TS_ASSERT_THROWS(builder.setName("Nickel").build(),
+                     const std::runtime_error &);
   }
 
   void test_Setting_Both_ChemicalFormula_And_AtomicNumber_Throws_Error() {
     MaterialBuilder builder;
     TS_ASSERT_THROWS(builder.setFormula("Al2-O3").setAtomicNumber(28),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(builder.setAtomicNumber(28).setFormula("Al2-O3"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Setting_ZParameter_UnitCell_And_MassDensity_Throws_Error() {
     MaterialBuilder builder;
     TS_ASSERT_THROWS(builder.setMassDensity(4).setZParameter(6),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(builder.setMassDensity(4).setUnitCellVolume(250.),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     TS_ASSERT_THROWS(builder.setZParameter(6).setMassDensity(4),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(builder.setUnitCellVolume(6).setMassDensity(4),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_MultiAtom_with_no_number_density_throws() {
@@ -198,7 +211,7 @@ public:
                   .setCoherentXSection(0.5)
                   .setIncoherentXSection(5.0)
                   .setAbsorptionXSection(0.23);
-    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+    TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 
   void test_User_Defined_Material_Without_TotalScatterXSection_Throws() {
@@ -207,7 +220,7 @@ public:
                   .setCoherentXSection(0.5)
                   .setIncoherentXSection(5.0)
                   .setAbsorptionXSection(0.23);
-    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+    TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 
   void test_User_Defined_Material_Without_CoherentXSection_Throws() {
@@ -216,7 +229,7 @@ public:
                   .setTotalScatterXSection(2.3)
                   .setIncoherentXSection(5.0)
                   .setAbsorptionXSection(0.23);
-    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+    TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 
   void test_User_Defined_Material_Without_IncoherentXSection_Throws() {
@@ -225,7 +238,7 @@ public:
                   .setTotalScatterXSection(2.3)
                   .setCoherentXSection(5.0)
                   .setAbsorptionXSection(0.23);
-    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+    TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 
   void test_User_Defined_Material_Without_AbsorptionXSection_Throws() {
@@ -234,7 +247,7 @@ public:
                   .setTotalScatterXSection(2.3)
                   .setCoherentXSection(5.0)
                   .setIncoherentXSection(5.0);
-    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+    TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 };
 

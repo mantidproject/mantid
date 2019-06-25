@@ -43,28 +43,28 @@ void ImportMDHistoWorkspaceBase::initGenericImportProps() {
   validator->add(boost::make_shared<BoundedValidator<int>>(1, 9));
   validator->add(boost::make_shared<MandatoryValidator<int>>());
 
-  declareProperty(make_unique<PropertyWithValue<int>>(
+  declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "Dimensionality", -1, validator, Direction::Input),
                   "Dimensionality of the data in the file.");
 
-  declareProperty(make_unique<ArrayProperty<double>>("Extents"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Extents"),
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(make_unique<ArrayProperty<int>>("NumberOfBins"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("NumberOfBins"),
                   "Number of bin in each dimension.");
 
-  declareProperty(make_unique<ArrayProperty<std::string>>("Names"),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Names"),
                   "A comma separated list of the name of each dimension.");
 
-  declareProperty(make_unique<ArrayProperty<std::string>>("Units"),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDHistoWorkspace reflecting the input text file.");
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("Frames"),
+      std::make_unique<ArrayProperty<std::string>>("Frames"),
       " A comma separated list of the frames of each dimension. "
       " The frames can be"
       " **General Frame**: Any frame which is not a Q-based frame."
@@ -196,12 +196,9 @@ ImportMDHistoWorkspaceBase::validateInputs() {
  */
 bool ImportMDHistoWorkspaceBase::checkIfFrameValid(
     const std::string &frame, const std::vector<std::string> &targetFrames) {
-  for (const auto &targetFrame : targetFrames) {
-    if (targetFrame == frame) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+      targetFrames.cbegin(), targetFrames.cend(),
+      [&frame](const auto &targetFrame) { return targetFrame == frame; });
 }
 
 } // namespace MDAlgorithms

@@ -177,8 +177,6 @@ public:
     auto base = createWorkspace(4.5, 3.2, 7.9, "2018-11-30T16:17:03");
     TS_ASSERT_EQUALS(ws->getLog("B")->units(), "B_unit")
     TS_ASSERT_EQUALS(base->getLog("B")->units(), "B_unit")
-    SampleLogsBehaviour::ParameterName parameterNames;
-    parameterNames.SUM_MERGE = "logs_sum";
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsTimeSeries = "B";
     SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, sampleLogNames);

@@ -13,7 +13,7 @@ from __future__ import (absolute_import, division,
 # Import mantid to set MANTIDPATH for any ConfigService call that may be done
 import mantid  # noqa
 # Add workspace creation namespace
-from . import WorkspaceCreationHelper
+import WorkspaceCreationHelper
 
 # Define some pure-Python functions to add to the mix
 

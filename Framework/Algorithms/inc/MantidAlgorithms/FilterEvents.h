@@ -82,7 +82,7 @@ private:
   /// create event workspace
   boost::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
   /// create output workspaces if the splitters are given in SplittersWorkspace
-  void createOutputWorkspaces();
+  void createOutputWorkspacesSplitters();
   /// create output workspaces in the case of using TableWorlspace for splitters
   void createOutputWorkspacesTableSplitterCase();
   /// create output workspaces in the case of using MatrixWorkspace for
@@ -122,7 +122,9 @@ private:
   void splitTimeSeriesLogs(
       const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
       const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
-      const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector);
+      const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector,
+      const std::vector<Kernel::TimeSeriesProperty<std::string> *>
+          &string_tsp_vector);
 
   /// get the names of all the time series properties in the input workspace's
   /// Run object
@@ -141,7 +143,9 @@ private:
   void copyNoneSplitLogs(
       std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
       std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
-      std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector);
+      std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
+      std::vector<Kernel::TimeSeriesProperty<std::string> *>
+          &string_tsp_vector);
 
   template <typename TYPE>
   void splitTimeSeriesProperty(
@@ -195,7 +199,7 @@ private:
   /// Vector for splitting time
   /// FIXME - shall we convert this to DateAndTime???.  Need to do speed test!
   std::vector<int64_t> m_vecSplitterTime;
-  /// Vector for splitting grouip
+  /// Vector for splitting group
   std::vector<int> m_vecSplitterGroup;
 
   /// Flag to split sample logs

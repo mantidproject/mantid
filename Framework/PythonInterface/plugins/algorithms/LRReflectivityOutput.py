@@ -80,7 +80,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         return normalization_available
 
     #pylint: disable=too-many-locals,too-many-branches
-    def average_points_for_single_q(self, scaled_ws_list):
+    def average_points_for_single_q(self, scaled_ws_list): # noqa
         """
             Take the point with the smalled error when multiple points are
             at the same q-value.

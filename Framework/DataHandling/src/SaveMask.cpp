@@ -36,12 +36,12 @@ DECLARE_ALGORITHM(SaveMask)
 /// Define input parameters
 void SaveMask::init() {
 
-  declareProperty(make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to output masking to XML file");
-  declareProperty(
-      make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
-      "File to save the detectors mask in XML format");
+  declareProperty(std::make_unique<FileProperty>("OutputFile", "",
+                                                 FileProperty::Save, ".xml"),
+                  "File to save the detectors mask in XML format");
 }
 
 /// Main body to execute algorithm
@@ -57,6 +57,7 @@ void SaveMask::exec() {
         this->createChildAlgorithm("ExtractMask", 0.0, 0.5, false);
     emAlg->setProperty("InputWorkspace", userInputWS);
     emAlg->setPropertyValue("OutputWorkspace", "tmp");
+    emAlg->setLogging(this->isLogging());
     emAlg->execute();
     API::MatrixWorkspace_sptr ws = emAlg->getProperty("OutputWorkspace");
     inpWS = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(ws);
@@ -71,11 +72,10 @@ void SaveMask::exec() {
   // 2. Convert Workspace to ...
   std::vector<detid_t> detid0s;
   for (size_t i = 0; i < inpWS->getNumberHistograms(); i++) {
-    if (inpWS->y(i)[0] > 0.1) {
+    if (inpWS->y(i).front() > 0.1) {
       // It is way from 0 but smaller than 1
-      for (const auto &det_id : inpWS->getSpectrum(i).getDetectorIDs()) {
-        detid0s.push_back(det_id);
-      }
+      const auto &ids = inpWS->getSpectrum(i).getDetectorIDs();
+      std::copy(ids.cbegin(), ids.cend(), std::back_inserter(detid0s));
     }
   }
 

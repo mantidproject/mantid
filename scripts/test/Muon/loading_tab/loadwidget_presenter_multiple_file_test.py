@@ -6,50 +6,46 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
-from PyQt4 import QtGui
-
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
-
-from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
-from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
-
-from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
-from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common import mock_widget
-from mantid.api import FileFinder
 from mantid import ConfigService
+from mantid.api import FileFinder
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QApplication, QWidget
+
+from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 
 
-class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
+class LoadRunWidgetPresenterMultipleFileTest(GuiTest):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            self._qapp.processEvents()
+            QApplication.instance().processEvents()
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
+        ConfigService['default.instrument'] = 'MUSR'
 
-        self.data = MuonLoadData()
+        setup_context_for_tests(self)
+        self.context.instrument = 'MUSR'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
-        self.load_file_model = BrowseFileWidgetModel(self.data)
-        self.load_run_model = LoadRunWidgetModel(self.data)
+        self.load_file_model = BrowseFileWidgetModel(self.loaded_data, self.context)
+        self.load_run_model = LoadRunWidgetModel(self.loaded_data, self.context)
 
         self.view = LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view,
                                    load_run_view=self.load_run_view)
-        self.presenter = LoadWidgetPresenter(self.view, LoadWidgetModel(self.data))
+        self.presenter = LoadWidgetPresenter(self.view, LoadWidgetModel(self.loaded_data, self.context))
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
 
@@ -60,10 +56,8 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
         self.presenter.handle_multiple_files_option_changed()
 
         self.runs = [15196, 15197]
-        self.workspaces = [{'OutputWorkspace': mock.MagicMock()} for _ in self.runs]
+        self.workspaces = [self.create_fake_workspace(1) for _ in self.runs]
         self.filenames = FileFinder.findRuns('MUSR00015196.nxs, MUSR00015197.nxs')
-
-        ConfigService['default.instrument'] = 'MUSR'
 
     def tearDown(self):
         self.obj = None
@@ -76,6 +70,14 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     def assert_interface_contains_correct_runs_and_files(self):
         self.assertEqual(self.load_file_view.get_file_edit_text(), ";".join(['Co-added']))
         self.assertEqual(self.load_run_view.get_run_edit_text(), "15196-15197")
+
+    def create_fake_workspace(self, name):
+        workspace_mock = mock.MagicMock()
+        instrument_mock = mock.MagicMock()
+        instrument_mock.getName.return_value = 'MUSR'
+        workspace_mock.workspace.getInstrument.return_value = instrument_mock
+
+        return {'OutputWorkspace': [workspace_mock]}
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : The loading of multiple files is supported by the widget

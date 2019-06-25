@@ -39,6 +39,8 @@ function (find_qscintilla qt_version)
       libqscintilla2-qt5
       qt5scintilla2
       libqscintilla2_qt5.dylib
+      qscintilla2
+      libqscintilla2
     )
     set ( _qsci_lib_names_debug
       qscintilla2_qt5d

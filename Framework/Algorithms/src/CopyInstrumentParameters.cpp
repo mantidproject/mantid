@@ -10,7 +10,6 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,12 +25,12 @@ using namespace Geometry;
 /// using namespace DataObjects;
 
 void CopyInstrumentParameters::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Name of the workspace giving the instrument");
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
-      "Name of the workspace receiving the instrument");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the workspace giving the instrument");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::InOut),
+                  "Name of the workspace receiving the instrument");
 }
 
 /** Executes the algorithm

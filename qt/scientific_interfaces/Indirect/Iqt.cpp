@@ -5,19 +5,22 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Iqt.h"
-#include "../General/UserInputValidator.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
+
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <qwt_plot.h>
 
 #include <tuple>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
+using namespace MantidQt::CustomInterfaces;
 
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
@@ -31,12 +34,65 @@ std::size_t getWsNumberOfSpectra(std::string const &workspaceName) {
   return getADSMatrixWorkspace(workspaceName)->getNumberHistograms();
 }
 
-bool checkADSForWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
 bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
   return workspace->y(0).size() > 1;
+}
+
+std::string
+checkInstrumentParametersMatch(Instrument_const_sptr sampleInstrument,
+                               Instrument_const_sptr resolutionInstrument,
+                               std::string const &parameter) {
+  if (!sampleInstrument->hasParameter(parameter))
+    return "Could not find the " + parameter + " for the sample workspace.";
+  if (!resolutionInstrument->hasParameter(parameter))
+    return "Could not find the " + parameter +
+           " for the resolution workspaces.";
+  if (sampleInstrument->getStringParameter(parameter)[0] !=
+      resolutionInstrument->getStringParameter(parameter)[0])
+    return "The sample and resolution must have matching " + parameter + "s.";
+  return "";
+}
+
+std::string checkParametersMatch(MatrixWorkspace_const_sptr sampleWorkspace,
+                                 MatrixWorkspace_const_sptr resolutionWorkspace,
+                                 std::string const &parameter) {
+  auto const sampleInstrument = sampleWorkspace->getInstrument();
+  auto const resolutionInstrument = resolutionWorkspace->getInstrument();
+  return checkInstrumentParametersMatch(sampleInstrument, resolutionInstrument,
+                                        parameter);
+}
+
+std::string checkParametersMatch(std::string const &sampleName,
+                                 std::string const &resolutionName,
+                                 std::string const &parameter) {
+  auto const sampleWorkspace = getADSMatrixWorkspace(sampleName);
+  auto const resolutionWorkspace = getADSMatrixWorkspace(resolutionName);
+  return checkParametersMatch(sampleWorkspace, resolutionWorkspace, parameter);
+}
+
+std::string
+checkInstrumentsMatch(MatrixWorkspace_const_sptr sampleWorkspace,
+                      MatrixWorkspace_const_sptr resolutionWorkspace) {
+  auto const sampleInstrument = sampleWorkspace->getInstrument();
+  auto const resolutionInstrument = resolutionWorkspace->getInstrument();
+  if (sampleInstrument->getName() != resolutionInstrument->getName())
+    return "The sample and resolution must have matching instruments.";
+  return "";
+}
+
+std::string
+validateNumberOfHistograms(MatrixWorkspace_const_sptr sampleWorkspace,
+                           MatrixWorkspace_const_sptr resolutionWorkspace) {
+  auto const sampleSize = sampleWorkspace->getNumberHistograms();
+  auto const resolutionSize = resolutionWorkspace->getNumberHistograms();
+  if (resolutionSize > 1 && sampleSize != resolutionSize)
+    return "Resolution must have either one or as many spectra as the sample.";
+  return "";
+}
+
+void addErrorMessage(UserInputValidator &uiv, std::string const &message) {
+  if (!message.empty())
+    uiv.addErrorMessage(QString::fromStdString(message) + "\n");
 }
 
 void cloneWorkspace(std::string const &workspaceName,
@@ -71,16 +127,17 @@ void cropWorkspace(std::string const &name, std::string const &newName,
  * otherwise they are undefined.
  */
 std::tuple<bool, float, int, int>
-calculateBinParameters(QString wsName, QString resName, double energyMin,
-                       double energyMax, double binReductionFactor) {
+calculateBinParameters(std::string const &wsName, std::string const &resName,
+                       double energyMin, double energyMax,
+                       double binReductionFactor) {
   ITableWorkspace_sptr propsTable;
-  const auto paramTableName = "__IqtProperties_temp";
   try {
+    const auto paramTableName = "__IqtProperties_temp";
     auto toIqt = AlgorithmManager::Instance().createUnmanaged("TransformToIqt");
     toIqt->initialize();
     toIqt->setChild(true); // record this as internal
-    toIqt->setProperty("SampleWorkspace", wsName.toStdString());
-    toIqt->setProperty("ResolutionWorkspace", resName.toStdString());
+    toIqt->setProperty("SampleWorkspace", wsName);
+    toIqt->setProperty("ResolutionWorkspace", resName);
     toIqt->setProperty("ParameterWorkspace", paramTableName);
     toIqt->setProperty("EnergyMin", energyMin);
     toIqt->setProperty("EnergyMax", energyMax);
@@ -150,6 +207,14 @@ void Iqt::setup() {
 
   m_iqtTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
+  // Format the tree widget so its easier to read the contents
+  m_iqtTree->setIndentation(0);
+  for (auto const &item : m_properties)
+    m_iqtTree->setBackgroundColor(m_iqtTree->topLevelItem(item),
+                                  QColor(246, 246, 246));
+
+  setPreviewSpectrumMaximum(0);
+
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators
@@ -177,6 +242,14 @@ void Iqt::setup() {
           SLOT(setTiledPlotFirstPlot(int)));
   connect(m_uiForm.spTiledPlotLast, SIGNAL(valueChanged(int)), this,
           SLOT(setTiledPlotLastPlot(int)));
+
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
+          SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
+          SLOT(plotInput()));
+
+  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this,
+          SLOT(updateEnergyRange(int)));
 }
 
 void Iqt::run() {
@@ -312,7 +385,7 @@ void Iqt::plotTiled() {
   auto const lastTiledPlot = m_uiForm.spTiledPlotLast->text().toInt();
 
   // Clone workspace before cropping to keep in ADS
-  if (!checkADSForWorkspace(tiledPlotWsName))
+  if (!AnalysisDataService::Instance().doesExist(tiledPlotWsName))
     cloneWorkspace(outWs->getName(), tiledPlotWsName);
 
   // Get first x value which corresponds to a y value below 1
@@ -322,22 +395,8 @@ void Iqt::plotTiled() {
 
   auto const tiledPlotWs = getADSMatrixWorkspace(tiledPlotWsName);
 
-  // Plot tiledwindow
-  std::size_t const numberOfPlots = lastTiledPlot - firstTiledPlot + 1;
-  if (numberOfPlots != 0) {
-    QString pyInput = "from mantidplot import newTiledWindow\n";
-    pyInput += "newTiledWindow(sources=[";
-    for (auto index = firstTiledPlot; index <= lastTiledPlot; ++index) {
-      if (index > firstTiledPlot) {
-        pyInput += ",";
-      }
-      std::string const pyInStr =
-          "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
-      pyInput += QString::fromStdString(pyInStr);
-    }
-    pyInput += "])\n";
-    runPythonCode(pyInput);
-  }
+  IndirectTab::plotTiled(tiledPlotWsName, firstTiledPlot, lastTiledPlot);
+
   setTiledPlotIsPlotting(false);
 }
 
@@ -353,19 +412,38 @@ bool Iqt::validate() {
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
-  const auto eLow = m_dblManager->value(m_properties["ELow"]);
-  const auto eHigh = m_dblManager->value(m_properties["EHigh"]);
-  if (eLow >= eHigh)
-    uiv.addErrorMessage("ELow must be strictly less than EHigh.\n");
+  auto const eLow = m_dblManager->value(m_properties["ELow"]);
+  auto const eHigh = m_dblManager->value(m_properties["EHigh"]);
 
-  QString message = uiv.generateErrorMessage();
+  if (eLow >= eHigh)
+    uiv.addErrorMessage("ELow must be less than EHigh.\n");
+
+  auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
+  auto const resolutionName =
+      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(sampleName) && ads.doesExist(resolutionName)) {
+    auto const sampleWorkspace = getADSMatrixWorkspace(sampleName);
+    auto const resWorkspace = getADSMatrixWorkspace(resolutionName);
+
+    addErrorMessage(uiv, checkInstrumentsMatch(sampleWorkspace, resWorkspace));
+    addErrorMessage(
+        uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "analyser"));
+    addErrorMessage(
+        uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "reflection"));
+    addErrorMessage(uiv,
+                    validateNumberOfHistograms(sampleWorkspace, resWorkspace));
+  }
+
+  auto const message = uiv.generateErrorMessage();
   showMessageBox(message);
 
   return message.isEmpty();
 }
 
 /**
- * Ensures that absolute min and max energy are equal.
+ * Ensures that the min energy is below zero and the max energy is above zero
  *
  * @param prop Qt property that was changed
  * @param val New value of that property
@@ -375,22 +453,21 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
              SLOT(updatePropertyValues(QtProperty *, double)));
 
   if (prop == m_properties["EHigh"]) {
-    // If the user enters a negative value for EHigh assume they did not mean to
-    // add a -
     if (val < 0) {
       val = -val;
       m_dblManager->setValue(m_properties["EHigh"], val);
     }
 
-    m_dblManager->setValue(m_properties["ELow"], -val);
+    if (m_uiForm.ckSymmetricEnergy->isChecked())
+      m_dblManager->setValue(m_properties["ELow"], -val);
   } else if (prop == m_properties["ELow"]) {
-    // If the user enters a positive value for ELow, assume they meant to add a
     if (val > 0) {
       val = -val;
       m_dblManager->setValue(m_properties["ELow"], val);
     }
 
-    m_dblManager->setValue(m_properties["EHigh"], -val);
+    if (m_uiForm.ckSymmetricEnergy->isChecked())
+      m_dblManager->setValue(m_properties["EHigh"], -val);
   }
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
@@ -403,9 +480,16 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
  * Calculates binning parameters.
  */
 void Iqt::updateDisplayedBinParameters() {
-  QString wsName = m_uiForm.dsInput->getCurrentDataName();
-  QString resName = m_uiForm.dsResolution->getCurrentDataName();
-  if (wsName.isEmpty() || resName.isEmpty())
+  auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
+  auto const resolutionName =
+      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+
+  auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
+    return;
+
+  if (!checkParametersMatch(sampleName, resolutionName, "analyser").empty() ||
+      !checkParametersMatch(sampleName, resolutionName, "reflection").empty())
     return;
 
   double energyMin = m_dblManager->value(m_properties["ELow"]);
@@ -421,7 +505,8 @@ void Iqt::updateDisplayedBinParameters() {
   float energyWidth(0.0f);
   int resolutionBins(0), sampleBins(0);
   std::tie(success, energyWidth, sampleBins, resolutionBins) =
-      calculateBinParameters(wsName, resName, energyMin, energyMax, numBins);
+      calculateBinParameters(sampleName, resolutionName, energyMin, energyMax,
+                             numBins);
   if (success) {
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
                SLOT(updatePropertyValues(QtProperty *, double)));
@@ -434,9 +519,8 @@ void Iqt::updateDisplayedBinParameters() {
 
     // Warn for low number of resolution bins
     if (resolutionBins < 5)
-      showMessageBox(
-          "Number of resolution bins is less than 5.\nResults may be "
-          "inaccurate.");
+      showMessageBox("Results may be inaccurate as ResolutionBins is "
+                     "less than 5.\nLower the SampleBinning.");
   }
 }
 
@@ -445,16 +529,38 @@ void Iqt::loadSettings(const QSettings &settings) {
   m_uiForm.dsResolution->readSettings(settings.group());
 }
 
+void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
+
+void Iqt::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Iqt");
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                         : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                         : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
+                                              : noSuffixes);
+}
+
 void Iqt::plotInput(const QString &wsname) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updatePropertyValues(QtProperty *, double)));
+
   MatrixWorkspace_sptr workspace;
   try {
-    workspace = Mantid::API::AnalysisDataService::Instance()
-                    .retrieveWS<MatrixWorkspace>(wsname.toStdString());
+    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        wsname.toStdString());
     setInputWorkspace(workspace);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     showMessageBox(QString("Unable to retrieve workspace: " + wsname));
+    setPreviewSpectrumMaximum(0);
     return;
   }
+
+  setPreviewSpectrumMaximum(
+      static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1);
 
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
@@ -500,14 +606,21 @@ void Iqt::plotInput(const QString &wsname) {
     showMessageBox(exc.what());
   }
 
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updatePropertyValues(QtProperty *, double)));
+
   updateDisplayedBinParameters();
+}
+
+void Iqt::setPreviewSpectrumMaximum(int value) {
+  m_uiForm.spPreviewSpec->setMaximum(value);
 }
 
 /**
  * Updates the range selectors and properties when range selector is moved.
  *
  * @param min Range selector min value
- * @param max Range selector amx value
+ * @param max Range selector max value
  */
 void Iqt::rsRangeChangedLazy(double min, double max) {
   double oldMin = m_dblManager->value(m_properties["ELow"]);
@@ -529,8 +642,15 @@ void Iqt::updateRS(QtProperty *prop, double val) {
     xRangeSelector->setMaximum(val);
 }
 
+void Iqt::updateEnergyRange(int state) {
+  if (state != 0) {
+    auto const value = m_dblManager->value(m_properties["ELow"]);
+    m_dblManager->setValue(m_properties["EHigh"], -value);
+  }
+}
+
 void Iqt::setTiledPlotFirstPlot(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotFirst);
   auto const lastPlotIndex = m_uiForm.spTiledPlotLast->text().toInt();
   auto const rangeSize = lastPlotIndex - value;
   if (value > lastPlotIndex)
@@ -546,7 +666,7 @@ void Iqt::setTiledPlotFirstPlot(int value) {
 }
 
 void Iqt::setTiledPlotLastPlot(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotLast);
   auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const rangeSize = value - firstPlotIndex;
   if (value < firstPlotIndex)
@@ -569,12 +689,12 @@ void Iqt::setMinMaxOfTiledPlotLastIndex(int minimum, int maximum) {
 }
 
 void Iqt::setTiledPlotFirstIndex(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotFirst);
   m_uiForm.spTiledPlotFirst->setValue(value);
 }
 
 void Iqt::setTiledPlotLastIndex(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotLast);
   auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const lastPlotIndex = value - m_maxTiledPlots > firstPlotIndex
                                  ? firstPlotIndex + m_maxTiledPlots
@@ -583,12 +703,12 @@ void Iqt::setTiledPlotLastIndex(int value) {
 }
 
 void Iqt::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 
 void Iqt::setPlotSpectrumIndex(int spectrum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setValue(spectrum);
 }
 

@@ -75,14 +75,14 @@ class WorkspaceGroupTest(unittest.TestCase):
     def test_that_GroupWorkspaces_algorithm_creates_group_of_the_correct_size(self):
         group = self.create_group_via_GroupWorkspace_algorithm()
 
-        self.assertEquals(type(group), WorkspaceGroup)
-        self.assertEquals(2, group.size())
-        self.assertEquals(2, group.getNumberOfEntries())
+        self.assertEqual(type(group), WorkspaceGroup)
+        self.assertEqual(2, group.size())
+        self.assertEqual(2, group.getNumberOfEntries())
 
     def test_that_python__len__method_works_correctly_on_group(self):
         group = self.create_group_via_GroupWorkspace_algorithm()
 
-        self.assertEquals(len(group), group.getNumberOfEntries())
+        self.assertEqual(len(group), group.getNumberOfEntries())
 
     def test_that_getName_method_returns_correct_names(self):
         group = self.create_group_via_GroupWorkspace_algorithm()
@@ -154,6 +154,23 @@ class WorkspaceGroupTest(unittest.TestCase):
         mtd.remove('grouped')
         mtd.remove('grouped_1')
         mtd.remove('grouped_2')
+
+    def test_negative_indices_return_correct_ws_from_group(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        self.assertEqual(group[-1].name(), "Second")
+        self.assertEqual(group[-2].name(), "First")
+
+    def test_out_of_bounds_negative_index_returns_IndexError(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        with self.assertRaises(IndexError):
+            group[-400]
+
+    def test_getItem_negative_int_index_values(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        self.assertEqual(group.getItem(-1).name(), "Second")
+        self.assertEqual(group.getItem(-2).name(), "First")
+        with self.assertRaises(IndexError):
+            group.getItem(-400)
 
 
 if __name__ == '__main__':

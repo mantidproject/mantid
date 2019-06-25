@@ -235,10 +235,12 @@ void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
                         double &sumSQErrors, double &sumNEvents) {
   if (!iterator->getIsMasked()) {
     const double weight = box.fraction(iterator->getBoxExtents());
-    sumSignal += weight * iterator->getSignal();
-    const double error = iterator->getError();
-    sumSQErrors += weight * (error * error);
-    sumNEvents += weight * double(iterator->getNumEventsFraction());
+    if (weight != 0) {
+      sumSignal += weight * iterator->getSignal();
+      const double error = iterator->getError();
+      sumSQErrors += weight * (error * error);
+      sumNEvents += weight * double(iterator->getNumEventsFraction());
+    }
   }
 }
 
@@ -275,28 +277,28 @@ const std::string IntegrateMDHistoWorkspace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateMDHistoWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   const std::vector<double> defaultBinning;
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("P1Bin", defaultBinning),
+      std::make_unique<ArrayProperty<double>>("P1Bin", defaultBinning),
       "Projection 1 binning.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("P2Bin", defaultBinning),
+      std::make_unique<ArrayProperty<double>>("P2Bin", defaultBinning),
       "Projection 2 binning.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("P3Bin", defaultBinning),
+      std::make_unique<ArrayProperty<double>>("P3Bin", defaultBinning),
       "Projection 3 binning.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("P4Bin", defaultBinning),
+      std::make_unique<ArrayProperty<double>>("P4Bin", defaultBinning),
       "Projection 4 binning.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("P5Bin", defaultBinning),
+      std::make_unique<ArrayProperty<double>>("P5Bin", defaultBinning),
       "Projection 5 binning.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -378,10 +380,10 @@ void IntegrateMDHistoWorkspace::exec() {
         // Calculate the extents for this out iterator position.
         std::vector<Mantid::coord_t> mins(nDims);
         std::vector<Mantid::coord_t> maxs(nDims);
-        for (size_t i = 0; i < nDims; ++i) {
-          const coord_t delta = binWidthsOut[i] / 2;
-          mins[i] = outIteratorCenter[i] - delta;
-          maxs[i] = outIteratorCenter[i] + delta;
+        for (size_t j = 0; j < nDims; ++j) {
+          const coord_t delta = binWidthsOut[j] / 2;
+          mins[j] = outIteratorCenter[j] - delta;
+          maxs[j] = outIteratorCenter[j] + delta;
         }
         MDBoxImplicitFunction box(mins, maxs);
 

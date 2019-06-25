@@ -125,7 +125,7 @@ void MaxEnt::init() {
   const double warningLevel = 0.01;
   const double errorLevel = 0.5;
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::Input,
           boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "An input workspace.");
@@ -158,7 +158,7 @@ void MaxEnt::init() {
 
   auto mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(0);
-  declareProperty(make_unique<PropertyWithValue<size_t>>(
+  declareProperty(std::make_unique<PropertyWithValue<size_t>>(
                       "ResolutionFactor", 1, mustBePositive, Direction::Input),
                   "An integer number indicating the factor by which the number "
                   "of points will be increased in the image and reconstructed "
@@ -167,8 +167,8 @@ void MaxEnt::init() {
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
   declareProperty(
-      make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative,
+                                                  Direction::Input),
       "A maximum entropy constant. This algorithm was first developed for the "
       "ISIS muon group where the default 0.4 was found to give good "
       "reconstructions. "
@@ -184,21 +184,21 @@ void MaxEnt::init() {
       "this data point is).");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "ChiTargetOverN", 1.0, mustBeNonNegative, Direction::Input),
       "Target value of Chi-square divided by the number of data points (N)");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
                   "Required precision for Chi-square");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "DistancePenalty", 0.1, mustBeNonNegative, Direction::Input),
       "Distance penalty applied to the current image at each iteration.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "MaxAngle", 0.001, mustBeNonNegative, Direction::Input),
       "Maximum degree of non-parallelism between S (the entropy) and C "
       "(chi-squared). These needs to be parallel. Chosing a smaller "
@@ -209,16 +209,16 @@ void MaxEnt::init() {
 
   mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(1);
-  declareProperty(make_unique<PropertyWithValue<size_t>>(
+  declareProperty(std::make_unique<PropertyWithValue<size_t>>(
                       "MaxIterations", 20000, mustBePositive, Direction::Input),
                   "Maximum number of iterations.");
 
-  declareProperty(make_unique<PropertyWithValue<size_t>>("AlphaChopIterations",
-                                                         500, mustBePositive,
-                                                         Direction::Input),
-                  "Maximum number of iterations in alpha chop.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<PropertyWithValue<size_t>>(
+          "AlphaChopIterations", 500, mustBePositive, Direction::Input),
+      "Maximum number of iterations in alpha chop.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>(
           "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
           boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "Adjusts the calculated data by multiplying each value by the "
@@ -226,7 +226,7 @@ void MaxEnt::init() {
       "The data in this workspace is complex in the same manner as complex "
       "input data.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
           boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
       "Adjusts the calculated data by adding to each value the corresponding Y "
@@ -245,17 +245,17 @@ void MaxEnt::init() {
       "ComplexData must be set true, when this is false.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
       "Output workspace containing the evolution of Chi-sq.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("EvolAngle", "", Direction::Output),
       "Output workspace containing the evolution of "
       "non-paralellism between S and C.");
-  declareProperty(make_unique<WorkspaceProperty<>>("ReconstructedImage", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedImage",
+                                                        "", Direction::Output),
                   "The output workspace containing the reconstructed image.");
-  declareProperty(make_unique<WorkspaceProperty<>>("ReconstructedData", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ReconstructedData", "",
+                                                        Direction::Output),
                   "The output workspace containing the reconstructed data.");
 }
 
@@ -369,14 +369,10 @@ void MaxEnt::exec() {
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
   for (size_t s = 0; s < nHist; s++) {
-    auto errors = inWS->e(s).rawData();
-
-    size_t npoints = errors.size();
-    for (size_t i = 0; i < npoints; i++) {
-      if (errors[i] <= 0.0) {
-        throw std::invalid_argument(
-            "Input data must have all errors non-zero.");
-      }
+    const auto &errors = inWS->e(s);
+    if (std::any_of(errors.cbegin(), errors.cend(),
+                    [](const auto error) { return error <= 0.; })) {
+      throw std::invalid_argument("Input data must have all errors non-zero.");
     }
   }
 
@@ -794,11 +790,11 @@ std::vector<double> MaxEnt::applyDistancePenalty(
     const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
     const std::vector<double> &image, double background, double distEps) {
 
-  double sum = 0.;
-  for (double point : image)
-    sum += fabs(point);
+  const double pointSum = std::accumulate(
+      image.cbegin(), image.cend(), 0.,
+      [](const auto sum, const auto point) { return sum + std::abs(point); });
 
-  size_t dim = coeffs.s2.size().first;
+  const size_t dim = coeffs.s2.size().first;
 
   double dist = 0.;
 
@@ -809,10 +805,10 @@ std::vector<double> MaxEnt::applyDistancePenalty(
     dist += delta[k] * sum;
   }
 
-  if (dist > distEps * sum / background) {
+  if (dist > distEps * pointSum / background) {
     auto newDelta = delta;
     for (size_t k = 0; k < delta.size(); k++) {
-      newDelta[k] *= sqrt(distEps * sum / dist / background);
+      newDelta[k] *= sqrt(distEps * pointSum / dist / background);
     }
     return newDelta;
   }

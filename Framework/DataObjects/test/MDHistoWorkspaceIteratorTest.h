@@ -131,7 +131,7 @@ public:
 
     Mantid::DataObjects::MDHistoWorkspace_sptr ws_sptr(ws);
 
-    auto histoIt = Kernel::make_unique<MDHistoWorkspaceIterator>(ws, function);
+    auto histoIt = std::make_unique<MDHistoWorkspaceIterator>(ws, function);
 
     TSM_ASSERT_EQUALS("The first index hit should be 5 since that is the first "
                       "unmasked and inside function",
@@ -202,7 +202,7 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws, function);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, function);
     TSM_ASSERT("This iterator is valid at the start.", it->valid());
 
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 0.);
@@ -237,7 +237,7 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws, function);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, function);
     TSM_ASSERT("This iterator is valid at the start.", it->valid());
 
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 4.);
@@ -266,7 +266,7 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws, function);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, function);
 
     TSM_ASSERT("This iterator is not valid at the start.", !it->valid());
   }
@@ -382,7 +382,7 @@ public:
 
      */
 
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At first position
     /*
@@ -450,7 +450,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -534,7 +534,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -649,7 +649,7 @@ public:
      [60 61 62 63]]]
      */
 
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // Start at Index = 0
     std::vector<size_t> neighbourIndexes =
@@ -721,7 +721,7 @@ public:
      [60 61 62 63]]]
      */
 
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // Start at Index = 0
     std::vector<size_t> neighbourIndexes = it->findNeighbourIndexes();
@@ -785,7 +785,7 @@ public:
 
      */
 
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At first position
     /*
@@ -848,7 +848,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -943,7 +943,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -1039,7 +1039,7 @@ public:
      [60 61 62 63]]]
      */
 
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // Start at Index = 0
     std::vector<size_t> neighbourIndexes =
@@ -1076,7 +1076,7 @@ public:
 
      */
 
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
     TSM_ASSERT_EQUALS("Empty cache expected", 0, it->permutationCacheSize());
     it->findNeighbourIndexesByWidth(3);
     TSM_ASSERT_EQUALS("One cache item expected", 1, it->permutationCacheSize());
@@ -1093,7 +1093,7 @@ public:
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
         1.0 /*signal*/, nd, 3 /*3 bins*/); // Dimension length defaults to 10
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At zeroth position
     VecMDExtents extents = it->getBoxExtents();
@@ -1119,7 +1119,7 @@ public:
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
         1.0 /*signal*/, 3 /*nd*/, 4 /*nbins per dim*/, 6 /*max*/,
         1.0 /*error sq*/);
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At zeroth position
     VecMDExtents extents = it->getBoxExtents();
@@ -1170,8 +1170,8 @@ public:
 
     */
 
-    auto itIn = Kernel::make_unique<MDHistoWorkspaceIterator>(wsIn);
-    auto itOut = Kernel::make_unique<MDHistoWorkspaceIterator>(wsOut);
+    auto itIn = std::make_unique<MDHistoWorkspaceIterator>(wsIn);
+    auto itOut = std::make_unique<MDHistoWorkspaceIterator>(wsOut);
 
     // First position
     TS_ASSERT_EQUALS(itIn->getLinearIndex(), 0);
@@ -1197,8 +1197,9 @@ public:
     itIn->next();
     TS_ASSERT_EQUALS(itIn->getLinearIndex(), 3);
     diff = itOut->jumpToNearest(itIn->getCenter());
-    TS_ASSERT_EQUALS(itOut->getLinearIndex(), 3); // 10.5 closer to 12 than 8
-    TS_ASSERT_DELTA(1.5, diff, 1e-4);
+    TS_ASSERT(itOut->isWithinBounds(itOut->getLinearIndex()));
+    TS_ASSERT_EQUALS(itOut->getLinearIndex(), 2); // 10.5 closer to 12 than 8
+    TS_ASSERT_DELTA(2.5, diff, 1e-4);
   }
 
   void test_neighbours_1d_with_width_including_out_of_bounds() {
@@ -1216,7 +1217,7 @@ public:
 
      */
 
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At first position
     /*
@@ -1321,7 +1322,7 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    auto it = Kernel::make_unique<MDHistoWorkspaceIterator>(ws);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At initial position
     /*
@@ -1432,8 +1433,7 @@ public:
 
   /** ~Two million iterations */
   void test_iterator_3D_signalAndErrorOnly() {
-    auto it =
-        Kernel::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     do {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
@@ -1444,8 +1444,7 @@ public:
 
   /** ~Two million iterations */
   void test_iterator_3D_withGetVertexes() {
-    auto it =
-        Kernel::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     size_t numVertices;
     do {
       signal_t sig = it->getNormalizedSignal();
@@ -1458,8 +1457,7 @@ public:
 
   /** ~Two million iterations */
   void test_iterator_3D_withGetCenter() {
-    auto it =
-        Kernel::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     do {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
@@ -1471,8 +1469,7 @@ public:
 
   /** Use jumpTo() */
   void test_iterator_3D_withGetCenter_usingJumpTo() {
-    auto it =
-        Kernel::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
+    auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     int max = int(it->getDataSize());
     for (int i = 0; i < max; i++) {
       it->jumpTo(size_t(i));
@@ -1492,7 +1489,7 @@ public:
     bool maskDim[] = {true};
     TSM_ASSERT_THROWS("Not implemented yet, should throw",
                       it->getVertexesArray(numVertexes, outDimensions, maskDim),
-                      std::runtime_error);
+                      const std::runtime_error &);
   }
 
   void test_getIsMasked() {

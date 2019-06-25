@@ -8,7 +8,6 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <list>
 #include <map>
 #include <sstream>
@@ -22,15 +21,18 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
-//#include "MantidGeometry/Surfaces/Torus.h"
-#include "MantidGeometry/Surfaces/SurfaceFactory.h"
 
 namespace Mantid {
+
+namespace {
+Kernel::Logger logger("surfaceFactory");
+}
 
 namespace Geometry {
 
@@ -76,13 +78,12 @@ void SurfaceFactory::registerSurface()
   Register tallies to be used
 */
 {
-  using Mantid::Kernel::make_unique;
-  SGrid.emplace_back("Plane", make_unique<Plane>());
-  SGrid.emplace_back("Cylinder", make_unique<Cylinder>());
-  SGrid.emplace_back("Cone", make_unique<Cone>());
+  SGrid.emplace_back("Plane", std::make_unique<Plane>());
+  SGrid.emplace_back("Cylinder", std::make_unique<Cylinder>());
+  SGrid.emplace_back("Cone", std::make_unique<Cone>());
   // SGrid["Torus"]=new Torus;
-  SGrid.emplace_back("General", make_unique<General>());
-  SGrid.emplace_back("Sphere", make_unique<Sphere>());
+  SGrid.emplace_back("General", std::make_unique<General>());
+  SGrid.emplace_back("Sphere", std::make_unique<Sphere>());
 
   ID['c'] = "Cylinder";
   ID['k'] = "Cone";
@@ -164,7 +165,7 @@ SurfaceFactory::processLine(const std::string &Line) const
 
   std::unique_ptr<Surface> X = createSurfaceID(key);
   if (X->setSurface(Line)) {
-    std::cerr << "X:: " << X->setSurface(Line) << '\n';
+    logger.error() << "X:: " << X->setSurface(Line) << '\n';
     throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);
   }
 

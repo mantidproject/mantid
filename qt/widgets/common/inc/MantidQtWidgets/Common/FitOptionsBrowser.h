@@ -77,7 +77,7 @@ protected:
   void displaySequentialFitProperties();
 
 private slots:
-  void enumChanged(QtProperty *);
+  void enumChanged(QtProperty * /*prop*/);
   void doubleChanged(QtProperty *property);
 
 private:
@@ -101,19 +101,19 @@ private:
   void removeProperty(const QString &name);
 
   //  Setters and getters
-  QString getMinimizer(QtProperty *) const;
-  void setMinimizer(QtProperty *, const QString &);
+  QString getMinimizer(QtProperty * /*unused*/) const;
+  void setMinimizer(QtProperty * /*unused*/, const QString & /*value*/);
 
-  QString getIntProperty(QtProperty *) const;
-  void setIntProperty(QtProperty *, const QString &);
-  QString getDoubleProperty(QtProperty *) const;
-  void setDoubleProperty(QtProperty *, const QString &);
-  QString getBoolProperty(QtProperty *) const;
-  void setBoolProperty(QtProperty *, const QString &);
-  QString getStringEnumProperty(QtProperty *) const;
-  void setStringEnumProperty(QtProperty *, const QString &);
-  QString getStringProperty(QtProperty *) const;
-  void setStringProperty(QtProperty *, const QString &);
+  QString getIntProperty(QtProperty * /*prop*/) const;
+  void setIntProperty(QtProperty * /*prop*/, const QString & /*value*/);
+  QString getDoubleProperty(QtProperty * /*prop*/) const;
+  void setDoubleProperty(QtProperty * /*prop*/, const QString & /*value*/);
+  QString getBoolProperty(QtProperty * /*prop*/) const;
+  void setBoolProperty(QtProperty * /*prop*/, const QString & /*value*/);
+  QString getStringEnumProperty(QtProperty * /*prop*/) const;
+  void setStringEnumProperty(QtProperty * /*prop*/, const QString & /*value*/);
+  QString getStringProperty(QtProperty * /*prop*/) const;
+  void setStringProperty(QtProperty * /*prop*/, const QString & /*value*/);
 
   void setPropertyEnumValues(QtProperty *prop, const QStringList &values);
 

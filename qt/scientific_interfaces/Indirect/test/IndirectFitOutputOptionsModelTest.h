@@ -10,7 +10,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "IndirectFitOutputOptionsModel.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -68,12 +70,17 @@ public:
   }
 
   void setUp() override {
+    m_ads =
+        std::make_unique<SetUpADSWithWorkspace>("Name", createWorkspace(3, 4));
+
     m_groupWorkspace = createGroupWorkspaceWithTextAxes(
         NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA);
     m_model = std::make_unique<IndirectFitOutputOptionsModel>();
   }
 
   void tearDown() override {
+    AnalysisDataService::Instance().clear();
+
     m_groupWorkspace.reset();
     m_model.reset();
   }
@@ -204,16 +211,16 @@ public:
   }
 
   void test_that_plotResult_will_throw_when_there_is_no_result_workspace_set() {
-    TS_ASSERT_THROWS(m_model->plotResult("HWHM"), std::runtime_error);
+    TS_ASSERT_THROWS(m_model->plotResult("HWHM"), const std::runtime_error &);
   }
 
   void test_that_plotPDF_will_throw_when_there_is_no_pdf_workspace_set() {
     TS_ASSERT_THROWS(m_model->plotPDF("WorkspaceName", "HWHM"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_that_saveResult_will_throw_when_there_is_no_result_workspace_set() {
-    TS_ASSERT_THROWS(m_model->saveResult(), std::runtime_error);
+    TS_ASSERT_THROWS(m_model->saveResult(), const std::runtime_error &);
   }
 
   void
@@ -253,6 +260,17 @@ public:
   }
 
   void
+  test_that_isSelectedGroupSelected_returns_true_when_passed_the_result_group_string_with_a_result_group_set() {
+    m_model->setResultWorkspace(m_groupWorkspace);
+    TS_ASSERT(m_model->isSelectedGroupPlottable("Result Group"));
+  }
+
+  void
+  test_that_isSelectedGroupSelected_returns_false_when_passed_the_pdf_group_string_when_a_pdf_group_is_not_set() {
+    TS_ASSERT(!m_model->isSelectedGroupPlottable("PDF Group"));
+  }
+
+  void
   test_that_isResultGroupSelected_returns_true_when_passed_the_result_group_string() {
     TS_ASSERT(m_model->isResultGroupSelected("Result Group"));
   }
@@ -262,7 +280,35 @@ public:
     TS_ASSERT(!m_model->isResultGroupSelected("PDF Group"));
   }
 
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_inputWorkspace_name() {
+    auto const singleBinName("Workspace_s0_Result");
+    auto const outputName("Output_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceFitResult("", singleBinName, outputName),
+                     const std::runtime_error &);
+  }
+
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_singleBinWorkspace_name() {
+    auto const inputName("Workspace_s0_to_s2_Result");
+    auto const outputName("Output_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, "", outputName),
+                     const std::runtime_error &);
+  }
+
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_outputWorkspace_name() {
+    auto const inputName("Workspace_s0_to_s2_Result");
+    auto const singleBinName("Workspace_s0_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, singleBinName, ""),
+                     const std::runtime_error &);
+  }
+
 private:
+  std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   WorkspaceGroup_sptr m_groupWorkspace;
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
 };

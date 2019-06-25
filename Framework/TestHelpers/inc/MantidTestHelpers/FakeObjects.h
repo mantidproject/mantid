@@ -37,6 +37,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -154,6 +155,7 @@ public:
     return m_vec.empty() ? 0 : m_vec[0].dataY().size();
   }
   ISpectrum &getSpectrum(const size_t index) override {
+    invalidateCommonBinsFlag();
     m_vec[index].setMatrixWorkspace(this, index);
     return m_vec[index];
   }
@@ -203,6 +205,10 @@ protected:
 private:
   std::vector<SpectrumTester> m_vec;
   size_t m_spec;
+  ISpectrum &getSpectrumWithoutInvalidation(const size_t index) override {
+    m_vec[index].setMatrixWorkspace(this, index);
+    return m_vec[index];
+  }
 };
 
 class WorkspaceTester : public AxeslessWorkspaceTester {
@@ -229,16 +235,16 @@ protected:
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(this);
-    m_axes[1] = new Mantid::API::SpectraAxis(this);
+    m_axes[0] = std::make_unique<Mantid::API::RefAxis>(this);
+    m_axes[1] = std::make_unique<Mantid::API::SpectraAxis>(this);
   }
   void init(const Mantid::HistogramData::Histogram &histogram) override {
     AxeslessWorkspaceTester::init(histogram);
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(this);
-    m_axes[1] = new Mantid::API::SpectraAxis(this);
+    m_axes[0] = std::make_unique<Mantid::API::RefAxis>(this);
+    m_axes[1] = std::make_unique<Mantid::API::SpectraAxis>(this);
   }
 
 private:
@@ -460,8 +466,8 @@ public:
     throw std::runtime_error("Not Implemented");
   }
 
-  void
-  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override {
+  void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
+                        maskingRegion) override {
     UNUSED_ARG(maskingRegion);
     throw std::runtime_error("Not Implemented");
   }

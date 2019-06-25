@@ -183,7 +183,7 @@ class BayesQuasi(PythonAlgorithm):
         erange = [self._e_min, self._e_max]
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._samWS, self._resWS)
+        CheckAnalysersOrEFixed(self._samWS, self._resWS)
         setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._samWS)
         theta, Q = GetThetaQ(self._samWS)
@@ -211,9 +211,9 @@ class BayesQuasi(PythonAlgorithm):
             else:
                 raise ValueError('Stretched Exp ONLY works with RES file')
 
-        logger.information('Version is ' + prog)
-        logger.information(' Number of spectra = ' + str(nsam))
-        logger.information(' Erange : ' + str(erange[0]) + ' to ' + str(erange[1]))
+        logger.information('Version is {0}'.format(prog))
+        logger.information(' Number of spectra = {0} '.format(nsam))
+        logger.information(' Erange : {0}  to {1} '.format(erange[0], erange[1]))
 
         setup_prog.report('Reading files')
         Wy, We = self._read_width_file(self._width, self._wfile, totalNoSam)
@@ -233,19 +233,20 @@ class BayesQuasi(PythonAlgorithm):
         setup_prog.report('Initialising probability list')
         # initialise probability list
         if self._program == 'QL':
-            prob0, prob1, prob2 = [], [], []
+            prob0, prob1, prob2, prob3 = [], [], [], []
         xQ = np.array([Q[0]])
         for m in range(1, nsam):
             xQ = np.append(xQ, Q[m])
         xProb = xQ
         xProb = np.append(xProb, xQ)
         xProb = np.append(xProb, xQ)
-        eProb = np.zeros(3 * nsam)
+        xProb = np.append(xProb, xQ)
+        eProb = np.zeros(4 * nsam)
 
         group = ''
         workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam * 3)
         for spectrum in range(0, nsam):
-            logger.information('Group ' + str(spectrum) + ' at angle ' + str(theta[spectrum]))
+            logger.information('Group {0} at angle {1} '.format(spectrum, theta[spectrum]))
             nsp = spectrum + 1
 
             nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._samWS, spectrum, erange, nbin)
@@ -262,23 +263,19 @@ class BayesQuasi(PythonAlgorithm):
             reals = [efix, theta[spectrum], rscl, bnorm]
 
             if prog == 'QLr':
-                workflow_prog.report('Processing Sample number %i as Lorentzian' % spectrum)
+                workflow_prog.report('Processing Sample number {0} as Lorentzian'.format(spectrum))
                 nd, xout, yout, eout, yfit, yprob = QLr.qlres(numb, Xv, Yv, Ev, reals, fitOp,
                                                               Xdat, Xb, Yb, Wy, We, dtn, xsc,
                                                               wrks, wrkr, lwrk)
-                message = ' Log(prob) : ' + str(yprob[0]) + ' ' + str(yprob[1]) + ' ' + str(yprob[2]) + ' ' + str(
-                    yprob[3])
-                logger.information(message)
+                logger.information(' Log(prob) : {0} {1} {2} {3}'.format(yprob[0], yprob[1], yprob[2], yprob[3]))
             elif prog == 'QLd':
-                workflow_prog.report('Processing Sample number %i' % spectrum)
+                workflow_prog.report('Processing Sample number {0}'.format(spectrum))
                 nd, xout, yout, eout, yfit, yprob = QLd.qldata(numb, Xv, Yv, Ev, reals, fitOp,
                                                                Xdat, Xb, Yb, Eb, Wy, We,
                                                                wrks, wrkr, lwrk)
-                message = ' Log(prob) : ' + str(yprob[0]) + ' ' + str(yprob[1]) + ' ' + str(yprob[2]) + ' ' + str(
-                    yprob[3])
-                logger.information(message)
+                logger.information(' Log(prob) : {0} {1} {2} {3}'.format(yprob[0], yprob[1], yprob[2], yprob[3]))
             elif prog == 'QSe':
-                workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
+                workflow_prog.report('Processing Sample number {0} as Stretched Exp'.format(spectrum))
                 nd, xout, yout, eout, yfit, yprob = Qse.qlstexp(numb, Xv, Yv, Ev, reals, fitOp,
                                                                 Xdat, Xb, Yb, Wy, We, dtn, xsc,
                                                                 wrks, wrkr, lwrk)
@@ -314,10 +311,23 @@ class BayesQuasi(PythonAlgorithm):
                 datE = np.append(datE, dataG)
                 nsp += 2
                 names += ',fit.2,diff.2'
+
+                dataF3 = yfit_list[3]
+                datX = np.append(datX, dataX)
+                datY = np.append(datY, dataF3[:nd])
+                datE = np.append(datE, dataG)
+                res3 = dataF3[:nd] - yout[:nd]
+                datX = np.append(datX, dataX)
+                datY = np.append(datY, res3)
+                datE = np.append(datE, dataG)
+                nsp += 2
+                names += ',fit.3,diff.3'
+
                 res_plot.append(4)
                 prob0.append(yprob[0])
                 prob1.append(yprob[1])
                 prob2.append(yprob[2])
+                prob3.append(yprob[3])
 
             # create result workspace
             fitWS = fname + '_Workspaces'
@@ -325,7 +335,8 @@ class BayesQuasi(PythonAlgorithm):
 
             workflow_prog.report('Creating OutputWorkspace')
             s_api.CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
-                                  Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
+                                  Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names,
+                                  EnableLogging=False)
 
             # append workspace to list of results
             group += fout + ','
@@ -339,15 +350,21 @@ class BayesQuasi(PythonAlgorithm):
             yPr0 = np.array([prob0[0]])
             yPr1 = np.array([prob1[0]])
             yPr2 = np.array([prob2[0]])
+            yPr3 = np.array([prob3[0]])
             for m in range(1, nsam):
                 yPr0 = np.append(yPr0, prob0[m])
                 yPr1 = np.append(yPr1, prob1[m])
                 yPr2 = np.append(yPr2, prob2[m])
+                yPr3 = np.append(yPr3, prob3[m])
             yProb = yPr0
             yProb = np.append(yProb, yPr1)
             yProb = np.append(yProb, yPr2)
+            yProb = np.append(yProb, yPr3)
+
+            prob_axis_names = '0 Peak, 1 Peak, 2 Peak, 3 Peak'
             s_api.CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
-                                  Nspec=3, UnitX='MomentumTransfer')
+                                  Nspec=4, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
+                                  VerticalAxisValues=prob_axis_names, EnableLogging=False)
             outWS = self.C2Fw(fname)
         elif self._program == 'QSe':
             comp_prog.report('Running C2Se')
@@ -466,7 +483,7 @@ class BayesQuasi(PythonAlgorithm):
         logger.information('Vaxis=' + str(Vaxis))
         s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
                               UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis,
-                              YUnitLabel='')
+                              YUnitLabel='', EnableLogging=False)
 
         return outWS
 
@@ -652,7 +669,7 @@ class BayesQuasi(PythonAlgorithm):
 
         s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
                               UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text',
-                              VerticalAxisValues=axis_names)
+                              VerticalAxisValues=axis_names, EnableLogging=False)
 
         return output_workspace
 

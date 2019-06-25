@@ -11,7 +11,7 @@
 
 #include "DllConfig.h"
 #include "IALCPeakFittingView.h"
-#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
 
 #include "ui_ALCPeakFittingView.h"
 

@@ -5,16 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class BeamCentrePresenterTest(unittest.TestCase):
@@ -29,13 +27,14 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.SANSCentreFinder = mock.MagicMock()
         self.presenter = BeamCentrePresenter(self.parent_presenter, self.WorkHandler, self.BeamCentreModel,
                                              self.SANSCentreFinder)
+        self.presenter.connect_signals = mock.Mock()
 
     def test_that_on_run_clicked_calls_find_beam_centre(self):
         self.presenter.set_view(self.view)
         self.presenter.on_run_clicked()
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
-        self.assertTrue(self.presenter._work_handler.process.call_args[0][1] == self.presenter._beam_centre_model.find_beam_centre)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][1],  self.presenter._beam_centre_model.find_beam_centre)
 
     def test_that_on_run_clicked_updates_model_from_view(self):
         self.view.left_right = False
@@ -57,7 +56,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.view.set_options.assert_called_once_with(self.presenter._beam_centre_model)
 
         self.presenter.on_update_rows()
-        self.assertTrue(self.view.set_options.call_count == 2)
+        self.assertEqual(self.view.set_options.call_count,  2)
 
     def test_that_model_reset_to_defaults_for_instrument_is_called_on_update_rows(self):
         self.presenter.set_view(self.view)

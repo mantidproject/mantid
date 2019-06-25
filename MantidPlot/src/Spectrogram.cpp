@@ -26,7 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "Spectrogram.h"
-#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
+#include "MantidQtWidgets/Plotting/Qwt/qwt_compat.h"
 #include <QColor>
 #include <QPainter>
 #include <QPen>
@@ -41,10 +41,10 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/PlotAxis.h"
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
-#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Plotting/Qwt/SignalRange.h"
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
@@ -203,8 +203,7 @@ void Spectrogram::updateData(
   if (d_wsData) {
     if (!d_color_map_autoscale) {
       // Find the color range the data should use
-      range = Mantid::Kernel::make_unique<const QwtDoubleInterval>(
-          d_wsData->range());
+      range = std::make_unique<const QwtDoubleInterval>(d_wsData->range());
     }
     delete d_wsData;
   }

@@ -12,11 +12,10 @@
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
-
-#include <iostream>
 
 using namespace Mantid::PhysicalConstants;
 
@@ -42,7 +41,7 @@ using namespace Kernel;
  */
 void SetSampleMaterial::init() {
   using namespace Mantid::Kernel;
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut),
                   "The workspace with which to associate the sample ");
   declareProperty("ChemicalFormula", "",
@@ -52,10 +51,11 @@ void SetSampleMaterial::init() {
                   "Mass number if ion (use 0 for default mass number)");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-                  "This number density of the sample in number of "
-                  "atoms per cubic angstrom will be used instead of "
-                  "calculated");
+  declareProperty(
+      "SampleNumberDensity", EMPTY_DBL(), mustBePositive,
+      "This number density of the sample in number of "
+      "atoms or formula units per cubic Angstrom will be used instead of "
+      "calculated");
   declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
                   "Number of formula units in unit cell");
   declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
@@ -77,6 +77,18 @@ void SetSampleMaterial::init() {
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
+  declareProperty(
+      "SampleMass", EMPTY_DBL(), mustBePositive,
+      "Measured mass in g of the sample. This is used with the SampleVolume "
+      "to calculate the number density.");
+  declareProperty(
+      "SampleVolume", EMPTY_DBL(), mustBePositive,
+      "Measured volume in gm^3 of the sample. This is used with the SampleMass "
+      "to calculate the number density.");
+  const std::vector<std::string> units({"Atoms", "Formula Units"});
+  declareProperty("NumberDensityUnit", units.front(),
+                  boost::make_shared<StringListValidator>(units),
+                  "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
   std::string formulaGrp("By Formula or Atomic Number");
@@ -86,9 +98,12 @@ void SetSampleMaterial::init() {
 
   std::string densityGrp("Sample Density");
   setPropertyGroup("SampleNumberDensity", densityGrp);
+  setPropertyGroup("NumberDensityUnit", densityGrp);
   setPropertyGroup("ZParameter", densityGrp);
   setPropertyGroup("UnitCellVolume", densityGrp);
   setPropertyGroup("SampleMassDensity", densityGrp);
+  setPropertyGroup("SampleMass", densityGrp);
+  setPropertyGroup("SampleVolume", densityGrp);
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
@@ -98,13 +113,17 @@ void SetSampleMaterial::init() {
 
   // Extra property settings
   setPropertySettings("ChemicalFormula",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "AtomicNumber", Kernel::IS_DEFAULT));
   setPropertySettings("AtomicNumber",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "ChemicalFormula", Kernel::IS_DEFAULT));
-  setPropertySettings("MassNumber", make_unique<Kernel::EnabledWhenProperty>(
-                                        "ChemicalFormula", Kernel::IS_DEFAULT));
+  setPropertySettings("MassNumber",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "ChemicalFormula", Kernel::IS_DEFAULT));
+  setPropertySettings("NumberDensityUnit",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleNumberDensity", Kernel::IS_NOT_DEFAULT));
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
@@ -115,10 +134,18 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.zParameter = getProperty("ZParameter");
   params.unitCellVolume = getProperty("UnitCellVolume");
   params.sampleMassDensity = getProperty("SampleMassDensity");
+  params.sampleMass = getProperty("SampleMass");
+  params.sampleVolume = getProperty("SampleVolume");
   params.coherentXSection = getProperty("CoherentXSection");
   params.incoherentXSection = getProperty("IncoherentXSection");
   params.attenuationXSection = getProperty("AttenuationXSection");
   params.scatteringXSection = getProperty("ScatteringXSection");
+  const std::string numberDensityUnit = getProperty("NumberDensityUnit");
+  if (numberDensityUnit == "Atoms") {
+    params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
+  } else {
+    params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::FormulaUnits;
+  }
   auto result = ReadMaterial::validateInputs(params);
 
   return result;
@@ -163,9 +190,6 @@ void SetSampleMaterial::exec() {
   ReadMaterial reader;
   reader.setMaterialParameters(params);
 
-  const double rho =
-      getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
-
   // get the scattering information - this will override table values
   // create the material
   auto material = reader.buildMaterial();
@@ -203,9 +227,10 @@ void SetSampleMaterial::exec() {
                       << "    <b_tot^2> = " << btot_sq_avg << "\n"
                       << "    L         = " << normalizedLaue << "\n";
 
-  if (isEmpty(rho)) {
+  if (isDefault("SampleNumberDensity") && isDefault("SampleMassDensity")) {
     g_log.information("Unknown value for number density");
   } else {
+    const double rho = material->numberDensity();
     double smu =
         material->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
     double amu = material->absorbXSection(NeutronAtom::ReferenceLambda) * rho;

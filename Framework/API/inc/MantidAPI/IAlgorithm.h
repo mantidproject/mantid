@@ -168,6 +168,11 @@ public:
   virtual void setChildEndProgress(const double endProgress) const = 0;
   /// Serialize an algorithm
   virtual std::string toString() const = 0;
+  /// Serialize an algorithm as Json
+  virtual ::Json::Value toJson() const = 0;
+
+private:
+  using Kernel::IPropertyManager::asJson;
 };
 
 } // namespace API

@@ -15,7 +15,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -248,7 +247,7 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Input ws
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input run in TOF or wavelength");
 
@@ -266,7 +265,7 @@ void ReflectometryReductionOneAuto2::init() {
                   Direction::Input);
 
   // Processing instructions
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern of spectrum numbers to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
@@ -281,8 +280,8 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Whether to correct detectors
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
+                                                Direction::Input),
       "Moves detectors to twoTheta if ThetaIn or ThetaLogName is given");
 
   // Detector position correction type
@@ -299,7 +298,7 @@ void ReflectometryReductionOneAuto2::init() {
       "should be shifted vertically or rotated around the sample position.",
       Direction::Input);
   setPropertySettings("DetectorCorrectionType",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "CorrectDetectors", IS_EQUAL_TO, "1"));
 
   // Wavelength limits
@@ -326,21 +325,21 @@ void ReflectometryReductionOneAuto2::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "Polarization analysis mode.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
       "Effective polarizing power of the polarizing system. "
       "Expressed as a ratio 0 &lt; Pp &lt; 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CAp", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("CAp", Direction::Input),
       "Effective polarizing power of the analyzing system. "
       "Expressed as a ratio 0 &lt; Ap &lt; 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CRho", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("CRho", Direction::Input),
       "Ratio of efficiencies of polarizer spin-down to polarizer "
       "spin-up. This is characteristic of the polarizer flipper. "
       "Values are constants for each term in a polynomial "
       "expression.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CAlpha", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("CAlpha", Direction::Input),
       "Ratio of efficiencies of analyzer spin-down to analyzer "
       "spin-up. This is characteristic of the analyzer flipper. "
       "Values are factors for each term in a polynomial "
@@ -360,7 +359,7 @@ void ReflectometryReductionOneAuto2::init() {
                   "workspace, ParameterFile - use parameters in the parameter "
                   "file to construct and apply flood correction workspace.");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FloodWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A flood workspace to apply; if empty and FloodCorrection is "
       "'Workspace' then no correction is applied.");
@@ -369,19 +368,19 @@ void ReflectometryReductionOneAuto2::init() {
   initDebugProperties();
 
   // Output workspace in Q
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceBinned", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in Q (rebinned workspace)");
 
   // Output workspace in Q (unbinned)
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Output workspace in Q (native binning)");
 
   // Output workspace in wavelength
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in wavelength");
@@ -453,14 +452,25 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
 
+  // Set the unbinned output workspace in Q, cropped to the min/max q
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspace", IvsQ);
+  auto const params = getRebinParams(IvsQ, theta);
+  auto IvsQC = IvsQ;
+  if (!(params.qMinIsDefault() && params.qMaxIsDefault()))
+    IvsQC = cropQ(IvsQ, params);
+  setProperty("OutputWorkspace", IvsQC);
 
-  std::vector<double> params;
-  MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, theta, params);
+  // Set the binned output workspace in Q
+  if (params.hasQStep()) {
+    MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, params);
+    setProperty("OutputWorkspaceBinned", IvsQB);
+  } else {
+    g_log.error("NRCalculateSlitResolution failed. Workspace in Q will not be "
+                "rebinned. Please provide dQ/Q.");
+    setProperty("OutputWorkspaceBinned", IvsQC);
+  }
 
-  setProperty("OutputWorkspaceBinned", IvsQB);
-
+  // Set the output workspace in wavelength, if debug outputs are enabled
   bool const isDebug = getProperty("Debug");
   if (isDebug || isChild()) {
     MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
@@ -469,11 +479,10 @@ void ReflectometryReductionOneAuto2::exec() {
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
-  if (!params.empty()) {
-    setProperty("MomentumTransferMin", params[0]);
-    setProperty("MomentumTransferStep", -params[1]);
-    setProperty("MomentumTransferMax", params[2]);
-  }
+  setProperty("MomentumTransferMin", params.qMin());
+  setProperty("MomentumTransferMax", params.qMax());
+  if (params.hasQStep())
+    setProperty("MomentumTransferStep", -params.qStep());
   if (getPointerToProperty("ScaleFactor")->isDefault())
     setProperty("ScaleFactor", 1.0);
 }
@@ -654,18 +663,26 @@ void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(
   }
 }
 
-/** Rebin and scale a workspace in Q.
+auto ReflectometryReductionOneAuto2::getRebinParams(
+    MatrixWorkspace_sptr inputWS, const double theta) -> RebinParams {
+  bool qMinIsDefault = true, qMaxIsDefault = true;
+  auto const qMin = getPropertyOrDefault("MomentumTransferMin",
+                                         inputWS->x(0).front(), qMinIsDefault);
+  auto const qMax = getPropertyOrDefault("MomentumTransferMax",
+                                         inputWS->x(0).back(), qMaxIsDefault);
+  return RebinParams(qMin, qMinIsDefault, qMax, qMaxIsDefault,
+                     getQStep(inputWS, theta));
+}
+
+/** Get the binning step the final output workspace in Q
  *
  * @param inputWS :: the workspace in Q
  * @param theta :: the angle of this run
- * @param params :: [output] rebin parameters
- * @return :: the output workspace
+ * @return :: the rebin step in Q, or none if it could not be found
  */
-MatrixWorkspace_sptr
-ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
-                                              const double theta,
-                                              std::vector<double> &params) {
-
+boost::optional<double>
+ReflectometryReductionOneAuto2::getQStep(MatrixWorkspace_sptr inputWS,
+                                         const double theta) {
   Property *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
   if (!qStepProp->isDefault()) {
@@ -686,29 +703,30 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
     calcRes->execute();
 
     if (!calcRes->isExecuted()) {
-      g_log.error(
-          "NRCalculateSlitResolution failed. Workspace in Q will not be "
-          "rebinned. Please provide dQ/Q.");
-      return inputWS;
+      return boost::none;
     }
     qstep = calcRes->getProperty("Resolution");
     qstep = -qstep;
   }
+  return qstep;
+}
 
-  auto qmin =
-      getPropertyOrDefault("MomentumTransferMin", inputWS->x(0).front());
-  auto qmax = getPropertyOrDefault("MomentumTransferMax", inputWS->x(0).back());
-
-  params.push_back(qmin);
-  params.push_back(qstep);
-  params.push_back(qmax);
-
+/** Rebin and scale a workspace in Q.
+ *
+ * @param inputWS :: the workspace in Q
+ * @param params :: A vector containing the three rebin parameters (min, step
+ * and max)
+ * @return :: the output workspace
+ */
+MatrixWorkspace_sptr
+ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
+                                              RebinParams const &params) {
   // Rebin
   IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();
   algRebin->setProperty("InputWorkspace", inputWS);
   algRebin->setProperty("OutputWorkspace", inputWS);
-  algRebin->setProperty("Params", params);
+  algRebin->setProperty("Params", params.asVector());
   algRebin->execute();
   MatrixWorkspace_sptr IvsQ = algRebin->getProperty("OutputWorkspace");
 
@@ -728,16 +746,35 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
   return IvsQ;
 }
 
+MatrixWorkspace_sptr
+ReflectometryReductionOneAuto2::cropQ(MatrixWorkspace_sptr inputWS,
+                                      RebinParams const &params) {
+  IAlgorithm_sptr algCrop = createChildAlgorithm("CropWorkspace");
+  algCrop->initialize();
+  algCrop->setProperty("InputWorkspace", inputWS);
+  algCrop->setProperty("OutputWorkspace", inputWS);
+  if (!params.qMinIsDefault())
+    algCrop->setProperty("XMin", params.qMin());
+  if (!params.qMaxIsDefault())
+    algCrop->setProperty("XMax", params.qMax());
+  algCrop->execute();
+  MatrixWorkspace_sptr IvsQ = algCrop->getProperty("OutputWorkspace");
+  return IvsQ;
+}
+
 /**
  * @brief Get the Property Or return a default given value
  *
- * @param propertyName
- * @param defaultValue
+ * @param propertyName : the name of the property to get
+ * @param defaultValue : the default value to use if the property is not set
+ * @param isDefault [out] : true if the default value was used
  */
 double ReflectometryReductionOneAuto2::getPropertyOrDefault(
-    const std::string &propertyName, const double defaultValue) {
+    const std::string &propertyName, const double defaultValue,
+    bool &isDefault) {
   Property *property = getProperty(propertyName);
-  if (property->isDefault())
+  isDefault = property->isDefault();
+  if (isDefault)
     return defaultValue;
   else
     return getProperty(propertyName);
@@ -1079,7 +1116,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
         // If the first part is a number treat all parts as run numbers
         boost::lexical_cast<size_t>(parts.front());
         fileName = instrument->getName() + Strings::toString(parts);
-      } catch (boost::bad_lexical_cast) {
+      } catch (const boost::bad_lexical_cast &) {
         // Do nothing fileName == floodRunParam
       }
       auto alg = createChildAlgorithm("CreateFloodWorkspace");

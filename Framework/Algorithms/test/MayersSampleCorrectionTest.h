@@ -47,11 +47,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.374435, signal.front(), delta);
-    TS_ASSERT_DELTA(0.377909, signal.back(), delta);
+    TS_ASSERT_DELTA(2.307439, signal.front(), delta);
+    TS_ASSERT_DELTA(2.314956, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.264766, error.front(), delta);
-    TS_ASSERT_DELTA(0.267222, error.back(), delta);
+    TS_ASSERT_DELTA(1.631606, error.front(), delta);
+    TS_ASSERT_DELTA(1.636921, error.back(), delta);
   }
 
   void test_Success_With_Just_Absorption_Correction() {
@@ -82,14 +82,15 @@ public:
   void test_Input_Workspace_With_No_Instrument_Throws_Error() {
     auto noInstWS = createTestWorkspaceWithNoInstrument();
 
-    TS_ASSERT_THROWS(runAlgorithm(noInstWS, true), std::invalid_argument);
+    TS_ASSERT_THROWS(runAlgorithm(noInstWS, true),
+                     const std::invalid_argument &);
   }
 
   void test_InputWorkspace_With_No_Sample_Shape_Throws_Error() {
     auto noSampleShapeWS = createTestWorkspaceWithNoSampleShape();
 
     TS_ASSERT_THROWS(runAlgorithm(noSampleShapeWS, true),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
 private:

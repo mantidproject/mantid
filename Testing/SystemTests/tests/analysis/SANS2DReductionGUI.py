@@ -43,7 +43,7 @@ class SANS2DMinimalBatchReduction(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DMinimalBatchReduction, self).__init__()
         config['default.instrument'] = 'SANS2D'
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
 
     def runTest(self):
@@ -78,10 +78,10 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.assertDelta(f1,f2,0.0001)
 
     def checkStr(self, s1, s2):
-        self.assertTrue(s1==s2, '%s != %s'%(s1,s2))
+        self.assertEqual(s1, s2, '%s != %s'%(s1,s2))
 
     def checkObj(self, ob1, ob2):
-        self.assertTrue(ob1 == ob2, '%s != %s'%(str(ob1),str(ob2)))
+        self.assertEqual(ob1,  ob2, '%s != %s'%(str(ob1),str(ob2)))
 
     def checkFirstPart(self):
         self.checkObj(i.ReductionSingleton().instrument.listDetectors(),('rear-detector', 'front-detector'))
@@ -132,10 +132,10 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.checkStr(i.ReductionSingleton().mask.time_mask_r, "")
         self.checkStr(i.ReductionSingleton().mask.time_mask_f, "")
         self.checkStr(i.ReductionSingleton().mask.time_mask_f, "")
-        self.assertTrue(i.ReductionSingleton().mask.arm_width is None)
-        self.assertTrue(i.ReductionSingleton().mask.arm_angle is None)
-        self.assertTrue(i.ReductionSingleton().mask.arm_x is None)
-        self.assertTrue(i.ReductionSingleton().mask.arm_y is None)
+        self.assertEqual(i.ReductionSingleton().mask.arm_width, None)
+        self.assertEqual(i.ReductionSingleton().mask.arm_angle, None)
+        self.assertEqual(i.ReductionSingleton().mask.arm_x, None)
+        self.assertEqual(i.ReductionSingleton().mask.arm_y, None)
         self.assertTrue(i.ReductionSingleton().mask.phi_mirror)
 
     def applyGUISettings(self):
@@ -202,7 +202,7 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.checkFittingSettings(fit_settings)
 
     def validate(self):
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')
         return "trans_test_rear_1D_1.5_12.5","SANSReductionGUI.nxs"

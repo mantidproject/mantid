@@ -82,7 +82,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("OutputWorkspace", "InputWS"));
 
-    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg3.execute(), const std::runtime_error &);
     TS_ASSERT(!alg3.isExecuted());
 
     Workspace_sptr result;
@@ -116,7 +116,7 @@ public:
 
     // Try to rename it should throw exception
     renameAlgorithm.setRethrows(true);
-    TS_ASSERT_THROWS(renameAlgorithm.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(renameAlgorithm.execute(), const std::runtime_error &);
     TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
 
     TS_ASSERT_THROWS_NOTHING(
@@ -172,11 +172,11 @@ public:
 
     // The old ones should not be in the ADS
     TS_ASSERT_THROWS(ads.retrieve("oldName"),
-                     Mantid::Kernel::Exception::NotFoundError)
+                     const Mantid::Kernel::Exception::NotFoundError &)
     TS_ASSERT_THROWS(ads.retrieve("oldName_1"),
-                     Mantid::Kernel::Exception::NotFoundError)
+                     const Mantid::Kernel::Exception::NotFoundError &)
     TS_ASSERT_THROWS(ads.retrieve("oldName_2"),
-                     Mantid::Kernel::Exception::NotFoundError)
+                     const Mantid::Kernel::Exception::NotFoundError &)
     // The new ones should be
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("newName_1"))
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("newName_1"))
@@ -213,7 +213,7 @@ public:
     AnalysisDataService::Instance().remove("WS_monitors");
     TS_ASSERT_THROWS(
         AnalysisDataService::Instance().retrieveWS<Workspace>("WS_monitors"),
-        Exception::NotFoundError);
+        const Exception::NotFoundError &);
     // monitors resurrected
     alg.setPropertyValue("InputWorkspace", "WS");
     alg.setPropertyValue("OutputWorkspace", "WS1");

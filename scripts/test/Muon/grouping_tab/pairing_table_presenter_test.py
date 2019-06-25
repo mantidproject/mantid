@@ -1,39 +1,45 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 import six
+from qtpy.QtWidgets import QWidget
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
-
-from PyQt4 import QtGui
-
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_model import PairingTableModel
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
-
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class PairingTablePresenterTest(unittest.TestCase):
+def pair_name():
+    name = []
+    for i in range(21):
+        name.append("pair_" + str(i+1))
+    return name
+
+class PairingTablePresenterTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
-        self.data = MuonDataContext()
+        setup_context_for_tests(self)
+
         self.add_three_groups_to_model()
 
-        self.model = PairingTableModel(data=self.data)
+        self.model = GroupingTabModel(context=self.context)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()
+        self.view.enter_pair_name = mock.Mock(side_effect=pair_name())
 
     def tearDown(self):
         self.obj = None
@@ -49,9 +55,9 @@ class PairingTablePresenterTest(unittest.TestCase):
         group1 = MuonGroup(group_name="my_group_0", detector_ids=[1])
         group2 = MuonGroup(group_name="my_group_1", detector_ids=[2])
         group3 = MuonGroup(group_name="my_group_2", detector_ids=[3])
-        self.data.add_group(group1)
-        self.data.add_group(group2)
-        self.data.add_group(group3)
+        self.group_context.add_group(group1)
+        self.group_context.add_group(group2)
+        self.group_context.add_group(group3)
 
     def add_two_pairs_to_table(self):
         pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
@@ -209,10 +215,8 @@ class PairingTablePresenterTest(unittest.TestCase):
         invalid_names = ["", "@", "name!", "+-"]
 
         for invalid_name in invalid_names:
-            print(self.view.get_table_contents())
             self.view.pairing_table.setCurrentCell(0, 0)
             self.view.pairing_table.item(0, 0).setText(invalid_name)
-            print(self.view.get_table_contents())
 
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_pair_0")
             self.assertIn("my_pair_0", self.model.pair_names)
@@ -229,20 +233,11 @@ class PairingTablePresenterTest(unittest.TestCase):
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), valid_name)
             self.assertIn(valid_name, self.model.pair_names)
 
-    def test_that_renaming_group_to_duplicate_fails_and_reverts_to_previous_value(self):
-        self.add_two_pairs_to_table()
-
-        self.view.pairing_table.setCurrentCell(0, 0)
-        self.view.pairing_table.item(0, 0).setText("my_pair_1")
-
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_pair_0")
-        self.assertIn("my_pair_0", self.model.pair_names)
-
     def test_that_warning_shown_if_duplicated_pair_name_used(self):
         self.add_two_pairs_to_table()
 
-        self.view.pairing_table.setCurrentCell(0, 0)
-        self.view.pairing_table.item(0, 0).setText("my_group_1")
+        self.view.enter_pair_name = mock.Mock(return_value="my_group_1")
+        self.presenter.handle_add_pair_button_clicked()
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
 

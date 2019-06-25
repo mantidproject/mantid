@@ -77,6 +77,8 @@ public:
   bool isInGroup(const Workspace &workspaceToCheck, size_t level = 0) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
+  /// Throws an out_of_range error for an invalid index
+  void throwIndexOutOfRangeError(int index) const;
 
   /// Returns a non-const iterator pointing at the first element in the
   /// workspace group
@@ -107,6 +109,8 @@ public:
   void remove(const std::string &wsName) {
     AnalysisDataService::Instance().removeFromGroup(this->getName(), wsName);
   }
+  /// Does a workspace exist within the group or any groups within this group
+  bool containsInChildren(const std::string &wsName) const;
   /// Does a workspace exist within the group
   bool contains(const std::string &wsName) const;
   /// Does a workspace exist within the group

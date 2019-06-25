@@ -29,14 +29,24 @@ def get_type(log):
 
 
 def get_value(log):
-    """Returns the first value if length==1 otherwise returns number of
-    entries
+    """Returns the either the value or the number of entries
     """
+    MAX_LOG_SIZE = 20  # the maximum log length to try to show in the value column
+
     if isinstance(log, TimeSeriesProperties):
-        if log.size() > 1:
-            return "({} entries)".format(log.size())
+        if log.size() == 1:
+            return '{} (1 entry)'.format(log.firstValue())
         else:
-            return log.firstValue()
+            entry_descr = '({} entries)'.format(log.size())
+
+            # show the value if they are all the same
+            if log.size() < MAX_LOG_SIZE:
+                value = set(log.value)
+                if len(value) == 1:
+                    return "{} {}".format(value.pop(), entry_descr)
+
+            # otherwise just show the number of values
+            return entry_descr
     else:
         return log.value
 
