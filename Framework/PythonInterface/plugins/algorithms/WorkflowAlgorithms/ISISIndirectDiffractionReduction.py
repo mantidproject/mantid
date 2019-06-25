@@ -30,11 +30,18 @@ def contains_non_ascending_range(strings, delimiter):
     return False
 
 
-def find_minimum_non_zero_y(workspace):
-    y_minimum = min(filter(lambda x: x > 0, workspace.readY(0)))
-    for idx in range(1, workspace.getNumberHistograms()):
-        y_spec_min = min(filter(lambda x: x > 0, workspace.readY(idx)))
-        y_minimum = y_spec_min if y_spec_min < y_minimum else y_minimum
+def find_minimum_non_zero_y_in_spectrum(y_minimum, spectrum):
+    positive_y = filter(lambda x: x > 0, spectrum)
+    y_spec_min = min(positive_y) if len(positive_y) > 0 else None
+    if y_spec_min and (y_minimum is None or y_spec_min < y_minimum):
+        return y_spec_min
+    return y_minimum
+
+
+def find_minimum_non_zero_y_in_workspace(workspace):
+    y_minimum = None
+    for idx in range(0, workspace.getNumberHistograms()):
+        y_minimum = find_minimum_non_zero_y_in_spectrum(y_minimum, workspace.readY(idx))
     return y_minimum
 
 
@@ -266,7 +273,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                          WorkspaceToMatch=ws_name,
                                          OutputWorkspace=van_ws_name)
 
-                    replacement_value = 0.1*find_minimum_non_zero_y(van_ws)
+                    replacement_value = 0.1*find_minimum_non_zero_y_in_workspace(van_ws)
                     logger.information('Replacing zeros in {0} with {1}.'.format(van_ws_name, replacement_value))
                     ReplaceSpecialValues(InputWorkspace=van_ws_name,
                                          SmallNumberThreshold=0.0000001,
