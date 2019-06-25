@@ -109,6 +109,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_reduction_mode_selection_has_changed(self, selection):
+            pass
+
+        @abstractmethod
         def on_mask_file_add(self):
             pass
 
@@ -727,6 +731,7 @@ class SANSDataProcessorGui(QMainWindow,
         selection = self.reduction_mode_combo_box.currentText()
         is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
         self.merged_settings.setEnabled(is_merged)
+        self._call_settings_listeners(lambda listener: listener.on_reduction_mode_selection_has_changed(selection))
 
     def _on_q_resolution_shape_has_changed(self):
         shape_selection = self.q_resolution_shape_combo_box.currentIndex()
