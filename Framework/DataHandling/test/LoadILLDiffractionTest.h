@@ -444,4 +444,32 @@ private:
   std::string m_oldInstrument;
 };
 
+class LoadILLDiffractionTestPerformance : public CxxTest::TestSuite {
+public:
+  static LoadILLDiffractionTestPerformance *createSuite() {
+    return new LoadILLDiffractionTestPerformance();
+  }
+  static void destroySuite(LoadILLDiffractionTestPerformance *suite) {
+    delete suite;
+  }
+
+  LoadILLDiffractionTestPerformance() {}
+
+  void setUp() override {
+    m_alg.initialize();
+    m_alg.setChild(true);
+    m_alg.setPropertyValue("Filename", "ILL/D2B/508093.nxs");
+    m_alg.setPropertyValue("OutputWorkspace", "__");
+  }
+
+  void test_performance() {
+    for (int i = 0; i < 5; ++i) {
+      TS_ASSERT_THROWS_NOTHING(m_alg.execute());
+    }
+  }
+
+private:
+  LoadILLDiffraction m_alg;
+};
+
 #endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_ */
