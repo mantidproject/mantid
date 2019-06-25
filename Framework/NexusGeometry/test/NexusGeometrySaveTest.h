@@ -125,27 +125,10 @@ public:
 
     auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    std::string path = "invalid_path"; // test valid path
+    std::string path = "invalid_path"; // test invalid path
 
     TS_ASSERT_THROWS(saveInstrument(*inst2.first, path),
                      std::invalid_argument &);
-  }
-
-  void test_providing_valid_path_throws_nothing() { // testing that it passes
-  
-	   auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        Mantid::Kernel::V3D(1, 1, 1));
-
-    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    ScopedFileHandle fileResource(
-        "testIstrument.hdf5"); // creates a temp directory for the file.
-    std::string destinationFile = fileResource.fullPath();
-
-    TS_ASSERT_THROWS_NOTHING(saveInstrument(*inst2.first, destinationFile),
-                     std::invalid_argument &);
-
   }
 
   void test_nxinstrument_class_exists() {
@@ -165,16 +148,14 @@ public:
     std::string destinationFile = fileResource.fullPath();
     saveInstrument(*inst2.first, destinationFile); // saves the instrument.
 
-    // HDF5FileTestUtility tester(destinationFile); //tests the file has the
-    // nx_class
+    HDF5FileTestUtility tester(destinationFile); // tests the file has the
 
-    // RAII ScopedFileHanle
-    //
-    // ASSERT_TRUE(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
+    ASSERT_TRUE(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
+    ASSERT_TRUE(tester.hasNxClass("NXentry", "/raw_data_1"));
   }
 
   void test_progress_reporting() {
-    
+
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
         Mantid::Kernel::V3D(1, 1, 1));
@@ -186,23 +167,20 @@ public:
     std::string path = test.fullPath();
     saveInstrument(*inst2.first, path, &progressRep);
     ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&progressRep));
-    
   }
 
   // WIP-----------------------------------------------------
 
   void test_extension_validation() {
 
-    
-auto instrument = ComponentCreationHelper::createMinimalInstrument(
-  Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-  Mantid::Kernel::V3D(1, 1, 1));
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+        Mantid::Kernel::V3D(1, 1, 1));
 
-auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto inst2 = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-TS_ASSERT_THROWS(ScopedFileHandle test("testFile.abc"),
-               std::invalid_argument &);
-
+    TS_ASSERT_THROWS(ScopedFileHandle test("testFile.abc"),
+                     std::invalid_argument &);
   }
 };
 

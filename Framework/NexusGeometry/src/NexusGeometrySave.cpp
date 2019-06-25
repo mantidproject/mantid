@@ -49,20 +49,28 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     reporter->report();
   }
 
-  //auto compName = compInfo.name(0);	//potentially dead code
-  //auto allComps = compInfo.componentsInSubtree(compInfo.root()); //potentially dead code
+  // auto compName = compInfo.name(0);	//potentially dead code
+  // auto allComps = compInfo.componentsInSubtree(compInfo.root());
+  // //potentially dead code
 
-  const std::string nexusClassName = "NX_class";
-  const std::string nexusClassType = "NXinstrument"; // class type
+  const hsize_t dims = 5;
+  int ndims = 1;
 
-  H5::H5File file(fullPath, H5F_ACC_TRUNC); // create h5 file
-  H5::Group group = file.createGroup("/raw_data_1");  // create group in file
+  const std::string parentNexusClassName = "NX_class"; // class name
+  const std::string parentNexusClassType = "NXentry";  // class type
 
+  const std::string childNexusClassName = "NX_class";     // class name
+  const std::string childNexusClassType = "NXinstrument"; // class type
 
-  writeStrAttribute(group, nexusClassName, nexusClassType);
+  H5::H5File file(fullPath, H5F_ACC_TRUNC);          // create h5 file
+  H5::Group group = file.createGroup("/raw_data_1"); // create group in file
+
+  H5::Group subGroup = group.createGroup("instrument");
+
+  writeStrAttribute(group, parentNexusClassName, parentNexusClassType);
+  writeStrAttribute(subGroup, childNexusClassName, childNexusClassType);
 
   file.close();
-
 
 }; // saveInstrument
 
@@ -70,12 +78,3 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 } // namespace Mantid
 
 
-/* possibly dead code
-  H5::DataType(H5T_class_t::H5T_STRING,attributeType.length()); H5::DataSpace
-  dataSpace{}; //create dataSpace for attr
-
-   group.createDataSet("sample", dataType, dataSpace);
-
-  auto attr = group.createAttribute(attributeName, dataType, dataSpace);
-  attr.write(dataType, attributeType);
-  */
