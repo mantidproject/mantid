@@ -128,6 +128,31 @@ public:
     presenter.notifyDeleteGroupRequested();
     verifyAndClearExpectations();
   }
+
+  void testRemoveAllRowsAndGroupsUpdatesView() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    EXPECT_CALL(m_jobs, removeAllRows()).Times(1);
+    presenter.notifyRemoveAllRowsAndGroupsRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testRemoveAllRowsAndGroupsUpdatesModel() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    presenter.notifyRemoveAllRowsAndGroupsRequested();
+    auto &groups = jobsFromPresenter(presenter).groups();
+    // Should be left with a single empty group
+    TS_ASSERT_EQUALS(1, groups.size());
+    TS_ASSERT_EQUALS(0, groups[0].rows().size());
+    verifyAndClearExpectations();
+  }
+
+  void testRemoveAllRowsAndGroupsPerformedIfProcessingOrAutoreducing() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(0);
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(0);
+    presenter.notifyRemoveAllRowsAndGroupsRequested();
+    verifyAndClearExpectations();
+  }
 };
 
 #endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERGROUPDELETETEST_H_
