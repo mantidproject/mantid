@@ -22,6 +22,5 @@ class GetEiT0atSNSSystemTest(MantidSystemTest):
         # new DAS. unwrapped
         ws = sm.LoadNexusMonitors('SEQ_176472.nxs.h5')
         Ei, T0 = sm.GetEiT0atSNS(ws)
-        print Ei, T0
-        # assert abs(Ei-8.31)< 0.01
+        assert abs(Ei-8.27)< 0.01
         return
