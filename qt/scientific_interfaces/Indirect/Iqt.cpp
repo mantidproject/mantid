@@ -106,9 +106,13 @@ void cloneWorkspace(std::string const &workspaceName,
 
 bool isTechniqueDirect(MatrixWorkspace_const_sptr sampleWorkspace,
                        MatrixWorkspace_const_sptr resWorkspace) {
-  auto const logValue1 = sampleWorkspace->getLog("deltaE-mode")->value();
-  auto const logValue2 = resWorkspace->getLog("deltaE-mode")->value();
-  return (logValue1 == "Direct") && (logValue2 == "Direct");
+  try {
+    auto const logValue1 = sampleWorkspace->getLog("deltaE-mode")->value();
+    auto const logValue2 = resWorkspace->getLog("deltaE-mode")->value();
+    return (logValue1 == "Direct") && (logValue2 == "Direct");
+  } catch (std::exception const &) {
+    return false;
+  }
 }
 
 void cropWorkspace(std::string const &name, std::string const &newName,
