@@ -40,6 +40,8 @@ Bug Fixes
 
 - Pearl no longer produces an output of NaN when long-mode is changed after focusing.
 
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` if fixed to load also single point scans.
+
 Engineering Diffraction
 -----------------------
 
