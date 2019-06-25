@@ -13,6 +13,7 @@ from mantid.kernel import DateAndTime
 from testhelpers import *
 from numpy import *
 
+
 class GetEiT0atSNSTest(unittest.TestCase):
 
     def testGETS(self):
@@ -34,6 +35,7 @@ class GetEiT0atSNSTest(unittest.TestCase):
             s="Could not get Ei, and this is not a white beam run\nNo peak found for the monitor with spectra num: 2"
             self.assertEqual(str(e).find(s),0)
         DeleteWorkspace(w)
+
 
 if __name__ == '__main__':
     unittest.main()
