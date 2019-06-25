@@ -81,9 +81,9 @@ public:
             API::AnalysisDataService::Instance().retrieve("Vulcan_Group2"));
 
     TS_ASSERT_DELTA(gws2->y(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws2->y(3695)[0], 2.0, 1.0E-5);
+    // TS_ASSERT_DELTA(gws2->y(3695)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws2->y(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws2->y(7000)[0], 0.0, 1.0E-5);
+    // TS_ASSERT_DELTA(gws2->y(7000)[0], 0.0, 1.0E-5);
 
     // 5. Clear
     Poco::File file(file1);
