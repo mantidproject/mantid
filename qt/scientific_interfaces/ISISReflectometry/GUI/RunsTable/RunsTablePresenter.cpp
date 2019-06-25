@@ -622,8 +622,10 @@ void RunsTablePresenter::notifyRowOutputsChanged() {
     auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
     int rowIndex = 0;
     for (auto &row : group.rows()) {
-      auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
-      m_jobViewUpdater.rowModified(groupOf(rowPath), rowOf(rowPath), *row);
+      if (row) {
+        auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+        m_jobViewUpdater.rowModified(groupOf(rowPath), rowOf(rowPath), *row);
+      }
       ++rowIndex;
     }
     ++groupIndex;
