@@ -393,10 +393,26 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyRowStateChangedItem() {
+    auto presenter = makePresenter();
+    auto row = makeRow();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged(_)).Times(1);
+    presenter.notifyRowStateChanged(row);
+    verifyAndClear();
+  }
+
   void testNotifyRowOutputsChanged() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged()).Times(1);
     presenter.notifyRowOutputsChanged();
+    verifyAndClear();
+  }
+
+  void testNotifyRowOutputsChangedItem() {
+    auto presenter = makePresenter();
+    auto row = makeRow();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged(_)).Times(1);
+    presenter.notifyRowOutputsChanged(row);
     verifyAndClear();
   }
 
