@@ -233,7 +233,7 @@ class FittingTabPresenter(object):
         fit_group_name = self.model.get_function_name(self.view.fit_object)
         workspace_name_list = []
         for workspace in self.selected_data:
-            workspace_name, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(
+            workspace_name, workspace_directory = self.model.create_fitted_workspace_name(
                 workspace,
                 self.view.fit_object,
                 fit_group_name)
@@ -332,10 +332,13 @@ class FittingTabPresenter(object):
             return
 
         self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
+        global_parameters = self.view.get_global_parameters()
         if self._tf_asymmetry_mode:
             self.view.select_workspaces_to_fit_button.setEnabled(False)
+            new_global_parameters = [str('f0.f1.f1.' + item) for item in global_parameters]
         else:
             self.view.select_workspaces_to_fit_button.setEnabled(True)
+            new_global_parameters = [item[9:] for item in global_parameters]
 
         if self.view.fit_type != self.view.simultaneous_fit:
             for index, fit_function in enumerate(self._fit_function):
@@ -350,8 +353,13 @@ class FittingTabPresenter(object):
         self.view.function_browser.blockSignals(True)
         self.view.function_browser.clear()
         self.view.function_browser.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
+        self.view.function_browser.setGlobalParameters(new_global_parameters)
         self.view.function_browser.blockSignals(False)
         self.update_fit_status_information_in_view()
+        self.handle_display_workspace_changed()
+        if self.automatically_update_fit_name:
+            self.view.function_name += ',TFAsymmetry'
+            self.model.function_name = self.view.function_name
 
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()
@@ -468,6 +476,7 @@ class FittingTabPresenter(object):
             self.selected_data = [item for item in self.selected_data if item != workspace_removed]
         else:
             self.selected_data = []
+
     def check_workspaces_are_tf_asymmetry_compliant(self, workspace_list):
         non_compliant_workspaces = [item for item in workspace_list if 'Group' not in item]
         return False if non_compliant_workspaces else True

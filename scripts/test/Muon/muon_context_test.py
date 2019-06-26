@@ -50,17 +50,19 @@ class MuonContextTest(unittest.TestCase):
         self.context.calculate_all_pairs()
         self.context.show_all_pairs()
         workspace = CreateWorkspace([0], [0], StoreInADS=False)
-        self.context.phase_context.add_phase_quad(MuonWorkspaceWrapper(workspace, 'EMU19489; PhaseQuad; PhaseTable EMU19489'))
+        self.context.phase_context.add_phase_quad(
+            MuonWorkspaceWrapper(workspace, 'EMU19489; PhaseQuad; PhaseTable EMU19489'))
 
     def test_reset_groups_and_pairs_to_default(self):
         self.assertEqual(self.group_pair_context.group_names, ['fwd', 'bwd'])
         self.assertEqual(self.group_pair_context.pair_names, ['long'])
 
     def test_calculate_group_calculates_group_for_given_run(self):
-        counts_workspace, asymmetry_workspace = self.context.calculate_group('fwd', run=[19489])
+        counts_workspace, asymmetry_workspace, group_asymmetry_unormalised = self.context.calculate_group('fwd', run=[19489])
 
         self.assertEqual(type(counts_workspace), Workspace2D)
-        self.assertEqual(type(counts_workspace), Workspace2D)
+        self.assertEqual(type(asymmetry_workspace), Workspace2D)
+        self.assertEqual(type(group_asymmetry_unormalised), Workspace2D)
 
     def test_calculate_pair_calculates_pair_for_given_run(self):
         pair_asymmetry = self.context.calculate_pair('long', run=[19489])
@@ -70,9 +72,11 @@ class MuonContextTest(unittest.TestCase):
     def test_show_all_groups_calculates_and_shows_all_groups(self):
         self.context.show_all_groups()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489 Groups MA', 'EMU19489 MA','EMU19489; Group; bwd; Asymmetry; MA',
-                                                                 'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; fwd; Asymmetry; MA',
-                                                                 'EMU19489; Group; fwd; Counts; MA', 'Muon Data'])
+        self.assertEquals(AnalysisDataService.getObjectNames(),
+        ['__EMU19489; Group; bwd; Asymmetry; MA_unnorm', '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
+                   'EMU19489 Groups MA', 'EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                   'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; fwd; Asymmetry; MA',
+                   'EMU19489; Group; fwd; Counts; MA', 'Muon Data'])
 
     def test_that_show_all_calculates_and_shows_all_groups_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -81,7 +85,11 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_all_groups()
 
         self.assertEquals(AnalysisDataService.getObjectNames(),
-                          ['EMU19489 Groups MA','EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; Rebin; MA',
+                          ['__EMU19489; Group; bwd; Asymmetry; MA_unnorm',
+                           '__EMU19489; Group; bwd; Asymmetry; Rebin; MA_unnorm',
+                           '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
+                           '__EMU19489; Group; fwd; Asymmetry; Rebin; MA_unnorm', 'EMU19489 Groups MA', 'EMU19489 MA',
+                           'EMU19489; Group; bwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; Rebin; MA',
                            'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; bwd; Counts; Rebin; MA',
                            'EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; fwd; Asymmetry; Rebin; MA',
                            'EMU19489; Group; fwd; Counts; MA', 'EMU19489; Group; fwd; Counts; Rebin; MA', 'Muon Data'])
@@ -89,7 +97,8 @@ class MuonContextTest(unittest.TestCase):
     def test_show_all_pairs_calculates_and_shows_all_pairs(self):
         self.context.show_all_pairs()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489 MA', 'EMU19489 Pairs MA', 'EMU19489; Pair Asym; long; MA', 'Muon Data'])
+        self.assertEquals(AnalysisDataService.getObjectNames(),
+                          ['EMU19489 MA', 'EMU19489 Pairs MA', 'EMU19489; Pair Asym; long; MA', 'Muon Data'])
 
     def test_that_show_all_calculates_and_shows_all_pairs_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -98,7 +107,8 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_all_pairs()
 
         self.assertEquals(AnalysisDataService.getObjectNames(),
-                          ['EMU19489 MA', 'EMU19489 Pairs MA', 'EMU19489; Pair Asym; long; MA', 'EMU19489; Pair Asym; long; Rebin; MA', 'Muon Data'])
+                          ['EMU19489 MA', 'EMU19489 Pairs MA', 'EMU19489; Pair Asym; long; MA',
+                           'EMU19489; Pair Asym; long; Rebin; MA', 'Muon Data'])
 
     def test_update_current_data_sets_current_run_in_data_context(self):
         self.context.update_current_data()
@@ -114,7 +124,8 @@ class MuonContextTest(unittest.TestCase):
     def test_show_raw_data_puts_raw_data_into_the_ADS(self):
         self.context.show_raw_data()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489 MA', 'EMU19489 Raw Data MA', 'EMU19489_raw_data MA', 'Muon Data'])
+        self.assertEquals(AnalysisDataService.getObjectNames(),
+                          ['EMU19489 MA', 'EMU19489 Raw Data MA', 'EMU19489_raw_data MA', 'Muon Data'])
 
     def test_that_first_good_data_returns_correctly_when_from_file_chosen_option(self):
         self.gui_context.update({'FirstGoodDataFromFile': True})
@@ -156,7 +167,7 @@ class MuonContextTest(unittest.TestCase):
         workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long', True)
 
         self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                          'EMU19489; Pair Asym; long; MA','EMU19489; PhaseQuad; PhaseTable EMU19489'])
+                                          'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489'])
 
     def test_get_workspace_names_returns_nothing_if_no_parameters_passed(self):
         self.populate_ADS()
@@ -187,6 +198,7 @@ class MuonContextTest(unittest.TestCase):
 
         self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
                                           'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489'])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

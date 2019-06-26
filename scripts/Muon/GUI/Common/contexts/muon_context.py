@@ -79,7 +79,7 @@ class MuonContext(object):
                 if self._do_rebin():
                     name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=True)
                     asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=True)
-                    asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=False)
+                    asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=True)
 
                     self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name, asym_name_unnorm)
 
