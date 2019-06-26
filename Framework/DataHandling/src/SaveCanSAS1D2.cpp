@@ -245,7 +245,6 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
     } else {
       g_log.debug() << "Didn't find RunNumber log in workspace. Writing "
                        "<Run></Run> to the CANSAS file\n";
-      can_run = "";
     }
     std::string sasProcCanRun = "\n\t\t\t<term name=\"can_trans_run\">";
     sasProcCanRun += can_run;
