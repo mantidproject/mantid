@@ -16,6 +16,9 @@ from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.contexts.fitting_context import FittingContext
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
+
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
@@ -26,6 +29,8 @@ from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget_new import FFTWidget
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget_new import MaxEntWidget
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
+from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidget
+from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
@@ -66,10 +71,13 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.gui_context = MuonGuiContext()
         self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
+        self.fitting_context = FittingContext()
+        self.frequency_context = FrequencyContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
                                    muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
-                                   workspace_suffix=' FD')
+                                   fitting_context=self.fitting_context,
+                                   workspace_suffix=' FD', frequency_context=self.frequency_context)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -77,6 +85,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.home_tab = HomeTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
+        self.fitting_tab = FittingTabWidget(self.context, self)
+        self.results_tab = ResultsTabWidget(self.context.fitting_context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget("Frequency Domain Analysis")
@@ -113,6 +123,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.setup_phase_quad_changed_notifer()
 
         self.setup_phase_table_changed_notifier()
+        self.setup_fitting_notifier()
+
+        self.setup_on_recalulation_finished_notifer()
 
         self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
 
@@ -126,6 +139,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
         self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
         self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
+        self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
+        self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -220,6 +235,21 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def setup_phase_table_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber(
             self.transform._maxent._presenter.phase_table_observer)
+
+    def setup_fitting_notifier(self):
+        """Connect fitting and results tabs to inform of new fits"""
+        self.fitting_context.new_fit_notifier.add_subscriber(
+            self.results_tab.results_tab_presenter.new_fit_performed_observer)
+
+        self.fitting_context.new_fit_notifier.add_subscriber(
+            self.home_tab.plot_widget.fit_observer)
+
+    def setup_on_recalulation_finished_notifer(self):
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.home_tab.plot_widget.input_workspace_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT
+from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, convert_to_field
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
     get_base_data_directory
@@ -175,7 +175,7 @@ class FFTPresenter(object):
 
         fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input, imaginary_workspace_index)
 
-        frequency_domain_workspace = run_FFT(fft_parameters)
+        frequency_domain_workspace = convert_to_field(run_FFT(fft_parameters))
 
         self.add_fft_workspace_to_ADS(real_workspace_padding_parameters['InputWorkspace'],
                                       imaginary_workspace_padding_parameters['InputWorkspace'],
@@ -186,6 +186,7 @@ class FFTPresenter(object):
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
         group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument, self.load.workspace_suffix)
         directory = get_base_data_directory(self.load, run) + group
+        self.load._frequency_context.add_FFT(fft_workspace)
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(fft_workspace, directory + fft_workspace_name)
         muon_workspace_wrapper.show()

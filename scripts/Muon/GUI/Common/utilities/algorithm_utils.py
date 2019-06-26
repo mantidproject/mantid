@@ -209,3 +209,16 @@ def run_Plus(parameter_dict):
     alg.setProperties(parameter_dict)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value
+
+def convert_to_field(ws):
+    """
+    Apply the Scale algorithm to convert from MHz to Field.
+    """
+    alg = mantid.AlgorithmManager.create("ScaleX")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperty("Factor", 1.e3/13.55)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value

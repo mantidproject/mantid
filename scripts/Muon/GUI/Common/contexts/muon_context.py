@@ -25,7 +25,7 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_groupin
 class MuonContext(object):
     def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
                  muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext(),
-                 workspace_suffix=' MA', fitting_context=FittingContext()):
+                 workspace_suffix=' MA', fitting_context=FittingContext(), frequency_context = None):
 
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
@@ -34,6 +34,7 @@ class MuonContext(object):
         self.fitting_context = fitting_context
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
+        self._frequency_context = frequency_context
 
         self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
 
@@ -250,7 +251,10 @@ class MuonContext(object):
                 run_string = run_list_to_string(run)
                 phasequad_names += self.phase_context.get_phase_quad(self.data_context.instrument, run_string)
 
-        return group_names + pair_names + phasequad_names
+        frequency_names = []
+        if self._frequency_context:
+           frequency_names = self._frequency_context.maxEnt_freq + self._frequency_context.FFT_freq
+        return group_names + pair_names + phasequad_names + frequency_names
 
     def get_list_of_binned_or_unbinned_workspaces_from_equivalents(self, input_list):
         equivalent_list = []

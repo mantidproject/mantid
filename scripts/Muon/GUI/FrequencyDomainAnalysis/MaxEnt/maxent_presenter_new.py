@@ -158,7 +158,7 @@ class MaxEntPresenter(object):
         muon_workspace_wrapper.show()
 
         maxent_output_options = self.get_maxent_output_options()
-
+        self.load._frequency_context.add_maxEnt(maxent_workspace)
         self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, directory)
 
     def get_maxent_output_options(self):
