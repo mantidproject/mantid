@@ -23,11 +23,28 @@
 namespace Mantid {
 namespace NexusGeometry {
 
-void writeStrAttribute(H5::Group &grp, const std::string &nexusClass,
-                       const std::string &nexusType) {
+namespace {
+const std::string nxEntry = "NXentry";
+const std::string nxClass = "NX_class";
+
+const std::string nxInstrument = "NXinstrument";
+const std::string nxChar = "NX_CHAR";
+} // namespace
+
+void writeStrAttributeToGroup(H5::Group &grp, const std::string &nexusClass,
+                              const std::string &nexusType) {
   H5::StrType attrType(0, H5T_VARIABLE);
   H5::DataSpace attrSpace(H5S_SCALAR);
   auto attribute = grp.createAttribute(nexusClass, attrType, attrSpace);
+  attribute.write(attrType, nexusType);
+}
+
+void writeStrAttributeToDataSet(H5::DataSet &dSet,
+                                const std::string &nexusClass,
+                                const std::string &nexusType) {
+  H5::StrType attrType(0, H5T_VARIABLE);
+  H5::DataSpace attrSpace(H5S_SCALAR);
+  auto attribute = dSet.createAttribute(nexusClass, attrType, attrSpace);
   attribute.write(attrType, nexusType);
 }
 
@@ -62,35 +79,30 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     reporter->report();
   }
 
-  // create parent 'raw_data_1' and child 'instrument' group with NX_class
-  // attributes of type NXentry and NXinstrument, then write to file.
-
-  const std::string parentNexusClassName = "NX_class"; // class name
-  const std::string parentNexusClassType = "NXentry";  // class type
-
-  const std::string childNexusClassName = "NX_class";     // class name
-  const std::string childNexusClassType = "NXinstrument"; // class type
-
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // create h5 file
 
   H5::Group parentGroup =
       file.createGroup("/raw_data_1"); // create parent group in file.
 
-  H5::Group childGroup =
+  H5::Group instrumentGroup =
       parentGroup.createGroup("instrument"); // create child group in parent.
 
-  writeStrAttribute(parentGroup, parentNexusClassName,
-                    parentNexusClassType); // write attributes to parent.
+  writeStrAttributeToGroup(parentGroup, nxClass,
+                           nxEntry); // write attributes to parent.
 
-  writeStrAttribute(childGroup, childNexusClassName,
-                    childNexusClassType); // write attributes to child.
+  writeStrAttributeToGroup(instrumentGroup, nxClass,
+                           nxInstrument); // write attributes to child.
 
-  //create DataSet 'data' in instrument.
+  // create DataSet 'data' in instrument.
 
   H5::StrType dataType(0, H5T_VARIABLE);
   H5::DataSpace dataSpace(H5S_SCALAR);
 
-  childGroup.createDataSet("location",dataType,dataSpace);
+  // add dataset 'location' to child group 'instrument'
+  H5::DataSet dataSet =
+      instrumentGroup.createDataSet("name", dataType, dataSpace);
+
+  writeStrAttributeToDataSet(dataSet, nxClass, nxChar);
 
   file.close();
 

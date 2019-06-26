@@ -26,6 +26,7 @@
 #include <H5Group.h>
 #include <H5Location.h>
 #include <H5Object.h>
+#include <H5Rpublic.h>
 
 using namespace Mantid::NexusGeometry;
 
@@ -50,28 +51,39 @@ public:
     }
   }
 
-  bool hasNxClass(const std::string &classType, const std::string &path) const {
+  bool hasNxClass(const std::string &nxType, const std::string &path) const {
 
     H5::Group parentGroup = m_file.openGroup(path);
     H5::Attribute attribute = parentGroup.openAttribute("NX_class");
 
     std::string readClass;
     attribute.read(attribute.getDataType(), readClass);
-    return readClass == classType;
+    return readClass == nxType;
   }
 
-  bool hasDataSet(const std::string &dataSetname,
+  bool hasDataSet(const std::string &dataSetname, const std::string &nxType,
                   const std::string &path) const {
 
-    H5::Group parentGroup = m_file.openGroup(path);
+    H5::Group parentGroup = m_file.openGroup(path); //open group where DataSet should exist.
 
     try {
-      H5::DataSet dataSet = parentGroup.openDataSet(dataSetname);
-      return true;
-    } catch (...) {
-      return false;
-    }
 
+      H5::DataSet dataSet = parentGroup.openDataSet(dataSetname); //dataset exists if in this block.
+	  H5::Attribute attribute = dataSet.openAttribute("NX_class");//will open attribute if it is Nexus compliant.
+
+	  std::string readClass;
+      attribute.read(attribute.getDataType(), readClass);
+      return readClass == nxType; //return
+
+    } catch (...) {
+
+      return false; // DataSet could not be opened.
+    }
+    // check if dataset has NXClass
+
+    /*std::string readClass;
+    auto type = dataSet.getDataType();
+    dataSet.read(readClass, type);*/
   }
 
 private:
@@ -196,7 +208,8 @@ public:
     HDF5FileTestUtility testUtility(destinationFile);
 
     // TS_ASSERT(testUtility.hasDataSet("/raw_data1/instrument/name", NX_CHAR));
-    TS_ASSERT(testUtility.hasDataSet("location", "/raw_data_1/instrument"));
+    TS_ASSERT(
+        testUtility.hasDataSet("name", "NX_CHAR", "/raw_data_1/instrument"));
     // TODO write hasDataSet in HDF5FileTestUtility
   }
 };
