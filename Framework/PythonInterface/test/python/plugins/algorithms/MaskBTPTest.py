@@ -10,6 +10,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 from testhelpers import *
+import numpy as np
 from numpy import *
 
 # tests run x10 slower with this on, but it may be useful to track down issues refactoring
@@ -114,6 +115,15 @@ class MaskBTPTest(unittest.TestCase):
         MaskBTP(Instrument='SEQUOIA', Bank="37")
         MaskBTP(Instrument='SEQUOIA', Bank="38")
         return
+
+    def testEQSANSMaskBTP(self):
+        w = LoadEmptyInstrument(InstrumentName='EQ-SANS',
+                                OutputWorkspace='empty_eqsans')
+        m1 = MaskBTP(w, Bank='1-48', Pixel='1-8,249-256')  # tube tips
+        m2 = MaskBTP(w, Bank='17', Tube='2')  # rogue tube
+        m3 = MaskBTP(w, Components='back-panel')  # whole back panel
+        for mask, n_masked in zip((m1, m2, m3), (3072, 256, 24576)):
+            self.assertEqual(len(mask), n_masked)
 
     def testEdges(self):
         # this combined option should probably be called corners
