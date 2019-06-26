@@ -130,15 +130,43 @@ def instrumentName(ws):
     return name
 
 
+def slitSizes(ws):
+    run = ws.run()
+    instrName = instrumentName(ws)
+    slit2width = run.get(slitSizeLogEntry(instrName, 1))
+    slit3width = run.get(slitSizeLogEntry(instrName, 2))
+    if slit2width is None or slit3width is None:
+        run.addProperty(SampleLogs.SLIT2WIDTH, str('-'), '', True)
+        run.addProperty(SampleLogs.SLIT3WIDTH, str('-'), '', True)
+    else:
+        slit2widthUnit = slit2width.units
+        slit3widthUnit = slit3width.units
+        slit3w = slit3width.value
+        if instrumentName(ws) != 'D17':
+            bgs3 = float(run.getProperty('BGS3.value').value)
+            if bgs3 >= 150.:
+                slit3w += 0.08
+            elif 150. > bgs3 >= 50.:
+                slit3w += 0.06
+            elif -50. > bgs3 >= -150.:
+                slit3w -= 0.12
+            elif bgs3 < -150.:
+                slit3w -= 0.24
+        slit2w = slit2width.value
+        run.addProperty(SampleLogs.SLIT2WIDTH, float(slit2w), slit2widthUnit, True)
+        run.addProperty(SampleLogs.SLIT3WIDTH, float(slit3w), slit3widthUnit, True)
+
+
 class SampleLogs:
     FOREGROUND_CENTRE = 'reduction.foreground.centre_workspace_index'
     FOREGROUND_END = 'reduction.foreground.last_workspace_index'
     FOREGROUND_START = 'reduction.foreground.first_workspace_index'
     LINE_POSITION = 'reduction.line_position'
+    SLIT2WIDTH = 'reduction.slit2width'
+    SLIT3WIDTH = 'reduction.slit3width'
     SUM_TYPE = 'reduction.foreground.summation_type'
     TWO_THETA = 'loader.two_theta'
     REDUCTION_TWO_THETA = 'reduction.two_theta'
-
 
 class WSCleanup:
     """A class to manage intermediate workspace cleanup."""
@@ -198,3 +226,4 @@ class WSNameSource:
     def withSuffix(self, suffix):
         """Returns a workspace name with given suffix applied."""
         return self._prefix + '_' + suffix + '_'
+

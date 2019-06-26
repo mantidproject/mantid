@@ -186,8 +186,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         instrumentName = common.instrumentName(ws)
         pixelSize = common.pixelSize(instrumentName)
         detResolution = common.detectorResolution()
-        firstSlitSizeLog = common.slitSizeLogEntry(instrumentName, 1)
-        secondSlitSizeLog = common.slitSizeLogEntry(instrumentName, 2)
         ReflectometryBeamStatistics(
             ReflectedBeamWorkspace=ws,
             ReflectedForeground=reflectedForeground,
@@ -196,9 +194,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             PixelSize=pixelSize,
             DetectorResolution=detResolution,
             FirstSlitName='slit2',
-            FirstSlitSizeSampleLog=firstSlitSizeLog,
+            FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
             SecondSlitName='slit3',
-            SecondSlitSizeSampleLog=secondSlitSizeLog,
+            SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
             EnableLogging=self._subalgLogging)
 
     def _applyWavelengthRange(self, ws):
@@ -281,7 +279,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         foreground = self._foregroundIndices(ws)
         sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
         beamPosIndex = foreground[1]
-        foregroundWSName = self._names.withSuffix('foreground_grouped')
+        foregroundWSName = self._names.withSuffix('grouped')
         foregroundWS = ExtractSingleSpectrum(
             InputWorkspace=ws,
             OutputWorkspace=foregroundWSName,
@@ -296,7 +294,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 continue
             if i < 0 or i > maxIndex:
                 self.log().warning('Foreground partially out of the workspace.')
-            addeeWSName = self._names.withSuffix('foreground_addee')
+            addeeWSName = self._names.withSuffix('addee')
             addeeWS = ExtractSingleSpectrum(
                 InputWorkspace=ws,
                 OutputWorkspace=addeeWSName,
@@ -321,22 +319,11 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         dist = pixelSize * (linePosition-beamPosIndex)
 
         if dist != 0.:
-            # With the sinus law
-            #theta = foregroundWS.run().getProperty(common.SampleLogs.REDUCTION_TWO_THETA).value / 2.
-            #eq1 = dist / numpy.math.sin(numpy.radians([theta]))
-            #alpha = numpy.math.asin(foregroundWS.spectrumInfo().l2(0) / eq1)
-            #gamma = 180 - numpy.degrees([alpha]) - theta
-            #detectorDistance = numpy.math.sin(gamma) * eq1
             detPoint1 = ws.spectrumInfo().position(0)
             detPoint2 = ws.spectrumInfo().position(20)
             beta = numpy.math.atan2((detPoint2[0] - detPoint1[0]), (detPoint2[2] - detPoint1[2]))
             xvsy = numpy.math.sin(beta) * dist
             mz = numpy.math.cos(beta) * dist
-            #xvsy = numpy.math.sin(theta) * detectorDistance
-            #mz = numpy.math.cos(theta) * detectorDistance
-            #print('BP {} LP {}'.format(beamPosIndex, linePosition))
-            #print('beta {}  dist {}'.format(beta, dist))
-            #print('x {} z {}'.format(xvsy, mz))
             if instr == 'D17':
                 mx = xvsy
                 my = 0.0

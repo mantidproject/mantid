@@ -62,6 +62,7 @@ class FluxNormMethod:
 
 
 class SlitNorm:
+    AUTO = 'Slit Normalisation AUTO'
     OFF = 'Slit Normalisation OFF'
     ON = 'Slit Normalisation ON'
 
@@ -186,8 +187,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='A (water) calibration workspace (unit TOF).')
         self.declareProperty(Prop.SLIT_NORM,
-                             defaultValue=SlitNorm.OFF,
-                             validator=StringListValidator([SlitNorm.OFF, SlitNorm.ON]),
+                             defaultValue=SlitNorm.AUTO,
+                             validator=StringListValidator([SlitNorm.AUTO, SlitNorm.OFF, SlitNorm.ON]),
                              doc='Enable or disable slit normalisation.')
         self.declareProperty(Prop.FLUX_NORM_METHOD,
                              defaultValue=FluxNormMethod.TIME,
@@ -440,7 +441,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             'InputWorkspace': ws,
             'OutputWorkspace': detectorMovedWSName,
             'TwoTheta': twoTheta,
-            'EnableLogging': self._subalgLogging,
             'DetectorComponentName': 'detector',
             'PixelSize': common.pixelSize(self._instrumentName),
             'DetectorCorrectionType': 'RotateAroundSample',
@@ -520,16 +520,21 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return detWS
 
     def _normaliseToSlits(self, ws):
-        """Normalise ws to slit opening."""
-        if self.getProperty(Prop.SLIT_NORM).value == SlitNorm.OFF:
+        """Normalise ws to slit opening and update slit widths."""
+        # Update slit width in any case for later re-use.
+        common.slitSizes(ws)
+        slitNorm = self.getProperty(Prop.SLIT_NORM).value
+        if slitNorm == SlitNorm.OFF:
+            return ws
+        elif slitNorm == SlitNorm.AUTO and self._instrumentName != 'D17':
             return ws
         run = ws.run()
-        slit2width = run.get(common.slitSizeLogEntry(self._instrumentName, 1))
-        slit3width = run.get(common.slitSizeLogEntry(self._instrumentName, 2))
-        if slit2width is None or slit3width is None:
+        slit2width = run.get(common.SampleLogs.SLIT2WIDTH).value
+        slit3width = run.get(common.SampleLogs.SLIT3WIDTH).value
+        if slit2width == '-' or slit3width == '-':
             self.log().warning('Slit information not found in sample logs. Slit normalisation disabled.')
             return ws
-        f = slit2width.value * slit3width.value
+        f = slit2width * slit3width
         normalisedWSName = self._names.withSuffix('normalised_to_slits')
         normalisedWS = Scale(
             InputWorkspace=ws,

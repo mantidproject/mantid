@@ -34,14 +34,14 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
 
         det122 = outWS.getDetector(122)
         twoTheta122 = outWS.detectorTwoTheta(det122)
-        self.assertAlmostEquals(twoTheta122, 0.057659886309975004, delta=1.e-13)
+        self.assertAlmostEqual(twoTheta122, 0.057659886309975004, delta=1.e-13)
 
         twoTheta = outWS.run().getProperty(common.SampleLogs.TWO_THETA).value
-        self.assertAlmostEquals(twoTheta, 3.182191848754883, delta=1.e-13)
+        self.assertAlmostEqual(twoTheta, 3.182191848754883, delta=1.e-13)
 
         peakPosition = outWS.run().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value
         twoTheta2 = numpy.rad2deg(outWS.spectrumInfo().twoTheta(peakPosition))
-        self.assertAlmostEquals(twoTheta2, 1.5371900428796088, delta=1.e-13)
+        self.assertAlmostEqual(twoTheta2, 1.5371900428796088, delta=1.e-13)
         self.assertEqual(mtd.getObjectNames(), [])
 
     def testDefaultRunFIGARO(self):
@@ -58,7 +58,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
 
         det122 = outWS.getDetector(122)
         twoTheta122 = outWS.detectorTwoTheta(det122)
-        self.assertAlmostEquals(twoTheta122, 0.03060663990053301, delta=1.e-13)
+        self.assertAlmostEqual(twoTheta122, 0.03060663990053301, delta=1.e-13)
         self.assertEqual(mtd.getObjectNames(), [])
 
     def testFlatBackgroundSubtraction(self):
@@ -414,7 +414,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
-        self.assertAlmostEquals(outWS.getRun().getProperty(common.SampleLogs.LINE_POSITION).value,
+        self.assertAlmostEqual(outWS.getRun().getProperty(common.SampleLogs.LINE_POSITION).value,
                                 202.17752545515665,
                                 delta=1.e-13)
         self.assertEqual(outWS.getRun().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value, 202)

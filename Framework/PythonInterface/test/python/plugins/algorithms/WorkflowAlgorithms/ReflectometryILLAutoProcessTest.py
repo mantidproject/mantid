@@ -10,7 +10,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import mtd
 from testhelpers import (assertRaisesNothing, create_algorithm)
-#import numpy
 import unittest
 
 
@@ -29,9 +28,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
-                                                 'direct-317369-angle-0-foreground',
-                                                 'outWS'])
+        self.assertEqual(mtd.getObjectNames(), ['outWS',
+                                                 'outWS_direct_317369_angle_0',
+                                                 'outWS_direct_317369_angle_0_foreground'])
         mtd.clear()
 
     def testSampleAngle(self):
@@ -45,9 +44,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
-                                                 'direct-317369-angle-0-foreground',
-                                                 'outWS'])
+        self.assertEqual(mtd.getObjectNames(), ['outWS',
+                                                 'outWS_direct_317369_angle_0',
+                                                 'outWS_direct_317369_angle_0_foreground'])
         mtd.clear()
 
     def testUndefinedAngleOption(self):
@@ -72,9 +71,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369317370-angle-0',
-                                                 'direct-317369317370-angle-0-foreground',
-                                                 'outWS'])
+        self.assertEqual(mtd.getObjectNames(), ['outWS',
+                                                 'outWS_direct_317369317370_angle_0',
+                                                 'outWS_direct_317369317370_angle_0_foreground'])
         mtd.clear()
 
     def testSingleAngleMergeTwoRuns(self):
@@ -87,9 +86,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
-                                                 'direct-317369-angle-0-foreground',
-                                                 'outWS'])
+        self.assertEqual(mtd.getObjectNames(), ['outWS',
+                                                 'outWS_direct_317369_angle_0',
+                                                 'outWS_direct_317369_angle_0_foreground'])
         mtd.clear()
 
     def testTwoAnglesMergeOneRun(self):
@@ -102,11 +101,11 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
-                                                 'direct-317369-angle-0-foreground',
-                                                 'direct-317370-angle-1',
-                                                 'direct-317370-angle-1-foreground',
-                                                 'outWS'])
+        self.assertEqual(mtd.getObjectNames(), ['outWS',
+                                                 'outWS_direct_317369_angle_0',
+                                                 'outWS_direct_317369_angle_0_foreground',
+                                                 'outWS_direct_317370_angle_1',
+                                                 'outWS_direct_317370_angle_1_foreground'])
         mtd.clear()
 
     def testMultipleAngles(self):
@@ -128,14 +127,14 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'Run': 'ILL/D17/317370.nxs',
             'DirectRun': 'ILL/D17/317369.nxs',
             'OutputWorkspace': 'outWS',
-            'BraggAngle': 30.2,
+            'TwoTheta': 30.2,
             'rethrow': True,
             'child': True
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
         #out = mtd['outWS']
-        #self.assertEquals(out.spectrumInfo().signedTwoTheta(0), 2.*30.2*numpy.pi/180.)
+        #self.assertEqual(out.spectrumInfo().signedTwoTheta(0), 2.*30.2*numpy.pi/180.)
         mtd.clear()
 
     def testDefaultValues(self):
@@ -148,37 +147,37 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
         out = mtd['outWS']
-        self.assertEquals(out.getHistory().size(), 1)
+        self.assertEqual(out.getHistory().size(), 1)
         algH = out.getHistory().getAlgorithmHistory(0)
 
         from ReflectometryILLAutoProcess import PropAutoProcess
         from ReflectometryILLPreprocess import Prop
-        self.assertEquals(algH.getPropertyValue('AngleOption'), 'Detector angle')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_OFFSET_DIRECT), '7')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_OFFSET_REFLECTED), '7')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_WIDTH_DIRECT), '5')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_WIDTH_REFLECTED), '5')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_OFFSET_DIRECT), '7')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_OFFSET_REFLECTED), '7')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_WIDTH_DIRECT), '5')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_WIDTH_REFLECTED), '5')
-        self.assertEquals(algH.getPropertyValue(Prop.SUBALG_LOGGING), 'Logging OFF')
-        self.assertEquals(algH.getPropertyValue(Prop.CLEANUP), 'Cleanup ON')
-        self.assertEquals(algH.getPropertyValue(Prop.SLIT_NORM), 'Slit Normalisation OFF')
-        self.assertEquals(algH.getPropertyValue(Prop.FLUX_NORM_METHOD), 'Normalise To Time')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.BKG_METHOD_DIRECT), 'Background Constant Fit')
-        self.assertEquals(algH.getPropertyValue(Prop.BKG_METHOD), 'Background Constant Fit')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.START_WS_INDEX_DIRECT), '0')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.START_WS_INDEX_REFLECTED), '0')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.END_WS_INDEX_DIRECT), '255')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.END_WS_INDEX_REFLECTED), '255')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.SUM_TYPE), 'SumInLambda')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.WAVELENGTH_LOWER), '0')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.WAVELENGTH_UPPER), '35')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH), '0')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH), '0')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT), '0')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT), '0')
+        self.assertEqual(algH.getPropertyValue('AngleOption'), 'Detector angle')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.LOW_BKG_OFFSET_DIRECT), '7')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.LOW_BKG_OFFSET), '7')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.LOW_BKG_WIDTH_DIRECT), '5')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.LOW_BKG_WIDTH), '5')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_OFFSET_DIRECT), '7')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_OFFSET), '7')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_WIDTH_DIRECT), '5')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_WIDTH), '5')
+        self.assertEqual(algH.getPropertyValue(Prop.SUBALG_LOGGING), 'Logging OFF')
+        self.assertEqual(algH.getPropertyValue(Prop.CLEANUP), 'Cleanup ON')
+        self.assertEqual(algH.getPropertyValue(Prop.SLIT_NORM), 'Slit Normalisation AUTO')
+        self.assertEqual(algH.getPropertyValue(Prop.FLUX_NORM_METHOD), 'Normalise To Time')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.BKG_METHOD_DIRECT), 'Background Constant Fit')
+        self.assertEqual(algH.getPropertyValue(Prop.BKG_METHOD), 'Background Constant Fit')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.START_WS_INDEX_DIRECT), '0')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.START_WS_INDEX), '0')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.END_WS_INDEX_DIRECT), '255')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.END_WS_INDEX), '255')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.SUM_TYPE), 'SumInLambda')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.WAVELENGTH_LOWER), '0')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.WAVELENGTH_UPPER), '35')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH), '0')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH), '0')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT), '0')
+        self.assertEqual(algH.getPropertyValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT), '0')
         mtd.clear()
 
 if __name__ == "__main__":

@@ -31,6 +31,9 @@ The algorithm adds the following sample log entries to the *OutputWorkspace*:
 * reduction.foreground.last_workspace_index
 * reduction.foreground.first_workspace_index
 * reduction.line_position : the peak position (workspace index) used to define the :math:`2\theta` angles (detector positions)
+* reduction.two_theta
+
+The option *Slit Normalisation AUTO* will select the slit normalisation depending on the instrument: for D17 and FIGARO, the slit normalisation will be turned on and off, respectively.
 
 The workflow diagram below gives an overview of the algorithm:
 
