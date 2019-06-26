@@ -13,6 +13,7 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = \
     [
+     ParamMapEntry(ext_name="calibration_to_adjust",     int_name="cal_adjust", optional=True),
      ParamMapEntry(ext_name="calibration_directory",     int_name="calibration_dir"),
      ParamMapEntry(ext_name="calibration_mapping_file",  int_name="cal_mapping_path"),
      ParamMapEntry(ext_name="config_file",               int_name="config_file"),

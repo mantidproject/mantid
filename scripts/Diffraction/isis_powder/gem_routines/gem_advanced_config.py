@@ -111,7 +111,7 @@ texture_mode_off ={"focused_cropping_values": focused_cropping_values,
 
 calibration_params = {
     "create_cal_rebin_1_params": "100,-0.0006,19950",
-    "create_cal_rebin_2_params": "1,0.002,1.3",
+    "create_cal_rebin_2_params": "1.05,0.002,1.3",
     "create_cal_cross_correlate_params": {
         "cross_corr_reference_spectra": 5000,
         "cross_corr_ws_index_min": 11,
