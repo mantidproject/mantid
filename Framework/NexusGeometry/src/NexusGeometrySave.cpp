@@ -73,11 +73,24 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // create h5 file
 
-  H5::Group parentGroup = file.createGroup("/raw_data_1");  //create parent group in file.
-  H5::Group childGroup = parentGroup.createGroup("instrument"); //create child group in parent.
+  H5::Group parentGroup =
+      file.createGroup("/raw_data_1"); // create parent group in file.
 
-  writeStrAttribute(parentGroup, parentNexusClassName, parentNexusClassType); //write attributes to parent.
-  writeStrAttribute(childGroup, childNexusClassName, childNexusClassType); //write attributes to child.
+  H5::Group childGroup =
+      parentGroup.createGroup("instrument"); // create child group in parent.
+
+  writeStrAttribute(parentGroup, parentNexusClassName,
+                    parentNexusClassType); // write attributes to parent.
+
+  writeStrAttribute(childGroup, childNexusClassName,
+                    childNexusClassType); // write attributes to child.
+
+  //create DataSet 'data' in instrument.
+
+  H5::StrType dataType(0, H5T_VARIABLE);
+  H5::DataSpace dataSpace(H5S_SCALAR);
+
+  childGroup.createDataSet("location",dataType,dataSpace);
 
   file.close();
 

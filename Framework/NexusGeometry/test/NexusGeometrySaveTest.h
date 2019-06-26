@@ -37,7 +37,7 @@ public:
   MOCK_METHOD1(doReport, void(const std::string &));
 };
 
-// tests that attributes are in file. 
+// tests that attributes are in file.
 class HDF5FileTestUtility {
 
 public:
@@ -57,8 +57,21 @@ public:
 
     std::string readClass;
     attribute.read(attribute.getDataType(), readClass);
-    return (readClass == classType) ? true
-                                    : false; 
+    return readClass == classType;
+  }
+
+  bool hasDataSet(const std::string &dataSetname,
+                  const std::string &path) const {
+
+    H5::Group parentGroup = m_file.openGroup(path);
+
+    try {
+      H5::DataSet dataSet = parentGroup.openDataSet(dataSetname);
+      return true;
+    } catch (...) {
+      return false;
+    }
+
   }
 
 private:
@@ -138,8 +151,6 @@ public:
                      std::invalid_argument &);
   }
 
- 
-
   void test_progress_reporting() {
 
     MockProgressBase progressRep;
@@ -161,7 +172,7 @@ public:
                      std::invalid_argument &);
   }
 
-   void test_nxinstrument_class_exists() {
+  void test_nxinstrument_class_exists() {
 
     ScopedFileHandle fileResource(
         "testIstrument.hdf5"); // creates a temp directory for the file.
@@ -172,18 +183,20 @@ public:
     HDF5FileTestUtility tester(
         destinationFile); // tests the file has given attributes.
 
-    ASSERT_TRUE(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
-    ASSERT_TRUE(tester.hasNxClass("NXentry", "/raw_data_1"));
-
+    TS_ASSERT(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
+    TS_ASSERT(tester.hasNxClass("NXentry", "/raw_data_1"));
   }
 
   void test_instrument_has_name() {
-    ScopedFileHandle scopedFile("instrument.hdf5");
-    saveInstrument(*m_instrument.first, scopedFile.fullPath());
 
-    HDF5FileTestUtility testUtility(scopedFile.fullPath());
+    ScopedFileHandle scopedFile("instrument.hdf5"); // temp directory
+    auto destinationFile = scopedFile.fullPath();
+
+    saveInstrument(*m_instrument.first, destinationFile); // saves instrument
+    HDF5FileTestUtility testUtility(destinationFile);
+
     // TS_ASSERT(testUtility.hasDataSet("/raw_data1/instrument/name", NX_CHAR));
-
+    TS_ASSERT(testUtility.hasDataSet("location", "/raw_data_1/instrument"));
     // TODO write hasDataSet in HDF5FileTestUtility
   }
 };
