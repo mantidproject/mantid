@@ -168,6 +168,7 @@ class SampleLogs:
     TWO_THETA = 'loader.two_theta'
     REDUCTION_TWO_THETA = 'reduction.two_theta'
 
+
 class WSCleanup:
     """A class to manage intermediate workspace cleanup."""
 
@@ -226,4 +227,3 @@ class WSNameSource:
     def withSuffix(self, suffix):
         """Returns a workspace name with given suffix applied."""
         return self._prefix + '_' + suffix + '_'
-
