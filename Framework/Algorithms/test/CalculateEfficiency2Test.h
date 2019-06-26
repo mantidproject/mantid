@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CalculateSensitivityTEST_H_
-#define CalculateSensitivityTEST_H_
+#ifndef CalculateEfficiency2TEST_H_
+#define CalculateEfficiency2TEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAlgorithms/CalculateSensitivity.h"
+#include "MantidAlgorithms/CalculateEfficiency2.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidKernel/EmptyValues.h"
@@ -23,7 +23,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class CalculateSensitivityTest : public CxxTest::TestSuite {
+class CalculateEfficiency2Test : public CxxTest::TestSuite {
 public:
   /*
    * Generate fake data for which we know what the result should be
@@ -60,11 +60,9 @@ public:
     Y[0] = 202.0;
   }
 
-  void testName() {
-    TS_ASSERT_EQUALS(correction.name(), "CalculateSensitivity")
-  }
+  void testName() { TS_ASSERT_EQUALS(correction.name(), "CalculateEfficiency") }
 
-  void testVersion() { TS_ASSERT_EQUALS(correction.version(), 1) }
+  void testVersion() { TS_ASSERT_EQUALS(correction.version(), 2) }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(correction.initialize())
@@ -261,8 +259,8 @@ public:
   }
 
 private:
-  Mantid::Algorithms::CalculateSensitivity correction;
+  Mantid::Algorithms::CalculateEfficiency2 correction;
   std::string inputWS;
 };
 
-#endif /*CalculateSensitivityTEST_H_*/
+#endif /*CalculateEfficiency2TEST_H_*/

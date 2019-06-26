@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CalculateSensitivity_H_
-#define MANTID_ALGORITHMS_CalculateSensitivity_H_
+#ifndef MANTID_ALGORITHMS_CalculateEfficiency2_H_
+#define MANTID_ALGORITHMS_CalculateEfficiency2_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -56,17 +56,17 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CalculateSensitivity : public API::Algorithm {
+class DLLExport CalculateEfficiency2 : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "CalculateSensitivity"; }
+  const std::string name() const override { return "CalculateEfficiency"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Calculates the detector efficiency for a SANS instrument.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  int version() const override { return (1); }
+  int version() const override { return (2); }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "SANS;CorrectionFunctions\\EfficiencyCorrections";
@@ -90,4 +90,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_CalculateSensitivity_H_*/
+#endif /*MANTID_ALGORITHMS_CalculateEfficiency2_H_*/

@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/CalculateSensitivity.h"
+#include "MantidAlgorithms/CalculateEfficiency2.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
@@ -24,7 +24,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(CalculateSensitivity)
+DECLARE_ALGORITHM(CalculateEfficiency2)
 
 using namespace Kernel;
 using namespace API;
@@ -59,7 +59,7 @@ static void applyBadPixelThreshold(MatrixWorkspace &outputWS,
 /** Initialization method.
  *
  */
-void CalculateSensitivity::init() {
+void CalculateEfficiency2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
                   "The workspace containing the flood data");
@@ -81,7 +81,7 @@ void CalculateSensitivity::init() {
 /** Executes the algorithm
  *
  */
-void CalculateSensitivity::exec() {
+void CalculateEfficiency2::exec() {
 
   // Minimum efficiency. Pixels with lower efficiency will be masked
   double minThreshold = getProperty("MinThreshold");
@@ -123,7 +123,7 @@ void CalculateSensitivity::exec() {
  *
  * @param workspace: workspace where all the wavelength bins have been grouped
  */
-SummedResults CalculateSensitivity::sumUnmaskedAndDeadPixels(
+SummedResults CalculateEfficiency2::sumUnmaskedAndDeadPixels(
     const MatrixWorkspace &workspace) {
   // Number of spectra
   const size_t numberOfSpectra = workspace.getNumberHistograms();
@@ -154,7 +154,7 @@ SummedResults CalculateSensitivity::sumUnmaskedAndDeadPixels(
   return results;
 }
 
-void CalculateSensitivity::averageAndNormalizePixels(
+void CalculateEfficiency2::averageAndNormalizePixels(
     MatrixWorkspace &workspace, const SummedResults &counts) {
 
   // Number of spectra
