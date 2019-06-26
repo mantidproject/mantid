@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter,
-                                   PositiveFloatParameter, FloatParameter, ClassTypeParameter, DictParameter,
+                                   PositiveFloatParameter, FloatParameter, EnumParameter, DictParameter,
                                    PositiveFloatWithNoneParameter, BoolParameter, PositiveFloatListParameter)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)
@@ -30,11 +30,11 @@ class StateNormalizeToMonitor(StateBase):
     prompt_peak_correction_max = PositiveFloatWithNoneParameter()
     prompt_peak_correction_enabled = BoolParameter()
 
-    rebin_type = ClassTypeParameter(RebinType)
+    rebin_type = EnumParameter(RebinType)
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    wavelength_step_type = EnumParameter(RangeStepType)
 
     background_TOF_general_start = FloatParameter()
     background_TOF_general_stop = FloatParameter()

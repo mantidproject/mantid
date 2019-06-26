@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import copy
-from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter, ClassTypeParameter)
+from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter, EnumParameter)
 from sans.common.enums import (SampleShape, SANSFacility)
 from sans.state.automatic_setters import (automatic_setters)
 
@@ -18,14 +18,14 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateScale(StateBase):
-    shape = ClassTypeParameter(SampleShape)
+    shape = EnumParameter(SampleShape)
     thickness = PositiveFloatParameter()
     width = PositiveFloatParameter()
     height = PositiveFloatParameter()
     scale = PositiveFloatParameter()
 
     # Geometry from the file
-    shape_from_file = ClassTypeParameter(SampleShape)
+    shape_from_file = EnumParameter(SampleShape)
     thickness_from_file = PositiveFloatParameter()
     width_from_file = PositiveFloatParameter()
     height_from_file = PositiveFloatParameter()

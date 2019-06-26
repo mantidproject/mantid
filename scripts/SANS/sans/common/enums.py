@@ -67,7 +67,7 @@ CanonicalCoordinates = Enum("CanonicalCoordinates", "X Y Z")
 ReductionMode = SANSEnum("ReductionMode", "Merged All")
 
 # Defines the different reduction modes. This can be the high-angle bank, the low-angle bank
-ISISReductionMode = SANSEnum("ISISReductionMode", "HAB LAB")
+ISISReductionMode = SANSEnum("ISISReductionMode", "Merged All HAB LAB")
 
 
 # --------------------------

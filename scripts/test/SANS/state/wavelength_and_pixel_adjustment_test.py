@@ -68,10 +68,8 @@ class StateWavelengthAndPixelAdjustmentBuilderTest(unittest.TestCase):
         state = builder.build()
 
         # Assert
-        self.assertTrue(state.adjustment_files[DetectorType.to_string(
-                                                                     DetectorType.HAB)].pixel_adjustment_file == "test")
-        self.assertTrue(state.adjustment_files[DetectorType.to_string(
-                                                              DetectorType.HAB)].wavelength_adjustment_file == "test2")
+        self.assertTrue(state.adjustment_files[DetectorType.HAB.name].pixel_adjustment_file == "test")
+        self.assertTrue(state.adjustment_files[DetectorType.HAB.name].wavelength_adjustment_file == "test2")
         self.assertEqual(state.wavelength_low,  [1.5])
         self.assertEqual(state.wavelength_high,  [2.7])
         self.assertEqual(state.wavelength_step,  0.5)

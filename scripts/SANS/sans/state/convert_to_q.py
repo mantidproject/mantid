@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, BoolParameter, PositiveFloatParameter,
-                                   ClassTypeParameter, StringParameter)
+                                   EnumParameter, StringParameter)
 from sans.common.enums import (ReductionDimensionality, RangeStepType, SANSFacility)
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
                                         validation_message)
@@ -24,7 +24,7 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateConvertToQ(StateBase):
-    reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
+    reduction_dimensionality = EnumParameter(ReductionDimensionality)
     use_gravity = BoolParameter()
     gravity_extra_length = PositiveFloatParameter()
     radius_cutoff = PositiveFloatParameter()
@@ -38,7 +38,7 @@ class StateConvertToQ(StateBase):
     # 2D settings
     q_xy_max = PositiveFloatParameter()
     q_xy_step = PositiveFloatParameter()
-    q_xy_step_type = ClassTypeParameter(RangeStepType)
+    q_xy_step_type = EnumParameter(RangeStepType)
 
     # -----------------------
     # Q Resolution specific

@@ -92,7 +92,7 @@ class TableModel(object):
 
     def remove_table_entries(self, rows):
         # For speed rows should be a Set here but don't think it matters for the list sizes involved.
-        self._table_entries[:] = [item for i,item in enumerate(self._table_entries) if i not in rows]
+        self._table_entries[:] = [item for i, item in enumerate(self._table_entries) if i not in rows]
         if not self._table_entries:
             row_index_model = self.create_empty_row()
             self.append_table_entry(row_index_model)
@@ -461,10 +461,10 @@ class SampleShapeColumnModel(object):
         self._get_sample_shape(original_value)
 
     def _get_sample_shape(self, original_value):
-        try:
-            original_value = original_value.name
-        except RuntimeError as e:
-            if not isinstance(original_value, str):
+        if not isinstance(original_value, str):
+            try:
+                original_value = original_value.name
+            except AttributeError as e:
                 raise ValueError(str(e))
 
         value = original_value.strip().lower()

@@ -9,21 +9,18 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
-from mantid.kernel import (PropertyManagerProperty, PropertyManager)
 from mantid.api import Algorithm
+from mantid.kernel import (PropertyManagerProperty, PropertyManager)
+from mantid.py3compat import Enum
 
 from sans.state.state_base import (StringParameter, BoolParameter, FloatParameter, PositiveFloatParameter,
-                                   PositiveIntegerParameter, DictParameter, ClassTypeParameter,
+                                   PositiveIntegerParameter, DictParameter, EnumParameter,
                                    FloatWithNoneParameter, PositiveFloatWithNoneParameter, FloatListParameter,
-                                   StringListParameter, PositiveIntegerListParameter, ClassTypeListParameter,
+                                   StringListParameter, PositiveIntegerListParameter, EnumListParameter,
                                    StateBase, rename_descriptor_names, TypedParameter, validator_sub_state,
-                                   create_deserialized_sans_state_from_property_manager)
-from sans.common.enums import serializable_enum
+                                   create_deserialized_sans_state_from_property_manager, ClassTypeListParameter)
 
-
-@serializable_enum("TypeA", "TypeB")
-class TestType(object):
-    pass
+TestType = Enum("TestType", "TypeA TypeB")
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -44,8 +41,8 @@ class StateBaseTestClass(StateBase):
     float_list_parameter = FloatListParameter()
     string_list_parameter = StringListParameter()
     positive_integer_list_parameter = PositiveIntegerListParameter()
-    class_type_parameter = ClassTypeParameter(TestType)
-    class_type_list_parameter = ClassTypeListParameter(TestType)
+    enum_parameter = EnumParameter(TestType)
+    enum_list_parameter = EnumListParameter(TestType)
 
     def __init__(self):
         super(StateBaseTestClass, self).__init__()
@@ -61,7 +58,7 @@ class TypedParameterTest(unittest.TestCase):
             self.fail()
         except error_type:
             pass
-        except:  # noqa
+        except Exception as e:  # noqa
             self.fail()
 
     def test_that_can_set_to_valid_value_of_correct_type(self):
@@ -81,8 +78,8 @@ class TypedParameterTest(unittest.TestCase):
             test_class.float_list_parameter = [12., -123., 2355.]
             test_class.string_list_parameter = ["test", "test"]
             test_class.positive_integer_list_parameter = [1, 2, 4]
-            test_class.class_type_parameter = TestType.TypeA
-            test_class.class_type_list_parameter = [TestType.TypeA, TestType.TypeB]
+            test_class.enum_parameter = TestType.TypeA
+            test_class.enum_list_parameter = [TestType.TypeA, TestType.TypeB]
 
         except ValueError:
             self.fail()
@@ -100,8 +97,8 @@ class TypedParameterTest(unittest.TestCase):
         self._check_that_raises(TypeError, test_class, "float_list_parameter", [1.23, "test"])
         self._check_that_raises(TypeError, test_class, "string_list_parameter", ["test", "test", 123.])
         self._check_that_raises(TypeError, test_class, "positive_integer_list_parameter", [1, "test"])
-        self._check_that_raises(TypeError, test_class, "class_type_parameter", "test")
-        self._check_that_raises(TypeError, test_class, "class_type_list_parameter", ["test", TestType.TypeA])
+        self._check_that_raises(TypeError, test_class, "enum_parameter", "test")
+        self._check_that_raises(TypeError, test_class, "enum_list_parameter", ["test", TestType.TypeA])
 
     def test_that_will_raise_if_set_with_wrong_value(self):
         # Note that this check does not apply to all parameter, it checks the validator
@@ -110,7 +107,6 @@ class TypedParameterTest(unittest.TestCase):
         self._check_that_raises(ValueError, test_class, "positive_integer_parameter", -1)
         self._check_that_raises(ValueError, test_class, "positive_float_with_none_parameter", -234.)
         self._check_that_raises(ValueError, test_class, "positive_integer_list_parameter", [1, -2, 4])
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
@@ -180,8 +176,8 @@ class SimpleState(StateBase):
     float_list_parameter = FloatListParameter()
     string_list_parameter = StringListParameter()
     positive_integer_list_parameter = PositiveIntegerListParameter()
-    class_type_parameter = ClassTypeParameter(TestType)
-    class_type_list_parameter = ClassTypeListParameter(TestType)
+    enum_parameter = EnumParameter(TestType)
+    enum_list_parameter = EnumListParameter(TestType)
 
     sub_state_very_simple = TypedParameter(VerySimpleState, validator_sub_state)
 
@@ -194,12 +190,12 @@ class SimpleState(StateBase):
         self.positive_integer_parameter = 6
         self.dict_parameter = {"1": 123, "2": "test"}
         self.float_with_none_parameter = 325.
-        # We expliclty leave out the positive_float_with_none_parameter
+        # We explicitly leave out the positive_float_with_none_parameter
         self.float_list_parameter = [123., 234.]
         self.string_list_parameter = ["test1", "test2"]
         self.positive_integer_list_parameter = [1, 2, 3]
-        self.class_type_parameter = TestType.TypeA
-        self.class_type_list_parameter = [TestType.TypeA, TestType.TypeB]
+        self.enum_parameter = TestType.TypeA
+        self.enum_list_parameter = [TestType.TypeA, TestType.TypeB]
         self.sub_state_very_simple = VerySimpleState()
 
     def validate(self):
@@ -249,10 +245,10 @@ class TestStateBase(unittest.TestCase):
         self.assertEqual(state.positive_integer_list_parameter[1],  2)
         self.assertEqual(state.positive_integer_list_parameter[2],  3)
 
-        self.assertEqual(state.class_type_parameter, TestType.TypeA)
-        self.assertEqual(len(state.class_type_list_parameter),  2)
-        self.assertEqual(state.class_type_list_parameter[0],  TestType.TypeA)
-        self.assertEqual(state.class_type_list_parameter[1],  TestType.TypeB)
+        self.assertEqual(state.enum_parameter, TestType.TypeA)
+        self.assertEqual(len(state.enum_list_parameter),  2)
+        self.assertEqual(state.enum_list_parameter[0],  TestType.TypeA)
+        self.assertEqual(state.enum_list_parameter[1],  TestType.TypeB)
 
         self.assertEqual(state.sub_state_very_simple.string_parameter,  "test_in_very_simple")
         

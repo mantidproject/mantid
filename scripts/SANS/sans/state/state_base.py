@@ -15,6 +15,7 @@ from functools import (partial)
 from six import string_types, with_metaclass
 
 from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int, std_vector_long)
+from mantid.py3compat import Enum
 
 
 # ---------------------------------------------------------------
@@ -216,6 +217,17 @@ class ClassTypeParameter(TypedParameter):
                                                                                value, type(value)))
 
 
+class EnumParameter(TypedParameter):
+    def __init__(self, enum_type):
+        super(EnumParameter, self).__init__(enum_type, is_not_none)
+
+    def _type_check(self, value):
+        if not isinstance(value, self.parameter_type):
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
+
+
 class FloatWithNoneParameter(TypedParameter):
     def __init__(self):
         super(FloatWithNoneParameter, self).__init__(float)
@@ -299,6 +311,20 @@ class ClassTypeListParameter(TypedParameter):
     def __init__(self, class_type):
         typed_comparison = partial(all_list_elements_are_of_class_type_and_not_empty, comparison_type=class_type)
         super(ClassTypeListParameter, self).__init__(list, typed_comparison)
+
+
+class EnumListParameter(TypedParameter):
+    def __init__(self, enum_type):
+        typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=enum_type,
+                                   additional_comparison=self._additional_comparison)
+        super(EnumListParameter, self).__init__(list, typed_comparison)
+
+    @staticmethod
+    def _additional_comparison(value):
+        if isinstance(value, Enum):
+            return True
+        else:
+            raise TypeError("Expected type Enum, but {0} is of type {1} instead.".format(value, type(value)))
 
 
 # ------------------------------------------------

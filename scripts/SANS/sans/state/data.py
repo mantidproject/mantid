@@ -12,7 +12,7 @@ import json
 import copy
 
 from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter, BoolParameter,
-                                   ClassTypeParameter, rename_descriptor_names)
+                                   EnumParameter, rename_descriptor_names)
 from sans.common.enums import (SANSInstrument, SANSFacility)
 import sans.common.constants
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
@@ -43,8 +43,8 @@ class StateData(StateBase):
 
     sample_scatter_run_number = PositiveIntegerParameter()
     sample_scatter_is_multi_period = BoolParameter()
-    instrument = ClassTypeParameter(SANSInstrument)
-    facility = ClassTypeParameter(SANSFacility)
+    instrument = EnumParameter(SANSInstrument)
+    facility = EnumParameter(SANSFacility)
     idf_file_path = StringParameter()
     ipf_file_path = StringParameter()
 

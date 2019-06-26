@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter, BoolParameter,
-                                   PositiveFloatParameter, ClassTypeParameter, FloatParameter, DictParameter,
+                                   PositiveFloatParameter, EnumParameter, FloatParameter, DictParameter,
                                    StringListParameter, PositiveFloatWithNoneParameter, PositiveFloatListParameter)
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.common.configurations import Configurations
@@ -27,7 +27,7 @@ from sans.common.xml_parsing import get_named_elements_from_ipf_file
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateTransmissionFit(StateBase):
-    fit_type = ClassTypeParameter(FitType)
+    fit_type = EnumParameter(FitType)
     polynomial_order = PositiveIntegerParameter()
     wavelength_low = PositiveFloatWithNoneParameter()
     wavelength_high = PositiveFloatWithNoneParameter()
@@ -89,11 +89,11 @@ class StateCalculateTransmission(StateBase):
     # ----------------
     # Wavelength rebin
     # ----------------
-    rebin_type = ClassTypeParameter(RebinType)
+    rebin_type = EnumParameter(RebinType)
     wavelength_low = PositiveFloatListParameter()
     wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
-    wavelength_step_type = ClassTypeParameter(RangeStepType)
+    wavelength_step_type = EnumParameter(RangeStepType)
 
     use_full_wavelength_range = BoolParameter()
     wavelength_full_range_low = PositiveFloatParameter()

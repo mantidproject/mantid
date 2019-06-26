@@ -99,7 +99,7 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         # Convert and rebin the dummy workspace to get correct bin flags
         if use_dummy_workspace:
             dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
-                                             DetectorType[component_as_string)]
+                                             DetectorType[component_as_string])
             dummy_mask_workspace = self._convert_to_wavelength(state_serialized, dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------

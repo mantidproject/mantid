@@ -13,7 +13,7 @@ from abc import (ABCMeta, abstractmethod)
 from six import (with_metaclass)
 import copy
 import json
-from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
+from sans.state.state_base import (StateBase, EnumParameter, FloatParameter, DictParameter,
                                    FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
 from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, DetectorType)
@@ -40,14 +40,14 @@ class StateReductionBase(with_metaclass(ABCMeta, object)):
 
 @rename_descriptor_names
 class StateReductionMode(StateReductionBase, StateBase):
-    reduction_mode = ClassTypeParameter(ReductionMode)
-    reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
+    reduction_mode = EnumParameter(ISISReductionMode)
+    reduction_dimensionality = EnumParameter(ReductionDimensionality)
     merge_max = FloatWithNoneParameter()
     merge_min = FloatWithNoneParameter()
     merge_mask = BoolParameter()
 
     # Fitting
-    merge_fit_mode = ClassTypeParameter(FitModeForMerge)
+    merge_fit_mode = EnumParameter(FitModeForMerge)
     merge_shift = FloatParameter()
     merge_scale = FloatParameter()
     merge_range_min = FloatWithNoneParameter()

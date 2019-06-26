@@ -64,7 +64,7 @@ DetectorId = Enum("DetectorId", "reduction_mode rescale shift rescale_fit shift_
                   "correction_x_tilt correction_y_tilt merge_range instrument")
 
 # --- LIMITS
-LimitsId = Enum("LimitsId", "angle events_binnning events_binning_range radius_cut "
+LimitsId = Enum("LimitsId", "angle events_binning events_binning_range radius_cut "
                             "wavelength_cut radius q qxy wavelength")
 
 

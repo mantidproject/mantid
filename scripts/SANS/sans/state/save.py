@@ -11,7 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 import copy
 from sans.state.state_base import (StateBase, BoolParameter, StringParameter, StringWithNoneParameter,
-                                   ClassTypeListParameter, rename_descriptor_names)
+                                   EnumListParameter, rename_descriptor_names)
 from sans.common.enums import (SaveType, SANSFacility)
 from sans.state.automatic_setters import (automatic_setters)
 
@@ -22,7 +22,7 @@ from sans.state.automatic_setters import (automatic_setters)
 @rename_descriptor_names
 class StateSave(StateBase):
     zero_free_correction = BoolParameter()
-    file_format = ClassTypeListParameter(SaveType)
+    file_format = EnumListParameter(SaveType)
 
     # Settings for the output name
     user_specified_output_name = StringWithNoneParameter()

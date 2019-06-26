@@ -283,14 +283,15 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
         for transmission_bundle in transmission_bundles:
-transmission_bundle.data_type.name].fit_type != FitType.NoFit
+            fit_performed = fit_state[transmission_bundle.data_type.name].fit_type != FitType.NoFit
             calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
             unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
             if transmission_bundle.data_type is DataType.Can:
                 if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
                     # The workspace is cloned here because the transmission runs are diagnostic output so even though
-                    # the values already exist they need to be labelled seperately for each reduction.
-                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
+                    # the values already exist they need to be labelled separately for each reduction.
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace,
+                                                                       StoreInADS=False)
                 if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
                     unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
                 if fit_performed:
