@@ -322,7 +322,7 @@ class SANSILLReduction(PythonAlgorithm):
                 Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
             flux_in = self.getProperty('FluxInputWorkspace').value
             if flux_in:
-                coll_ws = beam_ws
+                coll_ws = flux_in
                 flux_ws = ws + '_flux'
                 if self._mode == 'TOF':
                     RebinToWorkspace(WorkspaceToRebin=flux_in, WorkspaceToMatch=ws, OutputWorkspace=flux_ws)
