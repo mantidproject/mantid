@@ -240,6 +240,18 @@ void ContourPreviewPlot::checkForInfiniteLimits(
             << ")\n";
 }
 
+std::tuple<double, double>
+ContourPreviewPlot::getAxisRange(AxisID axisID) const {
+  switch (axisID) {
+  case AxisID::XBottom:
+    return std::make_tuple(dimensionMinimum(0), dimensionMaximum(0));
+  case AxisID::YLeft:
+    return std::make_tuple(dimensionMinimum(1), dimensionMaximum(1));
+  }
+  throw std::runtime_error(
+      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
+}
+
 DimensionRange
 ContourPreviewPlot::dimensionRange(std::size_t const &index) const {
   DimensionRange range =

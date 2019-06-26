@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
 #include <Poco/NObserver.h>
@@ -40,6 +41,8 @@ public:
   void setCanvasColour(QColor const &colour);
 
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr workspace);
+
+  std::tuple<double, double> getAxisRange(AxisID axisID) const;
 
 private:
   void createLayout();

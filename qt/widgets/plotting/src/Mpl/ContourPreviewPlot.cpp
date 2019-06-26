@@ -116,5 +116,22 @@ void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr workspace) {
   }
 }
 
+/**
+ * Gets the range of the supplied axis
+ * @param axisID The axis to get the range for
+ * @return The axis range
+ */
+std::tuple<double, double>
+ContourPreviewPlot::getAxisRange(AxisID axisID) const {
+  switch (axisID) {
+  case AxisID::XBottom:
+    return m_canvas->gca().getXLim();
+  case AxisID::YLeft:
+    return m_canvas->gca().getYLim();
+  }
+  throw std::runtime_error(
+      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

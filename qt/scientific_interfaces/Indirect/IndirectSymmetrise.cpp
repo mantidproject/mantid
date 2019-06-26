@@ -402,9 +402,9 @@ void IndirectSymmetrise::preview() {
   double e_max = m_dblManager->value(m_properties["EMax"]);
 
   if (e_min == m_originalMin && e_max == m_originalMax) {
-    g_log.error("Preview has been called, but the max and min are still "
-                "default. Please update the min "
-                "and max lines on the top graph.");
+    IndirectTab::showMessageBox(
+        "Preview has been called, but the max and min are still default. "
+        "Please update the min and max lines on the top graph.");
     return;
   }
 

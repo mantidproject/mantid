@@ -9,6 +9,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 
 #include <QFileInfo>
 
@@ -21,6 +22,17 @@ Mantid::Kernel::Logger g_log("S(Q,w)");
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
+}
+
+double roundToPrecision(double value, double precision) {
+  return value - std::remainder(value, precision);
+}
+
+std::pair<double, double>
+roundToWidth(std::tuple<double, double> const &axisRange, double width) {
+  return std::make_pair(roundToPrecision(std::get<0>(axisRange), width) + width,
+                        roundToPrecision(std::get<1>(axisRange), width) -
+                            width);
 }
 
 void convertToSpectrumAxis(std::string const &inputName,
@@ -47,6 +59,8 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(plotRqwContour()));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
+          SLOT(setDefaultQAndEnergy()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(sqwAlgDone(bool)));
 
@@ -216,6 +230,26 @@ void IndirectSqw::plotRqwContour() {
   } else {
     emit showMessageBox("Invalid file. Please load a valid reduced workspace.");
   }
+}
+
+void IndirectSqw::setDefaultQAndEnergy() {
+  if (m_uiForm.dsSampleInput->isValid()) {
+    setQRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft));
+    setEnergyRange(
+        m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom));
+  }
+}
+
+void IndirectSqw::setQRange(std::tuple<double, double> const &axisRange) {
+  auto const qRange = roundToWidth(axisRange, m_uiForm.spQWidth->value());
+  m_uiForm.spQLow->setValue(qRange.first);
+  m_uiForm.spQHigh->setValue(qRange.second);
+}
+
+void IndirectSqw::setEnergyRange(std::tuple<double, double> const &axisRange) {
+  auto const energyRange = roundToWidth(axisRange, m_uiForm.spEWidth->value());
+  m_uiForm.spELow->setValue(energyRange.first);
+  m_uiForm.spEHigh->setValue(energyRange.second);
 }
 
 void IndirectSqw::setFileExtensionsByName(bool filter) {

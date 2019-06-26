@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
 #include <qwt_plot_spectrogram.h>
@@ -61,6 +62,8 @@ public:
 
   void setXAxisLabel(QString const &label);
   void setYAxisLabel(QString const &label);
+
+  std::tuple<double, double> getAxisRange(AxisID axisID) const;
 
 protected:
   void preDeleteHandle(
