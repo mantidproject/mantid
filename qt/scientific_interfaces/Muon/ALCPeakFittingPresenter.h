@@ -51,8 +51,8 @@ private:
   /// Plot guess on graph
   bool plotGuessOnGraph();
 
-  /// Remove plots from graph
-  void removePlots();
+  /// Remove plot from graph
+  void removePlot(std::string const &plotName);
 
   /// Associated view
   IALCPeakFittingView *const m_view;

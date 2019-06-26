@@ -791,10 +791,12 @@ class RunTabPresenter(object):
         Make all selected rows empty.
         """
         selected_rows = self._view.get_selected_rows()
-        empty_row = self._table_model.create_empty_row()
-        for row in selected_rows:
-            empty_row = TableModel.create_empty_row()
-            self._table_model.replace_table_entries([row], [empty_row])
+        if len(selected_rows) == 1 and self._table_model.get_number_of_rows() == 1:
+            self._table_model.replace_table_entries(selected_rows, [])
+        else:
+            for row in selected_rows:
+                empty_row = self._table_model.create_empty_row()
+                self._table_model.replace_table_entries([row], [empty_row])
 
     def on_rows_removed(self, rows):
         """

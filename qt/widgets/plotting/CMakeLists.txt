@@ -138,11 +138,13 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsPlottingTest
 # Matplotlib-based implementation
 ###########################################################################
 set(MPL_SRC_FILES
+    src/Mpl/PeakPicker.cpp
     src/Mpl/PreviewPlot.cpp
     src/Mpl/RangeSelector.cpp
 )
 
 set(MPL_MOC_FILES
+    inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
     inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h
     inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
 )
@@ -151,6 +153,7 @@ set(MPL_MOC_FILES
 set(MPL_INC_FILES
     ${MPL_MOC_FILES}
     inc/MantidQtWidgets/Plotting/AxisID.h
+    inc/MantidQtWidgets/Plotting/PeakPicker.h
     inc/MantidQtWidgets/Plotting/PreviewPlot.h
 )
 

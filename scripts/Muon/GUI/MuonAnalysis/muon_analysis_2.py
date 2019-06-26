@@ -84,7 +84,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.home_tab = HomeTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.fitting_tab = FittingTabWidget(self.context, self)
-        self.results_tab = ResultsTabWidget(self.context.fitting_context, self)
+        self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget("Muon Analysis 2")
@@ -257,4 +257,5 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
+        self.context.ads_observer = None
         super(MuonAnalysisGui, self).closeEvent(event)

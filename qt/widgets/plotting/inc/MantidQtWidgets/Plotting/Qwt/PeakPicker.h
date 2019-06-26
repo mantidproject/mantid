@@ -18,6 +18,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+class PreviewPlot;
 
 /** PeakPicker : A simplified version of PeakPickerTool, available for use on
   general QwtPlots.
@@ -29,6 +30,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PeakPicker : public QwtPlotPicker,
 public:
   /// Constructor
   PeakPicker(QwtPlot *plot, QColor color);
+  PeakPicker(PreviewPlot *plot, QColor color);
 
   /// Correct QwtPlotItem type info
   int rtti() const override { return QwtPlotItem::Rtti_PlotMarker; }

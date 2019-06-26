@@ -18,22 +18,23 @@ from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 class MuonContextTest(unittest.TestCase):
     def setUp(self):
         AnalysisDataService.clear()
         self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
+
         self.load_result, self.run_number, self.filename, psi_data = load_workspace_from_filename(self.filepath)
         self.assert_(not psi_data)
-        self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(load_data=self.loaded_data)
-        self.gui_context = MuonGuiContext()
-        self.group_pair_context = MuonGroupPairContext()
-        self.gui_context.update({'RebinType': 'None'})
 
-        self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context, muon_group_context=self.group_pair_context)
-
+        self.context = setup_context()
+        self.context.gui_context.update({'RebinType': 'None'})
+        self.loaded_data = self.context.data_context._loaded_data
+        self.data_context = self.context.data_context
+        self.gui_context = self.context.gui_context
+        self.group_pair_context = self.context.group_pair_context
         self.data_context.instrument = 'EMU'
 
         self.loaded_data.add_data(workspace=self.load_result, run=[self.run_number], filename=self.filename,
