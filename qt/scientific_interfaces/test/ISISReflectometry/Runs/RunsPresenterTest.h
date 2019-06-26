@@ -456,11 +456,10 @@ private:
                         double thetaTolerance,
                         std::vector<std::string> const &instruments,
                         int defaultInstrumentIndex,
-                        IMessageHandler *messageHandler,
-                        IPythonRunner *pythonRunner)
+                        IMessageHandler *messageHandler)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
-                        messageHandler, pythonRunner) {}
+                        messageHandler) {}
   };
 
   RunsPresenterFriend makePresenter() {
@@ -475,8 +474,7 @@ private:
         m_instruments, m_thetaTolerance, std::move(plotter));
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
-        m_instruments, defaultInstrumentIndex, &m_messageHandler,
-        m_pythonRunner);
+        m_instruments, defaultInstrumentIndex, &m_messageHandler);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
