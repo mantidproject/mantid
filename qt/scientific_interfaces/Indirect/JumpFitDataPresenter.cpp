@@ -19,7 +19,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
     : IndirectFitDataPresenter(model, view,
                                std::make_unique<JumpFitDataTablePresenter>(
                                    model, view->getDataTable())),
-      m_activeParameterType("Width"), m_dataIndex(0),
+      m_activeParameterType("Width"), m_dataIndex{0},
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
       m_jumpModel(model) {
@@ -82,9 +82,9 @@ void JumpFitDataPresenter::updateAvailableParameters() {
 
 void JumpFitDataPresenter::updateAvailableParameters(const QString &type) {
   if (type == "Width")
-    setAvailableParameters(m_jumpModel->getWidths(0));
+    setAvailableParameters(m_jumpModel->getWidths(DatasetIndex{0}));
   else if (type == "EISF")
-    setAvailableParameters(m_jumpModel->getEISF(0));
+    setAvailableParameters(m_jumpModel->getEISF(DatasetIndex{0}));
   else
     setAvailableParameters({});
 
@@ -100,7 +100,7 @@ void JumpFitDataPresenter::updateAvailableParameterTypes() {
 }
 
 void JumpFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled = m_jumpModel->numberOfWorkspaces() > 0;
+  const auto enabled = m_jumpModel->numberOfWorkspaces().value > 0;
   m_cbParameter->setEnabled(enabled);
   m_cbParameterType->setEnabled(enabled);
   m_lbParameter->setEnabled(enabled);
@@ -152,7 +152,7 @@ void JumpFitDataPresenter::updateParameterTypes(
 }
 
 std::vector<std::string>
-JumpFitDataPresenter::getParameterTypes(std::size_t dataIndex) const {
+JumpFitDataPresenter::getParameterTypes(DatasetIndex dataIndex) const {
   std::vector<std::string> types;
   if (!m_jumpModel->zeroWidths(dataIndex))
     types.emplace_back("Width");
@@ -179,9 +179,9 @@ void JumpFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
 void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
   auto index = static_cast<std::size_t>(parameterIndex);
   if (m_cbParameterType->currentIndex() == 0)
-    m_jumpModel->setActiveWidth(index, 0);
+    m_jumpModel->setActiveWidth(index, DatasetIndex{0});
   else
-    m_jumpModel->setActiveEISF(index, 0);
+    m_jumpModel->setActiveEISF(index, DatasetIndex{0});
 }
 
 void JumpFitDataPresenter::setModelSpectrum(int index) {

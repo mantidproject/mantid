@@ -7,6 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDATATABLEPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDATATABLEPRESENTER_H_
 
+#include "IndexTypes.h"
 #include "IndirectFittingModel.h"
 
 #include <QTableWidget>
@@ -17,6 +18,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+using DataPositionType = IndexCollectionType<DatasetIndex, SpectrumRowIndex>;
 
 /**
   Presenter for a table of indirect fitting data.
@@ -34,24 +37,30 @@ public:
   bool tableDatasetsMatchModel() const;
   bool isTableEmpty() const;
 
-  void setStartX(double startX, std::size_t dataIndex, int spectrumIndex);
-  void setEndX(double endX, std::size_t dataIndex, int spectrumIndex);
-  void setExclude(const std::string &exclude, std::size_t dataIndex,
-                  int spectrumIndex);
+  void setStartX(double startX, DatasetIndex dataIndex,
+                 WorkspaceIndex spectrumIndex);
+  void setStartX(double startX, DatasetIndex dataIndex);
+  void setEndX(double endX, DatasetIndex dataIndex,
+               WorkspaceIndex spectrumIndex);
+  void setEndX(double endX, DatasetIndex dataIndex);
+  void setExclude(const std::string &exclude, DatasetIndex dataIndex,
+                  WorkspaceIndex spectrumIndex);
 
 signals:
-  void startXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
-  void endXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
-  void excludeRegionChanged(const std::string & /*_t1*/, std::size_t /*_t2*/,
-                            std::size_t /*_t3*/);
+  void startXChanged(double /*_t1*/, DatasetIndex /*_t2*/,
+                     WorkspaceIndex /*_t3*/);
+  void endXChanged(double /*_t1*/, DatasetIndex /*_t2*/,
+                   WorkspaceIndex /*_t3*/);
+  void excludeRegionChanged(const std::string & /*_t1*/, DatasetIndex /*_t2*/,
+                            WorkspaceIndex /*_t3*/);
 
 public slots:
-  void addData(std::size_t index);
-  void updateData(std::size_t index);
+  void addData(DatasetIndex index);
+  void updateData(DatasetIndex index);
   void removeSelectedData();
-  void setStartX(double startX, int index);
-  void setEndX(double endX, int index);
-  void setExcludeRegion(const std::string &exclude, int index);
+  void setStartX(double startX, SpectrumRowIndex index);
+  void setEndX(double endX, SpectrumRowIndex index);
+  void setExcludeRegion(const std::string &exclude, SpectrumRowIndex index);
   void setGlobalFittingRange(bool global);
   void enableTable();
   void disableTable();
@@ -62,50 +71,53 @@ private slots:
   void updateAllFittingRangeFrom(int row, int column);
 
 protected:
-  int getFirstRow(std::size_t dataIndex) const;
-  std::string getString(int row, int column) const;
+  SpectrumRowIndex getFirstRow(DatasetIndex dataIndex) const;
+  std::string getString(SpectrumRowIndex row, int column) const;
 
-  virtual void addTableEntry(std::size_t dataIndex, std::size_t spectrum,
-                             int row);
-  void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
-  virtual void updateTableEntry(std::size_t dataIndex, std::size_t spectrum,
-                                int row);
-  void setCellText(const QString &text, int row, int column);
+  virtual void addTableEntry(DatasetIndex dataIndex, WorkspaceIndex spectrum,
+                             SpectrumRowIndex row);
+  void setCell(std::unique_ptr<QTableWidgetItem> cell, SpectrumRowIndex row,
+               int column);
+  virtual void updateTableEntry(DatasetIndex dataIndex, WorkspaceIndex spectrum,
+                                SpectrumRowIndex row);
+  void setCellText(const QString &text, SpectrumRowIndex row, int column);
 
 private:
   virtual int workspaceIndexColumn() const;
   virtual int startXColumn() const;
   virtual int endXColumn() const;
   virtual int excludeColumn() const;
-  double startX(int row) const;
-  double endX(int row) const;
-  std::string getExcludeString(int row) const;
-  std::string getWorkspaceName(int row) const;
-  std::size_t getWorkspaceIndex(int row) const;
-  double getDouble(int row, int column) const;
-  QString getText(int row, int column) const;
-  int getNextPosition(std::size_t index) const;
-  std::size_t getDataIndex(int row) const;
-  boost::optional<Spectra> getSpectra(std::size_t dataIndex) const;
-  boost::optional<Spectra> getSpectra(int start, int end) const;
-  boost::optional<int> getRowIndex(std::size_t dataIndex,
-                                   int spectrumIndex) const;
+  double startX(SpectrumRowIndex row) const;
+  double endX(SpectrumRowIndex row) const;
+  std::string getExcludeString(SpectrumRowIndex row) const;
+  std::string getWorkspaceName(SpectrumRowIndex row) const;
+  WorkspaceIndex getWorkspaceIndex(SpectrumRowIndex row) const;
+  double getDouble(SpectrumRowIndex row, int column) const;
+  QString getText(SpectrumRowIndex row, int column) const;
+  SpectrumRowIndex getNextPosition(DatasetIndex index) const;
+  DatasetIndex getDataIndex(SpectrumRowIndex row) const;
+  boost::optional<Spectra> getSpectra(DatasetIndex dataIndex) const;
+  boost::optional<Spectra> getSpectra(SpectrumRowIndex start,
+                                      SpectrumRowIndex end) const;
+  boost::optional<SpectrumRowIndex>
+  getRowIndex(DatasetIndex dataIndex, WorkspaceIndex spectrumIndex) const;
 
-  void setModelStartXAndEmit(double startX, std::size_t dataIndex,
-                             std::size_t workspaceIndex);
-  void setModelEndXAndEmit(double endX, std::size_t dataIndex,
-                           std::size_t workspaceIndex);
-  void setModelExcludeAndEmit(const std::string &exclude, std::size_t dataIndex,
-                              std::size_t workspaceIndex);
+  void setModelStartXAndEmit(double startX, DatasetIndex dataIndex,
+                             WorkspaceIndex workspaceIndex);
+  void setModelEndXAndEmit(double endX, DatasetIndex dataIndex,
+                           WorkspaceIndex workspaceIndex);
+  void setModelExcludeAndEmit(const std::string &exclude,
+                              DatasetIndex dataIndex,
+                              WorkspaceIndex workspaceIndex);
 
   void enableGlobalFittingRange();
   void disableGlobalFittingRange();
 
-  void updateExistingData(std::size_t index);
-  void addNewData(std::size_t index);
-  void addTableEntry(std::size_t dataIndex, std::size_t spectrum);
-  std::size_t removeTableEntry(int row);
-  std::pair<std::vector<std::size_t>, std::vector<std::size_t>>
+  void updateExistingData(DatasetIndex index);
+  void addNewData(DatasetIndex index);
+  void addTableEntry(DatasetIndex dataIndex, WorkspaceIndex spectrum);
+  DatasetIndex removeTableEntry(SpectrumRowIndex row);
+  std::pair<std::vector<DatasetIndex>, std::vector<SpectrumRowIndex>>
   removeTableRows(QModelIndexList &selectedRows);
   void setStartX(double startX);
   void setEndX(double endX);
@@ -114,12 +126,14 @@ private:
   void setColumnValues(int column, const QString &value);
   void setHorizontalHeaders(const QStringList &headers);
 
-  void collapseData(int from, int to, int initialSize, std::size_t dataIndex);
-  void updateFromRemovedIndices(const std::vector<std::size_t> &indices);
-  void shiftDataPositions(int value, std::size_t from, std::size_t to);
-  void updateDataPositionsInCells(std::size_t from, std::size_t to);
+  void collapseData(SpectrumRowIndex from, SpectrumRowIndex to,
+                    SpectrumRowIndex initialSize, DatasetIndex dataIndex);
+  void updateFromRemovedIndices(const std::vector<DatasetIndex> &indices);
+  void shiftDataPositions(SpectrumRowIndex value, DatasetIndex from,
+                          DatasetIndex to);
+  void updateDataPositionsInCells(DatasetIndex from, DatasetIndex to);
 
-  std::vector<int> m_dataPositions;
+  DataPositionType m_dataPositions;
   IndirectFittingModel *m_model;
   QTableWidget *m_dataTable;
 };

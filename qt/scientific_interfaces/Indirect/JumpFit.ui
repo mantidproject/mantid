@@ -28,7 +28,7 @@
        <item>
         <layout class="QHBoxLayout" name="loPlotArea" stretch="1,1">
          <item>
-          <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
            <widget class="QWidget" name="dockWidgetContents"/>
           </widget>
          </item>
@@ -222,9 +222,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowser</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPropertyBrowser</class>
    <extends>QDockWidget</extends>
-   <header>MantidQtWidgets/Common/IndirectFitPropertyBrowser.h</header>
+   <header>IndirectFitPropertyBrowser.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

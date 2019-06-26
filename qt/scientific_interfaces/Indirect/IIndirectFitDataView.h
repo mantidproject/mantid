@@ -51,8 +51,12 @@ public:
   virtual void readSettings(QSettings const &settings) = 0;
   virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
 
+  virtual void setXRange(std::pair<double, double> const &range) = 0;
+
 public slots:
   virtual void displayWarning(std::string const &warning) = 0;
+  virtual void setStartX(double) = 0;
+  virtual void setEndX(double) = 0;
 
 signals:
   void sampleLoaded(QString const & /*_t1*/);
@@ -61,6 +65,8 @@ signals:
   void removeClicked();
   void multipleDataViewSelected();
   void singleDataViewSelected();
+  void startXChanged(double);
+  void endXChanged(double);
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -40,7 +40,7 @@ public:
   QString getFitFunctionString() const;
   bool hasFunction() const;
   void setParameter(const QString &paramName, double value);
-  void setParamError(const QString &paramName, double value);
+  void setParameterError(const QString &paramName, double value);
   double getParameter(const QString &paramName);
   bool isParameterFixed(const QString &parName) const;
   QString getParameterTie(const QString &parName) const;
@@ -58,11 +58,13 @@ public:
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
   QString getLocalParameterTie(const QString &parName, int i) const;
+  QString getLocalParameterConstraint(const QString &parName, int i) const;
   void setLocalParameterValue(const QString &parName, int i, double value);
   void setLocalParameterValue(const QString &parName, int i, double value,
                               double error);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, QString tie);
+  void setLocalParameterConstraint(const QString &parName, int i, QString constraint);
   QStringList getGlobalParameters() const;
   void setGlobalParameters(const QStringList &globals);
   QStringList getLocalParameters() const;

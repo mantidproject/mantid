@@ -46,27 +46,27 @@ std::string IndirectFitPlotView::getSpectrumText() const {
   return m_plotForm->cbPlotSpectrum->currentText().toStdString();
 }
 
-std::size_t IndirectFitPlotView::getSelectedSpectrum() const {
+WorkspaceIndex IndirectFitPlotView::getSelectedSpectrum() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return m_plotForm->spPlotSpectrum->value();
+    return WorkspaceIndex{m_plotForm->spPlotSpectrum->value()};
   else if (m_plotForm->cbPlotSpectrum->count() != 0)
-    return std::stoull(getSpectrumText());
-  return 0;
+    return WorkspaceIndex{std::stoi(getSpectrumText())};
+  return WorkspaceIndex{0};
 }
 
-int IndirectFitPlotView::getSelectedSpectrumIndex() const {
+SpectrumRowIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return m_plotForm->spPlotSpectrum->value() -
-           m_plotForm->spPlotSpectrum->minimum();
-  return m_plotForm->cbPlotSpectrum->currentIndex();
+    return SpectrumRowIndex{m_plotForm->spPlotSpectrum->value() -
+                            m_plotForm->spPlotSpectrum->minimum()};
+  return SpectrumRowIndex{m_plotForm->cbPlotSpectrum->currentIndex()};
 }
 
-int IndirectFitPlotView::getSelectedDataIndex() const {
-  return m_plotForm->cbDataSelection->currentIndex();
+DatasetIndex IndirectFitPlotView::getSelectedDataIndex() const {
+  return DatasetIndex{m_plotForm->cbDataSelection->currentIndex()};
 }
 
-std::size_t IndirectFitPlotView::dataSelectionSize() const {
-  return boost::numeric_cast<std::size_t>(m_plotForm->cbDataSelection->count());
+DatasetIndex IndirectFitPlotView::dataSelectionSize() const {
+  return DatasetIndex{m_plotForm->cbDataSelection->count()};
 }
 
 bool IndirectFitPlotView::isPlotGuessChecked() const {
@@ -81,21 +81,23 @@ void IndirectFitPlotView::showMultipleDataSelection() {
   m_plotForm->cbDataSelection->show();
 }
 
-void IndirectFitPlotView::setAvailableSpectra(std::size_t minimum,
-                                              std::size_t maximum) {
+void IndirectFitPlotView::setAvailableSpectra(WorkspaceIndex minimum,
+                                              WorkspaceIndex maximum) {
   m_plotForm->swPlotSpectrum->setCurrentIndex(0);
-  m_plotForm->spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum));
-  m_plotForm->spPlotSpectrum->setMaximum(boost::numeric_cast<int>(maximum));
+  m_plotForm->spPlotSpectrum->setMinimum(
+      boost::numeric_cast<int>(minimum.value));
+  m_plotForm->spPlotSpectrum->setMaximum(
+      boost::numeric_cast<int>(maximum.value));
 }
 
 void IndirectFitPlotView::setAvailableSpectra(
-    const std::vector<std::size_t>::const_iterator &from,
-    const std::vector<std::size_t>::const_iterator &to) {
+    const std::vector<WorkspaceIndex>::const_iterator &from,
+    const std::vector<WorkspaceIndex>::const_iterator &to) {
   m_plotForm->swPlotSpectrum->setCurrentIndex(1);
   m_plotForm->cbPlotSpectrum->clear();
 
   for (auto spectrum = from; spectrum < to; ++spectrum)
-    m_plotForm->cbPlotSpectrum->addItem(QString::number(*spectrum));
+    m_plotForm->cbPlotSpectrum->addItem(QString::number(spectrum->value));
 }
 
 void IndirectFitPlotView::setMinimumSpectrum(int minimum) {
@@ -106,9 +108,9 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
   m_plotForm->spPlotSpectrum->setMaximum(maximum);
 }
 
-void IndirectFitPlotView::setPlotSpectrum(int spectrum) {
+void IndirectFitPlotView::setPlotSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->spPlotSpectrum);
-  m_plotForm->spPlotSpectrum->setValue(spectrum);
+  m_plotForm->spPlotSpectrum->setValue(spectrum.value);
 }
 
 void IndirectFitPlotView::setBackgroundLevel(double value) {
@@ -141,8 +143,8 @@ void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
 }
 
 void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName,
-                                                 std::size_t index) {
-  m_plotForm->cbDataSelection->setItemText(boost::numeric_cast<int>(index),
+                                                 DatasetIndex index) {
+  m_plotForm->cbDataSelection->setItemText(index.value,
                                            QString::fromStdString(dataName));
 }
 
@@ -152,14 +154,15 @@ void IndirectFitPlotView::clearDataSelection() {
 
 void IndirectFitPlotView::plotInTopPreview(
     const QString &name, Mantid::API::MatrixWorkspace_sptr workspace,
-    std::size_t spectrum, Qt::GlobalColor colour) {
-  m_plotForm->ppPlotTop->addSpectrum(name, workspace, spectrum, colour);
+    WorkspaceIndex spectrum, Qt::GlobalColor colour) {
+  m_plotForm->ppPlotTop->addSpectrum(name, workspace, spectrum.value, colour);
 }
 
 void IndirectFitPlotView::plotInBottomPreview(
     const QString &name, Mantid::API::MatrixWorkspace_sptr workspace,
-    std::size_t spectrum, Qt::GlobalColor colour) {
-  m_plotForm->ppPlotBottom->addSpectrum(name, workspace, spectrum, colour);
+    WorkspaceIndex spectrum, Qt::GlobalColor colour) {
+  m_plotForm->ppPlotBottom->addSpectrum(name, workspace, spectrum.value,
+                                        colour);
 }
 
 void IndirectFitPlotView::removeFromTopPreview(const QString &name) {
@@ -272,15 +275,15 @@ void IndirectFitPlotView::displayMessage(const std::string &message) const {
 
 void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
   if (index >= 0)
-    emit selectedFitDataChanged(boost::numeric_cast<std::size_t>(index));
+    emit selectedFitDataChanged(DatasetIndex{index});
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged(int spectrum) {
-  emit plotSpectrumChanged(boost::numeric_cast<std::size_t>(spectrum));
+  emit plotSpectrumChanged(WorkspaceIndex{spectrum});
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {
-  emit plotSpectrumChanged(spectrum.toULongLong());
+  emit plotSpectrumChanged(WorkspaceIndex{spectrum.toInt()});
 }
 
 void IndirectFitPlotView::emitPlotGuessChanged(int doPlotGuess) {

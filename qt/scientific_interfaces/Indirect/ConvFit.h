@@ -10,6 +10,7 @@
 #include "ConvFitModel.h"
 #include "IndirectFitAnalysisTab.h"
 #include "IndirectSpectrumSelectionPresenter.h"
+#include "ParameterEstimation.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -40,6 +41,7 @@ protected:
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+  EstimationDataSelector getEstimationDataSelector() const override;
 
   std::string fitTypeString() const;
 

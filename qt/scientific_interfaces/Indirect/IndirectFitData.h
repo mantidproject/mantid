@@ -8,28 +8,20 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
 
 #include "DllConfig.h"
+#include "IndexTypes.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 
 #include <boost/optional.hpp>
-#include <boost/variant.hpp>
-#include <boost/variant/static_visitor.hpp>
 #include <boost/weak_ptr.hpp>
 
 #include <cctype>
+#include <numeric>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-
-template <typename T>
-std::vector<T> vectorFromString(const std::string &listString) {
-  try {
-    return Mantid::Kernel::ArrayProperty<T>("vector", listString);
-  } catch (const std::runtime_error &) {
-    return std::vector<T>();
-  }
-}
 
 /*
  * Representation of a discontinuous spectra range.
@@ -37,71 +29,38 @@ std::vector<T> vectorFromString(const std::string &listString) {
  *
  * Holds a string and vector representation.
  */
-template <typename T> class DiscontinuousSpectra {
+class Spectra {
 public:
-  explicit DiscontinuousSpectra(const std::string &str)
-      : m_str(str), m_vec(vectorFromString<T>(str)) {
-    m_str.erase(std::remove_if(m_str.begin(), m_str.end(),
-                               static_cast<int (*)(int)>(std::isspace)),
-                m_str.end());
-  }
-  DiscontinuousSpectra(const DiscontinuousSpectra &vec)
-      : m_str(vec.m_str), m_vec(vec.m_vec) {}
-  DiscontinuousSpectra(DiscontinuousSpectra &&vec)
-      : m_str(std::move(vec.m_str)), m_vec(std::move(vec.m_vec)) {}
-
-  DiscontinuousSpectra &operator=(const DiscontinuousSpectra &vec) {
-    m_str = vec.m_str;
-    m_vec = vec.m_vec;
-    return *this;
-  }
-
-  DiscontinuousSpectra &operator=(DiscontinuousSpectra &&vec) {
-    m_str = std::move(vec.m_str);
-    m_vec = std::move(vec.m_vec);
-    return *this;
-  }
-
-  bool empty() const { return m_vec.empty(); }
-  std::size_t size() const { return m_vec.size(); }
-  const std::string &getString() const { return m_str; }
-  typename std::vector<T>::iterator begin() { return m_vec.begin(); }
-  typename std::vector<T>::iterator end() { return m_vec.end(); }
-  typename std::vector<T>::const_iterator begin() const {
-    return m_vec.begin();
-  }
-  typename std::vector<T>::const_iterator end() const { return m_vec.end(); }
-  const T &operator[](std::size_t index) const { return m_vec[index]; }
-  bool operator==(DiscontinuousSpectra<std::size_t> const &spec) const {
-    return this->getString() == spec.getString();
-  }
+  explicit Spectra(const std::string &str);
+  Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum);
+  Spectra(const Spectra &vec);
+  Spectra(Spectra &&vec);
+  Spectra &operator=(const Spectra &vec);
+  Spectra &operator=(Spectra &&vec);
+  bool empty() const;
+  SpectrumRowIndex size() const;
+  std::string getString() const;
+  std::pair<WorkspaceIndex, WorkspaceIndex> getMinMax() const;
+  WorkspaceIndex front() const {return m_vec.front();}
+  WorkspaceIndex back() const {return m_vec.back();}
+  std::vector<WorkspaceIndex>::iterator begin() { return m_vec.begin(); }
+  std::vector<WorkspaceIndex>::iterator end() { return m_vec.end(); }
+  std::vector<WorkspaceIndex>::const_iterator begin() const { return m_vec.begin(); }
+  std::vector<WorkspaceIndex>::const_iterator end() const { return m_vec.end(); }
+  const WorkspaceIndex &operator[](SpectrumRowIndex index) const { return m_vec[index.value]; }
+  bool operator==(Spectra const &spec) const;
+  bool isContinuous() const;
+  SpectrumRowIndex indexOf(WorkspaceIndex i) const;
 
 private:
-  std::string m_str;
-  std::vector<T> m_vec;
+  std::vector<WorkspaceIndex> m_vec;
+  bool m_isContinuous;
 };
 
-/*
- * Spectra can either be specified as:
- *
- * Continuous Range - Represented as a pair of the minimum and maximum spectrum.
- * Discontinuous Range - Represented by a DiscontinuousSpectra object.
- *
- * A variant is used, such that faster operations can be employed when using
- * a continuous range.
- */
-using Spectra = boost::variant<DiscontinuousSpectra<std::size_t>,
-                               std::pair<std::size_t, std::size_t>>;
-
-template <typename F> struct ApplySpectra : boost::static_visitor<> {
+template <typename F> struct ApplySpectra {
   explicit ApplySpectra(F &&functor) : m_functor(std::forward<F>(functor)) {}
 
-  void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
-    for (auto spectrum = spectra.first; spectrum <= spectra.second; ++spectrum)
-      m_functor(spectrum);
-  }
-
-  void operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
+  void operator()(const Spectra &spectra) const {
     for (const auto &spectrum : spectra)
       m_functor(spectrum);
   }
@@ -111,20 +70,12 @@ private:
 };
 
 template <typename F>
-struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
-  ApplyEnumeratedSpectra(F &&functor, std::size_t start = 0)
+struct ApplyEnumeratedSpectra {
+  ApplyEnumeratedSpectra(F &&functor, WorkspaceIndex start = 0)
       : m_start(start), m_functor(std::forward<F>(functor)) {}
 
-  std::size_t
-  operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
-    auto i = m_start;
-    for (auto spectrum = spectra.first; spectrum <= spectra.second; ++spectrum)
-      m_functor(i++, spectrum);
-    return i;
-  }
-
-  std::size_t
-  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
+  WorkspaceIndex
+  operator()(const Spectra &spectra) const {
     auto i = m_start;
     for (const auto &spectrum : spectra)
       m_functor(i++, spectrum);
@@ -132,9 +83,19 @@ struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
   }
 
 private:
-  std::size_t m_start;
+  WorkspaceIndex m_start;
   F m_functor;
 };
+
+template<class T>
+std::vector<T> vectorFromString(const std::string &listString) {
+  try {
+    return Mantid::Kernel::ArrayProperty<T>("vector", listString);
+  }
+  catch (const std::runtime_error &) {
+    return std::vector<T>();
+  }
+}
 
 /*
    IndirectFitData - Stores the data to be fit; workspace, spectra,
@@ -149,45 +110,46 @@ public:
   std::string displayName(const std::string &formatString,
                           const std::string &rangeDelimiter) const;
   std::string displayName(const std::string &formatString,
-                          std::size_t spectrum) const;
+    WorkspaceIndex spectrum) const;
   std::string getBasename() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
   const Spectra &spectra() const;
-  std::size_t getSpectrum(std::size_t index) const;
-  std::size_t numberOfSpectra() const;
+  WorkspaceIndex getSpectrum(SpectrumRowIndex index) const;
+  SpectrumRowIndex numberOfSpectra() const;
   bool zeroSpectra() const;
-  std::pair<double, double> getRange(std::size_t spectrum) const;
-  std::string getExcludeRegion(std::size_t spectrum) const;
+  std::pair<double, double> getRange(WorkspaceIndex spectrum) const;
+  std::string getExcludeRegion(WorkspaceIndex spectrum) const;
   IndirectFitData &combine(IndirectFitData const &fitData);
 
-  std::vector<double> excludeRegionsVector(std::size_t spectrum) const;
+  std::vector<double> excludeRegionsVector(WorkspaceIndex spectrum) const;
 
   template <typename F> void applySpectra(F &&functor) const {
-    boost::apply_visitor(ApplySpectra<F>(std::forward<F>(functor)), m_spectra);
+    ApplySpectra<F>(std::forward<F>(functor))(m_spectra);
   }
 
   template <typename F>
-  std::size_t applyEnumeratedSpectra(F &&functor, std::size_t start = 0) const {
-    return boost::apply_visitor(
-        ApplyEnumeratedSpectra<F>(std::forward<F>(functor), start), m_spectra);
+  WorkspaceIndex applyEnumeratedSpectra(F &&functor, WorkspaceIndex start = WorkspaceIndex{0}) const {
+    return ApplyEnumeratedSpectra<F>(std::forward<F>(functor), start)(m_spectra);
   }
 
   void setSpectra(std::string const &spectra);
   void setSpectra(Spectra &&spectra);
   void setSpectra(Spectra const &spectra);
-  void setStartX(double const &startX, std::size_t const &index);
-  void setEndX(double const &endX, std::size_t const &spectrum);
+  void setStartX(double const &startX, WorkspaceIndex const &index);
+  void setStartX(double const &startX);
+  void setEndX(double const &endX, WorkspaceIndex const &spectrum);
+  void setEndX(double const &endX);
   void setExcludeRegionString(std::string const &excludeRegion,
-                              std::size_t const &spectrum);
+    WorkspaceIndex const &spectrum);
 
 private:
   void validateSpectra(Spectra const &spectra);
 
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   Spectra m_spectra;
-  std::unordered_map<std::size_t, std::string> m_excludeRegions;
-  std::unordered_map<std::size_t, std::pair<double, double>> m_ranges;
+  std::map<WorkspaceIndex, std::string> m_excludeRegions;
+  std::map<WorkspaceIndex, std::pair<double, double>> m_ranges;
 };
 
 } // namespace IDA

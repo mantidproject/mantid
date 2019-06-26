@@ -19,6 +19,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+using namespace Mantid;
 using namespace Mantid::API;
 
 namespace {
@@ -49,13 +50,20 @@ void MSDFit::setupFitTab() {
   auto gaussian = functionFactory.createFunction("MSDGauss");
   auto peters = functionFactory.createFunction("MSDPeters");
   auto yi = functionFactory.createFunction("MSDYi");
-  addComboBoxFunctionGroup("Gaussian", {gaussian});
-  addComboBoxFunctionGroup("Peters", {peters});
-  addComboBoxFunctionGroup("Yi", {yi});
+  //addComboBoxFunctionGroup("Gaussian", {gaussian});
+  //addComboBoxFunctionGroup("Peters", {peters});
+  //addComboBoxFunctionGroup("Yi", {yi});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
+}
+
+EstimationDataSelector MSDFit::getEstimationDataSelector() const {
+  return
+      [](const MantidVec &x, const MantidVec &y) -> DataForParameterEstimation {
+        return DataForParameterEstimation{{}, {}};
+      };
 }
 
 void MSDFit::updateModelFitTypeString() {

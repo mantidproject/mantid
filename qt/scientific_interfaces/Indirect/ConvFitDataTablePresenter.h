@@ -28,17 +28,17 @@ public:
   ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable);
 
 protected:
-  void addTableEntry(std::size_t dataIndex, std::size_t spectrum,
-                     int row) override;
-  void updateTableEntry(std::size_t dataIndex, std::size_t spectrum,
-                        int row) override;
+  void addTableEntry(DatasetIndex dataIndex, WorkspaceIndex spectrum,
+    SpectrumRowIndex row) override;
+  void updateTableEntry(DatasetIndex dataIndex, WorkspaceIndex spectrum,
+    SpectrumRowIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
-  std::string getResolutionName(int row) const;
+  std::string getResolutionName(SpectrumRowIndex row) const;
 
   ConvFitModel *m_convFitModel;
 };

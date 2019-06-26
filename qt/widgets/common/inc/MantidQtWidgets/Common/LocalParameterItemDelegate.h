@@ -42,6 +42,8 @@ signals:
   void setAllFixed(bool /*_t1*/);
   void setTie(int /*_t1*/, QString /*_t2*/);
   void setTieAll(QString /*_t1*/);
+  void setConstraint(int /*_t1*/, QString /*_t2*/);
+  void setConstraintAll(QString /*_t1*/);
   void setValueToLog(int /*_t1*/);
   void setAllValuesToLog();
 

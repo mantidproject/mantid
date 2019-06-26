@@ -25,6 +25,8 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
   m_dataForm->setupUi(this);
   m_dataForm->dsResolution->hide();
   m_dataForm->lbResolution->hide();
+  m_dataForm->dsbStartX->setRange(-1e100, 1e100);
+  m_dataForm->dsbEndX->setRange(-1e100, 1e100);
 
   connect(m_dataForm->dsSample, SIGNAL(dataReady(const QString &)), this,
           SIGNAL(sampleLoaded(const QString &)));
@@ -33,6 +35,10 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
   connect(m_dataForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
   connect(m_dataForm->pbRemove, SIGNAL(clicked()), this,
           SIGNAL(removeClicked()));
+  connect(m_dataForm->dsbStartX, SIGNAL(valueChanged(double)), this,
+          SIGNAL(startXChanged(double)));
+  connect(m_dataForm->dsbEndX, SIGNAL(valueChanged(double)), this,
+          SIGNAL(endXChanged(double)));
 
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(emitViewSelected(int)));
 }
@@ -105,6 +111,24 @@ void IndirectFitDataView::setSampleWorkspaceSelectorIndex(
     const QString &workspaceName) {
   m_dataForm->dsSample->setWorkspaceSelectorIndex(workspaceName);
   m_dataForm->dsSample->setSelectorIndex(1);
+}
+
+void IndirectFitDataView::setXRange(std::pair<double, double> const &range) {
+  m_dataForm->dsbStartX->setRange(range.first, range.second);
+  m_dataForm->dsbEndX->setRange(range.first, range.second);
+  auto const dx = fabs(range.second - range.first) / 10.0;
+  m_dataForm->dsbStartX->setSingleStep(dx);
+  m_dataForm->dsbEndX->setSingleStep(dx);
+  m_dataForm->dsbStartX->setValue(range.first);
+  m_dataForm->dsbEndX->setValue(range.second);
+}
+
+void IndirectFitDataView::setStartX(double value) {
+  m_dataForm->dsbStartX->setValue(value);
+}
+
+void IndirectFitDataView::setEndX(double value) {
+  m_dataForm->dsbEndX->setValue(value);
 }
 
 UserInputValidator &

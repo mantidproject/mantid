@@ -41,8 +41,9 @@ ParameterPropertyManager::description(const QtProperty *property) const {
   // Cast for searching purposes
   auto prop = const_cast<QtProperty *>(property);
 
-  if (!m_descriptions.contains(prop))
+  if (!m_descriptions.contains(prop)) {
     throw std::runtime_error("Parameter doesn't have description set");
+  }
 
   return m_descriptions[prop];
 }
@@ -117,9 +118,9 @@ void ParameterPropertyManager::clearErrors() {
  */
 void ParameterPropertyManager::setErrorsEnabled(bool enabled) {
   m_errorsEnabled = enabled;
-
+  cleanUpErrors();
   foreach (QtProperty *prop, m_errors.keys()) {
-    emit propertyChanged(prop);
+    //updateTooltip(prop) emits propertyChanged(prop)
     updateTooltip(prop);
   }
 }
@@ -167,6 +168,17 @@ QString ParameterPropertyManager::valueText(const QtProperty *property) const {
     originalValueText += " [" + gText + "]";
   }
   return originalValueText;
+}
+
+void ParameterPropertyManager::cleanUpErrors()
+{
+  for (auto it = m_errors.begin(); it != m_errors.end();) {
+    if (!hasProperty(it.key())) {
+      it = m_errors.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
 /**

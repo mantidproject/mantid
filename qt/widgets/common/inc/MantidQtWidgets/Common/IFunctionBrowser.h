@@ -8,7 +8,8 @@
 #define MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H_
 
 #include "DllOption.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include <QString>
 
 namespace MantidQt {
@@ -32,6 +33,7 @@ public:
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
   virtual void
   updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;
+  virtual void updateMultiDatasetParameters(const Mantid::API::ITableWorkspace & paramTable) = 0;
   virtual bool isLocalParameterFixed(const QString &parName, int i) const = 0;
   virtual double getLocalParameterValue(const QString &parName,
                                         int i) const = 0;

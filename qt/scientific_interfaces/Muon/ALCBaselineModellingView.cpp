@@ -134,7 +134,7 @@ void ALCBaselineModellingView::setFunction(IFunction_const_sptr func) {
       double error = func->getError(i);
 
       m_ui.function->setParameter(name, value);
-      m_ui.function->setParamError(name, error);
+      m_ui.function->setParameterError(name, error);
     }
   }
 }

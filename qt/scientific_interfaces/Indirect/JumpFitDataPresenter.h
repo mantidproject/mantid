@@ -50,7 +50,7 @@ private:
   getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(JumpFitAddWorkspaceDialog *dialog);
   void updateParameterTypes(JumpFitAddWorkspaceDialog *dialog);
-  std::vector<std::string> getParameterTypes(std::size_t dataIndex) const;
+  std::vector<std::string> getParameterTypes(DatasetIndex dataIndex) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
 
@@ -58,7 +58,7 @@ private:
   void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
 
   std::string m_activeParameterType;
-  std::size_t m_dataIndex;
+  DatasetIndex m_dataIndex;
 
   QComboBox *m_cbParameterType;
   QComboBox *m_cbParameter;

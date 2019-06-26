@@ -42,8 +42,8 @@ int JumpFitDataTablePresenter::endXColumn() const { return 4; }
 
 int JumpFitDataTablePresenter::excludeColumn() const { return 5; }
 
-void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
-                                              std::size_t spectrum, int row) {
+void JumpFitDataTablePresenter::addTableEntry(DatasetIndex dataIndex,
+  WorkspaceIndex spectrum, SpectrumRowIndex row) {
   IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
 
   const auto parameter =
@@ -56,9 +56,9 @@ void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
   setCell(std::move(cell), row, 1);
 }
 
-void JumpFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,
-                                                 std::size_t spectrum,
-                                                 int row) {
+void JumpFitDataTablePresenter::updateTableEntry(DatasetIndex dataIndex,
+  WorkspaceIndex spectrum,
+  SpectrumRowIndex row) {
   IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
 
   const auto parameter =

@@ -13,10 +13,12 @@ set(
   ConvFitModel.cpp
   DensityOfStates.cpp
   Elwin.cpp
+  FunctionTemplateBrowser.cpp
   ILLEnergyTransfer.cpp
   ISISCalibration.cpp
   ISISDiagnostics.cpp
   ISISEnergyTransfer.cpp
+  IndexTypes.cpp
   IndirectAddWorkspaceDialog.cpp
   IndirectBayes.cpp
   IndirectBayesTab.cpp
@@ -64,6 +66,12 @@ set(
   Iqt.cpp
   IqtFit.cpp
   IqtFitModel.cpp
+  IndirectFitPropertyBrowser.cpp
+#  IndirectFunctionBrowser/ConvTemplateBrowser.cpp
+#  IndirectFunctionBrowser/ConvTemplatePresenter.cpp
+  IndirectFunctionBrowser/IqtFunctionModel.cpp
+  IndirectFunctionBrowser/IqtTemplateBrowser.cpp
+  IndirectFunctionBrowser/IqtTemplatePresenter.cpp
   JumpFit.cpp
   JumpFitAddWorkspaceDialog.cpp
   JumpFitDataPresenter.cpp
@@ -83,6 +91,7 @@ set(
   QT4_INC_FILES
   ConvFitModel.h
   DllConfig.h
+    IndexTypes.h
   IndirectFitData.h
   IndirectFitOutput.h
   IndirectFitOutputOptionsModel.h
@@ -91,8 +100,10 @@ set(
   IndirectFittingModel.h
   IndirectToolsTab.h
   IqtFitModel.h
+  IndirectFunctionBrowser/IqtFunctionModel.h
   JumpFitModel.h
   MSDFitModel.h
+    ParameterEstimation.h
 )
 
 set(
@@ -108,6 +119,7 @@ set(
   CorrectionsTab.h
   DensityOfStates.h
   Elwin.h
+  FunctionTemplateBrowser.h
   IAddWorkspaceDialog.h
   IIndirectFitDataView.h
   IIndirectFitOutputOptionsView.h
@@ -153,6 +165,11 @@ set(
   IndirectTransmissionCalc.h
   IndirectTransmission.h
   IqtFit.h
+  IndirectFitPropertyBrowser.h
+#  IndirectFunctionBrowser/ConvTemplateBrowser.h
+#  IndirectFunctionBrowser/ConvTemplatePresenter.h
+  IndirectFunctionBrowser/IqtTemplateBrowser.h
+  IndirectFunctionBrowser/IqtTemplatePresenter.h
   Iqt.h
   ISISCalibration.h
   ISISDiagnostics.h

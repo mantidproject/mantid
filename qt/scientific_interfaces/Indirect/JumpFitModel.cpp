@@ -13,6 +13,7 @@ using namespace Mantid::API;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
+using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 struct ContainsOneOrMore {
   explicit ContainsOneOrMore(std::vector<std::string> &&substrings)
@@ -31,32 +32,32 @@ private:
 };
 
 template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>>
+std::pair<std::vector<std::string>, std::vector<IDAWorkspaceIndex>>
 findAxisLabels(TextAxis *axis, Predicate const &predicate) {
   std::vector<std::string> labels;
-  std::vector<std::size_t> spectra;
+  std::vector<IDAWorkspaceIndex> spectra;
 
   for (auto i = 0u; i < axis->length(); ++i) {
     auto label = axis->label(i);
     if (predicate(label)) {
       labels.emplace_back(label);
-      spectra.emplace_back(i);
+      spectra.emplace_back(IDAWorkspaceIndex{static_cast<int>(i)});
     }
   }
   return std::make_pair(labels, spectra);
 }
 
 template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>>
+std::pair<std::vector<std::string>, std::vector<IDAWorkspaceIndex>>
 findAxisLabels(MatrixWorkspace const *workspace, Predicate const &predicate) {
   auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
   if (axis)
     return findAxisLabels(axis, predicate);
-  return std::make_pair(std::vector<std::string>(), std::vector<std::size_t>());
+  return std::make_pair(std::vector<std::string>(), std::vector<IDAWorkspaceIndex>());
 }
 
-Spectra createSpectra(std::size_t spectrum) {
-  return std::make_pair(spectrum, spectrum);
+Spectra createSpectra(IDAWorkspaceIndex spectrum) {
+  return Spectra(spectrum, spectrum);
 }
 
 std::string getHWHMName(const std::string &resultName) {
@@ -101,27 +102,27 @@ std::string scaleWorkspace(std::string const &inputName,
   return outputName;
 }
 
-std::string extractSpectra(std::string const &inputName, int startIndex,
-                           int endIndex, std::string const &outputName) {
+std::string extractSpectra(std::string const &inputName, IDAWorkspaceIndex startIndex,
+                           IDAWorkspaceIndex endIndex, std::string const &outputName) {
   auto extractAlg = AlgorithmManager::Instance().create("ExtractSpectra");
   extractAlg->initialize();
   extractAlg->setLogging(false);
   extractAlg->setProperty("InputWorkspace", inputName);
-  extractAlg->setProperty("StartWorkspaceIndex", startIndex);
-  extractAlg->setProperty("EndWorkspaceIndex", endIndex);
+  extractAlg->setProperty("StartWorkspaceIndex", startIndex.value);
+  extractAlg->setProperty("EndWorkspaceIndex", endIndex.value);
   extractAlg->setProperty("OutputWorkspace", outputName);
   extractAlg->execute();
   return outputName;
 }
 
-std::string extractSpectrum(MatrixWorkspace_sptr workspace, int index,
+std::string extractSpectrum(MatrixWorkspace_sptr workspace, IDAWorkspaceIndex index,
                             std::string const &outputName) {
   return extractSpectra(workspace->getName(), index, index, outputName);
 }
 
-std::string extractHWHMSpectrum(MatrixWorkspace_sptr workspace, int index) {
-  auto const scaledName = "__scaled_" + std::to_string(index);
-  auto const extractedName = "__extracted_" + std::to_string(index);
+std::string extractHWHMSpectrum(MatrixWorkspace_sptr workspace, IDAWorkspaceIndex index) {
+  auto const scaledName = "__scaled_" + std::to_string(index.value);
+  auto const extractedName = "__extracted_" + std::to_string(index.value);
   auto const outputName = scaleWorkspace(
       extractSpectrum(workspace, index, extractedName), scaledName, 0.5);
   deleteTemporaryWorkspaces({extractedName});
@@ -151,36 +152,35 @@ MatrixWorkspace_sptr appendAll(std::vector<std::string> const &workspaces,
 
 std::vector<std::string>
 subdivideWidthWorkspace(MatrixWorkspace_sptr workspace,
-                        const std::vector<std::size_t> &widthSpectra) {
+                        const std::vector<IDAWorkspaceIndex> &widthSpectra) {
   std::vector<std::string> subworkspaces;
   subworkspaces.reserve(1 + 2 * widthSpectra.size());
 
-  int start = 0;
-  for (auto spectrum_number : widthSpectra) {
-    const auto spectrum = static_cast<int>(spectrum_number);
+  IDAWorkspaceIndex start{0};
+  for (auto spectrum : widthSpectra) {
     if (spectrum > start) {
-      auto const outputName = "__extracted_" + std::to_string(start) + "_to_" +
-                              std::to_string(spectrum);
+      auto const outputName = "__extracted_" + std::to_string(start.value) + "_to_" +
+                              std::to_string(spectrum.value);
       subworkspaces.emplace_back(extractSpectra(workspace->getName(), start,
-                                                spectrum - 1, outputName));
+                                                spectrum - IDAWorkspaceIndex{1}, outputName));
     }
     subworkspaces.emplace_back(extractHWHMSpectrum(workspace, spectrum));
-    start = spectrum + 1;
+    start = spectrum + IDAWorkspaceIndex{1};
   }
 
-  const int end = static_cast<int>(workspace->getNumberHistograms());
+  IDAWorkspaceIndex end{static_cast<int>(workspace->getNumberHistograms())};
   if (start < end) {
     auto const outputName =
-        "__extracted_" + std::to_string(start) + "_to_" + std::to_string(end);
+        "__extracted_" + std::to_string(start.value) + "_to_" + std::to_string(end.value);
     subworkspaces.emplace_back(
-        extractSpectra(workspace->getName(), start, end - 1, outputName));
+        extractSpectra(workspace->getName(), start, end - IDAWorkspaceIndex{1}, outputName));
   }
   return subworkspaces;
 }
 
 MatrixWorkspace_sptr
 createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
-                    const std::vector<std::size_t> &widthSpectra) {
+                    const std::vector<IDAWorkspaceIndex> &widthSpectra) {
   if (widthSpectra.empty())
     return workspace;
   if (AnalysisDataService::Instance().doesExist(hwhmName))
@@ -198,7 +198,7 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
   return hwhmWorkspace;
 }
 
-boost::optional<std::size_t>
+boost::optional<IDAWorkspaceIndex>
 getFirstSpectrum(const JumpFitParameters &parameters) {
   if (!parameters.widthSpectra.empty())
     return parameters.widthSpectra.front();
@@ -230,7 +230,7 @@ void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                                         createSpectra(*spectrum));
 }
 
-void JumpFitModel::removeWorkspace(std::size_t index) {
+void JumpFitModel::removeWorkspace(DatasetIndex index) {
   m_jumpParameters.erase(getWorkspace(index)->getName());
   IndirectFittingModel::removeFittingData(index);
 }
@@ -249,22 +249,22 @@ JumpFitModel::addJumpFitParameters(MatrixWorkspace *workspace,
 }
 
 std::unordered_map<std::string, JumpFitParameters>::const_iterator
-JumpFitModel::findJumpFitParameters(std::size_t dataIndex) const {
+JumpFitModel::findJumpFitParameters(DatasetIndex dataIndex) const {
   const auto ws = getWorkspace(dataIndex);
   if (!ws)
     return m_jumpParameters.end();
   return m_jumpParameters.find(ws->getName());
 }
 
-std::string JumpFitModel::getFitParameterName(std::size_t dataIndex,
-                                              std::size_t spectrum) const {
+std::string JumpFitModel::getFitParameterName(DatasetIndex dataIndex,
+              WorkspaceIndex spectrum) const {
   const auto ws = getWorkspace(dataIndex);
   const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
-  return axis->label(spectrum);
+  return axis->label(spectrum.value);
 }
 
 void JumpFitModel::setActiveWidth(std::size_t widthIndex,
-                                  std::size_t dataIndex) {
+                                  DatasetIndex dataIndex) {
   const auto parametersIt = findJumpFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.widthSpectra.size() > widthIndex) {
@@ -274,7 +274,7 @@ void JumpFitModel::setActiveWidth(std::size_t widthIndex,
     throw std::runtime_error("Invalid width index specified.");
 }
 
-void JumpFitModel::setActiveEISF(std::size_t eisfIndex, std::size_t dataIndex) {
+void JumpFitModel::setActiveEISF(std::size_t eisfIndex, DatasetIndex dataIndex) {
   const auto parametersIt = findJumpFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.eisfSpectra.size() > eisfIndex) {
@@ -288,14 +288,14 @@ void JumpFitModel::setFitType(const std::string &fitType) {
   m_fitType = fitType;
 }
 
-bool JumpFitModel::zeroWidths(std::size_t dataIndex) const {
+bool JumpFitModel::zeroWidths(DatasetIndex dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
     return parameters->second.widths.empty();
   return true;
 }
 
-bool JumpFitModel::zeroEISF(std::size_t dataIndex) const {
+bool JumpFitModel::zeroEISF(DatasetIndex dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
     return parameters->second.eisf.empty();
@@ -303,32 +303,32 @@ bool JumpFitModel::zeroEISF(std::size_t dataIndex) const {
 }
 
 bool JumpFitModel::isMultiFit() const {
-  if (numberOfWorkspaces() == 0)
+  if (numberOfWorkspaces().value == 0)
     return false;
-  return !allWorkspacesEqual(getWorkspace(0));
+  return !allWorkspacesEqual(getWorkspace(DatasetIndex{0}));
 }
 
 std::vector<std::string> JumpFitModel::getSpectrumDependentAttributes() const {
   return {};
 }
 
-std::vector<std::string> JumpFitModel::getWidths(std::size_t dataIndex) const {
+std::vector<std::string> JumpFitModel::getWidths(DatasetIndex dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
     return parameters->second.widths;
   return std::vector<std::string>();
 }
 
-std::vector<std::string> JumpFitModel::getEISF(std::size_t dataIndex) const {
+std::vector<std::string> JumpFitModel::getEISF(DatasetIndex dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
     return parameters->second.eisf;
   return std::vector<std::string>();
 }
 
-boost::optional<std::size_t>
+boost::optional<WorkspaceIndex>
 JumpFitModel::getWidthSpectrum(std::size_t widthIndex,
-                               std::size_t dataIndex) const {
+                               DatasetIndex dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end() &&
       parameters->second.widthSpectra.size() > widthIndex)
@@ -336,9 +336,9 @@ JumpFitModel::getWidthSpectrum(std::size_t widthIndex,
   return boost::none;
 }
 
-boost::optional<std::size_t>
+boost::optional<WorkspaceIndex>
 JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
-                              std::size_t dataIndex) const {
+                              DatasetIndex dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end() &&
       parameters->second.eisfSpectra.size() > eisfIndex)
@@ -356,8 +356,8 @@ std::string JumpFitModel::simultaneousFitOutputName() const {
   return sequentialFitOutputName();
 }
 
-std::string JumpFitModel::singleFitOutputName(std::size_t index,
-                                              std::size_t spectrum) const {
+std::string JumpFitModel::singleFitOutputName(DatasetIndex index,
+        WorkspaceIndex spectrum) const {
   return createSingleFitOutputName("%1%_FofQFit_" + m_fitType + "_s%2%_Results",
                                    index, spectrum);
 }
@@ -365,7 +365,7 @@ std::string JumpFitModel::singleFitOutputName(std::size_t index,
 std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string JumpFitModel::constructOutputName() const {
-  auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
+  auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", DatasetIndex{0});
   auto const position = name.find("_Results");
   if (position != std::string::npos)
     return name.substr(0, position) + name.substr(position + 7, name.size());
@@ -374,7 +374,7 @@ std::string JumpFitModel::constructOutputName() const {
 
 bool JumpFitModel::allWorkspacesEqual(
     Mantid::API::MatrixWorkspace_sptr workspace) const {
-  for (auto i = 1u; i < numberOfWorkspaces(); ++i) {
+  for (auto i = DatasetIndex{1}; i < numberOfWorkspaces(); ++i) {
     if (getWorkspace(i) != workspace)
       return false;
   }

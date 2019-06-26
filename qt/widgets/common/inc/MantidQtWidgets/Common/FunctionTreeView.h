@@ -97,7 +97,7 @@ public:
   /// Update the function parameter value
   void setParameter(const QString &paramName, double value) override;
   /// Update the function parameter error
-  void setParamError(const QString &paramName, double error) override;
+  void setParameterError(const QString &paramName, double error) override;
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const override;
   /// Set error display on/off
@@ -108,6 +108,9 @@ public:
   boost::optional<QString> currentFunctionIndex() const override;
   /// Set a tie
   void setParameterTie(const QString &paramName, const QString &tie) override;
+  /// Set a constraint
+  void setParameterConstraint(const QString &paramName,
+                              const QString &constraint) override;
   /// Set new global parameters.
   void setGlobalParameters(const QStringList &) override;
   /// Get a list of global parameters
@@ -265,6 +268,7 @@ protected slots:
   void setAttributeToFunction(Mantid::API::IFunction &fun, QtProperty *prop);
 
 protected:
+  void removeConstraintsQuiet(QtProperty* paramProp);
   /// Manager for function group properties
   QtGroupPropertyManager *m_functionManager;
   /// Manager for function parameter properties

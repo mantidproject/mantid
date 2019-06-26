@@ -52,6 +52,7 @@ private:
   std::string fitTypeString() const;
 
   void setupFitTab() override;
+  EstimationDataSelector getEstimationDataSelector() const override;
 
   IqtFitModel *m_iqtFittingModel;
   std::unique_ptr<Ui::IqtFit> m_uiForm;

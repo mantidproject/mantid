@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidQtWidgets/Common/FunctionTreeView.h"
 
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 
@@ -85,10 +86,10 @@ void FunctionMultiDomainPresenter::setParameter(const QString &paramName,
   m_view->setParameter(paramName, value);
 }
 
-void FunctionMultiDomainPresenter::setParamError(const QString &paramName,
+void FunctionMultiDomainPresenter::setParameterError(const QString &paramName,
                                                  double value) {
-  m_model->setParamError(paramName, value);
-  m_view->setParamError(paramName, value);
+  m_model->setParameterError(paramName, value);
+  m_view->setParameterError(paramName, value);
 }
 
 double FunctionMultiDomainPresenter::getParameter(const QString &paramName) {
@@ -111,7 +112,7 @@ void FunctionMultiDomainPresenter::updateParameters(const IFunction &fun) {
     const QString qName = QString::fromStdString(parameter);
     setParameter(qName, fun.getParameter(parameter));
     const size_t index = fun.parameterIndex(parameter);
-    setParamError(qName, fun.getError(index));
+    setParameterError(qName, fun.getError(index));
   }
 }
 
@@ -124,7 +125,7 @@ void FunctionMultiDomainPresenter::updateMultiDatasetParameters(
     const QString qName = QString::fromStdString(parameter);
     m_view->setParameter(qName, currentFun->getParameter(parameter));
     const size_t index = currentFun->parameterIndex(parameter);
-    m_view->setParamError(qName, currentFun->getError(index));
+    m_view->setParameterError(qName, currentFun->getError(index));
   }
 }
 
@@ -162,12 +163,14 @@ void FunctionMultiDomainPresenter::setCurrentDataset(int index) {
   for (auto const name : m_model->getParameterNames()) {
     auto const value = m_model->getParameter(name);
     m_view->setParameter(name, value);
-    m_view->setParamError(name, m_model->getParamError(name));
+    m_view->setParameterError(name, m_model->getParameterError(name));
     if (m_model->isLocalParameterFixed(name, index)) {
       m_view->setParameterTie(name, QString::number(value));
     } else {
       m_view->setParameterTie(name, m_model->getLocalParameterTie(name, index));
     }
+    m_view->setParameterConstraint(
+        name, m_model->getLocalParameterConstraint(name, index));
   }
 }
 
@@ -204,6 +207,11 @@ FunctionMultiDomainPresenter::getLocalParameterTie(const QString &parName,
   return m_model->getLocalParameterTie(parName, i);
 }
 
+QString FunctionMultiDomainPresenter::getLocalParameterConstraint(
+    const QString &parName, int i) const {
+  return m_model->getLocalParameterConstraint(parName, i);
+}
+
 void FunctionMultiDomainPresenter::setLocalParameterValue(
     const QString &parName, int i, double value) {
   m_model->setLocalParameterValue(parName, i, value);
@@ -217,7 +225,7 @@ void FunctionMultiDomainPresenter::setLocalParameterValue(
   m_model->setLocalParameterValue(parName, i, value, error);
   if (m_model->currentDomainIndex() == i) {
     m_view->setParameter(parName, value);
-    m_view->setParamError(parName, error);
+    m_view->setParameterError(parName, error);
   }
 }
 
@@ -242,6 +250,14 @@ void FunctionMultiDomainPresenter::setLocalParameterTie(const QString &parName,
   }
 }
 
+void FunctionMultiDomainPresenter::setLocalParameterConstraint(
+    const QString &parName, int i, QString constraint) {
+  m_model->setLocalParameterConstraint(parName, i, constraint);
+  if (m_model->currentDomainIndex() == i) {
+    m_view->setParameterConstraint(parName, constraint);
+  }
+}
+
 QStringList FunctionMultiDomainPresenter::getGlobalParameters() const {
   return m_model->getGlobalParameters();
 }
@@ -249,6 +265,7 @@ QStringList FunctionMultiDomainPresenter::getGlobalParameters() const {
 void FunctionMultiDomainPresenter::setGlobalParameters(
     const QStringList &globals) {
   m_model->setGlobalParameters(globals);
+  m_view->setGlobalParameters(m_model->getGlobalParameters());
 }
 
 QStringList FunctionMultiDomainPresenter::getLocalParameters() const {
@@ -338,8 +355,25 @@ void FunctionMultiDomainPresenter::viewChangedParameter(
  * @param parName :: Name of parameter that button was clicked for.
  */
 void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName) {
+  auto const wsNames = m_model->getDatasetNames();
+  QList<double> values;
+  QList<bool> fixes;
+  QStringList ties;
+  QStringList constraints;
+  const int n = wsNames.size();
+  for (int i = 0; i < n; ++i) {
+    const double value = getLocalParameterValue(parName, i);
+    values.push_back(value);
+    const bool fixed = isLocalParameterFixed(parName, i);
+    fixes.push_back(fixed);
+    const auto tie = getLocalParameterTie(parName, i);
+    ties.push_back(tie);
+    const auto constraint = getLocalParameterConstraint(parName, i);
+    constraints.push_back(constraint);
+  }
+
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-      m_view, this, parName, m_model->getDatasetNames());
+      m_view, parName, wsNames, values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
           SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();
@@ -351,6 +385,7 @@ void FunctionMultiDomainPresenter::editLocalParameterFinish(int result) {
     auto values = m_editLocalParameterDialog->getValues();
     auto fixes = m_editLocalParameterDialog->getFixes();
     auto ties = m_editLocalParameterDialog->getTies();
+    auto constraints = m_editLocalParameterDialog->getConstraints();
     assert(values.size() == getNumberOfDatasets());
     for (int i = 0; i < values.size(); ++i) {
       setLocalParameterValue(parName, i, values[i]);
@@ -361,6 +396,7 @@ void FunctionMultiDomainPresenter::editLocalParameterFinish(int result) {
       } else {
         setLocalParameterTie(parName, i, "");
       }
+      setLocalParameterConstraint(parName, i, constraints[i]);
     }
   }
   m_editLocalParameterDialog = nullptr;

@@ -12,6 +12,7 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ParameterTie.h"
 
@@ -106,8 +107,8 @@ void FunctionBrowser::setParameter(const QString &paramName, double value) {
  * @param paramName :: Fully qualified parameter name (includes function index)
  * @param error :: New error
  */
-void FunctionBrowser::setParamError(const QString &paramName, double error) {
-  m_presenter->setParamError(paramName, error);
+void FunctionBrowser::setParameterError(const QString &paramName, double error) {
+  m_presenter->setParameterError(paramName, error);
 }
 
 /**
@@ -143,6 +144,11 @@ bool FunctionBrowser::hasFunction() const { return m_presenter->hasFunction(); }
 /// Get the number of datasets
 int FunctionBrowser::getNumberOfDatasets() const {
   return m_presenter->getNumberOfDatasets();
+}
+
+/// Get the names of datasets
+QStringList FunctionBrowser::getDatasetNames() const {
+  return m_presenter->getDatasetNames();
 }
 
 /// Set new number of the datasets
@@ -197,11 +203,6 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
   m_presenter->removeDatasets(indices);
 }
 
-/// Get a list of dataset names.
-QStringList FunctionBrowser::getDatasetNames() const {
-  return m_presenter->getDatasetNames();
-}
-
 /// Add some datasets to those already set.
 /// @param names :: A list of names fr the new datasets.
 void FunctionBrowser::addDatasets(const QStringList &names) {
@@ -252,9 +253,36 @@ void FunctionBrowser::setLocalParameterTie(const QString &parName, int i,
 
 /// Update the interface to have the same parameter values as in a function.
 /// @param fun :: A function to get parameter values from.
-void FunctionBrowser::updateMultiDatasetParameters(
-    const Mantid::API::IFunction &fun) {
+void FunctionBrowser::updateMultiDatasetParameters(const IFunction &fun) {
   m_presenter->updateMultiDatasetParameters(fun);
+}
+
+void FunctionBrowser::updateMultiDatasetParameters(const ITableWorkspace & paramTable)
+{
+  auto const nRows = paramTable.rowCount();
+  if (nRows == 0) return;
+
+  auto const globalParameterNames = getGlobalParameters();
+  for (auto &&name : globalParameterNames) {
+    auto valueColumn = paramTable.getColumn(name.toStdString());
+    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    setParameter(name, valueColumn->toDouble(0));
+    setParameterError(name, errorColumn->toDouble(0));
+  }
+
+  auto const localParameterNames = getLocalParameters();
+  for (auto &&name : localParameterNames) {
+    auto valueColumn = paramTable.getColumn(name.toStdString());
+    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    if (nRows > 1) {
+      for (size_t i = 0; i < nRows; ++i) {
+        setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(i), errorColumn->toDouble(i));
+      }
+    } else {
+      auto const i = getCurrentDataset();
+      setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(0), errorColumn->toDouble(0));
+    }
+  }
 }
 
 /// Get the index of the current dataset.

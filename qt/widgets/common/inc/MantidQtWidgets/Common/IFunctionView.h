@@ -32,13 +32,15 @@ public:
   virtual void setFunction(IFunction_sptr fun) = 0;
   virtual bool hasFunction() const = 0;
   virtual void setParameter(const QString &paramName, double value) = 0;
-  virtual void setParamError(const QString &paramName, double error) = 0;
+  virtual void setParameterError(const QString &paramName, double error) = 0;
   virtual double getParameter(const QString &paramName) const = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
   virtual void setParameterTie(const QString &paramName,
                                const QString &tie) = 0;
+  virtual void setParameterConstraint(const QString &paramName,
+                               const QString &constraint) = 0;
   virtual void setGlobalParameters(const QStringList &) = 0;
 
 signals:

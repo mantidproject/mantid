@@ -25,7 +25,8 @@ class LocalParameterEditor : public QWidget {
   Q_OBJECT
 public:
   LocalParameterEditor(QWidget *parent, int index, double value, bool fixed,
-                       QString tie, bool othersFixed, bool allOthersFixed,
+                       QString tie, QString constraint, bool othersFixed,
+                       bool allOthersFixed,
                        bool othersTied, bool logOptionsEnabled);
 signals:
   void setAllValues(double /*_t1*/);
@@ -33,6 +34,8 @@ signals:
   void setAllFixed(bool /*_t1*/);
   void setTie(int /*_t1*/, QString /*_t2*/);
   void setTieAll(QString /*_t1*/);
+  void setConstraint(int /*_t1*/, QString /*_t2*/);
+  void setConstraintAll(QString /*_t1*/);
   void setValueToLog(int /*_t1*/);
   void setAllValuesToLog();
 private slots:
@@ -44,6 +47,10 @@ private slots:
   void removeTie();
   void setTieAll();
   void removeAllTies();
+  void setConstraint();
+  void removeConstraint();
+  void setConstraintAll();
+  void removeAllConstraints();
   void updateValue(const QString &value);
   void setToLog();
   void setLogOptionsEnabled(bool enabled);
@@ -52,6 +59,7 @@ private:
   bool eventFilter(QObject *widget, QEvent *evn) override;
   void setEditorState();
   static QString setTieDialog(QString tie);
+  static QString setConstraintDialog(QString tie);
   QLineEdit *m_editor;
   QPushButton *m_button;
   QAction *m_setAllAction;
@@ -62,6 +70,10 @@ private:
   QAction *m_removeTieAction;
   QAction *m_setTieToAllAction;
   QAction *m_removeAllTiesAction;
+  QAction *m_setConstraintAction;
+  QAction *m_removeConstraintAction;
+  QAction *m_setConstraintToAllAction;
+  QAction *m_removeAllConstraintsAction;
   QAction *m_setToLogAction;
   QAction *m_setAllToLogAction;
 
@@ -69,9 +81,11 @@ private:
   QString m_value;
   bool m_fixed;
   QString m_tie;
+  QString m_constraint;
   bool m_othersFixed;
   bool m_allOthersFixed;
   bool m_othersTied;
+  bool m_othersConstrained;
 };
 
 } // namespace MantidWidgets

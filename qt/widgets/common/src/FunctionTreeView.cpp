@@ -268,7 +268,9 @@ void FunctionTreeView::clear() {
  */
 void FunctionTreeView::setFunction(Mantid::API::IFunction_sptr fun) {
   clear();
-  addFunction(nullptr, fun);
+  if (fun) {
+    addFunction(nullptr, fun);
+  }
 }
 
 /**
@@ -969,54 +971,11 @@ FunctionTreeView::addConstraintProperties(QtProperty *prop,
                                           QString constraint) {
   if (!isParameter(prop))
     return QList<FunctionTreeView::AProperty>();
-  QString lowerBoundStr = "";
-  QString upperBoundStr = "";
-  Mantid::API::Expression expr;
-  expr.parse(constraint.toStdString());
-  if (expr.name() != "==")
+  auto const parts = splitConstraintString(constraint);
+  if (parts.first.isEmpty())
     return QList<FunctionTreeView::AProperty>();
-  if (expr.size() == 3) { // lower < param < upper
-    try {
-      // check that the first and third terms are numbers
-      double d1 = boost::lexical_cast<double>(expr[0].name());
-      (void)d1;
-      double d2 = boost::lexical_cast<double>(expr[2].name());
-      (void)d2;
-      if (expr[1].operator_name() == "<" && expr[2].operator_name() == "<") {
-        lowerBoundStr = QString::fromStdString(expr[0].name());
-        upperBoundStr = QString::fromStdString(expr[2].name());
-      } else // assume that the operators are ">"
-      {
-        lowerBoundStr = QString::fromStdString(expr[2].name());
-        upperBoundStr = QString::fromStdString(expr[0].name());
-      }
-    } catch (...) { // error in constraint
-      return QList<FunctionTreeView::AProperty>();
-    }
-  } else if (expr.size() == 2) { // lower < param or param > lower etc
-    size_t paramPos = 0;
-    try // find position of the parameter name in expression
-    {
-      double d = boost::lexical_cast<double>(expr[1].name());
-      (void)d;
-    } catch (...) {
-      paramPos = 1;
-    }
-    std::string op = expr[1].operator_name();
-    if (paramPos == 0) { // parameter goes first
-      if (op == "<") {   // param < number
-        upperBoundStr = QString::fromStdString(expr[1].name());
-      } else { // param > number
-        lowerBoundStr = QString::fromStdString(expr[1].name());
-      }
-    } else {           // parameter is second
-      if (op == "<") { // number < param
-        lowerBoundStr = QString::fromStdString(expr[0].name());
-      } else { // number > param
-        upperBoundStr = QString::fromStdString(expr[0].name());
-      }
-    }
-  }
+  QString lowerBoundStr = parts.second.first;
+  QString upperBoundStr = parts.second.second;
 
   // add properties
   QList<FunctionTreeView::AProperty> plist;
@@ -1372,7 +1331,8 @@ void FunctionTreeView::setParameter(const QString &paramName, double value) {
  * @param paramName :: Parameter name
  * @param error :: New error
  */
-void FunctionTreeView::setParamError(const QString &paramName, double error) {
+void FunctionTreeView::setParameterError(const QString &paramName,
+                                         double error) {
   QString index, name;
   std::tie(index, name) = splitParameterName(paramName);
   if (auto prop = getFunctionProperty(index)) {
@@ -1638,6 +1598,15 @@ void FunctionTreeView::addConstraints50() {
   emit parameterConstraintAdded(functionIndex, constraint);
 }
 
+void FunctionTreeView::removeConstraintsQuiet(QtProperty *prop) {
+  auto props = prop->subProperties();
+  foreach (QtProperty *p, props) {
+    if (isConstraint(p)) {
+      removeProperty(p);
+    }
+  }
+}
+
 /**
  * Remove both constraints from current parameter
  */
@@ -1648,13 +1617,7 @@ void FunctionTreeView::removeConstraints() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
-  // const bool isLocal = isLocalParameterProperty(prop);
-  auto props = prop->subProperties();
-  foreach (QtProperty *p, props) {
-    if (isConstraint(p)) {
-      removeProperty(p);
-    }
-  }
+  removeConstraintsQuiet(prop);
   emit parameterConstraintRemoved(getParameterName(prop));
 }
 
@@ -1867,6 +1830,15 @@ void FunctionTreeView::setParameterTie(const QString &paramName,
   } else if (tieProp) {
     removeProperty(tieProp);
   }
+}
+
+void FunctionTreeView::setParameterConstraint(const QString &paramName,
+                                              const QString &constraint) {
+  auto paramProp = getParameterProperty(paramName);
+  if (hasConstraint(paramProp)) {
+    removeConstraintsQuiet(paramProp);
+  }
+  addConstraintProperties(paramProp, constraint);
 }
 
 QStringList FunctionTreeView::getGlobalParameters() const {

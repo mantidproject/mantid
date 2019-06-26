@@ -26,17 +26,19 @@ namespace MantidWidgets {
 /// @param value :: Current parameter value.
 /// @param fixed :: Is the parameter fixed initially?
 /// @param tie :: Parameter's current tie (or empty string).
+/// @param constraint :: Parameter's current constraint (or empty string).
 /// @param othersFixed :: True if some other local parameters are fixed.
 /// @param allOthersFixed :: True if all other local parameters are fixed.
 /// @param othersTied :: True if there are other tied parameters.
 /// @param logOptionsEnabled :: True if the log checkbox is ticked.
 LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
                                            double value, bool fixed,
-                                           QString tie, bool othersFixed,
+                                           QString tie, QString constraint,
+                                           bool othersFixed,
                                            bool allOthersFixed, bool othersTied,
                                            bool logOptionsEnabled)
     : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)),
-      m_fixed(fixed), m_tie(tie), m_othersFixed(othersFixed),
+      m_fixed(fixed), m_tie(tie), m_constraint(constraint), m_othersFixed(othersFixed),
       m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
@@ -101,6 +103,31 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
   connect(m_removeAllTiesAction, SIGNAL(triggered()), this,
           SLOT(removeAllTies()));
   setMenu->addAction(m_removeAllTiesAction);
+
+  setMenu->addSeparator();
+  m_setConstraintAction = new QAction("Set constraint", this);
+  m_setConstraintAction->setToolTip("Set a constraint for this parameter.");
+  connect(m_setConstraintAction, SIGNAL(triggered()), this,
+          SLOT(setConstraint()));
+  setMenu->addAction(m_setConstraintAction);
+
+  m_removeConstraintAction = new QAction("Remove constraint", this);
+  m_removeConstraintAction->setToolTip("Remove the constraint for this parameter.");
+  connect(m_removeConstraintAction, SIGNAL(triggered()), this,
+          SLOT(removeConstraint()));
+  setMenu->addAction(m_removeConstraintAction);
+
+  m_setConstraintToAllAction = new QAction("Set constraint to all", this);
+  m_setConstraintToAllAction->setToolTip("Set this constraint for all parameters.");
+  connect(m_setConstraintToAllAction, SIGNAL(triggered()), this,
+          SLOT(setConstraintAll()));
+  setMenu->addAction(m_setConstraintToAllAction);
+
+  m_removeAllConstraintsAction = new QAction("Remove all constraints", this);
+  m_removeAllConstraintsAction->setToolTip("Remove constraints for all parameters.");
+  connect(m_removeAllConstraintsAction, SIGNAL(triggered()), this,
+          SLOT(removeAllConstraints()));
+  setMenu->addAction(m_removeAllConstraintsAction);
 
   setMenu->addSeparator();
   m_setToLogAction = new QAction("Set to log", this);
@@ -194,6 +221,38 @@ void LocalParameterEditor::removeAllTies() {
   setEditorState();
 }
 
+void LocalParameterEditor::setConstraint() {
+  auto constraint = setTieDialog(m_constraint);
+  if (!constraint.isEmpty()) {
+    m_constraint = constraint;
+    emit setConstraint(m_index, m_constraint);
+  }
+  setEditorState();
+}
+
+void LocalParameterEditor::removeConstraint() {
+  m_constraint = "";
+  emit setConstraint(m_index, "");
+  setEditorState();
+}
+
+void LocalParameterEditor::setConstraintAll() {
+  auto constraint = setConstraintDialog(m_constraint);
+  if (!constraint.isEmpty()) {
+    m_constraint = constraint;
+    m_othersConstrained = true;
+    emit setConstraintAll(m_constraint);
+  }
+  setEditorState();
+}
+
+void LocalParameterEditor::removeAllConstraints() {
+  m_constraint = "";
+  m_othersConstrained = false;
+  emit setConstraintAll("");
+  setEditorState();
+}
+
 /// Send a signal to set value to log
 void LocalParameterEditor::setToLog() { emit setValueToLog(m_index); }
 
@@ -219,8 +278,9 @@ bool LocalParameterEditor::eventFilter(QObject * /*unused*/, QEvent *evn) {
 /// Set the state of the editor elements (the line editor and the button)
 /// according to the state of the parameter (fixed, tied, etc)
 void LocalParameterEditor::setEditorState() {
-  bool isNumber = m_tie.isEmpty();
-  bool isTie = !isNumber;
+  bool const isNumber = m_tie.isEmpty();
+  bool const isTie = !isNumber;
+  bool const hasConstraint = !m_constraint.isEmpty();
 
   m_setAllAction->setEnabled(isNumber);
   m_fixAction->setText(m_fixed ? "Unfix" : "Fix");
@@ -230,6 +290,8 @@ void LocalParameterEditor::setEditorState() {
 
   m_removeTieAction->setEnabled(isTie);
   m_removeAllTiesAction->setEnabled(isTie || m_othersTied);
+  m_removeConstraintAction->setEnabled(hasConstraint);
+  m_removeAllConstraintsAction->setEnabled(hasConstraint);
 
   if (isNumber) {
     auto validator = new QDoubleValidator(this);
@@ -250,6 +312,16 @@ QString LocalParameterEditor::setTieDialog(QString tie) {
   QInputDialog input;
   input.setWindowTitle("Set a tie.");
   input.setTextValue(tie);
+  if (input.exec() == QDialog::Accepted) {
+    return input.textValue();
+  }
+  return "";
+}
+
+QString LocalParameterEditor::setConstraintDialog(QString constraint) {
+  QInputDialog input;
+  input.setWindowTitle("Set a constraint.");
+  input.setTextValue(constraint);
   if (input.exec() == QDialog::Accepted) {
     return input.textValue();
   }

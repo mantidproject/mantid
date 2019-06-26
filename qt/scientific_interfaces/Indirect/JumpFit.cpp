@@ -21,6 +21,7 @@
 
 #include <string>
 
+using namespace Mantid;
 using namespace Mantid::API;
 
 namespace {
@@ -77,7 +78,7 @@ void JumpFit::setupFitTab() {
 
 void JumpFit::updateAvailableFitTypes() {
   auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
-  clearFitTypeComboBox();
+  //clearFitTypeComboBox();
   if (parameter == "Width")
     addFunctions(getWidthFunctions());
   else if (parameter == "EISF")
@@ -85,10 +86,17 @@ void JumpFit::updateAvailableFitTypes() {
 }
 
 void JumpFit::addFunctions(std::vector<std::string> const &functions) {
-  auto &factory = FunctionFactory::Instance();
-  for (auto const &function : functions)
-    addComboBoxFunctionGroup(QString::fromStdString(function),
-                             {factory.createFunction(function)});
+  //auto &factory = FunctionFactory::Instance();
+  //for (auto const &function : functions)
+  //  addComboBoxFunctionGroup(QString::fromStdString(function),
+  //                           {factory.createFunction(function)});
+}
+
+EstimationDataSelector JumpFit::getEstimationDataSelector() const {
+  return
+      [](const MantidVec &x, const MantidVec &y) -> DataForParameterEstimation {
+        return DataForParameterEstimation{{}, {}};
+      };
 }
 
 void JumpFit::updateModelFitTypeString() {

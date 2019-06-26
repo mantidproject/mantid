@@ -25,7 +25,7 @@ QWidget *LocalParameterItemDelegate::createEditor(
   auto row = index.row();
   m_currentEditor = new LocalParameterEditor(
       parent, row, owner()->getValue(row), owner()->isFixed(row),
-      owner()->getTie(row), owner()->areOthersFixed(row),
+      owner()->getTie(row), owner()->getConstraint(row), owner()->areOthersFixed(row),
       owner()->areAllOthersFixed(row), owner()->areOthersTied(row),
       owner()->isLogCheckboxTicked());
   connect(m_currentEditor, SIGNAL(setAllValues(double)), this,
@@ -38,6 +38,10 @@ QWidget *LocalParameterItemDelegate::createEditor(
           SIGNAL(setTie(int, QString)));
   connect(m_currentEditor, SIGNAL(setTieAll(QString)), this,
           SIGNAL(setTieAll(QString)));
+  connect(m_currentEditor, SIGNAL(setConstraint(int, QString)), this,
+          SIGNAL(setConstraint(int, QString)));
+  connect(m_currentEditor, SIGNAL(setConstraintAll(QString)), this,
+          SIGNAL(setConstraintAll(QString)));
   connect(m_currentEditor, SIGNAL(setValueToLog(int)), this,
           SLOT(doSetValueToLog(int)));
   connect(m_currentEditor, SIGNAL(setAllValuesToLog()), this,
@@ -78,7 +82,7 @@ bool LocalParameterItemDelegate::eventFilter(QObject *obj, QEvent *ev) {
 void LocalParameterItemDelegate::paint(QPainter *painter,
                                        const QStyleOptionViewItem &option,
                                        const QModelIndex &index) const {
-  auto tie = owner()->getTie(index.row());
+  auto const tie = owner()->getTie(index.row());
 
   if (!tie.isEmpty()) {
     auto rect = option.rect;

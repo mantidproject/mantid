@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
+#include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -23,6 +24,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+using namespace Mantid;
 using namespace Mantid::API;
 
 namespace {
@@ -44,64 +46,60 @@ IqtFit::IqtFit(QWidget *parent)
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
+  auto templateBrowser = new IqtTemplateBrowser;
+  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(true);
 }
 
 void IqtFit::setupFitTab() {
+  //setSampleWSSuffices({"_iqt"});
+  //setSampleFBSuffices({"_iqt.nxs"});
+
   // Create custom function groups
   auto &functionFactory = FunctionFactory::Instance();
   const auto exponential = functionFactory.createFunction("ExpDecay");
   const auto stretchedExponential =
       functionFactory.createFunction("StretchExp");
-  addSpinnerFunctionGroup("Exponential", {exponential}, 0, 2);
-  addCheckBoxFunctionGroup("Stretched Exponential", {stretchedExponential});
-
-  // Add custom settings
-  addBoolCustomSetting("ConstrainIntensities", "Constrain Intensities");
-  addBoolCustomSetting("ConstrainBeta", "Make Beta Global");
-  addBoolCustomSetting("ExtractMembers", "Extract Members");
-  setCustomSettingEnabled("ConstrainBeta", false);
-  setCustomSettingEnabled("ConstrainIntensities", false);
-
-  // Set available background options
-  setBackgroundOptions({"None", "FlatBackground"});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
   connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
           SLOT(customBoolUpdated(const QString &, bool)));
 }
 
+EstimationDataSelector IqtFit::getEstimationDataSelector() const {
+  return
+      [](const MantidVec &x, const MantidVec &y) -> DataForParameterEstimation {
+        size_t const n = 4;
+        if (y.size() < n + 1)
+          return DataForParameterEstimation{{}, {}};
+        return DataForParameterEstimation{{x[0], x[n]}, {y[0], y[n]}};
+      };
+}
+
 void IqtFit::fitFunctionChanged() {
-  if (numberOfCustomFunctions("StretchExp") > 0) {
-    setCustomSettingEnabled("ConstrainBeta", true);
-  } else {
-    setCustomBoolSetting("ConstrainBeta", false);
-    setCustomSettingEnabled("ConstrainBeta", false);
-  }
   setConstrainIntensitiesEnabled(m_iqtFittingModel->canConstrainIntensities());
   m_iqtFittingModel->setFitTypeString(fitTypeString());
 }
 
 void IqtFit::setConstrainIntensitiesEnabled(bool enabled) {
-  setCustomSettingEnabled("ConstrainIntensities", enabled);
-  if (!enabled)
-    setCustomBoolSetting("ConstrainIntensities", false);
-  else if (boolSettingValue("ConstrainIntensities")) {
-    if (m_iqtFittingModel->setConstrainIntensities(true))
-      updateTies();
-  }
+  //setCustomSettingEnabled("ConstrainIntensities", enabled);
+  //if (!enabled)
+  //  setCustomBoolSetting("ConstrainIntensities", false);
+  //else if (boolSettingValue("ConstrainIntensities")) {
+  //  if (m_iqtFittingModel->setConstrainIntensities(true))
+  //    updateTies();
+  //}
 }
 
 void IqtFit::customBoolUpdated(const QString &key, bool value) {
-  if (key == "Constrain Intensities") {
-    if (m_iqtFittingModel->setConstrainIntensities(value))
-      updateTies();
-  } else if (key == "Make Beta Global")
-    m_iqtFittingModel->setBetaIsGlobal(value);
+  //if (key == "Constrain Intensities") {
+  //  if (m_iqtFittingModel->setConstrainIntensities(value))
+  //    updateTies();
+  //} else if (key == "Make Beta Global")
+  //  m_iqtFittingModel->setBetaIsGlobal(value);
 }
 
 std::string IqtFit::fitTypeString() const {
@@ -118,8 +116,8 @@ std::string IqtFit::fitTypeString() const {
 }
 
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  fitAlgorithm->setProperty("ExtractMembers",
-                            boolSettingValue("ExtractMembers"));
+  //fitAlgorithm->setProperty("ExtractMembers",
+  //                          boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 

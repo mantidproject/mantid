@@ -16,6 +16,10 @@ namespace MantidWidgets {
 using namespace Mantid::API;
 
 void IFunctionModel::setFunctionString(const QString &funStr) {
+  if (funStr.isEmpty()) {
+    clear();
+    return;
+  }
   setFunction(
       FunctionFactory::Instance().createInitialized(funStr.toStdString()));
 }
@@ -35,6 +39,29 @@ QString IFunctionModel::getFitFunctionString() const {
 }
 
 void IFunctionModel::clear() { setFunction(IFunction_sptr()); }
+
+int IFunctionModel::getNumberLocalFunctions() const {
+  auto const n = getNumberDomains();
+  return n > 0 ? n : 1;
+}
+
+void IFunctionModel::copyParametersAndErrors(const IFunction &funFrom,
+                                             IFunction &funTo) {
+  if (funTo.nParams() != funFrom.nParams())
+    return;
+  for (size_t i = 0; i < funFrom.nParams(); ++i) {
+    funTo.setParameter(i, funFrom.getParameter(i));
+    funTo.setError(i, funFrom.getError(i));
+  }
+}
+
+void IFunctionModel::copyParametersAndErrorsToAllLocalFunctions(
+    const IFunction &fun) {
+  for (auto i = 0; i < getNumberLocalFunctions(); ++i) {
+    auto localFun = getSingleFunction(i);
+    copyParametersAndErrors(fun, *localFun);
+  }
+}
 
 void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
   m_globalParameterNames.clear();
@@ -56,21 +83,28 @@ IFunction_sptr MultiDomainFunctionModel::getFitFunction() const {
   if (!m_function) {
     return m_function;
   }
-  if (m_function->nFunctions() > 1) {
+  auto const nf = m_function->nFunctions();
+  if (nf > 1) {
     auto fun =
         boost::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
-    auto const n = m_function->nFunctions();
-    for (auto const par : m_globalParameterNames) {
-      QStringList ties;
-      for (size_t i = 1; i < n; ++i) {
-        ties << "f" + QString::number(i) + "." + par;
+    auto const singleFun = m_function->getFunction(0);
+    for (auto par = m_globalParameterNames.begin();
+         par != m_globalParameterNames.end();) {
+      if (singleFun->hasParameter(par->toStdString())) {
+        QStringList ties;
+        for (size_t i = 1; i < nf; ++i) {
+          ties << "f" + QString::number(i) + "." + *par;
+        }
+        ties << "f0." + *par;
+        fun->addTies(ties.join("=").toStdString());
+        ++par;
+      } else {
+        par = m_globalParameterNames.erase(par);
       }
-      ties << "f0." + par;
-      fun->addTies(ties.join("=").toStdString());
     }
     return fun;
   }
-  if (m_function->nFunctions() == 1) {
+  if (nf == 1) {
     auto fun = m_function->getFunction(0);
     auto compFun = boost::dynamic_pointer_cast<CompositeFunction>(fun);
     if (compFun && compFun->nFunctions() == 1) {
@@ -110,7 +144,6 @@ void MultiDomainFunctionModel::addFunction(const QString &prefix,
                                " is not composite.");
     }
   }
-  m_function->checkFunction();
   updateGlobals();
 }
 
@@ -134,19 +167,25 @@ void MultiDomainFunctionModel::removeFunction(const QString &functionIndex) {
     cf->removeFunction(index);
     if (cf->nFunctions() == 1 && prefix.isEmpty()) {
       m_function->replaceFunction(i, cf->getFunction(0));
+      m_function->checkFunction();
+    } else {
+      cf->checkFunction();
     }
   }
-  m_function->checkFunction();
   updateGlobals();
 }
 
 void MultiDomainFunctionModel::setParameter(const QString &paramName,
                                             double value) {
-  getCurrentFunction()->setParameter(paramName.toStdString(), value);
+  auto fun = getCurrentFunction();
+  if (!fun) {
+    throw std::logic_error("Function is undefined.");
+  }
+  fun->setParameter(paramName.toStdString(), value);
 }
 
-void MultiDomainFunctionModel::setParamError(const QString &paramName,
-                                             double value) {
+void MultiDomainFunctionModel::setParameterError(const QString &paramName,
+                                                 double value) {
   auto fun = getCurrentFunction();
   auto const index = fun->parameterIndex(paramName.toStdString());
   fun->setError(index, value);
@@ -156,10 +195,18 @@ double MultiDomainFunctionModel::getParameter(const QString &paramName) const {
   return getCurrentFunction()->getParameter(paramName.toStdString());
 }
 
-double MultiDomainFunctionModel::getParamError(const QString &paramName) const {
+double
+MultiDomainFunctionModel::getParameterError(const QString &paramName) const {
   auto fun = getCurrentFunction();
   auto const index = fun->parameterIndex(paramName.toStdString());
   return fun->getError(index);
+}
+
+QString MultiDomainFunctionModel::getParameterDescription(
+    const QString &paramName) const {
+  auto fun = getCurrentFunction();
+  auto const index = fun->parameterIndex(paramName.toStdString());
+  return QString::fromStdString(fun->parameterDescription(index));
 }
 
 bool MultiDomainFunctionModel::isParameterFixed(const QString &parName) const {
@@ -213,28 +260,31 @@ void MultiDomainFunctionModel::setNumberDomains(int nDomains) {
   }
   if (!hasFunction()) {
     m_numberDomains = nd;
-    return;
-  }
-  auto const nfOld = m_numberDomains > 0 ? m_numberDomains : 1;
-  auto const lastIndex = nfOld - 1;
-  auto const nf = nd > 0 ? nd : 1;
-  if (nd > m_numberDomains) {
-    auto fun = m_function->getFunction(lastIndex);
-    for (size_t i = nfOld; i < nf; ++i) {
-      m_function->addFunction(fun->clone());
-      m_function->setDomainIndex(i, i);
-    }
   } else {
-    for (size_t i = lastIndex; i >= nf; --i) {
-      m_function->removeFunction(i);
+    auto const nfOld = m_numberDomains > 0 ? m_numberDomains : 1;
+    auto const lastIndex = nfOld - 1;
+    auto const nf = nd > 0 ? nd : 1;
+    if (nd > m_numberDomains) {
+      auto fun = m_function->getFunction(lastIndex);
+      for (size_t i = nfOld; i < nf; ++i) {
+        m_function->addFunction(fun->clone());
+        m_function->setDomainIndex(i, i);
+      }
+    } else {
+      for (size_t i = lastIndex; i >= nf; --i) {
+        m_function->removeFunction(i);
+      }
+      m_function->checkFunction();
+      m_function->clearDomainIndices();
+      for (size_t i = 0; i < m_function->nFunctions(); ++i) {
+        m_function->setDomainIndex(i, i);
+      }
     }
-    m_function->checkFunction();
-    m_function->clearDomainIndices();
-    for (size_t i = 0; i < m_function->nFunctions(); ++i) {
-      m_function->setDomainIndex(i, i);
-    }
+    m_numberDomains = nDomains;
   }
-  m_numberDomains = nDomains;
+  if (m_currentDomainIndex >= m_numberDomains) {
+    m_currentDomainIndex = m_numberDomains > 0 ? m_numberDomains - 1 : 0;
+  }
 }
 
 void MultiDomainFunctionModel::setDatasetNames(const QStringList &names) {
@@ -292,6 +342,17 @@ QString MultiDomainFunctionModel::getLocalParameterTie(const QString &parName,
   return tieStr.mid(j + 1);
 }
 
+QString
+MultiDomainFunctionModel::getLocalParameterConstraint(const QString &parName,
+                                                      int i) const {
+  auto fun = getSingleFunction(i);
+  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  auto const constraint = fun->getConstraint(parIndex);
+  auto const out =
+      (!constraint) ? "" : QString::fromStdString(constraint->asString());
+  return out;
+}
+
 void MultiDomainFunctionModel::setLocalParameterValue(const QString &parName,
                                                       int i, double value) {
   getSingleFunction(i)->setParameter(parName.toStdString(), value);
@@ -318,7 +379,7 @@ void MultiDomainFunctionModel::setLocalParameterFixed(const QString &parName,
 }
 
 void MultiDomainFunctionModel::setLocalParameterTie(const QString &parName,
-                                                    int i, QString tie) {
+                                                    int i, const QString &tie) {
   auto fun = getSingleFunction(i);
   auto const name = parName.toStdString();
   if (tie.isEmpty()) {
@@ -326,6 +387,21 @@ void MultiDomainFunctionModel::setLocalParameterTie(const QString &parName,
   } else {
     auto const j = tie.indexOf('=');
     fun->tie(name, tie.mid(j + 1).toStdString());
+  }
+}
+
+void MultiDomainFunctionModel::setLocalParameterConstraint(
+    const QString &parName, int i, const QString &constraint) {
+  auto const parts = splitConstraintString(constraint);
+  QString prefix, name;
+  std::tie(prefix, name) = splitParameterName(parName);
+  auto fun = getFunctionWithPrefix(prefix, getSingleFunction(i));
+  if (constraint.isEmpty()) {
+    fun->removeConstraint(name.toStdString());
+  } else {
+    auto newConstraint(constraint);
+    newConstraint.replace(parts.first, name);
+    fun->addConstraints(newConstraint.toStdString());
   }
 }
 
@@ -380,11 +456,19 @@ void MultiDomainFunctionModel::updateMultiDatasetParameters(
     const IFunction &fun) {
   if (!hasFunction())
     return;
-  assert(m_function->nParams() == fun.nParams());
+  if (m_function->nParams() != fun.nParams())
+    return;
   for (size_t i = 0; i < fun.nParams(); ++i) {
     m_function->setParameter(i, fun.getParameter(i));
     m_function->setError(i, fun.getError(i));
   }
+}
+
+void MultiDomainFunctionModel::updateParameters(const IFunction &fun) {
+  if (!hasFunction())
+    return;
+  auto currentFun = getCurrentFunction();
+  copyParametersAndErrors(fun, *currentFun);
 }
 
 void MultiDomainFunctionModel::updateGlobals() {
@@ -397,6 +481,10 @@ void MultiDomainFunctionModel::updateGlobals() {
       ++it;
     }
   }
+}
+
+bool MultiDomainFunctionModel::isGlobal(const QString &parName) const {
+  return m_globalParameterNames.contains(parName);
 }
 
 } // namespace MantidWidgets

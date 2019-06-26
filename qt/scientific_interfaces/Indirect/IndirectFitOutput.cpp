@@ -16,6 +16,7 @@
 #include <unordered_set>
 
 using namespace Mantid::API;
+using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
@@ -28,8 +29,8 @@ struct TableRowExtractor {
   }
 
   std::unordered_map<std::string, ParameterValue>
-  operator()(std::size_t index) {
-    TableRow row = m_table->getRow(index);
+  operator()(IDAWorkspaceIndex index) {
+    TableRow row = m_table->getRow(index.value);
     std::unordered_map<std::string, ParameterValue> parameters;
 
     for (auto i = 1u; i < m_chiIndex; i += 2) {
@@ -56,7 +57,7 @@ typename Map::mapped_type &extractOrAddDefault(Map &map, const Key &key) {
 template <typename F>
 void applyEnumeratedData(F &&functor, const FitDataIterator &fitDataBegin,
                          const FitDataIterator &fitDataEnd) {
-  std::size_t start = 0;
+  IDAWorkspaceIndex start{ 0 };
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     start = (*it)->applyEnumeratedSpectra(functor(it->get()), start);
 }
@@ -73,13 +74,14 @@ void extractParametersFromTable(
     const FitDataIterator &fitDataEnd,
     std::unordered_map<IndirectFitData const *, ParameterValues> &parameters) {
   TableRowExtractor extractRowFromTable(tableWs);
-  auto extract = [&](IndirectFitData const *inputData) {
-    auto &values = extractOrAddDefault(parameters, inputData);
-    return [&](std::size_t index, std::size_t spectrum) {
+  IDAWorkspaceIndex index;
+  for (auto fitData = fitDataBegin; fitData < fitDataEnd; ++fitData) {
+    auto &values = parameters[fitData->get()];
+    for (const auto &spectrum : (**fitData).spectra()) {
       values[spectrum] = extractRowFromTable(index);
-    };
-  };
-  applyEnumeratedData(extract, fitDataBegin, fitDataEnd);
+      ++index;
+    }
+  }
 }
 
 template <typename Map, typename Value, typename Key>
@@ -222,35 +224,9 @@ typename Map::mapped_type &findOrCreateDefaultInMap(Map &map, const Key &key) {
   return map[key] = typename Map::mapped_type();
 }
 
-struct UnstructuredResultAdder {
-public:
-  UnstructuredResultAdder(
-      WorkspaceGroup_sptr resultGroup, ResultLocations &locations,
-      std::unordered_map<std::size_t, std::size_t> &defaultPositions,
-      std::size_t &index)
-      : m_resultGroup(resultGroup), m_locations(locations),
-        m_defaultPositions(defaultPositions), m_index(index) {}
-
-  void operator()(std::size_t spectrum) const {
-    auto defaultIt = m_defaultPositions.find(spectrum);
-    if (defaultIt != m_defaultPositions.end())
-      m_locations[spectrum] = ResultLocation(m_resultGroup, defaultIt->second);
-    else if (m_resultGroup->size() > m_index) {
-      m_locations[spectrum] = ResultLocation(m_resultGroup, m_index);
-      m_defaultPositions[spectrum] = m_index++;
-    }
-  }
-
-private:
-  WorkspaceGroup_sptr m_resultGroup;
-  ResultLocations &m_locations;
-  std::unordered_map<std::size_t, std::size_t> &m_defaultPositions;
-  std::size_t &m_index;
-};
-
-std::size_t numberOfSpectraIn(const FitDataIterator &fitDataBegin,
+SpectrumRowIndex numberOfSpectraIn(const FitDataIterator &fitDataBegin,
                               const FitDataIterator &fitDataEnd) {
-  std::size_t spectra = 0;
+  SpectrumRowIndex spectra{0};
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     spectra += (*it)->numberOfSpectra();
   return spectra;
@@ -276,14 +252,13 @@ IndirectFitOutput::IndirectFitOutput(WorkspaceGroup_sptr resultGroup,
                                      ITableWorkspace_sptr parameterTable,
                                      WorkspaceGroup_sptr resultWorkspace,
                                      IndirectFitData const *fitData,
-                                     std::size_t spectrum) {
+                                     WorkspaceIndex spectrum) {
   m_parameters[fitData] = ParameterValues();
   m_outputResultLocations[fitData] = ResultLocations();
   addOutput(resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
 }
 
-bool IndirectFitOutput::isSpectrumFit(IndirectFitData const *fitData,
-                                      std::size_t spectrum) const {
+bool IndirectFitOutput::isSpectrumFit(IndirectFitData const *fitData, WorkspaceIndex spectrum) const {
   auto values = m_parameters.find(fitData);
   return values != m_parameters.end() &&
          values->second.find(spectrum) != values->second.end();
@@ -291,7 +266,7 @@ bool IndirectFitOutput::isSpectrumFit(IndirectFitData const *fitData,
 
 std::unordered_map<std::string, ParameterValue>
 IndirectFitOutput::getParameters(IndirectFitData const *fitData,
-                                 std::size_t spectrum) const {
+                WorkspaceIndex spectrum) const {
   return getValueOr(m_parameters,
                     std::unordered_map<std::string, ParameterValue>(), fitData,
                     spectrum);
@@ -299,7 +274,7 @@ IndirectFitOutput::getParameters(IndirectFitData const *fitData,
 
 boost::optional<ResultLocation>
 IndirectFitOutput::getResultLocation(IndirectFitData const *fitData,
-                                     std::size_t spectrum) const {
+                WorkspaceIndex spectrum) const {
   return getValueOr(m_outputResultLocations,
                     boost::optional<ResultLocation>(boost::none), fitData,
                     spectrum);
@@ -340,7 +315,7 @@ void IndirectFitOutput::mapParameterNames(
 
 void IndirectFitOutput::mapParameterNames(
     const std::unordered_map<std::string, std::string> &parameterNameChanges,
-    IndirectFitData const *fitData, std::size_t spectrum) {
+    IndirectFitData const *fitData, WorkspaceIndex spectrum) {
   auto &parameters = m_parameters[fitData][spectrum];
   parameters = mapKeys(parameters, parameterNameChanges);
 }
@@ -361,10 +336,10 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
                                   ITableWorkspace_sptr parameterTable,
                                   WorkspaceGroup_sptr resultWorkspace,
                                   IndirectFitData const *fitData,
-                                  std::size_t spectrum) {
+                                  WorkspaceIndex spectrum) {
   TableRowExtractor extractRowFromTable(parameterTable);
-  m_parameters[fitData][spectrum] = extractRowFromTable(0);
-  m_outputResultLocations[fitData][spectrum] = ResultLocation(resultGroup, 0);
+  m_parameters[fitData][spectrum] = extractRowFromTable(WorkspaceIndex{ 0 });
+  m_outputResultLocations[fitData][spectrum] = ResultLocation(resultGroup, GroupIndex{ 0 });
   renameResult(resultWorkspace, fitData);
   m_resultWorkspace = resultWorkspace;
   m_resultGroup = resultGroup;
@@ -378,7 +353,7 @@ void IndirectFitOutput::removeOutput(IndirectFitData const *fitData) {
 void IndirectFitOutput::updateFitResults(WorkspaceGroup_sptr resultGroup,
                                          const FitDataIterator &fitDataBegin,
                                          const FitDataIterator &fitDataEnd) {
-  if (numberOfSpectraIn(fitDataBegin, fitDataEnd) <= resultGroup->size())
+  if (numberOfSpectraIn(fitDataBegin, fitDataEnd).value <= resultGroup->size())
     updateFitResultsFromStructured(resultGroup, fitDataBegin, fitDataEnd);
   else
     updateFitResultsFromUnstructured(resultGroup, fitDataBegin, fitDataEnd);
@@ -395,29 +370,37 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
     WorkspaceGroup_sptr resultGroup, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) {
   std::unordered_map<MatrixWorkspace *,
-                     std::unordered_map<std::size_t, std::size_t>>
+                     std::map<WorkspaceIndex, GroupIndex>>
       resultIndices;
-  std::size_t index = 0;
-
-  auto update = [&](IndirectFitData const *inputData) {
-    auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
-    auto ws = inputData->workspace().get();
-    auto &indices = findOrCreateDefaultInMap(resultIndices, ws);
-    return UnstructuredResultAdder(resultGroup, fitResults, indices, index);
-  };
-  applyData(update, fitDataBegin, fitDataEnd);
+  GroupIndex index{ 0 };
+  for (auto fitData = fitDataBegin; fitData < fitDataEnd; ++fitData) {
+    auto &fitResults = m_outputResultLocations[fitData->get()];
+    auto ws = (*fitData)->workspace().get();
+    auto &indices = resultIndices[ws];
+    for (const auto &spectrum : (**fitData).spectra()) {
+      auto defaultIt = indices.find(spectrum);
+      if (defaultIt != indices.end()) {
+        fitResults[spectrum] = ResultLocation(resultGroup, defaultIt->second);
+      } else if (resultGroup->size() > index.value) {
+        fitResults[spectrum] = ResultLocation(resultGroup, index);
+        indices[spectrum] = index;
+        ++index;
+      }
+    }
+  }
 }
 
 void IndirectFitOutput::updateFitResultsFromStructured(
     WorkspaceGroup_sptr resultGroup, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) {
-  auto update = [&](IndirectFitData const *inputData) {
-    auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
-    return [&](std::size_t index, std::size_t spectrum) {
+  GroupIndex index;
+  for (auto fitData = fitDataBegin; fitData < fitDataEnd; ++fitData) {
+    auto &fitResults = m_outputResultLocations[fitData->get()];
+    for (const auto &spectrum : (**fitData).spectra()) {
       fitResults[spectrum] = ResultLocation(resultGroup, index);
-    };
-  };
-  applyEnumeratedData(update, fitDataBegin, fitDataEnd);
+      ++index;
+    }
+  }
 }
 
 } // namespace IDA

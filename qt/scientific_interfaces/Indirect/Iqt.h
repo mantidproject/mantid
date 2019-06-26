@@ -25,7 +25,6 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
-  void setBrowserWorkspace() override{};
 
   bool isErrorsEnabled();
 
