@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import json
 import unittest
 
 from mantid.api import AnalysisDataService, FrameworkManager
@@ -17,7 +18,8 @@ from sans.common.enums import (ISISReductionMode, ReductionDimensionality, Outpu
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_managed_non_child_algorithm,
                                            create_unmanaged_algorithm, add_to_sample_log,
                                            get_standard_output_workspace_name, sanitise_instrument_name,
-                                           get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
+                                           EnumEncoder, decode_as_enum, get_reduced_can_workspace_from_ads,
+                                           write_hash_into_reduced_can_workspace,
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
                                            get_facility, parse_diagnostic_settings, get_transmission_output_name,
@@ -562,6 +564,15 @@ class SANSFunctionsTest(unittest.TestCase):
         alg_manager_mock.reset_mock()
         create_managed_non_child_algorithm("TestAlg", **{"test_val": 5})
         alg_manager_mock.create.assert_called_once_with("TestAlg")
+
+    def test_can_dump_enums_to_JSON(self):
+        data = {"an_enum": SANSFacility.ISIS,
+                "another_enum": DetectorType.HAB}
+        text = json.dumps(data, cls=EnumEncoder)
+
+        decoded_obj = json.loads(text, object_hook=decode_as_enum)
+        self.assertEqual(decoded_obj, data)
+
 
 if __name__ == '__main__':
     unittest.main()

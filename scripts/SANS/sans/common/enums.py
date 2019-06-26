@@ -13,6 +13,39 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.py3compat import Enum
 
 
+__all__ = [
+    "SANSInstrument",
+    "SANSFacility",
+    "SANSDataType",
+    "CanonicalCoordinates",
+    "ReductionMode",
+    "ISISReductionMode",
+    "ReductionDimensionality",
+    "ReductionData",
+    "DataType",
+    "OutputParts",
+    "FitModeForMerge",
+    "DetectorOrientation",
+    "DetectorType",
+    "TransmissionType",
+    "RangeStepType",
+    "RebinType",
+    "SaveType",
+    "FitType",
+    "SampleShape",
+    "FileType",
+    "OutputMode",
+    "BatchReductionEntry",
+    "MaskingQuadrant",
+    "FindDirectionEnum",
+    "IntegralEnum",
+    "RowState",
+    "BinningType",
+    "SANSEnum",
+    "SANS_ENUMS"
+]
+
+
 class SANSEnum(Enum):
     """
     This class extends Enum by adding a method to check if the enum
@@ -28,6 +61,7 @@ class SANSEnum(Enum):
         :return: True if member in cls, else False
         """
         for string_value, enum_value in cls._member_map_.items():
+            print(string_value, enum_value)
             if member == string_value or member == enum_value:
                 return True
         return False
@@ -215,3 +249,37 @@ RowState = SANSEnum("RowState", "Unprocessed Processed Error")
 # Binning Types for AddRuns
 # -------------------------------
 BinningType = SANSEnum("BinningType", "SaveAsEventData Custom FromMonitors")
+
+
+# -------------------------------
+# Dict of Enums for JSON encoding
+# -------------------------------
+SANS_ENUMS = {
+    "SANSInstrument": SANSInstrument,
+    "SANSFacility": SANSFacility,
+    "SANSDataType": SANSDataType,
+    "CanonicalCoordinates": CanonicalCoordinates,
+    "ReductionMode": ReductionMode,
+    "ISISReductionMode": ISISReductionMode,
+    "ReductionDimensionality": ReductionDimensionality,
+    "ReductionData": ReductionData,
+    "DataType": DataType,
+    "OutputParts": OutputParts,
+    "FitModeForMerge": FitModeForMerge,
+    "DetectorOrientation": DetectorOrientation,
+    "DetectorType": DetectorType,
+    "TransmissionType": TransmissionType,
+    "RangeStepType": RangeStepType,
+    "RebinType": RebinType,
+    "SaveType": SaveType,
+    "FitType": FitType,
+    "SampleShape": SampleShape,
+    "FileType": FileType,
+    "OutputMode": OutputMode,
+    "BatchReductionEntry": BatchReductionEntry,
+    "MaskingQuadrant": MaskingQuadrant,
+    "FindDirectionEnum": FindDirectionEnum,
+    "IntegralEnum": IntegralEnum,
+    "RowState": RowState,
+    "BinningType": BinningType
+}

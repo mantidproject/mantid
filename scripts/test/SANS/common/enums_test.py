@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
 
 from sans.common.enums import SANSEnum
@@ -26,6 +27,14 @@ class SANSEnumsTest(unittest.TestCase):
 
         self.assertTrue(DummyClass.has_member(a_variable))
         self.assertFalse(DummyClass.has_member(incorrect_variable))
+
+    def test_that_enum_is_initialised_correctly(self):
+        try:
+            dummy = DummyClass.TypeA
+            dummy = DummyClass.TypeB
+            dummy = DummyClass.TypeC
+        except AttributeError as e:
+            self.fail(str(e))
 
 
 if __name__ == '__main__':

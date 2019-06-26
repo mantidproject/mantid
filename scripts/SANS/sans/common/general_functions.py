@@ -15,13 +15,12 @@ from copy import deepcopy
 import json
 import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
-from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstrument_string_list,
-                                             SANSInstrument_string_as_key_NoInstrument)
 from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
+from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstrument_string_list,
+                                             SANSInstrument_string_as_key_NoInstrument)
+from sans.common.enums import *
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
-from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument, SANSFacility, DataType, TransmissionType)
 # -------------------------------------------
 # Constants
 # -------------------------------------------
@@ -878,6 +877,24 @@ def get_instrument(instrument_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # Hashing + ADS
 # ----------------------------------------------------------------------------------------------------------------------
+class EnumEncoder(json.JSONEncoder):
+    """
+    Class to allow JSON encoding of Enum
+    """
+    def default(self, obj):
+        if type(obj) in SANS_ENUMS.values():
+            return {"__enum__": str(obj)}
+        return json.JSONEncoder.default(self, obj)
+
+
+def decode_as_enum(obj):
+    if "__enum__" in obj:
+        name, member = obj["__enum__"].split(".")
+        return getattr(SANS_ENUMS[name], member)
+    else:
+        return obj
+
+
 def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
     """
     Creates a hash for a (modified) state object.
@@ -908,7 +925,7 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         return state_to_hash
     new_state = remove_sample_related_information(state)
     new_state_serialized = new_state.property_manager
-    new_state_serialized = json.dumps(new_state_serialized, sort_keys=True, indent=4)
+    new_state_serialized = json.dumps(new_state_serialized, sort_keys=True, indent=4, cls=EnumEncoder)
 
     # Add a tag for the reduction mode
     state_string = str(new_state_serialized)
