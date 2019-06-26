@@ -51,39 +51,43 @@ public:
     }
   }
 
-  bool hasNxClass(const std::string &nxType, const std::string &path) const {
+  bool hasNxClass(const std::string &attrVal, const std::string &path) const {
 
     H5::Group parentGroup = m_file.openGroup(path);
     H5::Attribute attribute = parentGroup.openAttribute("NX_class");
 
-    std::string readClass;
-    attribute.read(attribute.getDataType(), readClass);
-    return readClass == nxType;
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
+    return attributeValue == attrVal;
   }
 
-  bool hasDataSet(const std::string &dataSetname, const std::string &nxType,
-                  const std::string &path) const {
+  bool hasDataSet(const std::string name, const std::string &attrName,
+                  const std::string &attrVal, const std::string &path) const {
 
-    H5::Group parentGroup = m_file.openGroup(path); //open group where DataSet should exist.
+    H5::Group parentGroup =
+        m_file.openGroup(path); // open group where DataSet should exist.
 
     try {
 
-      H5::DataSet dataSet = parentGroup.openDataSet(dataSetname); //dataset exists if in this block.
-	  H5::Attribute attribute = dataSet.openAttribute("NX_class");//will open attribute if it is Nexus compliant.
+      // dataset with name 'name' exists if try block succeeds.
+      H5::DataSet dataSet = parentGroup.openDataSet(name);
 
-	  std::string readClass;
+      // attribute of dataset with atrtibute name 'attrName' exists if try block
+      // succeeds.
+      H5::Attribute attribute = dataSet.openAttribute(attrName);
+
+      std::string readClass;
       attribute.read(attribute.getDataType(), readClass);
-      return readClass == nxType; //return
+
+	  // if value of attribute read from file matches attrval, returns true.
+      return readClass == attrVal; 
 
     } catch (...) {
 
-      return false; // DataSet could not be opened.
+	// DataSet could not be opened.
+      return false; 
     }
-    // check if dataset has NXClass
 
-    /*std::string readClass;
-    auto type = dataSet.getDataType();
-    dataSet.read(readClass, type);*/
   }
 
 private:
@@ -95,11 +99,11 @@ private:
 class ScopedFileHandle {
 
 public:
-  ScopedFileHandle(const std::string &name) {
+  ScopedFileHandle(const std::string &fileName) {
 
     const auto temp_dir = boost::filesystem::temp_directory_path();
     auto temp_full_path = temp_dir;
-    temp_full_path /= name;
+    temp_full_path /= fileName;
 
     // Check proposed location and throw std::invalid argument if file does
     // not exist. otherwise set m_full_path to location.
@@ -208,8 +212,8 @@ public:
     HDF5FileTestUtility testUtility(destinationFile);
 
     // TS_ASSERT(testUtility.hasDataSet("/raw_data1/instrument/name", NX_CHAR));
-    TS_ASSERT(
-        testUtility.hasDataSet("name", "NX_CHAR", "/raw_data_1/instrument"));
+    TS_ASSERT(testUtility.hasDataSet("name", "short_name", "test",
+                                     "/raw_data_1/instrument"));
     // TODO write hasDataSet in HDF5FileTestUtility
   }
 };
