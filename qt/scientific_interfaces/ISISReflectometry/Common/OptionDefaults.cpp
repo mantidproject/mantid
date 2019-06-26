@@ -34,6 +34,11 @@ bool OptionDefaults::getBoolOrFalse(std::string const &propertyName,
   return getValueOrDefault<bool>(propertyName, parameterName, false);
 }
 
+bool OptionDefaults::getBoolOrTrue(std::string const &propertyName,
+                                   std::string const &parameterName) const {
+  return getValueOrDefault<bool>(propertyName, parameterName, true);
+}
+
 std::string
 OptionDefaults::getStringOrDefault(std::string const &propertyName,
                                    std::string const &parameterName,

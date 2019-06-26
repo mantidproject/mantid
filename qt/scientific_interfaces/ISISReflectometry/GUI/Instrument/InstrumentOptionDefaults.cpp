@@ -30,8 +30,8 @@ getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   if (monitorIndex < 0)
     throw std::invalid_argument("Monitor index cannot be negative");
 
-  auto integrate = defaults.getBoolOrFalse("NormalizeByIntegratedMonitors",
-                                           "NormalizeByIntegratedMonitors");
+  auto integrate = defaults.getBoolOrTrue("NormalizeByIntegratedMonitors",
+                                          "NormalizeByIntegratedMonitors");
   auto backgroundRange =
       RangeInLambda(defaults.getDoubleOrZero("MonitorBackgroundWavelengthMin",
                                              "MonitorBackgroundMin"),
@@ -54,7 +54,7 @@ getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto detectorCorrectionString = defaults.getStringOrDefault(
       "DetectorCorrectionType", "DetectorCorrectionType", "VerticalShift");
   auto detectorCorrections = DetectorCorrections(
-      defaults.getBoolOrFalse("CorrectDetectors", "CorrectDetectors"),
+      defaults.getBoolOrTrue("CorrectDetectors", "CorrectDetectors"),
       detectorCorrectionTypeFromString(detectorCorrectionString));
 
   return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),

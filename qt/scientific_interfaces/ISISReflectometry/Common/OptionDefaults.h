@@ -38,6 +38,8 @@ public:
                          std::string const &parameterName) const;
   bool getBoolOrFalse(std::string const &propertyName,
                       std::string const &parameterName) const;
+  bool getBoolOrTrue(std::string const &propertyName,
+                     std::string const &parameterName) const;
   std::string getStringOrDefault(std::string const &propertyName,
                                  std::string const &parameterName,
                                  std::string const &defaultValue) const;
