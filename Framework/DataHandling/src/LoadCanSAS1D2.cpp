@@ -20,8 +20,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 
-#include <boost/lexical_cast.hpp>
-
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
@@ -39,8 +37,8 @@ DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2)
 void LoadCanSAS1D2::init() {
   LoadCanSAS1D::init();
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
+                                                Direction::Input),
       "Load the transmission related data from the file if it is present "
       "(optional, default False).");
 }
@@ -87,7 +85,7 @@ void LoadCanSAS1D2::processTransmission(
   if (trans_gp.size() == 1) {
     MatrixWorkspace_sptr WS = trans_gp[0];
     WS->mutableRun().addProperty("Filename", fileName);
-    declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                         propertyWS, trans_wsname, Direction::Output),
                     doc);
 
@@ -102,14 +100,14 @@ void LoadCanSAS1D2::processTransmission(
       std::stringstream name;
       pname << propertyWS << i;
       name << trans_wsname << i;
-      declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                           pname.str(), name.str(), Direction::Output),
                       doc);
       setProperty(pname.str(), newWork);
       group->addWorkspace(newWork);
     }
     std::string pname = std::string(propertyWS).append("GP");
-    declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+    declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                         pname, trans_wsname, Direction::Output),
                     doc);
     setProperty(pname, group);
@@ -184,7 +182,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     // iterate through each Tdata element  and get the values of "Lambda",
     //"T" and "Tdev" text nodes and fill X,Y,E vectors
     for (unsigned long index = 0; index < nBins; ++index) {
-      Node *idataElem = tdataElemList->item(index);
+      idataElem = tdataElemList->item(index);
       Element *elem = dynamic_cast<Element *>(idataElem);
       if (elem) {
         // setting X vector

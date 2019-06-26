@@ -25,6 +25,7 @@
    api/index
    plotting/index
    release/index
+   workbench/index
 
 
 ======
@@ -33,8 +34,8 @@ Mantid
 
 The Mantid Framework has been created to visualise, manipulate and analyse neutron and muon scattering data. Mantid can be used though several Graphical User Interfaces (GUI) and programming languages, including:
 
-* `Mantidplot <https://www.mantidproject.org/MantidPlot:_Help>`_, the original interface supporting a wide range of techniques and visualisation approaches.
-* `Mantid Workbench <https://www.mantidproject.org/Mantid_4>`_, A newer, more stable, interface with growing supports for a list of techniques.
+* `MantidPlot <https://www.mantidproject.org/MantidPlot:_Help>`_, the original interface supporting a wide range of techniques and visualisation approaches.
+* :ref:`MantidWorkbench <workbench>`, A modern interface with growing supports for a list of techniques.
 * Autoreduction services at specific facilities, including ISIS and the `SNS <https://monitor.sns.gov>`_.
 * API's for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
 
@@ -52,9 +53,10 @@ This is the documentation for Mantid |release|.
   * :ref:`mantid_basic_course`, takes you through installing and basic use of Mantid through Mantidplot, including loading, visualising and fitting data.
   * :ref:`training`, links to further self paced courses and learning resources.
   * :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`, details of how to make pretty plots and manioukate them via Python.
-    
+
 **Reference Documentation:**
   * :ref:`Algorithms List`, specific details for all of our algorithms including descriptions of all inputs and parameters .
+  * :ref:`workbench` provides details on the new graphical user interface with matplotlib-based plotting.
   * :ref:`concepts contents`, deeper background information on the fundamental concepts within Mantid.
   * :ref:`interfaces contents`, descriptions of the bespoke technique interfaces available.
   * :ref:`fitting contents`, details of all the supported fitting functions and minimization approaches.

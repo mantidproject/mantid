@@ -71,7 +71,7 @@ public:
     algToBeTested.setPropertyValue("InputWorkspace", "SAVECSVTEST-testSpace");
 
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
     TS_ASSERT_EQUALS(algToBeTested.isExecuted(), false)
 
     // Now set it...

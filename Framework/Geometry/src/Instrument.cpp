@@ -20,7 +20,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 #include <nexus/NeXusFile.hpp>
@@ -427,9 +426,7 @@ IComponent_const_sptr Instrument::getSample() const {
  *  @returns A unit vector denoting the direction of the beam
  */
 Kernel::V3D Instrument::getBeamDirection() const {
-  V3D retval = getSample()->getPos() - getSource()->getPos();
-  retval.normalize();
-  return retval;
+  return normalize(getSample()->getPos() - getSource()->getPos());
 }
 
 //------------------------------------------------------------------------------------------
@@ -1040,7 +1037,6 @@ void Instrument::saveNexus(::NeXus::File *file,
     file->closeGroup(); // detectors
 
     // Create Monitor IDs vector
-    auto detmons = getDetectors(detmonIDs);
     std::vector<detid_t> monitorIDs;
     for (size_t i = 0; i < detmonIDs.size(); i++) {
       if (isMonitorViaIndex(i))
@@ -1409,7 +1405,7 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
                          const DetectorInfo &detectorInfo) const {
   auto compInfo = componentInfo.cloneWithoutDetectorInfo();
-  auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
+  auto detInfo = std::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   const auto parInstrument = ParComponentFactory::createInstrument(
       boost::shared_ptr<const Instrument>(this, NoDeleting()),

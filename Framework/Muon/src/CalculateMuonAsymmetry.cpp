@@ -20,11 +20,14 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
+
+#include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include <cmath>
 #include <numeric>
@@ -45,18 +48,19 @@ DECLARE_ALGORITHM(CalculateMuonAsymmetry)
 void CalculateMuonAsymmetry::init() {
   // norm table to update
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalizationTable", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "NormalizationTable", "", Direction::Input,
+          API::PropertyMode::Optional),
       "Name of the table containing the normalizations for the asymmetries.");
   // list of uNonrm workspaces to fit to
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Kernel::ArrayProperty<std::string>>(
           "UnNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
       "An ordered list of workspaces (to get the initial values "
       "for the normalizations).");
   // list of workspaces to output renormalized result to
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Kernel::ArrayProperty<std::string>>(
           "ReNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
       "An ordered list of workspaces (to get the initial values "
       "for the normalizations).");
@@ -70,7 +74,7 @@ void CalculateMuonAsymmetry::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
-  declareProperty(make_unique<API::FunctionProperty>("InputFunction"),
+  declareProperty(std::make_unique<API::FunctionProperty>("InputFunction"),
                   "The fitting function to be converted.");
 
   std::vector<std::string> minimizerOptions =
@@ -86,8 +90,8 @@ void CalculateMuonAsymmetry::init() {
       "Stop after this number of iterations if a good fit is not found");
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
   declareProperty("ChiSquared", 0.0, Kernel::Direction::Output);
-  declareProperty(make_unique<API::FunctionProperty>("OutputFunction",
-                                                     Kernel::Direction::Output),
+  declareProperty(std::make_unique<API::FunctionProperty>(
+                      "OutputFunction", Kernel::Direction::Output),
                   "The fitting function after fit.");
 }
 /*
@@ -127,46 +131,48 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
   // muon folder
   API::ITableWorkspace_const_sptr tabWS = getProperty("NormalizationTable");
 
-  if (tabWS->columnCount() == 0) {
-    validationOutput["NormalizationTable"] =
-        "Please provide a non-empty NormalizationTable.";
-  }
-  // NormalizationTable should have three columns: (norm, name, method)
-  if (tabWS->columnCount() != 3) {
-    validationOutput["NormalizationTable"] =
-        "NormalizationTable must have three columns";
-  }
-  auto names = tabWS->getColumnNames();
-  int normCount = 0;
-  int wsNamesCount = 0;
-  for (const std::string &name : names) {
-
-    if (name == "norm") {
-      normCount += 1;
+  if (tabWS) {
+    if (tabWS->columnCount() == 0) {
+      validationOutput["NormalizationTable"] =
+          "Please provide a non-empty NormalizationTable.";
     }
+    // NormalizationTable should have three columns: (norm, name, method)
+    if (tabWS->columnCount() != 3) {
+      validationOutput["NormalizationTable"] =
+          "NormalizationTable must have three columns";
+    }
+    auto names = tabWS->getColumnNames();
+    int normCount = 0;
+    int wsNamesCount = 0;
+    for (const std::string &name : names) {
 
-    if (name == "name") {
-      wsNamesCount += 1;
+      if (name == "norm") {
+        normCount += 1;
+      }
+
+      if (name == "name") {
+        wsNamesCount += 1;
+      }
+    }
+    if (normCount == 0) {
+      validationOutput["NormalizationTable"] =
+          "NormalizationTable needs norm column";
+    }
+    if (wsNamesCount == 0) {
+      validationOutput["NormalizationTable"] =
+          "NormalizationTable needs a name column";
+    }
+    if (normCount > 1) {
+      validationOutput["NormalizationTable"] = "NormalizationTable has " +
+                                               std::to_string(normCount) +
+                                               " norm columns";
+    }
+    if (wsNamesCount > 1) {
+      validationOutput["NormalizationTable"] = "NormalizationTable has " +
+                                               std::to_string(wsNamesCount) +
+                                               " name columns";
     }
   }
-  if (normCount == 0) {
-    validationOutput["NormalizationTable"] =
-        "NormalizationTable needs norm column";
-  }
-  if (wsNamesCount == 0) {
-    validationOutput["NormalizationTable"] =
-        "NormalizationTable needs a name column";
-  }
-  if (normCount > 1) {
-    validationOutput["NormalizationTable"] =
-        "NormalizationTable has " + std::to_string(normCount) + " norm columns";
-  }
-  if (wsNamesCount > 1) {
-    validationOutput["NormalizationTable"] = "NormalizationTable has " +
-                                             std::to_string(wsNamesCount) +
-                                             " name columns";
-  }
-
   return validationOutput;
 }
 /** Executes the algorithm
@@ -201,11 +207,17 @@ void CalculateMuonAsymmetry::exec() {
     normWS->mutableY(0) = ws->y(0) / norms[j];
     normWS->mutableY(0) -= 1.0;
     normWS->mutableE(0) = ws->e(0) / norms[j];
+
+    MuonAlgorithmHelper::addSampleLog(normWS, "analysis_asymmetry_norm",
+                                      std::to_string(norms[j]));
   }
   // update table with new norm
   std::vector<std::string> methods(wsNames.size(), "Calculated");
   API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
-  updateNormalizationTable(table, wsNames, norms, methods);
+  if (table) {
+
+    updateNormalizationTable(table, wsNames, norms, methods);
+  }
 }
 
 /**
@@ -223,7 +235,8 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   double endX = getProperty("EndX");
   int maxIterations = getProperty("MaxIterations");
   auto minimizer = getProperty("Minimizer");
-  API::IAlgorithm_sptr fit = API::AlgorithmManager::Instance().create("Fit");
+  API::IAlgorithm_sptr fit =
+      API::AlgorithmManager::Instance().createUnmanaged("Fit");
   fit->initialize();
 
   API::IFunction_sptr function = getProperty("InputFunction");
@@ -295,7 +308,6 @@ double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
   auto TFFunc =
       boost::dynamic_pointer_cast<API::CompositeFunction>(func->getFunction(0));
 
-  auto fdas = TFFunc->asString();
   // getFunction(0) -> N
   auto flat = TFFunc->getFunction(0);
 

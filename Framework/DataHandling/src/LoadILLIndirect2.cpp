@@ -12,12 +12,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-
+#include <cmath>
 #include <nexus/napi.h>
 
 namespace Mantid {
@@ -29,17 +30,6 @@ using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadILLIndirect2::LoadILLIndirect2()
-    : API::IFileLoader<Kernel::NexusDescriptor>(), m_numberOfTubes(0),
-      m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfSimpleDetectors(0), m_numberOfHistograms(0),
-      m_numberOfMonitors(0) {
-  m_supportedInstruments.emplace_back("IN16B");
-}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -81,12 +71,12 @@ int LoadILLIndirect2::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLIndirect2::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "File path of the Data file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "File path of the Data file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -96,35 +86,39 @@ void LoadILLIndirect2::init() {
 void LoadILLIndirect2::exec() {
 
   // Retrieve filename
-  std::string filenameData = getPropertyValue("Filename");
+  const std::string filenameData = getPropertyValue("Filename");
+
+  Progress progress(this, 0., 1., 6);
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
-  // Load Monitor details: n. monitors x monitor contents
-  std::vector<std::vector<int>> monitorsData = loadMonitors(firstEntry);
-
   // Load Data details (number of tubes, channels, etc)
   loadDataDetails(firstEntry);
+  progress.report("Loaded metadata");
 
   std::string instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
-
-  initWorkSpace(firstEntry, monitorsData);
+  initWorkSpace();
+  progress.report("Initialised the workspace");
 
   g_log.debug("Building properties...");
   loadNexusEntriesIntoProperties(filenameData);
+  progress.report("Loaded data details");
 
   g_log.debug("Loading data...");
-  loadDataIntoTheWorkSpace(firstEntry, monitorsData);
+  loadDataIntoTheWorkSpace(firstEntry);
+  progress.report("Loaded the data");
 
   // load the instrument from the IDF if it exists
   g_log.debug("Loading instrument definition...");
   runLoadInstrument();
+  progress.report("Loaded the instrument");
 
   g_log.debug("Movind SDs...");
   moveSingleDetectors(firstEntry);
+  progress.report("Loaded the single detectors");
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -132,6 +126,8 @@ void LoadILLIndirect2::exec() {
 
 /**
  * Set member variable with the instrument name
+ * @param firstEntry : nexus entry
+ * @param instrumentNamePath : nexus path to instrument name
  */
 void LoadILLIndirect2::setInstrumentName(
     const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
@@ -188,169 +184,93 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
 }
 
 /**
- * Load monitors data found in nexus file
- *
- * @param entry :: The Nexus entry
- *
- */
-std::vector<std::vector<int>>
-LoadILLIndirect2::loadMonitors(NeXus::NXEntry &entry) {
-  // read in the data
-  g_log.debug("Fetching monitor data...");
-
-  NXData dataGroup = entry.openNXData("monitor/data");
-  NXInt data = dataGroup.openIntData();
-  // load the counts from the file into memory
-  data.load();
-
-  // For the moment, we are aware of only one monitor entry, but we keep the
-  // generalized case of n monitors
-
-  std::vector<std::vector<int>> monitors(1);
-  std::vector<int> monitor(data(), data() + data.size());
-  monitors[0].swap(monitor);
-  m_numberOfMonitors = monitors.size();
-  return monitors;
-}
-
-/**
  * Creates the workspace and initialises member variables with
  * the corresponding values
- *
- * @param entry :: The Nexus entry
- * @param monitorsData :: Monitors data already loaded
- *
  */
-void LoadILLIndirect2::initWorkSpace(
-    NeXus::NXEntry & /*entry*/, std::vector<std::vector<int>> monitorsData) {
-
-  // dim0 * m_numberOfPixelsPerTube is the total number of detectors
-  m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
-
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
-  g_log.debug() << "NumberOfSimpleDetectors: " << m_numberOfSimpleDetectors
-                << '\n';
-  g_log.debug() << "Monitors: " << monitorsData.size() << '\n';
-  g_log.debug() << "Monitors[0]: " << monitorsData[0].size() << '\n';
-
-  // Now create the output workspace
-
+void LoadILLIndirect2::initWorkSpace() {
+  const size_t nHistograms = m_numberOfTubes * m_numberOfPixelsPerTube +
+                             m_numberOfMonitors + m_numberOfSimpleDetectors;
   m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D",
-      m_numberOfHistograms + monitorsData.size() + m_numberOfSimpleDetectors,
-      m_numberOfChannels + 1, m_numberOfChannels);
-
+      "Workspace2D", nHistograms, m_numberOfChannels + 1, m_numberOfChannels);
+  const auto timeChannels = make_cow<HistogramData::HistogramX>(
+      m_numberOfChannels + 1, HistogramData::LinearGenerator(0.0, 1.0));
+  for (size_t i = 0; i < nHistograms; ++i) {
+    m_localWorkspace->setSharedX(i, timeChannels);
+  }
   m_localWorkspace->getAxis(0)->unit() =
       UnitFactory::Instance().create("Empty");
-
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
 /**
  * Load data found in nexus file
- *
  * @param entry :: The Nexus entry
- * @param monitorsData :: Monitors data already loaded
- *
  */
-void LoadILLIndirect2::loadDataIntoTheWorkSpace(
-    NeXus::NXEntry &entry, std::vector<std::vector<int>> monitorsData) {
+void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
 
-  // read in the data
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
-  // load the counts from the file into memory
   data.load();
 
-  // Same for Simple Detectors
   NXData dataSDGroup = entry.openNXData("dataSD");
   NXInt dataSD = dataSDGroup.openIntData();
-  // load the counts from the file into memory
   dataSD.load();
 
-  // Assign calculated bins to first X axis
-  ////  m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),
-  /// detectorTofBins.end());
-
-  size_t spec = 0;
-
-  Progress progress(this, 0.0, 1.0,
-                    m_numberOfTubes * m_numberOfPixelsPerTube +
-                        m_numberOfMonitors + m_numberOfSimpleDetectors);
-
-  // Assign fake values to first X axis <<to be completed>>
-  for (size_t i = 0; i <= m_numberOfChannels; ++i) {
-    m_localWorkspace->dataX(0)[i] = double(i);
-  }
+  NXData dataMonGroup = entry.openNXData("monitor/data");
+  NXInt dataMon = dataMonGroup.openIntData();
+  dataMon.load();
 
   // First, Monitor
-  for (size_t im = 0; im < m_numberOfMonitors; im++) {
 
-    if (im > 0) {
-      m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
-    }
+  // Assign Y
+  int *monitor_p = &dataMon(0, 0);
+  m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
 
-    // Assign Y
-    int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im).assign(monitor_p,
-                                       monitor_p + m_numberOfChannels);
-
-    // Assign Error
-    MantidVec &E = m_localWorkspace->dataE(im);
-    std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(),
-                   LoadILLIndirect2::calculateError);
-
-    progress.report();
-  }
+  // Assign Error
+  MantidVec &E = m_localWorkspace->dataE(0);
+  std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(),
+                 [](const double v) { return std::sqrt(v); });
 
   // Then Tubes
-  for (size_t i = 0; i < m_numberOfTubes; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-
-      // just copy the time binning axis to every spectra
-      m_localWorkspace->dataX(spec + m_numberOfMonitors) =
-          m_localWorkspace->readX(0);
+      const size_t index = i * m_numberOfPixelsPerTube + j + m_numberOfMonitors;
 
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec + m_numberOfMonitors)
-          .assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->dataY(index).assign(data_p,
+                                            data_p + m_numberOfChannels);
 
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec + m_numberOfMonitors);
+      MantidVec &E = m_localWorkspace->dataE(index);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadILLIndirect2::calculateError);
-
-      ++spec;
-      progress.report();
+                     [](const double v) { return std::sqrt(v); });
     }
-  } // for m_numberOfTubes
+  }
 
   // Then add Simple Detector (SD)
-  size_t offset = 0;
+  size_t offset =
+      m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors;
   for (auto &index : m_activeSDIndices) {
-    // just copy again the time binning axis to every spectra
-    m_localWorkspace->dataX(spec + m_numberOfMonitors + offset) =
-        m_localWorkspace->readX(0);
 
     // Assign Y, note that index starts from 1
     int *dataSD_p = &dataSD(index - 1, 0, 0);
-    m_localWorkspace->dataY(spec + m_numberOfMonitors + offset)
-        .assign(dataSD_p, dataSD_p + m_numberOfChannels);
+    m_localWorkspace->dataY(offset).assign(dataSD_p,
+                                           dataSD_p + m_numberOfChannels);
 
     // Assign Error
-    MantidVec &E = m_localWorkspace->dataE(spec + m_numberOfMonitors + offset);
+    MantidVec &E = m_localWorkspace->dataE(offset);
     std::transform(dataSD_p, dataSD_p + m_numberOfChannels, E.begin(),
-                   LoadILLIndirect2::calculateError);
-
-    progress.report();
+                   [](const double v) { return std::sqrt(v); });
     ++offset;
   }
+}
 
-} // LoadILLIndirect::loadDataIntoTheWorkSpace
-
+/**
+ * @brief Loads the sample logs
+ * @param nexusfilename
+ */
 void LoadILLIndirect2::loadNexusEntriesIntoProperties(
     std::string nexusfilename) {
 
@@ -370,7 +290,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(
   // Add also "Facility", as asked
   runDetails.addProperty("Facility", std::string("ILL"));
 
-  stat = NXclose(&nxfileID);
+  NXclose(&nxfileID);
 }
 
 /**
@@ -388,63 +308,52 @@ void LoadILLIndirect2::runLoadInstrument() {
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
 
-  } catch (...) {
+  } catch (std::runtime_error &) {
     g_log.information("Cannot load the instrument definition.");
   }
 }
 
+/**
+ * @brief Moves the component to the given 2theta
+ * @param componentName
+ * @param twoTheta
+ */
 void LoadILLIndirect2::moveComponent(const std::string &componentName,
                                      double twoTheta) {
+  Geometry::Instrument_const_sptr instrument =
+      m_localWorkspace->getInstrument();
+  Geometry::IComponent_const_sptr component =
+      instrument->getComponentByName(componentName);
 
-  try {
+  double r, theta, phi;
+  V3D oldPos = component->getPos();
+  oldPos.getSpherical(r, theta, phi);
 
-    Geometry::Instrument_const_sptr instrument =
-        m_localWorkspace->getInstrument();
-    Geometry::IComponent_const_sptr component =
-        instrument->getComponentByName(componentName);
+  V3D newPos;
+  newPos.spherical(r, twoTheta, phi);
 
-    double r, theta, phi;
-    V3D oldPos = component->getPos();
-    oldPos.getSpherical(r, theta, phi);
+  g_log.debug() << componentName << " : t = " << theta
+                << " ==> t = " << twoTheta << "\n";
 
-    V3D newPos;
-    newPos.spherical(r, twoTheta, phi);
-
-    g_log.debug() << componentName << " : t = " << theta
-                  << " ==> t = " << twoTheta << "\n";
-
-    auto &compInfo = m_localWorkspace->mutableComponentInfo();
-    const auto componentIndex = compInfo.indexOf(component->getComponentID());
-    compInfo.setPosition(componentIndex, newPos);
-
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : NotFoundError");
-  } catch (std::runtime_error &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : runtime_error");
-  }
+  auto &compInfo = m_localWorkspace->mutableComponentInfo();
+  const auto componentIndex = compInfo.indexOf(component->getComponentID());
+  compInfo.setPosition(componentIndex, newPos);
 }
 
 /**
  * IN16B has a few single detectors that are place around the sample.
  * They are moved according to some values in the nexus file.
+ * @param entry : the nexus entry
  */
 void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
 
   std::string prefix("single_tube_");
-
   int index = 1;
-
   for (auto i : m_activeSDIndices) {
-
     std::string angleEntry =
         boost::str(boost::format("instrument/SingleD/SD%i angle") % i);
-
     NXFloat angleSD = entry.openNXFloat(angleEntry);
-
     angleSD.load();
-
     g_log.debug("Moving single detector " + std::to_string(i) +
                 " to t=" + std::to_string(angleSD[0]));
     moveComponent(prefix + std::to_string(index), angleSD[0]);

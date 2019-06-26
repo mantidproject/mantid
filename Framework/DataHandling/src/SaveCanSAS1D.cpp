@@ -66,11 +66,11 @@ DECLARE_ALGORITHM(SaveCanSAS1D)
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init() {
   declareProperty(
-      make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           "InputWorkspace", "", Kernel::Direction::Input,
           boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
       "The input workspace, which must be in units of Q");
-  declareProperty(make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".xml"),
                   "The name of the xml file to save");
 

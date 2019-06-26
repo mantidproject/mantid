@@ -8,7 +8,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <Poco/ActiveMethod.h>
 #include <Poco/ActiveResult.h>

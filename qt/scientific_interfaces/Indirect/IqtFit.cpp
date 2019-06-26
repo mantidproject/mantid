@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
 
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -39,7 +39,7 @@ IqtFit::IqtFit(QWidget *parent)
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
 
-  setFitDataPresenter(Mantid::Kernel::make_unique<IndirectFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
       m_iqtFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
@@ -50,9 +50,6 @@ IqtFit::IqtFit(QWidget *parent)
 }
 
 void IqtFit::setupFitTab() {
-  setSampleWSSuffices({"_iqt"});
-  setSampleFBSuffices({"_iqt.nxs"});
-
   // Create custom function groups
   auto &functionFactory = FunctionFactory::Instance();
   const auto exponential = functionFactory.createFunction("ExpDecay");

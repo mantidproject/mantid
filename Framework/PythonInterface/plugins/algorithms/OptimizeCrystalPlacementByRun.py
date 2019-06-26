@@ -40,13 +40,13 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
         tolerance = self.getProperty("Tolerance").value
         if not ws.sample().hasOrientedLattice():
             FindUBUsingIndexedPeaks(PeaksWorkspace=ws,Tolerance=tolerance)
-        num,err=IndexPeaks(PeaksWorkspace=ws,Tolerance=tolerance)
-        logger.notice('Initial Number indexed: %s error: %s\n'%(num, err))
+        result=IndexPeaks(PeaksWorkspace=ws,Tolerance=tolerance)
+        logger.notice('Initial Number indexed: %s error: %s\n'%(result[0], result[1]))
         stats = StatisticsOfTableWorkspace(InputWorkspace=ws)
         stat_col = stats.column('Statistic')
         minR = int(stats.column('RunNumber')[stat_col.index('Minimum')])
         maxR = int(stats.column('RunNumber')[stat_col.index('Maximum')]) + 1
-        AnalysisDataService.remove(stats.getName())
+        AnalysisDataService.remove(stats.name())
         group = []
         for run in range(minR, maxR):
             FilterPeaks(InputWorkspace=ws, OutputWorkspace=str(run), FilterVariable='RunNumber',
@@ -66,8 +66,8 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
                 CombinePeaksWorkspaces(LHSWorkspace=ws_append, RHSWorkspace=str(run),OutputWorkspace=ws_append)
                 logger.notice('Optimized %s sample position: %s\n'%(str(run),mtd[str(run)].getPeak(0).getSamplePos()))
                 AnalysisDataService.remove( str(run))
-        num,err=IndexPeaks(PeaksWorkspace=ws_append,Tolerance=tolerance)
-        logger.notice('After Optimization Number indexed: %s error: %s\n'%(num, err))
+        result=IndexPeaks(PeaksWorkspace=ws_append,Tolerance=tolerance)
+        logger.notice('After Optimization Number indexed: %s error: %s\n'%(result[0], result[1]))
         AnalysisDataService.remove(ws_group)
         self.setProperty("OutputWorkspace", ws_append)
 

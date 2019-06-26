@@ -4,20 +4,14 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.Common import thread_model
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
-
-import unittest
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class FFTPresenterTest(unittest.TestCase):
@@ -194,14 +188,14 @@ class FFTPresenterTest(unittest.TestCase):
         self.view.isComplex = mock.Mock(return_value=True)
         self.view.isRaw = mock.Mock(return_value=True)
         self.presenter.handleButton()
-        self.assertEquals(self.view.initFFTInput.call_count, 1)
-        self.assertEquals(self.view.addFFTComplex.call_count,1)
-        self.assertEquals(self.view.addFFTShift.call_count, 1)
-        self.assertEquals(self.view.addRaw.call_count, 3)
-        self.assertEquals(self.view.setPhaseBox.call_count, 1)
-        self.assertEquals(self.view.getFirstGoodData.call_count, 0)
-        self.assertEquals(self.view.getLastGoodData.call_count, 0)
-        self.assertEquals(self.presenter.thread.start.call_count, 1)
+        self.assertEqual(self.view.initFFTInput.call_count, 1)
+        self.assertEqual(self.view.addFFTComplex.call_count,1)
+        self.assertEqual(self.view.addFFTShift.call_count, 1)
+        self.assertEqual(self.view.addRaw.call_count, 3)
+        self.assertEqual(self.view.setPhaseBox.call_count, 1)
+        self.assertEqual(self.view.getFirstGoodData.call_count, 0)
+        self.assertEqual(self.view.getLastGoodData.call_count, 0)
+        self.assertEqual(self.presenter.thread.start.call_count, 1)
 
     def test_buttonNoShiftRawAndNoIm(self):
         self.view.isAutoShift = mock.Mock(return_value=False)

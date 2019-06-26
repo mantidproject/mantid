@@ -83,7 +83,8 @@ class FigureWindow(QMainWindow, ObservingView):
         :param event: A QDropEvent containing the MIME
                       data of the action
         """
-        self._plot_on_here(event.mimeData().text().split('\n'))
+        workspace_names = event.mimeData().text().split('\n')
+        self._plot_on_here(workspace_names)
         QMainWindow.dropEvent(self, event)
 
     # private api

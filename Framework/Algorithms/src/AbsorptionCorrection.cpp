@@ -13,15 +13,18 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -32,14 +35,38 @@ using namespace API;
 using namespace Geometry;
 using HistogramData::interpolateLinearInplace;
 using namespace Kernel;
+using Kernel::DeltaEMode;
 using namespace Mantid::PhysicalConstants;
 using namespace Mantid::DataObjects;
+using PhysicalConstants::E_mev_toNeutronWavenumberSq;
+
+namespace {
+// the maximum number of elements to combine at once in the pairwise summation
+constexpr size_t MAX_INTEGRATION_LENGTH{1000};
+
+const std::string CALC_SAMPLE = "Sample";
+const std::string CALC_CONTAINER = "Container";
+const std::string CALC_ENVIRONMENT = "Environment";
+
+inline size_t findMiddle(const size_t start, const size_t stop) {
+  size_t half =
+      static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
+  return start + half;
+}
+
+// wavelength = 2 pi / k
+double energyToWavelength(const double energyFixed) {
+  return 2. * M_PI * std::sqrt(E_mev_toNeutronWavenumberSq / energyFixed);
+}
+
+} // namespace
 
 AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
-      m_sampleVolume(0.0), m_refAtten(0.0), m_scattering(0), n_lambda(0),
-      m_xStep(0), m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}
+      m_sampleVolume(0.0), m_linearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
+      m_emode(Kernel::DeltaEMode::Undefined), m_lambdaFixed(0.), EXPONENTIAL() {
+}
 
 void AbsorptionCorrection::init() {
 
@@ -49,12 +76,20 @@ void AbsorptionCorrection::init() {
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
       "The X values for the input workspace must be in units of wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Output workspace name");
+
+  // AbsorbedBy
+  std::vector<std::string> scatter_options{CALC_SAMPLE, CALC_CONTAINER,
+                                           CALC_ENVIRONMENT};
+  declareProperty(
+      "ScatterFrom", CALC_SAMPLE,
+      boost::make_shared<StringListValidator>(std::move(scatter_options)),
+      "The component to calculate the absorption for (default: Sample)");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -99,6 +134,41 @@ void AbsorptionCorrection::init() {
   defineProperties();
 }
 
+std::map<std::string, std::string> AbsorptionCorrection::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // verify that the container/environment information is there if requested
+  const std::string scatterFrom = getProperty("ScatterFrom");
+  if (scatterFrom != CALC_SAMPLE) {
+    API::MatrixWorkspace_const_sptr wksp = getProperty("InputWorkspace");
+    const auto &sample = wksp->sample();
+    if (sample.hasEnvironment()) {
+      const auto numComponents = sample.getEnvironment().nelements();
+      // first element is assumed to be the container
+      if (scatterFrom == CALC_CONTAINER && numComponents == 0) {
+        result["ScatterFrom"] = "Sample does not have a container defined";
+      } else if (scatterFrom == CALC_ENVIRONMENT) {
+        if (numComponents < 2) {
+          result["ScatterFrom"] = "Sample does not have an environment defined";
+        } else if (numComponents > 2) {
+          std::stringstream msg;
+          msg << "Do not know how to calculate absorption from multiple "
+                 "component sample environment. Encountered "
+              << numComponents << " components";
+          result["ScatterFrom"] = msg.str();
+        }
+      }
+    } else { // customize error message based on selection
+      if (scatterFrom == CALC_CONTAINER)
+        result["ScatterFrom"] = "Sample does not have a container defined";
+      else if (scatterFrom == CALC_ENVIRONMENT)
+        result["ScatterFrom"] = "Sample does not have an environment defined";
+    }
+  }
+
+  return result;
+}
+
 void AbsorptionCorrection::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
@@ -124,9 +194,9 @@ void AbsorptionCorrection::exec() {
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
   // If the number of wavelength points has not been given, use them all
-  if (isEmpty(n_lambda))
-    n_lambda = specSize;
-  m_xStep = specSize / n_lambda; // Bin step between points to calculate
+  if (isEmpty(m_num_lambda))
+    m_num_lambda = specSize;
+  m_xStep = specSize / m_num_lambda; // Bin step between points to calculate
 
   if (m_xStep == 0) // Number of wavelength points >number of histogram points
     m_xStep = 1;
@@ -137,7 +207,7 @@ void AbsorptionCorrection::exec() {
   g_log.information(message.str());
   message.str("");
 
-  // Calculate the cached values of L1 and element volumes.
+  // Calculate the cached values of L1, element volumes, and geometry size
   initialiseCachedDistances();
   if (m_L1s.empty()) {
     throw std::runtime_error(
@@ -150,55 +220,59 @@ void AbsorptionCorrection::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-
     // Copy over bins
     correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
-    if (!spectrumInfo.hasDetectors(i))
+    if (!spectrumInfo.hasDetectors(i)) {
+      g_log.information() << "Spectrum " << i
+                          << " does not have a detector defined for it\n";
       continue;
-
+    }
     const auto &det = spectrumInfo.detector(i);
 
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det, L2s);
 
     // If an indirect instrument, see if there's an efixed in the parameter map
-    double lambda_f = m_lambdaFixed;
-    if (m_emode == 2) {
+    double lambdaFixed = m_lambdaFixed;
+    if (m_emode == DeltaEMode::Indirect) {
       try {
         Parameter_sptr par = pmap.get(&det, "Efixed");
         if (par) {
-          Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
-          double factor, power;
-          energy->quickConversion(*UnitFactory::Instance().create("Wavelength"),
-                                  factor, power);
-          lambda_f = factor * std::pow(par->value<double>(), power);
+          lambdaFixed = energyToWavelength(par->value<double>());
         }
       } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use single
                                           provided value */
       }
     }
 
-    const auto lambdas = m_inputWS->points(i);
+    // calculate the absorption coefficient for fixed wavelength
+    const double linearCoefAbsFixed = -m_material.linearAbsorpCoef(lambdaFixed);
+    const auto wavelengths = m_inputWS->points(i);
+    // these need to have the minus sign applied still
+    const auto linearCoefAbs =
+        m_material.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
+
     // Get a reference to the Y's in the output WS for storing the factors
     auto &Y = correctionFactors->mutableY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double lambda = lambdas[j];
-      if (m_emode == 0) // Elastic
-      {
-        Y[j] = this->doIntegration(lambda, L2s);
-      } else if (m_emode == 1) // Direct
-      {
-        Y[j] = this->doIntegration(m_lambdaFixed, lambda, L2s);
-      } else if (m_emode == 2) // Indirect
-      {
-        Y[j] = this->doIntegration(lambda, lambda_f, L2s);
+      if (m_emode == DeltaEMode::Elastic) {
+        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
+      } else if (m_emode == DeltaEMode::Direct) {
+        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s,
+                                   0, L2s.size());
+      } else if (m_emode == DeltaEMode::Indirect) {
+        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s,
+                                   0, L2s.size());
+      } else { // should never happen
+        throw std::runtime_error(
+            "AbsorptionCorrection doesn't have a known DeltaEMode defined");
       }
-      Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
+      Y[j] /= m_sampleVolume; // Divide by total volume of the shape
 
-      // Make certain that last point is calculates
+      // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
         j = specSize - m_xStep - 1;
       }
@@ -233,34 +307,48 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   double sigma_atten = getProperty("AttenuationXSection"); // in barns
   double sigma_s = getProperty("ScatteringXSection");      // in barns
   double rho = getProperty("SampleNumberDensity");         // in Angstroms-3
-  const Material &sampleMaterial = m_inputWS->sample().getShape().material();
-  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-      0.0) {
-    if (rho == EMPTY_DBL())
-      rho = sampleMaterial.numberDensity();
-    if (sigma_s == EMPTY_DBL())
-      sigma_s =
-          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda);
-    if (sigma_atten == EMPTY_DBL())
-      sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
-  } else // Save input in Sample with wrong atomic number and name
-  {
+  const std::string scatterFrom = getProperty("ScatterFrom");
+
+  bool createMaterial =
+      !(isEmpty(rho) && isEmpty(sigma_s) && isEmpty(sigma_atten));
+  // get the material from the correct component
+  const auto &sampleObj = m_inputWS->sample();
+  if (scatterFrom == CALC_SAMPLE) {
+    m_material = sampleObj.getShape().material();
+  } else if (scatterFrom == CALC_CONTAINER) {
+    m_material = sampleObj.getEnvironment().getContainer().material();
+  } else if (scatterFrom == CALC_ENVIRONMENT) {
+    m_material = sampleObj.getEnvironment().getComponent(1).material();
+  }
+
+  if (createMaterial) {
+    // get values from the existing material
+    if (isEmpty(rho))
+      rho = m_material.numberDensity();
+    if (isEmpty(sigma_s))
+      sigma_s = m_material.totalScatterXSection(NeutronAtom::ReferenceLambda);
+    if (isEmpty(sigma_atten))
+      sigma_atten = m_material.absorbXSection(NeutronAtom::ReferenceLambda);
+
+    // create the new material
     NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
 
+    // Save input in Sample with wrong atomic number and name
     auto shape = boost::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInAbsorptionCorrection", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
+
+    // get the material back
+    m_material = m_inputWS->sample().getShape().material();
   }
-  rho *= 100; // Will give right units in going from
-              // mu in cm^-1 to m^-1 for mu*total flight path( in m )
 
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
-  m_refAtten = -sigma_atten * rho / NeutronAtom::ReferenceLambda;
-  m_scattering = -sigma_s * rho;
+  m_linearCoefTotScatt =
+      -m_material.totalScatterXSection() * m_material.numberDensity() * 100;
 
-  n_lambda = getProperty("NumberOfWavelengthPoints");
+  m_num_lambda = getProperty("NumberOfWavelengthPoints");
 
   std::string exp_string = getProperty("ExpMethod");
   if (exp_string == "Normal") // Use the system exp function
@@ -271,19 +359,22 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   // Get the energy mode
   const std::string emodeStr = getProperty("EMode");
   // Convert back to an integer representation
-  m_emode = 0;
   if (emodeStr == "Direct")
-    m_emode = 1;
+    m_emode = DeltaEMode::Direct;
   else if (emodeStr == "Indirect")
-    m_emode = 2;
+    m_emode = DeltaEMode::Indirect;
+  else if (emodeStr == "Elastic")
+    m_emode = DeltaEMode::Elastic;
+  else {
+    std::stringstream msg;
+    msg << "Unknown EMode \"" << emodeStr << "\"";
+    throw std::runtime_error(msg.str());
+  }
+
   // If inelastic, get the fixed energy and convert it to a wavelength
-  if (m_emode) {
+  if (m_emode != DeltaEMode::Elastic) {
     const double efixed = getProperty("Efixed");
-    Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
-    double factor, power;
-    energy->quickConversion(*UnitFactory::Instance().create("Wavelength"),
-                            factor, power);
-    m_lambdaFixed = factor * std::pow(efixed, power);
+    m_lambdaFixed = energyToWavelength(efixed);
   }
 
   // Call the virtual function for any further properties
@@ -293,9 +384,18 @@ void AbsorptionCorrection::retrieveBaseProperties() {
 /// Create the sample object using the Geometry classes, or use the existing one
 void AbsorptionCorrection::constructSample(API::Sample &sample) {
   const std::string xmlstring = sampleXML();
+  const std::string scatterFrom = getProperty("ScatterFrom");
   if (xmlstring.empty()) {
-    // This means that we should use the shape already defined on the sample.
-    m_sampleObject = &sample.getShape();
+    // Get the shape from the proper object
+    if (scatterFrom == CALC_SAMPLE)
+      m_sampleObject = &sample.getShape();
+    else if (scatterFrom == CALC_CONTAINER)
+      m_sampleObject = &(sample.getEnvironment().getContainer());
+    else if (scatterFrom == CALC_ENVIRONMENT)
+      m_sampleObject = &(sample.getEnvironment().getComponent(1));
+    else
+      throw std::runtime_error("Somebody forgot to fill in an if/else tree");
+
     // Check there is one, and fail if not
     if (!m_sampleObject->hasValidShape()) {
       const std::string mess(
@@ -303,7 +403,11 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
       g_log.error(mess);
       throw std::invalid_argument(mess);
     }
-  } else {
+  } else if (scatterFrom != CALC_SAMPLE) { // should never be in this case
+    std::stringstream msg;
+    msg << "Cannot use geometry xml for ScatterFrom=" << scatterFrom;
+    throw std::runtime_error(msg.str());
+  } else { // create a geometry from the sample object
     boost::shared_ptr<IObject> shape = ShapeFactory().createShape(xmlstring);
     sample.setShape(shape);
     m_sampleObject = &sample.getShape();
@@ -331,8 +435,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
   for (size_t i = 0; i < m_numVolumeElements; ++i) {
     // Create track for distance in cylinder between scattering point and
     // detector
-    V3D direction = detectorPos - m_elementPositions[i];
-    direction.normalize();
+    const V3D direction = normalize(detectorPos - m_elementPositions[i]);
     Track outgoing(m_elementPositions[i], direction);
     int temp = m_sampleObject->interceptSurface(outgoing);
 
@@ -370,45 +473,61 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
   }
 }
 
+// the integrations are done using pairwise summation to reduce
+// issues from adding lots of little numbers together
+// https://en.wikipedia.org/wiki/Pairwise_summation
+
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
-double
-AbsorptionCorrection::doIntegration(const double &lambda,
-                                    const std::vector<double> &L2s) const {
-  double integral = 0.0;
+double AbsorptionCorrection::doIntegration(const double linearCoefAbs,
+                                           const std::vector<double> &L2s,
+                                           const size_t startIndex,
+                                           const size_t endIndex) const {
+  if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
+    size_t middle = findMiddle(startIndex, endIndex);
 
-  size_t el = L2s.size();
-  // Iterate over all the elements, summing up the integral
-  for (size_t i = 0; i < el; ++i) {
-    // Equation is exponent * element volume
-    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
-    const double exponent =
-        ((m_refAtten * lambda) + m_scattering) * (m_L1s[i] + L2s[i]);
-    integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+    return doIntegration(linearCoefAbs, L2s, startIndex, middle) +
+           doIntegration(linearCoefAbs, L2s, middle, endIndex);
+  } else {
+    double integral = 0.0;
+
+    // Iterate over all the elements, summing up the integral
+    for (size_t i = startIndex; i < endIndex; ++i) {
+      const double exponent =
+          (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
+      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+    }
+
+    return integral;
   }
-
-  return integral;
 }
 
 /// Carries out the numerical integration over the sample for inelastic
 /// instruments
-double
-AbsorptionCorrection::doIntegration(const double &lambda_i,
-                                    const double &lambda_f,
-                                    const std::vector<double> &L2s) const {
-  double integral = 0.0;
+double AbsorptionCorrection::doIntegration(const double linearCoefAbsL1,
+                                           const double linearCoefAbsL2,
+                                           const std::vector<double> &L2s,
+                                           const size_t startIndex,
+                                           const size_t endIndex) const {
+  if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
+    size_t middle = findMiddle(startIndex, endIndex);
 
-  size_t el = L2s.size();
-  // Iterate over all the elements, summing up the integral
-  for (size_t i = 0; i < el; ++i) {
-    // Equation is exponent * element volume
-    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
-    double exponent = ((m_refAtten * lambda_i) + m_scattering) * m_L1s[i];
-    exponent += ((m_refAtten * lambda_f) + m_scattering) * L2s[i];
-    integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+    return doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, startIndex,
+                         middle) +
+           doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, middle,
+                         endIndex);
+  } else {
+    double integral = 0.0;
+
+    // Iterate over all the elements, summing up the integral
+    for (size_t i = startIndex; i < endIndex; ++i) {
+      double exponent = (linearCoefAbsL1 + m_linearCoefTotScatt) * m_L1s[i];
+      exponent += (linearCoefAbsL2 + m_linearCoefTotScatt) * L2s[i];
+      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+    }
+
+    return integral;
   }
-
-  return integral;
 }
 
 } // namespace Algorithms

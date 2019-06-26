@@ -1,37 +1,47 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
-from PyQt4 import QtGui
-
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_model import PairingTableModel
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
-
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class AlphaTest(unittest.TestCase):
+def pair_name():
+    name = []
+    for i in range(21):
+        name.append("pair_" + str(i+1))
+    return name
+
+
+class AlphaTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
-        self.data = MuonDataContext()
+        setup_context_for_tests(self)
 
-        self.model = PairingTableModel(data=self.data)
+        self.model = GroupingTabModel(context=self.context)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
+        self.add_three_groups_to_model()
+
         self.view.warning_popup = mock.Mock()
+        self.view.enter_pair_name = mock.Mock(side_effect=pair_name())
 
     def tearDown(self):
         self.obj = None
@@ -47,9 +57,9 @@ class AlphaTest(unittest.TestCase):
         group1 = MuonGroup(group_name="my_group_0", detector_ids=[1])
         group2 = MuonGroup(group_name="my_group_1", detector_ids=[2])
         group3 = MuonGroup(group_name="my_group_2", detector_ids=[3])
-        self.data.add_group(group1)
-        self.data.add_group(group2)
-        self.data.add_group(group3)
+        self.group_context.add_group(group1)
+        self.group_context.add_group(group2)
+        self.group_context.add_group(group3)
 
     def add_two_pairs_to_table(self):
         pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
@@ -148,7 +158,7 @@ class AlphaTest(unittest.TestCase):
 
         self.assertEqual(self.presenter.guessAlphaNotifier.notify_subscribers.call_count, 1)
         self.assertEqual(self.presenter.guessAlphaNotifier.notify_subscribers.call_args_list[0][0][0],
-                         ["pair_2", "", ""])
+                         ["pair_2", "my_group_0", "my_group_1"])
 
 
 if __name__ == '__main__':

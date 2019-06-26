@@ -5,29 +5,6 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
-Improvements
-############
-
-- SNAP instrument geometry updated to include downstream monitor.
-- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will not flip the even-numbered tubes when using the calibrated data, since they are flipped already in the nexus files.
-- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` will scale the counts by 1M, when normalisation to monitor is requested, and it will also offer to enable/disable the tube alignment, and offer tube by tube reduction.
-- :ref:`PowderILLEfficiency <algm-PowderILLEfficiency>` now offers to use the raw or calibrated data blocks in the nexus files.
-- :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
-- :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
-- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
-- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files. Failing to load a cache file will now produce a warning, rather than exception, and the algorithm will continue without the file.
-- :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster.
-- Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`.
-- :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki.
-- Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation.
-- :ref:`ConvertToMD <algm-ConvertToMD>` now has `ConverterType = {Default, Indexed}` setting: `Default` keeps the old
-  version of the algorithm, `Indexed` provide the new one with better performance and some restrictions
-  (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes).
-- New TOPAZ instrument geometry for 2019 run cycle
-- :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
-- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will now correctly resolve for the scan type and drive the detector to the offset corrected :math:`2theta_0` for D20 detector scans.
-- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
-
 Single Crystal Diffraction
 --------------------------
 
@@ -39,6 +16,17 @@ New Algorithms
 Improvements
 ############
 
+- SNAP instrument geometry updated to include downstream monitor.
+- :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
+- :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
+- :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster.
+- Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`.
+- :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki.
+- :ref:`ConvertToMD <algm-ConvertToMD>` now has `ConverterType = {Default, Indexed}` setting: `Default` keeps the old
+  version of the algorithm, `Indexed` provide the new one with better performance and some restrictions
+  (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes).
+- New TOPAZ instrument geometry for 2019 run cycle
+- :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.  In addition, the algorithm can now automatically generate a strong peaks library is one is not provided.  Peakshapes will be learned to improve initial guesses as the strong peak library is generated.
 - :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
@@ -84,6 +72,14 @@ Improvements
 - Changed spline coefficient so that the default for long_mode on and long_mode off can be set separately.
 - Focus on Pearl now has a focused_bin_widths parameter in pearl_advanced_config.py to allow setting default rebin values.
 - Focus on Pearl now saves out xye_tof files.
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will not flip the even-numbered tubes when using the calibrated data, since they are flipped already in the nexus files.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` will scale the counts by 1M, when normalisation to monitor is requested, and it will also offer to enable/disable the tube alignment, and offer tube by tube reduction.
+- :ref:`PowderILLEfficiency <algm-PowderILLEfficiency>` now offers to use the raw or calibrated data blocks in the nexus files.
+- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files. Failing to load a cache file will now produce a warning, rather than exception, and the algorithm will continue without the file.
+- Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation.
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will now correctly resolve for the scan type and drive the detector to the offset corrected :math:`2theta_0` for D20 detector scans.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
 - :ref:`PDDetermineCharacterizations <algm-PDDetermineCharacterizations>` will generate an exception if it cannot determine the frequency or wavelength
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
@@ -100,6 +96,7 @@ Bugfixes
 - The Powder Diffraction GUI now remembers whether linear or logarithmic binning was selected between uses.
 - Fixed a bug in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` which caused detectors without corresponding spectrum to get included in grouping.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now does not use cache file when the grouping has changed.
+- :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>` will now accept also single run, when the time normalisation is enabled.
 
 New Algorithms
 ##############

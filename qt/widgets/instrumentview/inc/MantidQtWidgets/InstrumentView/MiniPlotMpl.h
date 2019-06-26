@@ -10,7 +10,7 @@
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/MplCpp/Cycler.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
-#include "MantidQtWidgets/MplCpp/Zoomer.h"
+#include "MantidQtWidgets/MplCpp/PanZoomTool.h"
 #include <QWidget>
 #include <list>
 
@@ -57,7 +57,7 @@ public slots:
 
 signals:
   void showContextMenu();
-  void clickedAt(double, double);
+  void clickedAt(double /*_t1*/, double /*_t2*/);
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
@@ -74,7 +74,7 @@ private:
   QString m_xunit;
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
-  Widgets::MplCpp::Zoomer m_zoomer;
+  Widgets::MplCpp::PanZoomTool m_zoomTool;
   QPoint m_mousePressPt;
 };
 } // namespace MantidWidgets

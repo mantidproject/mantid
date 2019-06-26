@@ -7,17 +7,17 @@
 Introduction to Matplotlib in Mantid
 ====================================
 
-Mantid now can use `Matplotlib <https://matplotlib.org/>`_ to produce figures. 
+Mantid can now use `Matplotlib <https://matplotlib.org/>`_ to produce figures.
 There are several advantages of using this software package:
 
 * it is python based, so it can easily be incorporated into Mantid scripts
 * there is a large user community, and therefore excellent documentation and examples are available
-* it is easy to change from plotting on the screen to produce publication quality plots in various image formats 
+* it is easy to change from plotting on the screen to produce publication quality plots in various image formats
 
 While Matplotlib is using data arrays for inputs in the plotting routines,
 it is now possible to also use several types on Mantid workspaces instead.
 For a detailed list of functions that use workspaces, see the documentation
-of the :ref:`mantid.plots <mantid.plots>` module. 
+of the :ref:`mantid.plots <mantid.plots>` module.
 
 This page is intended to provide examples about how to use different
 Matplotlib commands for several types of common task that Mantid users are interested in.
@@ -26,7 +26,7 @@ To understand the matplotlib vocabulary, a useful tool is the `"anatomy of a fig
 <https://matplotlib.org/examples/showcase/anatomy.html>`_, also shown below.
 
 .. plot::
-   
+
    # This figure shows the name of several matplotlib elements composing a figure
    import numpy as np
    import matplotlib.pyplot as plt
@@ -169,7 +169,7 @@ To understand the matplotlib vocabulary, a useful tool is the `"anatomy of a fig
 Here are some of the highlights:
 
 * **Figure** is the main container in matplotlib. You can think of it as the page
-* **Axes** is the coordinate system. It contains most of the figure elements, such as Axis, Line2D, Text. 
+* **Axes** is the coordinate system. It contains most of the figure elements, such as Axis, Line2D, Text.
   One can have multiple Axes objects in one Figure
 * **Axis** is the container for the ticks and labels for the x and y axis of the plot
 
@@ -236,7 +236,7 @@ fashion as the plotting of arrays in matplotlib. Moreover, one can combine the t
    import matplotlib.pyplot as plt
    from mantid import plots
    from mantid.simpleapi import CreateWorkspace
-   
+
    # Create a workspace that has a Gaussian peak
    x = np.arange(20)
    y0 = 10.+50*np.exp(-(x-10)**2/20)
@@ -245,7 +245,7 @@ fashion as the plotting of arrays in matplotlib. Moreover, one can combine the t
    y += err*np.random.normal(size=len(err))
    err = np.sqrt(y)
    w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
-   
+
    # Plot - note that the projection='mantid' keyword is passed to all axes
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.errorbar(w,'rs') # plot the workspace with errorbars, using red squares
@@ -266,14 +266,14 @@ Some data should be visualized as two dimensional colormaps
    # generate a nice 2D multi-dimensional workspace
    data = Load('CNCS_7860')
    data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
-   data = Rebin(InputWorkspace=data, Params='-3,0.025,3')
+   data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
    md = ConvertToMD(InputWorkspace=data,
                     QDimensions='|Q|',
                     dEAnalysisMode='Direct')
    sqw = BinMD(InputWorkspace=md,
                AlignedDim0='|Q|,0,3,100',
                AlignedDim1='DeltaE,-3,3,100')
-    
+
    #2D plot
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    c = ax.pcolormesh(sqw, norm=LogNorm())
@@ -295,7 +295,7 @@ and adds a grid
    import matplotlib.pyplot as plt
    from mantid import plots
    from mantid.simpleapi import CreateWorkspace
-   
+
    # Create a workspace that has a Gaussian peak
    x = np.arange(20)
    y0 = 10.+50.*np.exp(-(x-10.)**2/20.)
@@ -304,7 +304,7 @@ and adds a grid
    y += err*np.random.normal(size=len(err))
    err = np.sqrt(y)
    w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
-   
+
    # Plot - note that the projection='mantid' keyword is passed to all axes
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.errorbar(w,'rs', label='Data')
@@ -331,7 +331,7 @@ above, but we add a fit, In the bottom part we add the difference.
    import matplotlib.pyplot as plt
    from mantid import plots
    from mantid.simpleapi import CreateWorkspace, Fit
-   
+
    # Create a workspace that has a Gaussian peak
    x = np.arange(20)
    y0 = 10.+50*np.exp(-(x-10)**2/20)
@@ -340,9 +340,9 @@ above, but we add a fit, In the bottom part we add the difference.
    y += err*np.random.normal(size=len(err))
    err = np.sqrt(y)
    w = CreateWorkspace(DataX=x, DataY=y, DataE=err, NSpec=1, UnitX='DeltaE')
-   result = Fit(Function='name=LinearBackground,A0=10,A1=0.;name=Gaussian,Height=60.,PeakCentre=10.,Sigma=3.', 
-                InputWorkspace='w', 
-                Output='w', 
+   result = Fit(Function='name=LinearBackground,A0=10,A1=0.;name=Gaussian,Height=60.,PeakCentre=10.,Sigma=3.',
+                InputWorkspace='w',
+                Output='w',
                 OutputCompositeMembers=True)
    # The handle to the output workspace is result.OutputWorkspace. The first spectrum is the data,
    # the second is the fit, the third is the difference. Subsequent spectra are the calculated
@@ -350,10 +350,10 @@ above, but we add a fit, In the bottom part we add the difference.
    # Note that the difference spectrum has 0 errors. One can copy the errors from data
    result.OutputWorkspace.setE(2,result.OutputWorkspace.readE(0))
 
-   #do the plotting   
+   #do the plotting
    fig, [ax_top, ax_bottom] = plt.subplots(figsize=(9, 6),
-                                           nrows=2, 
-                                           ncols=1, 
+                                           nrows=2,
+                                           ncols=1,
                                            sharex=True,
                                            gridspec_kw={'height_ratios':[2,1]},
                                            subplot_kw={'projection':'mantid'})
@@ -369,7 +369,7 @@ above, but we add a fit, In the bottom part we add the difference.
    ax_bottom.set_ylabel('Difference')
    fig.tight_layout()
    #fig.show()
-   
+
 
 One can do twin axes as well:
 
@@ -413,11 +413,11 @@ beginning of the run), but one can also plot absolute time using `FullTime=True`
 
 .. plot::
    :include-source:
-   
+
    import matplotlib.pyplot as plt
    from mantid import plots
    from mantid.simpleapi import Load
-   
+
    w=Load('CNCS_7860')
    fig = plt.figure()
    ax1 = fig.add_subplot(211,projection='mantid')
@@ -428,14 +428,14 @@ beginning of the run), but one can also plot absolute time using `FullTime=True`
    ax2.set_title('Absolute time')
    fig.tight_layout()
    #fig.show()
-   
+
 
 Note that the parasite axes in matplotlib do not accept the projection keyword.
 So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunctions.plot>` instead.
 
 .. plot::
    :include-source:
-   
+
    import matplotlib.pyplot as plt
    from mantid import plots
    from mantid.simpleapi import Load
@@ -500,7 +500,7 @@ Plotting dispersion curves  on multiple panels can also be done using matplotlib
    from matplotlib.gridspec import GridSpec
    from mantid.simpleapi import CreateMDHistoWorkspace
    from mantid import plots
-   
+
    # Generate nice (fake) dispersion data
    # Gamma to K
    q = np.arange(0,0.333,0.01)
@@ -530,8 +530,8 @@ Plotting dispersion curves  on multiple panels can also be done using matplotlib
                               NumberOfBins='{0},{1}'.format(len(q),len(e)),
                               Names='Dim1,Dim2',
                               Units='MomentumTransfer,EnergyTransfer')
-   
-   
+
+
    d=6.7
    a=2.454
    #Gamma is (0,0,0)
@@ -542,67 +542,70 @@ Plotting dispersion curves  on multiple panels can also be done using matplotlib
    gamma_m=2.*np.pi/np.sqrt(3.)/a
    m_k=2.*np.pi/3/a
    gamma_k=4.*np.pi/3/a
-   
+
    fig=plt.figure(figsize=(12,5))
    gs = GridSpec(1, 4,
                  width_ratios=[gamma_k,m_k,gamma_m,gamma_a],
                  wspace=0)
-   
+
    ax1 = plt.subplot(gs[0],projection='mantid')
    ax2 = plt.subplot(gs[1],sharey=ax1,projection='mantid')
    ax3 = plt.subplot(gs[2],sharey=ax1)
    ax4 = plt.subplot(gs[3],sharey=ax1)
-   
+
    ax1.pcolormesh(ws1)
    ax2.pcolormesh(ws2)
    ax3.plot([0,0.5],[0,17.])
    ax4.plot([0,0.5],[0,10])
-   
-   
+
+
    #Adjust plotting parameters
-   
+
    ax1.set_ylabel('E (meV)')
    ax1.set_xlabel('')
    ax1.set_xlim(0,1./3)
    ax1.set_ylim(0.,40.)
-   ax1.set_title(r'$[\epsilon,\epsilon,0], 0 \leq \epsilon \leq 1/3$') 
+   ax1.set_title(r'$[\epsilon,\epsilon,0], 0 \leq \epsilon \leq 1/3$')
    ax1.set_xticks([0,1./3])
    ax1.set_xticklabels(['$\Gamma$','$K$'])
    #ax1.spines['right'].set_visible(False)
    ax1.tick_params(direction='in')
-   
+
    ax2.get_yaxis().set_visible(False)
    ax2.set_xlim(1./3,1./2)
    ax2.set_xlabel('')
-   ax2.set_title(r'$[1/3+\epsilon,1/3-2\epsilon,0], 0 \leq \epsilon \leq 1/6$') 
+   ax2.set_title(r'$[1/3+\epsilon,1/3-2\epsilon,0], 0 \leq \epsilon \leq 1/6$')
    ax2.set_xticks([1./2])
    ax2.set_xticklabels(['$M$'])
    #ax2.spines['left'].set_visible(False)
    ax2.tick_params(direction='in')
-   
+
    #invert axis
    ax3.set_xlim(1./2,0)
    ax3.get_yaxis().set_visible(False)
-   ax3.set_title(r'$[\epsilon,0,0], 1/2 \geq \epsilon \geq 0$') 
+   ax3.set_title(r'$[\epsilon,0,0], 1/2 \geq \epsilon \geq 0$')
    ax3.set_xticks([0])
    ax3.set_xticklabels(['$\Gamma$'])
    ax3.tick_params(direction='in')
-   
+
    ax4.set_xlim(0,1./2)
    ax4.get_yaxis().set_visible(False)
-   ax4.set_title(r'$[0,0,\epsilon], 0 \leq \epsilon \leq 1/2$') 
+   ax4.set_title(r'$[0,0,\epsilon], 0 \leq \epsilon \leq 1/2$')
    ax4.set_xticks([1./2])
    ax4.set_xticklabels(['$A$'])
    ax4.tick_params(direction='in')
    #fig.show()
+
+
+.. _mplDefaults:
 
 ==========================
 Change Matplotlib Defaults
 ==========================
 
 It is possible to alter the default appearance of Matplotlib plots, e.g. linewidths, label sizes,
-colour cycles etc. This is most readily achieved by setting the ``rcParams`` at the start of a 
-Mantid Workbench session. The example below shows a plot with the default line width, followed be resetting the parameters with ``rcParams``. An example with many of the 
+colour cycles etc. This is most readily achieved by setting the ``rcParams`` at the start of a
+Mantid Workbench session. The example below shows a plot with the default line width, followed be resetting the parameters with ``rcParams``. An example with many of the
 editable parameters is available at `the Matplotlib site <https://matplotlib.org/users/customizing.html>`_.
 
 .. plot::
@@ -631,7 +634,7 @@ editable parameters is available at `the Matplotlib site <https://matplotlib.org
     fig, ax = plt.subplots()
     ax.plot(yy)
 
-For much more on customising the graph appearance see the `Matplotlib documentation 
+For much more on customising the graph appearance see the `Matplotlib documentation
 <https://matplotlib.org/users/dflt_style_changes.html>`_.
 
 A list of some common properties you might want to change and the keywords to set:
@@ -656,5 +659,5 @@ A list of some common properties you might want to change and the keywords to se
 | Font type          | ``font.family``         | sans-serif |
 +--------------------+-------------------------+------------+
 
-A much fuller list of properties is avialble `in the Matplotlib documentation 
+A much fuller list of properties is avialble `in the Matplotlib documentation
 <https://matplotlib.org/users/customizing.html>`_.

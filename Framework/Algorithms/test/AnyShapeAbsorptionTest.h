@@ -10,12 +10,16 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::API::AnalysisDataService;
+using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace_sptr;
 
 class AnyShapeAbsorptionTest : public CxxTest::TestSuite {
@@ -77,11 +81,11 @@ public:
     Mantid::API::MatrixWorkspace_sptr flatws;
     TS_ASSERT_THROWS_NOTHING(
         flatws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(flatWS)));
+            AnalysisDataService::Instance().retrieve(flatWS)));
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+            AnalysisDataService::Instance().retrieve(outputWS)));
     // These should be extremely close to one another (a fraction of a %)
     TS_ASSERT_DELTA(result->readY(0).front(), flatws->readY(0).front(),
                     0.00001);
@@ -92,8 +96,8 @@ public:
     TS_ASSERT_DELTA(result->readY(0).back(), 0.0318, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[4], 0.1463, 0.0001);
 
-    Mantid::API::AnalysisDataService::Instance().remove(flatWS);
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+    AnalysisDataService::Instance().remove(flatWS);
+    AnalysisDataService::Instance().remove(outputWS);
   }
 
   void testAgainstCylinder() {
@@ -144,11 +148,11 @@ public:
     Mantid::API::MatrixWorkspace_sptr cylws;
     TS_ASSERT_THROWS_NOTHING(
         cylws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(cylWS)));
+            AnalysisDataService::Instance().retrieve(cylWS)));
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+            AnalysisDataService::Instance().retrieve(outputWS)));
     // These should be somewhat close to one another (within a couple of %)
     Mantid::MantidVec y0 = result->readY(0);
     TS_ASSERT_DELTA(y0.front() / cylws->readY(0).front(), 1.0, 0.02);
@@ -187,15 +191,15 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("gauge")));
+            AnalysisDataService::Instance().retrieve("gauge")));
     TS_ASSERT_LESS_THAN(result->readY(0).front(), y0.front());
     TS_ASSERT_LESS_THAN(result->readY(0).back(), y0.back());
     TS_ASSERT_LESS_THAN(result->readY(0)[1], y0[1]);
     TS_ASSERT_LESS_THAN(result->readY(0).back(), result->readY(0).front());
 
-    Mantid::API::AnalysisDataService::Instance().remove(cylWS);
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
-    Mantid::API::AnalysisDataService::Instance().remove("gauge");
+    AnalysisDataService::Instance().remove(cylWS);
+    AnalysisDataService::Instance().remove(outputWS);
+    AnalysisDataService::Instance().remove("gauge");
   }
 
   void testTinyVolume() {
@@ -241,10 +245,103 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         atten.setPropertyValue("SampleNumberDensity", "0.07192"));
     atten.setRethrows(true); // needed for the next check to work
-    TS_ASSERT_THROWS(atten.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(atten.execute(), const std::runtime_error &);
     TS_ASSERT(!atten.isExecuted());
 
-    Mantid::API::AnalysisDataService::Instance().remove(flatWS);
+    AnalysisDataService::Instance().remove(flatWS);
+  }
+
+  void testScatterBy() {
+    // these numbers are the default wl settings for NOMAD
+    constexpr double WL_MIN = .1;
+    constexpr size_t NUM_VALS = 10; // arbitrary
+    constexpr double WL_DELTA = (2.9 - WL_MIN) / static_cast<double>(NUM_VALS);
+
+    // create the input workspace
+    const std::string IN_WS{"AbsorptionCorrection_Input"};
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        1, NUM_VALS, WL_MIN, WL_DELTA);
+    auto testInst =
+        ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
+            {2.}, {90.}, {0.});
+    testInst->setName("ISIS_Histogram");
+    inputWS->setInstrument(testInst);
+    inputWS->rebuildSpectraMapping();
+    inputWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    AnalysisDataService::Instance().addOrReplace(
+        "bobby", inputWS); // TODO rename this nonsense
+
+    // set the sample/can geometry
+    auto setSampleAlg =
+        FrameworkManager::Instance().createAlgorithm("SetSample");
+    setSampleAlg->setRethrows(true);
+    setSampleAlg->initialize();
+    setSampleAlg->setPropertyValue("InputWorkspace", "bobby");
+    setSampleAlg->setPropertyValue(
+        "Environment", R"({"Name": "CRYO-01", "Container": "8mm"})");
+    setSampleAlg->setPropertyValue(
+        "Material",
+        R"({"ChemicalFormula": "(Li7)2-C-H4-N-Cl6", "SampleNumberDensity": 0.1})");
+
+    TS_ASSERT_THROWS_NOTHING(setSampleAlg->execute());
+
+    Mantid::Algorithms::AnyShapeAbsorption absAlg;
+    absAlg.setRethrows(true);
+    absAlg.initialize();
+
+    std::cout << "SAMPLE" << std::endl;
+    // run the actual algorithm on the sample
+    const std::string SAM_WS{"AbsorptionCorrection_Sample"};
+    absAlg.setProperty("InputWorkspace", inputWS);
+    absAlg.setPropertyValue("OutputWorkspace", SAM_WS);
+    absAlg.setProperty("ScatterFrom", "Sample");
+    absAlg.setProperty("EMode", "Elastic");
+    TS_ASSERT_THROWS_NOTHING(absAlg.execute());
+    TS_ASSERT(absAlg.isExecuted());
+
+    std::cout << "CONTAINER" << std::endl;
+    // run the algorithm on the container
+    const std::string CAN_WS{"AbsorptionCorrection_Container"};
+    absAlg.setProperty("InputWorkspace", inputWS);
+    absAlg.setPropertyValue("OutputWorkspace", CAN_WS);
+    absAlg.setProperty("ScatterFrom", "Container");
+    absAlg.setProperty("EMode", "Elastic");
+    TS_ASSERT_THROWS_NOTHING(absAlg.execute());
+    TS_ASSERT(absAlg.isExecuted()); // REMOVE
+
+    std::cout << "ENVIRONMENT" << std::endl;
+    // run the algorithm on the environment - which doesn't exist in the xml
+    const std::string ENV_WS{"AbsorptionCorrection_Environment"};
+    absAlg.setProperty("InputWorkspace", inputWS);
+    absAlg.setPropertyValue("OutputWorkspace", ENV_WS);
+    absAlg.setProperty("ScatterFrom", "Environment");
+    absAlg.setProperty("EMode", "Elastic");
+    TS_ASSERT_THROWS(absAlg.execute(), const std::runtime_error &);
+
+    // verify the sample term is bigger than the container term because the
+    // material contains Li7
+    Mantid::API::MatrixWorkspace_sptr samWS;
+    TS_ASSERT_THROWS_NOTHING(
+        samWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(SAM_WS)));
+    const auto &samValues = samWS->readY(0);
+    Mantid::API::MatrixWorkspace_sptr canWS;
+    TS_ASSERT_THROWS_NOTHING(
+        canWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(CAN_WS)));
+    const auto &canValues = canWS->readY(0);
+    TS_ASSERT_EQUALS(samValues.size(), canValues.size());
+    // the actual compare - sample should absorb more
+    for (size_t i = 0; i < NUM_VALS; ++i) {
+      std::cout << "values[" << i << "] " << samWS->readX(0)[i] << " : "
+                << samValues[i] << " and " << canValues[i] << '\n';
+      TS_ASSERT(samValues[i] < canValues[i])
+    }
+
+    // cleanup - ENV_WS should never have been created
+    AnalysisDataService::Instance().remove(SAM_WS);
+    AnalysisDataService::Instance().remove(CAN_WS);
   }
 
 private:

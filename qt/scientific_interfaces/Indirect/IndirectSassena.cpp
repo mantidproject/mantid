@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSassena.h"
 
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QString>
@@ -66,9 +66,6 @@ void IndirectSassena::run() {
   sassenaAlg->setProperty("OutputWorkspace", m_outWsName.toStdString());
 
   m_batchAlgoRunner->addAlgorithm(sassenaAlg);
-
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSassenaAlg;
-  inputFromSassenaAlg["InputWorkspace"] = m_outWsName.toStdString();
 
   m_batchAlgoRunner->executeBatchAsync();
 }

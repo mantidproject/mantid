@@ -11,8 +11,8 @@
 
 #include "IIndirectFitDataView.h"
 
-#include "../General/UserInputValidator.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QTabWidget>
 
@@ -44,6 +44,9 @@ public:
   virtual void setSampleFBSuffices(const QStringList &suffices) override;
   virtual void setResolutionWSSuffices(const QStringList &suffices) override;
   virtual void setResolutionFBSuffices(const QStringList &suffices) override;
+
+  bool isSampleWorkspaceSelectorVisible() const override;
+  void setSampleWorkspaceSelectorIndex(const QString &workspaceName) override;
 
   void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;

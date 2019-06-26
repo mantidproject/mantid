@@ -135,8 +135,8 @@ class RepoModel : public QAbstractItemModel {
     QString author();
     QString comment();
     bool saveInfo();
-    void setEmail(const QString &);
-    void setAuthor(const QString &);
+    void setEmail(const QString & /*email*/);
+    void setAuthor(const QString & /*author*/);
     void lastSaveOption(bool option);
 
   protected:
@@ -201,7 +201,7 @@ public:
   QString author(const QModelIndex &index);
 
 signals:
-  void executingThread(bool);
+  void executingThread(bool /*_t1*/);
 
 private:
   /// auxiliary method to populate the model

@@ -15,7 +15,7 @@ import directtools
 from mantid.api import mtd
 from mantid.simpleapi import (AddSampleLog, CloneWorkspace, ComputeIncoherentDOS, ConvertSpectrumAxis, CreateSampleWorkspace,
                               CreateWorkspace, DirectILLCollectData, DeleteWorkspace, DirectILLReduction, LoadILLTOF,
-                              MoveInstrumentComponent, SetInstrumentParameter)
+                              MoveInstrumentComponent, SetInstrumentParameter, Transpose)
 import numpy
 import numpy.testing
 import testhelpers
@@ -201,8 +201,18 @@ class DirectToolsTest(unittest.TestCase):
             'yscale': 'log'
         }
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
-        self.assertEquals(axes.get_xscale(), 'log')
-        self.assertEquals(axes.get_yscale(), 'log')
+        self.assertEqual(axes.get_xscale(), 'log')
+        self.assertEqual(axes.get_yscale(), 'log')
+
+    def test_plotconstE_legendLabels(self):
+        kwargs = {
+            'workspaces': self._sqw,
+            'E' : -1.,
+            'dE' : [0.5, 1.0],
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+        hangles, labels = axes.get_legend_handles_labels()
+        self.assertEqual(labels, [r' $E$ = -1.00 $\pm$ 0.57 meV', u' $E$ = -1.01 $\pm$ 1.02 meV'])
 
     def test_plotconstQ_nonListArgsExecutes(self):
         kwargs = {
@@ -248,8 +258,53 @@ class DirectToolsTest(unittest.TestCase):
             'yscale': 'log'
         }
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
-        self.assertEquals(axes.get_xscale(), 'log')
-        self.assertEquals(axes.get_yscale(), 'log')
+        self.assertEqual(axes.get_xscale(), 'log')
+        self.assertEqual(axes.get_yscale(), 'log')
+
+    def test_plotconstQ_legendLabels(self):
+        kwargs = {
+            'workspaces': self._sqw,
+            'Q' : 1.9,
+            'dQ' : [0.2, 0.4],
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        handles, labels = axes.get_legend_handles_labels()
+        self.assertEqual(labels, [r' $Q$ = 1.91 $\pm$ 0.21 $\mathrm{\AA}^{-1}$',
+                                   r' $Q$ = 1.91 $\pm$ 0.41 $\mathrm{\AA}^{-1}$'])
+
+    def test_plotconstQ_titles(self):
+        kwargs = {
+            'workspaces': self._sqw,
+            'Q' : 1.9,
+            'dQ' : 0.2,
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        titleLines = axes.get_title().split('\n')
+        self.assertEqual(len(titleLines), 4)
+        kwargs = {
+            'workspaces': self._sqw,
+            'Q' : [0.9, 1.9],
+            'dQ' : 0.2,
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        titleLines = axes.get_title().split('\n')
+        self.assertEqual(len(titleLines), 3)
+        kwargs = {
+            'workspaces': [self._sqw, self._sqw],
+            'Q' : 0.9,
+            'dQ' : 0.2,
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        titleLines = axes.get_title().split('\n')
+        self.assertEqual(len(titleLines), 2)
+        kwargs = {
+            'workspaces': [self._sqw, self._sqw],
+            'Q' : [0.9, 1.9],
+            'dQ' : 0.2,
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        titleLines = axes.get_title().split('\n')
+        self.assertEqual(len(titleLines), 1)
 
     def test_plotconstE_and_plotconstQ_plot_equal_value_at_crossing(self):
         Q = 2.512
@@ -260,7 +315,7 @@ class DirectToolsTest(unittest.TestCase):
         lineDataE = axes.get_lines()[0].get_data()
         indexE = numpy.argmin(numpy.abs(lineDataQ[0] - E))
         indexQ = numpy.argmin(numpy.abs(lineDataE[0] - Q))
-        self.assertEquals(lineDataQ[1][indexE], lineDataE[1][indexQ])
+        self.assertEqual(lineDataQ[1][indexE], lineDataE[1][indexQ])
 
     def test_plotcuts_keepCutWorkspaces(self):
         kwargs = {
@@ -272,10 +327,10 @@ class DirectToolsTest(unittest.TestCase):
             'unit': 'microseconds',
             'keepCutWorkspaces': True
         }
-        self.assertEquals(mtd.size(), 0)
+        self.assertEqual(mtd.size(), 0)
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotcuts, **kwargs)
-        self.assertEquals(len(cuts), 1)
-        self.assertEquals(mtd.size(), 1)
+        self.assertEqual(len(cuts), 1)
+        self.assertEqual(mtd.size(), 1)
 
     def test_plotcuts_doNotKeepCutWorkspaces(self):
         kwargs = {
@@ -287,10 +342,10 @@ class DirectToolsTest(unittest.TestCase):
             'unit': 'microseconds',
             'keepCutWorkspaces': False
         }
-        self.assertEquals(mtd.size(), 0)
+        self.assertEqual(mtd.size(), 0)
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotcuts, **kwargs)
-        self.assertEquals(len(cuts), 0)
-        self.assertEquals(mtd.size(), 0)
+        self.assertEqual(len(cuts), 0)
+        self.assertEqual(mtd.size(), 0)
 
     def test_plotcuts_loglog(self):
         kwargs = {
@@ -303,10 +358,10 @@ class DirectToolsTest(unittest.TestCase):
             'xscale': 'log',
             'yscale': 'log'
         }
-        self.assertEquals(mtd.size(), 0)
+        self.assertEqual(mtd.size(), 0)
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotcuts, **kwargs)
-        self.assertEquals(axes.get_xscale(), 'log')
-        self.assertEquals(axes.get_yscale(), 'log')
+        self.assertEqual(axes.get_xscale(), 'log')
+        self.assertEqual(axes.get_yscale(), 'log')
 
     def test_plotprofiles_noXUnitsExecutes(self):
         xs = numpy.linspace(-3., 10., 12)
@@ -314,8 +369,8 @@ class DirectToolsTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEquals(axes.get_xlabel(), '')
-        self.assertEquals(axes.get_ylabel(), r'$S(Q,E)$')
+        self.assertEqual(axes.get_xlabel(), '')
+        self.assertEqual(axes.get_ylabel(), r'$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
@@ -325,8 +380,8 @@ class DirectToolsTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='DeltaE', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEquals(axes.get_xlabel(), 'Energy (meV)')
-        self.assertEquals(axes.get_ylabel(), r'$S(Q,E)$')
+        self.assertEqual(axes.get_xlabel(), 'Energy (meV)')
+        self.assertEqual(axes.get_ylabel(), r'$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
@@ -336,8 +391,8 @@ class DirectToolsTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='MomentumTransfer', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEquals(axes.get_xlabel(), u'$Q$ (\u00c5$^{-1}$)')
-        self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
+        self.assertEqual(axes.get_xlabel(), r'$Q$ ($\mathrm{\AA}^{-1}$)')
+        self.assertEqual(axes.get_ylabel(), '$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
@@ -347,8 +402,8 @@ class DirectToolsTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='MomentumTransfer', StoreInADS=False)
         kwargs = {'workspaces': ws, 'xscale': 'log', 'yscale': 'log'}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEquals(axes.get_xscale(), 'log')
-        self.assertEquals(axes.get_yscale(), 'log')
+        self.assertEqual(axes.get_xscale(), 'log')
+        self.assertEqual(axes.get_yscale(), 'log')
 
     def test_plotDOS_PlotSingle(self):
         ws = CreateSampleWorkspace(NumBanks=1, XUnit='DeltaE', XMin=-12., XMax=12., BinWidth=0.2, StoreInADS=False)
@@ -359,8 +414,8 @@ class DirectToolsTest(unittest.TestCase):
         stw = ComputeIncoherentDOS(ws, StoreInADS=False)
         kwargs = {'workspaces': stw}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotDOS, **kwargs)
-        self.assertEquals(axes.get_xlabel(), u'Energy transfer ($meV$)')
-        self.assertEquals(axes.get_ylabel(), u'$g(E)$')
+        self.assertEqual(axes.get_xlabel(), 'Energy transfer ($meV$)')
+        self.assertEqual(axes.get_ylabel(), '$g(E)$')
 
     def test_plotDOS_PlotMultiple(self):
         ws = CreateSampleWorkspace(NumBanks=1, XUnit='DeltaE', XMin=-12., XMax=12., BinWidth=0.2, StoreInADS=False)
@@ -371,8 +426,8 @@ class DirectToolsTest(unittest.TestCase):
         stw = ComputeIncoherentDOS(ws)
         kwargs = {'workspaces': [stw, 'stw']}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotDOS, **kwargs)
-        self.assertEquals(axes.get_xlabel(), u'Energy transfer ($meV$)')
-        self.assertEquals(axes.get_ylabel(), u'$g(E)$')
+        self.assertEqual(axes.get_xlabel(), 'Energy transfer ($meV$)')
+        self.assertEqual(axes.get_ylabel(), '$g(E)$')
 
     def test_plotSofQW(self):
         wsName = 'ws'
@@ -381,7 +436,34 @@ class DirectToolsTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
         DeleteWorkspace(wsName)
         kwargs = {'workspace': self._sqw}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+        self.assertEqual(len(figure.axes), 2)
+        colorbar_axes = figure.axes[-1]
+        self.assertEqual(colorbar_axes.get_ylabel(), r'$S(Q,E)$ (arb. units)')
+
+    def test_plotSofQW_transposed(self):
+        wsName = 'ws'
+        CloneWorkspace(self._sqw, OutputWorkspace=wsName)
+        Transpose(wsName, OutputWorkspace=wsName)
+        kwargs = {'workspace': wsName}
         testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+        DeleteWorkspace(wsName)
+        kwargs = {'workspace': self._sqw}
+        testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+
+    def test_plotSofQW_dynamicsusceptibility(self):
+        xs = numpy.array([-2, -1, 0, 1, 2])
+        ys = numpy.tile(numpy.array([1, 1, 1 ,1 , 1]), 10)
+        vertX = numpy.array([-4, -3, -2, -1, 0, 1, 2, 3, 4, 5])
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=10, UnitX='MomentumTransfer', VerticalAxisUnit='DeltaE', VerticalAxisValues=vertX,
+                             StoreInADS=False)
+        wsOut = directtools.dynamicsusceptibility(ws, 100.)
+        kwargs = {'workspace': wsOut}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+        self.assertEqual(len(figure.axes), 2)
+        colorbar_axes = figure.axes[-1]
+        self.assertEqual(colorbar_axes.get_ylabel(), r"$\chi''(Q,E)$ (arb. units)")
+        self.assertEqual(axes.get_ylim()[0], 0.)
 
     def test_subplots(self):
         testhelpers.assertRaisesNothing(self, directtools.subplots)
@@ -393,7 +475,8 @@ class DirectToolsTest(unittest.TestCase):
         ys[nPoints] = numpy.nan
         ys[2 * nPoints - 1] = numpy.nan
         vertAxis = numpy.array([-3, -1, 2, 4])
-        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=3, VerticalAxisUnit='Degrees', VerticalAxisValues=vertAxis, StoreInADS=False)
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=3, UnitX='MomentumTransfer',
+                             VerticalAxisUnit='Degrees', VerticalAxisValues=vertAxis, StoreInADS=False)
         qMin, qMax = directtools.validQ(ws, -2.5)
         self.assertEqual(qMin, xs[0])
         self.assertEqual(qMax, xs[-1])

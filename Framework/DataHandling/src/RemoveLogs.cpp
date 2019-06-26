@@ -45,12 +45,12 @@ void RemoveLogs::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
-                                                      Direction::InOut),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "Workspace", "Anonymous", Direction::InOut),
       "The name of the workspace to which the log data will be removed");
-  declareProperty(
-      make_unique<ArrayProperty<std::string>>("KeepLogs", Direction::Input),
-      "List(comma separated) of logs to be kept");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      "KeepLogs", Direction::Input),
+                  "List(comma separated) of logs to be kept");
 }
 
 /** Executes the algorithm. Reading in log file(s)
@@ -69,7 +69,7 @@ void RemoveLogs::exec() {
   std::vector<std::string> logNames;
   logNames.reserve(logData.size());
   for (const auto property : logData) {
-    logNames.push_back(property->name());
+    logNames.emplace_back(property->name());
   }
   for (const auto &name : logNames) {
     auto location = std::find(keepLogs.cbegin(), keepLogs.cend(), name);

@@ -15,14 +15,16 @@ from __future__ import absolute_import
 import os.path as osp
 from contextlib import contextmanager
 from importlib import import_module
+import warnings
+warnings.filterwarnings(action='ignore',
+                        category=DeprecationWarning,
+                        module='.*uic.*')
 
 # 3rd-party modules
-from qtpy import QT_VERSION
-from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import QAction, QMenu
-from qtpy.uic import loadUi, loadUiType
-
-from ...icons import get_icon
+from qtpy import QT_VERSION # noqa
+from qtpy.QtGui import QKeySequence # noqa
+from qtpy.QtWidgets import QAction, QMenu # noqa
+from qtpy.uic import loadUi, loadUiType # noqa
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
@@ -136,6 +138,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
                                              are NOT shown on context menus. Set this to True to show them.
     :return: A new QAction object
     """
+    from ...icons import get_icon  # noqa
     action = QAction(text, parent)
     if on_triggered is not None:
         action.triggered.connect(on_triggered)

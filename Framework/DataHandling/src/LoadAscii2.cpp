@@ -14,9 +14,9 @@
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include <MantidKernel/StringTokenizer.h>
 
 // String utilities
 #include <boost/algorithm/string.hpp>
@@ -85,7 +85,7 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   m_spectrumIDcount = 0;
 
   m_spectra.clear();
-  m_curSpectra = Kernel::make_unique<DataObjects::Histogram1D>(
+  m_curSpectra = std::make_unique<DataObjects::Histogram1D>(
       HistogramData::Histogram::XMode::Points,
       HistogramData::Histogram::YMode::Counts);
   std::string line;
@@ -171,7 +171,7 @@ void LoadAscii2::parseLine(const std::string &line,
             "associated bins.");
       }
       m_curSpectra->setSpectrumNo(boost::lexical_cast<int>(*(columns.begin())));
-    } else if (cols != 1) {
+    } else {
       inconsistantIDCheck();
 
       checkLineColumns(cols);
@@ -523,7 +523,7 @@ void LoadAscii2::newSpectra() {
       m_curSpectra.reset();
     }
 
-    m_curSpectra = Kernel::make_unique<DataObjects::Histogram1D>(
+    m_curSpectra = std::make_unique<DataObjects::Histogram1D>(
         HistogramData::Histogram::XMode::Points,
         HistogramData::Histogram::YMode::Counts);
     m_curDx.clear();
@@ -600,12 +600,12 @@ void LoadAscii2::fillInputValues(std::vector<double> &values,
 /// Initialisation method.
 void LoadAscii2::init() {
   const std::vector<std::string> exts{".dat", ".txt", ".csv", ""};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the text file to read, including its full or "
-                  "relative path. The file extension must be .txt, .dat, or "
-                  ".csv");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the text file to read, including its full or "
+      "relative path. The file extension must be .txt, .dat, or "
+      ".csv");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, "
                   "filled with the read-in data and stored in the [[Analysis "
@@ -639,13 +639,13 @@ void LoadAscii2::init() {
                   " tab, space, semicolon or colon.).");
 
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
+                                                       Direction::Input),
       "If present, will override any specified choice given to Separator.");
 
   setPropertySettings("CustomSeparator",
-                      make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
-                                                       "UserDefined"));
+                      std::make_unique<VisibleWhenProperty>(
+                          "Separator", IS_EQUAL_TO, "UserDefined"));
 
   declareProperty("CommentIndicator", "#",
                   "Character(s) found front of "

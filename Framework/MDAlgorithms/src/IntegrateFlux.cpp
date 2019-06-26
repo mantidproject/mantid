@@ -32,7 +32,7 @@ namespace {
 class NoEventWorkspaceDeleting {
 public:
   /// deleting operator. Does nothing
-  void operator()(const API::MatrixWorkspace *) {}
+  void operator()(const API::MatrixWorkspace * /*unused*/) {}
 };
 } // namespace
 
@@ -59,7 +59,7 @@ const std::string IntegrateFlux::summary() const {
  */
 void IntegrateFlux::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input,
           boost::make_shared<API::WorkspaceUnitValidator>("Momentum")),
       "An input workspace. Must have units of Momentum");
@@ -67,7 +67,7 @@ void IntegrateFlux::init() {
   validator->setLower(2);
   declareProperty("NPoints", 1000, validator,
                   "Number of points per output spectrum.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

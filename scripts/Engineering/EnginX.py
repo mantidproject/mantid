@@ -12,9 +12,9 @@ import numpy as np
 import os
 from platform import system
 from shutil import copy2
-from six import u
+import six
 
-import mantid.plots # noqa
+import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
 import mantid.simpleapi as simple
 
@@ -380,7 +380,7 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
 
     # loop through used banks
     for i in banks:
-        actual_i = correction+i
+        actual_i = correction + i
         # retrieve required workspace
         if not plot_spec_num:
             bank_ws = simple.AnalysisDataService.retrieve("engg_calibration_bank_{}".format(actual_i))
@@ -509,7 +509,7 @@ def focus_whole(run_number, van_curves, van_int, focus_directory, focus_general,
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
                          Bank=str(i))
-        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}", str(i))
+        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}{{}}", str(i))
 
 
 def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params, time_period,
@@ -542,14 +542,14 @@ def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_genera
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
                          Bank=bank.get(crop_on))
-        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}", crop_on)
+        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}{{}}", crop_on)
     else:
         # crop on the spectra passed in, focus and save it out
         output_ws = output_ws.format("", "")
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws,
                          VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=crop_on)
-        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_bank_{}", "cropped")
+        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_bank_{}{{}}", "cropped")
 
 
 def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params,
@@ -573,11 +573,19 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_g
                                                                    params, time_period)
     banks = {}
     # read the csv file to work out the banks
-    with open(dg_file) as grouping_file:
-        group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
+    # ensure csv reading works on python 2 or 3
+    if not six.PY2:
+        with open(dg_file, 'r', newline='', encoding='utf-8') as grouping_file:
+            group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
 
-        for row in group_reader:
-            banks.update({row[0]: ','.join(row[1:])})
+            for row in group_reader:
+                banks.update({row[0]: ','.join(row[1:])})
+    else:
+        with open(dg_file, 'r') as grouping_file:
+            group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
+
+            for row in group_reader:
+                banks.update({row[0]: ','.join(row[1:])})
 
     # loop through the banks described in the csv, focusing and saing them out
     for bank in banks:
@@ -586,7 +594,7 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_g
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
                          SpectrumNumbers=banks.get(bank))
-        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_texture_{}", bank)
+        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_texture_{}{{}}", bank)
 
 
 def _prepare_focus(run_number, van_curves, van_int, do_pre_process, params, time_period):
@@ -609,7 +617,7 @@ def _prepare_focus(run_number, van_curves, van_int, do_pre_process, params, time
     return van_curves_ws, van_integrated_ws, ws_to_focus
 
 
-def _save_out(run_number, focus_directory, focus_general, output, join_string, bank_id):
+def _save_out(run_number, focus_directory, focus_general, output, enginx_file_name_format, bank_id):
     """
     save out the files required for the focus
 
@@ -617,31 +625,45 @@ def _save_out(run_number, focus_directory, focus_general, output, join_string, b
     @param focus_directory :: the user directory to save to
     @param focus_general :: the general folder to copy the saved out files to
     @param output :: the workspace to save
-    @param join_string :: the nameing scheme of the files
+    @param enginx_file_name_format :: the nameing scheme of the files
     @param bank_id :: the bank being saved
 
     """
     # work out where to save the files
-    filename = os.path.join(focus_directory, join_string.format(run_number, bank_id))
-    hdf5_name = os.path.join(focus_directory, run_number + ".hdf5")
-    if not u(bank_id).isnumeric():
+    dat_name, genie_filename, gss_name, hdf5_name, nxs_name = _find_focus_file_location(bank_id, focus_directory,
+                                                                                        enginx_file_name_format,
+                                                                                        run_number)
+    if not six.u(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
-    simple.SaveFocusedXYE(InputWorkspace=output, Filename=filename + ".dat", SplitFiles=False,
+    simple.SaveFocusedXYE(InputWorkspace=output, Filename=dat_name, SplitFiles=False,
                           StartAtBankNumber=bank_id)
-    simple.SaveGSS(InputWorkspace=output, Filename=filename + ".gss", SplitFiles=False, Bank=bank_id)
-    simple.SaveOpenGenieAscii(InputWorkspace=output, Filename=filename + ".his", OpenGenieFormat="ENGIN-X Format")
-    simple.SaveNexus(InputWorkspace=output, Filename=filename + ".nxs")
+    simple.SaveGSS(InputWorkspace=output, Filename=gss_name, SplitFiles=False, Bank=bank_id)
+    simple.SaveOpenGenieAscii(InputWorkspace=output, Filename=genie_filename, OpenGenieFormat="ENGIN-X Format")
+    simple.SaveNexus(InputWorkspace=output, Filename=nxs_name)
     simple.ExportSampleLogsToHDF5(InputWorkspace=output, Filename=hdf5_name, Blacklist="bankid")
     if not focus_general == focus_directory:
         if not os.path.exists(focus_general):
             os.makedirs(focus_general)
         # copy the files to the general directory
-        copy2(filename + ".dat", focus_general)
-        copy2(filename + ".gss", focus_general)
-        copy2(filename + ".his", focus_general)
-        copy2(filename + ".nxs", focus_general)
+        copy2(dat_name, focus_general)
+        copy2(gss_name, focus_general)
+        copy2(genie_filename, focus_general)
+        copy2(nxs_name, focus_general)
         copy2(hdf5_name, focus_general)
+
+
+def _find_focus_file_location(bank_id, focus_directory, enginx_file_name_format, run_number):
+    # Leave final {} in string so that file extension can be set.
+    run_and_bank = enginx_file_name_format.format(run_number, bank_id)
+    filename = os.path.join(focus_directory, run_and_bank)
+    genie_filename = os.path.join(focus_directory, run_and_bank.replace("_", "", 1).format(".his"))
+
+    dat_name = filename.format(".dat")
+    gss_name = filename.format(".gss")
+    nxs_name = filename.format(".nxs")
+    hdf5_name = os.path.join(focus_directory, run_number + ".hdf5")
+    return dat_name, genie_filename, gss_name, hdf5_name, nxs_name
 
 
 def _decomment_csv(csvfile):

@@ -19,7 +19,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
@@ -453,7 +452,7 @@ public:
 
     std::vector<coord_t> cenroid(2, 0);
     TS_ASSERT_THROWS(superbox->calculateCentroid(&cenroid[0]),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     // Check the centroid for these 3 events
     // TS_ASSERT_DELTA( cenroid[0], 3.233, 0.001);

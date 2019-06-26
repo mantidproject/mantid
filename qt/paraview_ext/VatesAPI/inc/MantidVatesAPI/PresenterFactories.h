@@ -8,7 +8,6 @@
 #define MANTID_VATES_PRESENTER_FACTORIES_H
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace VATES {
@@ -47,9 +46,9 @@ public:
   create(std::unique_ptr<MDLoadingView> view,
          Mantid::API::IMDWorkspace_sptr workspace,
          std::unique_ptr<WorkspaceProvider> workspaceProvider) {
-    return Mantid::Kernel::make_unique<Presenter>(std::move(view),
-                                                  workspaceProvider.release(),
-                                                  getWorkspaceName(*workspace));
+    return std::make_unique<Presenter>(std::move(view),
+                                       workspaceProvider.release(),
+                                       getWorkspaceName(*workspace));
   }
 };
 } // namespace VATES

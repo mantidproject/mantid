@@ -42,12 +42,12 @@ DECLARE_ALGORITHM(ExportTimeSeriesLog)
  */
 void ExportTimeSeriesLog::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "Anonymous", Direction::InOut),
       "Name of input Matrix workspace containing the log to export. ");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "Dummy", Direction::Output),
       "Name of the workspace containing the log events in Export. ");
 

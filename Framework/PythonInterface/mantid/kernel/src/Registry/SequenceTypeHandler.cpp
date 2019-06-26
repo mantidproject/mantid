@@ -31,7 +31,7 @@ template <typename HeldType> struct StdVectorExtractor {
   }
 };
 template <> struct StdVectorExtractor<bool> {
-  static std::vector<bool> extract(const boost::python::object &) {
+  static std::vector<bool> extract(const boost::python::object & /*unused*/) {
     throw std::runtime_error(
         "Unable to supported extracting std::vector<bool> from python object");
   }
@@ -108,11 +108,11 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
 
   std::unique_ptr<Kernel::Property> valueProp;
   if (isNone(validator)) {
-    valueProp = Mantid::Kernel::make_unique<PropertyWithValue<ContainerType>>(
+    valueProp = std::make_unique<PropertyWithValue<ContainerType>>(
         name, valueInC, direction);
   } else {
     const IValidator *propValidator = extract<IValidator *>(validator);
-    valueProp = Mantid::Kernel::make_unique<PropertyWithValue<ContainerType>>(
+    valueProp = std::make_unique<PropertyWithValue<ContainerType>>(
         name, valueInC, propValidator->clone(), direction);
   }
   return valueProp;

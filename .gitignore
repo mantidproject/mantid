@@ -164,8 +164,11 @@ Desktop.ini
 # PyCharm IDE
 .idea/
 
-# VSCode cache
+# VSCode
 .vscode/
+XDG_CACHE_HOME/
+# The file that contains metadata for VSCode Workspace
+*.code-workspace
 
 # Mac OS X Finder
 .DS_Store
@@ -174,7 +177,7 @@ Desktop.ini
 .tags
 .tags_sorted_by_file
 
-#Dynamically created files
+# Dynamically created files
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
 qt/applications/workbench/setup.py

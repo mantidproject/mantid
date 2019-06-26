@@ -15,21 +15,21 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def test_construction_from_single_ws(self):
         ws = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength(ws)
-        self.assertTrue(converter != None, "Should have been able to make a valid converter from a single workspace")
+        self.assertNotEqual(converter,  None, "Should have been able to make a valid converter from a single workspace")
         DeleteWorkspace(ws)
 
     def test_construction_from_single_ws_name(self):
         ws = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
 
         converter = ConvertToWavelength(ws.name())
-        self.assertTrue(converter != None, "Should have been able to make a valid converter from a single workspace name")
+        self.assertNotEqual(converter,  None, "Should have been able to make a valid converter from a single workspace name")
         DeleteWorkspace(ws)
 
     def test_construction_from_many_workspaces(self):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength([ws1, ws2])
-        self.assertTrue(converter != None, "Should have been able to make a valid converter from many workspace objects")
+        self.assertNotEqual(converter,  None, "Should have been able to make a valid converter from many workspace objects")
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
 
@@ -37,7 +37,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength([ws1.name(), ws2.name()])
-        self.assertTrue(converter != None, "Should have been able to make a valid converter from many workspace objects")
+        self.assertNotEqual(converter,  None, "Should have been able to make a valid converter from many workspace objects")
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
 
@@ -46,7 +46,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         comma_separated_names = "%s, %s" % (ws1.name(), ws2.name())
         converter = ConvertToWavelength(comma_separated_names)
-        self.assertTrue(converter != None, "Should have been able to make a valid converter from many , separated workspace objects")
+        self.assertNotEqual(converter,  None, "Should have been able to make a valid converter from many , separated workspace objects")
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
 
@@ -55,7 +55,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         colon_separated_names = "%s: %s" % (ws1.name(), ws2.name())
         converter = ConvertToWavelength(colon_separated_names)
-        self.assertTrue(converter != None, "Should have been able to make a valid converter from many : separated workspace objects")
+        self.assertNotEqual(converter,  None, "Should have been able to make a valid converter from many : separated workspace objects")
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
 
@@ -136,8 +136,8 @@ class ConvertToWavelengthTest(unittest.TestCase):
         self.assertEqual("Wavelength", monitor_ws.getAxis(0).getUnit().unitID())
         x_min, x_max = ConvertToWavelengthTest.cropped_x_range(detector_ws, 0)
 
-        self.assertTrue(x_min >= 0.0)
-        self.assertTrue(x_max <= 10.0)
+        self.assertGreaterEqual(x_min, 0.0)
+        self.assertLessEqual(x_max, 10.0)
 
 if __name__ == '__main__':
     unittest.main()

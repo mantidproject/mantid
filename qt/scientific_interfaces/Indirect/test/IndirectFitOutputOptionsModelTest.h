@@ -211,16 +211,16 @@ public:
   }
 
   void test_that_plotResult_will_throw_when_there_is_no_result_workspace_set() {
-    TS_ASSERT_THROWS(m_model->plotResult("HWHM"), std::runtime_error);
+    TS_ASSERT_THROWS(m_model->plotResult("HWHM"), const std::runtime_error &);
   }
 
   void test_that_plotPDF_will_throw_when_there_is_no_pdf_workspace_set() {
     TS_ASSERT_THROWS(m_model->plotPDF("WorkspaceName", "HWHM"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_that_saveResult_will_throw_when_there_is_no_result_workspace_set() {
-    TS_ASSERT_THROWS(m_model->saveResult(), std::runtime_error);
+    TS_ASSERT_THROWS(m_model->saveResult(), const std::runtime_error &);
   }
 
   void
@@ -260,6 +260,17 @@ public:
   }
 
   void
+  test_that_isSelectedGroupSelected_returns_true_when_passed_the_result_group_string_with_a_result_group_set() {
+    m_model->setResultWorkspace(m_groupWorkspace);
+    TS_ASSERT(m_model->isSelectedGroupPlottable("Result Group"));
+  }
+
+  void
+  test_that_isSelectedGroupSelected_returns_false_when_passed_the_pdf_group_string_when_a_pdf_group_is_not_set() {
+    TS_ASSERT(!m_model->isSelectedGroupPlottable("PDF Group"));
+  }
+
+  void
   test_that_isResultGroupSelected_returns_true_when_passed_the_result_group_string() {
     TS_ASSERT(m_model->isResultGroupSelected("Result Group"));
   }
@@ -275,7 +286,7 @@ public:
     auto const outputName("Output_Result");
 
     TS_ASSERT_THROWS(m_model->replaceFitResult("", singleBinName, outputName),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void
@@ -284,7 +295,7 @@ public:
     auto const outputName("Output_Result");
 
     TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, "", outputName),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void
@@ -293,7 +304,7 @@ public:
     auto const singleBinName("Workspace_s0_Result");
 
     TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, singleBinName, ""),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
 private:

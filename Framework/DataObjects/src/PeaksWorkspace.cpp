@@ -173,11 +173,8 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
       std::remove_if(peaks.begin(), peaks.end(), [&ip, badPeaks](Peak &pk) {
         (void)pk;
         ip++;
-        for (int badPeak : badPeaks) {
-          if (badPeak == ip)
-            return true;
-        }
-        return false;
+        return std::any_of(badPeaks.cbegin(), badPeaks.cend(),
+                           [ip](int badPeak) { return badPeak == ip; });
       });
   peaks.erase(it, peaks.end());
 }
@@ -527,6 +524,7 @@ Peak *PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
 
   // We need to set HKL separately to keep things consistent.
   peak->setHKL(HKL[0], HKL[1], HKL[2]);
+  peak->setIntHKL(peak->getHKL());
 
   // Set the goniometer
   peak->setGoniometerMatrix(goniometer.getR());
@@ -968,7 +966,7 @@ PeaksWorkspace::getSpecialCoordinateSystem() const {
 
 // prevent shared pointer from deleting this
 struct NullDeleter {
-  template <typename T> void operator()(T *) {}
+  template <typename T> void operator()(T * /*unused*/) {}
 };
 /**Get access to shared pointer containing workspace porperties */
 API::LogManager_sptr PeaksWorkspace::logs() {
@@ -982,8 +980,8 @@ API::LogManager_const_sptr PeaksWorkspace::getLogs() const {
   return API::LogManager_const_sptr(new API::LogManager(this->run()));
 }
 
-ITableWorkspace *
-PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
+ITableWorkspace *PeaksWorkspace::doCloneColumns(
+    const std::vector<std::string> & /*colNames*/) const {
   throw Kernel::Exception::NotImplementedError(
       "PeaksWorkspace cannot clone columns.");
 }

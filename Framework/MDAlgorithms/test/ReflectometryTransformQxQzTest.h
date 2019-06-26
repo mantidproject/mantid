@@ -38,7 +38,7 @@ public:
     double incidentTheta = 1;
     TS_ASSERT_THROWS(
         ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_qxmin_equal_to_qxmax_throws() {
@@ -49,7 +49,7 @@ public:
     double incidentTheta = 1;
     TS_ASSERT_THROWS(
         ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_qzmin_greater_than_qzmax_throws() {
@@ -60,7 +60,7 @@ public:
     double incidentTheta = 1;
     TS_ASSERT_THROWS(
         ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_qzmin_equal_to_qzmax_throws() {
@@ -71,7 +71,7 @@ public:
     double incidentTheta = 1;
     TS_ASSERT_THROWS(
         ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_incident_theta_negative() {
@@ -82,7 +82,7 @@ public:
     double incidentTheta = -0.001; // Negative
     TS_ASSERT_THROWS(
         ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        std::out_of_range);
+        const std::out_of_range &);
   }
 
   void test_incident_theta_too_large() {
@@ -93,7 +93,7 @@ public:
     double incidentTheta = 90.001; // Too large
     TS_ASSERT_THROWS(
         ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-        std::out_of_range);
+        const std::out_of_range &);
   }
 
   void test_valid_construction_inputs() {

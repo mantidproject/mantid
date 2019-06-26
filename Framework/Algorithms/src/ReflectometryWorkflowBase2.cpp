@@ -59,17 +59,17 @@ void ReflectometryWorkflowBase2::initReductionProperties() {
                   "The type of reduction to perform when summing in Q.",
                   Direction::Input);
   setPropertySettings("ReductionType",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SummationType", IS_EQUAL_TO, "SumInQ"));
 
   // Whether to crop out partial bins when projecting to virtual lambda for Q
   // summation
-  declareProperty(make_unique<PropertyWithValue<bool>>("IncludePartialBins",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "IncludePartialBins", false, Direction::Input),
                   "If true then partial bins at the beginning and end of the "
                   "output range are included");
   setPropertySettings("IncludePartialBins",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SummationType", IS_EQUAL_TO, "SumInQ"));
 }
 
@@ -77,7 +77,7 @@ void ReflectometryWorkflowBase2::initReductionProperties() {
  */
 void ReflectometryWorkflowBase2::initDirectBeamProperties() {
 
-  declareProperty(make_unique<ArrayProperty<int>>("RegionOfDirectBeam"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("RegionOfDirectBeam"),
                   "Indices of the spectra a pair (lower, upper) that mark the "
                   "ranges that correspond to the direct beam in multi-detector "
                   "mode.");
@@ -88,30 +88,30 @@ void ReflectometryWorkflowBase2::initDirectBeamProperties() {
 void ReflectometryWorkflowBase2::initMonitorProperties() {
 
   // Monitor workspace index
-  declareProperty(make_unique<PropertyWithValue<int>>(
+  declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
                   "I0 monitor workspace index");
 
   // Minimum wavelength for background subtraction
   declareProperty(
-      make_unique<PropertyWithValue<double>>("MonitorBackgroundWavelengthMin",
-                                             Mantid::EMPTY_DBL(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+          Direction::Input),
       "Wavelength minimum for monitor background subtraction in angstroms.");
   // Maximum wavelength for background subtraction
   declareProperty(
-      make_unique<PropertyWithValue<double>>("MonitorBackgroundWavelengthMax",
-                                             Mantid::EMPTY_DBL(),
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+          Direction::Input),
       "Wavelength maximum for monitor background subtraction in angstroms.");
 
   // Minimum wavelength for monitor integration
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
                       Direction::Input),
                   "Wavelength minimum for integration in angstroms.");
   // Maximum wavelength for monitor integration
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
                       Direction::Input),
                   "Wavelength maximum for integration in angstroms.");
@@ -125,13 +125,13 @@ void ReflectometryWorkflowBase2::initMonitorProperties() {
 void ReflectometryWorkflowBase2::initTransmissionProperties() {
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional),
       "First transmission run, or the low wavelength transmission run if "
       "SecondTransmissionRun is also provided.");
 
   auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator),
                   "Second, high wavelength transmission run. Optional. Causes "
@@ -141,7 +141,7 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
   initStitchProperties();
 
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>(
+      std::make_unique<PropertyWithValue<std::string>>(
           "TransmissionProcessingInstructions", "", Direction::Input),
       "These processing instructions will be passed to the transmission "
       "workspace algorithm");
@@ -159,25 +159,25 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
 void ReflectometryWorkflowBase2::initStitchProperties() {
 
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
       "SecondTransmission run is provided.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start wavelength for stitching transmission runs together. "
                   "Only used if a second transmission run is provided.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "End wavelength (angstroms) for stitching transmission runs "
                   "together. Only used if a second transmission run is "
                   "provided.");
-  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "ScaleRHSWorkspace", true, Direction::Input),
                   "Scale the right-hand-side or left-hand-side workspace. "
                   "Only used if a second transmission run is provided.");
 }
@@ -201,16 +201,16 @@ void ReflectometryWorkflowBase2::initAlgorithmicProperties(bool autoDetect) {
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
-  declareProperty(make_unique<ArrayProperty<double>>("Polynomial"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Polynomial"),
                   "Coefficients to be passed to the PolynomialCorrection"
                   " algorithm.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
       "C0 value to be passed to the ExponentialCorrection algorithm.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
       "C1 value to be passed to the ExponentialCorrection algorithm.");
 
   setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
@@ -726,15 +726,15 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndices(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (auto i = 0u; i < instructions.size(); ++i) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted followed by separator
       converted.append(convertToWorkspaceIndex(currentNumber, ws));
-      converted.push_back(instructions[i]);
+      converted.push_back(instruction);
       currentNumber = "";
     } else {
-      currentNumber.push_back(instructions[i]);
+      currentNumber.push_back(instruction);
     }
   }
   // Add currentNumber onto converted
@@ -757,15 +757,15 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (auto i = 0u; i < instructions.size(); ++i) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted after seperator
       converted.append(convertToSpectrumNumber(currentNumber, ws));
-      converted.push_back(instructions[i]);
+      converted.push_back(instruction);
       currentNumber = "";
     } else {
-      currentNumber.push_back(instructions[i]);
+      currentNumber.push_back(instruction);
     }
   }
   // Add currentNumber onto converted

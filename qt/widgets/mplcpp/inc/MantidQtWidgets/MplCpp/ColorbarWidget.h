@@ -45,24 +45,25 @@ public:
   QString getMinValue() const;
   QString getMaxValue() const;
   QString getNthPower() const;
-  void setMinPositiveValue(double) { /*Unused in this implementation*/
+  void
+  setMinPositiveValue(double /*unused*/) { /*Unused in this implementation*/
   }
   int getScaleType() const;
-  void setScaleType(int);
-  void setNthPower(double);
-  void loadFromProject(const std::string &) {}
+  void setScaleType(int /*index*/);
+  void setNthPower(double /*gamma*/);
+  void loadFromProject(const std::string & /*unused*/) {}
   std::string saveToProject() const { return ""; }
 signals:
   // Changed signals emitted for any change
-  void scaleTypeChanged(int);
-  void minValueChanged(double);
-  void maxValueChanged(double);
-  void nthPowerChanged(double);
+  void scaleTypeChanged(int /*_t1*/);
+  void minValueChanged(double /*_t1*/);
+  void maxValueChanged(double /*_t1*/);
+  void nthPowerChanged(double /*_t1*/);
 
   // Edited signals only emitted when manual editing of that field
   // occurs
-  void minValueEdited(double);
-  void maxValueEdited(double);
+  void minValueEdited(double /*_t1*/);
+  void maxValueEdited(double /*_t1*/);
   ///@}
 
 private slots:
@@ -73,8 +74,9 @@ private slots:
 
 private:
   void initLayout();
-  void createColorbar(const Python::Object &ticks = Python::Object(),
-                      const Python::Object &format = Python::Object());
+  void createColorbar(
+      const Common::Python::Object &ticks = Common::Python::Object(),
+      const Common::Python::Object &format = Common::Python::Object());
   void connectSignals();
 
 private: // data

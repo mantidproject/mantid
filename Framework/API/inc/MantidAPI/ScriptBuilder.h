@@ -35,7 +35,8 @@ public:
       boost::shared_ptr<HistoryView> view,
       std::string versionSpecificity = "old", bool appendTimestamp = false,
       std::vector<std::string> ignoreTheseAlgs = {},
-      std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {});
+      std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {},
+      bool appendExecCount = false);
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();
@@ -62,6 +63,7 @@ private:
   bool m_timestampCommands;
   std::vector<std::string> m_algsToIgnore;
   std::vector<std::vector<std::string>> m_propertiesToIgnore;
+  bool m_execCount;
 };
 
 } // namespace API

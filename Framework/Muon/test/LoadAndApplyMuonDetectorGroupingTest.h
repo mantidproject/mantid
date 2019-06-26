@@ -8,7 +8,6 @@
 #define MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPINGTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
@@ -306,7 +305,7 @@ public:
         MuonGroupingXMLHelper::createGroupingXMLSingleGroup("group_", "1-2");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_throws_if_pair_contains_non_existant_group() {
@@ -318,7 +317,8 @@ public:
         "pair1", "nonExistantGroup");
 
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
-    TS_ASSERT_THROWS(alg->execute(), Mantid::Kernel::Exception::FileError);
+    TS_ASSERT_THROWS(alg->execute(),
+                     const Mantid::Kernel::Exception::FileError &);
   }
 
   void test_throws_when_file_has_detectors_which_are_not_in_workspace() {
@@ -330,7 +330,7 @@ public:
         MuonGroupingXMLHelper::createGroupingXMLSingleGroup("test", group);
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_rebinning_applied_correctly() {

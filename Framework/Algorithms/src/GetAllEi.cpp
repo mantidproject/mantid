@@ -48,7 +48,7 @@ GetAllEi::GetAllEi()
 void GetAllEi::init() {
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "Workspace", "", Kernel::Direction::Input),
       "The input workspace containing the monitor's spectra "
       "measured after the last chopper");
@@ -93,7 +93,7 @@ void GetAllEi::init() {
       "E.g. the 'proton_chage' log grows for each frame "
       "when instrument is counting and is constant otherwise.");
   setPropertySettings("FilterWithDerivative",
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "FilterBaseLog",
                           Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           "Defined in IDF"));
@@ -136,7 +136,7 @@ void GetAllEi::init() {
       "This is debugging option as getEi has to use both monitors.");
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output matrix workspace, containing single spectra with"
       " monitor peaks energies\n"
@@ -537,7 +537,6 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
       this->calcDerivativeAndCountZeros(binsAvrg, SAvrg, der1Avrg, peaks);
   size_t nHills =
       this->calcDerivativeAndCountZeros(binsAvrg, der1Avrg, der2Avrg, hillsPos);
-  size_t nPrevHills = 2 * nHills;
   if (nPeaks == 1) {
     foundRealPeakPos = true;
     realPeakPos = peaks[0];
@@ -548,7 +547,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   while ((nPeaks > 1 || nHills > 2) && (!iterations_fail)) {
     Kernel::VectorHelper::smoothInRange(SAvrg, SAvrg1, SmoothRange, &binsAvrg,
                                         0, ind_max - ind_min, &binsAvrg1);
-    nPrevHills = nHills;
+    const auto nPrevHills = nHills;
 
     nPeaks =
         this->calcDerivativeAndCountZeros(binsAvrg1, SAvrg1, der1Avrg, peaks);

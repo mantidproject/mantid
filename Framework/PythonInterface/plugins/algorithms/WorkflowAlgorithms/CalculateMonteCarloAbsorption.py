@@ -58,7 +58,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
     def seeAlso(self):
-        return [ "MonteCarloAbsorption","SimpleShapeMonteCarloAbsorption" ]
+        return ["MonteCarloAbsorption", "SimpleShapeMonteCarloAbsorption"]
 
     def summary(self):
         return "Calculates indirect absorption corrections for a given sample shape, using a MonteCarlo simulation."
@@ -72,15 +72,33 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                              doc='Sample Workspace')
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              doc='Chemical formula for the sample material')
+        self.declareProperty(name='SampleCoherentXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The coherent cross-section for the sample material in barns. To be used instead of '
+                                 'Chemical Formula.')
+        self.declareProperty(name='SampleIncoherentXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The incoherent cross-section for the sample material in barns. To be used instead of '
+                                 'Chemical Formula.')
+        self.declareProperty(name='SampleAttenuationXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The absorption cross-section for the sample material in barns. To be used instead of '
+                                 'Chemical Formula.')
         self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc='Sample density type')
+                             doc='Use of Mass density or Number density for the sample.')
+        self.declareProperty(name='SampleNumberDensityUnit', defaultValue='Atoms',
+                             validator=StringListValidator(['Atoms', 'Formula Units']),
+                             doc='Choose which units SampleDensity refers to. Allowed values: [Atoms, Formula Units]')
         self.declareProperty(name='SampleDensity', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Sample density')
+                             doc='The value for the sample Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
         self.setPropertyGroup('SampleWorkspace', 'Sample Options')
         self.setPropertyGroup('SampleChemicalFormula', 'Sample Options')
+        self.setPropertyGroup('SampleCoherentXSection', 'Sample Options')
+        self.setPropertyGroup('SampleIncoherentXSection', 'Sample Options')
+        self.setPropertyGroup('SampleAttenuationXSection', 'Sample Options')
         self.setPropertyGroup('SampleDensityType', 'Sample Options')
         self.setPropertyGroup('SampleDensity', 'Sample Options')
 
@@ -124,15 +142,33 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
                              doc='Chemical formula for the container material')
+        self.declareProperty(name='ContainerCoherentXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The coherent cross-section for the can material in barns. To be used instead of '
+                                 'Chemical Formula.')
+        self.declareProperty(name='ContainerIncoherentXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The incoherent cross-section for the can material in barns. To be used instead of '
+                                 'Chemical Formula.')
+        self.declareProperty(name='ContainerAttenuationXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The absorption cross-section for the can material in barns. To be used instead of '
+                                 'Chemical Formula.')
         self.declareProperty(name='ContainerDensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc='Container density type')
+                             doc='Use of Mass density or Number density for the container.')
+        self.declareProperty(name='ContainerNumberDensityUnit', defaultValue='Atoms',
+                             validator=StringListValidator(['Atoms', 'Formula Units']),
+                             doc='Choose which units ContainerDensity refers to. Allowed values: [Atoms, Formula Units]')
         self.declareProperty(name='ContainerDensity', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Container density')
+                             doc='The value for the container Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
         self.setPropertyGroup('ContainerWorkspace', 'Container Options')
         self.setPropertyGroup('ContainerChemicalFormula', 'Container Options')
+        self.setPropertyGroup('ContainerCoherentXSection', 'Container Options')
+        self.setPropertyGroup('ContainerIncoherentXSection', 'Container Options')
+        self.setPropertyGroup('ContainerAttenuationXSection', 'Container Options')
         self.setPropertyGroup('ContainerDensityType', 'Container Options')
         self.setPropertyGroup('ContainerDensity', 'Container Options')
 
@@ -260,9 +296,19 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
         sample_kwargs = dict()
         sample_kwargs.update(self._general_kwargs)
-        sample_kwargs['ChemicalFormula'] = self._sample_chemical_formula
+        if self._set_sample_method == 'Chemical Formula':
+            sample_kwargs['ChemicalFormula'] = self._sample_chemical_formula
+        else:
+            sample_kwargs['CoherentXSection'] = self._sample_coherent_cross_section
+            sample_kwargs['IncoherentXSection'] = self._sample_incoherent_cross_section
+            sample_kwargs['AttenuationXSection'] = self._sample_attenuation_cross_section
+
         sample_kwargs['DensityType'] = self._sample_density_type
         sample_kwargs['Density'] = self._sample_density
+
+        if self._sample_density_type == 'Number Density':
+            sample_kwargs['NumberDensityUnit'] = self._sample_number_density_unit
+
         sample_kwargs['Height'] = self._height
         sample_kwargs['Shape'] = self._shape
 
@@ -306,9 +352,18 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
             container_kwargs = dict()
             container_kwargs.update(self._general_kwargs)
-            container_kwargs['ChemicalFormula'] = self._container_chemical_formula
+            if self._set_can_method == 'Chemical Formula':
+                container_kwargs['ChemicalFormula'] = self._container_chemical_formula
+            else:
+                container_kwargs['CoherentXSection'] = self._container_coherent_cross_section
+                container_kwargs['IncoherentXSection'] = self._container_incoherent_cross_section
+                container_kwargs['AttenuationXSection'] = self._container_attenuation_cross_section
+
             container_kwargs['DensityType'] = self._container_density_type
             container_kwargs['Density'] = self._container_density
+            if self._container_density_type == 'Number Density':
+                container_kwargs['NumberDensityUnit'] = self._container_number_density_unit
+
             container_kwargs['Height'] = self._height
             container_kwargs['Shape'] = self._shape
             self._set_algorithm_properties(ss_monte_carlo_alg, container_kwargs)
@@ -407,12 +462,20 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             self._efixed = self._get_efixed()
 
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
+        self._sample_coherent_cross_section = self.getPropertyValue('SampleCoherentXSection')
+        self._sample_incoherent_cross_section = self.getPropertyValue('SampleIncoherentXSection')
+        self._sample_attenuation_cross_section = self.getPropertyValue('SampleAttenuationXSection')
         self._sample_density_type = self.getPropertyValue('SampleDensityType')
+        self._sample_number_density_unit = self.getPropertyValue('SampleNumberDensityUnit')
         self._sample_density = self.getProperty('SampleDensity').value
 
         if self._container_ws:
             self._container_chemical_formula = self.getPropertyValue('ContainerChemicalFormula')
+            self._container_coherent_cross_section = self.getPropertyValue('ContainerCoherentXSection')
+            self._container_incoherent_cross_section = self.getPropertyValue('ContainerIncoherentXSection')
+            self._container_attenuation_cross_section = self.getPropertyValue('ContainerAttenuationXSection')
             self._container_density_type = self.getPropertyValue('ContainerDensityType')
+            self._container_number_density_unit = self.getPropertyValue('ContainerNumberDensityUnit')
             self._container_density = self.getProperty('ContainerDensity').value
 
         if self._shape == 'FlatPlate':
@@ -443,6 +506,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._acc_ws_name = output_ws_name + "_acc"
         self._transposed = False
         self._indirect_elastic = False
+
+        self._set_sample_method = 'Chemical Formula' if self._sample_chemical_formula != '' else 'Cross Sections'
+        self._set_can_method = 'Chemical Formula' if self._container_chemical_formula != '' else 'Cross Sections'
 
     def validateInputs(self):
         issues = dict()

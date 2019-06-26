@@ -30,11 +30,10 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <algorithm>
 #include <limits>
@@ -181,7 +180,7 @@ void IFunction::unfix(size_t i) {
  */
 void IFunction::tie(const std::string &parName, const std::string &expr,
                     bool isDefault) {
-  auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
+  auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());
     fix(getParameterIndex(*ti));
@@ -400,9 +399,9 @@ void IFunction::removeConstraint(const std::string &parName) {
 void IFunction::setConstraintPenaltyFactor(const std::string &parName,
                                            const double &c) {
   size_t iPar = parameterIndex(parName);
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    if (iPar == (**it).getLocalIndex()) {
-      (**it).setPenaltyFactor(c);
+  for (auto &constraint : m_constraints) {
+    if (iPar == constraint->getLocalIndex()) {
+      constraint->setPenaltyFactor(c);
       return;
     }
   }
@@ -586,17 +585,17 @@ namespace {
 class AttType : public IFunction::ConstAttributeVisitor<std::string> {
 protected:
   /// Apply if string
-  std::string apply(const std::string &) const override {
+  std::string apply(const std::string & /*str*/) const override {
     return "std::string";
   }
   /// Apply if int
-  std::string apply(const int &) const override { return "int"; }
+  std::string apply(const int & /*i*/) const override { return "int"; }
   /// Apply if double
-  std::string apply(const double &) const override { return "double"; }
+  std::string apply(const double & /*d*/) const override { return "double"; }
   /// Apply if bool
-  std::string apply(const bool &) const override { return "bool"; }
+  std::string apply(const bool & /*i*/) const override { return "bool"; }
   /// Apply if vector
-  std::string apply(const std::vector<double> &) const override {
+  std::string apply(const std::vector<double> & /*unused*/) const override {
     return "std::vector<double>";
   }
 };
@@ -1348,12 +1347,17 @@ void IFunction::setAttributeValue(const std::string &attName,
   setAttribute(attName, att);
 }
 
+/// Returns the pointer to a child function
+IFunction_sptr IFunction::getFunction(std::size_t) const {
+  throw std::runtime_error("Function " + name() + " doesn't have children.");
+}
+
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
   names.reserve(m_attrs.size());
   for (const auto &attr : m_attrs) {
-    names.push_back(attr.first);
+    names.emplace_back(attr.first);
   }
   return names;
 }

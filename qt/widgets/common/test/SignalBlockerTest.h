@@ -23,18 +23,10 @@ public:
   void test_obtain_and_release_behaviour() {
     QObject *toBlock = new QObject;
     {
-      SignalBlocker<QObject> scopedObj(toBlock);
+      SignalBlocker scopedObj(toBlock);
       TSM_ASSERT("Should now block", toBlock->signalsBlocked());
     }
     TSM_ASSERT("Should no longer block", !toBlock->signalsBlocked());
-    delete toBlock;
-  }
-
-  void test_access_pointer() {
-    QObject *toBlock = new QObject;
-    SignalBlocker<QObject> scopedObj(toBlock);
-    TSM_ASSERT("Should now block", scopedObj->signalsBlocked());
-    scopedObj.release();
     delete toBlock;
   }
 };

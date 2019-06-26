@@ -17,14 +17,6 @@ namespace Algorithms {
 /** Calculates and outputs the solid angles for each detector in the instrument.
     The sample position is taken as a point source for the solid angle
    calculations.
-
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace  - The name of the input workspace. </LI>
-    <LI> OutputWorkspace - The name of the output workspace. Can be the same as
-   the input one. </LI>
-    </UL>
-
     @author Nick Draper, Tessella Support Services plc
     @date 26/01/2009
 */

@@ -943,9 +943,9 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
                 workspace = AnalysisDataService.retrieve(reduced_workspace_name)
                 if isinstance(workspace, WorkspaceGroup):
                     for ws in workspace:
-                        PlotResult(ws.getName())
+                        PlotResult(ws.name())
                 else:
-                    PlotResult(workspace.getName())
+                    PlotResult(workspace.name())
 
 
 def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
@@ -1071,7 +1071,7 @@ def PlotResult(workspace, canvas=None):
         number_of_spectra = workspace[0].getNumberHistograms() if isinstance(workspace, WorkspaceGroup) else\
             workspace.getNumberHistograms()
         graph = mantidplot.plotSpectrum(workspace, 0) if number_of_spectra == 1 else \
-            mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
+            mantidplot.importMatrixWorkspace(workspace.name()).plotGraph2D()
 
         if canvas is not None:
             # we were given a handle to an existing graph, use it

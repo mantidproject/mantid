@@ -53,9 +53,9 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         runs_log2 = mtd['out_red'].getItem(1).getRun().getLogData('ReducedRunsList').value
 
-        self.assertEquals(runs_log1,'170299,170301,170303',"Reduced runs list mismatch.")
+        self.assertEqual(runs_log1,'170299,170301,170303',"Reduced runs list mismatch.")
 
-        self.assertEquals(runs_log2,'170300,170302,170304',"Reduced runs list mismatch.")
+        self.assertEqual(runs_log2,'170300,170302,170304',"Reduced runs list mismatch.")
 
     def test_one_wing(self):
 
@@ -73,20 +73,20 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup),
                         "{0} should be a group workspace".format(wsgroup.getName()))
 
-        self.assertEquals(wsgroup.getNumberOfEntries(), nentries,
+        self.assertEqual(wsgroup.getNumberOfEntries(), nentries,
                           "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))
 
         item = wsgroup.getItem(0)
 
-        name = item.getName()
+        name = item.name()
 
         self.assertTrue(isinstance(item, MatrixWorkspace),
                         "{0} should be a matrix workspace".format(name))
 
-        self.assertEquals(item.getNumberHistograms(), nspectra,
+        self.assertEqual(item.getNumberHistograms(), nspectra,
                           "{0} should contain {1} spectra".format(name, nspectra))
 
-        self.assertEquals(item.blocksize(), nbins,
+        self.assertEqual(item.blocksize(), nbins,
                           "{0} should contain {1} bins".format(name, nbins))
 
         self.assertTrue(item.getSampleDetails(),

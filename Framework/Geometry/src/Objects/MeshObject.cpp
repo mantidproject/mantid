@@ -13,7 +13,6 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 
@@ -474,9 +473,9 @@ void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   }
 }
 
-void MeshObject::translate(Kernel::V3D translationVector) {
+void MeshObject::translate(const Kernel::V3D &translationVector) {
   for (Kernel::V3D &vertex : m_vertices) {
-    vertex = vertex + translationVector;
+    vertex += translationVector;
   }
 }
 
@@ -500,9 +499,7 @@ std::vector<uint32_t> MeshObject::getTriangles() const { return m_triangles; }
 /**
  * get number of points
  */
-size_t MeshObject::numberOfVertices() const {
-  return static_cast<int>(m_vertices.size());
-}
+size_t MeshObject::numberOfVertices() const { return m_vertices.size(); }
 
 /**
  * get vertices
@@ -511,8 +508,19 @@ std::vector<double> MeshObject::getVertices() const {
   return MeshObjectCommon::getVertices(m_vertices);
 }
 
+/**
+ * get vertices in V3D form
+ */
+const std::vector<Kernel::V3D> &MeshObject::getV3Ds() const {
+  return m_vertices;
+}
+
 detail::ShapeInfo::GeometryShape MeshObject::shape() const {
   return detail::ShapeInfo::GeometryShape::NOSHAPE;
+}
+
+const detail::ShapeInfo &MeshObject::shapeInfo() const {
+  throw std::runtime_error("MeshObject::shapeInfo() is not implemented");
 }
 
 /**
@@ -520,14 +528,15 @@ detail::ShapeInfo::GeometryShape MeshObject::shape() const {
  */
 void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                                std::vector<Kernel::V3D> &vectors,
-                               double &myradius, double &myheight) const {
+                               double &innerRadius, double &radius,
+                               double &height) const {
   // In practice, this outputs type = -1,
   // to indicate not a "standard" object (cuboid/cone/cyl/sphere).
   // Retained for possible future use.
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
-  m_handler->GetObjectGeom(type, vectors, myradius, myheight);
+  m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
 }
 
 } // NAMESPACE Geometry

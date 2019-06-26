@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore, QtGui
 from Muon.GUI.Common.utilities.run_string_utils import valid_alpha_regex
 from Muon.GUI.Common.message_box import warning
+from Muon.GUI.Common.utilities.run_string_utils import run_string_regex
 
 
-class HomeGroupingWidgetView(QtGui.QWidget):
+class HomeGroupingWidgetView(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(HomeGroupingWidgetView, self).__init__(parent)
@@ -24,26 +25,26 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.setObjectName("GroupingWidget")
         self.resize(500, 100)
 
-        self.grouppair_label = QtGui.QLabel(self)
+        self.grouppair_label = QtWidgets.QLabel(self)
         self.grouppair_label.setObjectName("groupPairLabel")
         self.grouppair_label.setText("Group / ")
 
-        self.pair_label = QtGui.QLabel(self)
+        self.pair_label = QtWidgets.QLabel(self)
         self.pair_label.setObjectName("pairLabel")
         font = QtGui.QFont()
         font.setBold(True)
         self.pair_label.setFont(font)
         self.pair_label.setText("Pair : ")
 
-        self.grouppair_selector = QtGui.QComboBox(self)
+        self.grouppair_selector = QtWidgets.QComboBox(self)
         self.grouppair_selector.setObjectName("groupPairSelector")
         self.grouppair_selector.addItems(["fwd", "bwd"])
 
-        self.alpha_label_2 = QtGui.QLabel(self)
+        self.alpha_label_2 = QtWidgets.QLabel(self)
         self.alpha_label_2.setObjectName("AlphaLabel")
         self.alpha_label_2.setText("Alpha : ")
 
-        self.alpha_edit = QtGui.QLineEdit(self)
+        self.alpha_edit = QtWidgets.QLineEdit(self)
         self.alpha_edit.setObjectName("alphaEdit")
         self.alpha_edit.setText("1.0")
         self.alpha_edit.setEnabled(False)
@@ -52,7 +53,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         alpha_validator = QtGui.QRegExpValidator(reg_ex, self.alpha_edit)
         self.alpha_edit.setValidator(alpha_validator)
 
-        self.horizontal_layout = QtGui.QHBoxLayout()
+        self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout3")
         self.horizontal_layout.addWidget(self.grouppair_label)
         self.horizontal_layout.addWidget(self.pair_label)
@@ -61,26 +62,26 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.alpha_label_2)
         self.horizontal_layout.addWidget(self.alpha_edit)
 
-        self.period_label = QtGui.QLabel(self)
+        self.period_label = QtWidgets.QLabel(self)
         self.period_label.setObjectName("periodLabel")
         self.period_label.setText("Data collected in n periods. Plot/analysis period(s) : ")
 
-        self.summed_period_edit = QtGui.QLineEdit(self)
+        self.summed_period_edit = QtWidgets.QLineEdit(self)
         self.summed_period_edit.setText("1")
-        reg_ex = QtCore.QRegExp("^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$")
+        reg_ex = QtCore.QRegExp(run_string_regex)
         period_validator = QtGui.QRegExpValidator(reg_ex, self.summed_period_edit)
         self.summed_period_edit.setValidator(period_validator)
 
-        self.minus_label = QtGui.QLabel(self)
+        self.minus_label = QtWidgets.QLabel(self)
         self.minus_label.setObjectName("minusLabel")
         self.minus_label.setText("-")
 
-        self.subtracted_period_edit = QtGui.QLineEdit(self)
+        self.subtracted_period_edit = QtWidgets.QLineEdit(self)
         self.subtracted_period_edit.setText("")
         period_validator = QtGui.QRegExpValidator(reg_ex, self.subtracted_period_edit)
         self.subtracted_period_edit.setValidator(period_validator)
 
-        self.horizontal_layout_2 = QtGui.QHBoxLayout()
+        self.horizontal_layout_2 = QtWidgets.QHBoxLayout()
         self.horizontal_layout_2.setObjectName("horizontalLayout2")
         self.horizontal_layout_2.addWidget(self.period_label)
         self.horizontal_layout_2.addStretch(0)
@@ -90,7 +91,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.horizontal_layout_2.addSpacing(10)
         self.horizontal_layout_2.addWidget(self.subtracted_period_edit)
 
-        self.group = QtGui.QGroupBox("Groups and Pairs")
+        self.group = QtWidgets.QGroupBox("Groups and Pairs")
         self.group.setFlat(False)
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"
@@ -102,24 +103,24 @@ class HomeGroupingWidgetView(QtGui.QWidget):
                            "padding-right: 10px;"
                            ' color: grey; }')
 
-        self.vertical_layout = QtGui.QVBoxLayout(self)
+        self.vertical_layout = QtWidgets.QVBoxLayout(self)
         self.vertical_layout.setObjectName("verticalLayout")
         self.vertical_layout.addItem(self.horizontal_layout)
         self.vertical_layout.addItem(self.horizontal_layout_2)
         if show_checks:
-            self.all_groups_label = QtGui.QLabel(self)
+            self.all_groups_label = QtWidgets.QLabel(self)
             self.all_groups_label.setText("Apply to all groups : ")
-            self.all_groups_checkbox = QtGui.QCheckBox(self)
-            self.all_pairs_label = QtGui.QLabel(self)
+            self.all_groups_checkbox = QtWidgets.QCheckBox(self)
+            self.all_pairs_label = QtWidgets.QLabel(self)
             self.all_pairs_label.setText("Apply to all pairs (alpha will not be applied)  : ")
-            self.all_pairs_checkbox = QtGui.QCheckBox(self)
+            self.all_pairs_checkbox = QtWidgets.QCheckBox(self)
 
-            self.horizontal_layout_3 = QtGui.QHBoxLayout()
+            self.horizontal_layout_3 = QtWidgets.QHBoxLayout()
             self.horizontal_layout_3.setObjectName("horizontalLayout2")
             self.horizontal_layout_3.addWidget(self.all_groups_label)
             self.horizontal_layout_3.addWidget(self.all_groups_checkbox)
 
-            self.horizontal_layout_4 = QtGui.QHBoxLayout()
+            self.horizontal_layout_4 = QtWidgets.QHBoxLayout()
             self.horizontal_layout_4.addWidget(self.all_pairs_label)
             self.horizontal_layout_4.addWidget(self.all_pairs_checkbox)
             self.vertical_layout.addItem(self.horizontal_layout_3)
@@ -127,7 +128,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
         self.group.setLayout(self.vertical_layout)
 
-        self.widget_layout = QtGui.QVBoxLayout(self)
+        self.widget_layout = QtWidgets.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
         self.setLayout(self.widget_layout)
 
@@ -138,7 +139,8 @@ class HomeGroupingWidgetView(QtGui.QWidget):
     # Groups and Pairs
     # ------------------------------------------------------------------------------------------------------------------
 
-    def populate_group_pair_selector(self, group_names, pair_names):
+    def populate_group_pair_selector(self, group_names, pair_names, default_name):
+        self.grouppair_selector.blockSignals(True)
         self.grouppair_selector.clear()
 
         model = self.grouppair_selector.model()
@@ -149,11 +151,16 @@ class HomeGroupingWidgetView(QtGui.QWidget):
             model.appendRow(item)
         for name in pair_names:
             item = QtGui.QStandardItem(str(name))
-            #item.setForeground(QtGui.QColor('red'))
             font = item.font()
             font.setBold(True)
             item.setFont(font)
             model.appendRow(item)
+
+        index = self.grouppair_selector.findText(default_name)
+        index = 0 if index == -1 else index
+        self.grouppair_selector.setCurrentIndex(index)
+        self.grouppair_selector.blockSignals(False)
+        self.grouppair_selector.currentIndexChanged.emit(index)
 
     def get_selected_group_or_pair_name(self):
         return self.grouppair_selector.currentText()

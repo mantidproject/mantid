@@ -96,15 +96,15 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
 void PlotAsymmetryByLogValue::init() {
   std::string nexusExt(".nxs");
 
-  declareProperty(Kernel::make_unique<FileProperty>(
-                      "FirstRun", "", FileProperty::Load, nexusExt),
+  declareProperty(std::make_unique<FileProperty>("FirstRun", "",
+                                                 FileProperty::Load, nexusExt),
                   "The name of the first workspace in the series.");
-  declareProperty(Kernel::make_unique<FileProperty>(
-                      "LastRun", "", FileProperty::Load, nexusExt),
+  declareProperty(std::make_unique<FileProperty>("LastRun", "",
+                                                 FileProperty::Load, nexusExt),
                   "The name of the last workspace in the series.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the output workspace containing the resulting asymmetries.");
   declareProperty("LogValue", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
@@ -130,12 +130,12 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty("TimeMax", EMPTY_DBL(),
                   "The end of the time interval used in the calculations.");
 
-  declareProperty(make_unique<ArrayProperty<int>>("ForwardSpectra"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra"),
                   "The list of spectra for the forward group. If not specified "
                   "the following happens. The data will be grouped according "
                   "to grouping information in the data, if available. The "
                   "forward will use the first of these groups.");
-  declareProperty(make_unique<ArrayProperty<int>>("BackwardSpectra"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("BackwardSpectra"),
                   "The list of spectra for the backward group. If not "
                   "specified the following happens. The data will be grouped "
                   "according to grouping information in the data, if "
@@ -149,9 +149,9 @@ void PlotAsymmetryByLogValue::init() {
                   boost::make_shared<StringListValidator>(deadTimeCorrTypes),
                   "Type of Dead Time Correction to apply.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("DeadTimeCorrFile", "",
-                                                    FileProperty::OptionalLoad,
-                                                    nexusExt),
+  declareProperty(std::make_unique<FileProperty>("DeadTimeCorrFile", "",
+                                                 FileProperty::OptionalLoad,
+                                                 nexusExt),
                   "Custom file with Dead Times. Will be used only if "
                   "appropriate DeadTimeCorrType is set.");
 }
@@ -393,7 +393,7 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
 void PlotAsymmetryByLogValue::populateOutputWorkspace(
     MatrixWorkspace_sptr &outWS, int nplots) {
 
-  auto tAxis = new TextAxis(nplots);
+  auto tAxis = std::make_unique<TextAxis>(nplots);
   if (nplots == 1) {
     size_t i = 0;
     for (auto &value : m_logValue) {
@@ -426,7 +426,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
     tAxis->setLabel(2, "Green");
     tAxis->setLabel(3, "Red+Green");
   }
-  outWS->replaceAxis(1, tAxis);
+  outWS->replaceAxis(1, std::move(tAxis));
   outWS->getAxis(0)->title() = m_logName;
   outWS->setYUnitLabel("Asymmetry");
 }
@@ -568,7 +568,8 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
   ScopedWorkspace dt(deadTimes);
 
   IAlgorithm_sptr applyCorr =
-      AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+      AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
+  applyCorr->initialize();
   applyCorr->setLogging(false);
   applyCorr->setRethrows(true);
   applyCorr->setPropertyValue("InputWorkspace", ws.name());
@@ -613,7 +614,8 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
   ScopedWorkspace outWS;
 
   IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("MuonGroupDetectors");
+      AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
+  alg->initialize();
   alg->setLogging(false);
   alg->setPropertyValue("InputWorkspace", inWS.name());
   alg->setPropertyValue("DetectorGroupingTable", grWS.name());

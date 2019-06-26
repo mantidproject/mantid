@@ -238,7 +238,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 /** Initialisation method
  */
 void DiffractionEventCalibrateDetectors::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
@@ -260,13 +260,13 @@ void DiffractionEventCalibrateDetectors::init() {
   declareProperty("LocationOfPeakToOptimize", 2.0308, dblmustBePositive,
                   "Optimize this location of peak by moving detectors");
 
-  declareProperty(make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "DetCalFilename", "", API::FileProperty::Save, ".DetCal"),
                   "The output filename of the ISAW DetCal file");
 
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>("BankName", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("BankName", "",
+                                                       Direction::Input),
       "Optional: To only calibrate one bank. Any bank whose name does not "
       "match the given string will have no events.");
 

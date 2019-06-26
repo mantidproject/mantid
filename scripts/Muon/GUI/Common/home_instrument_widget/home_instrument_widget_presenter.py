@@ -29,6 +29,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.on_first_good_data_checkState_changed(self.handle_loaded_first_good_data_checkState_change)
         self._view.on_first_good_data_changed(self.handle_user_changes_first_good_data)
 
+        self._view.on_last_good_data_checkState_changed(self.handle_loaded_last_good_data_checkState_change)
+        self._view.on_last_good_data_changed(self.handle_user_changes_last_good_data)
+
         self._view.on_fixed_rebin_edit_changed(self.handle_fixed_rebin_changed)
         self._view.on_variable_rebin_edit_changed(self.handle_variable_rebin_changed)
 
@@ -44,6 +47,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
         self.handle_loaded_time_zero_checkState_change()
         self.handle_loaded_first_good_data_checkState_change()
+        self.handle_loaded_last_good_data_checkState_change()
 
     def show(self):
         self._view.show()
@@ -55,6 +59,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         else:
             first_good_data = self._model.get_user_first_good_data()
             self._view.set_first_good_data(first_good_data)
+
+        last_good_data = self._model.get_last_good_data()
+        self._view.set_last_good_data(last_good_data)
 
         if self._view.time_zero_state():
             time_zero = self._model.get_file_time_zero()
@@ -68,6 +75,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     def clear_view(self):
         self._view.set_time_zero(0.0)
         self._view.set_first_good_data(0.0)
+        self._view.set_last_good_data(0.0)
         self._view.set_combo_boxes_to_default()
         self._view.set_checkboxes_to_defualt()
 
@@ -106,6 +114,20 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._model.set_first_good_data_source(False)
             first_good_data = self._model.get_user_first_good_data()
             self._view.set_first_good_data(first_good_data)
+
+    def handle_user_changes_last_good_data(self):
+        last_good_data = self._view.get_last_good_data()
+        self._model.set_user_last_good_data(last_good_data)
+
+    def handle_loaded_last_good_data_checkState_change(self):
+        if self._view.last_good_data_state():
+            self._model.set_last_good_data_source(True)
+            last_good_data = self._model.get_last_good_data()
+            self._view.set_last_good_data(last_good_data)
+        else:
+            self._model.set_last_good_data_source(False)
+            last_good_data = self._model.get_last_good_data()
+            self._view.set_last_good_data(last_good_data)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Rebin
@@ -198,7 +220,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         try:
             self._model.check_dead_time_file_selection(selection)
             self._model.set_user_dead_time_from_ADS(selection)
-            dead_times = self._model._data.gui_variables['DeadTimeTable'].toDict()['dead-time']
+            dead_times = self._model._context.gui_context['DeadTimeTable'].toDict()['dead-time']
             dead_time_text = self.dead_time_from_data_text(dead_times)
             self._view.set_dead_time_label(dead_time_text)
         except ValueError as error:

@@ -63,7 +63,7 @@ std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
  * serialize this type.
  * @return A new Json::Value
  */
-Json::Value encodeAsJson(const OptionalBool &) {
+Json::Value encodeAsJson(const OptionalBool & /*unused*/) {
   throw Exception::NotImplementedError(
       "encodeAsJson not implemented for OptionalBool type");
 }

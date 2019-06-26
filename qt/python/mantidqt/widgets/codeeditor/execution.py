@@ -10,11 +10,13 @@
 from __future__ import absolute_import
 
 import inspect
+import os
 
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtWidgets import QApplication
 from six import PY2, iteritems
 
+from mantidqt.utils import AddedToSysPath
 from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 
@@ -160,12 +162,14 @@ class PythonCodeExecution(QObject):
             filename = EMPTY_FILENAME_ID
         compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True)
 
-        sig_progress = self.sig_exec_progress
-        for block in code_blocks(code_str):
-            sig_progress.emit(block.lineno)
-            # compile so we can set the filename
-            code_obj = compile(block.code_str, filename, mode=COMPILE_MODE, dont_inherit=True)
-            exec (code_obj, self.globals_ns, self.globals_ns)
+        with AddedToSysPath([os.path.dirname(filename)]):
+            sig_progress = self.sig_exec_progress
+            for block in code_blocks(code_str):
+                sig_progress.emit(block.lineno)
+                # compile so we can set the filename
+                code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
+                                   dont_inherit=True)
+                exec (code_obj, self.globals_ns, self.globals_ns)
 
     def generate_calltips(self):
         """

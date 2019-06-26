@@ -49,10 +49,10 @@ const std::string RecalculateTrajectoriesExtents::summary() const {
 /** Initialize the algorithm's properties.
  */
 void RecalculateTrajectoriesExtents::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace. Must be in Q_sample frame.");
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Copy of the input MDEventWorkspace with the corrected "
                   "trajectory extents.");
@@ -122,8 +122,8 @@ void RecalculateTrajectoriesExtents::exec() {
     if (outWS->getDimension(3)->getMDFrame().name() == "DeltaE") {
       diffraction = false;
       if (outWS->getExperimentInfo(0)->run().hasProperty("Ei")) {
-        Property *eiprop = outWS->getExperimentInfo(0)->run().getProperty("Ei");
-        Ei = boost::lexical_cast<double>(eiprop->value());
+        Ei = outWS->getExperimentInfo(0)->run().getPropertyValueAsType<double>(
+            "Ei");
       } else {
         throw std::runtime_error(
             "Workspace contains energy transfer axis, but no Ei."

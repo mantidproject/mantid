@@ -8,9 +8,9 @@
 #define MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_
 
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/if.hpp>

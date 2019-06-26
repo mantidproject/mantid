@@ -11,18 +11,11 @@
 
 #include "DllConfig.h"
 #include "IALCPeakFittingView.h"
-#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/PeakPicker.h"
 
 #include "ui_ALCPeakFittingView.h"
 
 #include <QWidget>
-#include <qwt_plot_curve.h>
-
-namespace MantidQt {
-namespace MantidWidgets {
-class ErrorCurve;
-}
-} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,9 +29,6 @@ public:
   ALCPeakFittingView(QWidget *widget);
   ~ALCPeakFittingView();
 
-  // -- IALCPeakFitting interface
-  // ----------------------------------------------------------------
-
   Mantid::API::IFunction_const_sptr function(QString index) const override;
   boost::optional<QString> currentFunctionIndex() const override;
   Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
@@ -47,9 +37,13 @@ public:
 public slots:
 
   void initialize() override;
-  void setDataCurve(const QwtData &data,
-                    const std::vector<double> &errors) override;
-  void setFittedCurve(const QwtData &data) override;
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
+                    std::size_t const &workspaceIndex = 0) override;
+  void setFittedCurve(Mantid::API::MatrixWorkspace_sptr workspace,
+                      std::size_t const &workspaceIndex = 0) override;
+  void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace,
+                     std::size_t const &workspaceIndex = 0) override;
+  void removePlot(QString const &plotName) override;
   void
   setFunction(const Mantid::API::IFunction_const_sptr &newFunction) override;
   void setParameter(const QString &funcIndex, const QString &paramName,
@@ -62,20 +56,12 @@ public slots:
   void plotGuess() override;
   void changePlotGuessState(bool plotted) override;
 
-  // -- End of IALCPeakFitting interface
-  // ---------------------------------------------------------
 private:
   /// The widget used
   QWidget *const m_widget;
 
   /// UI form
   Ui::ALCPeakFittingView m_ui;
-
-  /// Plot curves
-  QwtPlotCurve *m_dataCurve, *m_fittedCurve;
-
-  /// Error curves
-  MantidQt::MantidWidgets::ErrorCurve *m_dataErrorCurve;
 
   /// Peak picker tool - only one on the plot at any given moment
   MantidWidgets::PeakPicker *m_peakPicker;

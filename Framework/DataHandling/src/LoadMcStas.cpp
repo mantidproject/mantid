@@ -51,11 +51,11 @@ const std::string LoadMcStas::category() const { return "DataHandling\\Nexus"; }
  */
 void LoadMcStas::init() {
   const std::vector<std::string> exts{".h5", ".nxs"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the Nexus file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
@@ -410,7 +410,7 @@ std::vector<std::string> LoadMcStas::readEventData(
             detIDtoWSindex_map.find(detectorID)->second;
 
         int64_t pulse_time = 0;
-        auto weightedEvent = WeightedEvent();
+        WeightedEvent weightedEvent;
         if (errorBarsSetTo1) {
           weightedEvent = WeightedEvent(detector_time, pulse_time,
                                         data[numberOfDataColumn * in], 1.0);
@@ -442,11 +442,11 @@ std::vector<std::string> LoadMcStas::readEventData(
 
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
-  for (auto eventWS : allEventWS) {
-    const auto ws = eventWS.first;
+  for (const auto &wsAndName : allEventWS) {
+    const auto ws = wsAndName.first;
     ws->setAllX(axis);
-    AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
-    scatteringWSNames.emplace_back(eventWS.second);
+    AnalysisDataService::Instance().addOrReplace(wsAndName.second, ws);
+    scatteringWSNames.emplace_back(wsAndName.second);
   }
   return scatteringWSNames;
 }
@@ -542,7 +542,8 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     lblUnit->setLabel(axis1Name, "");
     axis1->unit() = lblUnit;
 
-    Axis *axis2 = new NumericAxis(axis2Length);
+    auto axis2 = std::make_unique<NumericAxis>(axis2Length);
+    auto axis2Raw = axis2.get();
     axis2->title() = axis2Name;
     // Set caption
     lblUnit = boost::make_shared<Units::Label>();
@@ -550,7 +551,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     axis2->unit() = lblUnit;
 
     ws->setYUnit(axis2Name);
-    ws->replaceAxis(1, axis2);
+    ws->replaceAxis(1, std::move(axis2));
 
     for (size_t wsIndex = 0; wsIndex < axis2Length; ++wsIndex) {
       auto &dataX = ws->mutableX(wsIndex);
@@ -567,7 +568,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
         if (!errors.empty())
           dataE[j] = errors[fileDataIndex];
       }
-      axis2->setValue(wsIndex, axis2Values[wsIndex]);
+      axis2Raw->setValue(wsIndex, axis2Values[wsIndex]);
     }
 
     // set the workspace title

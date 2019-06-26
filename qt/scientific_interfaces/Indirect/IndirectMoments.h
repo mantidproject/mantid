@@ -36,7 +36,7 @@ public:
 
 protected slots:
   // Handle when a file/workspace is ready for plotting
-  void handleSampleInputReady(const QString &);
+  void handleSampleInputReady(const QString & /*filename*/);
   /// Slot for when the range selector changes
   void rangeChanged(double min, double max);
   /// Slot to update the guides when the range properties change
@@ -59,6 +59,8 @@ protected slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   Ui::IndirectMoments m_uiForm;
 };
 } // namespace CustomInterfaces

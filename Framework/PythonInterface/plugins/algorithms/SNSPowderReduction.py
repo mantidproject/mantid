@@ -164,20 +164,13 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty("PushDataPositive", "None",
                              StringListValidator(["None", "ResetToZero", "AddMinimum"]),
                              "Add a constant to the data that makes it positive over the whole range.")
-        arrvalidatorBack = IntArrayBoundedValidator()
-        arrvalidatorBack.setLower(-1)
-        self.declareProperty(IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidatorBack),
+        arrvalidator = IntArrayBoundedValidator(lower=-1)
+        self.declareProperty(IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidator),
                              doc="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
-        arrvalidatorVan = IntArrayBoundedValidator()
-        arrvalidatorVan.setLower(-1)
-        self.declareProperty(IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidatorVan),
-                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction."
-                                 "")
-        arrvalidatorVanBack = IntArrayBoundedValidator()
-        arrvalidatorVanBack.setLower(-1)
-        self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidatorVanBack),
-                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction."
-                                 "")
+        self.declareProperty(IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidator),
+                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
+        self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidator),
+                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".h5", ".hd5", ".hdf", ".cal"]))  # CalFileName
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
@@ -213,6 +206,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              doc="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Constant to multiply the data before writing out. This does not apply to "
+                                 "PDFgetN files.")
+        self.declareProperty("OffsetData", defaultValue=0., validator=FloatBoundedValidator(lower=0., exclusive=False),
+                             doc="Constant to add to the data before writing out. This does not apply to "
                                  "PDFgetN files.")
         self.declareProperty("SaveAs", "gsas",
                              "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', "
@@ -271,6 +267,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._vanRadius = self.getProperty("VanadiumRadius").value
         self.calib = self.getProperty("CalibrationFile").value
         self._scaleFactor = self.getProperty("ScaleData").value
+        self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
@@ -462,19 +459,24 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                    OutputWorkspace=sam_ws_name,
                                    Tolerance=self.COMPRESS_TOL_TOF)  # 5ns/
 
-            # make sure there are no negative values - gsas hates them
-            if self.getProperty("PushDataPositive").value != "None":
-                addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
-                api.ResetNegatives(InputWorkspace=sam_ws_name,
-                                   OutputWorkspace=sam_ws_name,
-                                   AddMinimum=addMin,
-                                   ResetValue=0.)
-
             # write out the files
             # FIXME - need documentation for mpiRank
             if mpiRank == 0:
                 if self._scaleFactor != 1.:
                     api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
+                if self._offsetFactor != 0.:
+                    api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
+                                                 OutputWorkspace=sam_ws_name)
+                    api.Scale(sam_ws_name, Factor=self._offsetFactor, OutputWorkspace=sam_ws_name,
+                              Operation='Add')
+                # make sure there are no negative values - gsas hates them
+                if self.getProperty("PushDataPositive").value != "None":
+                    addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
+                    api.ResetNegatives(InputWorkspace=sam_ws_name,
+                                       OutputWorkspace=sam_ws_name,
+                                       AddMinimum=addMin,
+                                       ResetValue=0.)
+
                 self._save(sam_ws_name, self._info, normalized, False)
         # ENDFOR
 
@@ -678,15 +680,32 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         """
         if final_name is None:
             final_name = getBasename(filenames[0])
+
+        # only pass in the characterizations if the values haven't already been determined
+        characterizations = self._charTable
+        if self._info is not None:
+            characterizations = ''
+
+        # put together a list of the other arguments
+        otherArgs = self._focusPos.copy()
+        # use the workspaces if they already exists, or pass the filenames down
+        # this assumes that AlignAndFocusPowderFromFiles will give the workspaces the canonical names
+        cal, grp, msk = [self._instrument + name for name in ['_cal', '_group', '_mask']]
+        if mtd.doesExist(cal) and mtd.doesExist(grp) and mtd.doesExist(msk):
+            otherArgs['CalibrationWorkspace'] = cal
+            otherArgs['GroupingWorkspace'] = grp
+            otherArgs['MaskWorkspace'] = msk
+        else:
+            otherArgs['CalFileName'] = self.calib
+            otherArgs['GroupFilename'] = self.getProperty("GroupingFile").value
+
         api.AlignAndFocusPowderFromFiles(Filename=','.join(filenames),
                                          OutputWorkspace=final_name,
                                          AbsorptionWorkspace=absorptionWksp,
                                          MaxChunkSize=self._chunks,
                                          FilterBadPulses=self._filterBadPulses,
-                                         Characterizations=self._charTable,
+                                         Characterizations=characterizations,
                                          CacheDir=self.getProperty("CacheDir").value,
-                                         CalFileName=self.calib,
-                                         GroupFilename=self.getProperty("GroupingFile").value,
                                          Params=self._binning,
                                          ResampleX=self._resampleX,
                                          Dspacing=self._bin_in_dspace,
@@ -700,8 +719,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          CropWavelengthMax=self._wavelengthMax,
                                          FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
                                          WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
-                                         ReductionProperties="__snspowderreduction_inner",
-                                         **self._focusPos)
+                                         ReductionProperties="__snspowderreduction",
+                                         **otherArgs)
 
         #TODO make sure that this funny function is called
         #self.checkInfoMatch(info, tempinfo)
@@ -1175,6 +1194,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
             # get reference to container run
             can_run_ws_name = getBasename(can_run_number)
+            self.log().notice('Processing empty container {}'.format(can_run_ws_name))
             if self.does_workspace_exist(can_run_ws_name):
                 # container run exists to get reference from mantid
                 api.ConvertUnits(InputWorkspace=can_run_ws_name,
@@ -1290,19 +1310,28 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         else:
             # Explicitly load, reduce and correct vanadium runs
             van_run_ws_name = getBasename(van_run_number)
+            self.log().notice('Processing vanadium {}'.format(van_run_ws_name))
 
             # create the donor workspace for calculating the sample correction
             absWksp = self._create_absorption_input(van_run_number, num_wl_bins=1000)  # TODO should this be hard coded?
 
             # set material as Vanadium and correct for multiple scattering
-            api.SetSampleMaterial(InputWorkspace=absWksp,
-                                  ChemicalFormula="V",
-                                  SampleNumberDensity=0.0721)
+            api.SetSample(InputWorkspace=absWksp,
+                          Material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
+                          Geometry={'Shape': 'Cylinder',
+                                    'Height':7.,  # cm - shouldn't be hard coded
+                                    'Radius':self._vanRadius,
+                                    'Center': [0., 0., 0.]})
 
-            # calculate the correction which is 1/normal carpenter correction
-            api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr')
+            # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
+            api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
+                                                   CylinderSampleRadius=self._vanRadius)
             api.DeleteWorkspace(Workspace=absWksp)   # no longer needed
             __V_corr_eff = 1. / ((1. / mtd['__V_corr_abs']) - mtd['__V_corr_ms'])
+            __V_corr_eff = str(__V_corr_eff)
+            # adding geometry to aid in creating a value for cache file calculation
+            api.CopySample(InputWorkspace=__V_corr_eff, OutputWorkspace=__V_corr_eff,
+                           CopyEnvironment=False)
             api.DeleteWorkspace(Workspace='__V_corr')  # don't need partials anymore
 
             if self.getProperty("Sum").value:
@@ -1324,6 +1353,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                     van_bkgd_run_number = van_bkgd_run_number_list[samRunIndex]
                 van_bkgd_ws_name = getBasename(van_bkgd_run_number) + "_vanbg"
                 try:
+                    self.log().notice('Processing vanadium background {}'.format(van_bkgd_ws_name))
                     # load background runs and sum if necessary
                     if self.getProperty("Sum").value:
                         self._focusAndSum(van_bkgd_run_number_list, preserveEvents=True, final_name=van_bkgd_ws_name,

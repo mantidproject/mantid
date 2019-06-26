@@ -33,13 +33,13 @@ LoadSpec::LoadSpec() {}
 /// Initialisation method.
 void LoadSpec::init() {
   const std::vector<std::string> exts{".dat", ".txt"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the text file to read, including its full or "
-                  "relative path. The file extension must be .txt or .dat.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the text file to read, including its full or "
+      "relative path. The file extension must be .txt or .dat.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "
       "data and stored in the [[Analysis Data Service]].");
 
@@ -143,8 +143,9 @@ void LoadSpec::readLine(const std::string &line,
     using tokenizer = Mantid::Kernel::StringTokenizer;
     const std::string sep = " ";
     tokenizer tok(line, sep, Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    buffer.reserve(buffer.size() + tok.size());
     for (const auto &beg : tok) {
-      buffer.push_back(std::stod(beg));
+      buffer.emplace_back(std::stod(beg));
     }
   }
 }

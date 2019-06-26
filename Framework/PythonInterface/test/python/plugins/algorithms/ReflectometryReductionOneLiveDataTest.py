@@ -10,7 +10,8 @@ import unittest
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (CreateWorkspace, ReflectometryReductionOneLiveData)
+from mantid.simpleapi import (CreateWorkspace, ReflectometryReductionOneAuto,
+                              ReflectometryReductionOneLiveData)
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
@@ -56,7 +57,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def test_basic_reduction_works(self):
         workspace = self._run_algorithm_with_defaults()
-        self.assertEquals(workspace.dataX(0).size, 55)
+        self.assertEqual(workspace.dataX(0).size, 55)
         self._assert_delta(workspace.dataX(0)[0],  0.006462)
         self._assert_delta(workspace.dataX(0)[33], 0.027376)
         self._assert_delta(workspace.dataX(0)[54], 0.066421)
@@ -79,10 +80,33 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
                           InputWorkspace=self.__class__._input_ws,
                           OutputWorkspace='')
 
+    def test_invalid_property(self):
+        self.assertRaises(RuntimeError,
+                          ReflectometryReductionOneLiveData,
+                          InputWorkspace=self.__class__._input_ws,
+                          OutputWorkspace='output',
+                          Instrument='INTER',
+                          GetLiveValueAlgorithm='GetFakeLiveInstrumentValue',
+                          BadProperty='badvalue')
+
+    def test_all_child_properties_are_present(self):
+        # Get the properties for the child algorithm, apart from a list of known
+        # exclusions
+        child_alg = create_algorithm('ReflectometryReductionOneAuto')
+        excluded = ['ThetaIn', 'ThetaLogName', 'Diagnostics',
+                    'OutputWorkspaceBinned', 'OutputWorkspaceWavelength']
+        child_props = set([prop.name for prop in child_alg.getProperties() if prop.name not in excluded])
+        # Check the child properties exist in the parent algorithm
+        actual_alg = create_algorithm('ReflectometryReductionOneLiveData')
+        actual_props = set([prop.name for prop in actual_alg.getProperties()])
+        if not child_props.issubset(actual_props):
+            assert False, "The following child properties are not implemented in the parent algorithm:\n" \
+            + str(child_props.difference(actual_props))
+
     def test_instrument_was_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
-        self.assertEquals(self.__class__._input_ws.getInstrument().getName(), '')
-        self.assertEquals(workspace.getInstrument().getName(), self._instrument_name)
+        self.assertEqual(self.__class__._input_ws.getInstrument().getName(), '')
+        self.assertEqual(workspace.getInstrument().getName(), self._instrument_name)
 
     def test_sample_log_values_were_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
@@ -96,16 +120,16 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             if log.name in names:
                 matched_names.append(log.name)
                 idx = names.index(log.name)
-                self.assertEquals(log.value, values[idx])
-                self.assertEquals(log.units, units[idx])
-        self.assertEquals(sorted(matched_names), sorted(names))
+                self.assertEqual(log.value, values[idx])
+                self.assertEqual(log.units, units[idx])
+        self.assertEqual(sorted(matched_names), sorted(names))
 
     def test_slits_gaps_are_set_up_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
         slit1vg = workspace.getInstrument().getComponentByName('slit1').getNumberParameter('vertical gap')
         slit2vg = workspace.getInstrument().getComponentByName('slit2').getNumberParameter('vertical gap')
-        self.assertEquals(slit1vg[0], 1.001)
-        self.assertEquals(slit2vg[0], 0.5)
+        self.assertEqual(slit1vg[0], 1.001)
+        self.assertEqual(slit2vg[0], 0.5)
 
     def _setup_environment(self):
         self._old_facility = config['default.facility']
@@ -156,7 +180,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         return mtd['output']
 
     def _assert_delta(self, value1, value2):
-        self.assertEquals(round(value1, 6), round(value2, 6))
+        self.assertEqual(round(value1, 6), round(value2, 6))
 
 
 if __name__ == '__main__':

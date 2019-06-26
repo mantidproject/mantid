@@ -7,7 +7,7 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <MantidKernel/VMD.h>
+#include "MantidKernel/VMD.h"
 #include <json/json.h>
 
 namespace Mantid {

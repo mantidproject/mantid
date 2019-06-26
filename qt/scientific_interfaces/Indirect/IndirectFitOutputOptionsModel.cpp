@@ -86,11 +86,16 @@ IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
   return saveAlg;
 }
 
-void saveWorkspace(WorkspaceGroup_sptr resultWorkspace) {
+void saveWorkspace(Workspace_sptr workspace) {
   auto const filename = Mantid::Kernel::ConfigService::Instance().getString(
                             "defaultsave.directory") +
-                        resultWorkspace->getName() + ".nxs";
-  saveNexusProcessedAlgorithm(resultWorkspace, filename)->execute();
+                        workspace->getName() + ".nxs";
+  saveNexusProcessedAlgorithm(workspace, filename)->execute();
+}
+
+void saveWorkspacesInGroup(WorkspaceGroup_const_sptr group) {
+  for (auto const workspace : *group)
+    saveWorkspace(workspace);
 }
 
 bool workspaceIsPlottable(MatrixWorkspace_const_sptr workspace) {
@@ -98,10 +103,11 @@ bool workspaceIsPlottable(MatrixWorkspace_const_sptr workspace) {
 }
 
 bool containsPlottableWorkspace(WorkspaceGroup_const_sptr groupWorkspace) {
-  for (auto const &workspace : *groupWorkspace)
-    if (workspaceIsPlottable(convertToMatrixWorkspace(workspace)))
-      return true;
-  return false;
+  return std::any_of(groupWorkspace->begin(), groupWorkspace->end(),
+                     [](auto const &workspace) {
+                       return workspaceIsPlottable(
+                           convertToMatrixWorkspace(workspace));
+                     });
 }
 
 std::vector<std::string>
@@ -206,6 +212,12 @@ WorkspaceGroup_sptr IndirectFitOutputOptionsModel::getPDFWorkspace() const {
 
 void IndirectFitOutputOptionsModel::removePDFWorkspace() { m_pdfGroup.reset(); }
 
+bool IndirectFitOutputOptionsModel::isSelectedGroupPlottable(
+    std::string const &selectedGroup) const {
+  return isResultGroupSelected(selectedGroup) ? isResultGroupPlottable()
+                                              : isPDFGroupPlottable();
+}
+
 bool IndirectFitOutputOptionsModel::isResultGroupPlottable() const {
   if (m_resultGroup)
     return containsPlottableWorkspace(m_resultGroup);
@@ -303,7 +315,7 @@ void IndirectFitOutputOptionsModel::plotPDF(
 
 void IndirectFitOutputOptionsModel::saveResult() const {
   if (m_resultGroup)
-    saveWorkspace(m_resultGroup);
+    saveWorkspacesInGroup(m_resultGroup);
   else
     throw std::runtime_error(noWorkspaceErrorMessage("saving"));
 }

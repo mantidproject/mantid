@@ -316,6 +316,12 @@ public:
   double angle(const V3D &) const;
   /// Direction angles
   V3D directionAngles(bool inDegrees = true) const;
+  /// Maximum absolute integer value
+  int maxCoeff();
+  /// Absolute value
+  V3D absoluteValue() const;
+  /// Calculates the error in hkl
+  double hklError() const;
 
   // Make 2 vectors into 3 orthogonal vectors
   static std::vector<V3D>
@@ -352,6 +358,16 @@ private:
 // Overload operator <<
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const V3D &);
 MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, V3D &);
+
+/** Normalizes a V3D.
+ * @param v a vector to normalize.
+ * @return a vector with norm 1 parallel to v
+ * @throw std::runtime_error if v is a null vector.
+ */
+inline MANTID_KERNEL_DLL V3D normalize(V3D v) {
+  v.normalize();
+  return v;
+}
 
 } // Namespace Kernel
 } // Namespace Mantid

@@ -8,14 +8,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
+from mantid.py3compat import mock
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, SampleShapeColumnModel, options_column_bool)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from qtpy.QtCore import QCoreApplication
 from sans.common.enums import (RowState, SampleShape)
-try:
-    from unittest import mock
-except:
-    import mock
 
 
 class TableModelTest(unittest.TestCase):
@@ -43,7 +40,7 @@ class TableModelTest(unittest.TestCase):
         table_index_model = TableIndexModel(*row_entry)
         table_model.add_table_entry(0, table_index_model)
         returned_model = table_model.get_table_entry(0)
-        self.assertTrue(returned_model.sample_scatter == '')
+        self.assertEqual(returned_model.sample_scatter,  '')
 
     def test_that_can_set_the_options_column_model(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
@@ -51,9 +48,9 @@ class TableModelTest(unittest.TestCase):
                                             options_column_string="WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
         options_column_model = table_index_model.options_column_model
         options = options_column_model.get_options()
-        self.assertTrue(len(options) == 2)
-        self.assertTrue(options["WavelengthMin"] == 1.)
-        self.assertTrue(options["WavelengthMax"] == 3.)
+        self.assertEqual(len(options),  2)
+        self.assertEqual(options["WavelengthMin"],  1.)
+        self.assertEqual(options["WavelengthMax"],  3.)
 
     def test_that_raises_for_missing_equal(self):
         args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
@@ -89,7 +86,7 @@ class TableModelTest(unittest.TestCase):
                                                 sample_shape="Disc")
             table_index_model.sample_shape = "not a sample shape"
         except Exception as e:
-            self.assertTrue(False, "Did not except incorrect sample shape to raise error")
+            self.fail("Did not except incorrect sample shape to raise error")
         else:
             self.assertEqual("Disc", table_index_model.sample_shape_string)
 
@@ -313,12 +310,8 @@ class TableModelTest(unittest.TestCase):
         self.assertEqual(options_column_model.get_options(), {'UseMirror': False})
 
     def test_that_non_bool_option_raises_error_if_option_is_bool(self):
-        try:
-            options_column_model = OptionsColumnModel('UseMirror=SomeString')
-        except ValueError as e:
-            self.assertEqual(str(e), 'Could not evaluate SomeString as a boolean value. It should be True or False.')
-        else:
-            self.assertTrue(False, 'A RuntimeError should be raised.')
+        with self.assertRaises(ValueError):
+            OptionsColumnModel("UseMirror=SomeString")
             
     def test_that_to_batch_list_is_correct_format(self):
         test_row = ['SANS2D00022024  ', '', 'SANS2D00022025 ', '', '   SANS2D00022026 ', '', '', '', '', '', '', '',
@@ -326,8 +319,8 @@ class TableModelTest(unittest.TestCase):
         table_index_model = TableIndexModel(*test_row)
 
         actual_list = table_index_model.to_batch_list()
-        expected_list = ["SANS2D00022024", "out_file", "SANS2D00022025", "SANS2D00022026",
-                         "", "", "", "a_user_file"]
+        expected_list = ["SANS2D00022024", "SANS2D00022025", "SANS2D00022026",
+                         "", "", "",  "out_file", "a_user_file"]
 
         self.assertEqual(actual_list, expected_list)
 
@@ -363,7 +356,7 @@ class TableModelTest(unittest.TestCase):
 
         # Test that can be set to valid value
         setattr(table_model, prop, __file__)
-        self.assertTrue(getattr(table_model, prop) == __file__)
+        self.assertEqual(getattr(table_model, prop), __file__)
 
     @staticmethod
     def _batch_file_wrapper(value):

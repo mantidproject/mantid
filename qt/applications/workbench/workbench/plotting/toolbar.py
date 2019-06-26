@@ -29,26 +29,26 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_toggle_fit_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'fa.home', 'home', None),
-        ('Pan', 'Pan axes with left mouse, zoom with right', 'fa.arrows-alt', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'fa.search-plus', 'zoom', False),
+        ('Home', 'Reset original view', 'mdi.home', 'home', None),
+        ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
+        ('Zoom', 'Zoom to rectangle', 'mdi.magnify-plus-outline', 'zoom', False),
         (None, None, None, None, None),
-        ('Grid', 'Toggle grid on/off', None, 'toggle_grid', False),
-        ('Save', 'Save the figure', 'fa.save', 'save_figure', None),
-        ('Print','Print the figure', 'fa.print', 'print_figure', None),
+        ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
+        ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
+        ('Print','Print the figure', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'fa.cog', 'edit_parameters', None),
+        ('Customize', 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
         (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
     )
 
     def _init_toolbar(self):
-        for text, tooltip_text, fa_icon, callback, checked in self.toolitems:
+        for text, tooltip_text, mdi_icon, callback, checked in self.toolitems:
             if text is None:
                 self.addSeparator()
             else:
-                if fa_icon:
-                    a = self.addAction(get_icon(fa_icon),
+                if mdi_icon:
+                    a = self.addAction(get_icon(mdi_icon),
                                        text, getattr(self, callback))
                 else:
                     a = self.addAction(text, getattr(self, callback))
@@ -110,9 +110,10 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         pass
 
 
-class ToolbarStateChecker(object):
+class ToolbarStateManager(object):
     """
-    An object that lets users check the state of the toolbar hiding at the same time any implementation details.
+    An object that lets users check and manipulate the state of the toolbar
+    whilst hiding any implementation details.
     """
 
     def __init__(self, toolbar):
@@ -135,3 +136,10 @@ class ToolbarStateChecker(object):
         Check if any of the zoom buttons are checked
         """
         return self.is_pan_active() or self.is_zoom_active()
+
+    def toggle_fit_button_checked(self):
+        fit_action = self._toolbar._actions['toggle_fit']
+        if fit_action.isChecked():
+            fit_action.setChecked(False)
+        else:
+            fit_action.setChecked(True)

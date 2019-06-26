@@ -220,7 +220,7 @@ void V3D::rotate(const Kernel::Matrix<double> &A) noexcept {
 }
 
 /**
-  Determines if this,B,C are collinear
+  Determines if this,B,C are colinear
   @param Bv :: Vector to test
   @param Cv :: Vector to test
   @return false if no colinear and true if they are (within Tolerance)
@@ -298,14 +298,12 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(const std::vector<V3D> &vectors) {
     throw std::invalid_argument(
         "makeVectorsOrthogonal() only works with 2 vectors");
 
-  V3D v0 = vectors[0];
-  v0.normalize();
-  V3D v1 = vectors[1];
-  v1.normalize();
+  const V3D v0 = Kernel::normalize(vectors[0]);
+  V3D v1 = Kernel::normalize(vectors[1]);
 
   std::vector<V3D> out;
   out.reserve(3);
-  out.push_back(v0);
+  out.emplace_back(v0);
 
   // Make a rotation 90 degrees from 0 to 1
   Quat q(v0, v1);
@@ -313,11 +311,11 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(const std::vector<V3D> &vectors) {
   // Rotate v1 so it is 90 deg
   v1 = v0;
   q.rotate(v1);
-  out.push_back(v1);
+  out.emplace_back(v1);
 
   // Finally, the 3rd vector = cross product of 0 and 1
   V3D v2 = v0.cross_prod(v1);
-  out.push_back(v2);
+  out.emplace_back(v2);
   return out;
 }
 
@@ -508,6 +506,39 @@ V3D V3D::directionAngles(bool inDegrees) const {
   return V3D(conversionFactor * acos(m_pt[0] / divisor),
              conversionFactor * acos(m_pt[1] / divisor),
              conversionFactor * acos(m_pt[2] / divisor));
+}
+
+/**
+  Vector maximum absolute integer value
+  @return maxCoeff()
+*/
+int V3D::maxCoeff() {
+  int MaxOrder = 0;
+  if (abs(static_cast<int>(m_pt[0])) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(m_pt[0]));
+  if (abs(static_cast<int>(m_pt[1])) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(m_pt[1]));
+  if (abs(static_cast<int>(m_pt[2])) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(m_pt[2]));
+  return MaxOrder;
+}
+
+/**
+  Calculates the absolute value.
+  @return The absolute value
+*/
+V3D V3D::absoluteValue() const {
+  return V3D(fabs(m_pt[0]), fabs(m_pt[1]), fabs(m_pt[2]));
+}
+
+/**
+  Calculates the error of the HKL to compare with tolerance
+  @return The error
+*/
+double V3D::hklError() const {
+  return fabs(m_pt[0] - std::round(m_pt[0])) +
+         fabs(m_pt[1] - std::round(m_pt[1])) +
+         fabs(m_pt[2] - std::round(m_pt[2]));
 }
 
 } // Namespace Kernel

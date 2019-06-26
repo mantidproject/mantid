@@ -33,7 +33,8 @@ private:
 public:
   void testThrowIfvtkDataSetNull() {
     vtkDataSet *nullArg = nullptr;
-    TS_ASSERT_THROWS(vtkDataSetToWsName temp(nullArg), std::runtime_error);
+    TS_ASSERT_THROWS(vtkDataSetToWsName temp(nullArg),
+                     const std::runtime_error &);
   }
 
   void testExecution() {

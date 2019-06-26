@@ -35,7 +35,7 @@ public:
                QString curveLabel);
   QString label() const { return m_label; }
   void setYAxisLabelRotation(double degrees);
-  void addPeakLabel(const PeakMarker2D *);
+  void addPeakLabel(const PeakMarker2D * /*marker*/);
   void clearPeakLabels();
   bool hasCurve() const;
   void store();
@@ -57,13 +57,13 @@ public slots:
   void clearAll();
 signals:
   void showContextMenu();
-  void clickedAt(double, double);
+  void clickedAt(double /*_t1*/, double /*_t2*/);
 
 protected:
   void resizeEvent(QResizeEvent *e) override;
   void contextMenuEvent(QContextMenuEvent *e) override;
-  void mousePressEvent(QMouseEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *) override;
+  void mousePressEvent(QMouseEvent * /*unused*/) override;
+  void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
 
 private:
   QwtPlotCurve *m_curve;

@@ -10,6 +10,7 @@
 #include "DoubleEditorFactory.h"
 #include "ParameterPropertyManager.h"
 
+class QCheckBox;
 class QLineEdit;
 class QPushButton;
 
@@ -23,25 +24,30 @@ class QPushButton;
 class DoubleDialogEditor : public QWidget {
   Q_OBJECT
 public:
-  DoubleDialogEditor(QtProperty *property, QWidget *parent);
+  DoubleDialogEditor(QtProperty *property, QWidget *parent,
+                     bool hasOption = false, bool isOptionSet = false);
 signals:
-  void buttonClicked(QtProperty *);
+  void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
 
 protected slots:
   /// Implementations must open a dialog to edit the editor's text. If editing
   /// is successful
   /// setText() and updateProperty() methods must be called.
-  virtual void runDialog();
+  void runDialog();
+  void optionToggled(bool);
   void updateProperty();
   void setText(const QString &txt);
   QString getText() const;
 
 private:
-  bool eventFilter(QObject *, QEvent *) override;
+  bool eventFilter(QObject * /*obj*/, QEvent * /*evt*/) override;
   DoubleEditor *m_editor;
   QPushButton *m_button;
+  QCheckBox *m_checkBox;
   QtProperty *m_property;
+  bool m_hasOption;
+  bool m_isOptionSet;
 };
 
 /**
@@ -52,29 +58,26 @@ private:
  * method which creates a specific editor. The underlying type of the edited
  * property must be string.
  */
-class DoubleDialogEditorFactory
+class EXPORT_OPT_MANTIDQT_COMMON DoubleDialogEditorFactory
     : public QtAbstractEditorFactory<ParameterPropertyManager> {
   Q_OBJECT
 public:
-  DoubleDialogEditorFactory(QObject *parent = nullptr)
-      : QtAbstractEditorFactory<ParameterPropertyManager>(parent) {}
+  DoubleDialogEditorFactory(QObject *parent = nullptr, bool hasOption = false)
+      : QtAbstractEditorFactory<ParameterPropertyManager>(parent),
+        m_hasOption(hasOption) {}
   QWidget *createEditorForManager(ParameterPropertyManager *,
                                   QtProperty *property,
-                                  QWidget *parent) override {
-    auto editor = new DoubleDialogEditor(property, parent);
-    connect(editor, SIGNAL(buttonClicked(QtProperty *)), this,
-            SIGNAL(buttonClicked(QtProperty *)));
-    connect(editor, SIGNAL(closeEditor()), this, SIGNAL(closeEditor()),
-            Qt::QueuedConnection);
-    return editor;
-  }
+                                  QWidget *parent) override;
 signals:
-  void buttonClicked(QtProperty *);
+  void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
 
 protected:
-  void connectPropertyManager(ParameterPropertyManager *) override {}
-  void disconnectPropertyManager(ParameterPropertyManager *) override {}
+  void connectPropertyManager(ParameterPropertyManager * /*manager*/) override {
+  }
+  void
+  disconnectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
+  bool m_hasOption;
 };
 
 #endif // DOUBLEDIALOGEDITORFACTORY_H

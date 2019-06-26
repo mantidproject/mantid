@@ -50,7 +50,7 @@ DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
   if (!m_usingFullRayTrace) {
     createDetectorCache();
   } else {
-    m_rayTracer = Kernel::make_unique<InstrumentRayTracer>(instrument);
+    m_rayTracer = std::make_unique<InstrumentRayTracer>(instrument);
   }
 }
 
@@ -64,7 +64,6 @@ void DetectorSearcher::createDetectorCache() {
   const auto frame = m_instrument->getReferenceFrame();
   auto beam = frame->vecPointingAlongBeam();
   auto up = frame->vecPointingUp();
-  beam.normalize();
 
   for (size_t pointNo = 0; pointNo < m_detInfo.size(); ++pointNo) {
     if (m_detInfo.isMonitor(pointNo) || m_detInfo.isMasked(pointNo))
@@ -72,8 +71,7 @@ void DetectorSearcher::createDetectorCache() {
 
     // Calculate a unit Q vector for each detector
     // This follows a method similar to that used in IntegrateEllipsoids
-    auto pos = m_detInfo.position(pointNo);
-    pos.normalize();
+    const auto pos = normalize(m_detInfo.position(pointNo));
     auto E1 = (pos - beam) * -m_crystallography_convention;
     const auto norm = E1.norm();
     if (norm == 0.) {
@@ -94,7 +92,7 @@ void DetectorSearcher::createDetectorCache() {
 
   // create KDtree of cached detector Q vectors
   m_detectorCacheSearch =
-      Kernel::make_unique<Kernel::NearestNeighbours<3>>(points);
+      std::make_unique<Kernel::NearestNeighbours<3>>(points);
 }
 
 /** Find the index of a detector given a vector in Qlab space
@@ -196,13 +194,11 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::handleTubeGap(
       auto gapDir = V3D(0., 0., 0.);
       gapDir[i] = gap;
 
-      auto beam1 = detectorDir + gapDir;
-      beam1.normalize();
+      auto beam1 = normalize(detectorDir + gapDir);
       const auto result1 = checkInteceptWithNeighbours(beam1, neighbours);
       const auto hit1 = std::get<0>(result1);
 
-      auto beam2 = detectorDir - gapDir;
-      beam2.normalize();
+      const auto beam2 = normalize(detectorDir - gapDir);
       const auto result2 = checkInteceptWithNeighbours(beam2, neighbours);
       const auto hit2 = std::get<0>(result2);
 

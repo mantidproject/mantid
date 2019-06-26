@@ -13,8 +13,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceBinData.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtWorkspaceBinData.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtWorkspaceSpectrumData.h"
 
 #include "../ApplicationWindow.h"
 #include "../Graph.h"

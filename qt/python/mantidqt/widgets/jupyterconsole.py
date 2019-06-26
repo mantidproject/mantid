@@ -10,7 +10,6 @@
 from __future__ import absolute_import
 
 # system imports
-import inspect
 import types
 
 # 3rd party imports
@@ -26,6 +25,7 @@ except ImportError:
     from IPython.qt.inprocess import QtInProcessKernelManager
 
 # local imports
+from mantid.py3compat import getfullargspec
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
 
@@ -77,7 +77,7 @@ def async_wrapper(orig_run_code, shell_instance):
         periodically until the method finishes
         """
         # ipython 3.0 introduces a third argument named result
-        if len(inspect.getargspec(orig_run_code).args) == 3:
+        if len(getfullargspec(orig_run_code).args) == 3:
             args = (code_obj, result)
         else:
             args = (code_obj,)

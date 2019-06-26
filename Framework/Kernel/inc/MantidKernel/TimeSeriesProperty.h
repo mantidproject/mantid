@@ -109,6 +109,9 @@ class DLLExport TimeSeriesProperty : public Property,
 public:
   /// Constructor
   explicit TimeSeriesProperty(const std::string &name);
+  TimeSeriesProperty(const std::string &name,
+                     const std::vector<Types::Core::DateAndTime> &times,
+                     const std::vector<TYPE> &values);
 
   /// Virtual destructor
   ~TimeSeriesProperty() override;

@@ -93,11 +93,12 @@ void EnggDiffFittingModel::setDifcTzero(
     run.addProperty<double>("tzero", DEFAULT_TZERO, units, true);
   } else {
     GSASCalibrationParms params(0, 0.0, 0.0, 0.0);
-    for (const auto &paramSet : calibParams) {
-      if (paramSet.bankid == runLabel.bank) {
-        params = paramSet;
-        break;
-      }
+    const auto found = std::find_if(calibParams.cbegin(), calibParams.cend(),
+                                    [&runLabel](const auto &paramSet) {
+                                      return paramSet.bankid == runLabel.bank;
+                                    });
+    if (found != calibParams.cend()) {
+      params = *found;
     }
     if (params.difc == 0) {
       params = calibParams.front();
@@ -133,16 +134,15 @@ void EnggDiffFittingModel::saveFitResultsToHDF5(
     const std::vector<RunLabel> &runLabels, const std::string &filename) const {
   std::vector<std::string> inputWorkspaces;
   inputWorkspaces.reserve(runLabels.size());
-  std::vector<long> runNumbers;
+  std::vector<std::string> runNumbers;
   runNumbers.reserve(runLabels.size());
   std::vector<long> bankIDs;
   bankIDs.reserve(runLabels.size());
 
   for (const auto &runLabel : runLabels) {
     const auto ws = getFitResults(runLabel);
-    const auto clonedWSName = "enggggui_fit_params_" +
-                              std::to_string(runLabel.runNumber) + "_" +
-                              std::to_string(runLabel.bank);
+    const auto clonedWSName = "enggggui_fit_params_" + runLabel.runNumber +
+                              "_" + std::to_string(runLabel.bank);
     cloneWorkspace(ws, clonedWSName);
     inputWorkspaces.emplace_back(clonedWSName);
     runNumbers.emplace_back(runLabel.runNumber);
@@ -358,7 +358,6 @@ EnggDiffFittingModel::createCalibrationParamsTable(
 
 void EnggDiffFittingModel::convertFromDistribution(
     Mantid::API::MatrixWorkspace_sptr inputWS) {
-  const auto name = inputWS->getName();
   auto convertFromDistAlg = Mantid::API::AlgorithmManager::Instance().create(
       "ConvertFromDistribution");
   convertFromDistAlg->initialize();
@@ -496,10 +495,13 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
     loadWorkspace(filename, temporaryWSName);
 
     API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-    const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(temporaryWSName);
-
+    auto ws_test = ADS.retrieveWS<API::Workspace>(temporaryWSName);
+    const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws_test);
+    if (!ws) {
+      throw std::invalid_argument("Workspace is not a matrix workspace.");
+    }
     const auto bank = guessBankID(ws);
-    const int runNumber = ws->getRunNumber();
+    const auto runNumber = std::to_string(ws->getRunNumber());
     RunLabel runLabel(runNumber, bank);
 
     addFocusedWorkspace(runLabel, ws, filename);
@@ -537,17 +539,19 @@ EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
   const std::string name = ws->getName();
   std::vector<std::string> chunks;
   boost::split(chunks, name, boost::is_any_of("_"));
-  bool isNum = isDigit(chunks.back());
-  if (!chunks.empty() && isNum) {
-    try {
-      return boost::lexical_cast<size_t>(chunks.back());
-    } catch (boost::exception &) {
-      // If we get a bad cast or something goes wrong then
-      // the file is probably not what we were expecting
-      // so throw a runtime error
-      throw std::runtime_error(
-          "Failed to fit file: The data was not what is expected. "
-          "Does the file contain a focused workspace?");
+  if (!chunks.empty()) {
+    const bool isNum = isDigit(chunks.back());
+    if (isNum) {
+      try {
+        return boost::lexical_cast<size_t>(chunks.back());
+      } catch (boost::exception &) {
+        // If we get a bad cast or something goes wrong then
+        // the file is probably not what we were expecting
+        // so throw a runtime error
+        throw std::runtime_error(
+            "Failed to fit file: The data was not what is expected. "
+            "Does the file contain a focused workspace?");
+      }
     }
   }
 

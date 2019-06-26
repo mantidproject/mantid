@@ -6,13 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
-
-//----------------------
-// Includes
-//----------------------
-#include "IndirectBayesTab.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectBayes.h"
+
+#include "IndirectBayesTab.h"
+#include "IndirectInterface.h"
 
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>
@@ -27,7 +24,7 @@ window.
 @author Samuel Jackson, STFC
 */
 
-class DLLExport IndirectBayes : public MantidQt::API::UserSubWindow {
+class DLLExport IndirectBayes : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -45,19 +42,13 @@ public: // public constructor, destructor and functions
   static QString categoryInfo() { return "Indirect"; }
   void initLayout() override;
 
-private slots:
-  // Run the appropriate action depending based on the selected tab
-
-  /// Slot for clicking on the hlep button
-  void helpClicked();
-  /// Slot for clicking on the manage directories button
-  void manageUserDirectories();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
-
 private:
+  std::string documentationPage() const override;
+
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
+
   /// Called upon a close event.
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);

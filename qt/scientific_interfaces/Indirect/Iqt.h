@@ -23,10 +23,8 @@ private:
   void run() override;
   void setup() override;
   bool validate() override;
-  bool validWorkspaceProperty(std::string const &sampleName,
-                              std::string const &resolutionName,
-                              std::string const &parameter) const;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
   void setBrowserWorkspace() override{};
 
   bool isErrorsEnabled();
@@ -57,6 +55,7 @@ private:
 
 private slots:
   void algorithmComplete(bool error);
+  void plotInput();
   void plotInput(const QString &wsname);
   void rsRangeChangedLazy(double min, double max);
   void updateRS(QtProperty *prop, double val);
@@ -69,12 +68,16 @@ private slots:
   void plotClicked();
   void errorsClicked();
   void plotTiled();
+  void updateEnergyRange(int state);
 
 private:
+  void setPreviewSpectrumMaximum(int value);
+
+  int m_maxTiledPlots = 17;
+
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;
-  int m_maxTiledPlots = 17;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

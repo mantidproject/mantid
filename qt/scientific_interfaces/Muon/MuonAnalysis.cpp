@@ -1094,8 +1094,7 @@ void MuonAnalysis::updatePairTable() {
 
   // reset context of combo boxes
   for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
-    QComboBox *qwF =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
+    qwF = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
     QComboBox *qwB =
         static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
 
@@ -2336,15 +2335,13 @@ void MuonAnalysis::loadFittings() {
   m_dataSelector->sizePolicy().setVerticalStretch(0);
   m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);
   // Set up fit data and function presenters
-  m_fitDataPresenter =
-      Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
-          m_uiForm.fitBrowser, m_dataSelector, m_dataLoader,
-          m_groupingHelper.parseGroupingTable(), PlotType::Asymmetry,
-          m_dataTimeZero);
+  m_fitDataPresenter = std::make_unique<MuonAnalysisFitDataPresenter>(
+      m_uiForm.fitBrowser, m_dataSelector, m_dataLoader,
+      m_groupingHelper.parseGroupingTable(), PlotType::Asymmetry,
+      m_dataTimeZero);
   updateRebinParams(); // set initial params for fit data presenter
-  m_fitFunctionPresenter =
-      Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
-          nullptr, m_uiForm.fitBrowser, m_functionBrowser);
+  m_fitFunctionPresenter = std::make_unique<MuonAnalysisFitFunctionPresenter>(
+      nullptr, m_uiForm.fitBrowser, m_functionBrowser);
   // Connect signals
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
@@ -2478,7 +2475,6 @@ void MuonAnalysis::setAppendingRun(int inc) {
 
   int fileExtensionSize(currentFiles[fileNumber].size() -
                         currentFiles[fileNumber].indexOf('.'));
-  QString fileExtension = currentFiles[fileNumber].right(fileExtensionSize);
   currentFiles[fileNumber].chop(fileExtensionSize);
 
   int firstRunNumber = currentFiles[fileNumber].right(runSize).toInt();
@@ -2983,7 +2979,7 @@ bool MuonAnalysis::isOverwriteEnabled() {
 /**
  * Executed when interface gets hidden or closed
  */
-void MuonAnalysis::hideEvent(QHideEvent *) {
+void MuonAnalysis::hideEvent(QHideEvent * /*unused*/) {
   // Show toolbars if were chosen to be hidden by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(false);
@@ -2996,7 +2992,7 @@ void MuonAnalysis::hideEvent(QHideEvent *) {
 /**
  * Executed when interface gets shown
  */
-void MuonAnalysis::showEvent(QShowEvent *) {
+void MuonAnalysis::showEvent(QShowEvent * /*unused*/) {
   // Hide toolbars if requested by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);

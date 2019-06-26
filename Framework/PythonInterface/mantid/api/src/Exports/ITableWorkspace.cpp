@@ -11,9 +11,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
-#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
@@ -106,8 +106,7 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
   }
 
   // -- Use the boost preprocessor to generate a list of else if clause to cut
-  // out copy
-  // and pasted code.
+  // out copy and pasted code.
   // cppcheck-suppress unreadVariable
   PyObject *result(nullptr);
   if (false) {
@@ -184,12 +183,12 @@ void setValue(const Column_sptr column, const int row, const object &value) {
  */
 bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
                        const std::string &name, int plottype) {
-  auto column = self.addColumn(type, name);
+  auto newColumn = self.addColumn(type, name);
 
-  if (column)
-    column->setPlotType(plottype);
+  if (newColumn)
+    newColumn->setPlotType(plottype);
 
-  return column != nullptr;
+  return newColumn != nullptr;
 }
 
 /**
@@ -286,12 +285,12 @@ PyObject *row(ITableWorkspace &self, int row) {
 
   PyObject *result = PyDict_New();
 
-  for (int col = 0; col < numCols; col++) {
-    Mantid::API::Column_const_sptr column = self.getColumn(col);
-    const std::type_info &typeID = column->get_type_info();
+  for (int columnIndex = 0; columnIndex < numCols; columnIndex++) {
+    Mantid::API::Column_const_sptr col = self.getColumn(columnIndex);
+    const std::type_info &typeID = col->get_type_info();
 
-    if (PyDict_SetItemString(result, column->name().c_str(),
-                             getValue(column, typeID, row)))
+    if (PyDict_SetItemString(result, col->name().c_str(),
+                             getValue(col, typeID, row)))
       throw std::runtime_error("Error while building dict");
   }
 
@@ -308,9 +307,9 @@ boost::python::list columnTypes(ITableWorkspace &self) {
 
   boost::python::list types;
 
-  for (int col = 0; col < numCols; col++) {
-    const auto column = self.getColumn(col);
-    const auto &type = column->type();
+  for (int colIndex = 0; colIndex < numCols; colIndex++) {
+    const auto col = self.getColumn(colIndex);
+    const auto &type = col->type();
     types.append(type);
   }
 
@@ -340,23 +339,23 @@ void addRowFromDict(ITableWorkspace &self, const dict &rowItems) {
   self.appendRow();
 
   // Declared in this scope so we can access them in catch block
-  Column_sptr column; // Column in table
-  object value;       // Value from dictionary
+  Column_sptr col; // Column in table
+  object value;    // Value from dictionary
 
   try {
     // Retrieve and set the value for each column
     auto columns = self.getColumnNames();
     for (auto &iter : columns) {
-      column = self.getColumn(iter);
+      col = self.getColumn(iter);
       value = rowItems[iter];
-      setValue(column, rowIndex, value);
+      setValue(col, rowIndex, value);
     }
   } catch (error_already_set &) {
     // One of the columns wasn't found in the dictionary
     if (PyErr_ExceptionMatches(PyExc_KeyError)) {
       std::ostringstream msg;
       msg << "Missing key-value entry for column ";
-      msg << "<" << column->name() << ">";
+      msg << "<" << col->name() << ">";
       PyErr_SetString(PyExc_KeyError, msg.str().c_str());
     }
 
@@ -366,8 +365,8 @@ void addRowFromDict(ITableWorkspace &self, const dict &rowItems) {
       msg << "Wrong datatype <";
       msg << std::string(
           extract<std::string>(value.attr("__class__").attr("__name__")));
-      msg << "> for column <" << column->name() << "> ";
-      msg << "(expected <" << column->type() << ">)";
+      msg << "> for column <" << col->name() << "> ";
+      msg << "(expected <" << col->type() << ">)";
       PyErr_SetString(PyExc_TypeError, msg.str().c_str());
     }
 
@@ -401,11 +400,11 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
 
   // Loop over sequence and set each column value in same order
   for (decltype(nitems) i = 0; i < nitems; ++i) {
-    auto column = self.getColumn(i);
+    auto col = self.getColumn(i);
     auto value = rowItems[i];
 
     try {
-      setValue(column, rowIndex, value);
+      setValue(col, rowIndex, value);
     } catch (error_already_set &) {
       // Wrong type of data for one of the columns
       if (PyErr_ExceptionMatches(PyExc_TypeError)) {
@@ -413,8 +412,8 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
         msg << "Wrong datatype <";
         msg << std::string(
             extract<std::string>(value.attr("__class__").attr("__name__")));
-        msg << "> for column <" << column->name() << "> ";
-        msg << "(expected <" << column->type() << ">)";
+        msg << "> for column <" << col->name() << "> ";
+        msg << "(expected <" << col->type() << ">)";
         PyErr_SetString(PyExc_TypeError, msg.str().c_str());
       }
 
@@ -455,11 +454,11 @@ void getCellLoc(ITableWorkspace &self, const object &col_or_row,
  */
 PyObject *cell(ITableWorkspace &self, const object &value, int row_or_col) {
   // Find the column and row
-  Mantid::API::Column_sptr column;
-  int row(-1);
-  getCellLoc(self, value, row_or_col, column, row);
-  const std::type_info &typeID = column->get_type_info();
-  return getValue(column, typeID, row);
+  Mantid::API::Column_sptr col;
+  int rowIndex;
+  getCellLoc(self, value, row_or_col, col, rowIndex);
+  const std::type_info &typeID = col->get_type_info();
+  return getValue(col, typeID, rowIndex);
 }
 
 /**
@@ -473,10 +472,10 @@ PyObject *cell(ITableWorkspace &self, const object &value, int row_or_col) {
 void setCell(ITableWorkspace &self, const object &col_or_row,
              const int row_or_col, const object &value,
              const bool &notify_replace) {
-  Mantid::API::Column_sptr column;
-  int row(-1);
-  getCellLoc(self, col_or_row, row_or_col, column, row);
-  setValue(column, row, value);
+  Mantid::API::Column_sptr col;
+  int rowIndex;
+  getCellLoc(self, col_or_row, row_or_col, col, rowIndex);
+  setValue(col, rowIndex, value);
 
   if (notify_replace) {
     self.modified();

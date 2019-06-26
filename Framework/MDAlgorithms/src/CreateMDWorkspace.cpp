@@ -65,27 +65,27 @@ DECLARE_ALGORITHM(CreateMDWorkspace)
 /** Initialize the algorithm's properties.
  */
 void CreateMDWorkspace::init() {
-  declareProperty(
-      make_unique<PropertyWithValue<int>>("Dimensions", 1, Direction::Input),
-      "Number of dimensions that the workspace will have.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("Dimensions", 1,
+                                                           Direction::Input),
+                  "Number of dimensions that the workspace will have.");
 
   std::vector<std::string> propOptions{"MDEvent", "MDLeanEvent"};
   declareProperty("EventType", "MDLeanEvent",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which underlying data type will event take.");
 
-  declareProperty(make_unique<ArrayProperty<double>>("Extents"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Extents"),
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("Names", Direction::Input),
+      std::make_unique<ArrayProperty<std::string>>("Names", Direction::Input),
       "A comma separated list of the name of each dimension.");
 
-  declareProperty(make_unique<ArrayProperty<std::string>>("Units"),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("Frames"),
+      std::make_unique<ArrayProperty<std::string>>("Frames"),
       " A comma separated list of the frames of each dimension. "
       " The frames can be"
       " **General Frame**: Any frame which is not a Q-based frame."
@@ -98,31 +98,32 @@ void CreateMDWorkspace::init() {
   // Set the box controller properties
   this->initBoxControllerProps("5", 1000, 5);
 
-  declareProperty(make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
-                  "Optional. If specified, then all the boxes will be split to "
-                  "this minimum recursion depth. 0 = no splitting, 1 = one "
-                  "level of splitting, etc.\n"
-                  "Be careful using this since it can quickly create a huge "
-                  "number of boxes = (SplitInto ^ (MinRercursionDepth * "
-                  "NumDimensions)).");
+  declareProperty(
+      std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
+      "Optional. If specified, then all the boxes will be split to "
+      "this minimum recursion depth. 0 = no splitting, 1 = one "
+      "level of splitting, etc.\n"
+      "Be careful using this since it can quickly create a huge "
+      "number of boxes = (SplitInto ^ (MinRercursionDepth * "
+      "NumDimensions)).");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                     ".nxs"),
       "Optional: to use a file as the back end, give the path to the file to "
       "save.");
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("Memory", -1),
+      std::make_unique<PropertyWithValue<int>>("Memory", -1),
       "If Filename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings(
-      "Memory", make_unique<EnabledWhenProperty>("Filename", IS_NOT_DEFAULT));
+  setPropertySettings("Memory", std::make_unique<EnabledWhenProperty>(
+                                    "Filename", IS_NOT_DEFAULT));
 }
 
 /** Finish initialisation
@@ -291,12 +292,9 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
  */
 bool CreateMDWorkspace::checkIfFrameValid(
     const std::string &frame, const std::vector<std::string> &targetFrames) {
-  for (const auto &targetFrame : targetFrames) {
-    if (targetFrame == frame) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+      targetFrames.cbegin(), targetFrames.cend(),
+      [&frame](const auto &targetFrame) { return targetFrame == frame; });
 }
 
 } // namespace MDAlgorithms

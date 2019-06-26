@@ -37,9 +37,6 @@ factory is implemented as a singleton class. Typical usages:
 
 Mantid::API::IRemoteJob|Manager_sptr jobManager =
     Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi");
-
-Mantid::API::IRemoteJob|Manager_sptr jobManager =
-    Mantid::API::RemoteJobManagerFactory::Instance().create("SCARF@STFC");
 */
 class MANTID_API_DLL RemoteJobManagerFactoryImpl
     : public Kernel::DynamicFactory<IRemoteJobManager> {
@@ -93,7 +90,6 @@ EXTERN_MANTID_API template class MANTID_API_DLL
  *
  * You need to use this in every remote job manager. For example:
  * DECLARE_REMOTEJOBMANAGER(MantidWebServiceAPI)
- * DECLARE_REMOTEJOBMANAGER(SCARFLSFJobManager)
  */
 #define DECLARE_REMOTEJOBMANAGER(classname)                                    \
   namespace {                                                                  \

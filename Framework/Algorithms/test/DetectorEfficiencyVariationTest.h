@@ -20,7 +20,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <fstream>

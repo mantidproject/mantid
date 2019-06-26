@@ -221,23 +221,23 @@ int LoadILLReflectometry::confidence(
 
 /// Initialize the algorithm's properties.
 void LoadILLReflectometry::init() {
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", std::string(),
-                                                    FileProperty::Load, ".nxs",
-                                                    Direction::Input),
+  declareProperty(std::make_unique<FileProperty>("Filename", std::string(),
+                                                 FileProperty::Load, ".nxs",
+                                                 Direction::Input),
                   "Name of the Nexus file to load");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", std::string(), Direction::Output),
                   "Name of the output workspace");
   declareProperty(
       "BeamCentre", EMPTY_DBL(),
       "Beam position in workspace indices (disables peak finding).");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputBeamPosition", std::string(), Direction::Output,
                       PropertyMode::Optional),
                   "Name of the fitted beam position output workspace");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "DirectBeamPosition", std::string(), Direction::Input,
                       PropertyMode::Optional),
                   "A workspace defining the beam position; used to calculate "
@@ -597,10 +597,10 @@ void LoadILLReflectometry::loadData(
       progress.report();
       for (size_t im = 0; im < nb_monitors; ++im) {
         const int *monitor_p = monitorsData[im].data();
-        const HistogramData::Counts counts(monitor_p,
-                                           monitor_p + m_numberOfChannels);
+        const HistogramData::Counts monitorCounts(
+            monitor_p, monitor_p + m_numberOfChannels);
         m_localWorkspace->setHistogram(im + m_numberOfHistograms, binEdges,
-                                       std::move(counts));
+                                       std::move(monitorCounts));
         progress.report();
       }
       ++spectrumNumber;
@@ -622,7 +622,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
-  stat = NXclose(&nxfileID);
+  NXclose(&nxfileID);
 }
 
 /**

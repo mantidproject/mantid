@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.observer_pattern import Observer, Observable
+from Muon.GUI.Common.observer_pattern import Observer, Observable, GenericObservable
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -45,6 +51,7 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
+        self.calculation_finished_notifier = GenericObservable()
 
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
@@ -115,7 +122,7 @@ class GroupingTabPresenter(object):
         file_filter = file_utils.filter_for_extensions(["xml"])
         filename = self._view.show_file_browser_and_return_selection(file_filter, [""])
 
-        groups, pairs, description = xml_utils.load_grouping_from_XML(filename)
+        groups, pairs, description, default = xml_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
         for group in groups:
@@ -131,6 +138,10 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text(description)
+        self._model._context.group_pair_context.selected = default
+        self.groupingNotifier.notify_subscribers()
+
+        self.handle_update_all_clicked()
 
     def disable_editing(self):
         self._view.set_buttons_enabled(False)
@@ -151,12 +162,17 @@ class GroupingTabPresenter(object):
         self.update_thread = self.create_update_thread()
         self.update_thread.threadWrapperSetUp(self.disable_editing,
                                               self.handle_update_finished,
-                                              self._view.display_warning_box)
+                                              self.error_callback)
         self.update_thread.start()
+
+    def error_callback(self, error_message):
+        self.enable_editing_notifier.notify_subscribers()
+        self._view.display_warning_box(error_message)
 
     def handle_update_finished(self):
         self.enable_editing()
         self.groupingNotifier.notify_subscribers()
+        self.calculation_finished_notifier.notify_subscribers()
 
     def handle_default_grouping_button_clicked(self):
         self._model.reset_groups_and_pairs_to_default()
@@ -172,9 +188,11 @@ class GroupingTabPresenter(object):
 
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
+            self._model._context.show_raw_data()
             self.grouping_table_widget.update_view_from_model()
             self.pairing_table_widget.update_view_from_model()
             self.update_description_text()
+            self.handle_update_all_clicked()
         else:
             self.on_clear_requested()
 

@@ -44,7 +44,6 @@
 #include <condition_variable>
 #include <ctime>
 #include <iomanip>
-#include <iostream>
 #include <mutex>
 #include <signal.h>
 #include <string>
@@ -654,6 +653,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->initialize();
     alg->setLogging(false);
     alg->setProperty("AppendTimestamp", true);
+    alg->setProperty("AppendExecCount", true);
     alg->setProperty("InputWorkspace", wsHandles[i]);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
@@ -807,8 +807,9 @@ void ProjectRecovery::repairCheckpointDirectory() {
 
   for (auto c : vectorToDelete) {
     // Remove c recursively
-    const Poco::Path sanityCheckPath(getRecoveryFolderCheck());
-    if (sanityCheckPath.toString() == Poco::Path(c).popDirectory().toString()) {
+    const std::string sanityCheckPath = getRecoveryFolderCheck();
+    const auto searchResult = c.find(Poco::Path(sanityCheckPath).toString());
+    if (searchResult != std::string::npos) {
       Poco::File(c).remove(true);
     }
   }

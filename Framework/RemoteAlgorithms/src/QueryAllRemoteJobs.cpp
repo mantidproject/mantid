@@ -12,7 +12,7 @@
 #include "MantidKernel/NullValidator.h"
 
 #include "MantidKernel/RemoteJobManager.h"
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
 
@@ -45,32 +45,32 @@ void QueryAllRemoteJobs::init() {
   // array properties for different pieces of data.  Values from the same array
   // index are for
   // the same job.
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "JobId", nullValidator, Direction::Output),
                   "ID string for the job");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "JobStatusString", nullValidator, Direction::Output),
                   "Description of the job's current status (Queued, Running, "
                   "Complete, etc..)");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "JobName", nullValidator, Direction::Output),
                   "Name of the job (specified when the job was submitted)");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "ScriptName", nullValidator, Direction::Output),
                   "The name of the python script that was executed");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "TransID", nullValidator, Direction::Output),
                   "The ID of the transaction that owns the job");
 
   // Times for job submit, job start and job complete (may be empty depending
   // on the server-side implementation)
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "SubmitDate", nullValidator, Direction::Output),
                   "The date & time the job was submitted");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "StartDate", nullValidator, Direction::Output),
                   "The date & time the job actually started executing");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "CompletionDate", nullValidator, Direction::Output),
                   "The date & time the job finished");
 }

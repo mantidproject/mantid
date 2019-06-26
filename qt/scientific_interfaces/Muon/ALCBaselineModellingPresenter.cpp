@@ -6,16 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCBaselineModellingPresenter.h"
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
 using namespace Mantid::API;
 
 namespace MantidQt {
-namespace QwtHelper = API::QwtHelper;
 namespace CustomInterfaces {
 
 ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(
@@ -144,9 +140,9 @@ void ALCBaselineModellingPresenter::onSectionRowModified(int row) {
   double endX = sectionRow.second.toDouble();
 
   int index(row); // That's what we make sure of in addSection()
-  IALCBaselineModellingView::SectionSelector sectionSelector(startX, endX);
+  IALCBaselineModellingView::SectionSelector selector(startX, endX);
 
-  m_view->updateSectionSelector(index, sectionSelector);
+  m_view->updateSectionSelector(index, selector);
 }
 
 /**
@@ -165,35 +161,31 @@ void ALCBaselineModellingPresenter::onSectionSelectorModified(int index) {
 }
 
 void ALCBaselineModellingPresenter::updateDataCurve() {
-  MatrixWorkspace_const_sptr data = m_model->data();
-  assert(data);
-  m_view->setDataCurve(*(QwtHelper::curveDataFromWs(data, 0)),
-                       QwtHelper::curveErrorsFromWs(data, 0));
-  // Delete all section selectors
-  int noRows = m_view->noOfSectionRows() - 1;
-  for (int j = noRows; j > -1; --j) {
-    removeSection(j);
+  if (auto dataWs = m_model->data()) {
+    m_view->setDataCurve(dataWs);
+    // Delete all section selectors
+    int noRows = m_view->noOfSectionRows() - 1;
+    for (int j = noRows; j > -1; --j) {
+      removeSection(j);
+    }
   }
 }
 
 void ALCBaselineModellingPresenter::updateCorrectedCurve() {
-  if (MatrixWorkspace_const_sptr correctedData = m_model->correctedData()) {
-    m_view->setCorrectedCurve(*(QwtHelper::curveDataFromWs(correctedData, 0)),
-                              QwtHelper::curveErrorsFromWs(correctedData, 0));
-  } else {
-    m_view->setCorrectedCurve(*(QwtHelper::emptyCurveData()),
-                              std::vector<double>());
-  }
+  if (auto correctedData = m_model->correctedData())
+    m_view->setCorrectedCurve(correctedData);
+  else
+    m_view->removePlot("Corrected");
 }
 
 void ALCBaselineModellingPresenter::updateBaselineCurve() {
-  if (IFunction_const_sptr fittedFunc = m_model->fittedFunction()) {
-
+  if (const auto fitFunction = m_model->fittedFunction()) {
     const auto &xValues = m_model->data()->x(0);
-    m_view->setBaselineCurve(
-        *(QwtHelper::curveDataFromFunction(fittedFunc, xValues.rawData())));
+    const auto baslineWorkspace =
+        m_model->baselineData(fitFunction, xValues.rawData());
+    m_view->setBaselineCurve(baslineWorkspace);
   } else {
-    m_view->setBaselineCurve(*(QwtHelper::emptyCurveData()));
+    m_view->removePlot("Baseline");
   }
 }
 

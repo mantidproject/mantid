@@ -39,19 +39,19 @@ using namespace DataObjects;
 
 void EQSANSLoad::init() {
   declareProperty(
-      make_unique<API::FileProperty>(
+      std::make_unique<API::FileProperty>(
           "Filename", "", API::FileProperty::OptionalLoad, "_event.nxs"),
       "The name of the input event Nexus file to load");
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       PropertyMode::Optional, wsValidator),
                   "Input event workspace. Assumed to be unmodified events "
                   "straight from LoadEventNexus");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Then name of the output EventWorkspace");
   declareProperty(
       "NoBeamCenter", false,
@@ -109,6 +109,9 @@ void EQSANSLoad::init() {
       "using the distance found in the meta data), in mm");
   declareProperty("LoadMonitors", true,
                   "If true, the monitor workspace will be loaded");
+  declareProperty("LoadNexusInstrumentXML", true,
+                  "Reads the embedded Instrument XML from the NeXus file "
+                  "(optional, default True). ");
   declareProperty("OutputMessage", "", Direction::Output);
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
@@ -506,7 +509,7 @@ void EQSANSLoad::exec() {
   }
 
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
-    auto loadProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
+    auto loadProp = std::make_unique<AlgorithmProperty>("LoadAlgorithm");
     setPropertyValue("InputWorkspace", "");
     setProperty("NoBeamCenter", false);
     loadProp->setValue(toString());
@@ -515,8 +518,8 @@ void EQSANSLoad::exec() {
 
   if (!reductionManager->existsProperty("InstrumentName"))
     reductionManager->declareProperty(
-        make_unique<PropertyWithValue<std::string>>("InstrumentName",
-                                                    "EQSANS"));
+        std::make_unique<PropertyWithValue<std::string>>("InstrumentName",
+                                                         "EQSANS"));
 
   // Output log
   m_output_message = "";
@@ -524,9 +527,11 @@ void EQSANSLoad::exec() {
   // Check whether we need to load the data
   if (!inputEventWS) {
     const bool loadMonitors = getProperty("LoadMonitors");
+    const bool loadNexusInstrumentXML = getProperty("LoadNexusInstrumentXML");
     IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
     loadAlg->setProperty("LoadMonitors", loadMonitors);
     loadAlg->setProperty("Filename", fileName);
+    loadAlg->setProperty("LoadNexusInstrumentXML", loadNexusInstrumentXML);
     if (skipTOFCorrection) {
       if (m_low_TOF_cut > 0.0)
         loadAlg->setProperty("FilterByTofMin", m_low_TOF_cut);
@@ -549,7 +554,7 @@ void EQSANSLoad::exec() {
         throw Exception::NotImplementedError("The file contains multi period "
                                              "data, support for this is not "
                                              "implemented in EQSANSLoad yet");
-      declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      declareProperty(std::make_unique<WorkspaceProperty<>>(
                           "MonitorWorkspace", mon_wsname, Direction::Output),
                       "Monitors from the Event NeXus file");
       setProperty("MonitorWorkspace", monWS);
@@ -718,13 +723,15 @@ void EQSANSLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterX", m_center_x));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
+                                                      m_center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", m_center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterY", m_center_y));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
+                                                      m_center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", m_center_y);
   }
@@ -732,7 +739,7 @@ void EQSANSLoad::exec() {
   // Modify TOF
   const bool correct_for_flight_path = getProperty("CorrectForFlightPath");
   double wl_min = 0.0;
-  double wl_max = 0.0;
+  double wl_max;
   double wl_combined_max = 0.0;
   if (skipTOFCorrection) {
     m_output_message +=
@@ -759,7 +766,7 @@ void EQSANSLoad::exec() {
     tofAlg->executeAsChildAlg();
     wl_min = tofAlg->getProperty("WavelengthMin");
     wl_max = tofAlg->getProperty("WavelengthMax");
-    if (wl_min != wl_min || wl_max != wl_max) {
+    if (wl_min >= wl_max) {
       g_log.error() << "Bad wavelength range\n";
       g_log.error() << m_output_message << '\n';
     }

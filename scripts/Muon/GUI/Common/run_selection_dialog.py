@@ -4,29 +4,33 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import PyQt4.QtGui as QtGui
-import PyQt4.QtCore as QtCore
+from __future__ import (absolute_import, division, unicode_literals)
 
 
-class RunSelectionDialog(QtGui.QDialog):
+from qtpy import QtWidgets, QtCore
+
+
+class RunSelectionDialog(QtWidgets.QDialog):
+
     def __init__(self, current_runs, instrument, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
 
         self.setWindowTitle('Run Selection')
-        layout = QtGui.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
 
-        self.message = QtGui.QLabel()
+        self.message = QtWidgets.QLabel()
         self.message.setText('Which run do you wish to use for calculation?')
         layout.addWidget(self.message)
 
-        current_runs_as_string = [instrument + str(run[0]) for run in current_runs]
-        self.run_selector_combo = QtGui.QComboBox()
+        current_runs_as_string = [
+            instrument + str(run[0]) for run in current_runs]
+        self.run_selector_combo = QtWidgets.QComboBox()
         self.run_selector_combo.addItems(current_runs_as_string)
 
         layout.addWidget(self.run_selector_combo)
 
-        buttons = QtGui.QDialogButtonBox(
-            QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
             QtCore.Qt.Horizontal, self)
 
         buttons.accepted.connect(self.accept)
@@ -47,4 +51,4 @@ class RunSelectionDialog(QtGui.QDialog):
         result = dialog.exec_()
         run = dialog.run()
         index = dialog.index()
-        return (run, index, result == QtGui.QDialog.Accepted)
+        return (run, index, result == QtWidgets.QDialog.Accepted)

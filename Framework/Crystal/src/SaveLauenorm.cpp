@@ -23,7 +23,6 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -41,12 +40,12 @@ DECLARE_ALGORITHM(SaveLauenorm)
 /** Initialize the algorithm's properties.
  */
 void SaveLauenorm::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
-  declareProperty(
-      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save),
-      "Select the directory and base name for the output files.");
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Save),
+                  "Select the directory and base name for the output files.");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("ScalePeaks", 1.0, mustBePositive,
@@ -71,8 +70,8 @@ void SaveLauenorm::init() {
                   "SetDetScale.\n"
                   "If false, no change (default).");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers",
-                                                      Direction::Input),
+      std::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers",
+                                                   Direction::Input),
       "Comma deliminated string of bank numbers to exclude for example 1,2,5");
   declareProperty("LaueScaleFormat", false, "New format for Lauescale");
 
@@ -442,9 +441,6 @@ void SaveLauenorm::exec() {
     if (newFormat) {
       // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
       out << " 1 0 0 0 0 0 0 0 0.0 0 ";
-    }
-
-    if (newFormat) {
       // Dmin threshold squared for next harmonic
       out << std::setw(10) << std::fixed << std::setprecision(5)
           << dsp * dsp * 0.25 << "\n";

@@ -1,14 +1,19 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from Muon.GUI.Common import mock_widget
+from mantidqt.utils.qt.testing import GuiTest
 
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 
 
-class LoadFileWidgetViewTest(unittest.TestCase):
+class LoadFileWidgetViewTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         self.view = BrowseFileWidgetView()
 
     # ------------------------------------------------------------------------------------------------------------------

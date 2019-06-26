@@ -29,28 +29,26 @@ CompositeDomainMD::CompositeDomainMD(IMDWorkspace_const_sptr ws,
   m_domains.resize(nParts);
   for (size_t i = 0; i < nParts - 1; ++i) {
     size_t start = i * maxDomainSize;
-    m_domains[i] = new FunctionDomainMD(ws, start, maxDomainSize);
+    m_domains[i] = std::make_unique<FunctionDomainMD>(ws, start, maxDomainSize);
   }
   size_t start = (nParts - 1) * maxDomainSize;
-  m_domains.back() = new FunctionDomainMD(ws, start, m_totalSize - start);
+  m_domains.back() =
+      std::make_unique<FunctionDomainMD>(ws, start, m_totalSize - start);
 }
 
 /**
  * Destructor.
  */
-CompositeDomainMD::~CompositeDomainMD() {
-  for (auto domain : m_domains)
-    delete domain;
-}
+CompositeDomainMD::~CompositeDomainMD() {}
 
 /// Return i-th domain reset to its start.
 const FunctionDomain &CompositeDomainMD::getDomain(size_t i) const {
   if (i >= m_domains.size()) {
     throw std::out_of_range("Domain index out of range");
   }
-  FunctionDomainMD *domain = m_domains[i];
-  domain->reset();
-  return *domain;
+  m_domains[i]->reset();
+
+  return *m_domains[i];
 }
 
 } // namespace API

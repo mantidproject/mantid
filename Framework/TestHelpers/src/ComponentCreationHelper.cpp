@@ -33,7 +33,6 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/Path.h>
 #include <boost/make_shared.hpp>
@@ -83,6 +82,39 @@ void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
   source->setPos(sourcePos);
   instrument->add(source);
   instrument->markAsSource(source);
+}
+//----------------------------------------------------------------------------------------------
+
+/**
+ * Return the XML for a hollow cylinder
+ */
+std::string hollowCylinderXML(double innerRadius, double outerRadius,
+                              double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id) {
+  std::ostringstream xml;
+  xml << "<hollow-cylinder id=\"" << id << "\">"
+      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
+      << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
+      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\""
+      << axis.Z() << "\"/>"
+      << "<inner-radius val=\"" << innerRadius << "\" />"
+      << "<outer-radius val=\"" << outerRadius << "\" />"
+      << "<height val=\"" << height << "\" />"
+      << "</hollow-cylinder>";
+  return xml.str();
+}
+
+/**
+ * Create a hollow cylinder object
+ */
+boost::shared_ptr<CSGObject>
+createHollowCylinder(double innerRadius, double outerRadius, double height,
+                     const V3D &baseCentre, const V3D &axis,
+                     const std::string &id) {
+  return ShapeFactory().createShape(hollowCylinderXML(
+      innerRadius, outerRadius, height, baseCentre, axis, id));
 }
 
 void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
@@ -294,8 +326,8 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        auto det = Mantid::Kernel::make_unique<Detector>(os.str(), ic + 1,
-                                                         detShape, nullptr);
+        auto det =
+            std::make_unique<Detector>(os.str(), ic + 1, detShape, nullptr);
         det->setPos(x, y, z0);
         allDetectors.emplace_back(std::move(det));
       }
@@ -318,10 +350,10 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
   std::vector<boost::shared_ptr<const IDetector>> groupMembers;
   groupMembers.reserve(vecOfDetectors.size());
   for (auto &det : vecOfDetectors) {
-    groupMembers.push_back(boost::shared_ptr<const IDetector>(std::move(det)));
+    groupMembers.emplace_back(std::move(det));
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers);
+  return boost::make_shared<DetectorGroup>(std::move(groupMembers));
 }
 
 Instrument_sptr createTestInstrumentCylindrical(

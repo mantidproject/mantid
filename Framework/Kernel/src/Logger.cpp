@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Logger.h"
 
-#include "MantidKernel/ThreadSafeLogStream.h"
-
 #include <Poco/Logger.h>
 #include <Poco/NullStream.h>
 
@@ -34,24 +32,20 @@ const std::string *Logger::PriorityNames = PriorityNames_data;
  */
 Logger::Logger(const std::string &name)
     : m_log(&Poco::Logger::get(name)),
-      m_logStream(new ThreadSafeLogStream(*m_log)), m_levelOffset(0),
-      m_enabled(true) {}
-
-/// Destructor
-Logger::~Logger() { delete m_logStream; }
+      m_logStream(std::make_unique<ThreadSafeLogStream>(*m_log)),
+      m_levelOffset(0), m_enabled(true) {}
 
 /**
  * @param name The new name
  */
 void Logger::setName(const std::string &name) {
   auto *logger = &Poco::Logger::get(name);
-  auto *logStream =
-      new ThreadSafeLogStream(*logger); // don't swap if this throws
+  auto logStream = std::make_unique<ThreadSafeLogStream>(
+      *logger); // don't swap if this throws
 
   using std::swap;
   swap(m_log, logger);
   swap(m_logStream, logStream);
-  delete logStream;
 }
 
 /** Returns true if the log is enabled
@@ -395,9 +389,9 @@ Logger::Priority Logger::applyLevelOffset(Logger::Priority proposedLevel) {
 void Logger::setLevelOffset(int level) { m_levelOffset = level; }
 
 /**
-   * Gets the Logger's log offset level.
-   * @returns The offset level
-   */ /// Gets the Logger's log offset level.
+ * Gets the Logger's log offset level.
+ * @returns The offset level
+ */ /// Gets the Logger's log offset level.
 int Logger::getLevelOffset() const { return m_levelOffset; }
 
 } // namespace Kernel

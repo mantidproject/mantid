@@ -65,7 +65,7 @@ Group Group::operator*(const Group &other) const {
 
   for (const auto &operation : m_allOperations) {
     for (const auto &otherOp : other.m_allOperations) {
-      result.push_back(operation * otherOp);
+      result.emplace_back(operation * otherOp);
     }
   }
 
@@ -78,9 +78,8 @@ std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
   std::vector<Kernel::V3D> result;
   result.reserve(m_allOperations.size());
   for (const auto &operation : m_allOperations) {
-    result.push_back(Geometry::getWrappedVector(operation * vector));
+    result.emplace_back(Geometry::getWrappedVector(operation * vector));
   }
-
   std::sort(result.begin(), result.end(), AtomPositionsLessThan());
   result.erase(std::unique(result.begin(), result.end()), result.end());
 
@@ -238,14 +237,11 @@ bool Group::hasIdentity() const {
 
 /// Returns true if the inverse of each element is in the group
 bool Group::eachElementHasInverse() const {
-  // Iterate through all operations, check that the inverse is in the group.
-  for (const auto &operation : m_allOperations) {
-    if (!containsOperation(getUnitCellIntervalOperation(operation.inverse()))) {
-      return false;
-    }
-  }
-
-  return true;
+  return std::all_of(m_allOperations.cbegin(), m_allOperations.cend(),
+                     [this](const auto &operation) {
+                       return this->containsOperation(
+                           getUnitCellIntervalOperation(operation.inverse()));
+                     });
 }
 
 /**

@@ -144,7 +144,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         A = mtd['A']
         B = mtd['B']
         C = (A + B) / (A - B)
-        self.assertTrue(C is not None)
+        self.assertNotEqual(C, None)
 
     """ boolean_workspace = MDHistoWorkspace < MDHistoWorkspace """
     def test_comparisons_and_boolean_operations(self):
@@ -210,7 +210,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         A = mtd['A']
         B = mtd['B']
         C = (A > B) & (A > 123) & (B < 2345)
-        self.assertTrue(C is not None)
+        self.assertNotEqual(C, None)
 
 
     def test_compound_boolean_operations(self):

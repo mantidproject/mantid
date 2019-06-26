@@ -33,7 +33,7 @@ std::string PeaksIntersection::hklFrame() { return "HKL"; }
 /** Initialize the algorithm's properties.
  */
 void PeaksIntersection::initBaseProperties() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input peaks workspace.");
 
@@ -55,7 +55,7 @@ void PeaksIntersection::initBaseProperties() {
   declareProperty("PeakRadius", 0.0,
                   "Effective peak radius in CoordinateFrame");
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output table workspace. Two columns. Peak index into "
                   "input workspace, and boolean, where true is for positive "
@@ -145,18 +145,19 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
 
       if (checkPeakExtents) {
         // Take account of radius spherical extents.
-        for (int i = 0; i < numberOfFaces; ++i) {
-          distance = normals[i].scalar_prod(
-              faces[i][0] -
+        for (int j = 0; j < numberOfFaces; ++j) {
+          distance = normals[j].scalar_prod(
+              faces[j][0] -
               peakCenter); // Distance between plane and peak center.
           if (m_peakRadius >= std::abs(distance)) // Sphere passes through one
                                                   // of the PLANES defined by
                                                   // the box faces.
           {
             // Check that it is actually within the face boundaries.
-            V3D touchPoint = (normals[i] * distance) +
-                             peakCenter; // Vector equation of line give touch
-                                         // point on plane.
+            const V3D touchPoint =
+                (normals[j] * distance) +
+                peakCenter; // Vector equation of line give touch
+                            // point on plane.
 
             // checkTouchPoint(touchPoint, normals[i], faces[i][0]); //
             // Debugging line.

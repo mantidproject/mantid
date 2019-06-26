@@ -10,8 +10,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/LogFilter.h"
 
-#include <boost/lexical_cast.hpp>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -23,13 +21,13 @@ using namespace API;
 using namespace DataObjects;
 
 void NormaliseByCurrent::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "RecalculatePCharge", false, Kernel::Direction::Input),
                   "Re-integrates the proton charge. This will modify the "
                   "gd_prtn_chrg. Does nothing for multi-period data");
@@ -55,8 +53,7 @@ double NormaliseByCurrent::extractCharge(
 
   int nPeriods = 0;
   try {
-    Property *nPeriodsProperty = run.getLogData("nperiods");
-    nPeriods = boost::lexical_cast<int>(nPeriodsProperty->value());
+    nPeriods = run.getPropertyValueAsType<int>("nperiods");
   } catch (Exception::NotFoundError &) {
     g_log.information() << "No nperiods property. If this is multi-period "
                            "data, then you will be normalising against the "

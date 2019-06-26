@@ -37,8 +37,8 @@ void SubmitRemoteJob2::init() {
       "The name of the remote computer to submit the job to", Direction::Input);
 
   // Note: these 2 properties are 'implementation specific'.  We know that for
-  // example Fermi  needs them, and SCARF supports them, but we really
-  // ought to query the information URL before requiring them.
+  // example Fermi needs them, but we really ought to query the information URL
+  // before requiring them.
   declareProperty("NumNodes", 1, mustBePositive,
                   "The number of compute nodes the job requires",
                   Direction::Input);

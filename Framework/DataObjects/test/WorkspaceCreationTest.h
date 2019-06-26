@@ -244,7 +244,7 @@ public:
     // No instrument, so spectrum definitions created by make_indices are bad.
     TS_ASSERT_THROWS(
         create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4})),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_create_Instrument_size_Histogram() {
@@ -397,7 +397,7 @@ public:
     // make_indices are bad.
     TS_ASSERT_THROWS(
         create<Workspace2D>(*parent, make_indices(), (BinEdges{1, 2, 4})),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_create_parent_IndexInfo() {
@@ -423,8 +423,9 @@ public:
   void test_create_parent_numeric_vertical_axis() {
     constexpr size_t parentNhist{3};
     const auto parent = create<Workspace2D>(parentNhist, Histogram(Points{1}));
-    NumericAxis *parentAxis = new NumericAxis({-1.5, -0.5, 2.3});
-    parent->replaceAxis(1, parentAxis);
+    std::vector<double> vec{-1.5, -0.5, 2.3};
+    auto parentAxis = std::make_unique<NumericAxis>(vec);
+    parent->replaceAxis(1, std::move(parentAxis));
     constexpr size_t nhist{2};
     const auto ws = create<Workspace2D>(*parent, nhist, parent->histogram(0));
     auto axis = ws->getAxis(1);
@@ -435,8 +436,9 @@ public:
   void test_create_parent_bin_edge_vertical_axis() {
     constexpr size_t parentNhist{3};
     const auto parent = create<Workspace2D>(parentNhist, Histogram(Points{1}));
-    BinEdgeAxis *parentAxis = new BinEdgeAxis({-1.5, -0.5, 2.3, 3.4});
-    parent->replaceAxis(1, parentAxis);
+    std::vector<double> vec{-1.5, -0.5, 2.3, 3.4};
+    auto parentAxis = std::make_unique<BinEdgeAxis>(vec);
+    parent->replaceAxis(1, std::move(parentAxis));
     constexpr size_t nhist{2};
     const auto ws = create<Workspace2D>(*parent, nhist, parent->histogram(0));
     auto axis = ws->getAxis(1);

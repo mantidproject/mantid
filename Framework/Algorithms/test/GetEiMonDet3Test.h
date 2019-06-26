@@ -71,8 +71,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     TS_ASSERT_DELTA(
-        static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
-        realEi, 1e-6)
+        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
+        1e-6)
   }
 
   void testSuccessWithPulseInterval() {
@@ -87,8 +87,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     TS_ASSERT_DELTA(
-        static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
-        realEi, 1e-6)
+        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
+        1e-6)
   }
 
   void testPulseIntervalInSampleLogs() {
@@ -102,8 +102,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     TS_ASSERT_DELTA(
-        static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
-        realEi, 1e-6)
+        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
+        1e-6)
   }
 
   void testMonitorWorkspace() {
@@ -124,8 +124,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     TS_ASSERT_DELTA(
-        static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
-        realEi, 1e-6)
+        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
+        1e-6)
   }
 
   void testMonitorWorkspaceWithEPPTable() {
@@ -153,8 +153,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     TS_ASSERT_DELTA(
-        static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
-        realEi, 1e-6)
+        static_cast<double>(algorithm.getProperty("IncidentEnergy")), realEi,
+        1e-6)
   }
 
 private:

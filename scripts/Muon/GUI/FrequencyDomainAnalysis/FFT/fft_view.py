@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtWidgets, QtCore
 
 import mantid.simpleapi as mantid
 
@@ -14,25 +14,25 @@ from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
 
 
-class FFTView(QtGui.QWidget):
+class FFTView(QtWidgets.QWidget):
 
     """
     creates the layout for the FFT GUI
     """
     # signals
-    buttonSignal = QtCore.pyqtSignal()
-    tableClickSignal = QtCore.pyqtSignal(object, object)
-    phaseCheckSignal = QtCore.pyqtSignal()
+    buttonSignal = QtCore.Signal()
+    tableClickSignal = QtCore.Signal(object, object)
+    phaseCheckSignal = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(FFTView, self).__init__(parent)
-        self.grid = QtGui.QGridLayout(self)
+        self.grid = QtWidgets.QGridLayout(self)
 
         # add splitter for resizing
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
 
         # make table
-        self.FFTTable = QtGui.QTableWidget(self)
+        self.FFTTable = QtWidgets.QTableWidget(self)
         self.FFTTable.resize(800, 800)
         self.FFTTable.setRowCount(9)
         self.FFTTable.setColumnCount(2)
@@ -85,8 +85,8 @@ class FFTView(QtGui.QWidget):
 
         self.FFTTable.resizeRowsToContents()
         # make advanced table options
-        self.advancedLabel = QtGui.QLabel("\n Advanced Options")
-        self.FFTTableA = QtGui.QTableWidget(self)
+        self.advancedLabel = QtWidgets.QLabel("\n Advanced Options")
+        self.FFTTableA = QtWidgets.QTableWidget(self)
         self.FFTTableA.resize(800, 800)
         self.FFTTableA.setRowCount(4)
         self.FFTTableA.setColumnCount(2)
@@ -98,7 +98,7 @@ class FFTView(QtGui.QWidget):
             ("Advanced Property;Value").split(";"))
 
         table_utils.setRowName(self.FFTTableA, 0, "Apodization Function")
-        options = ["None", "Lorentz", "Gaussian"]
+        options = ["Lorentz", "Gaussian", "None"]
         self.apodization = table_utils.addComboToTable(
             self.FFTTableA, 0, options)
 
@@ -106,7 +106,7 @@ class FFTView(QtGui.QWidget):
             self.FFTTableA,
             1,
             "Decay Constant (micro seconds)")
-        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 1.4, 1)
+        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
         self.negativePadding = table_utils.addCheckBoxToTable(
@@ -117,7 +117,7 @@ class FFTView(QtGui.QWidget):
         self.FFTTableA.resizeRowsToContents()
 
         # make button
-        self.button = QtGui.QPushButton('Calculate FFT', self)
+        self.button = QtWidgets.QPushButton('Calculate FFT', self)
         self.button.setStyleSheet("background-color:lightgrey")
         # connects
         self.FFTTable.cellClicked.connect(self.tableClick)

@@ -5,14 +5,14 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MSDFit.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QFileInfo>
 
@@ -34,7 +34,7 @@ MSDFit::MSDFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
-  setFitDataPresenter(Mantid::Kernel::make_unique<IndirectFitDataPresenter>(
+  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
       m_msdFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
@@ -52,9 +52,6 @@ void MSDFit::setupFitTab() {
   addComboBoxFunctionGroup("Gaussian", {gaussian});
   addComboBoxFunctionGroup("Peters", {peters});
   addComboBoxFunctionGroup("Yi", {yi});
-
-  setSampleWSSuffices({"_eq"});
-  setSampleFBSuffices({"_eq.nxs"});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,

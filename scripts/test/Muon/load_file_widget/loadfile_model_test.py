@@ -1,18 +1,24 @@
-import six
-import unittest
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import os
+import unittest
+
+import six
+
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 class LoadFileWidgetModelTest(unittest.TestCase):
 
     def setUp(self):
-        self.data = MuonLoadData()
-        self.context = MuonDataContext()
-        self.context.instrument = 'EMU'
-        self.model = BrowseFileWidgetModel(self.data, self.context)
+        setup_context_for_tests(self)
+        self.data_context.instrument = 'EMU'
+        self.model = BrowseFileWidgetModel(self.loaded_data, self.context)
 
     def assert_model_empty(self):
         self.assertEqual(self.model.loaded_workspaces, [])

@@ -41,7 +41,7 @@ endif()
 # -Wno-unused-result: Do not warn about unused return values in some C functions
 add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
                       -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
-                      -Wno-write-strings -Wno-unused-result )
+                      -Wno-write-strings -Wno-unused-result)
 # C++-specific flags
 add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
@@ -81,6 +81,15 @@ if(WITH_ASAN)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
 endif()
 
+option(WITH_TSAN "Enable thread sanitizer" OFF)
+if(WITH_TSAN)
+  message(STATUS "enabling thread sanitizer")
+  add_compile_options(-fno-omit-frame-pointer -fno-common -fsanitize=thread)
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=thread" )
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=thread")
+endif()
+
 option(WITH_UBSAN "Enable undefined behavior sanitizer" OFF)
 if(WITH_UBSAN)
   message(STATUS "enabling undefined behavior sanitizers")
@@ -113,5 +122,22 @@ if( CMAKE_COMPILER_IS_GNUCXX )
     )
     set( CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc" )
     set( CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++" )
+  endif()
+endif()
+
+option (COLORED_COMPILER_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." TRUE)
+
+if(COLORED_COMPILER_OUTPUT)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fdiagnostics-color=always)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-fcolor-diagnostics)
+  endif()
+else()
+  # disables the color output on diagnostics
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fdiagnostics-color=never)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-fno-color-diagnostics)
   endif()
 endif()

@@ -107,11 +107,11 @@ public:
       return "PropertyManagerInputAlgorithm";
     }
     void init() override {
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
       declareProperty(
           std::make_unique<PropertyManagerProperty>("Dict", Direction::Input));
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
     }
     void exec() override {
@@ -134,9 +134,9 @@ public:
     }
 
     void init() override {
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
@@ -209,9 +209,9 @@ public:
     }
 
     void init() override {
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
     }
     void exec() override {
@@ -247,9 +247,9 @@ public:
     }
 
     void init() override {
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");

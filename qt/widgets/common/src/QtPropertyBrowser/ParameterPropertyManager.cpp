@@ -12,8 +12,10 @@
 
 const QString ParameterPropertyManager::ERROR_TOOLTIP(" (Error)");
 
-ParameterPropertyManager::ParameterPropertyManager(QObject *parent)
-    : QtDoublePropertyManager(parent), m_errors(), m_errorsEnabled(false) {}
+ParameterPropertyManager::ParameterPropertyManager(QObject *parent,
+                                                   bool hasGlobalOption)
+    : QtDoublePropertyManager(parent), m_errors(), m_errorsEnabled(false),
+      m_hasGlobalOption(hasGlobalOption) {}
 
 /**
  * Throws if property error is not set
@@ -54,6 +56,14 @@ bool ParameterPropertyManager::isErrorSet(const QtProperty *property) const {
   auto prop = const_cast<QtProperty *>(property);
 
   return m_errors.contains(prop);
+}
+
+/**
+ * Check if a parameter is global.
+ * @param property :: Property to check
+ */
+bool ParameterPropertyManager::isGlobal(const QtProperty *property) const {
+  return m_globals.contains(const_cast<QtProperty *>(property));
 }
 
 /**
@@ -115,6 +125,25 @@ void ParameterPropertyManager::setErrorsEnabled(bool enabled) {
 }
 
 /**
+ * Set whether parameter is global or not.
+ * @param property :: Property to set the option for
+ * @param option :: New parameter's global state
+ */
+void ParameterPropertyManager::setGlobal(QtProperty *property, bool option) {
+  if (option == isGlobal(property))
+    return;
+  if (option) {
+    m_globals.insert(property);
+  } else {
+    auto iter = m_globals.find(property);
+    if (iter != m_globals.end()) {
+      m_globals.erase(iter);
+    }
+  }
+  emit propertyChanged(property);
+}
+
+/**
  * Adds error parameter value to property display
  * @param property :: Property we want to display
  * @return Text representation of the property
@@ -131,12 +160,13 @@ QString ParameterPropertyManager::valueText(const QtProperty *property) const {
     double absVal = fabs(value(property));
     char format = absVal > 1e5 || (absVal != 0 && absVal < 1e-5) ? 'e' : 'f';
 
-    return originalValueText +
-           QString(" (%1)").arg(propError, 0, format, precision);
-  } else {
-    // No error set or errors disabled, so don't append error value
-    return originalValueText;
+    originalValueText += QString(" (%1)").arg(propError, 0, format, precision);
   }
+  if (m_hasGlobalOption) {
+    QString gText(isGlobal(property) ? "G" : "L");
+    originalValueText += " [" + gText + "]";
+  }
+  return originalValueText;
 }
 
 /**

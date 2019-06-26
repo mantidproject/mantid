@@ -16,6 +16,7 @@ class Material;
 }
 namespace DataHandling {
 using ValidationErrors = std::map<std::string, std::string>;
+
 /**
     This class contains code for interpreting a material input for
    SetSampleMaterial, validating the parameters before sending them on to
@@ -43,6 +44,10 @@ public:
     double unitCellVolume = EMPTY_DBL();
     /// The sample mass density to set, defaults to EMPTY_DBL()
     double sampleMassDensity = EMPTY_DBL();
+    /// The sample mass to set, defaults to EMPTY_DBL()
+    double sampleMass = EMPTY_DBL();
+    /// The sample volume to set, defaults to EMPTY_DBL()
+    double sampleVolume = EMPTY_DBL();
     /// The coherent scattering cross section to set, defaults to EMPTY_DBL()
     double coherentXSection = EMPTY_DBL();
     /// The incoherent scattering cross section to set, defaults to EMPTY_DBL()

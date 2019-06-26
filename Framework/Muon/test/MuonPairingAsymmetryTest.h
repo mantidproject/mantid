@@ -230,7 +230,7 @@ public:
     IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(
         setup.inputWSName, "", group1, group2);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void
@@ -250,7 +250,7 @@ public:
   void test_that_exec_throws_if_pair_name_is_not_alphanumeric_or_underscored() {
     const std::vector<int> group1 = {1, 2};
     const std::vector<int> group2 = {3, 4};
-    auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "pair1");
+    auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "pairWS");
 
     std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @", "   "};
     for (auto &&invalidName : invalidNames) {
@@ -320,7 +320,7 @@ public:
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void
@@ -331,7 +331,7 @@ public:
     std::vector<int> summedPeriods = {3};
     alg->setProperty("SummedPeriods", summedPeriods);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void
@@ -342,7 +342,7 @@ public:
     std::vector<int> subtractedPeriods = {3};
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   // --------------------------------------------------------------------------

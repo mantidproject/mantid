@@ -30,12 +30,12 @@ using Geometry::IDetector_const_sptr;
 
 /// Initialisation method.
 void FindDetectorsOutsideLimits::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace2D");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector");
   declareProperty(

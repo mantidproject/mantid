@@ -27,7 +27,7 @@ class AlgorithmFactoryTest(unittest.TestCase):
         FrameworkManagerImpl.Instance()
 
     def test_get_algorithm_factory_does_not_return_None(self):
-        self.assertTrue(AlgorithmFactory is not None )
+        self.assertNotEqual(AlgorithmFactory, None )
 
     def test_getDescriptors(self):
 
@@ -50,14 +50,25 @@ class AlgorithmFactoryTest(unittest.TestCase):
         self.assertTrue( 'ConvertUnits' in all_algs )
         self.assertTrue( 'LoadRaw' in all_algs )
         # one versions of LoadRaw
-        self.assertEquals( len(all_algs['LoadRaw']), 1 )
-        self.assertEquals( all_algs['LoadRaw'], [3] )
+        self.assertEqual( len(all_algs['LoadRaw']), 1 )
+        self.assertEqual( all_algs['LoadRaw'], [3] )
 
     def test_algorithm_subscription_with_valid_object_succeeds(self):
         testhelpers.assertRaisesNothing(self, AlgorithmFactory.subscribe, IsAnAlgorithm)
 
     def test_algorithm_registration_with_invalid_object_throws(self):
         self.assertRaises(ValueError, AlgorithmFactory.subscribe, NotAnAlgorithm)
+
+    def test_can_enable_and_disable_notifications(self):
+        try:
+            AlgorithmFactory.enableNotifications()
+        except Exception:
+            self.fail( "Algorithm factory class is expected to have a method 'enableNotifications'")
+
+        try:
+            AlgorithmFactory.disableNotifications()
+        except Exception:
+            self.fail( "Algorithm factory class is expected to have a method 'disableNotifications'")
 
 
 if __name__ == '__main__':

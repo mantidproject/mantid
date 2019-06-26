@@ -10,12 +10,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
-
 using namespace Mantid::API;
 
 namespace MantidQt {
-namespace QwtHelper = API::QwtHelper;
 namespace CustomInterfaces {
 
 ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView *view,
@@ -45,7 +42,7 @@ void ALCPeakFittingPresenter::fit() {
   IFunction_const_sptr func = m_view->function("");
   auto dataWS = m_model->data();
   if (func && dataWS) {
-    removePlots();
+    removePlot("Fit");
     m_model->fitPeaks(func);
   } else {
     m_view->displayError("Couldn't fit with empty function/data");
@@ -76,7 +73,8 @@ void ALCPeakFittingPresenter::onPeakPickerChanged() {
   // If PeakPicker is changed, it should be enabled, which means a peak function
   // should be selected
   // (See onCurrentFunctionChanged)
-  assert(bool(index));
+  if (!index)
+    return;
 
   auto peakFunc = m_view->peakPicker();
 
@@ -103,27 +101,21 @@ void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {
 }
 
 void ALCPeakFittingPresenter::onFittedPeaksChanged() {
-  IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
+  IFunction_const_sptr fitted = m_model->fittedPeaks();
   auto dataWS = m_model->data();
-  if (fittedPeaks && dataWS) {
-    const auto &x = dataWS->x(0);
-    m_view->setFittedCurve(
-        *(QwtHelper::curveDataFromFunction(fittedPeaks, x.rawData())));
-    m_view->setFunction(fittedPeaks);
+  if (fitted && dataWS) {
+    m_view->setFittedCurve(dataWS, 1);
+    m_view->setFunction(fitted);
   } else {
-    m_view->setFittedCurve(*(QwtHelper::emptyCurveData()));
+    m_view->removePlot("Fit");
     m_view->setFunction(IFunction_const_sptr());
   }
 }
 
 void ALCPeakFittingPresenter::onDataChanged() {
   auto dataWS = m_model->data();
-  if (dataWS) {
-    m_view->setDataCurve(*(QwtHelper::curveDataFromWs(m_model->data(), 0)),
-                         QwtHelper::curveErrorsFromWs(m_model->data(), 0));
-  } else {
-    m_view->setDataCurve(*(QwtHelper::emptyCurveData()), Mantid::MantidVec{});
-  }
+  if (dataWS)
+    m_view->setDataCurve(dataWS);
 }
 
 /**
@@ -132,14 +124,14 @@ void ALCPeakFittingPresenter::onDataChanged() {
  */
 void ALCPeakFittingPresenter::onPlotGuessClicked() {
   if (m_guessPlotted) {
-    removePlots();
+    removePlot("Guess");
   } else {
     if (plotGuessOnGraph()) {
       m_view->changePlotGuessState(true);
       m_guessPlotted = true;
     } else {
       m_view->displayError("Couldn't plot with empty function/data");
-      removePlots();
+      removePlot("Guess");
     }
   }
 }
@@ -150,23 +142,21 @@ void ALCPeakFittingPresenter::onPlotGuessClicked() {
  * @returns :: success or failure
  */
 bool ALCPeakFittingPresenter::plotGuessOnGraph() {
-  bool plotted = false;
-  auto func = m_view->function("");
-  auto dataWS = m_model->data();
-  if (func && dataWS) {
-    const auto &xdata = dataWS->x(0);
-    m_view->setFittedCurve(
-        *(QwtHelper::curveDataFromFunction(func, xdata.rawData())));
-    plotted = true;
+  if (const auto fitFunction = m_view->function("")) {
+    if (const auto dataWorkspace = m_model->data()) {
+      const auto &xValues = dataWorkspace->x(0);
+      m_view->setGuessCurve(m_model->guessData(fitFunction, xValues.rawData()));
+      return true;
+    }
   }
-  return plotted;
+  return false;
 }
 
 /**
  * Removes any fit function from the graph.
  */
-void ALCPeakFittingPresenter::removePlots() {
-  m_view->setFittedCurve(*(QwtHelper::emptyCurveData()));
+void ALCPeakFittingPresenter::removePlot(std::string const &plotName) {
+  m_view->removePlot(QString::fromStdString(plotName));
   m_view->changePlotGuessState(false);
   m_guessPlotted = false;
 }

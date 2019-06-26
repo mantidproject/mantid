@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 
-class HomeTabView(QtGui.QWidget):
+class HomeTabView(QtWidgets.QWidget):
 
-    def __init__(self, parent=None,widget_list=None):
+    def __init__(self, parent=None, widget_list=None):
         super(HomeTabView, self).__init__(parent)
 
         self._widget_list = widget_list
@@ -26,7 +26,7 @@ class HomeTabView(QtGui.QWidget):
         self.setWindowTitle("Home Tab")
         self.resize(500, 100)
 
-        self.vertical_layout = QtGui.QVBoxLayout()
+        self.vertical_layout = QtWidgets.QVBoxLayout()
 
         if self._widget_list:
             for i, widget in enumerate(self._widget_list):

@@ -7,11 +7,8 @@
 #include "ALCPeakFittingView.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 
 #include <QMessageBox>
-
-#include <qwt_symbol.h>
 
 using namespace Mantid::API;
 
@@ -19,18 +16,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget)
-    : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()),
-      m_fittedCurve(new QwtPlotCurve()), m_dataErrorCurve(nullptr),
-      m_peakPicker(nullptr) {}
+    : m_widget(widget), m_ui(), m_peakPicker(nullptr) {}
 
-ALCPeakFittingView::~ALCPeakFittingView() {
-  m_dataCurve->detach();
-  delete m_dataCurve;
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-}
+ALCPeakFittingView::~ALCPeakFittingView() {}
 
 IFunction_const_sptr ALCPeakFittingView::function(QString index) const {
   return m_ui.peaks->getFunctionByIndex(index);
@@ -49,19 +37,11 @@ void ALCPeakFittingView::initialize() {
 
   connect(m_ui.fit, SIGNAL(clicked()), this, SIGNAL(fitRequested()));
 
-  m_ui.plot->setCanvasBackground(Qt::white);
-  m_ui.plot->setAxisFont(QwtPlot::xBottom, m_widget->font());
-  m_ui.plot->setAxisFont(QwtPlot::yLeft, m_widget->font());
+  m_ui.plot->setCanvasColour(Qt::white);
 
-  m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
-  m_dataCurve->setSymbol(
-      QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7, 7)));
-  m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_dataCurve->attach(m_ui.plot);
-
-  m_fittedCurve->setPen(QPen(Qt::red, 1.5));
-  m_fittedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_fittedCurve->attach(m_ui.plot);
+  // Error bars on the plot
+  QStringList plotsWithErrors{"Corrected"};
+  m_ui.plot->setLinesWithErrors(plotsWithErrors);
 
   // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
   // (auto-delete option)
@@ -78,27 +58,37 @@ void ALCPeakFittingView::initialize() {
   connect(m_ui.plotGuess, SIGNAL(clicked()), this, SLOT(plotGuess()));
 }
 
-void ALCPeakFittingView::setDataCurve(const QwtData &data,
-                                      const std::vector<double> &errors) {
+void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace,
+                                      std::size_t const &workspaceIndex) {
+  // These kwargs ensure only the data points are plotted with no line
+  QHash<QString, QVariant> kwargs;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_ui.plot->setCurveStyle("Corrected", -1);
+  m_ui.plot->setCurveSymbol("Corrected", 0);
+#else
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
+#endif
 
-  // Set data
-  m_dataCurve->setData(data);
+  m_ui.plot->clear();
+  m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::black,
+                         kwargs);
+}
 
-  // Set errors
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-  m_dataErrorCurve =
-      new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
-  m_dataErrorCurve->attach(m_ui.plot);
-
-  // Replot
+void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr workspace,
+                                        std::size_t const &workspaceIndex) {
+  m_ui.plot->addSpectrum("Fit", workspace, workspaceIndex, Qt::red);
   m_ui.plot->replot();
 }
 
-void ALCPeakFittingView::setFittedCurve(const QwtData &data) {
-  m_fittedCurve->setData(data);
+void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr workspace,
+                                       std::size_t const &workspaceIndex) {
+  m_ui.plot->addSpectrum("Guess", workspace, workspaceIndex, Qt::green);
+  m_ui.plot->replot();
+}
+
+void ALCPeakFittingView::removePlot(QString const &plotName) {
+  m_ui.plot->removeSpectrum(plotName);
   m_ui.plot->replot();
 }
 
@@ -121,13 +111,21 @@ void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
 
 void ALCPeakFittingView::setParameter(const QString &funcIndex,
                                       const QString &paramName, double value) {
-  m_ui.peaks->setParameter(funcIndex, paramName, value);
+  m_ui.peaks->setParameter(funcIndex + paramName, value);
 }
 
 void ALCPeakFittingView::setPeakPickerEnabled(bool enabled) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_peakPicker->setEnabled(enabled);
   m_peakPicker->setVisible(enabled);
-  m_ui.plot->replot(); // PeakPicker might get hidden/shown
+#else
+  m_peakPicker->select(enabled);
+  if (enabled)
+    m_peakPicker->redraw();
+  else
+    m_peakPicker->remove();
+#endif
+  m_ui.plot->replot();
 }
 
 void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {

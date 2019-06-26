@@ -227,7 +227,7 @@ public:
 protected:
   // the pointer to the class, responsible for saving/restoring this class to
   // the hdd
-  mutable Kernel::ISaveable *m_Saveable;
+  mutable std::unique_ptr<Kernel::ISaveable> m_Saveable;
   /** Vector of MDEvent's, in no particular order. */
   mutable std::vector<MDE> data;
 

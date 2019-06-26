@@ -86,7 +86,7 @@ void forceSpectraAxis(MatrixWorkspace &ws) {
   if (dynamic_cast<SpectraAxis *>(ws.getAxis(1))) {
     return;
   }
-  ws.replaceAxis(1, new SpectraAxis(&ws));
+  ws.replaceAxis(1, std::make_unique<SpectraAxis>(&ws));
 }
 
 } // anonymous namespace
@@ -99,36 +99,36 @@ const double GroupDetectors2::OPENINGFILE = 0.03;
 const double GroupDetectors2::READFILE = 0.15;
 
 void GroupDetectors2::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<CommonBinsValidator>()),
                   "The name of the input 2D workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
   const std::vector<std::string> exts{".map", ".xml"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("MapFile", "",
-                                        FileProperty::OptionalLoad, exts),
+      std::make_unique<FileProperty>("MapFile", "", FileProperty::OptionalLoad,
+                                     exts),
       "A file that consists of lists of spectra numbers to group. See the "
       "help for the file format");
   declareProperty(
       "IgnoreGroupNumber", true,
       "If true, use sequential spectrum numbers, otherwise use the group "
       "number from MapFile as spectrum numbers.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "GroupingPattern", "", Direction::Input),
                   "Describes how this algorithm should group the detectors. "
                   "See the help for full instructions.");
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectraList"),
       "An array containing a list of the spectrum numbers to combine "
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
-  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "An array of detector IDs to combine (WorkspaceIndexList is "
                   "ignored if this is set)");
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
   declareProperty(
       "KeepUngroupedSpectra", false,
@@ -145,7 +145,7 @@ void GroupDetectors2::init() {
                   "Keep the output workspace as an EventWorkspace, if the "
                   "input has events.");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "CopyGroupingFromWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "The name of a workspace to copy the grouping from. "
@@ -705,11 +705,10 @@ void GroupDetectors2::processMatrixWorkspace(
       // not found - create an empty set
       group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
     }
-    // get a reference to the set
-    std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
 
     // If the detector was not found or was not in a group, then ignore it.
     if (spectrumInfo.spectrumDefinition(i).size() > 1) {
+      std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
       for (const auto &spectrumDefinition :
            spectrumInfo.spectrumDefinition(i)) {
         // translate detectors to target det ws indexes
@@ -987,21 +986,21 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
           spectrumInfo.isMasked(originalWI)) {
         continue;
       }
-      const auto &Ys = inputWS->y(originalWI);
-      const auto &Es = inputWS->e(originalWI);
+      const auto &inYs = inputWS->y(originalWI);
+      const auto &inEs = inputWS->e(originalWI);
       if (inputWS->hasMaskedBins(originalWI)) {
         const auto &maskedBins = inputWS->maskedBins(originalWI);
-        for (size_t binIndex = 0; binIndex < Ys.size(); ++binIndex) {
+        for (size_t binIndex = 0; binIndex < inYs.size(); ++binIndex) {
           if (maskedBins.count(binIndex) == 0) {
-            sum[binIndex] += Ys[binIndex];
-            errorSum[binIndex] += Es[binIndex] * Es[binIndex];
+            sum[binIndex] += inYs[binIndex];
+            errorSum[binIndex] += inEs[binIndex] * inEs[binIndex];
             count[binIndex] += 1;
           }
         }
       } else {
-        for (size_t binIndex = 0; binIndex < Ys.size(); ++binIndex) {
-          sum[binIndex] += Ys[binIndex];
-          errorSum[binIndex] += Es[binIndex] * Es[binIndex];
+        for (size_t binIndex = 0; binIndex < inYs.size(); ++binIndex) {
+          sum[binIndex] += inYs[binIndex];
+          errorSum[binIndex] += inEs[binIndex] * inEs[binIndex];
           count[binIndex] += 1;
         }
       }

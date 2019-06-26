@@ -5,10 +5,21 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBoxIterator.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadPool.h"
@@ -16,21 +27,11 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidDataObjects/MDBoxBase.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
-#include "MantidDataObjects/MDGridBox.h"
-#include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidKernel/ConfigService.h"
 
-#include <iomanip>
-#include <iostream>
-#include <functional>
 #include <algorithm>
-#include "MantidDataObjects/MDBoxIterator.h"
-#include "MantidKernel/Memory.h"
-#include "MantidKernel/Exception.h"
+#include <functional>
+#include <iomanip>
+#include <ostream>
 
 // Test for gcc 4.4
 #if __GNUC__ > 4 ||                                                            \
@@ -41,6 +42,10 @@ GNU_DIAG_OFF("strict-aliasing")
 
 namespace Mantid {
 namespace DataObjects {
+
+namespace {
+Kernel::Logger logger("MDEventWorkspace");
+}
 
 //-----------------------------------------------------------------------------------------------
 /** Constructor
@@ -55,7 +60,7 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(
       m_displayNormalizationHisto(preferredNormalizationHisto),
       m_coordSystem(Kernel::None) {
   // First box is at depth 0, and has this default boxController
-  data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
+  data = std::make_unique<MDBox<MDE, nd>>(m_BoxController.get(), 0);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -69,13 +74,14 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
       m_coordSystem(other.m_coordSystem) {
 
   const MDBox<MDE, nd> *mdbox =
-      dynamic_cast<const MDBox<MDE, nd> *>(other.data);
+      dynamic_cast<const MDBox<MDE, nd> *>(other.data.get());
   const MDGridBox<MDE, nd> *mdgridbox =
-      dynamic_cast<const MDGridBox<MDE, nd> *>(other.data);
+      dynamic_cast<const MDGridBox<MDE, nd> *>(other.data.get());
   if (mdbox) {
-    data = new MDBox<MDE, nd>(*mdbox, m_BoxController.get());
+    data = std::make_unique<MDBox<MDE, nd>>(*mdbox, m_BoxController.get());
   } else if (mdgridbox) {
-    data = new MDGridBox<MDE, nd>(*mdgridbox, m_BoxController.get());
+    data =
+        std::make_unique<MDGridBox<MDE, nd>>(*mdgridbox, m_BoxController.get());
   } else {
     throw std::runtime_error(
         "MDEventWorkspace::copy_ctor(): unexpected data box type found.");
@@ -85,11 +91,11 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
 //-----------------------------------------------------------------------------------------------
 /** Destructor
  */
-TMDE(MDEventWorkspace)::~MDEventWorkspace() { delete data; }
+TMDE(MDEventWorkspace)::~MDEventWorkspace() {}
 /**Make workspace file backed if it has not been already file backed
  * @param fileName -- short or full file name of the file, which should be used
  * as the file back end
-*/
+ */
 TMDE(void MDEventWorkspace)::setFileBacked(const std::string & /*fileName*/) {
   throw Kernel::Exception::NotImplementedError(" Not yet implemented");
 }
@@ -243,9 +249,10 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
  * @param suggestedNumCores :: split iterator over this many cores.
  * @param function :: Optional MDImplicitFunction limiting the iterator
  */
-TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>> MDEventWorkspace)::createIterators(
-    size_t suggestedNumCores,
-    Mantid::Geometry::MDImplicitFunction *function) const {
+TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>>
+         MDEventWorkspace)::createIterators(size_t suggestedNumCores,
+                                            Mantid::Geometry::MDImplicitFunction
+                                                *function) const {
   // Get all the boxes in this workspaces
   std::vector<API::IMDNode *> boxes;
   // TODO: Should this be leaf only? Depends on most common use case
@@ -271,7 +278,7 @@ TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>> MDEventWorkspace)::c
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(Kernel::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
+    out.push_back(std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
   }
   return out;
 }
@@ -545,18 +552,13 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
     }
     ws->cell<std::string>(i, col++) = box->getExtentsStr();
   }
-  std::cout << tim << " to create the MDBox data table.\n";
+  logger.information() << tim << " to create the MDBox data table.\n";
   return ws;
 }
 
 //-----------------------------------------------------------------------------------------------
 /** @returns the number of bytes of memory used by the workspace. */
 TMDE(size_t MDEventWorkspace)::getMemorySize() const {
-  //    std::cout << "sizeof(MDE) " << sizeof(MDE) << '\n';
-  //    std::cout << "sizeof(MDBox<MDE,nd>) " << sizeof(MDBox<MDE,nd>) <<
-  //    '\n';
-  //    std::cout << "sizeof(MDGridBox<MDE,nd>) " << sizeof(MDGridBox<MDE,nd>)
-  //    << '\n';
   size_t total = 0;
   if (this->m_BoxController->isFileBacked()) {
     // File-backed workspace
@@ -602,17 +604,17 @@ TMDE(size_t MDEventWorkspace)::addEvents(const std::vector<MDE> &events) {
  */
 TMDE(void MDEventWorkspace)::splitBox() {
   // Want MDGridBox
-  MDGridBox<MDE, nd> *gridBox = dynamic_cast<MDGridBox<MDE, nd> *>(data);
+  MDGridBox<MDE, nd> *gridBox = dynamic_cast<MDGridBox<MDE, nd> *>(data.get());
   if (!gridBox) {
     // Track how many MDBoxes there are in the overall workspace
     this->m_BoxController->trackNumBoxes(data->getDepth());
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(data);
+    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(data.get());
     if (!box)
       throw std::runtime_error("MDEventWorkspace::splitBox() expected its data "
                                "to be a MDBox* to split to MDGridBox.");
-    gridBox = new MDGridBox<MDE, nd>(box);
-    delete data;
-    data = gridBox;
+    auto tempGridBox = std::make_unique<MDGridBox<MDE, nd>>(box);
+
+    data = std::move(tempGridBox);
   }
 }
 
@@ -664,95 +666,6 @@ TMDE(void MDEventWorkspace)::refreshCache() {
   data->refreshCache();
   // TODO ThreadPool
 }
-
-//  //-----------------------------------------------------------------------------------------------
-//  /** Add a large number of events to this MDEventWorkspace.
-//   * This will use a ThreadPool/OpenMP to allocate events in parallel.
-//   *
-//   * param events :: vector of events to be copied.
-//   * param prog :: optional Progress object to report progress back to
-//   GUI/algorithms.
-//   * return the number of events that were rejected (because of being out of
-//   bounds)
-//   */
-//  TMDE(
-//  void MDEventWorkspace)::addManyEvents(const std::vector<MDE> & events,
-//  Mantid::Kernel::ProgressBase * prog)
-//  {
-//    // Always split the MDBox into a grid box
-//    this->splitBox();
-//    MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
-//
-//    // Get some parameters that should optimize task allocation.
-//    size_t eventsPerTask, numTasksPerBlock;
-//    this->m_BoxController->getAddingEventsParameters(eventsPerTask,
-//    numTasksPerBlock);
-//
-//    // Set up progress report, if any
-//    if (prog)
-//    {
-//      size_t numTasks = events.size()/eventsPerTask;
-//      prog->setNumSteps( int( numTasks + numTasks/numTasksPerBlock ));
-//    }
-//
-//    // Where we are in the list of events
-//    size_t event_index = 0;
-//    while (event_index < events.size())
-//    {
-//      //Since the costs are not known ahead of time, use a simple FIFO buffer.
-//      ThreadScheduler * ts = new ThreadSchedulerFIFO();
-//      // Create the threadpool
-//      ThreadPool tp(ts);
-//
-//      // Do 'numTasksPerBlock' tasks with 'eventsPerTask' events in each one.
-//      for (size_t i = 0; i < numTasksPerBlock; i++)
-//      {
-//        // Calculate where to start and stop in the events vector
-//        bool breakout = false;
-//        size_t start_at = event_index;
-//        event_index += eventsPerTask;
-//        size_t stop_at = event_index;
-//        if (stop_at >= events.size())
-//        {
-//          stop_at = events.size();
-//          breakout = true;
-//        }
-//
-//        // Create a task and push it into the scheduler
-//        //std::cout << "Making a AddEventsTask " << start_at << " to " <<
-//        stop_at << '\n';
-//        typename MDGridBox<MDE,nd>::AddEventsTask * task;
-//        task = new typename MDGridBox<MDE,nd>::AddEventsTask(gridBox, events,
-//        start_at, stop_at, prog) ;
-//        ts->push( task );
-//
-//        if (breakout) break;
-//      }
-//
-//      // Finish all threads.
-////      std::cout << "Starting block ending at index " << event_index << " of
-///" << events.size() << '\n';
-//      Timer tim;
-//      tp.joinAll();
-////      std::cout << "... block took " << tim.elapsed() << " secs.\n";
-//
-//      //Create a threadpool for splitting.
-//      ThreadScheduler * ts_splitter = new ThreadSchedulerFIFO();
-//      ThreadPool tp_splitter(ts_splitter);
-//
-//      //Now, shake out all the sub boxes and split those if needed
-////      std::cout << "\nStarting splitAllIfNeeded().\n";
-//      if (prog) prog->report("Splitting MDBox'es.");
-//
-//      gridBox->splitAllIfNeeded(ts_splitter);
-//      tp_splitter.joinAll();
-////      std::cout << "\n... splitAllIfNeeded() took " << tim.elapsed() << "
-/// secs.\n";
-//    }
-//
-//    // Refresh the counts, now that we are all done.
-//    this->refreshCache();
-//  }
 
 //----------------------------------------------------------------------------------------------
 /** Get ordered list of positions-along-the-line that lie halfway between points
@@ -936,19 +849,17 @@ Setter for the masking region.
 @param maskingRegion : Implicit function defining mask region.
 */
 TMDE(void MDEventWorkspace)::setMDMasking(
-    Mantid::Geometry::MDImplicitFunction *maskingRegion) {
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) {
   if (maskingRegion) {
     std::vector<API::IMDNode *> toMaskBoxes;
 
     // Apply new masks
-    this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
+    this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion.get());
     for (const auto box : toMaskBoxes) {
       box->clear();
       box->clearFileBacked(false);
       box->mask();
     }
-
-    delete maskingRegion;
   }
 }
 

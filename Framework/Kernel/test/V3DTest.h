@@ -418,10 +418,10 @@ public:
     NexusTestHelper th(true);
     th.createFile("V3DTest.nxs");
     V3D a(1, 2, 3);
-    a.saveNexus(th.file, "vector");
+    a.saveNexus(th.file.get(), "vector");
     th.reopenFile();
     V3D b;
-    b.loadNexus(th.file, "vector");
+    b.loadNexus(th.file.get(), "vector");
     TS_ASSERT_EQUALS(a, b);
   }
 
@@ -468,7 +468,7 @@ public:
 
   void test_toCrystllographic() {
     V3D a0;
-    TS_ASSERT_THROWS(a0.toMillerIndexes(), std::invalid_argument);
+    TS_ASSERT_THROWS(a0.toMillerIndexes(), const std::invalid_argument &);
 
     V3D a1(0.1, 0.2, 5);
     TS_ASSERT_THROWS_NOTHING(a1.toMillerIndexes());
@@ -560,6 +560,20 @@ public:
     TS_ASSERT_DELTA(acos(2.0 / modv2) * 180 / M_PI, angles[0], 1e-6);
     TS_ASSERT_DELTA(acos(3.0 / modv2) * 180 / M_PI, angles[1], 1e-6);
     TS_ASSERT_DELTA(acos(4.0 / modv2) * 180 / M_PI, angles[2], 1e-6);
+  }
+
+  void test_normalize() {
+    constexpr V3D v(-2.3, 5.0, -7.1);
+    const V3D normalized = normalize(v);
+    TS_ASSERT_DELTA(normalized.norm(), 1., 1e-12)
+    TS_ASSERT_DELTA(v.scalar_prod(normalized) / v.norm(), 1., 1e-12)
+  }
+
+  void test_normalize_nullVector_throws() {
+    constexpr V3D nullVector;
+    TS_ASSERT_THROWS_EQUALS(
+        normalize(nullVector), const std::runtime_error &e, e.what(),
+        std::string("Unable to normalize a zero length vector."))
   }
 };
 

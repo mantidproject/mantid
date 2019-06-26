@@ -43,7 +43,6 @@ using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::ListValidator;
 using Mantid::Kernel::MandatoryValidator;
-using Mantid::Kernel::make_unique;
 
 namespace {
 /// An enum specifying a line profile orientation.
@@ -135,14 +134,14 @@ void setAxesAndUnits(Workspace2D &outWS, const MatrixWorkspace &ws,
   std::vector<double> vertBins(2);
   vertBins.front() = dir == LineDirection::horizontal ? box.top : box.left;
   vertBins.back() = dir == LineDirection::horizontal ? box.bottom : box.right;
-  auto outVertAxis = make_unique<BinEdgeAxis>(vertBins);
+  auto outVertAxis = std::make_unique<BinEdgeAxis>(vertBins);
   axisIndex = dir == LineDirection::horizontal ? 1 : 0;
   if (ws.getAxis(axisIndex)->isSpectra()) {
     outVertAxis->setUnit("Empty");
   } else {
     outVertAxis->setUnit(ws.getAxis(axisIndex)->unit()->unitID());
   }
-  outWS.replaceAxis(1, outVertAxis.release());
+  outWS.replaceAxis(1, std::move(outVertAxis));
 }
 
 /**
@@ -260,7 +259,8 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
  * @param n Number of summed points.
  * @return The average.
  */
-double averageMode(const double sum, const size_t n, const size_t) noexcept {
+double averageMode(const double sum, const size_t n,
+                   const size_t /*unused*/) noexcept {
   return sum / static_cast<double>(n);
 }
 
@@ -328,11 +328,11 @@ void LineProfile::init() {
   const auto inputWorkspaceValidator = boost::make_shared<CompositeValidator>();
   inputWorkspaceValidator->add(boost::make_shared<CommonBinsValidator>());
   inputWorkspaceValidator->add(boost::make_shared<IncreasingAxisValidator>());
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
                       inputWorkspaceValidator),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
                   "A single histogram workspace containing the profile.");
   declareProperty(PropertyNames::CENTRE, EMPTY_DBL(), mandatoryDouble,

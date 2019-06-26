@@ -24,8 +24,9 @@ DECLARE_LISTENER(FakeEventDataListener)
 
 /// Constructor
 FakeEventDataListener::FakeEventDataListener()
-    : LiveListener(), m_buffer(), m_rand(new Kernel::MersenneTwister(5489)),
-      m_timer(), m_callbackloop(1), m_numExtractDataCalls(0), m_runNumber(1) {
+    : LiveListener(), m_buffer(),
+      m_rand(std::make_unique<Kernel::MersenneTwister>(5489)), m_timer(),
+      m_callbackloop(1), m_numExtractDataCalls(0), m_runNumber(1) {
 
   auto datarateConfigVal =
       ConfigService::Instance().getValue<int>("fakeeventdatalistener.datarate");
@@ -43,12 +44,10 @@ FakeEventDataListener::FakeEventDataListener()
 }
 
 /// Destructor
-FakeEventDataListener::~FakeEventDataListener() {
-  m_timer.stop();
-  delete m_rand;
-}
+FakeEventDataListener::~FakeEventDataListener() { m_timer.stop(); }
 
-bool FakeEventDataListener::connect(const Poco::Net::SocketAddress &) {
+bool FakeEventDataListener::connect(
+    const Poco::Net::SocketAddress & /*address*/) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }
@@ -144,7 +143,7 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 /** Callback method called at specified interval by timer.
  *  Used to fill buffer workspace with events between calls to extractData.
  */
-void FakeEventDataListener::generateEvents(Poco::Timer &) {
+void FakeEventDataListener::generateEvents(Poco::Timer & /*unused*/) {
   std::lock_guard<std::mutex> _lock(m_mutex);
   for (long i = 0; i < m_callbackloop; ++i) {
     m_buffer->getSpectrum(0).addEventQuickly(

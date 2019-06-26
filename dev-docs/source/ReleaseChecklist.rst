@@ -164,6 +164,7 @@ Once the unscripted testing has passed:
   following the instructions
   `here <https://github.com/mantidproject/download.mantidproject.org>`__
 * Publish the draft release on GitHub (this will create the tag too).
+* Clear any error reports from https://errorreports.mantidproject.org for the new version.
 
 Finalise
 ========

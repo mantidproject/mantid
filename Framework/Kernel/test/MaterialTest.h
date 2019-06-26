@@ -9,7 +9,6 @@
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 #include <stdexcept>
 
 #include "MantidKernel/Atom.h"
@@ -135,11 +134,11 @@ public:
     NexusTestHelper th(true);
     th.createFile("MaterialTest.nxs");
 
-    TS_ASSERT_THROWS_NOTHING(testA.saveNexus(th.file, "material"););
+    TS_ASSERT_THROWS_NOTHING(testA.saveNexus(th.file.get(), "material"););
 
     Material testB;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING(testB.loadNexus(th.file, "material"););
+    TS_ASSERT_THROWS_NOTHING(testB.loadNexus(th.file.get(), "material"););
 
     TS_ASSERT_EQUALS(testB.name(), "testMaterial");
     TS_ASSERT_DELTA(testB.numberDensity(), 0.072, 1e-6);
@@ -156,10 +155,10 @@ public:
     Material testA;
     NexusTestHelper th(true);
     th.createFile("MaterialTest.nxs");
-    TS_ASSERT_THROWS_NOTHING(testA.saveNexus(th.file, "material"););
+    TS_ASSERT_THROWS_NOTHING(testA.saveNexus(th.file.get(), "material"););
     Material testB;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING(testB.loadNexus(th.file, "material"););
+    TS_ASSERT_THROWS_NOTHING(testB.loadNexus(th.file.get(), "material"););
   }
 
   void test_parseMaterial() {
@@ -235,7 +234,7 @@ public:
     TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     TS_ASSERT_THROWS(cf = Material::parseChemicalFormula("H2*O"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_EQUALS(cf.size(), 2);
     TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
     TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);

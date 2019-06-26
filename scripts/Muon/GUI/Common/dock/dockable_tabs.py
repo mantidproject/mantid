@@ -1,5 +1,14 @@
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import pyqtSignal, pyqtSlot
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
+
+from qtpy import QtWidgets, QtCore, QtGui, PYQT4
+from qtpy.QtCore import Slot
 
 """
 Original code by user Blackwood, Jan 2018.
@@ -7,13 +16,13 @@ https://stackoverflow.com/questions/47267195/in-pyqt4-is-it-possible-to-detach-t
 """
 
 
-class DetachableTabWidget(QtGui.QTabWidget):
+class DetachableTabWidget(QtWidgets.QTabWidget):
     """
     The detached tabs are QMainWindow type
     """
 
     def __init__(self, parent=None):
-        QtGui.QTabWidget.__init__(self, parent)
+        QtWidgets.QTabWidget.__init__(self, parent)
 
         self.tab_bar = self.TabBar(self)
 
@@ -48,7 +57,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
         self.attached_tab_names.append(name)
         super(DetachableTabWidget, self).addTab(tab, name)
 
-    @pyqtSlot(int, int)
+    @Slot(int, int)
     def move_tab(self, from_index, to_index):
         """
         Move a tab from one position (index) to another
@@ -64,7 +73,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
         self.insertTab(to_index, widget, icon, text)
         self.setCurrentIndex(to_index)
 
-    @pyqtSlot(int, QtCore.QPoint)
+    @Slot(int, QtCore.QPoint)
     def detach_tab(self, index, point):
         """
         Detach the tab by removing it's contents and placing them in
@@ -186,7 +195,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
                     del self.detachedTabs[key]
                     break
 
-    @QtCore.pyqtSlot(str, int, QtCore.QPoint)
+    @Slot(str, int, QtCore.QPoint)
     def detached_tab_drop(self, name, index, drop_pos):
         """
         Handle dropping of a detached tab inside the DetachableTabWidget.
@@ -243,17 +252,17 @@ class DetachableTabWidget(QtGui.QTabWidget):
         for detachedTab in list_of_detached_tabs:
             detachedTab.close()
 
-    class DetachedTab(QtGui.QMainWindow):
+    class DetachedTab(QtWidgets.QMainWindow):
         """
         When a tab is detached, the contents are placed into this QDialog.  The tab
         can be re-attached by closing the dialog or by double clicking on its
         window frame.
         """
-        onCloseSignal = pyqtSignal(QtGui.QWidget, str, QtGui.QIcon)
-        onDropSignal = pyqtSignal(str, QtCore.QPoint)
+        onCloseSignal = QtCore.Signal(QtWidgets.QWidget, str, QtGui.QIcon)
+        onDropSignal = QtCore.Signal(str, QtCore.QPoint)
 
         def __init__(self, name, content_widget):
-            QtGui.QMainWindow.__init__(self, None)
+            QtWidgets.QMainWindow.__init__(self, None)
 
             self.setObjectName(name)
             self.setWindowTitle(name)
@@ -266,7 +275,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
             self.installEventFilter(self.windowDropFilter)
             self.windowDropFilter.onDropSignal.connect(self.windowDropSlot)
 
-        @pyqtSlot(QtCore.QPoint)
+        @Slot(QtCore.QPoint)
         def windowDropSlot(self, drop_pos):
             """
             Handle a window drop event
@@ -278,7 +287,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
             """
             An event filter class to detect a QMainWindow drop event.
             """
-            onDropSignal = pyqtSignal(QtCore.QPoint)
+            onDropSignal = QtCore.Signal(QtCore.QPoint)
 
             def __init__(self, outer):
                 QtCore.QObject.__init__(self)
@@ -311,21 +320,21 @@ class DetachableTabWidget(QtGui.QTabWidget):
             """
             self.onCloseSignal.emit(self.contentWidget, self.objectName(), self.windowIcon())
 
-    class TabBar(QtGui.QTabBar):
+    class TabBar(QtWidgets.QTabBar):
         """
         The TabBar class re-implements some of the functionality of the QTabBar widget.
         """
 
-        onDetachTabSignal = pyqtSignal(int, QtCore.QPoint)
-        onMoveTabSignal = pyqtSignal(int, int)
-        detachedTabDropSignal = pyqtSignal(str, int, QtCore.QPoint)
+        onDetachTabSignal = QtCore.Signal(int, QtCore.QPoint)
+        onMoveTabSignal = QtCore.Signal(int, int)
+        detachedTabDropSignal = QtCore.Signal(str, int, QtCore.QPoint)
 
         def __init__(self, parent=None):
-            QtGui.QTabBar.__init__(self, parent)
+            QtWidgets.QTabBar.__init__(self, parent)
 
             self.setAcceptDrops(True)
             self.setElideMode(QtCore.Qt.ElideRight)
-            self.setSelectionBehaviorOnRemove(QtGui.QTabBar.SelectLeftTab)
+            self.setSelectionBehaviorOnRemove(QtWidgets.QTabBar.SelectLeftTab)
 
             self.drag_start_pos = QtCore.QPoint()
             self.drag_end_pos = QtCore.QPoint()
@@ -355,7 +364,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
 
             self.drag_initiated = False
 
-            QtGui.QTabBar.mousePressEvent(self, event)
+            QtWidgets.QTabBar.mousePressEvent(self, event)
 
         def mouseMoveEvent(self, event):
             """
@@ -367,7 +376,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
 
             # Determine if the current movement is detected as a drag
             if not self.drag_start_pos.isNull() and (
-                    (event.pos() - self.drag_start_pos).manhattanLength() < QtGui.QApplication.startDragDistance()):
+                    (event.pos() - self.drag_start_pos).manhattanLength() < QtWidgets.QApplication.startDragDistance()):
                 self.drag_initiated = True
 
             # If the current movement is a drag initiated by the left button
@@ -376,15 +385,23 @@ class DetachableTabWidget(QtGui.QTabWidget):
                 # Stop the move event
                 finish_move_event = QtGui.QMouseEvent(QtCore.QEvent.MouseMove, event.pos(), QtCore.Qt.NoButton,
                                                       QtCore.Qt.NoButton, QtCore.Qt.NoModifier)
-                QtGui.QTabBar.mouseMoveEvent(self, finish_move_event)
+                QtWidgets.QTabBar.mouseMoveEvent(self, finish_move_event)
 
                 # Convert the move event into a drag
                 drag = QtGui.QDrag(self)
                 mime_data = QtCore.QMimeData()
                 drag.setMimeData(mime_data)
 
-                # Create the appearance of dragging the tab content
-                pixmap = QtGui.QPixmap.grabWindow(self.parentWidget().currentWidget().winId())
+                if PYQT4:
+                    pixmap = QtGui.QPixmap.grabWindow(self.parentWidget().currentWidget().winId())
+                else:
+                    app = QtWidgets.QApplication.instance()
+                    desktop = app.desktop()
+                    screen_number = desktop.screenNumber(self.parentWidget().currentWidget())
+                    screen = app.screens()[screen_number]
+                    # Create the appearance of dragging the tab content
+                    pixmap = QtGui.QScreen.grabWindow(screen, self.parentWidget().currentWidget().winId())
+
                 target_pixmap = QtGui.QPixmap(pixmap.size())
                 target_pixmap.fill(QtCore.Qt.transparent)
                 painter = QtGui.QPainter(target_pixmap)
@@ -413,17 +430,17 @@ class DetachableTabWidget(QtGui.QTabWidget):
                         event.accept()
                         self.onMoveTabSignal.emit(self.tabAt(self.drag_start_pos), self.tabAt(self.drag_end_pos))
             else:
-                QtGui.QTabBar.mouseMoveEvent(self, event)
+                QtWidgets.QTabBar.mouseMoveEvent(self, event)
 
         def dragEnterEvent(self, event):
-            QtGui.QTabBar.dragMoveEvent(self, event)
+            QtWidgets.QTabBar.dragMoveEvent(self, event)
 
         def dropEvent(self, event):
             """
             Get the position of the end of the drag.
             """
             self.drag_end_pos = event.pos()
-            QtGui.QTabBar.dropEvent(self, event)
+            QtWidgets.QTabBar.dropEvent(self, event)
 
         def detachedTabDrop(self, tab_name, drop_pos):
             """

@@ -10,18 +10,45 @@
 # PARAVIEW_DIR should be set in the configuration of each slave.
 ###############################################################################
 SCRIPT_DIR=$(dirname "$0")
+XVFB_SERVER_NUM=101
+ULIMIT_CORE_ORIG=$(ulimit -c)
+
+if [ $(command -v xvfb-run) ]; then
+  X11_RUNNER="xvfb-run"
+  X11_RUNNER_ARGS1=--server-args="-screen 0 640x480x24"
+  X11_RUNNER_ARGS2=--server-num=${XVFB_SERVER_NUM}
+else
+  X11_RUNNER="eval"
+  X11_RUNNER_ARGS1=""
+  X11_RUNNER_ARGS2=""
+fi
+
+###############################################################################
+# Functions
+###############################################################################
+
+function onexit {
+  if [[ ${USE_CORE_DUMPS} == true ]]; then
+    ulimit -c $ULIMIT_CORE_ORIG
+  fi
+}
+
+function run_with_xvfb {
+  ${X11_RUNNER} "${X11_RUNNER_ARGS1}" "${X11_RUNNER_ARGS2}" $@
+}
+
 
 ###############################################################################
 # Terminate existing Xvfb sessions
 ###############################################################################
-if [[ -n ${CLEAN_XVFB} && "${CLEAN_XVFB}" == true ]] && [ $(command -v xvfb-run) ]; then
+if [ $(command -v xvfb-run) ]; then
   echo "Terminating existing Xvfb sessions"
 
   # Kill Xvfb processes
   killall Xvfb || true
 
   # Remove Xvfb X server lock files
-  rm -f /tmp/.X*-lock
+  rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
 fi
 
 ###############################################################################
@@ -40,12 +67,6 @@ fi
 ###############################################################################
 # Script cleanup
 ###############################################################################
-ULIMIT_CORE_ORIG=$(ulimit -c)
-function onexit {
-  if [[ ${USE_CORE_DUMPS} == true ]]; then
-    ulimit -c $ULIMIT_CORE_ORIG
-  fi
-}
 trap onexit INT TERM EXIT
 
 ###############################################################################
@@ -54,15 +75,15 @@ trap onexit INT TERM EXIT
 export PARAVIEW_DIR=${PARAVIEW_DIR}
 
 ###############################################################################
-# Wraps calls for gui emulation
+# Some preprocessing steps on the workspace
 ###############################################################################
-if [ $(command -v xvfb-run) ]; then
-  X11_RUNNER="xvfb-run"
-  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24"
-else
-  X11_RUNNER="eval"
-  X11_RUNNER_ARGS=""
-fi
+BUILD_DIR_REL=build
+BUILD_DIR=$WORKSPACE/$BUILD_DIR_REL
+
+# Clean the source tree to remove stale configured files but make sure to
+# leave external/ and the BUILD_DIR directory intact.
+# There is a later check to see if this is a clean build and remove BUILD_DIR.
+git clean -d -x --force --exclude=${BUILD_DIR_REL} --exclude=".Xauthority-*"
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -149,14 +170,13 @@ fi
 # For a clean build the entire thing is removed to guarantee it is clean. All
 # other build types are assumed to be incremental and the following items
 # are removed to ensure stale build objects don't interfere with each other:
-#   - those removed by git clean -fdx --exclude=`basename $BUILD_DIR`
 #   - build/bin/**: if libraries are removed from cmake they are not deleted
 #                   from bin and can cause random failures
 #   - build/ExternalData/**: data files will change over time and removing
 #                            the links helps keep it fresh
+#   - build/Testing/**: old ctest xml files will change over time and removing
+#                       the links helps keep it fresh
 ###############################################################################
-BUILD_DIR_REL=build
-BUILD_DIR=$WORKSPACE/$BUILD_DIR_REL
 if [ -z "$BUILD_DIR" ]; then
   echo "Build directory not set. Cannot continue"
   exit 1
@@ -166,13 +186,11 @@ if [[ "$CLEANBUILD" == true ]]; then
   rm -rf $BUILD_DIR
 fi
 if [ -d $BUILD_DIR ]; then
-  git clean -fdx --exclude=${BUILD_DIR_REL} --exclude=".Xauthority-*"
-  rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
+  rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
   find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
       rm -rf $BUILD_DIR/googletest-*
-      rm -fr $BUILD_DIR/python-xmlrunner-*
   fi
 else
   mkdir $BUILD_DIR
@@ -315,7 +333,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -378,7 +396,7 @@ userprops_file=$userconfig_dir/Mantid.user.properties
 echo MultiThreaded.MaxCores=2 > $userprops_file
 
 if [[ ${DO_UNITTESTS} == true ]]; then
-  ${X11_RUNNER} "${X11_RUNNER_ARGS}" $CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
+  run_with_xvfb $CTEST_EXE --no-compress-output -T Test -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 fi
 
 ###############################################################################
@@ -393,8 +411,8 @@ if [[ ${DO_DOCTESTS_USER} == true ]]; then
     rm -fr $BUILD_DIR/docs/doctrees/*
   fi
   # Build HTML to verify that no referencing errors have crept in.
-  ${X11_RUNNER} "${X11_RUNNER_ARGS}" ${CMAKE_EXE} --build . --target docs-html
-  ${X11_RUNNER} "${X11_RUNNER_ARGS}" ${CMAKE_EXE} --build . --target docs-test
+  run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
+  run_with_xvfb ${CMAKE_EXE} --build . --target docs-test
 fi
 
 ###############################################################################
@@ -413,7 +431,7 @@ fi
 # documentation
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
-  ${X11_RUNNER} "${X11_RUNNER_ARGS}" ${CMAKE_EXE} --build . --target docs-qthelp
+  run_with_xvfb ${CMAKE_EXE} --build . --target docs-qthelp
   ${CPACK_EXE}
 
   # Source tarball on clean build (arbitrarily choose rhel7)
@@ -421,7 +439,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
   if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
-    ${X11_RUNNER} "${X11_RUNNER_ARGS}" ${CMAKE_EXE} --build . --target docs-html
+    run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
     ${CPACK_EXE} --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX=

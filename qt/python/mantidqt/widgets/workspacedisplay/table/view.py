@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
+#  This file is part of the mantidqt package.
 from __future__ import (absolute_import, division, print_function)
 
 import sys
@@ -42,11 +42,8 @@ class TableWorkspaceDisplayView(QTableWidget):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
-        self.COPY_ICON = mantidqt.icons.get_icon("fa.files-o")
-        self.DELETE_ROW = mantidqt.icons.get_icon("fa.minus-square-o")
-        self.STATISTICS_ON_ROW = mantidqt.icons.get_icon('fa.fighter-jet')
-        self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
-        self.TBD = mantidqt.icons.get_icon('fa.question')
+        self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
+        self.DELETE_ROW = mantidqt.icons.get_icon("mdi.minus-box-outline")
 
         item_delegate = QStyledItemDelegate(self)
         item_delegate.setItemEditorFactory(PreciseDoubleFactory())
@@ -62,6 +59,10 @@ class TableWorkspaceDisplayView(QTableWidget):
     def resizeEvent(self, event):
         QTableWidget.resizeEvent(self, event)
         header = self.horizontalHeader()
+        # resizes the column headers to fit the contents,
+        # currently this overwrites any manual changes to the widths of the columns
+        header.resizeSections(QHeaderView.ResizeToContents)
+        # then allows the users to resize the headers manually
         header.setSectionResizeMode(QHeaderView.Interactive)
 
     def emit_repaint(self):
@@ -128,12 +129,16 @@ class TableWorkspaceDisplayView(QTableWidget):
         plot_scatter = QAction("Scatter", plot)
         plot_scatter.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER))
 
+        plot_scatter_with_yerr = QAction("Scatter with Y Errors", plot)
+        plot_scatter_with_yerr.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER_WITH_ERR))
+
         plot_line_and_points = QAction("Line + Symbol", plot)
         plot_line_and_points.triggered.connect(partial(self.presenter.action_plot, PlotType.LINE_AND_SYMBOL))
 
         plot.addAction(plot_line)
         plot.addAction(plot_line_with_yerr)
         plot.addAction(plot_scatter)
+        plot.addAction(plot_scatter_with_yerr)
         plot.addAction(plot_line_and_points)
         menu_main.addMenu(plot)
 

@@ -535,7 +535,7 @@ void InstrumentWidgetMaskTab::clearShapes() {
   setSelectActivity();
 }
 
-void InstrumentWidgetMaskTab::showEvent(QShowEvent *) {
+void InstrumentWidgetMaskTab::showEvent(QShowEvent * /*unused*/) {
   setActivity();
   m_instrWidget->setMouseTracking(true);
   enableApplyButtons();
@@ -960,7 +960,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
     temptablews = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             outputWorkspaceName));
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
     std::cout << "TableWorkspace " << outputWorkspaceName
               << " cannot be found in ADS."
               << ".\n";
@@ -1012,9 +1012,9 @@ InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
   auto wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   int maxIndex = 0;
   const std::string baseName = "MaskWorkspace";
-  for (auto name = wsNames.begin(); name != wsNames.end(); ++name) {
-    if (name->find(baseName) == 0) {
-      int index = Mantid::Kernel::Strings::endsWithInt(*name);
+  for (auto &wsName : wsNames) {
+    if (wsName.find(baseName) == 0) {
+      int index = Mantid::Kernel::Strings::endsWithInt(wsName);
       if (index > 0 && index > maxIndex)
         maxIndex = index;
       else
@@ -1193,7 +1193,8 @@ void InstrumentWidgetMaskTab::storeMask() {
   }
 }
 
-void InstrumentWidgetMaskTab::changedIntegrationRange(double, double) {
+void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
+                                                      double /*unused*/) {
   enableApplyButtons();
 }
 

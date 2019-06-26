@@ -146,6 +146,7 @@ RECURSIVE              = YES
 
 #Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
 # Third party library ANN in Kernel is not doxygenised.
+# Third party library span.hpp has doxygen warnings
 EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoapGenerated \
                          @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoap \
                          @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoap.cpp \
@@ -157,7 +158,8 @@ EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoapGenerated \
                          @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN_complete.cpp \
                          @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser \
                          @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/src/QtPropertyBrowser \
-                         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins
+                         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/span.hpp
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =

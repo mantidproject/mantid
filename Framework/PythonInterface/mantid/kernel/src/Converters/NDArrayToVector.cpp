@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
-#include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
+#include "MantidPythonInterface/core/Converters/NumpyFunctions.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/stl_iterator.hpp>
@@ -64,15 +64,10 @@ template <typename DestElementType> struct CopyToImpl {
                   PyArrayObject *arr) {
     // Use the iterator API to iterate through the array
     // and assign each value to the corresponding vector
-    typedef union {
-      DestElementType *output;
-      void *input;
-    } npy_union;
-    npy_union data;
     object iter(handle<>(Converters::Impl::func_PyArray_IterNew(arr)));
     do {
-      data.input = PyArray_ITER_DATA(iter.ptr());
-      *first++ = *data.output;
+      void *data = PyArray_ITER_DATA(iter.ptr());
+      *first++ = *static_cast<DestElementType *>(data);
       PyArray_ITER_NEXT(iter.ptr());
     } while (PyArray_ITER_NOTDONE(iter.ptr()));
   }
@@ -189,6 +184,7 @@ INSTANTIATE_TOVECTOR(long long)
 INSTANTIATE_TOVECTOR(unsigned int)
 INSTANTIATE_TOVECTOR(unsigned long)
 INSTANTIATE_TOVECTOR(unsigned long long)
+INSTANTIATE_TOVECTOR(float)
 INSTANTIATE_TOVECTOR(double)
 INSTANTIATE_TOVECTOR(bool)
 INSTANTIATE_TOVECTOR(std::string)

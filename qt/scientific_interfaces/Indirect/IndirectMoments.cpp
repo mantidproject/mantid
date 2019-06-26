@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMoments.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -212,6 +212,15 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   // Enable plot and save buttons
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
+}
+
+void IndirectMoments::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Moments");
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                         : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                         : noSuffixes);
 }
 
 /**

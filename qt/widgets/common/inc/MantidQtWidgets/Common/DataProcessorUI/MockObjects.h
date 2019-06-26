@@ -8,7 +8,7 @@
 #define MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H
 
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -177,7 +177,7 @@ private:
   std::vector<Command_uptr> publishCommands() override {
     std::vector<Command_uptr> commands;
     for (size_t i = 0; i < 31; i++)
-      commands.push_back(Mantid::Kernel::make_unique<AppendRowCommand>(this));
+      commands.push_back(std::make_unique<AppendRowCommand>(this));
     publishCommandsMocked();
     return commands;
   };

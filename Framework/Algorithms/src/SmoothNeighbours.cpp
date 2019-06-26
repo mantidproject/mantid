@@ -54,11 +54,11 @@ SmoothNeighbours::SmoothNeighbours()
  *
  */
 void SmoothNeighbours::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       INPUT_WORKSPACE, "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the spectra to be averaged.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
@@ -85,7 +85,7 @@ void SmoothNeighbours::init() {
   declareProperty(
       "Sigma", 0.5, mustBePositiveDouble,
       "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
-  setPropertySettings("Sigma", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Sigma", std::make_unique<EnabledWhenProperty>(
                                    "WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   declareProperty(
@@ -452,14 +452,12 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
 
 /**
 Attempts to reset the Weight based on the strategyName provided. Note that if
-these conditional
-statements fail to override the existing WeightedSum member, it should stay as a
-NullWeighting, which
-will throw during usage.
+these conditional statements fail to override the existing WeightedSum member,
+it should stay as a NullWeighting, which will throw during usage.
 @param strategyName : The name of the weighting strategy to use
 @param cutOff : The cutoff distance
 */
-void SmoothNeighbours::setWeightingStrategy(const std::string strategyName,
+void SmoothNeighbours::setWeightingStrategy(const std::string &strategyName,
                                             double &cutOff) {
   if (strategyName == "Flat") {
     boost::scoped_ptr<WeightingStrategy> flatStrategy(new FlatWeighting);
@@ -484,45 +482,19 @@ void SmoothNeighbours::setWeightingStrategy(const std::string strategyName,
   }
 }
 
-/*
-Fetch the instrument associated with the workspace
-@return const shared pointer to the instrument,
-*/
-Instrument_const_sptr SmoothNeighbours::fetchInstrument() const {
-  Instrument_const_sptr instrument;
-  EventWorkspace_sptr wsEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(inWS);
-  MatrixWorkspace_sptr wsMatrix =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS);
-  if (wsEvent) {
-    instrument =
-        boost::dynamic_pointer_cast<EventWorkspace>(inWS)->getInstrument();
-  } else if (wsMatrix) {
-    instrument =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(inWS)->getInstrument();
-  } else {
-    throw std::invalid_argument("Neither a Matrix Workspace or an "
-                                "EventWorkpace provided to SmoothNeighbours.");
-  }
-  return instrument;
-}
-
 /**
 Translate the radius into meters.
 @param radiusUnits : The name of the radius units
 @param enteredRadius : The numerical value of the radius in whatever units have
 been specified
 */
-double SmoothNeighbours::translateToMeters(const std::string radiusUnits,
-                                           const double &enteredRadius) {
+double SmoothNeighbours::translateToMeters(const std::string &radiusUnits,
+                                           const double &enteredRadius) const {
   double translatedRadius = 0;
   if (radiusUnits == "Meters") {
     // Nothing more to do.
     translatedRadius = enteredRadius;
   } else if (radiusUnits == "NumberOfPixels") {
-    // Fetch the instrument.
-    Instrument_const_sptr instrument = fetchInstrument();
-
     // Get the first idetector from the workspace index 0.
     const auto &firstDet = inWS->spectrumInfo().detector(0);
     // Find the bounding box of that detector
@@ -532,27 +504,25 @@ double SmoothNeighbours::translateToMeters(const std::string radiusUnits,
     // takes on meaning of the number of pixels.
     translatedRadius = bbox.width().norm() * enteredRadius;
   } else {
-    std::string message =
+    const std::string message =
         "SmoothNeighbours::translateToMeters, Unknown Unit: " + radiusUnits;
     throw std::invalid_argument(message);
   }
   return translatedRadius;
 }
 
-/*
+/**
 Check whether the properties provided are all in their default state.
 @param properties : Vector of mantid property pointers
 @return True only if they are all default, otherwise False.
 */
 bool areAllDefault(ConstVecProperties &properties) {
-  bool areAllDefault = false;
   for (auto property : properties) {
     if (!property->isDefault()) {
-      return areAllDefault;
+      return false;
     }
   }
-  areAllDefault = true;
-  return areAllDefault;
+  return true;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -579,7 +549,7 @@ void SmoothNeighbours::exec() {
 
   // Progress reporting, first for the sorting
   m_progress =
-      make_unique<Progress>(this, 0.0, 0.2, inWS->getNumberHistograms());
+      std::make_unique<Progress>(this, 0.0, 0.2, inWS->getNumberHistograms());
 
   // Run the appropriate method depending on the type of the instrument
   if (inWS->getInstrument()->containsRectDetectors() ==
@@ -624,7 +594,7 @@ void SmoothNeighbours::execWorkspace2D() {
   }
   this->setProperty("OutputWorkspace", outWS);
 
-  setupNewInstrument(outWS);
+  setupNewInstrument(*outWS);
 
   // Copy geometry over.
   // API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
@@ -692,15 +662,15 @@ void SmoothNeighbours::execWorkspace2D() {
 //--------------------------------------------------------------------------------------------
 /** Build the instrument/detector setup in workspace
  */
-void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
+void SmoothNeighbours::setupNewInstrument(MatrixWorkspace &outws) const {
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*inWS, *outws, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inWS, outws, false);
 
   // Go through all the output workspace
-  size_t numberOfSpectra = outws->getNumberHistograms();
+  size_t numberOfSpectra = outws.getNumberHistograms();
 
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
-    auto &outSpec = outws->getSpectrum(outWIi);
+    auto &outSpec = outws.getSpectrum(outWIi);
 
     // Reset detectors
     outSpec.clearDetectorIDs();
@@ -711,8 +681,6 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
       outSpec.addDetectorIDs(inSpec.getDetectorIDs());
     }
   }
-
-  return;
 }
 //--------------------------------------------------------------------------------------------
 /** Spread the average over all the pixels
@@ -761,7 +729,7 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
 /** Execute the algorithm for a EventWorkspace input
  * @param ws :: EventWorkspace
  */
-void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
+void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
   m_progress->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   // Get some stuff from the input workspace

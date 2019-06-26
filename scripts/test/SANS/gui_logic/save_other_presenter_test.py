@@ -5,14 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import sys
+
 from mantid import ConfigService
+from mantid.py3compat import mock
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class SaveOtherPresenterTest(unittest.TestCase):

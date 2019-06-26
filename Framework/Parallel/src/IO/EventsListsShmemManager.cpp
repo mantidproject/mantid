@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <MantidParallel/IO/EventsListsShmemManager.h>
+#include "MantidParallel/IO/EventsListsShmemManager.h"
 #include <random>
 #include <sstream>
 
@@ -28,7 +28,8 @@ EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
 }
 
 EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
-                                                 const std::string &elName, int)
+                                                 const std::string &elName,
+                                                 int /*unused*/)
     : m_segmentName(segmentName), m_chunksName(elName), m_chunks(nullptr) {}
 
 /// Appends ToF event to given pixel in given chunk of shared storage

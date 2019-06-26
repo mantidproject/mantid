@@ -1,38 +1,47 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
-import six
-from PyQt4 import QtGui
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
+
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.observer_pattern import Observer
 
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 maximum_number_of_groups = 20
 
+def group_name():
+    name = []
+    for i in range(maximum_number_of_groups + 1):
+        name.append("group_" + str(i))
+    return name
 
-class GroupingTablePresenterTest(unittest.TestCase):
+
+class GroupingTablePresenterTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
-        self.data = MuonDataContext()
+        setup_context_for_tests(self)
+
         self.gui_variable_observer = Observer()
 
-        self.data.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
-        self.model = GroupingTabModel(data=self.data)
+        self.gui_context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
+        self.model = GroupingTabModel(context=self.context)
         self.view = GroupingTableView(parent=self.obj)
         self.presenter = GroupingTablePresenter(self.view, self.model)
 
+        self.view.enter_group_name = mock.Mock(side_effect=group_name())
         self.view.warning_popup = mock.Mock()
         self.gui_variable_observer.update = mock.MagicMock()
 
@@ -141,7 +150,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(len(self.model.groups), 2)
         self.assertEqual(self.view.num_rows(), 2)
-        self.assertEqual(self.view.get_table_item_text(1, 0), "group_2")
+        self.assertEqual(self.view.get_table_item_text(1, 0), "group_1")
 
     def test_context_menu_add_grouping_with_rows_selected_does_not_add_group(self):
         self.presenter.handle_add_group_button_clicked()
@@ -220,38 +229,13 @@ class GroupingTablePresenterTest(unittest.TestCase):
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), valid_name)
             self.assertIn(valid_name, self.model.group_names)
 
-    def test_that_renaming_group_to_duplicate_fails_and_reverts_to_previous_value(self):
-        self.add_three_groups_to_table()
-
-        self.view.grouping_table.setCurrentCell(0, 0)
-        self.view.grouping_table.item(0, 0).setText("my_group_1")
-
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_group_0")
-        self.assertIn("my_group_0", self.model.group_names)
-
     def test_that_warning_shown_if_duplicated_group_name_used(self):
         self.add_three_groups_to_table()
 
-        self.view.grouping_table.setCurrentCell(0, 0)
-        self.view.grouping_table.item(0, 0).setText("my_group_1")
+        self.view.enter_group_name = mock.Mock(return_value="my_group_1")
+        self.presenter.handle_add_group_button_clicked()
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
-
-    def test_that_default_group_name_is_group_1(self):
-        self.presenter.handle_add_group_button_clicked()
-
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "group_1")
-        self.assertIn("group_1", self.model.group_names)
-
-    def test_that_adding_new_group_creates_incremented_default_name(self):
-        self.presenter.handle_add_group_button_clicked()
-        self.presenter.handle_add_group_button_clicked()
-        self.presenter.handle_add_group_button_clicked()
-
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "group_1")
-        self.assertEqual(str(self.view.get_table_item_text(1, 0)), "group_2")
-        self.assertEqual(str(self.view.get_table_item_text(2, 0)), "group_3")
-        six.assertCountEqual(self, self.model.group_names, ["group_1", "group_2", "group_3"])
 
     # ------------------------------------------------------------------------------------------------------------------
     # detector ID validation
@@ -272,7 +256,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
             self.assertEqual(self.view.warning_popup.call_count, call_count)
 
             self.assertEqual(self.view.get_table_item_text(0, 1), "1")
-            self.assertEqual(self.model._data._groups["my_group_0"].detectors, [1])
+            self.assertEqual(self.model._context.group_pair_context["my_group_0"].detectors, [1])
 
     def test_that_displayed_values_are_simplified_to_least_verbose_form(self):
         self.presenter.handle_add_group_button_clicked()
@@ -281,7 +265,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.grouping_table.item(0, 1).setText("20-25,10,5,4,3,2,1")
 
         self.assertEqual(self.view.get_table_item_text(0, 1), "1-5,10,20-25")
-        self.assertEqual(self.model._data._groups["group_1"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
+        self.assertEqual(self.model._context.group_pair_context["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
 
     def test_that_if_detector_list_changed_that_number_of_detectors_updates(self):
         self.presenter.handle_add_group_button_clicked()
@@ -321,20 +305,20 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_min.setText(number)
         self.view.group_range_use_first_good_data.setChecked(False)
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+        self.assertEqual(self.gui_context['GroupRangeMin'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMin': 1.12})
 
     def test_disabling_range_min_editing_removes_context_variable(self):
         number = '1.12'
         self.view.group_range_min.setText(number)
         self.view.group_range_use_first_good_data.setChecked(False)
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+        self.assertEqual(self.gui_context['GroupRangeMin'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMin': 1.12})
 
         self.view.group_range_use_first_good_data.setChecked(True)
 
-        self.assertFalse('GroupRangeMin' in self.data.gui_variables)
+        self.assertFalse('GroupRangeMin' in self.gui_context)
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
     def test_enabling_range_max_editing_creates_context_variable(self):
@@ -342,20 +326,20 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_max.setText(number)
         self.view.group_range_use_last_data.setChecked(False)
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+        self.assertEqual(self.gui_context['GroupRangeMax'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMax': 1.12})
 
     def test_disabling_range_max_editing_removes_context_variable(self):
         number = '1.12'
         self.view.group_range_max.setText(number)
         self.view.group_range_use_last_data.setChecked(False)
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+        self.assertEqual(self.gui_context['GroupRangeMax'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'GroupRangeMax': 1.12})
 
         self.view.group_range_use_last_data.setChecked(True)
 
-        self.assertFalse('GroupRangeMax' in self.data.gui_variables)
+        self.assertFalse('GroupRangeMax' in self.gui_context)
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
     def test_updating_range_min_to_be_greater_than_range_max_displays_warning_and_vice_versa(self):
@@ -369,13 +353,13 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_min.setText('2.0')
         self.view.group_range_min.editingFinished.emit()
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(original_min))
+        self.assertEqual(self.gui_context['GroupRangeMin'], float(original_min))
         self.view.warning_popup.assert_called_once_with('Minimum of group asymmetry range must be less than maximum')
 
         self.view.group_range_max.setText('0.05')
         self.view.group_range_max.editingFinished.emit()
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(original_max))
+        self.assertEqual(self.gui_context['GroupRangeMax'], float(original_max))
         self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be greater than minimum')
         self.assertEqual(self.view.warning_popup.call_count, 2)
 

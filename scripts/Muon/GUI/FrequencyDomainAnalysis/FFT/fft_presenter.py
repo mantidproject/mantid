@@ -67,7 +67,7 @@ class FFTPresenter(object):
             self.view.setReTo(name)
 
     def handle_use_raw_data_changed(self):
-        if not self.view.isRaw() and not self.load.context.do_rebin():
+        if not self.view.isRaw() and not self.load.context._do_rebin():
             self.view.set_raw_checkbox_state(True)
             self.view.warning_popup('No rebin options specified')
             return
@@ -132,6 +132,7 @@ class FFTPresenter(object):
             if self.load.version == 2:
                 phaseTable["InputWorkspace"] = self.clean(
                     self.view.getInputWS())
+                phaseTable['MaskedDetectors'] = self.load.get_detectors_excluded_from_default_grouping_tables()
 
             inputs["phaseTable"] = phaseTable
             self.view.RePhaseAdvanced(preInputs)

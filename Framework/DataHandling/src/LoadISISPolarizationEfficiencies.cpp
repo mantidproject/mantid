@@ -12,7 +12,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
-#include "MantidKernel/make_unique.h"
+
 #include <limits>
 
 namespace Mantid {
@@ -50,43 +50,43 @@ LoadISISPolarizationEfficiencies::seeAlso() const {
 /** Initialize the algorithm's properties.
  */
 void LoadISISPolarizationEfficiencies::init() {
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       Pp, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the Pp polarization efficiency "
                   "in XYE columns.");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       Ap, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the Ap polarization efficiency "
                   "in XYE columns.");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       Rho, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the Rho polarization efficiency "
                   "in XYE columns.");
 
   declareProperty(
-      Kernel::make_unique<API::FileProperty>(Alpha, "",
-                                             API::FileProperty::OptionalLoad),
+      std::make_unique<API::FileProperty>(Alpha, "",
+                                          API::FileProperty::OptionalLoad),
       "Path to the file containing the Alpha polarization efficiency "
       "in XYE columns.");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       P1, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the P1 polarization efficiency "
                   "in XYE columns.");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       P2, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the P2 polarization efficiency "
                   "in XYE columns.");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       F1, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the F1 polarization efficiency "
                   "in XYE columns.");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       F2, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the F2 polarization efficiency "
                   "in XYE columns.");

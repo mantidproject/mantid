@@ -36,7 +36,7 @@ class MuonLoadData:
         nouns.
         """
         self.params = []
-        self.defaults = {"run": 0, "workspace": [], "filename": "", 'instrument': ''}
+        self.defaults = {"run": [0], "workspace": [], "filename": "", 'instrument': ''}
 
     def __iter__(self):
         self._n = -1

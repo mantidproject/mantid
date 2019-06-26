@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GenerateEventsFilter.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -47,17 +48,17 @@ GenerateEventsFilter::GenerateEventsFilter()
 void GenerateEventsFilter::init() {
   // Input/Output Workspaces
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
-      "An input event workspace");
+      "An input Matrix workspace.");
 
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output SplittersWorkspace object, "
                   "i.e., the filter.");
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "InformationWorkspace", "", Direction::Output),
       "Optional output for the information of each splitter workspace index");
 
@@ -85,7 +86,7 @@ void GenerateEventsFilter::init() {
       "while the relative time takes integer or float. ");
 
   // Split by time (only) in steps
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("TimeInterval"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("TimeInterval"),
                   "Array for lengths of time intervals for splitters.  "
                   "If the array is empty, then there will be one splitter "
                   "created from StartTime and StopTime. "
@@ -93,7 +94,7 @@ void GenerateEventsFilter::init() {
                   "same time intervals. "
                   "If the size of the array is larger than one, then the "
                   "splitters can have various time interval values.");
-  setPropertySettings("TimeInterval", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("TimeInterval", std::make_unique<VisibleWhenProperty>(
                                           "LogName", IS_EQUAL_TO, ""));
 
   std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
@@ -112,23 +113,20 @@ void GenerateEventsFilter::init() {
 
   declareProperty("MinimumLogValue", EMPTY_DBL(),
                   "Minimum log value for which to keep events.");
-  setPropertySettings(
-      "MinimumLogValue",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("MinimumLogValue", std::make_unique<VisibleWhenProperty>(
+                                             "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("MaximumLogValue", EMPTY_DBL(),
                   "Maximum log value for which to keep events.");
-  setPropertySettings(
-      "MaximumLogValue",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("MaximumLogValue", std::make_unique<VisibleWhenProperty>(
+                                             "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueInterval", EMPTY_DBL(),
                   "Delta of log value to be sliced into from min log value and "
                   "max log value.\n"
                   "If not given, then only value ");
-  setPropertySettings(
-      "LogValueInterval",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("LogValueInterval", std::make_unique<VisibleWhenProperty>(
+                                              "LogName", IS_NOT_EQUAL_TO, ""));
 
   std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty(
@@ -141,12 +139,12 @@ void GenerateEventsFilter::init() {
       "respectively.");
   setPropertySettings(
       "FilterLogValueByChangingDirection",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("TimeTolerance", 0.0,
                   "Tolerance in time for the event times to keep. "
                   "It is used in the case to filter by single value.");
-  setPropertySettings("TimeTolerance", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("TimeTolerance", std::make_unique<VisibleWhenProperty>(
                                            "LogName", IS_NOT_EQUAL_TO, ""));
 
   vector<string> logboundoptions{"Centre", "Left", "Other"};
@@ -155,7 +153,7 @@ void GenerateEventsFilter::init() {
       "LogBoundary", "Centre", logvalidator,
       "How to treat log values as being measured in the centre of time. "
       "There are three options, 'Centre', 'Left' and 'Other'. ");
-  setPropertySettings("LogBoundary", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("LogBoundary", std::make_unique<VisibleWhenProperty>(
                                          "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueTolerance", EMPTY_DBL(),
@@ -163,7 +161,7 @@ void GenerateEventsFilter::init() {
                   "used in the case to filter by multiple values.");
   setPropertySettings(
       "LogValueTolerance",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   // Output workspaces' title and name
   declareProperty(
@@ -672,11 +670,11 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   ss << "Log." << m_dblLog->name() << ".From." << minvalue << ".To." << maxvalue
      << ".Value-change-direction:";
   if (filterincrease && filterdecrease) {
-    ss << ".both ";
+    ss << "both";
   } else if (filterincrease) {
-    ss << ".increase";
+    ss << "increase";
   } else {
-    ss << ".decrease";
+    ss << "decrease";
   }
   row << 0 << ss.str();
 }
@@ -1277,6 +1275,12 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
         // Check this value whether it falls into any range
         size_t index = searchValue(logvalueranges, currValue);
 
+        bool valueWithinMinMax = true;
+        if (index > logvalueranges.size()) {
+          // Out of range
+          valueWithinMinMax = false;
+        }
+
         if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
           stringstream dbss;
           dbss << "[DBx257] Examine Log Index " << i
@@ -1289,16 +1293,10 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
             dbss << logvalueranges[index] << ", " << logvalueranges[index + 1];
           else if (index == logvalueranges.size())
             dbss << logvalueranges[index - 1] << ", " << logvalueranges[index];
-          else
+          else if (valueWithinMinMax)
             dbss << logvalueranges[index - 1] << ", " << logvalueranges[index]
                  << ", " << logvalueranges[index + 1];
           g_log.debug(dbss.str());
-        }
-
-        bool valueWithinMinMax = true;
-        if (index > logvalueranges.size()) {
-          // Out of range
-          valueWithinMinMax = false;
         }
 
         if (valueWithinMinMax) {
@@ -1858,6 +1856,8 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   int64_t extended_ns = static_cast<int64_t>(1.0E8);
   if (m_dataWS->run().hasProperty("proton_charge")) {
     // Get last proton charge time and compare with run end time
+    // this does nothing but make sure that run().endTime() is same as proton
+    // charge end time
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             m_dataWS->run().getProperty("proton_charge"));
@@ -1882,12 +1882,36 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
 
     g_log.debug() << "Check point 2A "
                   << " run end time = " << runendtime << "\n";
-  } else if (norunendset && m_dataWS->getNumberEvents() > 0) {
+  } else if (norunendset) {
     // No proton_charge or run_end: sort events and find the last event
     norunendset = false;
 
-    for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i) {
-      const DataObjects::EventList &evlist = m_dataWS->getSpectrum(i);
+    runendtime = 0;
+
+    DataObjects::EventWorkspace_const_sptr eventWS =
+        boost::dynamic_pointer_cast<const EventWorkspace>(m_dataWS);
+    if (!eventWS) {
+      stringstream errss;
+      errss << "Input workspace " << m_dataWS->getName()
+            << " is not an Eventworkspace and does not have sample log "
+               "'proton_charge'."
+               "Therefore it fails to find run end time.";
+      g_log.error(errss.str());
+
+      throw std::runtime_error(errss.str());
+    } else if (eventWS->getNumberEvents() == 0) {
+      stringstream errss;
+      errss << "Input EventWorkspace " << m_dataWS->getName()
+            << " has zero event and does not have sample log 'proton_charge'.  "
+               "Therefore, unable to "
+               "determine run end time";
+
+      g_log.error(errss.str());
+      throw std::runtime_error(errss.str());
+    }
+
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
+      const DataObjects::EventList &evlist = eventWS->getSpectrum(i);
       if (evlist.getNumberEvents() > 0) {
         // If event list is empty, the returned value may not make any sense
         DateAndTime lastpulse = evlist.getPulseTimeMax();

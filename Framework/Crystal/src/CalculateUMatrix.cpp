@@ -24,7 +24,7 @@ using Mantid::Geometry::OrientedLattice;
 /** Initialize the algorithm's properties.
  */
 void CalculateUMatrix::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "An input workspace.");
   boost::shared_ptr<BoundedValidator<double>> mustBePositive =

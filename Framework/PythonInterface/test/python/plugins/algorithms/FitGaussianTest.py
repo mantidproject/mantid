@@ -62,8 +62,8 @@ class FitGaussianTest(unittest.TestCase):
         diffPeakCentre = abs((fitPeakCentre - peakCentre) / peakCentre)
         diffSigma      = abs((fitSigma      - sigma)      / sigma)
 
-        self.assertTrue(diffPeakCentre < 0.03)
-        self.assertTrue(diffSigma < 1e-6)
+        self.assertLess(diffPeakCentre, 0.03)
+        self.assertLess(diffSigma, 1e-6)
 
     def test_guessedPeaks(self):
         """Test that generated Gaussian peaks are reasonably well guessed.

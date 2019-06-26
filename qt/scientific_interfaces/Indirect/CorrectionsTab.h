@@ -11,8 +11,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-class QwtPlotCurve;
-class QwtPlot;
 class QSettings;
 class QString;
 
@@ -45,6 +43,22 @@ class RangeSelector;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+struct Densities {
+  Densities() : m_massDensity(1.0), m_numberDensity(0.1){};
+
+  void setMassDensity(double value) { m_massDensity = value; }
+  void setNumberDensity(double value) { m_numberDensity = value; }
+  double getMassDensity() const { return m_massDensity; }
+  double getNumberDensity() const { return m_numberDensity; }
+  std::string getMassDensityUnit() const { return " g/cm3"; }
+  std::string getNumberDensityUnit() const { return " /A3"; }
+
+private:
+  double m_massDensity;
+  double m_numberDensity;
+};
+
 class DLLExport CorrectionsTab : public IndirectTab {
   Q_OBJECT
 
@@ -55,9 +69,13 @@ public:
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
 
+  /// Prevent loading of data with incorrect naming
+  void filterInputData(bool filter);
+
+  /// Allows the user to turn the plotting of error bars off and on
+  void setPlotErrorBars(bool errorBars);
+
 protected:
-  /// Function to run a string as python code
-  void runPythonScript(const QString &pyInput);
   /// Check the binning between two workspaces match
   bool
   checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
@@ -81,15 +99,12 @@ protected slots:
   void inputChanged();
 
 private:
-  /// Overidden by child class.
   void setup() override = 0;
-  /// Overidden by child class.
   void run() override = 0;
-  /// Overidden by child class.
   bool validate() override = 0;
 
-  /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
+  virtual void setFileExtensionsByName(bool filter) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -9,7 +9,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/regex.hpp>
 namespace Mantid {
 namespace Geometry {
@@ -34,7 +34,7 @@ bool GeneralFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   return canInterpret;
 }
 
-QLab *QLabFrameFactory::createRaw(const MDFrameArgument &) const {
+QLab *QLabFrameFactory::createRaw(const MDFrameArgument & /*argument*/) const {
   return new QLab;
 }
 
@@ -43,7 +43,8 @@ bool QLabFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   return argument.frameString == QLab::QLabName;
 }
 
-QSample *QSampleFrameFactory::createRaw(const MDFrameArgument &) const {
+QSample *
+QSampleFrameFactory::createRaw(const MDFrameArgument & /*argument*/) const {
   return new QSample;
 }
 
@@ -88,18 +89,19 @@ UnknownFrameFactory::createRaw(const MDFrameArgument &argument) const {
 }
 
 /// Indicate an ability to intepret the string
-bool UnknownFrameFactory::canInterpret(const MDFrameArgument &) const {
+bool UnknownFrameFactory::canInterpret(
+    const MDFrameArgument & /*unitString*/) const {
   return true; // This can interpret everything
 }
 
 MDFrameFactory_uptr makeMDFrameFactoryChain() {
-  MDFrameFactory_uptr first = Kernel::make_unique<QLabFrameFactory>();
-  first->setSuccessor(Kernel::make_unique<QSampleFrameFactory>())
-      .setSuccessor(Kernel::make_unique<HKLFrameFactory>())
+  MDFrameFactory_uptr first = std::make_unique<QLabFrameFactory>();
+  first->setSuccessor(std::make_unique<QSampleFrameFactory>())
+      .setSuccessor(std::make_unique<HKLFrameFactory>())
       // Make sure that GeneralFrameFactory is the last in the chain to give a
       // fall-through option
-      .setSuccessor(Kernel::make_unique<GeneralFrameFactory>())
-      .setSuccessor(Kernel::make_unique<UnknownFrameFactory>());
+      .setSuccessor(std::make_unique<GeneralFrameFactory>())
+      .setSuccessor(std::make_unique<UnknownFrameFactory>());
   return first;
 }
 

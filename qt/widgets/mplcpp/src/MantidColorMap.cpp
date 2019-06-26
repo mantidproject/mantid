@@ -13,6 +13,8 @@
 #include <QStringList>
 #include <QWidget>
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -46,7 +48,7 @@ QString MantidColorMap::defaultColorMap() { return defaultCMapName(); }
 
 /**
  * @brief Check if a given color map exists. This interface has to
- * match the existing interface in LegacyQwt.
+ * match the existing interface in Plotting.
  * @param name The name of a colormap
  * @return The same name passed to the function if it exists
  * @throws std::runtime_error if the colomap does not exist

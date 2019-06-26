@@ -4,15 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtCore, QtGui
+from __future__ import (absolute_import, division, unicode_literals)
+
+from qtpy import QtCore, QtWidgets
 
 
-class Checkbox(QtGui.QCheckBox):
-    checked = QtCore.pyqtSignal(object)
-    unchecked = QtCore.pyqtSignal(object)
+class Checkbox(QtWidgets.QCheckBox):
+    checked = QtCore.Signal(object)
+    unchecked = QtCore.Signal(object)
 
     def __init__(self, name):
-        super(QtGui.QCheckBox, self).__init__(name)
+        super(QtWidgets.QCheckBox, self).__init__(name)
         self.name = name
         self.stateChanged.connect(self._check_state)
 

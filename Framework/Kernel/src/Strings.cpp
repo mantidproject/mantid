@@ -11,7 +11,6 @@
 #include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -1050,8 +1049,6 @@ size_t split_path(const std::string &path,
     }
     // reprocess up-references;
     if (folder == "..") {
-      if (folder.size() != 2)
-        throw(std::invalid_argument("path contains wrong path group"));
       ic--;
       if (ic < 0)
         throw(std::invalid_argument("path contains relative references to a "
@@ -1231,6 +1228,8 @@ template MANTID_KERNEL_DLL std::string toString(const uint64_t &value);
 template MANTID_KERNEL_DLL std::string toString(const std::string &value);
 
 template MANTID_KERNEL_DLL std::string toString(const std::vector<int> &value);
+template MANTID_KERNEL_DLL std::string
+toString(const std::vector<size_t> &value);
 
 // this block should generate the vector ones as well
 template MANTID_KERNEL_DLL std::string toString(const std::set<int> &value);

@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/FindEPP.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <sstream>
@@ -45,10 +44,10 @@ const std::string FindEPP::summary() const {
 /** Initialize the algorithm's properties.
  */
 void FindEPP::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -204,11 +203,9 @@ void FindEPP::initWorkspace() {
   m_outWS->addColumn("str", "FitStatus");
 
   const size_t numberSpectra = m_inWS->getNumberHistograms();
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, numberSpectra);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numberSpectra);
 
-  for (size_t i = 0; i < numberSpectra; ++i) {
-    m_outWS->appendRow();
-  }
+  m_outWS->setRowCount(numberSpectra);
 }
 
 } // namespace Algorithms

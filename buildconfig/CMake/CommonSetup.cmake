@@ -34,7 +34,7 @@ if ( stdint )
 endif ( stdint )
 
 # Configure a variable to hold the required test timeout value for all tests
-set ( TESTING_TIMEOUT 300 CACHE INTEGER
+set ( TESTING_TIMEOUT 300 CACHE STRING
       "Timeout in seconds for each test (default 300=5minutes)")
 
 ###########################################################################
@@ -54,7 +54,7 @@ find_package ( Nexus 4.3.1 REQUIRED )
 find_package ( MuParser REQUIRED )
 find_package ( JsonCPP 0.7.0 REQUIRED )
 
-set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation" )
+option ( ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON )
 if (ENABLE_OPENCASCADE)
   find_package ( OpenCascade REQUIRED )
   add_definitions ( -DENABLE_OPENCASCADE )
@@ -258,14 +258,25 @@ endif ()
 ###########################################################################
 
 if ( CMAKE_VERSION VERSION_GREATER "3.5" )
-  set(ENABLE_CLANG_TIDY OFF CACHE BOOL "Add clang-tidy automatically to builds")
+  set(DEFAULT_CLANG_TIDY_CHECKS "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*,-misc-unused-parameters")
+  option(ENABLE_CLANG_TIDY "Add clang-tidy automatically to builds")
   if (ENABLE_CLANG_TIDY)
     find_program (CLANG_TIDY_EXE NAMES "clang-tidy" PATHS /usr/local/opt/llvm/bin )
     if (CLANG_TIDY_EXE)
       message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-      set(CLANG_TIDY_CHECKS "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*,-misc-unused-parameters")
-      set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
-        CACHE STRING "" FORCE)
+      set(CLANG_TIDY_CHECKS "${DEFAULT_CLANG_TIDY_CHECKS}" CACHE STR "Select checks to perform")
+      option(APPLY_CLANG_TIDY_FIX "Apply fixes found through clang-tidy checks" OFF)
+      if(CLANG_TIDY_CHECKS STREQUAL "")
+        # use default checks if empty to avoid errors
+        set(CLANG_TIDY_CHECKS "${DEFAULT_CLANG_TIDY_CHECKS}" CACHE STR "Select checks to perform" FORCE)
+      endif()
+      if(APPLY_CLANG_TIDY_FIX)
+        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*';-fix"
+          CACHE STRING "" FORCE)
+      else()
+        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
+          CACHE STRING "" FORCE)
+      endif()
     else()
       message(AUTHOR_WARNING "clang-tidy not found!")
       set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
@@ -273,6 +284,8 @@ if ( CMAKE_VERSION VERSION_GREATER "3.5" )
   else()
     set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
   endif()
+else()
+  message(AUTHOR_WARNING "Using cmake version 3.5 or below. Clang-tidy is not supported!")
 endif()
 
 ###########################################################################
@@ -291,7 +304,6 @@ include ( PylintSetup )
 
 find_package ( CxxTest )
 if ( CXXTEST_FOUND )
-  enable_testing ()
   add_custom_target( check COMMAND ${CMAKE_CTEST_COMMAND} )
   make_directory( ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing )
   message ( STATUS "Added target ('check') for unit tests" )
@@ -299,17 +311,9 @@ else ()
   message ( STATUS "Could NOT find CxxTest - unit testing not available" )
 endif ()
 
-# Some unit tests need GMock/GTest
 include ( GoogleTest )
-
-find_package ( PyUnitTest )
-if ( PYUNITTEST_FOUND )
-  enable_testing ()
-  include ( Python-xmlrunner )
-  message (STATUS "Found pyunittest generator")
-else()
-  message (STATUS "Could NOT find PyUnitTest - unit testing of python not available" )
-endif()
+include ( PyUnitTest )
+enable_testing ()
 
 # GUI testing via Squish
 find_package ( Squish )

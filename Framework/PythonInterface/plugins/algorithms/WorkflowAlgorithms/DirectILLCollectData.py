@@ -9,43 +9,34 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, InstrumentValidator,
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, MultipleFileProperty, Progress, PropertyMode,
                         WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
+from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
-from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP,
-                              CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, Divide, ExtractMonitors,
+from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
+                              CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
                               FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale)
 import numpy
 
 _MONSUM_LIMIT = 100
 
 
-def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
-                                    algorithmLogging):
+def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging):
     """Update incident energy and wavelength in the sample logs."""
     originalEnergy = ws.getRun().getLogData('Ei').value
     originalWavelength = ws.getRun().getLogData('wavelength').value
     energy = eiWS.readY(0)[0]
     wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0, 0, 0, Direct, 5)
-    if wsType == common.WS_CONTENT_DETS:
-        calibratedWSName = wsNames.withSuffix('incident_energy_calibrated_detectors')
-    elif wsType == common.WS_CONTENT_MONS:
-        calibratedWSName = wsNames.withSuffix('incident_energy_calibrated_monitors')
-    else:
-        raise RuntimeError('Unknown workspace content type')
-    calibratedWS = CloneWorkspace(InputWorkspace=ws,
-                                  OutputWorkspace=calibratedWSName,
-                                  EnableLogging=algorithmLogging)
-    AddSampleLog(Workspace=calibratedWS,
+    AddSampleLog(Workspace=ws,
                  LogName='Ei',
                  LogText=str(energy),
                  LogType='Number',
                  NumberType='Double',
                  LogUnit='meV',
                  EnableLogging=algorithmLogging)
-    AddSampleLog(Workspace=calibratedWS,
+    AddSampleLog(Workspace=ws,
                  Logname='wavelength',
                  LogText=str(wavelength),
                  LogType='Number',
@@ -55,7 +46,7 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
     report.notice("Applied Ei calibration to '" + str(ws) + "'.")
     report.notice('Original Ei: {} new Ei: {}.'.format(originalEnergy, energy))
     report.notice('Original wavelength: {} new wavelength {}.'.format(originalWavelength, wavelength))
-    return calibratedWS
+    return ws
 
 
 def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
@@ -198,15 +189,10 @@ def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
     if time < 0:
         raise RuntimeError("Cannot normalise to acquisition time: time is negative.")
     normalizedWSName = wsNames.withSuffix('normalized_to_time')
-    normalizationFactorWsName = wsNames.withSuffix('normalization_factor_time')
-    normalizationFactorWS = CreateSingleValuedWorkspace(OutputWorkspace=normalizationFactorWsName,
-                                                        DataValue=time,
-                                                        EnableLogging=algorithmLogging)
-    normalizedWS = Divide(LHSWorkspace=ws,
-                          RHSWorkspace=normalizationFactorWS,
-                          OutputWorkspace=normalizedWSName,
-                          EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(normalizationFactorWS)
+    normalizedWS = Scale(InputWorkspace=ws,
+                         Factor=1./time,
+                         OutputWorkspace=normalizedWSName,
+                         EnableLogging=algorithmLogging)
     return normalizedWS
 
 
@@ -227,8 +213,7 @@ def _scaleAfterMonitorNormalization(ws, wsNames, wsCleanup, algorithmLogging):
     return scaledWS
 
 
-def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames,
-                     wsCleanup, algorithmLogging):
+def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames, wsCleanup, algorithmLogging):
     """Subtract a scaled flat background from a workspace."""
     if wsType == common.WS_CONTENT_DETS:
         subtractedWSName = wsNames.withSuffix('flat_bkg_subtracted_detectors')
@@ -293,54 +278,54 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     def PyExec(self):
         """Execute the data collection workflow."""
         progress = Progress(self, 0.0, 1.0, 9)
-        report = common.Report()
-        subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
-        wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
+        self._report = utils.Report()
+        self._subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
+        namePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
-        wsNames = common.NameSource(wsNamePrefix, cleanupMode)
-        wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
+        self._names = utils.NameSource(namePrefix, cleanupMode)
 
         # The variables 'mainWS' and 'monWS shall hold the current main
         # data throughout the algorithm.
 
         # Get input workspace.
         progress.report('Loading inputs')
-        mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
+        mainWS = self._inputWS()
 
         # Extract monitors to a separate workspace.
         progress.report('Extracting monitors')
-        mainWS, monWS = self._separateMons(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS, monWS = self._separateMons(mainWS)
 
         # Save the main workspace for later use, if needed.
         rawWS = None
         if not self.getProperty(common.PROP_OUTPUT_RAW_WS).isDefault:
             rawWS = mainWS
-            wsCleanup.protect(rawWS)
+            self._cleanup.protect(rawWS)
 
         # Normalisation to monitor/time, if requested.
         progress.report('Normalising to monitor/time')
-        monWS = self._flatBkgMon(monWS, wsNames, wsCleanup, subalgLogging)
-        monEPPWS = self._createEPPWSMon(monWS, wsNames, wsCleanup, subalgLogging)
-        mainWS = self._normalize(mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging)
+        monWS = self._flatBkgMon(monWS)
+        monEPPWS = self._createEPPWSMon(monWS)
+        mainWS = self._normalize(mainWS, monWS, monEPPWS)
 
         # Time-independent background.
         progress.report('Calculating backgrounds')
-        mainWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
+        mainWS = self._flatBkgDet(mainWS)
 
         # Calibrate incident energy, if requested.
         progress.report('Calibrating incident energy')
-        mainWS, monWS = self._calibrateEi(mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging)
-        wsCleanup.cleanup(monWS, monEPPWS)
+        mainWS, monWS = self._calibrateEi(mainWS, monWS, monEPPWS)
+        self._cleanup.cleanup(monWS, monEPPWS)
 
         progress.report('Correcting TOF')
-        mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, report, subalgLogging)
-        self._outputRaw(mainWS, rawWS, subalgLogging)
+        mainWS = self._correctTOFAxis(mainWS)
+        self._outputRaw(mainWS, rawWS)
 
         # Find elastic peak positions.
         progress.report('Calculating EPPs')
-        self._outputDetEPPWS(mainWS, wsNames, wsCleanup, report, subalgLogging)
+        self._outputDetEPPWS(mainWS)
 
-        self._finalize(mainWS, wsCleanup, report)
+        self._finalize(mainWS)
         progress.report('Done')
 
     def PyInit(self):
@@ -354,8 +339,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         mandatoryPositiveInt.add(IntBoundedValidator(lower=0))
         positiveFloat = FloatBoundedValidator(lower=0)
         positiveInt = IntBoundedValidator(lower=0)
-        positiveIntArray = IntArrayBoundedValidator()
-        positiveIntArray.setLower(0)
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
@@ -377,10 +360,10 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                                direction=Direction.Output),
                              doc='A flux normalized and background subtracted workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
-                             defaultValue=common.CLEANUP_ON,
+                             defaultValue=utils.Cleanup.ON,
                              validator=StringListValidator([
-                                 common.CLEANUP_ON,
-                                 common.CLEANUP_OFF]),
+                                 utils.Cleanup.ON,
+                                 utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
@@ -546,78 +529,74 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 'List of runs is given without summing. Consider giving summed runs (+) or summed ranges (-).'
         return issues
 
-    def _calibrateEi(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
+    def _calibrateEi(self, mainWS, monWS, monEPPWS):
         """Perform and apply incident energy calibration."""
         eiCalibrationWS = None
-        if self._eiCalibrationEnabled(mainWS, report):
+        if self._eiCalibrationEnabled(mainWS):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 monIndex = self._monitorIndex(monWS)
-                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, monWS, monEPPWS, monIndex, wsNames,
-                                                            self.log(), subalgLogging)
+                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, monWS, monEPPWS, monIndex, self._names,
+                                                            self.log(), self._subalgLogging)
             else:
                 eiCalibrationWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
-                wsCleanup.protect(eiCalibrationWS)
+                self._cleanup.protect(eiCalibrationWS)
             if eiCalibrationWS:
-                eiCalibratedDetWS = _applyIncidentEnergyCalibration(mainWS, common.WS_CONTENT_DETS, eiCalibrationWS, wsNames,
-                                                                    report, subalgLogging)
-                wsCleanup.cleanup(mainWS)
-                mainWS = eiCalibratedDetWS
-                eiCalibratedMonWS = _applyIncidentEnergyCalibration(monWS, common.WS_CONTENT_MONS, eiCalibrationWS, wsNames, report,
-                                                                    subalgLogging)
-                wsCleanup.cleanup(monWS)
-                monWS = eiCalibratedMonWS
+                mainWS = _applyIncidentEnergyCalibration(mainWS, eiCalibrationWS, self._names,
+                                                         self._report, self._subalgLogging)
+                monWS = _applyIncidentEnergyCalibration(monWS, eiCalibrationWS, self._names, self._report,
+                                                        self._subalgLogging)
         if not self.getProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
             if eiCalibrationWS is None:
-                eiCalibrationWSName = wsNames.withSuffix('incident_energy_from_logs')
+                eiCalibrationWSName = self._names.withSuffix('incident_energy_from_logs')
                 Ei = mainWS.run().getProperty('Ei').value
                 eiCalibrationWS = CreateSingleValuedWorkspace(OutputWorkspace=eiCalibrationWSName,
                                                               DataValue=Ei,
-                                                              EnableLogging=subalgLogging)
+                                                              EnableLogging=self._subalgLogging)
             self.setProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS, eiCalibrationWS)
-        wsCleanup.cleanup(eiCalibrationWS)
+        self._cleanup.cleanup(eiCalibrationWS)
         return mainWS, monWS
 
-    def _chooseElasticChannelMode(self, mainWS, report):
+    def _chooseElasticChannelMode(self, mainWS):
         """Return suitable elastic channel mode."""
         mode = self.getProperty(common.PROP_ELASTIC_CHANNEL_MODE).value
         if mode == common.ELASTIC_CHANNEL_AUTO:
             instrument = mainWS.getInstrument()
             if instrument.hasParameter('enable_elastic_channel_fitting'):
                 if instrument.getBoolParameter('enable_elastic_channel_fitting')[0]:
-                    report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to '
-                                  + common.ELASTIC_CHANNEL_FIT + ' by the IPF.')
+                    self._report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to '
+                                        + common.ELASTIC_CHANNEL_FIT + ' by the IPF.')
                     return common.ELASTIC_CHANNEL_FIT
                 else:
-                    report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to '
-                                  + common.ELASTIC_CHANNEL_SAMPLE_LOG + ' by the IPF.')
+                    self._report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to '
+                                        + common.ELASTIC_CHANNEL_SAMPLE_LOG + ' by the IPF.')
                     return common.ELASTIC_CHANNEL_SAMPLE_LOG
             else:
-                report.notice('Defaulted ' + common.PROP_ELASTIC_CHANNEL_MODE + ' to '
-                              + common.ELASTIC_CHANNEL_SAMPLE_LOG + '.')
+                self._report.notice('Defaulted ' + common.PROP_ELASTIC_CHANNEL_MODE + ' to '
+                                    + common.ELASTIC_CHANNEL_SAMPLE_LOG + '.')
                 return common.ELASTIC_CHANNEL_SAMPLE_LOG
         return mode
 
-    def _chooseEPPMethod(self, mainWS, report):
+    def _chooseEPPMethod(self, mainWS):
         """Return a suitable EPP method."""
         eppMethod = self.getProperty(common.PROP_EPP_METHOD).value
         if eppMethod == common.EPP_METHOD_AUTO:
             instrument = mainWS.getInstrument()
             if instrument.hasParameter('enable_elastic_peak_fitting'):
                 if instrument.getBoolParameter('enable_elastic_peak_fitting')[0]:
-                    report.notice(common.PROP_EPP_METHOD + ' set to '
-                                  + common.EPP_METHOD_FIT + ' by the IPF.')
+                    self._report.notice(common.PROP_EPP_METHOD + ' set to '
+                                        + common.EPP_METHOD_FIT + ' by the IPF.')
                     return common.EPP_METHOD_FIT
                 else:
-                    report.notice(common.PROP_EPP_METHOD + ' set to '
-                                  + common.EPP_METHOD_CALCULATE + ' by the IPF.')
+                    self._report.notice(common.PROP_EPP_METHOD + ' set to '
+                                        + common.EPP_METHOD_CALCULATE + ' by the IPF.')
                     return common.EPP_METHOD_CALCULATE
             else:
-                report.notice('Defaulted ' + common.PROP_EPP_METHOD + ' to '
-                              + common.EPP_METHOD_FIT + '.')
+                self._report.notice('Defaulted ' + common.PROP_EPP_METHOD + ' to '
+                                    + common.EPP_METHOD_FIT + '.')
                 return common.EPP_METHOD_FIT
         return eppMethod
 
-    def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _correctTOFAxis(self, mainWS):
         """Adjust the TOF axis to get the elastic channel correct."""
         try:
             l2 = float(mainWS.getInstrument().getStringParameter('l2')[0])
@@ -628,7 +607,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             indexWS = self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).value
             index = int(indexWS.readY(0)[0])
         else:
-            mode = self._chooseElasticChannelMode(mainWS, report)
+            mode = self._chooseElasticChannelMode(mainWS)
             if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
                 if not mainWS.run().hasProperty('Detector.elasticpeak'):
                     self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL_WS +
@@ -637,51 +616,51 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 index = mainWS.run().getLogData('Detector.elasticpeak').value
             else:
                 ys = _sumDetectorsAtDistance(mainWS, l2, 1e-5)
-                index = _fitElasticChannel(ys, wsNames, wsCleanup, subalgLogging)
-        correctedWSName = wsNames.withSuffix('tof_axis_corrected')
+                index = _fitElasticChannel(ys, self._names, self._cleanup, self._subalgLogging)
+        correctedWSName = self._names.withSuffix('tof_axis_corrected')
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
                                      IndexType='Workspace Index',
                                      ElasticBinIndex=index,
                                      L2=l2,
-                                     EnableLogging=subalgLogging)
-        report.notice('Elastic channel index {0} was used for TOF axis adjustment.'.format(index))
+                                     EnableLogging=self._subalgLogging)
+        self._report.notice('Elastic channel index {0} was used for TOF axis adjustment.'.format(index))
         if not self.getProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS).isDefault:
-            indexOutputWSName = wsNames.withSuffix('elastic_channel_output')
+            indexOutputWSName = self._names.withSuffix('elastic_channel_output')
             indexOutputWS = CreateSingleValuedWorkspace(OutputWorkspace=indexOutputWSName,
                                                         DataValue=index,
-                                                        EnableLogging=subalgLogging)
+                                                        EnableLogging=self._subalgLogging)
             self.setProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS, indexOutputWS)
-            wsCleanup.cleanup(indexOutputWS)
-        wsCleanup.cleanup(mainWS)
+            self._cleanup.cleanup(indexOutputWS)
+        self._cleanup.cleanup(mainWS)
         return correctedWS
 
-    def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _createEPPWSDet(self, mainWS):
         """Create an EPP table for a detector workspace."""
-        eppMethod = self._chooseEPPMethod(mainWS, report)
+        eppMethod = self._chooseEPPMethod(mainWS)
         if eppMethod == common.EPP_METHOD_FIT:
-            detEPPWS = _fitEPP(mainWS, common.WS_CONTENT_DETS, wsNames, subalgLogging)
+            detEPPWS = _fitEPP(mainWS, common.WS_CONTENT_DETS, self._names, self._subalgLogging)
         else:
             sigma = self.getProperty(common.PROP_EPP_SIGMA).value
             if sigma == Property.EMPTY_DBL:
                 sigma = 10.0 * (mainWS.readX(0)[1] - mainWS.readX(0)[0])
-            detEPPWS = _calculateEPP(mainWS, sigma, wsNames, subalgLogging)
-        wsCleanup.cleanupLater(detEPPWS)
+            detEPPWS = _calculateEPP(mainWS, sigma, self._names, self._subalgLogging)
+        self._cleanup.cleanupLater(detEPPWS)
         return detEPPWS
 
-    def _createEPPWSMon(self, monWS, wsNames, wsCleanup, subalgLogging):
+    def _createEPPWSMon(self, monWS):
         """Create an EPP table for a monitor workspace."""
-        monEPPWS = _fitEPP(monWS, common.WS_CONTENT_MONS, wsNames, subalgLogging)
+        monEPPWS = _fitEPP(monWS, common.WS_CONTENT_MONS, self._names, self._subalgLogging)
         return monEPPWS
 
-    def _finalize(self, outWS, wsCleanup, report):
+    def _finalize(self, outWS):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
-        wsCleanup.cleanup(outWS)
-        wsCleanup.finalCleanup()
-        report.toLog(self.log())
+        self._cleanup.cleanup(outWS)
+        self._cleanup.finalCleanup()
+        self._report.toLog(self.log())
 
-    def _eiCalibrationEnabled(self, mainWS, report):
+    def _eiCalibrationEnabled(self, mainWS):
         """Return true if incident energy calibration should be perfomed, false if not."""
         calibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
         state = None
@@ -693,38 +672,38 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             if instrument.hasParameter('enable_incident_energy_calibration'):
                 enabled = instrument.getBoolParameter('enable_incident_energy_calibration')[0]
                 if not enabled:
-                    report.notice('Incident energy calibration disabled by the IPF.')
+                    self._report.notice('Incident energy calibration disabled by the IPF.')
                     return False
                 else:
                     state = ENABLED_AUTOMATICALLY
         monitorCounts = _monitorCounts(mainWS)
         if monitorCounts < _MONSUM_LIMIT:
-            report.warning("'monsum' less than {}. Disabling incident energy calibration.".format(_MONSUM_LIMIT))
+            self._report.warning("'monsum' less than {}. Disabling incident energy calibration.".format(_MONSUM_LIMIT))
             return False
         if state == ENABLED_AUTOMATICALLY:
-            report.notice('Incident energy calibration enabled.')
+            self._report.notice('Incident energy calibration enabled.')
         return True
 
-    def _flatBkgDet(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _flatBkgDet(self, mainWS):
         """Subtract flat background from a detector workspace."""
-        if not self._flatBgkEnabled(mainWS, report):
+        if not self._flatBgkEnabled(mainWS):
             return mainWS
         if not self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
             bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
-            wsCleanup.protect(bkgWS)
+            self._cleanup.protect(bkgWS)
         else:
             windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
-            bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, wsNames, subalgLogging)
+            bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, self._names, self._subalgLogging)
         if not self.getProperty(common.PROP_OUTPUT_FLAT_BKG_WS).isDefault:
             self.setProperty(common.PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
         bkgScaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
-        bkgSubtractedWS = _subtractFlatBkg(mainWS, common.WS_CONTENT_DETS, bkgWS, bkgScaling, wsNames,
-                                           wsCleanup, subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        wsCleanup.cleanup(bkgWS)
+        bkgSubtractedWS = _subtractFlatBkg(mainWS, common.WS_CONTENT_DETS, bkgWS, bkgScaling, self._names,
+                                           self._cleanup, self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
+        self._cleanup.cleanup(bkgWS)
         return bkgSubtractedWS
 
-    def _flatBgkEnabled(self, mainWS, report):
+    def _flatBgkEnabled(self, mainWS):
         """Returns true if flat background subtraction is enabled, false otherwise."""
         flatBkgOption = self.getProperty(common.PROP_FLAT_BKG).value
         if flatBkgOption == common.BKG_AUTO:
@@ -732,33 +711,33 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             if instrument.hasParameter('enable_flat_background_subtraction'):
                 enabled = instrument.getBoolParameter('enable_flat_background_subtraction')[0]
                 if not enabled:
-                    report.notice('Flat background subtraction disabled by the IPF.')
+                    self._report.notice('Flat background subtraction disabled by the IPF.')
                     return False
-            report.notice('Flat background subtraction enabled.')
+            self._report.notice('Flat background subtraction enabled.')
             return True
         return flatBkgOption != common.BKG_OFF
 
-    def _flatBkgMon(self, monWS, wsNames, wsCleanup, subalgLogging):
+    def _flatBkgMon(self, monWS):
         """Subtract flat background from a monitor workspace."""
         windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
-        monBkgWS = _createFlatBkg(monWS, common.WS_CONTENT_MONS, windowWidth, wsNames, subalgLogging)
+        monBkgWS = _createFlatBkg(monWS, common.WS_CONTENT_MONS, windowWidth, self._names, self._subalgLogging)
         monBkgScaling = 1
-        bkgSubtractedMonWS = _subtractFlatBkg(monWS, common.WS_CONTENT_MONS, monBkgWS, monBkgScaling, wsNames,
-                                              wsCleanup, subalgLogging)
-        wsCleanup.cleanup(monBkgWS)
-        wsCleanup.cleanup(monWS)
+        bkgSubtractedMonWS = _subtractFlatBkg(monWS, common.WS_CONTENT_MONS, monBkgWS, monBkgScaling, self._names,
+                                              self._cleanup, self._subalgLogging)
+        self._cleanup.cleanup(monBkgWS)
+        self._cleanup.cleanup(monWS)
         return bkgSubtractedMonWS
 
-    def _inputWS(self, wsNames, wsCleanup, subalgLogging):
+    def _inputWS(self):
         """Return the raw input workspace."""
         inputFiles = self.getPropertyValue(common.PROP_INPUT_FILE)
         if inputFiles:
-            mergedWSName = wsNames.withSuffix('merged')
+            mergedWSName = self._names.withSuffix('merged')
             mainWS = LoadAndMerge(Filename=inputFiles, OutputWorkspace=mergedWSName,
-                                  LoaderName='LoadILLTOF', EnableLogging=subalgLogging)
+                                  LoaderName='LoadILLTOF', EnableLogging=self._subalgLogging)
         else:
             mainWS = self.getProperty(common.PROP_INPUT_WS).value
-            wsCleanup.protect(mainWS)
+            self._cleanup.protect(mainWS)
         return mainWS
 
     def _monitorIndex(self, monWS):
@@ -775,7 +754,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             monIndex = common.convertToWorkspaceIndex(monIndex, monWS)
         return monIndex
 
-    def _normalize(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
+    def _normalize(self, mainWS, monWS, monEPPWS):
         """Normalize to monitor or measurement time."""
         normalisationMethod = self.getProperty(common.PROP_NORMALISATION).value
         if normalisationMethod == common.NORM_METHOD_OFF:
@@ -783,7 +762,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if normalisationMethod == common.NORM_METHOD_MON:
             monitorCounts = _monitorCounts(monWS)
             if monitorCounts < _MONSUM_LIMIT:
-                report.warning("'monsum' less than {}. Disabling normalization to monitor.".format(_MONSUM_LIMIT))
+                self._report.warning("'monsum' less than {}. Disabling normalization to monitor.".format(_MONSUM_LIMIT))
                 normalisationMethod = common.NORM_METHOD_TIME
             else:
                 sigmaMultiplier = \
@@ -800,42 +779,41 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                     centre = eppRow['PeakCentre']
                     begin = centre - sigmaMultiplier * sigma
                     end = centre + sigmaMultiplier * sigma
-                normalizedWS = _normalizeToMonitor(mainWS, monWS, monIndex, begin, end, wsNames, wsCleanup,
-                                                   subalgLogging)
-                normalizedWS = _scaleAfterMonitorNormalization(normalizedWS, wsNames, wsCleanup,
-                                                               subalgLogging)
+                normalizedWS = _normalizeToMonitor(mainWS, monWS, monIndex, begin, end, self._names, self._cleanup,
+                                                   self._subalgLogging)
+                normalizedWS = _scaleAfterMonitorNormalization(normalizedWS, self._names, self._cleanup, self._subalgLogging)
         if normalisationMethod == common.NORM_METHOD_TIME:
-            normalizedWS = _normalizeToTime(mainWS, wsNames, wsCleanup, subalgLogging)
-        wsCleanup.cleanup(mainWS)
+            normalizedWS = _normalizeToTime(mainWS, self._names, self._cleanup, self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return normalizedWS
 
-    def _outputDetEPPWS(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _outputDetEPPWS(self, mainWS):
         """Set the output epp workspace property, if needed."""
         if not self.getProperty(common.PROP_OUTPUT_DET_EPP_WS).isDefault:
-            eppWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
+            eppWS = self._createEPPWSDet(mainWS)
             self.setProperty(common.PROP_OUTPUT_DET_EPP_WS, eppWS)
-            wsCleanup.cleanup(eppWS)
+            self._cleanup.cleanup(eppWS)
 
-    def _outputRaw(self, mainWS, rawWS, subalgLogging):
+    def _outputRaw(self, mainWS, rawWS):
         """Optionally set mainWS as the raw output workspace."""
         if not self.getProperty(common.PROP_OUTPUT_RAW_WS).isDefault:
             CorrectTOFAxis(InputWorkspace=rawWS,
                            OutputWorkspace=rawWS,
                            ReferenceWorkspace=mainWS,
-                           EnableLogging=subalgLogging)
+                           EnableLogging=self._subalgLogging)
             self.setProperty(common.PROP_OUTPUT_RAW_WS, rawWS)
             DeleteWorkspace(Workspace=rawWS,
-                            EnableLogging=subalgLogging)
+                            EnableLogging=self._subalgLogging)
 
-    def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _separateMons(self, mainWS):
         """Extract monitors to a separate workspace."""
-        detWSName = wsNames.withSuffix('extracted_detectors')
-        monWSName = wsNames.withSuffix('extracted_monitors')
+        detWSName = self._names.withSuffix('extracted_detectors')
+        monWSName = self._names.withSuffix('extracted_monitors')
         detWS, monWS = ExtractMonitors(InputWorkspace=mainWS,
                                        DetectorWorkspace=detWSName,
                                        MonitorWorkspace=monWSName,
-                                       EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                                       EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return detWS, monWS
 
 

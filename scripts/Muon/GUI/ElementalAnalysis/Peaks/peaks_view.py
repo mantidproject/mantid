@@ -4,16 +4,18 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtGui
+from __future__ import (absolute_import, division, unicode_literals)
+
+from qtpy import QtWidgets
 
 from Muon.GUI.Common.checkbox import Checkbox
 
 
-class PeaksView(QtGui.QWidget):
+class PeaksView(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(PeaksView, self).__init__(parent)
 
-        self.list = QtGui.QVBoxLayout()
+        self.list = QtWidgets.QVBoxLayout()
 
         self.major = Checkbox("Major Peaks")
         self.minor = Checkbox("Minor Peaks")

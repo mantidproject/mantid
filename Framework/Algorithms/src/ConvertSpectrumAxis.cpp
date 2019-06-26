@@ -44,11 +44,11 @@ void ConvertSpectrumAxis::init() {
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, wsVal),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsVal),
                   "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace.");
   std::vector<std::string> targetOptions =
       Mantid::Kernel::UnitFactory::Instance().getKeys();
@@ -162,19 +162,20 @@ void ConvertSpectrumAxis::exec() {
       create<MatrixWorkspace>(*inputWS, indexMap.size(), builder.build());
   // Now set up a new, numeric axis holding the theta values corresponding to
   // each spectrum
-  auto const newAxis = new NumericAxis(indexMap.size());
-  outputWS->replaceAxis(1, newAxis);
+  auto newAxis = std::make_unique<NumericAxis>(indexMap.size());
+  auto newAxisRaw = newAxis.get();
+  outputWS->replaceAxis(1, std::move(newAxis));
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   if (unitTarget == "theta" || unitTarget == "signed_theta") {
-    newAxis->unit() = boost::make_shared<Units::Degrees>();
+    newAxisRaw->unit() = boost::make_shared<Units::Degrees>();
   } else {
-    newAxis->unit() = UnitFactory::Instance().create(unitTarget);
+    newAxisRaw->unit() = UnitFactory::Instance().create(unitTarget);
   }
   std::multimap<double, size_t>::const_iterator it;
   size_t currentIndex = 0;
   for (it = indexMap.begin(); it != indexMap.end(); ++it) {
     // Set the axis value
-    newAxis->setValue(currentIndex, it->first);
+    newAxisRaw->setValue(currentIndex, it->first);
     // Now copy over the data
     outputWS->setHistogram(currentIndex, inputWS->histogram(it->second));
     // We can keep the spectrum numbers etc.

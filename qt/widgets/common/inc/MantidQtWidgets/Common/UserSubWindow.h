@@ -24,11 +24,12 @@
 // Includes
 //----------------------------------
 #include "DllOption.h"
-#include "InterfaceFactory.h"
 #include "PythonRunner.h"
+#include "UserSubWindowFactory.h"
 
 #include <QLabel>
 #include <QMainWindow>
+#include <QPointer>
 #include <QStringList>
 #include <QWidget>
 #include <set>
@@ -88,20 +89,28 @@ public:
 
 signals:
   /// Emitted to start a (generally small) script running
-  void runAsPythonScript(const QString &code, bool);
+  void runAsPythonScript(const QString &code, bool /*_t2*/);
 
   /// Thrown when used fit property browser should be changed to given one
   void
   setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser *browser);
 
 protected:
-  /**@name Virtual Functions */
-  //@{
   /// To be overridden to set the appropriate layout
   virtual void initLayout() = 0;
   /// Run local Python setup code
   virtual void initLocalPython() {}
-  //@}
+
+  /// To be overridden in order to connect a signal between two interfaces
+  virtual void otherUserSubWindowCreated(QPointer<UserSubWindow> window) {
+    UNUSED_ARG(window);
+  }
+
+  /// To be overridden in order to connect a signal between two interfaces
+  virtual void
+  otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) {
+    UNUSED_ARG(windows);
+  }
 
   /// Raise a dialog box giving some information
   void showInformationBox(const QString &message) const;

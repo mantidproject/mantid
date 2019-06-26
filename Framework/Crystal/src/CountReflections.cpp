@@ -17,7 +17,6 @@
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -55,7 +54,7 @@ const std::string CountReflections::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CountReflections::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "A workspace with peaks to calculate statistics for. Sample "
                   "with valid UB-matrix is required.");
@@ -70,33 +69,33 @@ void CountReflections::init() {
       "PointGroup", "1", boost::make_shared<StringListValidator>(pointGroups),
       "Point group symmetry for completeness and redundancy calculations.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MinDSpacing", 1.0, Direction::Input),
                   "Minimum d-spacing for completeness calculation.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MaxDSpacing", 100.0, Direction::Input),
                   "Maximum d-spacing for completeness calculation.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<int>>(
+  declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "UniqueReflections", 0, Direction::Output),
                   "Number of unique reflections in data set.");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<double>>("Completeness", 0.0,
-                                                     Direction::Output),
+      std::make_unique<PropertyWithValue<double>>("Completeness", 0.0,
+                                                  Direction::Output),
       "Completeness of the data set as a fraction between 0 and 1.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "Redundancy", 0.0, Direction::Output),
                   "Average redundancy in data set, depending on point group.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "MultiplyObserved", 0.0, Direction::Output),
                   "Fraction of reflections with more than one observation.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "MissingReflectionsWorkspace", "", Direction::Output,
           PropertyMode::Optional),
       "Reflections in specified d-range that are missing in input workspace.");

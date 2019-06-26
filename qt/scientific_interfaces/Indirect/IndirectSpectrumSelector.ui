@@ -16,6 +16,9 @@
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
     <widget class="QLabel" name="lbSelectionMode">
+     <property name="toolTip">
+      <string>Choose the spectra you want to fit.</string>
+     </property>
      <property name="text">
       <string>Fit Spectra</string>
      </property>
@@ -23,6 +26,9 @@
    </item>
    <item>
     <widget class="QComboBox" name="cbSelectionMode">
+     <property name="toolTip">
+      <string>Choose Range to select a continuous range of spectra. Choose String to specify a discontinuous collection of spectra (e.g. 0-3, 6, 8-10).</string>
+     </property>
      <item>
       <property name="text">
        <string>Range</string>
@@ -99,7 +105,7 @@
    <item>
     <widget class="QLabel" name="lbMaskSpectrum">
      <property name="text">
-      <string>Mask Energies of Spectrum</string>
+      <string>Mask X Range of Spectrum</string>
      </property>
     </widget>
    </item>

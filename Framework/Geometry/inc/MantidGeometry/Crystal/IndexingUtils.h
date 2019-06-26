@@ -66,6 +66,20 @@ public:
                             const std::vector<Kernel::V3D> &hkl_vectors,
                             const std::vector<Kernel::V3D> &q_vectors);
 
+  static double Optimize_6dUB(Kernel::DblMatrix &UB, Kernel::DblMatrix &ModUB,
+                              const std::vector<Kernel::V3D> &hkl_vectors,
+                              const std::vector<Kernel::V3D> &mnp_vectors,
+                              const int &ModDim,
+                              const std::vector<Kernel::V3D> &q_vectors,
+                              std::vector<double> &sigabc,
+                              std::vector<double> &sigq);
+
+  static double Optimize_6dUB(Kernel::DblMatrix &UB, Kernel::DblMatrix &ModUB,
+                              const std::vector<Kernel::V3D> &hkl_vectors,
+                              const std::vector<Kernel::V3D> &mnp_vectors,
+                              const int &ModDim,
+                              const std::vector<Kernel::V3D> &q_vectors);
+
   /// Find the vector that best corresponds to plane normal, given 1-D indices
   static double Optimize_Direction(Kernel::V3D &best_vec,
                                    const std::vector<int> &index_values,
@@ -219,6 +233,15 @@ public:
   /// Get the lattice parameters for the specified orientation matrix
   static bool GetLatticeParameters(const Kernel::DblMatrix &UB,
                                    std::vector<double> &lattice_par);
+
+  static int GetModulationVectors(const Kernel::DblMatrix &UB,
+                                  const Kernel::DblMatrix &ModUB,
+                                  Kernel::V3D &ModVec1, Kernel::V3D &ModVec2,
+                                  Kernel::V3D &ModVec3);
+
+  static bool GetModulationVector(const Kernel::DblMatrix &UB,
+                                  const Kernel::DblMatrix &ModUB,
+                                  Kernel::V3D &ModVec, int &j);
 
   /// Get a formatted string listing the lattice parameters and cell volume
   static std::string GetLatticeParameterString(const Kernel::DblMatrix &UB);

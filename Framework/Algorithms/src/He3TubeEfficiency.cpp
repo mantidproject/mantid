@@ -59,18 +59,18 @@ void He3TubeEfficiency::init() {
   wsValidator->add<API::HistogramValidator>();
   wsValidator->add<API::InstrumentValidator>();
   this->declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input, wsValidator),
       "Name of the input workspace");
   this->declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output workspace, can be the same as the input");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   this->declareProperty(
-      make_unique<Kernel::PropertyWithValue<double>>("ScaleFactor", 1.0,
-                                                     mustBePositive),
+      std::make_unique<Kernel::PropertyWithValue<double>>("ScaleFactor", 1.0,
+                                                          mustBePositive),
       "Constant factor with which to scale the calculated"
       "detector efficiency. Same factor applies to all efficiencies.");
 
@@ -78,16 +78,18 @@ void He3TubeEfficiency::init() {
       boost::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   this->declareProperty(
-      make_unique<Kernel::ArrayProperty<double>>("TubePressure", mustBePosArr),
+      std::make_unique<Kernel::ArrayProperty<double>>("TubePressure",
+                                                      mustBePosArr),
       "Provide overriding the default tube pressure. The pressure must "
       "be specified in atm.");
   this->declareProperty(
-      make_unique<Kernel::ArrayProperty<double>>("TubeThickness", mustBePosArr),
+      std::make_unique<Kernel::ArrayProperty<double>>("TubeThickness",
+                                                      mustBePosArr),
       "Provide overriding the default tube thickness. The thickness must "
       "be specified in metres.");
   this->declareProperty(
-      make_unique<Kernel::ArrayProperty<double>>("TubeTemperature",
-                                                 mustBePosArr),
+      std::make_unique<Kernel::ArrayProperty<double>>("TubeTemperature",
+                                                      mustBePosArr),
       "Provide overriding the default tube temperature. The temperature must "
       "be specified in Kelvin.");
 }
@@ -226,8 +228,7 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
   // now get the sin of the angle, it's the magnitude of the cross product of
   // unit vector along the detector tube axis and a unit vector directed from
   // the sample to the detector center
-  Kernel::V3D vectorFromSample = idet.getPos() - m_samplePos;
-  vectorFromSample.normalize();
+  const Kernel::V3D vectorFromSample = normalize(idet.getPos() - m_samplePos);
   Kernel::Quat rot = idet.getRotation();
   // rotate the original cylinder object axis to get the detector axis in the
   // actual instrument
@@ -324,9 +325,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
 double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
                                         const Geometry::IObject *shape) const {
   // get a vector from the point that was passed to the origin
-  Kernel::V3D direction = Kernel::V3D(0.0, 0.0, 0.0) - start;
-  // it needs to be a unit vector
-  direction.normalize();
+  const Kernel::V3D direction = normalize(-start);
   // put the point and the vector (direction) together to get a line,
   // here called a track
   Geometry::Track track(start, direction);

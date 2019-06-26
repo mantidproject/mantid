@@ -9,8 +9,8 @@
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
 
 #include <type_traits>

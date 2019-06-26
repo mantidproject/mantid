@@ -23,6 +23,7 @@ import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
+from matplotlib.axes import Axes
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
 
@@ -30,7 +31,7 @@ from qtpy.QtWidgets import QApplication, QLabel
 from .figureinteraction import FigureInteraction
 from .figurewindow import FigureWindow
 from .qappthreadcall import QAppThreadCall
-from .toolbar import WorkbenchNavigationToolbar, ToolbarStateChecker
+from .toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
 
 
 def _catch_exceptions(func):
@@ -82,11 +83,27 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         all_axes = self.canvas.figure.axes
         if not all_axes:
             return
-        empty_axes = False
+
+        # Here we wish to delete any curves linked to the workspace being
+        # deleted and if a figure is now empty, close it. We must avoid closing
+        # any figures that were created via the script window that are not
+        # managed via a workspace.
+        # See https://github.com/mantidproject/mantid/issues/25135.
+        empty_axes = []
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                empty_axes = ax.remove_workspace_artists(workspace)
-        if empty_axes:
+                ax.remove_workspace_artists(workspace)
+            # We check for axes type below as a pseudo check for an axes being
+            # a colorbar. Creating a colorfill plot creates 2 axes: one linked
+            # to a workspace, the other a colorbar. Deleting the workspace
+            # deletes the colorfill, but the plot remains open due to the
+            # non-empty colorbar. This solution seems to work for the majority
+            # of cases but could lead to unmanaged figures only containing an
+            # Axes object being closed.
+            if type(ax) is not Axes:
+                empty_axes.append(MantidAxes.is_empty(ax))
+
+        if all(empty_axes):
             self.window.emit_close()
         else:
             self.canvas.draw_idle()
@@ -183,7 +200,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateChecker(self.toolbar))
+        self.fit_browser = FitPropertyBrowser(canvas,
+                                              ToolbarStateManager(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
@@ -200,11 +218,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
-        self._fig_interation = FigureInteraction(self)
+        self._fig_interaction = FigureInteraction(self)
         self._ads_observer = FigureManagerADSObserver(self)
-
-        # Plotted workspace names/spectra in form '{workspace}: spec {spec_num}'
-        self.workspace_labels = []
 
         self.window.raise_()
 
@@ -242,11 +257,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
         if figure_type(self.canvas.figure) != FigureType.Line:
-            action = self.toolbar._actions['toggle_fit']
-            action.setEnabled(False)
-            action.setVisible(False)
-
-        self._update_workspace_labels()
+            self._set_fit_enabled(False)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -261,7 +272,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.destroy()
         self._ads_observer.observeAll(False)
         del self._ads_observer
-        self._fig_interation.disconnect()
+        self._fig_interaction.disconnect()
         self.window.close()
 
         try:
@@ -325,24 +336,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         Gcf.figure_visibility_changed(self.num)
 
-    def get_curve_labels(self):
-        """Get curve labels from Matplotlib figure"""
-        return [line.get_label() for line in self.canvas.figure.axes[0].lines]
+    def _set_fit_enabled(self, on):
+        action = self.toolbar._actions['toggle_fit']
+        action.setEnabled(on)
+        action.setVisible(on)
 
-    def _update_workspace_labels(self):
-        """Check for new curves and update the workspace labels"""
-        curve_labels = self.get_curve_labels()
-        num_new_curves = len(curve_labels) - len(self.workspace_labels)
-        self.workspace_labels += curve_labels[-num_new_curves:]
-        self._update_fit_browser_workspace_labels()
-
-    def _update_fit_browser_workspace_labels(self):
-        self.fit_browser.workspace_labels = self.workspace_labels
 
 # -----------------------------------------------------------------------------
 # Figure control
 # -----------------------------------------------------------------------------
-
 
 def new_figure_manager(num, *args, **kwargs):
     """
@@ -378,7 +380,7 @@ if __name__ == '__main__':
     fig1 = fig_mgr_1.canvas.figure
     ax = fig1.add_subplot(111)
     ax.set_title("Test title")
-    ax.set_xlabel("$\mu s$")
+    ax.set_xlabel(r"$\mu s$")
     ax.set_ylabel("Counts")
 
     ax.plot(x, cx)

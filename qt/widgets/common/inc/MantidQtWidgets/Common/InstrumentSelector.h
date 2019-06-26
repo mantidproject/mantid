@@ -9,15 +9,11 @@
 
 #include "DllOption.h"
 #include "MantidKernel/ConfigService.h"
+
+#include <Poco/NObserver.h>
 #include <QComboBox>
 #include <QStringList>
 
-#include <Poco/AutoPtr.h>
-#include <Poco/NObserver.h>
-
-//----------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------
 namespace Mantid {
 namespace Kernel {
 class FacilityInfo;
@@ -66,8 +62,9 @@ public slots:
 signals:
   /// Indicate that the instrument selection has changed. The parameter will
   /// contain the new name
-  void instrumentSelectionChanged(const QString &);
-  void configValueChanged(const QString &, const QString &, const QString &);
+  void instrumentSelectionChanged(const QString & /*_t1*/);
+  void configValueChanged(const QString & /*_t1*/, const QString & /*_t2*/,
+                          const QString & /*_t3*/);
   /// Signals that the list of instruments has been updated
   void instrumentListUpdated();
 
