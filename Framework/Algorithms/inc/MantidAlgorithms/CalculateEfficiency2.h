@@ -75,6 +75,7 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
   /// Sum all detectors, excluding monitors and masked detectors
@@ -83,8 +84,10 @@ private:
   void averageAndNormalizePixels(API::MatrixWorkspace &workspace,
                                  const SummedResults &results);
 
-  // void applyBadPixelThreshold(API::MatrixWorkspace &outputWS, double,
-  // double);
+  /// Minimum efficiency. Pixels with lower efficiency will be masked
+  double m_minThreshold{0.};
+  /// Maximum efficiency. Pixels with higher efficiency will be masked
+  double m_maxThreshold{0.};
 };
 
 } // namespace Algorithms

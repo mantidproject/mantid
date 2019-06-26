@@ -9,7 +9,7 @@
 Description
 -----------
 Compute the detector efficiency of SANS data. This algorithm is used by
-the EQSANS and HFIR SANS reduction.
+SANS reduction.
 
 The flood is a short for flood field. The flood field is collected from a
 sample that scatters uniformly in angle to ensure that every pixel on the
