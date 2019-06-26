@@ -82,7 +82,8 @@ void InterpolatingRebin::exec() {
       create<MatrixWorkspace>(*inputW, BinEdges(ntcnew));
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
-    outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));
+    outputW->replaceAxis(
+        1, std::unique_ptr<Axis>(inputW->getAxis(1)->clone(outputW.get())));
   outputW->setDistribution(true);
 
   // this calculation requires a distribution workspace but deal with the

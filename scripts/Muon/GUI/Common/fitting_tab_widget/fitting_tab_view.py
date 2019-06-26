@@ -226,6 +226,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         return current_index if current_index != -1 else 0
 
+    def get_global_parameters(self):
+        return self.function_browser.getGlobalParameters()
+
     def setup_fit_options_table(self):
         self.fit_options_table.setRowCount(5)
         self.fit_options_table.setColumnCount(2)

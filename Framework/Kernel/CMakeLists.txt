@@ -7,6 +7,7 @@ set(SRC_FILES
     src/Atom.cpp
     src/BinFinder.cpp
     src/BinaryStreamReader.cpp
+    src/BinaryStreamWriter.cpp
     src/CPUTimer.cpp
     src/CatalogInfo.cpp
     src/ChecksumHelper.cpp
@@ -97,6 +98,7 @@ set(SRC_FILES
     src/RebinParamsValidator.cpp
     src/RegexStrings.cpp
     src/RemoteJobManager.cpp
+    src/SimpleJSON.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
     src/StartsWithValidator.cpp
@@ -149,6 +151,7 @@ set(INC_FILES
     inc/MantidKernel/BinFinder.h
     inc/MantidKernel/BinaryFile.h
     inc/MantidKernel/BinaryStreamReader.h
+    inc/MantidKernel/BinaryStreamWriter.h
     inc/MantidKernel/BoundedValidator.h
     inc/MantidKernel/CPUTimer.h
     inc/MantidKernel/Cache.h
@@ -268,6 +271,7 @@ set(INC_FILES
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
     inc/MantidKernel/RemoteJobManager.h
+    inc/MantidKernel/SimpleJSON.h 
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
@@ -319,6 +323,7 @@ set(TEST_FILES
     BinFinderTest.h
     BinaryFileTest.h
     BinaryStreamReaderTest.h
+    BinaryStreamWriterTest.h
     BoseEinsteinDistributionTest.h
     BoundedValidatorTest.h
     CPUTimerTest.h
@@ -414,6 +419,7 @@ set(TEST_FILES
     RegexStringsTest.h
     SLSQPMinimizerTest.h
     ShrinkToFitTest.h
+    SimpleJSONTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
     StartsWithValidatorTest.h

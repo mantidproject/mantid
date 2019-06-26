@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from mantid.api import FileFinder
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
@@ -71,6 +70,12 @@ class LoadRunWidgetPresenterTest(GuiTest):
         self.addCleanup(self.popup_patcher.stop)
         self.popup_mock = self.popup_patcher.start()
 
+        def setGroupAndPairsToEmptyList(grouping_context):
+            grouping_context._groups = []
+            grouping_context._pairs = []
+        self.group_context.reset_group_and_pairs_to_default = mock.MagicMock(
+            side_effect=setGroupAndPairsToEmptyList(self.group_context))
+
     def tearDown(self):
         self.obj = None
 
@@ -83,22 +88,22 @@ class LoadRunWidgetPresenterTest(GuiTest):
     def mock_loading_from_browse(self, workspace, filename, run):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
             return_value=[filename])
-        self.load_mock.return_value = (workspace, run, filename)
-        self.load_run_mock.return_value = (workspace, run, filename)
+        self.load_mock.return_value = (workspace, run, filename, False)
+        self.load_run_mock.return_value = (workspace, run, filename, False)
 
     def mock_loading_from_current_run(self, workspace, filename, run):
         file_utils.get_current_run_filename = mock.Mock(return_value=filename)
-        self.load_run_mock.return_value = (workspace, run, filename)
-        self.load_mock.return_value = (workspace, run, filename)
+        self.load_run_mock.return_value = (workspace, run, filename, False)
+        self.load_mock.return_value = (workspace, run, filename, False)
 
     def mock_user_input_single_run(self, workspace, filename, run):
         self.load_run_view.get_run_edit_text = mock.Mock(return_value=str(run))
-        self.load_run_mock.return_value = (workspace, run, filename)
-        self.load_mock.return_value = (workspace, run, filename)
+        self.load_run_mock.return_value = (workspace, run, filename, False)
+        self.load_mock.return_value = (workspace, run, filename, False)
 
     def mock_user_input_single_file(self, workspace, filename, run):
-        self.load_run_mock.return_value = (workspace, run, filename)
-        self.load_mock.return_value = (workspace, run, filename)
+        self.load_run_mock.return_value = (workspace, run, filename, False)
+        self.load_mock.return_value = (workspace, run, filename, False)
 
         self.load_file_view.get_file_edit_text = mock.Mock(
             return_value=filename)

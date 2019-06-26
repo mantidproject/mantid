@@ -419,7 +419,9 @@ void ResampleX::exec() {
 
       // Copy all the axes
       for (int i = 1; i < inputWS->axes(); i++) {
-        outputWS->replaceAxis(i, inputWS->getAxis(i)->clone(outputWS.get()));
+        outputWS->replaceAxis(
+            i,
+            std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       }
 
@@ -453,7 +455,8 @@ void ResampleX::exec() {
 
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
-      outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
+      outputWS->replaceAxis(
+          1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
 
     Progress prog(this, 0.0, 1.0, numSpectra);
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))

@@ -20,8 +20,7 @@ class QwtWorkspaceBinDataTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
     ws = WorkspaceCreationHelper::create2DWorkspace(3, 4);
-    auto *ax1 = new Mantid::API::NumericAxis(3);
-    ws->replaceAxis(1, ax1);
+    auto ax1 = std::make_unique<Mantid::API::NumericAxis>(3);
     for (size_t i = 0; i < 3; i++) {
       ax1->setValue(i, 10.0 + static_cast<double>(i));
       for (size_t j = 0; j < 5; j++)
@@ -31,6 +30,7 @@ public:
         ws->dataE(i)[j] = double(i) + double(j) * 3;
       }
     }
+    ws->replaceAxis(1, std::move(ax1));
   }
 
   void checkData(QwtWorkspaceBinData &data, double binIndex) {

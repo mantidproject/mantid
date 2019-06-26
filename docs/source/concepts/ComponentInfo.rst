@@ -1,7 +1,7 @@
 .. _ComponentInfo:
 
 =============
-ComponentInfo 
+ComponentInfo
 =============
 
 .. contents::
@@ -9,21 +9,21 @@ ComponentInfo
 
 Introduction
 ------------
-``ComponentInfo`` provides faster and simpler access to instrument/beamline geometry as required by Mantid :ref:`Algorithms <Algorithm>` than was possible using :ref:`Instrument`. ``ComponentInfo`` and :ref:`DetectorInfo` are designed as full replacements to :ref:`Instrument`. 
+:py:obj:`~mantid.geometry.ComponentInfo` provides faster and simpler access to instrument/beamline geometry as required by Mantid :ref:`Algorithms <Algorithm>` than was possible using :ref:`Instrument`. :py:obj:`~mantid.geometry.ComponentInfo` and :ref:`DetectorInfo` are designed as full replacements to :ref:`Instrument`.
 
-:ref:`Instrument Access Layers <InstrumentAccessLayers>` provides details on how `DetectorInfo` interacts with other geometry access layers.
+:ref:`Instrument Access Layers <InstrumentAccessLayers>` provides details on how :py:obj:`~mantid.geometry.DetectorInfo` interacts with other geometry access layers.
 
 Python Interface
 ----------------
 
-Examples of using ``ComponentInfo`` in python
+Examples of using :py:obj:`~mantid.geometry.ComponentInfo` in python
 
 **Print indices of detectors in "bank1" that are masked**
 
-.. testcode:: show_masked_detectors_in_bank 
+.. testcode:: show_masked_detectors_in_bank
 
    from mantid.simpleapi import CreateSampleWorkspace
-   
+
    ws = CreateSampleWorkspace()
    comp_info = ws.componentInfo()
    det_info = ws.detectorInfo()

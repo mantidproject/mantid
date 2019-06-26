@@ -14,6 +14,7 @@ def calculate_group_data(context, group_name, run, rebin):
 
     params = _get_MuonGroupingCounts_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
+
     group_data = algorithm_utils.run_MuonGroupingCounts(params)
 
     return group_data

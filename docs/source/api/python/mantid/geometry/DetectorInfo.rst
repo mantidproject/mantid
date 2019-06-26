@@ -4,25 +4,25 @@
 
 This is a python binding to the C++ class Mantid::Geometry::DetectorInfo.
 
-Most of the information concerning ``DetectorInfo`` can be found in the `Instrument Access Layers <https://github.com/mantidproject/mantid/blob/9e3d799d40fda4a5ca08887e8c47f41c3316da91/docs/source/concepts/InstrumentAccessLayers.rst>`_ document.
+Most of the information concerning :py:obj:`~mantid.geometry.DetectorInfo` can be found in the :ref:`Instrument Access Layers <InstrumentAccessLayers>` document.
 
 --------
 Purpose
 --------
-The purpose of the ``DetectorInfo`` object is to allow the user to access information about the detector(s) being used in an experiment. The ``DetectorInfo`` object can be used to access geometric information such as the number of detectors in the beamline, the absolute position of a detector as well as the absolute rotation of a detector.
+The purpose of the :py:obj:`~mantid.geometry.DetectorInfo` object is to allow the user to access information about the detector(s) being used in an experiment. The :py:obj:`~mantid.geometry.DetectorInfo` object can be used to access geometric information such as the number of detectors in the beamline, the absolute position of a detector as well as the absolute rotation of a detector.
 
 Many users may need this extra information so that they can have a better understanding of the beamline they are using. This information is easy and fast to access. Some information like mask flags can be modified directly.
 
-The ``DetectorInfo`` object is one of three objects that the user can gain access to from a workspace.
+The :py:obj:`~mantid.geometry.DetectorInfo` object is one of three objects that the user can gain access to from a workspace.
 The other two are:
 
- * SpectrumInfo
- * ComponentInfo
+* :py:obj:`~mantid.api.SpectrumInfo`
+* :py:obj:`~mantid.geometry.ComponentInfo`
 
 ---------
 Indexing
 ---------
-The ``DetectorInfo`` object is accessed by an index going from 0 to N-1, where N is the number of detectors.
+The :py:obj:`~mantid.geometry.DetectorInfo` object is accessed by an index going from 0 to N-1, where N is the number of detectors.
 It is important to note that the detector index is NOT the detector ID. A detector index is a way of addressing and enumerating detectors in the beamline.
 A detector index can be found from a detector ID using ``indexOf``.
 
@@ -31,8 +31,8 @@ Usage
 -------
 
 **Example 1 - Creating a DetectorInfo Object:**
-This example shows how to obtain a ``DetectorInfo`` object from a workspace object.
-The return value is a ``DetectorInfo`` object.
+This example shows how to obtain a :py:obj:`~mantid.geometry.DetectorInfo` object from a workspace object.
+The return value is a :py:obj:`~mantid.geometry.DetectorInfo` object.
 
 .. testcode:: CreateDetectorInfoObject
 
@@ -111,4 +111,3 @@ Output:
     :members:
     :undoc-members:
     :inherited-members:
-

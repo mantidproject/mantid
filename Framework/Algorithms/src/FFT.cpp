@@ -270,7 +270,7 @@ void FFT::transformBackward(boost::shared_array<double> &data, const int xSize,
 }
 
 void FFT::setupTAxis(const int nOut, const bool addPositiveOnly) {
-  auto tAxis = new API::TextAxis(nOut);
+  auto tAxis = std::make_unique<API::TextAxis>(nOut);
 
   m_iRe = 0;
   m_iIm = 1;
@@ -286,7 +286,7 @@ void FFT::setupTAxis(const int nOut, const bool addPositiveOnly) {
   tAxis->setLabel(m_iRe, "Real");
   tAxis->setLabel(m_iIm, "Imag");
   tAxis->setLabel(m_iAbs, "Modulus");
-  m_outWS->replaceAxis(1, tAxis);
+  m_outWS->replaceAxis(1, std::move(tAxis));
 }
 
 void FFT::createUnitsLabels(double &df) {

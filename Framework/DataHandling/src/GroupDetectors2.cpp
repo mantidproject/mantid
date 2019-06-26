@@ -86,7 +86,7 @@ void forceSpectraAxis(MatrixWorkspace &ws) {
   if (dynamic_cast<SpectraAxis *>(ws.getAxis(1))) {
     return;
   }
-  ws.replaceAxis(1, new SpectraAxis(&ws));
+  ws.replaceAxis(1, std::make_unique<SpectraAxis>(&ws));
 }
 
 } // anonymous namespace

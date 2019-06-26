@@ -167,7 +167,7 @@ public:
     // Let WS know that it is in TOF now (one column)
     auto &T = ws2D->dataX(0);
 
-    auto *pAxis0 = new NumericAxis(n_bins - 1);
+    auto pAxis0 = std::make_unique<NumericAxis>(n_bins - 1);
     for (size_t i = 0; i < n_bins - 1; i++) {
       double Tm = 0.5 * (TOFS[i] + TOFS[i + 1]);
       pAxis0->setValue(i, Tm);
@@ -176,7 +176,7 @@ public:
     T[n_bins - 1] = TOFS[n_bins - 1];
 
     pAxis0->setUnit("TOF");
-    ws2D->replaceAxis(0, pAxis0);
+    ws2D->replaceAxis(0, std::move(pAxis0));
 
     // initialize matrix ws description, to the same number of dimensions as
     // before
@@ -218,9 +218,9 @@ public:
       E_storage[i] = -0.1 + 0.1 * static_cast<double>(i);
     }
 
-    auto *pAxis0 = new NumericAxis(n_bins - 1);
+    auto pAxis0 = std::make_unique<NumericAxis>(n_bins - 1);
     pAxis0->setUnit("Energy");
-    ws2D->replaceAxis(0, pAxis0);
+    ws2D->replaceAxis(0, std::move(pAxis0));
 
     //---------------------------------------------------------------------------------
     UnitsConversionHelper Conv;
@@ -249,9 +249,9 @@ public:
     TS_ASSERT_DELTA(10000, range.second, 1.e-8);
 
     // initalize Convert from momentum to energy, forcing convert wia TOF
-    pAxis0 = new NumericAxis(n_bins - 1);
+    pAxis0 = std::make_unique<NumericAxis>(n_bins - 1);
     pAxis0->setUnit("Momentum");
-    ws2D->replaceAxis(0, pAxis0);
+    ws2D->replaceAxis(0, std::move(pAxis0));
     WSD.buildFromMatrixWS(ws2D, "Q3D", "Elastic");
 
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD, "Energy", true));

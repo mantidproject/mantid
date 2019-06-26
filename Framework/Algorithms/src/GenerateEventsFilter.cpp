@@ -670,11 +670,11 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   ss << "Log." << m_dblLog->name() << ".From." << minvalue << ".To." << maxvalue
      << ".Value-change-direction:";
   if (filterincrease && filterdecrease) {
-    ss << ".both ";
+    ss << "both";
   } else if (filterincrease) {
-    ss << ".increase";
+    ss << "increase";
   } else {
-    ss << ".decrease";
+    ss << "decrease";
   }
   row << 0 << ss.str();
 }
@@ -1275,6 +1275,12 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
         // Check this value whether it falls into any range
         size_t index = searchValue(logvalueranges, currValue);
 
+        bool valueWithinMinMax = true;
+        if (index > logvalueranges.size()) {
+          // Out of range
+          valueWithinMinMax = false;
+        }
+
         if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
           stringstream dbss;
           dbss << "[DBx257] Examine Log Index " << i
@@ -1287,16 +1293,10 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
             dbss << logvalueranges[index] << ", " << logvalueranges[index + 1];
           else if (index == logvalueranges.size())
             dbss << logvalueranges[index - 1] << ", " << logvalueranges[index];
-          else
+          else if (valueWithinMinMax)
             dbss << logvalueranges[index - 1] << ", " << logvalueranges[index]
                  << ", " << logvalueranges[index + 1];
           g_log.debug(dbss.str());
-        }
-
-        bool valueWithinMinMax = true;
-        if (index > logvalueranges.size()) {
-          // Out of range
-          valueWithinMinMax = false;
         }
 
         if (valueWithinMinMax) {

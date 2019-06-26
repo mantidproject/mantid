@@ -45,7 +45,7 @@ class BrowseFileWidgetPresenter(object):
         self._multiple_file_mode = text
 
     def get_filenames_from_user(self):
-        file_filter = file_utils.filter_for_extensions(["nxs"])
+        file_filter = file_utils.filter_for_extensions(["bin", "nxs"])
         directory = ""
         filenames = self._view.show_file_browser_and_return_selection(file_filter, [directory],
                                                                       multiple_files=self._multiple_files)
@@ -124,7 +124,7 @@ class BrowseFileWidgetPresenter(object):
 
     def on_loading_finished(self):
         instrument_from_workspace = self._model.get_instrument_from_latest_run()
-        if instrument_from_workspace != self._model._data_context.instrument:
+        if instrument_from_workspace != self._model._data_context.instrument or instrument_from_workspace == "PSI":
             self._model.instrument = instrument_from_workspace
 
         if self._multiple_files and self._multiple_file_mode == "Co-Add":

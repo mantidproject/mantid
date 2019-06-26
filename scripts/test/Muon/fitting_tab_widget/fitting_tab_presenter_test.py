@@ -104,7 +104,8 @@ class FittingTabPresenterTest(GuiTest):
 
         self.assertEqual(self.view.function_browser.getDatasetNames(), ['Input Workspace Name'])
 
-    def test_fit_clicked_with_simultaneous_selected(self):
+    def test_fit_clicked_with_simultaneous_selected_and_no_globals(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
         self.view.simul_fit_radio.toggle()
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -114,12 +115,39 @@ class FittingTabPresenterTest(GuiTest):
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
 
-        call_args_dict = self.presenter.model.do_simultaneous_fit.call_args[0][0]
+        simultaneous_call_args = self.presenter.model.do_simultaneous_fit.call_args
+        call_args_dict = simultaneous_call_args[0][0]
 
         self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
         self.assertEqual(call_args_dict['Minimizer'], 'Levenberg-Marquardt')
         self.assertEqual(call_args_dict['StartX'], [0.0, 0.0])
         self.assertEqual(call_args_dict['EndX'], [15.0, 15.0])
+
+        call_args_globals = simultaneous_call_args[0][1]
+        self.assertEqual(call_args_globals, [])
+
+    def test_fit_clicked_with_simultaneous_selected_with_global_parameters(self):
+        self.presenter.model.get_function_name.return_value = 'GausOsc'
+        self.view.simul_fit_radio.toggle()
+        self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.view.function_browser.setGlobalParameters(['A'])
+        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+                                                                 'Fit Suceeded', 0.5)
+
+        self.view.fit_button.clicked.emit(True)
+        wait_for_thread(self.presenter.calculation_thread)
+
+        simultaneous_call_args = self.presenter.model.do_simultaneous_fit.call_args
+
+        call_args_dict = simultaneous_call_args[0][0]
+        self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
+        self.assertEqual(call_args_dict['Minimizer'], 'Levenberg-Marquardt')
+        self.assertEqual(call_args_dict['StartX'], [0.0, 0.0])
+        self.assertEqual(call_args_dict['EndX'], [15.0, 15.0])
+
+        call_args_globals = simultaneous_call_args[0][1]
+        self.assertEqual(call_args_globals, ['A'])
 
     def test_when_new_data_is_selected_clear_out_old_fits_and_information(self):
         self.presenter._fit_status = ['success', 'success', 'success']

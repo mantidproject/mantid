@@ -135,7 +135,8 @@ void RebinByTimeBase::exec() {
 
   // Copy all the axes
   for (int i = 1; i < inWS->axes(); i++) {
-    outputWS->replaceAxis(i, inWS->getAxis(i)->clone(outputWS.get()));
+    outputWS->replaceAxis(
+        i, std::unique_ptr<Axis>(inWS->getAxis(i)->clone(outputWS.get())));
     outputWS->getAxis(i)->unit() = inWS->getAxis(i)->unit();
   }
 

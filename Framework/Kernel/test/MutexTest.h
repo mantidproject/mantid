@@ -62,7 +62,7 @@ public:
     CPUTimer tim;
     size_t numTasks = 50;
     for (size_t i = 0; i < numTasks; i++)
-      pool.schedule(new FunctionTask(reader));
+      pool.schedule(std::make_shared<FunctionTask>(reader));
     pool.joinAll();
     std::cout << tim << " to execute all " << numTasks << " tasks\n";
   }
@@ -73,7 +73,7 @@ public:
     CPUTimer tim;
     size_t numTasks = 10;
     for (size_t i = 0; i < numTasks; i++)
-      pool.schedule(new FunctionTask(unconditional_writer));
+      pool.schedule(std::make_shared<FunctionTask>(unconditional_writer));
     pool.joinAll();
     std::cout << tim << " to execute all " << numTasks << " tasks\n";
     TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(),
@@ -87,9 +87,9 @@ public:
     size_t numTasks = 50;
     for (size_t i = 0; i < numTasks; i++) {
       if (i % 10 == 0)
-        pool.schedule(new FunctionTask(unconditional_writer));
+        pool.schedule(std::make_shared<FunctionTask>(unconditional_writer));
       else
-        pool.schedule(new FunctionTask(reader));
+        pool.schedule(std::make_shared<FunctionTask>(reader));
     }
     pool.joinAll();
     std::cout << tim << " to execute all " << numTasks << " tasks\n";

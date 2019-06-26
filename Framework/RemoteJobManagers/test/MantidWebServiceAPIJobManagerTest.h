@@ -12,8 +12,8 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/SimpleJSON.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
-#include "MantidRemoteJobManagers/SimpleJSON.h"
 
 #include <boost/make_shared.hpp>
 

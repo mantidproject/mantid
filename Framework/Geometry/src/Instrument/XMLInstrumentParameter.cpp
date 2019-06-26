@@ -145,7 +145,8 @@ double XMLInstrumentParameter::createParamValue(
       extractedValue =
           Kernel::filterByStatistic(logData, (*statisics_choice).second);
     }
-    // Looking for string: "position n", where n is an integer
+    // Looking for string: "position n", where n is an integer and is a 1-based
+    // index
     else if (m_extractSingleValueAs.find("position") == 0 &&
              m_extractSingleValueAs.size() >= 10) {
       std::stringstream extractPosition(m_extractSingleValueAs);
@@ -153,7 +154,7 @@ double XMLInstrumentParameter::createParamValue(
       int position;
       extractPosition >> dummy >> position;
 
-      extractedValue = logData->nthValue(position);
+      extractedValue = logData->nthValue(position - 1);
     } else {
       throw Kernel::Exception::InstrumentDefinitionError(
           std::string("extract-single-value-as attribute for <parameter>") +

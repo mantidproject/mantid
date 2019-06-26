@@ -124,6 +124,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_fitting_notifier()
 
+        self.setup_on_recalulation_finished_notifer()
+
         self.context.data_context.message_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.message_observer)
 
@@ -164,6 +166,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+
+        self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
+            self.home_tab.plot_widget.group_pair_observer)
 
     def setup_alpha_recalculated_observers(self):
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
@@ -233,6 +238,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.home_tab.plot_widget.input_workspace_observer)
+
     def setup_phase_quad_changed_notifer(self):
         pass
 
@@ -243,6 +251,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         """Connect fitting and results tabs to inform of new fits"""
         self.fitting_context.new_fit_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
+
+        self.fitting_context.new_fit_notifier.add_subscriber(
+            self.home_tab.plot_widget.fit_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

@@ -183,11 +183,12 @@ Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
 Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 
   Workspace2D_sptr outputWS = create2DWorkspaceBinned(nHist, nBins);
-  auto const newAxis = new NumericAxis(nHist);
-  outputWS->replaceAxis(1, newAxis);
-  newAxis->unit() = boost::make_shared<Units::Degrees>();
+  auto newAxis = std::make_unique<NumericAxis>(nHist);
+  auto newAxisRaw = newAxis.get();
+  outputWS->replaceAxis(1, std::move(newAxis));
+  newAxisRaw->unit() = boost::make_shared<Units::Degrees>();
   for (int i = 0; i < nHist; ++i) {
-    newAxis->setValue(i, i + 1);
+    newAxisRaw->setValue(i, i + 1);
   }
 
   return outputWS;
@@ -478,12 +479,12 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   // Set the X axes
   const auto &xVals = ws->x(0);
   const size_t xSize = xVals.size();
-  auto ax0 = new NumericAxis(xSize);
+  auto ax0 = std::make_unique<NumericAxis>(xSize);
   ax0->setUnit("dSpacing");
   for (size_t i = 0; i < xSize; i++) {
     ax0->setValue(i, xVals[i]);
   }
-  ws->replaceAxis(0, ax0);
+  ws->replaceAxis(0, std::move(ax0));
 
   // re-assign detector IDs to the rectangular detector
   const auto detIds = inst->getDetectorIDs();
@@ -818,7 +819,7 @@ EventWorkspace_sptr createRandomEventWorkspace(size_t numbins, size_t numpixels,
   retVal->initialize(numpixels, numbins, numbins - 1);
 
   // and X-axis for references:
-  auto pAxis0 = new NumericAxis(numbins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numbins);
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
   HistogramData::BinEdges axis(numbins, LinearGenerator(0.0, bin_delta));
@@ -841,7 +842,7 @@ EventWorkspace_sptr createRandomEventWorkspace(size_t numbins, size_t numpixels,
     events.addDetectorID(detid_t(i));
   }
   retVal->setAllX(axis);
-  retVal->replaceAxis(0, pAxis0);
+  retVal->replaceAxis(0, std::move(pAxis0));
 
   return retVal;
 }
@@ -990,13 +991,13 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
 
   Mantid::API::MatrixWorkspace_sptr ws =
       createGroupedWorkspace2DWithRingsAndBoxes(rHist, 10, 0.1);
-  auto pAxis0 = new NumericAxis(numBins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numBins);
   for (size_t i = 0; i < numBins; i++) {
     double dE = -1.0 + static_cast<double>(i) * 0.8;
     pAxis0->setValue(i, dE);
   }
   pAxis0->setUnit("DeltaE");
-  ws->replaceAxis(0, pAxis0);
+  ws->replaceAxis(0, std::move(pAxis0));
   if (has_oriented_lattice) {
     auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt.release());
@@ -1063,7 +1064,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   }
 
   // set axis, correspondent to the X-values
-  auto pAxis0 = new NumericAxis(numBins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numBins);
   const auto &E_transfer = ws->x(0);
   for (size_t i = 0; i < numBins; i++) {
     double E = 0.5 * (E_transfer[i] + E_transfer[i + 1]);
@@ -1072,7 +1073,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
 
   pAxis0->setUnit("DeltaE");
 
-  ws->replaceAxis(0, pAxis0);
+  ws->replaceAxis(0, std::move(pAxis0));
 
   // define oriented lattice which requested for processed ws
   auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
@@ -1190,8 +1191,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   HistogramData::BinEdges x1{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
 
   // Create a numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new NumericAxis(numY);
-  outputWS->replaceAxis(1, verticalAxis);
+  auto verticalAxis = std::make_unique<NumericAxis>(numY);
 
   // Now set the axis values
   for (int i = 0; i < numHist; ++i) {
@@ -1204,6 +1204,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set the 'y' axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   verticalAxis->title() = "|Q|";
+  outputWS->replaceAxis(1, std::move(verticalAxis));
 
   // Set the X axis title (for conversion to MD)
   outputWS->getAxis(0)->title() = "Energy transfer";

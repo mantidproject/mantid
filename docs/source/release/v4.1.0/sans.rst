@@ -11,7 +11,10 @@ SANS Changes
 
 :ref:`Release 4.1.0 <v4.1.0>`
 
-- New IDF for EQSANS
+- New algorithm :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>`
+- New IDF for ``EQSANS`` and ``CG2/GP-SANS``
+- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
+- New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
 
 ISIS SANS Interface
 -------------------
@@ -40,3 +43,4 @@ Bug Fixes
 - You can now process in **memory** mode with no file type buttons selected. A warning box will open if you process with no file types while in **file** or **both** mode, and processing will not continue.
 - A bug in which the final column in a batch file was sometimes ignored if empty, and therefore impossible to load, has been fixed.
 - The differences between non-compatibility and compatibility modes has been minimised. Compatibility mode can now be turned off in the settings tab. When off, workspaces stay as EventWorkspaces until the penultimate stage of **SANSReductionCore**. Bin masking is not performed until workspace has been converted to a histogram.
+- A bug in which a row was added if the only row is the table was erased, has been fixed.

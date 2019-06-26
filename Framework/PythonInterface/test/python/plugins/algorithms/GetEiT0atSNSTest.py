@@ -9,13 +9,20 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
+from mantid.kernel import DateAndTime
 from testhelpers import *
 from numpy import *
+
 
 class GetEiT0atSNSTest(unittest.TestCase):
 
     def testGETS(self):
         w=Load('ADARAMonitors.nxs')
+        run = w.getRun()
+        run.setStartAndEndTime(
+            DateAndTime("2015-01-27T11:00:00"),
+            DateAndTime("2015-01-27T11:57:51")
+        )
         LoadInstrument(Workspace=w,InstrumentName='SEQUOIA',RewriteSpectraMap=False)
         AddSampleLog(Workspace=w,LogName='vChTrans',LogText='1',LogType='Number Series')
         AddSampleLog(Workspace=w,LogName='EnergyRequest',LogText='20',LogType='Number Series')
@@ -28,6 +35,7 @@ class GetEiT0atSNSTest(unittest.TestCase):
             s="Could not get Ei, and this is not a white beam run\nNo peak found for the monitor with spectra num: 2"
             self.assertEqual(str(e).find(s),0)
         DeleteWorkspace(w)
+
 
 if __name__ == '__main__':
     unittest.main()
