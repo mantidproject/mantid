@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
-#include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
+#include "MantidPythonInterface/core/Converters/NumpyFunctions.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/stl_iterator.hpp>

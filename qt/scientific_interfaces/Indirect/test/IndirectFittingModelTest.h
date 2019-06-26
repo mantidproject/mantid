@@ -207,7 +207,7 @@ public:
     std::string const spectraString("");
 
     TS_ASSERT_THROWS(model->addWorkspace("WorkspaceName", spectraString),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void
@@ -514,7 +514,7 @@ public:
 
   void test_that_getNumberOfSpectra_throws_if_dataIndex_is_out_of_range() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
-    TS_ASSERT_THROWS(model->getNumberOfSpectra(1), std::runtime_error);
+    TS_ASSERT_THROWS(model->getNumberOfSpectra(1), const std::runtime_error &);
   }
 
   void
@@ -621,7 +621,7 @@ public:
   void
   test_that_removeWorkspace_throws_when_provided_an_out_of_range_dataIndex() {
     auto model = createModelWithMultipleWorkspaces(3, "Ws1", "Ws2");
-    TS_ASSERT_THROWS(model->removeWorkspace(2), std::runtime_error);
+    TS_ASSERT_THROWS(model->removeWorkspace(2), const std::runtime_error &);
   }
 
   void test_that_clearWorkspaces_will_empty_the_fittingData() {

@@ -38,6 +38,24 @@ void CorrectionsTab::loadTabSettings(const QSettings &settings) {
 }
 
 /**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void CorrectionsTab::filterInputData(bool filter) {
+  setFileExtensionsByName(filter);
+}
+
+/**
+ * Allows the user to turn the plotting of error bars off and on
+ *
+ * @param errorBars :: true if you want output plots to have error bars
+ */
+void CorrectionsTab::setPlotErrorBars(bool errorBars) {
+  IndirectTab::setPlotErrorBars(errorBars);
+}
+
+/**
  * Slot that can be called when a user edits an input.
  */
 void CorrectionsTab::inputChanged() { validate(); }

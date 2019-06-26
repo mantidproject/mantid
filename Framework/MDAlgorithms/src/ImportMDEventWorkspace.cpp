@@ -97,10 +97,10 @@ const std::string ImportMDEventWorkspace::category() const {
  */
 void ImportMDEventWorkspace::init() {
   std::vector<std::string> fileExtensions{".txt"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type txt");
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

@@ -18,27 +18,37 @@ namespace MplCpp {
 
 /**
  * @brief Line2D holds an instance of a matplotlib Line2D type.
- * This type is designed to hold an existing Line2D instance that contains
- * data in numpy arrays that do not own their data but have a view on to an
- * existing vector of data. This object keeps the data alive.
+ * This type is designed to hold an existing Line2D instance and optionally
+ * hold the raw data for the numpy arrays stored with the Line2D instance.
+ * This object keeps the data alive if it has it.
  */
 class MANTID_MPLCPP_DLL Line2D : public Artist {
 public:
-  Line2D(Python::Object obj, std::vector<double> xdataOwner,
-         std::vector<double> ydataOwner);
+  // Ties together Line2D data
+  struct Data {
+    std::vector<double> xaxis, yaxis;
+  };
+
+public:
+  explicit Line2D(Common::Python::Object obj);
+  Line2D(Common::Python::Object obj, std::vector<double> &&xdataOwner,
+         std::vector<double> &&ydataOwner);
+  Line2D(Common::Python::Object obj, Line2D::Data &&dataOwner);
   ~Line2D() noexcept;
-  // not copyable
   Line2D(const Line2D &) = delete;
   Line2D &operator=(const Line2D &) = delete;
-  // movable
   Line2D(Line2D &&) = default;
-  Line2D &operator=(Line2D &&) = default;
+  Line2D &operator=(Line2D &&);
 
   QColor getColor() const;
 
+  const Data &rawData() const { return m_dataOwner; }
+  void setData(std::vector<double> &&xdataOwner,
+               std::vector<double> &&ydataOwner);
+  void setData(Line2D::Data &&lineDataOwner);
+
 private:
-  // Containers that own the data making up the line
-  std::vector<double> m_xOwner, m_yOwner;
+  Data m_dataOwner;
 };
 
 } // namespace MplCpp

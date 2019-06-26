@@ -21,19 +21,20 @@ public:
   void testGettingPeaksWorkspaceThrows() {
     NullPeaksPresenterVsi presenter;
     TSM_ASSERT_THROWS("Should not implement this method",
-                      presenter.getPeaksWorkspace(), std::runtime_error);
+                      presenter.getPeaksWorkspace(),
+                      const std::runtime_error &);
   }
 
   void testGettingUsablePeaksThrows() {
     NullPeaksPresenterVsi presenter;
     TSM_ASSERT_THROWS("Should not implement this method",
-                      presenter.getViewablePeaks(), std::runtime_error);
+                      presenter.getViewablePeaks(), const std::runtime_error &);
   }
 
   void testGettingPeaksWorkspaceNameThrows() {
     NullPeaksPresenterVsi presenter;
     TSM_ASSERT_THROWS("Should not implement this method",
-                      presenter.getViewablePeaks(), std::runtime_error);
+                      presenter.getViewablePeaks(), const std::runtime_error &);
   }
 
   void testGettingPeaksInfoThrows() {
@@ -47,7 +48,7 @@ public:
     TSM_ASSERT_THROWS(
         "Should not implement this method",
         presenter.getPeaksInfo(peaksWorkspace, row, position, radius, coord),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 };
 #endif

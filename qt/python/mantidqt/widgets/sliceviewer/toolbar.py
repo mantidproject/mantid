@@ -19,6 +19,7 @@ from qtpy.QtWidgets import QLabel, QSizePolicy
 class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
     gridClicked = Signal()
+    linePlotsClicked = Signal(bool)
 
     toolitems = (
         ('Home', 'Reset original view', 'mdi.home', 'home', None),
@@ -26,6 +27,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
         ('Zoom', 'Zoom to rectangle', 'mdi.magnify-plus-outline', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'gridClicked', None),
+        ('LinePlots', 'Toggle lineplots on/off', 'mdi.chart-bell-curve', 'linePlotsClicked', False),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
         (None, None, None, None, None),
         ('Customize', 'Configure plot options', 'mdi.settings', 'edit_parameters', None),

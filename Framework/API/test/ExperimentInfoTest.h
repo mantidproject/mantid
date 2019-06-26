@@ -113,13 +113,14 @@ public:
   void test_Setting_A_New_Source_With_NULL_Ptr_Throws() {
     ExperimentInfo ws;
 
-    TS_ASSERT_THROWS(ws.setModeratorModel(nullptr), std::invalid_argument);
+    TS_ASSERT_THROWS(ws.setModeratorModel(nullptr),
+                     const std::invalid_argument &);
   }
 
   void test_Retrieving_Source_Properties_Before_Set_Throws() {
     ExperimentInfo ws;
 
-    TS_ASSERT_THROWS(ws.moderatorModel(), std::runtime_error);
+    TS_ASSERT_THROWS(ws.moderatorModel(), const std::runtime_error &);
   }
 
   void test_Setting_New_Source_Description_With_Valid_Object_Does_Not_Throw() {
@@ -137,7 +138,8 @@ public:
   void test_Setting_A_New_Chopper_With_NULL_Ptr_Throws() {
     ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
 
-    TS_ASSERT_THROWS(ws->setChopperModel(nullptr), std::invalid_argument);
+    TS_ASSERT_THROWS(ws->setChopperModel(nullptr),
+                     const std::invalid_argument &);
   }
 
   void test_Setting_A_New_Chopper_To_Point_Lower_Point_Succeeds() {
@@ -151,13 +153,13 @@ public:
     ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
 
     TS_ASSERT_THROWS_NOTHING(ws->setChopperModel(new FakeChopper));
-    TS_ASSERT_THROWS(ws->chopperModel(1), std::invalid_argument);
+    TS_ASSERT_THROWS(ws->chopperModel(1), const std::invalid_argument &);
   }
 
   void test_Getting_Chopper_At_Index_Greater_Than_Descriptions_Added_Throws() {
     ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
 
-    TS_ASSERT_THROWS(ws->chopperModel(2), std::invalid_argument);
+    TS_ASSERT_THROWS(ws->chopperModel(2), const std::invalid_argument &);
   }
 
   void test_GetSetSample() {
@@ -175,7 +177,7 @@ public:
   void test_GetLog_Throws_If_No_Log_Or_Instrument_Parameter_Exists() {
     ExperimentInfo expt;
 
-    TS_ASSERT_THROWS(expt.getLog("__NOTALOG__"), std::invalid_argument);
+    TS_ASSERT_THROWS(expt.getLog("__NOTALOG__"), const std::invalid_argument &);
   }
 
   void
@@ -186,7 +188,7 @@ public:
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
     TS_ASSERT_THROWS(expt.getLog(instPar),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void
@@ -222,7 +224,7 @@ public:
     ExperimentInfo expt;
 
     TS_ASSERT_THROWS(expt.getLogAsSingleValue("__NOTALOG__"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -233,7 +235,7 @@ public:
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
     TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void
@@ -373,7 +375,7 @@ public:
     ExperimentInfo_sptr exptInfo = createTestInfoWithDirectEModeLog();
 
     TS_ASSERT_THROWS(exptInfo->getEFixed(1),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_correct_efixed_value_is_returned_for_direct_run() {
@@ -388,7 +390,7 @@ public:
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     Instrument_sptr inst = addInstrumentWithIndirectEmodeParameter(exptInfo);
 
-    TS_ASSERT_THROWS(exptInfo->getEFixed(), std::runtime_error);
+    TS_ASSERT_THROWS(exptInfo->getEFixed(), const std::runtime_error &);
   }
 
   void
@@ -397,7 +399,7 @@ public:
     addInstrumentWithIndirectEmodeParameter(exptInfo);
     IDetector_const_sptr det = exptInfo->getInstrument()->getDetector(3);
 
-    TS_ASSERT_THROWS(exptInfo->getEFixed(det), std::runtime_error);
+    TS_ASSERT_THROWS(exptInfo->getEFixed(det), const std::runtime_error &);
   }
 
   void
@@ -466,7 +468,7 @@ public:
   void test_Getting_Group_For_Unknown_ID_Throws() {
     ExperimentInfo expt;
 
-    TS_ASSERT_THROWS(expt.groupOfDetectorID(1), std::out_of_range);
+    TS_ASSERT_THROWS(expt.groupOfDetectorID(1), const std::out_of_range &);
   }
 
   void
@@ -628,14 +630,14 @@ public:
     inst1->setXmlText("");
     ws.setInstrument(inst1);
 
-    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file););
+    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file.get()););
 
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(
-        ws2.loadExperimentInfoNexus(filename, th.file, parameterStr));
+        ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT(inst->getFilename().find("GEM_Definition.xml", 0) !=
@@ -654,14 +656,14 @@ public:
     inst1->setXmlText("");
     ws.setInstrument(inst1);
 
-    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file););
+    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file.get()););
 
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(
-        ws2.loadExperimentInfoNexus(filename, th.file, parameterStr));
+        ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "");
     TS_ASSERT_EQUALS(parameterStr, "");
@@ -687,14 +689,14 @@ public:
     // this occurs in ConvertToMD, copy methadata
     ei.mutableRun().addProperty("W_MATRIX", wTrVector, true);
 
-    TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(th.file));
+    TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(th.file.get()));
 
     th.reopenFile();
 
     ExperimentInfo other;
     std::string InstrParameters;
-    TS_ASSERT_THROWS_NOTHING(
-        other.loadExperimentInfoNexus(filename, th.file, InstrParameters));
+    TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(
+        filename, th.file.get(), InstrParameters));
 
     std::vector<double> wMatrRestored =
         other.run().getPropertyValueAsType<std::vector<double>>("W_MATRIX");

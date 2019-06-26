@@ -86,7 +86,7 @@ public:
 
     TS_ASSERT_THROWS(MockSymmetryElementWithAxis invalidElement(
                          "41", V3R(0, 0, 0), translation),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(
         MockSymmetryElementWithAxis axisElement("41", axis, translation));

@@ -52,3 +52,7 @@ class SliceViewer(object):
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
         pass
+
+    def line_plots(self):
+        self.view.create_axes()
+        self.new_plot()

@@ -323,8 +323,6 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
       plot();
     }
   }
-
-  // Nothing to do here
 }
 
 /**

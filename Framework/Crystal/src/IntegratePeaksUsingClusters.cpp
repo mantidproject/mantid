@@ -52,10 +52,10 @@ const std::string IntegratePeaksUsingClusters::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksUsingClusters::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
@@ -67,7 +67,7 @@ void IntegratePeaksUsingClusters::init() {
   compositeValidator->add(positiveValidator);
   compositeValidator->add(boost::make_shared<MandatoryValidator<double>>());
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "Threshold", 0, compositeValidator, Direction::Input),
                   "Threshold signal above which to consider peaks");
 
@@ -80,10 +80,10 @@ void IntegratePeaksUsingClusters::init() {
                   "Normalization to use with Threshold. Defaults to "
                   "VolumeNormalization to account for different binning.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspaceMD", "", Direction::Output),
                   "MDHistoWorkspace containing the labeled clusters used by "
                   "the algorithm.");

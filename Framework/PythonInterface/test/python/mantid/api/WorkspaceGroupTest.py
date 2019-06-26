@@ -75,14 +75,14 @@ class WorkspaceGroupTest(unittest.TestCase):
     def test_that_GroupWorkspaces_algorithm_creates_group_of_the_correct_size(self):
         group = self.create_group_via_GroupWorkspace_algorithm()
 
-        self.assertEquals(type(group), WorkspaceGroup)
-        self.assertEquals(2, group.size())
-        self.assertEquals(2, group.getNumberOfEntries())
+        self.assertEqual(type(group), WorkspaceGroup)
+        self.assertEqual(2, group.size())
+        self.assertEqual(2, group.getNumberOfEntries())
 
     def test_that_python__len__method_works_correctly_on_group(self):
         group = self.create_group_via_GroupWorkspace_algorithm()
 
-        self.assertEquals(len(group), group.getNumberOfEntries())
+        self.assertEqual(len(group), group.getNumberOfEntries())
 
     def test_that_getName_method_returns_correct_names(self):
         group = self.create_group_via_GroupWorkspace_algorithm()

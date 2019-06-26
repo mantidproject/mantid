@@ -26,7 +26,7 @@ using namespace API;
 using namespace Geometry;
 
 void FindDetectorsInShape::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::Input),
                   "Name of the input workspace");
   declareProperty("ShapeXML", "",

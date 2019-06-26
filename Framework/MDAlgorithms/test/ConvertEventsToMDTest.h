@@ -74,7 +74,7 @@ public:
   ConvertEventsToMDTest() {
     FrameworkManager::Instance();
 
-    pAlg = Mantid::Kernel::make_unique<ConvertEvents2MDEvTestHelper>();
+    pAlg = std::make_unique<ConvertEvents2MDEvTestHelper>();
     pAlg->initialize();
 
     int numHist = 10;

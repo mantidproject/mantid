@@ -40,10 +40,10 @@ void CorelliCrossCorrelate::init() {
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 

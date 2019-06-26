@@ -1,49 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument = "CG2" valid-from = "2011-08-18 11:50:59">
 
-<component-link name = "CG2">
+  <component-link name = "CG2">
 
-<parameter name="detector-name" type="string">
-  <value val="detector1"/>
-</parameter>
+    <parameter name="detector-name" type="string">
+      <value val="detector1"/>
+    </parameter>
 
-<parameter name="default-incident-timer-spectrum">
-  <value val="2"/>
-</parameter>
+    <parameter name="default-incident-timer-spectrum">
+      <value val="2"/>
+    </parameter>
 
-<parameter name="default-incident-monitor-spectrum">
-  <value val="1"/>
-</parameter>
+    <parameter name="default-incident-monitor-spectrum">
+      <value val="1"/>
+    </parameter>
 
-<parameter name="number-of-x-pixels">
-  <value val="192"/>
-</parameter>
+    <parameter name="number-of-x-pixels">
+      <value val="192"/>
+    </parameter>
 
-<parameter name="number-of-y-pixels">
-  <value val="256"/>
-</parameter>
+    <parameter name="number-of-y-pixels">
+      <value val="256"/>
+    </parameter>
 
-<parameter name="number-of-monitors">
-  <value val="2"/>
-</parameter>
+    <parameter name="number-of-monitors">
+      <value val="2"/>
+    </parameter>
 
-<parameter name="x-pixel-size">
-  <value val="5.500000"/>
-</parameter>
+    <parameter name="x-pixel-size">
+      <value val="5.500000"/>
+    </parameter>
 
-<parameter name="y-pixel-size">
-  <value val="4.3000000"/>
-</parameter>
+    <parameter name="y-pixel-size">
+      <value val="4.3000000"/>
+    </parameter>
 
-<parameter name="detector-distance-offset">
-  <value val="711.0"/>
-</parameter>
+    <parameter name="detector-distance-offset">
+      <value val="711.0"/>
+    </parameter>
 
-<!-- Aperture distances for 8 guides to 0 guides -->
-<parameter name="aperture-distances" type="string">
-  <value val="1919.1, 3329.3, 5323.7, 7377.5, 9399.0, 11433.8, 13454.4, 15473.2, 17495.2" />
-</parameter>
+    <parameter name="aperture-distances" type="string">
+      <!-- Aperture distances for 8 guides to 0 guides -->
+      <!-- <value val="1919.1, 3329.3, 5323.7, 7377.5, 9399.0, 11433.8, 13454.4, 15473.2, 17495.2" /> -->
+      <!-- distance to aperture based on the number of guides used -->
+			<value val="17495.2 15473.2 13454.4 11433.8 9399 7377.5 5323.7 3329.3 1919.1"/>
+    </parameter>
 
-</component-link>
+  </component-link>
 
 </parameter-file>

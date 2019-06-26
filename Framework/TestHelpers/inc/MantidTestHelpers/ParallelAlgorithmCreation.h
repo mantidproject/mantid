@@ -9,7 +9,6 @@
 
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Parallel {
@@ -31,7 +30,7 @@ namespace ParallelTestHelpers {
 template <class T>
 std::unique_ptr<T> create(const Mantid::Parallel::Communicator &comm) {
   using namespace Mantid;
-  auto alg = Kernel::make_unique<T>();
+  auto alg = std::make_unique<T>();
   alg->setChild(true);
   alg->setCommunicator(comm);
   alg->initialize();

@@ -42,8 +42,8 @@ class FunctionPropertyTest(unittest.TestCase):
 
     def test_value_is_empty_string_for_default_property(self):
         func = FunctionProperty("name")
-        self.assertEquals(None, func.value)
-        self.assertEquals("", func.valueAsStr)
+        self.assertEqual(None, func.value)
+        self.assertEqual("", func.valueAsStr)
 
     def test_valid_string_value_gives_function_object_as_value(self):
         alg=self.TestFunctionPropAlg()

@@ -45,6 +45,8 @@ private slots:
                        QString const tooltip = "");
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   Mantid::API::MatrixWorkspace_const_sptr
   getADSWorkspace(std::string const &name) const;
   std::size_t getOutWsNumberOfSpectra() const;

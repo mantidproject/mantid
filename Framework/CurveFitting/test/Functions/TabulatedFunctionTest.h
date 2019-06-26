@@ -186,14 +186,14 @@ public:
     fun.setAttributeValue("WorkspaceIndex", 20);
     FunctionDomain1DVector x(-5.0, 5.0, 83);
     FunctionValues y(x);
-    TS_ASSERT_THROWS(fun.function(x, y), std::range_error);
+    TS_ASSERT_THROWS(fun.function(x, y), const std::range_error &);
     AnalysisDataService::Instance().clear();
   }
 
   void test_loadWorkspaceWhichDoesNotExist() {
     TabulatedFunction fun;
     TS_ASSERT_THROWS(fun.setAttributeValue("Workspace", "SomeWorkspace"),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_Derivatives() {

@@ -11,7 +11,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -38,11 +38,11 @@ const std::string SortXAxis::summary() const {
 }
 
 void SortXAxis::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input Workspace");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Sorted Output Workspace");
 
@@ -51,26 +51,13 @@ void SortXAxis::init() {
       boost::make_shared<StringListValidator>(orderingValues);
   declareProperty("Ordering", orderingValues[0], orderingValidator,
                   "Ascending or descending sorting", Direction::Input);
-  declareProperty("IgnoreHistogramValidation", false,
-                  "This will stop SortXAxis from throwing if the workspace is "
-                  "not a valid histogram for this algorithm to work on. THIS "
-                  "IS TEMPORARY, this item will be removed for 4.1 and thus "
-                  "should only be used internally for the TOSCA legacy data "
-                  "in indirect .");
 }
 
 void SortXAxis::exec() {
-
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
-  const bool ignoreHistogramValidation =
-      getProperty("IgnoreHistogramValidation");
-
   // Check if it is a valid histogram here
-  const bool isAProperHistogram =
-      (!ignoreHistogramValidation)
-          ? determineIfHistogramIsValid(*inputWorkspace)
-          : false;
+  const bool isAProperHistogram = determineIfHistogramIsValid(*inputWorkspace);
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size

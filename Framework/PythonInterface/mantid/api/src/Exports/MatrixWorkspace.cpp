@@ -63,6 +63,9 @@ GNU_DIAG_OFF("conversion")
 // Overloads for yIndexOfX function which has 2 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
                                        MatrixWorkspace::yIndexOfX, 1, 3)
+// Overloads for YUnitLabel which has 1 optional argument
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_YUnitLabelOverloads,
+                                       YUnitLabel, 0, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -224,6 +227,17 @@ std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
   return self.maskedBinsIndices(i);
 }
 
+/**
+ * Raw Pointer wrapper of replaceAxis to allow it to work with python
+ * @param self
+ * @param axisIndex :: The index of the axis to replace
+ * @param newAxis :: A pointer to the new axis. The class will take ownership.
+ */
+void pythonReplaceAxis(MatrixWorkspace &self, const std::size_t &axisIndex,
+                       Axis *newAxis) {
+  self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -284,8 +298,10 @@ void export_MatrixWorkspace() {
            arg("self"), "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
-      .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
-           "Returns the caption for the Y axis")
+      .def("YUnitLabel", &MatrixWorkspace::YUnitLabel,
+           MatrixWorkspace_YUnitLabelOverloads(
+               (arg("self"), arg("useLatex"), arg("plotAsDistribution")),
+               "Returns the caption for the Y axis"))
       .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
            (arg("self"), arg("workspaceIndex")),
            "Returns true if this spectrum contains any masked bins")
@@ -325,7 +341,7 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("newVal")),
            "Set distribution flag. If True the workspace has been divided by "
            "the bin-width.")
-      .def("replaceAxis", &MatrixWorkspace::replaceAxis,
+      .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
            "Replaces one of the workspace's axes with the new one provided.")
 

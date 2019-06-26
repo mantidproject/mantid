@@ -143,7 +143,7 @@ void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   }
   // Instantiator will store a reference to the class object, so increase
   // reference count with borrowed template
-  auto *creator = new PythonObjectInstantiator<IFunction>(
+  auto creator = std::make_unique<PythonObjectInstantiator<IFunction>>(
       object(handle<>(borrowed(classObject))));
 
   // Can the function be created and initialized? It really shouldn't go in
@@ -152,7 +152,8 @@ void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   func->initialize();
 
   // Takes ownership of instantiator
-  self.subscribe(func->name(), creator, FunctionFactoryImpl::OverwriteCurrent);
+  self.subscribe(func->name(), std::move(creator),
+                 FunctionFactoryImpl::OverwriteCurrent);
 }
 ///@endcond
 } // namespace

@@ -78,11 +78,11 @@ class TestParameterMapModifications(unittest.TestCase):
         self.assertTrue(ws2.getInstrument().hasParameter("val3"))
         self.assertTrue(ws2.getInstrument().hasParameter("val4"))
 
-        self.assertTrue(len(ws2.getInstrument().getNumberParameter("val1"))== 1)
-        self.assertTrue(ws2.getInstrument().getNumberParameter("val1")[0] == 2.4)
+        self.assertEqual(len(ws2.getInstrument().getNumberParameter("val1")),  1)
+        self.assertEqual(ws2.getInstrument().getNumberParameter("val1")[0],  2.4)
 
-        self.assertTrue(len(ws2.getInstrument().getIntParameter("val3"))== 1)
-        self.assertTrue(ws2.getInstrument().getIntParameter("val3")[0] == 200)
+        self.assertEqual(len(ws2.getInstrument().getIntParameter("val3")),  1)
+        self.assertEqual(ws2.getInstrument().getIntParameter("val3")[0],  200)
 
         # Clean up
         DeleteWorkspace(ws_name1)

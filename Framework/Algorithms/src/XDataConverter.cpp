@@ -37,12 +37,12 @@ XDataConverter::XDataConverter() : m_sharedX(false) {}
 /// Initialize the properties on the algorithm
 void XDataConverter::init() {
   using Kernel::Direction;
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
                   "Name of the input workspace.");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                               Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "Name of the output workspace, can be the same as the input.");
 }
 
@@ -64,7 +64,8 @@ void XDataConverter::exec() {
 
   // Copy over the 'vertical' axis
   if (inputWS->axes() > 1)
-    outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
+    outputWS->replaceAxis(1, std::unique_ptr<API::Axis>(
+                                 inputWS->getAxis(1)->clone(outputWS.get())));
 
   Progress prog(this, 0.0, 1.0, numSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))

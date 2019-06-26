@@ -351,6 +351,9 @@ void export_UnitCell() {
            "right-handed coordinate system and using the Busing-Levy "
            "convention. This will return a :class:`numpy.ndarray` with shape "
            "``(3,3)``.")
+      .def("getMaxOrder", &UnitCell::getMaxOrder, arg("self"),
+           "Returns the number of modulation vectors. This will return an "
+           "int.")
       .def("recalculateFromGstar", &recalculateFromGstar,
            (arg("self"), arg("NewGstar")),
            "Recalculate the unit cell parameters from a metric tensor. This "

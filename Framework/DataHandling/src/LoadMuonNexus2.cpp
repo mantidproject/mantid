@@ -249,7 +249,7 @@ void LoadMuonNexus2::doExec() {
       suffix << (period + 1);
       outws = outputWorkspace + "_" + suffix.str();
       std::string WSName = localWSName + "_" + suffix.str();
-      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
           outws, WSName, Direction::Output));
       if (wsGrpSptr)
         wsGrpSptr->addWorkspace(localWorkspace);

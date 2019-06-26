@@ -199,7 +199,7 @@ public:
 
     TS_ASSERT_THROWS(
         MayersSampleCorrectionStrategy(createTestParameters(), histo),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
 private:

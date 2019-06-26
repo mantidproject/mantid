@@ -7,8 +7,6 @@
 #include "JumpFitDataPresenter.h"
 #include "JumpFitDataTablePresenter.h"
 
-#include "MantidKernel/make_unique.h"
-
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace MantidQt {
@@ -18,10 +16,9 @@ namespace IDA {
 JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
-    : IndirectFitDataPresenter(
-          model, view,
-          Mantid::Kernel::make_unique<JumpFitDataTablePresenter>(
-              model, view->getDataTable())),
+    : IndirectFitDataPresenter(model, view,
+                               std::make_unique<JumpFitDataTablePresenter>(
+                                   model, view->getDataTable())),
       m_activeParameterType("Width"), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
@@ -96,7 +93,7 @@ void JumpFitDataPresenter::updateAvailableParameters(const QString &type) {
 }
 
 void JumpFitDataPresenter::updateAvailableParameterTypes() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_cbParameterType);
+  MantidQt::API::SignalBlocker blocker(m_cbParameterType);
   m_cbParameterType->clear();
   for (const auto &type : getParameterTypes(m_dataIndex))
     m_cbParameterType->addItem(QString::fromStdString(type));
@@ -111,7 +108,7 @@ void JumpFitDataPresenter::updateParameterSelectionEnabled() {
 
 void JumpFitDataPresenter::setAvailableParameters(
     const std::vector<std::string> &parameters) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_cbParameter);
+  MantidQt::API::SignalBlocker blocker(m_cbParameter);
   m_cbParameter->clear();
   for (const auto &parameter : parameters)
     m_cbParameter->addItem(QString::fromStdString(parameter));
@@ -204,7 +201,7 @@ void JumpFitDataPresenter::closeDialog() {
 
 std::unique_ptr<IAddWorkspaceDialog>
 JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = Mantid::Kernel::make_unique<JumpFitAddWorkspaceDialog>(parent);
+  auto dialog = std::make_unique<JumpFitAddWorkspaceDialog>(parent);
   connect(dialog.get(),
           SIGNAL(workspaceChanged(JumpFitAddWorkspaceDialog *,
                                   const std::string &)),
@@ -218,6 +215,16 @@ JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
           SLOT(dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *,
                                           const std::string &)));
   return std::move(dialog);
+}
+
+void JumpFitDataPresenter::setMultiInputResolutionFBSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  UNUSED_ARG(dialog);
+}
+
+void JumpFitDataPresenter::setMultiInputResolutionWSSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  UNUSED_ARG(dialog);
 }
 
 } // namespace IDA

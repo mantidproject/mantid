@@ -430,8 +430,8 @@ public:
     // rather than asymmetry (Y values)
     const auto &X = outWs->x(0);
 
-    TS_ASSERT_DELTA(X[0], 178.740476, 0.00001);
-    TS_ASSERT_DELTA(X[1], 178.849998, 0.00001);
+    TS_ASSERT_DELTA(X[0], 178.7, 1e-5);
+    TS_ASSERT_DELTA(X[1], 178.3, 1e-5);
   }
 
   void test_invalidRunNumbers() {
@@ -445,7 +445,7 @@ public:
     alg.setPropertyValue("LastRun", firstRun);
     alg.setPropertyValue("OutputWorkspace", ws);
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

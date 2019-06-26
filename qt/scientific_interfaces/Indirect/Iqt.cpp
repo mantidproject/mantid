@@ -242,6 +242,7 @@ void Iqt::setup() {
           SLOT(setTiledPlotFirstPlot(int)));
   connect(m_uiForm.spTiledPlotLast, SIGNAL(valueChanged(int)), this,
           SLOT(setTiledPlotLastPlot(int)));
+
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
@@ -392,22 +393,10 @@ void Iqt::plotTiled() {
       getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
   cropWorkspace(tiledPlotWsName, tiledPlotWsName, cropValue);
 
-  // Plot tiledwindow
-  std::size_t const numberOfPlots = lastTiledPlot - firstTiledPlot + 1;
-  if (numberOfPlots != 0) {
-    QString pyInput = "from mantidplot import newTiledWindow\n";
-    pyInput += "newTiledWindow(sources=[";
-    for (auto index = firstTiledPlot; index <= lastTiledPlot; ++index) {
-      if (index > firstTiledPlot) {
-        pyInput += ",";
-      }
-      std::string const pyInStr =
-          "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
-      pyInput += QString::fromStdString(pyInStr);
-    }
-    pyInput += "])\n";
-    runPythonCode(pyInput);
-  }
+  auto const tiledPlotWs = getADSMatrixWorkspace(tiledPlotWsName);
+
+  IndirectTab::plotTiled(tiledPlotWsName, firstTiledPlot, lastTiledPlot);
+
   setTiledPlotIsPlotting(false);
 }
 
@@ -542,6 +531,19 @@ void Iqt::loadSettings(const QSettings &settings) {
 
 void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
 
+void Iqt::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Iqt");
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                         : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                         : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
+                                              : noSuffixes);
+}
+
 void Iqt::plotInput(const QString &wsname) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updatePropertyValues(QtProperty *, double)));
@@ -648,7 +650,7 @@ void Iqt::updateEnergyRange(int state) {
 }
 
 void Iqt::setTiledPlotFirstPlot(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotFirst);
   auto const lastPlotIndex = m_uiForm.spTiledPlotLast->text().toInt();
   auto const rangeSize = lastPlotIndex - value;
   if (value > lastPlotIndex)
@@ -664,7 +666,7 @@ void Iqt::setTiledPlotFirstPlot(int value) {
 }
 
 void Iqt::setTiledPlotLastPlot(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotLast);
   auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const rangeSize = value - firstPlotIndex;
   if (value < firstPlotIndex)
@@ -687,12 +689,12 @@ void Iqt::setMinMaxOfTiledPlotLastIndex(int minimum, int maximum) {
 }
 
 void Iqt::setTiledPlotFirstIndex(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotFirst);
   m_uiForm.spTiledPlotFirst->setValue(value);
 }
 
 void Iqt::setTiledPlotLastIndex(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotLast);
   auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const lastPlotIndex = value - m_maxTiledPlots > firstPlotIndex
                                  ? firstPlotIndex + m_maxTiledPlots
@@ -701,12 +703,12 @@ void Iqt::setTiledPlotLastIndex(int value) {
 }
 
 void Iqt::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 
 void Iqt::setPlotSpectrumIndex(int spectrum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setValue(spectrum);
 }
 

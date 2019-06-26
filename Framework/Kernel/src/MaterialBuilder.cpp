@@ -8,7 +8,7 @@
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/NeutronAtom.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/make_shared.hpp>
 #include <numeric>
 

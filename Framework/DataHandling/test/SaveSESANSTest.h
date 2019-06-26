@@ -49,7 +49,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("InputWorkspace", ws));
 
     // Should throw, as we can't save more than one histogram
-    TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
   }
 
   void test_exec() {

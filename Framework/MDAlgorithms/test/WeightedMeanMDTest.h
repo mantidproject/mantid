@@ -71,7 +71,7 @@ private:
     alg.setProperty("LHSWorkspace", a);
     alg.setProperty("RHSWorkspace", b);
     alg.setPropertyValue("OutputWorkspace", outName);
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
 public:

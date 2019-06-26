@@ -11,7 +11,7 @@ Description
 
 This algorithm is able to generate event splitters according to user's
 requirement for filtering events. The generated time splitters are
-stored either in a :ref:`SplittersWorkspace`or a
+stored either in a :ref:`SplittersWorkspace` or a
 :ref:`MatrixWorkspace <MatrixWorkspace>`. Both of them will be used by
 algorithm :ref:`FilterEvents <algm-FilterEvents>`
 to filter events from an

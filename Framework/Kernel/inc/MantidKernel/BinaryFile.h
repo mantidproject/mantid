@@ -8,10 +8,11 @@
 #define BINARYFILE_H_
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/make_unique.h"
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -62,14 +63,15 @@ public:
    * @throw invalid_argument if the file does not exist
    * */
   void open(const std::string &filename) {
-    this->handle = nullptr;
+    this->handle.reset(nullptr);
     if (!Poco::File(filename).exists()) {
       std::stringstream msg;
       msg << "BinaryFile::open: File " << filename << " was not found.";
       throw std::invalid_argument("File does not exist.");
     }
     // Open the file
-    this->handle = new std::ifstream(filename.c_str(), std::ios::binary);
+    this->handle =
+        std::make_unique<std::ifstream>(filename.c_str(), std::ios::binary);
     // Count the # of elements.
     this->num_elements = this->getFileSize();
     // Make sure we are starting at 0
@@ -79,10 +81,7 @@ public:
   //------------------------------------------------------------------------------------
   /** Close the file
    * */
-  void close() {
-    delete handle;
-    handle = nullptr;
-  }
+  void close() { handle.reset(nullptr); }
 
   //-----------------------------------------------------------------------------
   /// Returns the # of elements in the file (cached result of getFileSize)
@@ -119,7 +118,7 @@ public:
 
     // A buffer to load from
     size_t buffer_size = getBufferSize(num_elements);
-    auto buffer = Mantid::Kernel::make_unique<T[]>(buffer_size);
+    auto buffer = std::make_unique<T[]>(buffer_size);
 
     // Make sure we are at the beginning
     offset = 0;
@@ -262,7 +261,7 @@ private:
   }
 
   /// File stream
-  std::ifstream *handle;
+  std::unique_ptr<std::ifstream> handle;
   /// Size of each object.
   size_t obj_size;
   /// Number of elements of size T in the file

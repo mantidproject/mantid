@@ -55,7 +55,8 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //===================================
 
   // Function pointers to disambiguate the calls
-  using Signature1_2D = Workspace2D_sptr (*)(int, int, bool, bool);
+  using Signature1_2D = Workspace2D_sptr (*)(int, int, bool, bool, bool,
+                                             const std::string &, bool);
   using Signature2_2D = Workspace2D_sptr (*)(int, int, int);
   using Signature3_2D = Workspace2D_sptr (*)(int, int, int, int);
 
@@ -82,19 +83,17 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //===================================
 
   def("createPeaksWorkspace",
-      reinterpret_cast<PeaksWorkspace_sptr (*)(const int)>(
-          createPeaksWorkspace),
-      return_value_policy<AsType<Workspace_sptr>>());
-  def("createPeaksWorkspace",
       (PeaksWorkspace_sptr(*)(const int, const bool))createPeaksWorkspace,
+      (arg("numPeaks") = 2, arg("createOrientedLattice") = false),
       return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== MD Workspaces
   //===================================
 
   // Typedef for function pointer to disabiguate references
-  using Signature1_MDHisto = MDHistoWorkspace_sptr (*)(
-      double, size_t, size_t, Mantid::coord_t, double, std::string, double);
+  using Signature1_MDHisto =
+      MDHistoWorkspace_sptr (*)(double, size_t, size_t, Mantid::coord_t, double,
+                                const std::string &, double);
 
   def("makeFakeMDHistoWorkspace", (Signature1_MDHisto)&makeFakeMDHistoWorkspace,
       makeFakeMDHistoWorkspace_overloads()

@@ -43,16 +43,16 @@ using namespace HistogramData;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The name of the input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the output workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(make_unique<WorkspaceProperty<>>("InputImagWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputImagWorkspace",
+                                                        "", Direction::Input,
+                                                        PropertyMode::Optional),
                   "The name of the input workspace for the imaginary part. "
                   "Leave blank if same as InputWorkspace");
 
@@ -81,7 +81,7 @@ void FFT::init() {
 
   // "Shift" should only be enabled if "AutoShift" is turned off
   setPropertySettings(
-      "Shift", make_unique<EnabledWhenProperty>("AutoShift", IS_DEFAULT));
+      "Shift", std::make_unique<EnabledWhenProperty>("AutoShift", IS_DEFAULT));
 }
 
 /** Executes the algorithm
@@ -270,7 +270,7 @@ void FFT::transformBackward(boost::shared_array<double> &data, const int xSize,
 }
 
 void FFT::setupTAxis(const int nOut, const bool addPositiveOnly) {
-  auto tAxis = new API::TextAxis(nOut);
+  auto tAxis = std::make_unique<API::TextAxis>(nOut);
 
   m_iRe = 0;
   m_iIm = 1;
@@ -286,7 +286,7 @@ void FFT::setupTAxis(const int nOut, const bool addPositiveOnly) {
   tAxis->setLabel(m_iRe, "Real");
   tAxis->setLabel(m_iIm, "Imag");
   tAxis->setLabel(m_iAbs, "Modulus");
-  m_outWS->replaceAxis(1, tAxis);
+  m_outWS->replaceAxis(1, std::move(tAxis));
 }
 
 void FFT::createUnitsLabels(double &df) {

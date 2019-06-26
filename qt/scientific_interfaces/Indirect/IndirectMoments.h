@@ -59,6 +59,8 @@ protected slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   Ui::IndirectMoments m_uiForm;
 };
 } // namespace CustomInterfaces

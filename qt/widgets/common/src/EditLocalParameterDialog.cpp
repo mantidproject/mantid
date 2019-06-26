@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidQtWidgets/Common/LocalParameterItemDelegate.h"
 
@@ -58,7 +58,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(
  */
 void EditLocalParameterDialog::doSetup(const QString &parName,
                                        const QStringList &wsNames) {
-  m_logFinder = Mantid::Kernel::make_unique<LogValueFinder>(wsNames);
+  m_logFinder = std::make_unique<LogValueFinder>(wsNames);
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
   for (const auto &logName : m_logFinder->getLogNames()) {

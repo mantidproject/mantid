@@ -5,20 +5,25 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-from mantid.kernel import (V3D, Quat)
+
 from mantid.api import AnalysisDataService, FrameworkManager
-from sans.common.general_functions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log,
+from mantid.kernel import (V3D, Quat)
+from mantid.py3compat import mock
+from sans.common.constants import (SANS2D, LOQ, LARMOR)
+from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
+                               SANSInstrument, DetectorType, SANSFacility, DataType)
+from sans.common.general_functions import (quaternion_to_angle_and_axis, create_managed_non_child_algorithm,
+                                           create_unmanaged_algorithm, add_to_sample_log,
                                            get_standard_output_workspace_name, sanitise_instrument_name,
                                            get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
-                                           get_facility, parse_diagnostic_settings, get_transmission_output_name, get_output_name)
-from sans.common.constants import (SANS2D, LOQ, LARMOR)
-from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
-                               SANSInstrument, DetectorType, SANSFacility, DataType)
-from sans.test_helper.test_director import TestDirector
+                                           get_facility, parse_diagnostic_settings, get_transmission_output_name,
+                                           get_output_name)
 from sans.state.data import StateData
+from sans.test_helper.test_director import TestDirector
 
 
 class SANSFunctionsTest(unittest.TestCase):
@@ -126,7 +131,7 @@ class SANSFunctionsTest(unittest.TestCase):
         # Assert
         run = workspace.run()
         self.assertTrue(run.hasProperty(log_name))
-        self.assertTrue(run.getProperty(log_name).value == log_value)
+        self.assertEqual(run.getProperty(log_name).value,  log_value)
 
     def test_that_sample_log_raises_for_non_string_type_arguments(self):
         # Arrange
@@ -176,7 +181,16 @@ class SANSFunctionsTest(unittest.TestCase):
         # Act
         output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB)
         # Assert
-        self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+        self.assertEqual("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37",  output_workspace)
+
+    def test_that_can_switch_off_including_slice_limits_in_standard_output_workspace_name(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        # Act
+        output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB,
+                                                                 include_slice_limits=False)
+        # Assert
+        self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0" == output_workspace)
 
     def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace(self):
         # Arrange
@@ -305,12 +319,12 @@ class SANSFunctionsTest(unittest.TestCase):
                                                                               reduction_mode=ISISReductionMode.LAB)  # noqa
 
         # Assert
-        self.assertTrue(workspace is not None)
-        self.assertTrue(workspace.name() == AnalysisDataService.retrieve("test_ws").name())
-        self.assertTrue(workspace_count is not None)
-        self.assertTrue(workspace_count.name() == AnalysisDataService.retrieve("test_ws_count").name())
-        self.assertTrue(workspace_norm is not None)
-        self.assertTrue(workspace_norm.name() == AnalysisDataService.retrieve("test_ws_norm").name())
+        self.assertNotEqual(workspace, None)
+        self.assertEqual(workspace.name(),  AnalysisDataService.retrieve("test_ws").name())
+        self.assertNotEqual(workspace_count, None)
+        self.assertEqual(workspace_count.name(),  AnalysisDataService.retrieve("test_ws_count").name())
+        self.assertNotEqual(workspace_norm, None)
+        self.assertEqual(workspace_norm.name(),  AnalysisDataService.retrieve("test_ws_norm").name())
 
         # Clean up
         SANSFunctionsTest._remove_workspaces()
@@ -332,9 +346,9 @@ class SANSFunctionsTest(unittest.TestCase):
             get_reduced_can_workspace_from_ads(state, output_parts=False, reduction_mode=ISISReductionMode.LAB)
 
         # Assert
-        self.assertTrue(workspace is None)
-        self.assertTrue(workspace_count is None)
-        self.assertTrue(workspace_norm is None)
+        self.assertEqual(workspace, None)
+        self.assertEqual(workspace_count, None)
+        self.assertEqual(workspace_norm, None)
 
         # Clean up
         SANSFunctionsTest._remove_workspaces()
@@ -354,22 +368,22 @@ class SANSFunctionsTest(unittest.TestCase):
                                                                                              DetectorType.LAB))
 
     def test_that_converts_detector_name_to_type(self):
-        self.assertTrue(convert_bank_name_to_detector_type_isis("rEar-detector") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("MAIN-detector-BANK") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("DeTectorBench") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("rear") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("MAIN") is DetectorType.LAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("FRoNT-DETECTOR") is DetectorType.HAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("HaB") is DetectorType.HAB)
-        self.assertTrue(convert_bank_name_to_detector_type_isis("front") is DetectorType.HAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("rEar-detector"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("MAIN-detector-BANK"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("DeTectorBench"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("rear"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("MAIN"), DetectorType.LAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("FRoNT-DETECTOR"), DetectorType.HAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("HaB"), DetectorType.HAB)
+        self.assertEqual(convert_bank_name_to_detector_type_isis("front"), DetectorType.HAB)
         self.assertRaises(RuntimeError, convert_bank_name_to_detector_type_isis, "test")
 
     def test_that_gets_facility(self):
-        self.assertTrue(get_facility(SANSInstrument.SANS2D) is SANSFacility.ISIS)
-        self.assertTrue(get_facility(SANSInstrument.LOQ) is SANSFacility.ISIS)
-        self.assertTrue(get_facility(SANSInstrument.LARMOR) is SANSFacility.ISIS)
-        self.assertTrue(get_facility(SANSInstrument.ZOOM) is SANSFacility.ISIS)
-        self.assertTrue(get_facility(SANSInstrument.NoInstrument) is SANSFacility.NoFacility)
+        self.assertEqual(get_facility(SANSInstrument.SANS2D), SANSFacility.ISIS)
+        self.assertEqual(get_facility(SANSInstrument.LOQ), SANSFacility.ISIS)
+        self.assertEqual(get_facility(SANSInstrument.LARMOR), SANSFacility.ISIS)
+        self.assertEqual(get_facility(SANSInstrument.ZOOM), SANSFacility.ISIS)
+        self.assertEqual(get_facility(SANSInstrument.NoInstrument), SANSFacility.NoFacility)
 
     def test_that_diagnostic_parser_produces_correct_list(self):
         string_to_parse = '8-11, 12:15, 5, 7:9'
@@ -539,6 +553,15 @@ class SANSFunctionsTest(unittest.TestCase):
 
         self.assertEqual(output_name, '12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
         self.assertEqual(group_output_name, '12345rear_1DPhi12.0_56.0')
+
+    @mock.patch("sans.common.general_functions.AlgorithmManager")
+    def test_that_can_create_versioned_managed_non_child_algorithms(self, alg_manager_mock):
+        create_managed_non_child_algorithm("TestAlg", version=2, **{"test_val": 5})
+        alg_manager_mock.create.assert_called_once_with("TestAlg", 2)
+
+        alg_manager_mock.reset_mock()
+        create_managed_non_child_algorithm("TestAlg", **{"test_val": 5})
+        alg_manager_mock.create.assert_called_once_with("TestAlg")
 
 if __name__ == '__main__':
     unittest.main()

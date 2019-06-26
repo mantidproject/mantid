@@ -71,7 +71,7 @@ void NormaliseByPeakArea::init() {
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
 
@@ -85,20 +85,20 @@ void NormaliseByPeakArea::init() {
       "If true all spectra on the Y-space, fitted & symmetrised workspaces "
       "are summed in quadrature to produce the final result");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Input workspace normalised by the fitted peak area");
-  declareProperty(make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace",
+                                                        "", Direction::Output),
                   "Input workspace converted to units of Y-space");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("FittedWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("FittedWorkspace", "",
+                                            Direction::Output),
       "Output from fit of the single mass peakin y-space. The output units are "
       "in momentum (A^-1)");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("SymmetrisedWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("SymmetrisedWorkspace", "",
+                                            Direction::Output),
       "The input data symmetrised about Y=0.  The output units are in momentum "
       "(A^-1)");
 }

@@ -79,11 +79,11 @@ int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadGSS::init() {
   const std::vector<std::string> exts{".gsa", ".gss", ".gda", ".txt"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
 
-  declareProperty(make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace name to load into.");
 
@@ -166,7 +166,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   while (!input.eof() && input.getline(currentLine, 256)) {
     // Initialize progress after NSpec is imported
     if (nSpec != 0 && !prog) {
-      prog = make_unique<Progress>(this, 0.0, 1.0, nSpec);
+      prog = std::make_unique<Progress>(this, 0.0, 1.0, nSpec);
     }
 
     // Set flag to test SLOG

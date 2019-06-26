@@ -65,7 +65,7 @@ class SavePlot1DTest(unittest.TestCase):
         self.makeWs()
         div = simpleapi.SavePlot1D(InputWorkspace='test1', OutputType='plotly')
         self.cleanup()
-        self.assertTrue(len(div) > 0)  # confirm result is non-empty
+        self.assertGreater(len(div), 0)  # confirm result is non-empty
 
 
     @unittest.skipIf(not havePlotly, 'Do not have plotly installed')
@@ -73,7 +73,7 @@ class SavePlot1DTest(unittest.TestCase):
         self.makeWs()
         div = simpleapi.SavePlot1D(InputWorkspace='group', OutputType='plotly')
         self.cleanup()
-        self.assertTrue(len(div) > 0)  # confirm result is non-empty
+        self.assertGreater(len(div), 0)  # confirm result is non-empty
 
 
 if __name__ == "__main__":

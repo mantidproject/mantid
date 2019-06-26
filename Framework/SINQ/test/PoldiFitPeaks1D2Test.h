@@ -134,13 +134,13 @@ public:
     // Null pointer does not work
     PoldiPeak_sptr nullPeak;
     TS_ASSERT_THROWS(RefinedRange invalid(nullPeak, 2.0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // 0 or fewer multiples does not work
     TS_ASSERT_THROWS(RefinedRange invalid(m_testPeak, 0.0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(RefinedRange invalid(m_testPeak, -1.0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testRefinedRangeLimitConstructor() {
@@ -148,9 +148,9 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(RefinedRange range(0.0, 1.0, peaks));
     TS_ASSERT_THROWS(RefinedRange invalid(1.0, 0.0, peaks),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(RefinedRange invalid(1.0, 1.0, peaks),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     RefinedRange range(3.0, 4.0, peaks);
     TS_ASSERT_EQUALS(range.getXStart(), 3.0);

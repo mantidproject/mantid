@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -48,6 +49,7 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
 }
 
 ContainerSubtraction::~ContainerSubtraction() {
+  m_uiForm.ppPreview->watchADS(false);
   if (m_transformedContainerWS)
     AnalysisDataService::Instance().remove(m_transformedContainerWS->getName());
 }
@@ -146,6 +148,17 @@ std::string ContainerSubtraction::createOutputName() {
 }
 
 /**
+ * Removes the output workspace from the ADS if exists
+ */
+void ContainerSubtraction::removeOutput() {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(m_pythonExportWsName)) {
+    ads.remove(m_pythonExportWsName);
+  }
+  m_pythonExportWsName.clear();
+}
+
+/**
  * Validates the user input in the UI
  * @return if the input was valid
  */
@@ -213,14 +226,29 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
 }
 
+void ContainerSubtraction::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("ContainerSubtraction");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                             : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
+                                             : noSuffixes);
+}
+
 /**
  * Displays the sample data on the plot preview
  * @param dataName Name of new data source
  */
 void ContainerSubtraction::newSample(const QString &dataName) {
-  // Remove old sample and fit
+  // Remove old sample and fit curves from plot
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Sample");
+  // Remove the subtracted workspace as it is no longer valid
+  removeOutput();
 
   m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
@@ -252,6 +280,8 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Remove old container and fit
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Container");
+  // Remove the subtracted workspace as it is no longer valid
+  removeOutput();
 
   // Get new workspace
   m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -564,7 +594,7 @@ IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
 }
 
 void ContainerSubtraction::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 

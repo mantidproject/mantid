@@ -102,28 +102,28 @@ class BatchCsvParserTest(unittest.TestCase):
         output = parser.parse_batch_file()
 
         # Assert
-        self.assertTrue(len(output) == 2)
+        self.assertEqual(len(output),  2)
 
         first_line = output[0]
         # Should have 5 user specified entries and 3 period entries
-        self.assertTrue(len(first_line) == 8)
-        self.assertTrue(first_line[BatchReductionEntry.SampleScatter] == "1")
-        self.assertTrue(first_line[BatchReductionEntry.SampleScatterPeriod] == ALL_PERIODS)
-        self.assertTrue(first_line[BatchReductionEntry.SampleTransmission] == "2")
-        self.assertTrue(first_line[BatchReductionEntry.SampleTransmissionPeriod] == ALL_PERIODS)
-        self.assertTrue(first_line[BatchReductionEntry.SampleDirect] == "3")
-        self.assertTrue(first_line[BatchReductionEntry.SampleDirectPeriod] == ALL_PERIODS)
-        self.assertTrue(first_line[BatchReductionEntry.Output] == "test_file")
-        self.assertTrue(first_line[BatchReductionEntry.UserFile] == "user_test_file")
+        self.assertEqual(len(first_line),  8)
+        self.assertEqual(first_line[BatchReductionEntry.SampleScatter],  "1")
+        self.assertEqual(first_line[BatchReductionEntry.SampleScatterPeriod],  ALL_PERIODS)
+        self.assertEqual(first_line[BatchReductionEntry.SampleTransmission],  "2")
+        self.assertEqual(first_line[BatchReductionEntry.SampleTransmissionPeriod],  ALL_PERIODS)
+        self.assertEqual(first_line[BatchReductionEntry.SampleDirect],  "3")
+        self.assertEqual(first_line[BatchReductionEntry.SampleDirectPeriod],  ALL_PERIODS)
+        self.assertEqual(first_line[BatchReductionEntry.Output],  "test_file")
+        self.assertEqual(first_line[BatchReductionEntry.UserFile],  "user_test_file")
         second_line = output[1]
 
         # Should have 3 user specified entries and 2 period entries
-        self.assertTrue(len(second_line) == 5)
-        self.assertTrue(second_line[BatchReductionEntry.SampleScatter] == "1")
-        self.assertTrue(second_line[BatchReductionEntry.SampleScatterPeriod] == ALL_PERIODS)
-        self.assertTrue(second_line[BatchReductionEntry.CanScatter] == "2")
-        self.assertTrue(second_line[BatchReductionEntry.CanScatterPeriod] == ALL_PERIODS)
-        self.assertTrue(second_line[BatchReductionEntry.Output] == "test_file2")
+        self.assertEqual(len(second_line),  5)
+        self.assertEqual(second_line[BatchReductionEntry.SampleScatter],  "1")
+        self.assertEqual(second_line[BatchReductionEntry.SampleScatterPeriod],  ALL_PERIODS)
+        self.assertEqual(second_line[BatchReductionEntry.CanScatter],  "2")
+        self.assertEqual(second_line[BatchReductionEntry.CanScatterPeriod],  ALL_PERIODS)
+        self.assertEqual(second_line[BatchReductionEntry.Output],  "test_file2")
 
         BatchCsvParserTest._remove_csv(batch_file_path)
 
@@ -137,16 +137,16 @@ class BatchCsvParserTest(unittest.TestCase):
         output = parser.parse_batch_file()
 
         # Assert
-        self.assertTrue(len(output) == 1)
+        self.assertEqual(len(output),  1)
 
         first_line = output[0]
         # Should have 5 user specified entries and 3 period entries
-        self.assertTrue(len(first_line) == 5)
-        self.assertTrue(first_line[BatchReductionEntry.SampleScatter] == "1")
-        self.assertTrue(first_line[BatchReductionEntry.SampleScatterPeriod] == 7)
-        self.assertTrue(first_line[BatchReductionEntry.CanScatter] == "2")
-        self.assertTrue(first_line[BatchReductionEntry.CanScatterPeriod] == 3)
-        self.assertTrue(first_line[BatchReductionEntry.Output] == "test_file2")
+        self.assertEqual(len(first_line),  5)
+        self.assertEqual(first_line[BatchReductionEntry.SampleScatter],  "1")
+        self.assertEqual(first_line[BatchReductionEntry.SampleScatterPeriod],  7)
+        self.assertEqual(first_line[BatchReductionEntry.CanScatter],  "2")
+        self.assertEqual(first_line[BatchReductionEntry.CanScatterPeriod],  3)
+        self.assertEqual(first_line[BatchReductionEntry.Output],  "test_file2")
 
         BatchCsvParserTest._remove_csv(batch_file_path)
 
@@ -161,30 +161,48 @@ class BatchCsvParserTest(unittest.TestCase):
         output = parser.parse_batch_file()
 
         # Assert
-        self.assertTrue(len(output) == 2)
+        self.assertEqual(len(output),  2)
 
         first_line = output[0]
         # Should have 5 user specified entries and 3 period entries
-        self.assertTrue(len(first_line) == 8)
-        self.assertTrue(first_line[BatchReductionEntry.SampleScatter] == "1")
-        self.assertTrue(first_line[BatchReductionEntry.SampleScatterPeriod] == ALL_PERIODS)
-        self.assertTrue(first_line[BatchReductionEntry.SampleTransmission] == "2")
-        self.assertTrue(first_line[BatchReductionEntry.SampleTransmissionPeriod] == ALL_PERIODS)
-        self.assertTrue(first_line[BatchReductionEntry.SampleDirect] == "3")
-        self.assertTrue(first_line[BatchReductionEntry.SampleDirectPeriod] == ALL_PERIODS)
-        self.assertTrue(first_line[BatchReductionEntry.Output] == "test_file")
-        self.assertTrue(first_line[BatchReductionEntry.UserFile] == "user_test_file")
+        self.assertEqual(len(first_line),  8)
+        self.assertEqual(first_line[BatchReductionEntry.SampleScatter],  "1")
+        self.assertEqual(first_line[BatchReductionEntry.SampleScatterPeriod],  ALL_PERIODS)
+        self.assertEqual(first_line[BatchReductionEntry.SampleTransmission],  "2")
+        self.assertEqual(first_line[BatchReductionEntry.SampleTransmissionPeriod],  ALL_PERIODS)
+        self.assertEqual(first_line[BatchReductionEntry.SampleDirect],  "3")
+        self.assertEqual(first_line[BatchReductionEntry.SampleDirectPeriod],  ALL_PERIODS)
+        self.assertEqual(first_line[BatchReductionEntry.Output],  "test_file")
+        self.assertEqual(first_line[BatchReductionEntry.UserFile],  "user_test_file")
         second_line = output[1]
 
         # Should have 3 user specified entries and 2 period entries
-        self.assertTrue(len(second_line) == 5)
-        self.assertTrue(second_line[BatchReductionEntry.SampleScatter] == "1")
-        self.assertTrue(second_line[BatchReductionEntry.SampleScatterPeriod] == ALL_PERIODS)
-        self.assertTrue(second_line[BatchReductionEntry.CanScatter] == "2")
-        self.assertTrue(second_line[BatchReductionEntry.CanScatterPeriod] == ALL_PERIODS)
-        self.assertTrue(second_line[BatchReductionEntry.Output] == "test_file2")
+        self.assertEqual(len(second_line),  5)
+        self.assertEqual(second_line[BatchReductionEntry.SampleScatter],  "1")
+        self.assertEqual(second_line[BatchReductionEntry.SampleScatterPeriod],  ALL_PERIODS)
+        self.assertEqual(second_line[BatchReductionEntry.CanScatter],  "2")
+        self.assertEqual(second_line[BatchReductionEntry.CanScatterPeriod],  ALL_PERIODS)
+        self.assertEqual(second_line[BatchReductionEntry.Output],  "test_file2")
 
         BatchCsvParserTest._remove_csv(batch_file_path)
+
+    def test_can_parse_file_with_empty_final_column(self):
+        """There was a bug where certain batch files with an empty final column (no user file provided)
+        would not be treated as a column and therefore the batch file would be read as having only 15
+        rows.
+        We now add an empty final row in the parser if there are 15 rows and the last row provided is
+        a batch file key"""
+        batch_file_row = ["sample_sans", "1", "sample_trans", "", "sample_direct_beam", "",
+                          "can_sans", "", "can_trans", "", "can_direct_beam", "", "output_as", "", "user_file"]
+
+        content = "# MANTID_BATCH_FILE add more text here\n" + ",".join(batch_file_row)
+        batch_file_path = BatchCsvParserTest._save_to_csv(content)
+        parser = BatchCsvParser(batch_file_path)
+
+        try:
+            parser._parse_row(batch_file_row, 0)
+        except RuntimeError as e:
+            self.fail("An error should not have been raised. Error raised was: {}".format(str(e)))
 
 
 if __name__ == '__main__':

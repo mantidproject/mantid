@@ -21,7 +21,7 @@ class AxisChangerTwoPresenterTest(unittest.TestCase):
 
     def test_get_bounds(self):
         self.acp.get_bounds()
-        self.assertEquals(self.view.get_bounds.call_count, 1)
+        self.assertEqual(self.view.get_bounds.call_count, 1)
 
     def test_set_bounds(self):
         self.acp.set_bounds(self.bounds)
@@ -29,7 +29,7 @@ class AxisChangerTwoPresenterTest(unittest.TestCase):
 
     def test_clear_bounds(self):
         self.acp.clear_bounds()
-        self.assertEquals(self.view.clear_bounds.call_count, 1)
+        self.assertEqual(self.view.clear_bounds.call_count, 1)
 
     def test_on_lower_bound_changed(self):
         self.acp.on_bound_changed(self.slot)

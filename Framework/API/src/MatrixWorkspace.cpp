@@ -27,10 +27,13 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
+
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/regex.hpp>
 
 #include <cmath>
 #include <functional>
@@ -49,6 +52,50 @@ namespace {
 /// static logger
 Kernel::Logger g_log("MatrixWorkspace");
 constexpr const double EPSILON{1.0e-9};
+
+/** Append the x-unit of the workspace to the y-unit label as a denominator
+ * E.g. if a workspace has y-unit label "Counts" and x-unit angstrom, the y-unit
+ * label becomes "Counts per angstrom". Or if useLatex is true "Counts per
+ * $\AA$"
+ * @param yLabel :: The y-axis label
+ * @param workspace :: The workspace
+ * @param useLatex :: Boolean, if true use latex else use ascii
+ */
+std::string appendUnitDenominatorUsingPer(std::string yLabel,
+                                          const MatrixWorkspace &workspace,
+                                          bool useLatex) {
+  if (useLatex) {
+    std::string xLabel = workspace.getAxis(0)->unit()->label().latex();
+    if (!xLabel.empty())
+      yLabel += " per $" + workspace.getAxis(0)->unit()->label().latex() + "$";
+  } else {
+    std::string xLabel = workspace.getAxis(0)->unit()->label().ascii();
+    if (!xLabel.empty())
+      yLabel += " per " + workspace.getAxis(0)->unit()->label().ascii();
+  }
+  return yLabel;
+}
+
+/** Splits a string on the word "per" and replaces it with a Latex equivalent.
+ * E.g. "Counts per meV per hour" becomes "Counts (meV hour)$^{-1}$"
+ * If no "per"s are present leave the string as it is.
+ * @param yLabel :: The y-axis label
+ * @return std::string
+ */
+std::string replacePerWithLatex(std::string yLabel) {
+  std::vector<std::string> splitVec;
+  boost::split_regex(splitVec, yLabel, boost::regex(" per "));
+  if (splitVec.size() > 1) {
+    yLabel = splitVec[0];
+    splitVec.erase(splitVec.begin());
+    std::string unitString = boost::algorithm::join(splitVec, " ");
+    if (!yLabel.empty())
+      yLabel += " ";
+    yLabel += "(" + unitString + ")$^{-1}$";
+  }
+  return yLabel;
+}
+
 } // namespace
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
@@ -64,10 +111,10 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
       m_YUnitLabel(other.m_YUnitLabel),
       m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks),
       m_indexInfoNeedsUpdate(false) {
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(other.indexInfo());
+  m_indexInfo = std::make_unique<Indexing::IndexInfo>(other.indexInfo());
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
-    m_axes[i] = other.m_axes[i]->clone(this);
+    m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
   m_isCommonBinsFlagValid.store(other.m_isCommonBinsFlagValid.load());
   // TODO: Do we need to init m_monitorWorkspace?
 }
@@ -75,11 +122,7 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 /// Destructor
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
-MatrixWorkspace::~MatrixWorkspace() {
-  for (auto &axis : m_axes) {
-    delete axis;
-  }
-}
+MatrixWorkspace::~MatrixWorkspace() {}
 
 /** Returns a const reference to the IndexInfo object of the workspace.
  *
@@ -122,7 +165,7 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
                                 "does not match number of histograms in "
                                 "workspace");
 
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(indexInfo);
+  m_indexInfo = std::make_unique<Indexing::IndexInfo>(indexInfo);
   m_indexInfoNeedsUpdate = false;
   if (!m_indexInfo->spectrumDefinitions())
     buildDefaultSpectrumDefinitions();
@@ -226,7 +269,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
     return;
 
   setNumberOfDetectorGroups(NVectors);
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(NVectors);
+  m_indexInfo = std::make_unique<Indexing::IndexInfo>(NVectors);
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
@@ -359,7 +402,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
  *    VALUE is the Workspace Index
  */
 spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
+  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -383,7 +426,7 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
  */
 std::vector<size_t>
 MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
+  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -839,7 +882,7 @@ double MatrixWorkspace::detectorTwoTheta(const Geometry::IDetector &det) const {
 /// @return The number of axes which this workspace has
 int MatrixWorkspace::axes() const { return static_cast<int>(m_axes.size()); }
 
-/** Get a pointer to a workspace axis
+/** Get a non owning pointer to a workspace axis
  *  @param axisIndex :: The index of the axis required
  *  @throw IndexError If the argument given is outside the range of axes held by
  * this workspace
@@ -852,19 +895,20 @@ Axis *MatrixWorkspace::getAxis(const std::size_t &axisIndex) const {
         "Argument to getAxis is invalid for this workspace");
   }
 
-  return m_axes[axisIndex];
+  return m_axes[axisIndex].get();
 }
 
 /** Replaces one of the workspace's axes with the new one provided.
  *  @param axisIndex :: The index of the axis to replace
- *  @param newAxis :: A pointer to the new axis. The class will take ownership.
+ *  @param newAxis :: A Unique_ptr to the new axis. The class will take
+ * ownership.
  *  @throw IndexError If the axisIndex given is outside the range of axes held
  * by this workspace
  *  @throw std::runtime_error If the new axis is not of the correct length
  * (within one of the old one)
  */
 void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
-                                  Axis *const newAxis) {
+                                  std::unique_ptr<Axis> newAxis) {
   // First check that axisIndex is in range
   if (axisIndex >= m_axes.size()) {
     throw Kernel::Exception::IndexError(
@@ -872,8 +916,7 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
         "Value of axisIndex is invalid for this workspace");
   }
   // If we're OK, then delete the old axis and set the pointer to the new one
-  delete m_axes[axisIndex];
-  m_axes[axisIndex] = newAxis;
+  m_axes[axisIndex] = std::move(newAxis);
 }
 
 /**
@@ -930,22 +973,35 @@ void MatrixWorkspace::setYUnit(const std::string &newUnit) {
   m_YUnit = newUnit;
 }
 
-/// Returns a caption for the units of the data in the workspace
-std::string MatrixWorkspace::YUnitLabel() const {
+/**
+ * Returns a caption for the units of the data in the workspace.
+ * @param useLatex :: Return label using Latex syntax
+ * @param plotAsDistribution :: If true, the Y-axis has been divided by bin
+ * width
+ */
+std::string
+MatrixWorkspace::YUnitLabel(bool useLatex /* = false */,
+                            bool plotAsDistribution /* = false */) const {
   std::string retVal;
-  if (!m_YUnitLabel.empty())
+  if (!m_YUnitLabel.empty()) {
     retVal = m_YUnitLabel;
-  else {
+    // If a custom label has been set and we are dividing by bin width when
+    // plotting (i.e. plotAsDistribution = true and the workspace is not a
+    // distribution), we must append the x-unit as a divisor. We assume the
+    // custom label contains the correct units for the data.
+    if (plotAsDistribution && !this->isDistribution())
+      retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
+  } else {
     retVal = m_YUnit;
-    // If this workspace a distribution & has at least one axis & this axis has
-    // its unit set
-    // then append that unit to the string to be returned
-    if (!retVal.empty() && this->isDistribution() && this->axes() &&
-        this->getAxis(0)->unit()) {
-      retVal = retVal + " per " + this->getAxis(0)->unit()->label().ascii();
-    }
+    // If no custom label is set and the workspace is a distribution we need to
+    // append the divisor's unit to the label. If the workspace is not a
+    // distribution, but we are plotting it as a distribution, we must append
+    // the divisor's unit.
+    if (plotAsDistribution || this->isDistribution())
+      retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
   }
-
+  if (useLatex)
+    retVal = replacePerWithLatex(retVal);
   return retVal;
 }
 
@@ -1404,7 +1460,7 @@ public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
         m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
-        m_frame(Kernel::make_unique<Geometry::GeneralFrame>(
+        m_frame(std::make_unique<Geometry::GeneralFrame>(
             m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
@@ -1490,7 +1546,7 @@ class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
       : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(dimensionId),
-        m_frame(Kernel::make_unique<Geometry::GeneralFrame>(
+        m_frame(std::make_unique<Geometry::GeneralFrame>(
             m_ws->getAxis(0)->unit()->label(),
             m_ws->getAxis(0)->unit()->label())) {}
 
@@ -1617,8 +1673,8 @@ std::vector<std::unique_ptr<IMDIterator>> MatrixWorkspace::createIterators(
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(Kernel::make_unique<MatrixWorkspaceMDIterator>(this, function,
-                                                                 begin, end));
+    out.push_back(std::make_unique<MatrixWorkspaceMDIterator>(this, function,
+                                                              begin, end));
   }
   return out;
 }
@@ -1738,7 +1794,7 @@ MDMasking for a Matrix Workspace has not been implemented.
 @param :
 */
 void MatrixWorkspace::setMDMasking(
-    Mantid::Geometry::MDImplicitFunction * /*maskingRegion*/) {
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> /*maskingRegion*/) {
   throw std::runtime_error(
       "MatrixWorkspace::setMDMasking has no implementation");
 }

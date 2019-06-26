@@ -87,21 +87,21 @@ class EnggFitPeaksTest(unittest.TestCase):
         cell00, cell01, cell10, cell14 = cells
         # it has ben created
         tbl = mtd[tbl_name]
-        self.assertEquals(tbl.name(), tbl_name)
+        self.assertEqual(tbl.name(), tbl_name)
         self.assertTrue(isinstance(tbl, ITableWorkspace),
                         'The output workspace of fitted peaks should be a table workspace.')
 
         # number of peaks
-        self.assertEquals(tbl.rowCount(), num_peaks)
+        self.assertEqual(tbl.rowCount(), num_peaks)
         # number of parameters for every peak
         col_names = ['dSpacing',
                      'A0', 'A0_Err', 'A1', 'A1_Err', 'X0', 'X0_Err', 'A', 'A_Err',
                      'B', 'B_Err', 'S', 'S_Err', 'I', 'I_Err',
                      'Chi']
-        self.assertEquals(tbl.columnCount(), len(col_names))
+        self.assertEqual(tbl.columnCount(), len(col_names))
 
         # expected columns
-        self.assertEquals(tbl.getColumnNames(), col_names)
+        self.assertEqual(tbl.getColumnNames(), col_names)
 
         # some values
         # note approx comparison - fitting results differences of ~5% between glinux/win/osx
@@ -187,7 +187,7 @@ class EnggFitPeaksTest(unittest.TestCase):
             test_fit_peaks_table = EnggFitPeaks(sws,
                                                 WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
                                                 OutFittedPeaksTable=peaksTblName)
-            self.assertEquals(test_fit_peaks_table.rowCount(), 1)
+            self.assertEqual(test_fit_peaks_table.rowCount(), 1)
         except RuntimeError as rex:
             print("Failed (as expected) to fit the first peak (too far off the initial "
                   "guess), with RuntimeError: {0}".format(str(rex)))
@@ -212,7 +212,7 @@ class EnggFitPeaksTest(unittest.TestCase):
         test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
                                             OutFittedPeaksTable=peaksTblName)
 
-        self.assertEquals(test_fit_peaks_table.rowCount(), 2)
+        self.assertEqual(test_fit_peaks_table.rowCount(), 2)
 
         # check 'OutFittedPeaksTable' table workspace
         self._check_outputs_ok(peaksTblName, 2, [ep1, 1.98624796464,
@@ -241,11 +241,11 @@ class EnggFitPeaksTest(unittest.TestCase):
         test_fit_peaks_table = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
                                             OutFittedPeaksTable=peaksTblName)
 
-        self.assertEquals(test_fit_peaks_table.rowCount(), 3)
-        self.assertEquals(3, len(test_fit_peaks_table.column('dSpacing')))
-        self.assertEquals(3, len(test_fit_peaks_table.column('X0')))
-        self.assertEquals(3, len(test_fit_peaks_table.column('A')))
-        self.assertEquals(3, len(test_fit_peaks_table.column('S')))
+        self.assertEqual(test_fit_peaks_table.rowCount(), 3)
+        self.assertEqual(3, len(test_fit_peaks_table.column('dSpacing')))
+        self.assertEqual(3, len(test_fit_peaks_table.column('X0')))
+        self.assertEqual(3, len(test_fit_peaks_table.column('A')))
+        self.assertEqual(3, len(test_fit_peaks_table.column('S')))
 
         # check 'OutFittedPeaksTable' table workspace
         self._check_outputs_ok(peaksTblName, 3, [ep1, 2.98294345043,
@@ -264,7 +264,7 @@ class EnggFitPeaksTest(unittest.TestCase):
         except RuntimeError as e:
             error_msg = e.args[0].split("\n")[0]
 
-        self.assertEquals(error_msg, "Expected peak centres lie outside the limits of the workspace x axis")
+        self.assertEqual(error_msg, "Expected peak centres lie outside the limits of the workspace x axis")
 
     def test_expected_peaks_can_be_in_tof(self):
         """
