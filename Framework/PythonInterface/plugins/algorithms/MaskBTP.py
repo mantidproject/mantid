@@ -184,7 +184,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 raise RuntimeError('Could not generate values from "{}"'.format(value))
             return result - min_value
 
-    def _getBankName(self, banknum, validFrom):
+    def _getBankName(self, banknum, validFrom):  # noqa: C901
         banknum=int(banknum)
         if not (self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]):
             raise ValueError("Out of range index={} for {} instrument bank numbers".format(banknum, self.instname))

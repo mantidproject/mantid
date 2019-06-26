@@ -10,7 +10,6 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 from testhelpers import *
-import numpy as np
 from numpy import *
 
 # tests run x10 slower with this on, but it may be useful to track down issues refactoring
