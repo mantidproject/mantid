@@ -23,7 +23,7 @@ namespace NexusGeometry {
 class MANTID_NEXUSGEOMETRY_DLL Logger {
 public:
   virtual void warning(const std::string &warning) = 0;
-  virtual void error(const std::string &warning) = 0;
+  virtual void error(const std::string &error) = 0;
   virtual ~Logger() {}
 };
 
