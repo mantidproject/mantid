@@ -7,7 +7,8 @@
 #include "AsciiSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 namespace MantidQt {
@@ -79,19 +80,19 @@ std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory,
   return path.toString();
 }
 
-Mantid::API::MatrixWorkspace_sptr
+Mantid::API::Workspace_sptr
 AsciiSaver::workspace(std::string const &workspaceName) const {
   auto const &ads = Mantid::API::AnalysisDataService::Instance();
 
   if (!ads.doesExist(workspaceName))
     return nullptr;
 
-  return ads.retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+  return ads.retrieveWS<Mantid::API::Workspace>(workspaceName);
 }
 
 Mantid::API::IAlgorithm_sptr
 AsciiSaver::setUpSaveAlgorithm(std::string const &saveDirectory,
-                               Mantid::API::MatrixWorkspace_sptr workspace,
+                               Mantid::API::Workspace_sptr workspace,
                                std::vector<std::string> const &logParameters,
                                FileFormatOptions const &fileFormat) const {
   auto saveAlg = algorithmForFormat(fileFormat.format());
@@ -110,6 +111,15 @@ AsciiSaver::setUpSaveAlgorithm(std::string const &saveDirectory,
   return saveAlg;
 }
 
+void AsciiSaver::save(Mantid::API::Workspace_sptr workspace,
+                      std::string const &saveDirectory,
+                      std::vector<std::string> const &logParameters,
+                      FileFormatOptions const &fileFormat) const {
+  auto alg =
+      setUpSaveAlgorithm(saveDirectory, workspace, logParameters, fileFormat);
+  alg->execute();
+}
+
 void AsciiSaver::save(std::string const &saveDirectory,
                       std::vector<std::string> const &workspaceNames,
                       std::vector<std::string> const &logParameters,
@@ -118,12 +128,18 @@ void AsciiSaver::save(std::string const &saveDirectory,
   if (isValidSaveDirectory(saveDirectory)) {
     for (auto const &name : workspaceNames) {
       auto ws = workspace(name);
-      if (!ws)
-        throw InvalidWorkspaceName(name);
+      if (ws->isGroup()) {
+        // Save child workspaces separately because the current algorithms
+        // don't handle groups. When we switch to SaveReflectometryAscii we can
+        // probably remove this
+        Mantid::API::WorkspaceGroup_sptr group =
+            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+        for (auto child : group->getAllItems())
+          save(child, saveDirectory, logParameters, fileFormat);
+        continue;
+      }
 
-      auto alg =
-          setUpSaveAlgorithm(saveDirectory, ws, logParameters, fileFormat);
-      alg->execute();
+      save(ws, saveDirectory, logParameters, fileFormat);
     }
   } else {
     throw InvalidSavePath(saveDirectory);
