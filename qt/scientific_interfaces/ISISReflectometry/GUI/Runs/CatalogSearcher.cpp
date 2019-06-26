@@ -37,10 +37,9 @@ void removeResultsWithoutFilenameExtension(ITableWorkspace_sptr results) {
 }
 } // unnamed namespace
 
-CatalogSearcher::CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *view)
-    : m_pythonRunner(pythonRunner), m_view(view), m_notifyee(nullptr),
-      m_searchText(), m_instrument(), m_searchType(SearchType::NONE),
-      m_searchInProgress(false) {
+CatalogSearcher::CatalogSearcher(IRunsView *view)
+    : m_view(view), m_notifyee(nullptr), m_searchText(), m_instrument(),
+      m_searchType(SearchType::NONE), m_searchInProgress(false) {
   m_view->subscribeSearch(this);
 }
 
@@ -151,9 +150,6 @@ void execLoginDialog(const IAlgorithm_sptr &alg) {
  * @returns : true if login succeeded
  */
 void CatalogSearcher::logInToCatalog() {
-  if (hasActiveSession())
-    return;
-
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CatalogLogin");
   alg->initialize();
   alg->setProperty("KeepSessionAlive", true);

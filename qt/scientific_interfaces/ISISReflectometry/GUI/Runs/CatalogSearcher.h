@@ -7,7 +7,6 @@
 #ifndef MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 #define MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 
-#include "GUI/Common/IPythonRunner.h"
 #include "GUI/Runs/IRunsView.h"
 #include "ISearcher.h"
 #include "MantidAPI/AlgorithmObserver.h"
@@ -27,7 +26,7 @@ class CatalogSearcher : public ISearcher,
                         public RunsViewSearchSubscriber,
                         public Mantid::API::AlgorithmObserver {
 public:
-  CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *m_view);
+  CatalogSearcher(IRunsView *m_view);
   ~CatalogSearcher() override{};
 
   // ISearcher overrides
@@ -53,7 +52,6 @@ protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
 
 private:
-  IPythonRunner *m_pythonRunner;
   IRunsView *m_view;
   SearcherSubscriber *m_notifyee;
   std::string m_searchText;
