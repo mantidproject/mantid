@@ -908,7 +908,7 @@ class SANSDataProcessorGui(QMainWindow,
             for element in value:
                 self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
                                                     expected_type=expected_type)
-        elif expected_type.has_member(value):
+        elif (isinstance(value, str) and value in expected_type.__members__) or isinstance(value, expected_type):
             self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value,
                                                    expected_type=expected_type)
         elif isinstance(value, str):

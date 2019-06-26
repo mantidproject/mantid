@@ -13,7 +13,6 @@ from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProper
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import (create_unmanaged_algorithm, append_to_sans_file_tag,
                                            get_input_workspace_as_copy_if_not_same_as_output_workspace)
-from sans.common.enums import (RangeStepType, RebinType)
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 

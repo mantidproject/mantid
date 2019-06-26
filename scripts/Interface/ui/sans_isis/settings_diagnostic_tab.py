@@ -62,7 +62,7 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
 
         # Excluded settings entries
         self.excluded = ["state_module", "state_name"]
-        self.class_type_id = "ClassTypeParameter"
+        self.enum_id = "EnumParameter"
 
         # Q Settings
         self.__generic_settings = GENERIC_SETTINGS
@@ -145,12 +145,12 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
                 item.addChild(child)
         else:
             child = QtWidgets.QTreeWidgetItem()
-            value = self.clean_class_type(value)
+            value = self.clean_enum(value)
             child.setText(1, unicode(value))
             item.addChild(child)
 
-    def clean_class_type(self, value):
-        if isinstance(value, str) and self.class_type_id in value:
+    def clean_enum(self, value):
+        if isinstance(value, str) and self.enum_id in value:
             # Only the last element is of interest
             split_values = value.split("#")
             return split_values[-1]

@@ -41,37 +41,15 @@ __all__ = [
     "IntegralEnum",
     "RowState",
     "BinningType",
-    "SANSEnum",
     "SANS_ENUMS"
 ]
-
-
-class SANSEnum(Enum):
-    """
-    This class extends Enum by adding a method to check if the enum
-    contains a certain member. This method is required for compatibility
-    with the old SANS enum setup.
-    """
-    @classmethod
-    def has_member(cls, member):
-        """
-        Check if member is part of the enum class
-        :param member: the thing to check if it's part of the class
-        :type member: str or Enum
-        :return: True if member in cls, else False
-        """
-        for string_value, enum_value in cls._member_map_.items():
-            print(string_value, enum_value)
-            if member == string_value or member == enum_value:
-                return True
-        return False
 
 
 # --------------------------------
 #  Instrument and facility types
 # --------------------------------
-SANSInstrument = SANSEnum("SANSInstrument", "LOQ LARMOR SANS2D ZOOM NoInstrument")
-SANSFacility = SANSEnum("SANSFacility", "ISIS NoFacility")
+SANSInstrument = Enum("SANSInstrument", "LOQ LARMOR SANS2D ZOOM NoInstrument")
+SANSFacility = Enum("SANSFacility", "ISIS NoFacility")
 
 
 # ------------------------------------
@@ -80,8 +58,8 @@ SANSFacility = SANSEnum("SANSFacility", "ISIS NoFacility")
 
 # Defines the different data types which are required for the reduction. Besides the fundamental data of the sample
 # and the can, we can also specify a calibration
-SANSDataType = SANSEnum("SANSDataType", "SampleScatter SampleTransmission SampleDirect "
-                                        "CanScatter CanTransmission CanDirect Calibration")
+SANSDataType = Enum("SANSDataType", "SampleScatter SampleTransmission SampleDirect "
+                                    "CanScatter CanTransmission CanDirect Calibration")
 
 
 # ---------------------------
@@ -98,17 +76,17 @@ CanonicalCoordinates = Enum("CanonicalCoordinates", "X Y Z")
 #  ReductionMode
 # --------------------------
 # Defines the reduction modes which should be common to all implementations, namely All and Merged
-ReductionMode = SANSEnum("ReductionMode", "Merged All")
+ReductionMode = Enum("ReductionMode", "Merged All")
 
 # Defines the different reduction modes. This can be the high-angle bank, the low-angle bank
-ISISReductionMode = SANSEnum("ISISReductionMode", "Merged All HAB LAB")
+ISISReductionMode = Enum("ISISReductionMode", "Merged All HAB LAB")
 
 
 # --------------------------
 #  Reduction dimensionality
 # --------------------------
 # Defines the dimensionality for reduction. This can be either 1D or 2D
-ReductionDimensionality = SANSEnum("ReductionDimensionality", "OneDim TwoDim")
+ReductionDimensionality = Enum("ReductionDimensionality", "OneDim TwoDim")
 
 
 # --------------------------
@@ -123,7 +101,7 @@ ReductionData = Enum("ReductionData", "Scatter Transmission Direct")
 #  Type of data
 # --------------------------
 # Defines the type of reduction data. This can either the sample or only the can
-DataType = SANSEnum("DataType", "Sample Can")
+DataType = Enum("DataType", "Sample Can")
 
 
 # ---------------------------------
@@ -137,7 +115,7 @@ OutputParts = Enum("OutputParts", "Count Norm")
 #  The fit type during merge of HAB and LAB reductions
 # -----------------------------------------------------
 # Defines which fit operation to use during the merge of two reductions
-FitModeForMerge = SANSEnum("FitModeForMerge", "Both NoFit ShiftOnly ScaleOnly")
+FitModeForMerge = Enum("FitModeForMerge", "Both NoFit ShiftOnly ScaleOnly")
 
 
 # --------------------------
@@ -149,44 +127,44 @@ DetectorOrientation = Enum("DetectorOrientation", "Horizontal Vertical Rotated")
 # --------------------------
 #  Detector Type
 # --------------------------
-DetectorType = SANSEnum("DetectorType", "HAB LAB")
+DetectorType = Enum("DetectorType", "HAB LAB")
 
 
 # --------------------------
 #  Transmission Type
 # --------------------------
-TransmissionType = SANSEnum("TransmissionType", "Calculated Unfitted")
+TransmissionType = Enum("TransmissionType", "Calculated Unfitted")
 
 
 # --------------------------
 #  Ranges
 # --------------------------
 # Defines the step type of a range
-RangeStepType = SANSEnum("RangeStepType", "Lin Log RangeLin RangeLog")
+RangeStepType = Enum("RangeStepType", "Lin Log RangeLin RangeLog")
 
 
 # --------------------------
 #  Rebin
 # --------------------------
-RebinType = SANSEnum("RebinType", "Rebin InterpolatingRebin")
+RebinType = Enum("RebinType", "Rebin InterpolatingRebin")
 
 
 # --------------------------
 #  SaveType
 # --------------------------
-SaveType = SANSEnum("SaveType", "Nexus NistQxy CanSAS RKH CSV NXcanSAS NoType")
+SaveType = Enum("SaveType", "Nexus NistQxy CanSAS RKH CSV NXcanSAS NoType")
 
 
 # ------------------------------------------
 # Fit type for the transmission calculation
 # ------------------------------------------
-FitType = SANSEnum("FitType", "Linear Logarithmic Polynomial NoFit")
+FitType = Enum("FitType", "Linear Logarithmic Polynomial NoFit")
 
 
 # --------------------------
 #  SampleShape
 # --------------------------
-SampleShape = SANSEnum("SampleShape", "Cylinder FlatPlate Disc")
+SampleShape = Enum("SampleShape", "Cylinder FlatPlate Disc")
 
 
 def convert_int_to_shape(shape_int):
@@ -214,41 +192,41 @@ FileType = Enum("FileType", "ISISNexus ISISNexusAdded ISISRaw NoFileType")
 # ---------------------------
 # OutputMode
 # ---------------------------
-OutputMode = SANSEnum("OutputMode", "PublishToADS SaveToFile Both")
+OutputMode = Enum("OutputMode", "PublishToADS SaveToFile Both")
 
 
 # ------------------------------
 # Entries of batch reduction file
 # -------------------------------
-BatchReductionEntry = SANSEnum("BatchReductionEntry", "SampleScatter SampleTransmission SampleDirect CanScatter "
-                                                      "CanTransmission CanDirect Output UserFile SampleScatterPeriod "
-                                                      "SampleTransmissionPeriod SampleDirectPeriod CanScatterPeriod "
-                                                      "CanTransmissionPeriod CanDirectPeriod")
+BatchReductionEntry = Enum("BatchReductionEntry", "SampleScatter SampleTransmission SampleDirect CanScatter "
+                                                  "CanTransmission CanDirect Output UserFile SampleScatterPeriod "
+                                                  "SampleTransmissionPeriod SampleDirectPeriod CanScatterPeriod "
+                                                  "CanTransmissionPeriod CanDirectPeriod")
 
 
 # ------------------------------
 # Quadrants for beam centre finder
 # -------------------------------
-MaskingQuadrant = SANSEnum("MaskingQuadrant", "Left Right Top Bottom")
+MaskingQuadrant = Enum("MaskingQuadrant", "Left Right Top Bottom")
 
 
 # ------------------------------
 # Directions for Beam centre finder
 # -------------------------------
-FindDirectionEnum = SANSEnum("FindDirectionEnum", "All Up_Down Left_Right")
+FindDirectionEnum = Enum("FindDirectionEnum", "All Up_Down Left_Right")
 
 
 # ------------------------------
 # Integrals for diagnostic tab
 # -------------------------------
-IntegralEnum = SANSEnum("IntegralEnum", "Horizontal Vertical Time")
-RowState = SANSEnum("RowState", "Unprocessed Processed Error")
+IntegralEnum = Enum("IntegralEnum", "Horizontal Vertical Time")
+RowState = Enum("RowState", "Unprocessed Processed Error")
 
 
 # ------------------------------
 # Binning Types for AddRuns
 # -------------------------------
-BinningType = SANSEnum("BinningType", "SaveAsEventData Custom FromMonitors")
+BinningType = Enum("BinningType", "SaveAsEventData Custom FromMonitors")
 
 
 # -------------------------------

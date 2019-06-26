@@ -15,7 +15,7 @@ import copy
 import json
 from sans.state.state_base import (StateBase, EnumParameter, FloatParameter, DictParameter,
                                    FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
-from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
+from sans.common.enums import (ISISReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, DetectorType)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.automatic_setters import (automatic_setters)

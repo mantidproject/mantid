@@ -177,16 +177,16 @@ build custom types. The current list of types are:
 - *PositiveFloatParameter*
 - *PositiveIntegerParameter*
 - *DictParameter*
-- *ClassTypeParameter*
+- *EnumParameter*
 - *FloatWithNoneParameter*
 - *StringWithNoneParameter*
 - *PositiveFloatWithNoneParameter*
 - *FloatListParameter*
 - *StringListParameter*
 - *PositiveIntegerListParameter*
-- *ClassTypeListParameter*
+- *EnumListParameter*
 
-Most of the  typed parameters are self-descriptive. The *ClassTypeParameter*
+Most of the  typed parameters are self-descriptive. The *EnumParameter*
 refers to the enum-like class definitions in *enum.py*. Note that if a parameter
 is not set by the state builder, then it will return *None* when it is queried.
 If it is a mandatory parameter on a state object, then this needs to be enforced
@@ -256,7 +256,7 @@ can_direct_period               The period to use for the can direct           *
 calibration                     The path to the calibration file               *StringParameter*                     Y         N
 sample_scatter_run_number       Run number of the sample scatter file          *PositiveIntegerParameter*            -         Y
 sample_scatter_is_multi_period  If the sample scatter is multi-period          *BoolParameter*                       -         Y
-instrument                      Enum for the SANS instrument                   *ClassTypeParameter(SANSInstrument)*  -         Y
+instrument                      Enum for the SANS instrument                   *EnumParameter(SANSInstrument)*  -         Y
 idf_file_path                   Path to the IDF file                           *StringParameter*                     -         Y
 ipf_file_path                   Path to the IPF file                           *StringParameter*                     -         Y
 =============================== ============================================== ===================================== ========= ===============
@@ -309,9 +309,9 @@ reduction. It contains the following parameters:
 =============================== ===================================================== ============================================== ========= =============== ===========================================
 Name                            Comment                                               Type                                           Optional? Auto-generated? Default value
 =============================== ===================================================== ============================================== ========= =============== ===========================================
-reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *ClassTypeParameter(ReductionMode)*            N         N               *ISISReductionMode.LAB* enum value
-reduction_dimensionality        If 1D or 2D reduction                                 *ClassTypeParameter(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
-merge_fit_mode                  The fit mode for merging                              *ClassTypeParameter(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
+reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *EnumParameter(ReductionMode)*            N         N               *ISISReductionMode.LAB* enum value
+reduction_dimensionality        If 1D or 2D reduction                                 *EnumParameter(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
+merge_fit_mode                  The fit mode for merging                              *EnumParameter(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
 merge_shift                     The shift value for merging                           *FloatParameter*                               Y         N               0.0
 merge_scale                     The scale value for merging                           *FloatParameter*                               Y         N               1.0
 merge_range_min                 The min q value for merging                           *FloatWithNoneParameter*                       Y         N               *None*
@@ -405,11 +405,11 @@ from time-of-flight to wavelength units. The parameters are:
 ===================== ==================================== =================================== ========= ===============
 Name                  Comment                              Type                                Optional? Auto-generated?
 ===================== ==================================== =================================== ========= ===============
-rebin_type            The type of rebinning                *ClassTypeParameter(RebinType)*      N         N
+rebin_type            The type of rebinning                *EnumParameter(RebinType)*      N         N
 wavelength_low        The lower wavelength boundary        *PositiveFloatParameter*            N         N
 wavelength_high       The upper wavelength boundary        *PositiveFloatParameter*            N         N
 wavelength_step       The wavelength step                  *PositiveFloatParameter*            N         N
-wavelength_step_type  This is either linear or logarithmic *ClassTypeParameter(RangeStepType)* N         N
+wavelength_step_type  This is either linear or logarithmic *EnumParameter(RangeStepType)* N         N
 ===================== ==================================== =================================== ========= ===============
 
 The validation ensures that all entries are specified and that the lower wavelength boundary is smaller than the upper wavelength boundary.
@@ -424,7 +424,7 @@ the required information about saving the reduced data. The relevant parameters 
 Name                               Comment                                            Type                                Optional? Auto-generated? Default
 ================================== ================================================== =================================== ========= =============== =======
 zero_free_correction               If zero error correction (inflation) should happen *BoolParameter*                     Y         N               True
-file_format                        A list of file formats to save into                *ClassTypeListParameter(SaveType)*  Y         N               -
+file_format                        A list of file formats to save into                *EnumListParameter(SaveType)*  Y         N               -
 user_specified_output_name         A custom user-specified name for the saved file    *StringWithNoneParameter*           Y         N               -
 user_specified_output_name_suffix  A custom user-specified suffix for the saved file  *StringParameter*                   Y         N               -
 use_reduction_mode_as_suffix       If the reduction mode should be used as a suffix   *BoolParameter*                     Y         N               -
@@ -441,12 +441,12 @@ and the volume information. The parameters are:
 ===================== ======================================== ================================== ========= ===============
 Name                  Comment                                  Type                               Optional? Auto-generated?
 ===================== ======================================== ================================== ========= ===============
-shape                 The user-specified shape of the sample   *ClassTypeParameter(SampleShape)*  N         Y
+shape                 The user-specified shape of the sample   *EnumParameter(SampleShape)*  N         Y
 thickness             The user-specified sample thickness      *PositiveFloatParameter*           N         Y
 width                 The user-specified sample width          *PositiveFloatParameter*           N         Y
 height                The user-specified sample height         *PositiveFloatParameter*           N         Y
 scale                 The user-specified absolute scale        *PositiveFloatParameter*           N         Y
-shape_from_file       The file-extracted shape of the sample   *ClassTypeParameter(SampleShape)*  N         Y
+shape_from_file       The file-extracted shape of the sample   *EnumParameter(SampleShape)*  N         Y
 thickness_from_file   The file-extracted sample thickness      *PositiveFloatParameter*           N         Y
 width_from_file       The file-extracted sample width          *PositiveFloatParameter*           N         Y
 height_from_file      The file-extracted sample height         *PositiveFloatParameter*           N         Y
@@ -501,11 +501,11 @@ incident_monitor                 The incident monitor                           
 prompt_peak_correction_min       The start time of a prompt peak correction                                                       *PositiveFloatParameter*        Y         N               -
 prompt_peak_correction_max       The stop time of a prompt peak correction                                                        *PositiveFloatParameter*        Y         N               -
 prompt_peak_correction_enabled   If the prompt peak correction should occur                                                       *BoolParameter*                 Y         N               True
-rebin_type                       The type of wavelength rebinning, i.e. standard or interpolating                                 *ClassTypeParameter(RebinType)* Y         N               -
+rebin_type                       The type of wavelength rebinning, i.e. standard or interpolating                                 *EnumParameter(RebinType)* Y         N               -
 wavelength_low                   The lower wavelength boundary                                                                    *PositiveFloatParameter*        Y         N               -
 wavelength_high                  The upper wavelength boundary                                                                    *PositiveFloatParameter*        Y         N               -
 wavelength_step                  The wavelength step                                                                              *PositiveFloatParameter*        Y         N               -
-wavelength_step_type             The wavelength step type, i.e. lin or log                                                        *ClassTypeParameter(RebinType)* Y         N               -
+wavelength_step_type             The wavelength step type, i.e. lin or log                                                        *EnumParameter(RebinType)* Y         N               -
 use_full_wavelength_range        If the full wavelength range of the instrument should be used                                    *BoolParameter*                 Y         N               -
 wavelength_full_range_low        The lower wavelength boundary of the full wavelength range                                       *PositiveFloatParameter*        Y         N               -
 wavelength_full_range_high       The upper wavelength boundary of the full wavelength range                                       *PositiveFloatParameter*        Y         N               -
@@ -532,7 +532,7 @@ fit information. The set of parameters describing this fit are:
 ================= ================================================================= ================================ ========= =============== ========================
 Name              Comment                                                           Type                             Optional? Auto-generated? Default
 ================= ================================================================= ================================ ========= =============== ========================
-fit_type          The type of fitting, i.e. lin, log or poly                        *ClassTypeParameter(FitType)*    Y         N               *FitType.Log* enum value
+fit_type          The type of fitting, i.e. lin, log or poly                        *EnumParameter(FitType)*    Y         N               *FitType.Log* enum value
 polynomial_order  Polynomial order when poly fit type has been selected             *PositiveIntegerParameter*       Y         N               0
 wavelength_low    Lower wavelength bound for fitting (*None* means no lower bound)  *PositiveFloatWithNoneParameter* Y         N               -
 wavelength_high   Upper wavelength bound for fitting (*None* means no upper bound)  *PositiveFloatWithNoneParameter* Y         N               -
@@ -557,11 +557,11 @@ incident_monitor                The incident monitor                            
 prompt_peak_correction_min      The start time of a prompt peak correction                                          *PositiveFloatParameter*            Y         N               -
 prompt_peak_correction_max      The stop time of a prompt peak correction                                           *PositiveFloatParameter*            Y         N               -
 prompt_peak_correction_enabled  If the prompt peak correction should occur                                          *BoolParameter*                     Y         N               False
-rebin_type                      The type of wavelength rebinning, i.e. standard or interpolating                    *ClassTypeParameter(RebinType)*     Y         N               *RebinType.Rebin* enum value
+rebin_type                      The type of wavelength rebinning, i.e. standard or interpolating                    *EnumParameter(RebinType)*     Y         N               *RebinType.Rebin* enum value
 wavelength_low                  The lower wavelength boundary                                                       *PositiveFloatParameter*            Y         N               -
 wavelength_high                 The upper wavelength boundary                                                       *PositiveFloatParameter*            Y         N               -
 wavelength_step                 The wavelength step                                                                 *PositiveFloatParameter*            Y         N               -
-wavelength_step_type            The wavelength step type, i.e. lin or log                                           *ClassTypeParameter(RangeStepType)* Y         N               -
+wavelength_step_type            The wavelength step type, i.e. lin or log                                           *EnumParameter(RangeStepType)* Y         N               -
 background_TOF_general_start    General lower boundary for background correction                                    *FloatParameter*                    Y         N               -
 background_TOF_general_stop     General upper boundary for background correction                                    *FloatParameter*                    Y         N               -
 background_TOF_monitor_start    Monitor specific lower boundary for background correction (monitor vs. start value) *DictParameter*                     Y         N               -
@@ -582,7 +582,7 @@ Name                   Comment                                                  
 wavelength_low         The lower bound of the for the wavelength range                            *PositiveFloatParameter*            N         N
 wavelength_high        The upper bound of the for the wavelength range                            *PositiveFloatParameter*            N         N
 wavelength_step        The wavelength step                                                        *PositiveFloatParameter*            N         N
-wavelength_step_type   The wavelength step type, i.e. lin or log                                  *ClassTypeParameter(RangeStepType)* N         N
+wavelength_step_type   The wavelength step type, i.e. lin or log                                  *EnumParameter(RangeStepType)* N         N
 adjustment_files       Dict to adjustment files; detector type vs *StateAdjustmentFiles* object   *DictParamter*                      N         Y
 idf_path               Path to the IDF file                                                       *StringParameter*                   N         Y
 ====================== ========================================================================== =================================== ========= ===============
@@ -611,7 +611,7 @@ The parameters are:
 ================================ ============================================= ============================================= =============================== =============== ===========================================
 Name                             Comment                                       Type                                          Optional?                       Auto-generated? Default
 ================================ ============================================= ============================================= =============================== =============== ===========================================
-reduction_dimensionality         1D or 2D                                      *ClassTypeParameter(ReductionDimensionality)* N                               N               *ReductionDimensionality.OneDim* enum value
+reduction_dimensionality         1D or 2D                                      *EnumParameter(ReductionDimensionality)* N                               N               *ReductionDimensionality.OneDim* enum value
 use_gravity                      If gravity correction should be applied       *BoolParameter*                               Y                               N                False
 gravity_extra_length             Extra length for gravity correction           *PositiveFloatParameter*                      Y                               N                0
 radius_cuto-off                  Radius above which pixels are not considered  *PositiveFloatParameter*                      Y                               N                0
@@ -621,7 +621,7 @@ q_max                            Max momentum transfer value for 1D reduction  *
 q_1d_rebin_string                Rebin string for Q1D                          *StringParameter*                             N,                              if 1D  N         -
 q_xy_max                         Max momentum transfer value for 2D reduction  *PositiveFloatParameter*                      N,                              if 2D  N         -
 q_xy_step                        Momentum transfer step for 2D reduction       *PositiveFloatParameter*                      N,                              if 2D  N         -
-q_xy_step_type                   The step type, i.e. lin or log                *ClassTypeParameter(RangeStepType)*           N,                              if 2D  N         -
+q_xy_step_type                   The step type, i.e. lin or log                *EnumParameter(RangeStepType)*           N,                              if 2D  N         -
 use_q_resolution                 If should perform a q resolution calculation  *BoolParameter*                               Y                               N                False
 q_resolution_collimation_length  Collimation length                            *PositiveFloatParameter*                      N, if performing q resolution   N                -
 q_resolution_delta_r             Virtual ring width on the detector            *PositiveFloatParameter*                      N, if performing q resolution   N                -

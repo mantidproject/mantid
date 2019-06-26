@@ -18,7 +18,7 @@ from sans.state.state_base import (StringParameter, BoolParameter, FloatParamete
                                    FloatWithNoneParameter, PositiveFloatWithNoneParameter, FloatListParameter,
                                    StringListParameter, PositiveIntegerListParameter, EnumListParameter,
                                    StateBase, rename_descriptor_names, TypedParameter, validator_sub_state,
-                                   create_deserialized_sans_state_from_property_manager, ClassTypeListParameter)
+                                   create_deserialized_sans_state_from_property_manager)
 
 TestType = Enum("TestType", "TypeA TypeB")
 

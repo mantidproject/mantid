@@ -13,7 +13,6 @@ from mantid.kernel import (Direction, FloatBoundedValidator, PropertyManagerProp
 from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.enums import RebinType, RangeStepType
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 

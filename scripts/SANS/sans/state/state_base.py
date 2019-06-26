@@ -67,15 +67,6 @@ def all_list_elements_are_of_instance_type_and_not_empty(value, comparison_type,
                                                                 type_check=isinstance)
 
 
-def all_list_elements_are_of_class_type_and_not_empty(value, comparison_type, additional_comparison=lambda x: True):
-    """
-    Ensures that all elements of a list are of a certain INSTANCE type and that the list is not empty.
-    """
-    return all_list_elements_are_of_specific_type_and_not_empty(value=value, comparison_type=comparison_type,
-                                                                additional_comparison=additional_comparison,
-                                                                type_check=issubclass)
-
-
 def all_list_elements_are_float_and_not_empty(value):
     typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=float)
     return typed_comparison(value)
@@ -199,24 +190,6 @@ class DictParameter(TypedParameter):
         super(DictParameter, self).__init__(dict, is_not_none)
 
 
-class ClassTypeParameter(TypedParameter):
-    """
-    This TypedParameter variant allows for storing a class type.
-
-    This could be for example something from the SANSType module, e.g. CanonicalCoordinates.X
-    It is something that is used frequently with the main of moving away from using strings where types
-    should be used instead.
-    """
-    def __init__(self, class_type):
-        super(ClassTypeParameter, self).__init__(class_type, is_not_none)
-
-    def _type_check(self, value):
-        if not issubclass(value, self.parameter_type):
-            raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
-                                                                               value, type(value)))
-
-
 class EnumParameter(TypedParameter):
     def __init__(self, enum_type):
         super(EnumParameter, self).__init__(enum_type, is_not_none)
@@ -307,12 +280,6 @@ class PositiveIntegerListParameter(TypedParameter):
                                                                                value, type(value)))
 
 
-class ClassTypeListParameter(TypedParameter):
-    def __init__(self, class_type):
-        typed_comparison = partial(all_list_elements_are_of_class_type_and_not_empty, comparison_type=class_type)
-        super(ClassTypeListParameter, self).__init__(list, typed_comparison)
-
-
 class EnumListParameter(TypedParameter):
     def __init__(self, enum_type):
         typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=enum_type,
@@ -375,7 +342,6 @@ def rename_descriptor_names(cls):
 STATE_NAME = "state_name"
 STATE_MODULE = "state_module"
 SEPARATOR_SERIAL = "#"
-class_type_parameter_id = "ClassTypeParameterID#"
 enum_parameter_id = "EnumParameterID#"
 MODULE = "__module__"
 
@@ -427,24 +393,8 @@ def provide_class(instance):
     return provide_class_from_module_and_class_name(module_name, class_name)
 
 
-def is_class_type_parameter(value):
-    return isinstance(value, string_types) and class_type_parameter_id in value
-
-
 def is_enum_parameter(value):
     return isinstance(value, string_types) and enum_parameter_id in value
-
-
-def is_vector_with_class_type_parameter(value):
-    is_vector_with_class_type = True
-    contains_str = is_string_vector(value)
-    if contains_str:
-        for element in value:
-            if not is_class_type_parameter(element):
-                is_vector_with_class_type = False
-    else:
-        is_vector_with_class_type = False
-    return is_vector_with_class_type
 
 
 def is_vector_with_enum_parameter(value):
@@ -518,8 +468,8 @@ def convert_state_to_dict(instance):
     for key, value in list(descriptor_values.items()):
         # If the value is a SANSBaseState then create a dict from it
         # If the value is a dict, then we need to check what the sub types are
-        # If the value is a ClassTypeParameter, then we need to encode it
-        # If the value is a list of ClassTypeParameters, then we need to encode each element in the list
+        # If the value is a EnumParameter, then we need to encode it
+        # If the value is a list of EnumParameter, then we need to encode each element in the list
         if isinstance(value, StateBase):
             sub_state_dict = value.property_manager
             value = sub_state_dict
@@ -533,17 +483,6 @@ def convert_state_to_dict(instance):
                     sub_dictionary_value = val_sub
                 sub_dictionary.update({key_sub: sub_dictionary_value})
             value = sub_dictionary
-        elif isinstance(descriptor_types[key], ClassTypeParameter):
-            value = get_serialized_class_type_parameter(value)
-        elif isinstance(descriptor_types[key], ClassTypeListParameter):
-            if value:
-                # If there are entries in the list, then convert them individually and place them into a list.
-                # The list will contain a sequence of serialized ClassTypeParameters
-                serialized_value = []
-                for element in value:
-                    serialized_element = get_serialized_class_type_parameter(element)
-                    serialized_value.append(serialized_element)
-                value = serialized_value
         elif isinstance(descriptor_types[key], EnumParameter):
             value = get_serialized_enum_parameter(value)
         elif isinstance(descriptor_types[key], EnumListParameter):
@@ -583,7 +522,7 @@ def set_state_from_property_manager(instance, property_manager):
         # 3. String with special meaning: Admittedly this is a hack, but we are limited by the input property types
         #                                 of Mantid algorithms, which can be string, int, float and containers of these
         #                                 types (and PropertyManagerProperties). We need a wider range of types, such
-        #                                 as ClassTypeParameters. These are encoded (as good as possible) in a string
+        #                                 as EnumParameter. These are encoded (as good as possible) in a string
         # 4. Vector of strings with special meaning: See point 3)
         # 5. Vector for float: This needs to handle Mantid's float array
         # 6. Vector for string: This needs to handle Mantid's string array
@@ -606,15 +545,6 @@ def set_state_from_property_manager(instance, property_manager):
                     sub_dict_value_to_insert = sub_dict_value
                 dict_element.update({sub_dict_key: sub_dict_value_to_insert})
             setattr(instance, key, dict_element)
-        elif is_class_type_parameter(value):
-            class_type_parameter = get_deserialized_class_type_parameter(value)
-            _set_element(instance, key, class_type_parameter)
-        elif is_vector_with_class_type_parameter(value):
-            class_type_list = []
-            for element in value:
-                class_type_parameter = get_deserialized_class_type_parameter(element)
-                class_type_list.append(class_type_parameter)
-            _set_element(instance, key, class_type_list)
         elif is_enum_parameter(value):
             enum_parameter = get_deserialized_enum_parameter(value)
             _set_element(instance, key, enum_parameter)
@@ -635,26 +565,6 @@ def set_state_from_property_manager(instance, property_manager):
             _set_element(instance, key, int_list_value)
         else:
             _set_element(instance, key, value)
-
-
-def get_serialized_class_type_parameter(value):
-    # The module will only know about the outer class name, therefore we need
-    # 1. The module name
-    # 2. The name of the outer class
-    # 3. The name of the actual class
-    module_name, class_name = get_module_and_class_name(value)
-    outer_class_name = value.outer_class_name
-    class_name = outer_class_name + SEPARATOR_SERIAL + class_name
-    return create_module_and_class_name_from_encoded_string(class_type_parameter_id, module_name, class_name)
-
-
-def get_deserialized_class_type_parameter(value):
-    # We need to first get the outer class from the module
-    module_name, outer_class_name, class_name = \
-        get_module_and_class_name_from_encoded_string(class_type_parameter_id, value)
-    outer_class_type_parameter = provide_class_from_module_and_class_name(module_name, outer_class_name)
-    # From the outer class we can then retrieve the inner class which normally defines the users selection
-    return getattr(outer_class_type_parameter, class_name)
 
 
 def get_serialized_enum_parameter(value):

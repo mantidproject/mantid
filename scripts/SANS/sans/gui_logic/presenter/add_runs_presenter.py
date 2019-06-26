@@ -7,7 +7,6 @@
 import os
 
 from mantid.kernel import ConfigService
-from sans.common.enums import SANSInstrument
 from sans.gui_logic.gui_common import SANSGuiPropertiesHandler
 
 

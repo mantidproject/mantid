@@ -12,7 +12,7 @@ from mantid.kernel import (Direction, StringListValidator, PropertyManagerProper
 from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.enums import (RangeStepType, RebinType, FitType, DataType)
+from sans.common.enums import (RangeStepType, FitType, DataType)
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.algorithm_detail.calculate_transmission_helper import (get_detector_id_for_spectrum_number,
                                                                  get_workspace_indices_for_monitors,

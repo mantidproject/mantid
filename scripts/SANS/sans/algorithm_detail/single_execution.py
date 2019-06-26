@@ -14,7 +14,7 @@ from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DataType, DetectorType, ISISReductionMode, OutputParts, TransmissionType)
+from sans.common.enums import (DetectorType, ISISReductionMode, OutputParts, TransmissionType)
 from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
                                            get_transmission_workspaces_from_ads,
                                            write_hash_into_reduced_can_workspace)
