@@ -70,7 +70,7 @@ public:
   /** set a new detector map, for use in clone empty
    * @param map the map to set.
    */
-  void setDetMap(std::map<detid_t, std::size_t> map){ detID_to_WI=map;}
+  void setDetMap(std::map<detid_t, std::size_t> map) { detID_to_WI = map; }
 
 private:
   SpecialWorkspace2D *doClone() const override {
