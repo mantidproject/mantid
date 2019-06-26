@@ -70,19 +70,16 @@ the user enables and will spline the resulting workspace(s) for later focusing.
 On POLARIS the following parameters are required when executing *create_vanadium*:
 
 - :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
-- :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref`
 - :ref:`first_cycle_run_no_polaris_isis-powder-diffraction-ref`
 
-If :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is 
-set to **True** the following parameter is required in addition to the 
-above:
+The following may optionally be set.
 
+- :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
 
 Example
 =======
-
 ..  code-block:: python
 
   # Notice how the filename ends with .yaml
@@ -102,20 +99,17 @@ focuses and optionally applies corrections if the user has requested them.
 On POLARIS the following parameters are required when executing *focus*:
 
 - :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
-- :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref`
 - :ref:`do_van_normalisation_polaris_isis-powder-diffraction-ref`
 - :ref:`input_mode_polaris_isis-powder-diffraction-ref`
 - :ref:`run_number_polaris_isis_powder-diffraction-ref`
 
-If :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is 
-set to **True** the following parameter is required in addition to the 
-above:
 
-- :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
 
 The following parameters may also be optionally set:
 
+- :ref:`mode_polaris_isis-powder-diffraction-ref`
+- :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
 - :ref:`file_ext_polaris_isis-powder-diffraction-ref`
 - :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
 - :ref:`suffix_polaris_isis-powder-diffraction-ref`
@@ -300,6 +294,7 @@ Example Input:
 
 mode
 ^^^^^^^^^^
+*optional*
 The current chopper mode to use in the 
 :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 and :ref:`focus_polaris_isis-powder-diffraction-ref` method.
@@ -309,6 +304,9 @@ to use whilst processing.
 Accepted values are: **PDF** or **Rietveld**
 
 *Note: This parameter is not case sensitive*
+
+If this value is not set, mantid will attempt to deduce it from
+the frequency logs.
 
 Example Input:
 
@@ -349,10 +347,6 @@ set first with the :ref:`set_sample_polaris_isis-powder-diffraction-ref`
 method. 
 
 Accepted values are: **True** or **False**
-
-*Note: If this is set to 'True'*
-:ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
-*must be set*
 
 Example Input:
 
@@ -453,10 +447,9 @@ Example Input:
 
 multiple_scattering
 ^^^^^^^^^^^^^^^^^^^
+*optional*
 Indicates whether to account for the effects of multiple scattering
-when calculating absorption corrections. If 
-:ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is
-set to **True** this parameter must be set.
+when calculating absorption corrections. 
 
 Accepted values are: **True** or **False**
 
