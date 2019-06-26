@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import csv
 import os
 import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
@@ -26,8 +25,8 @@ def create_calibration(calibration_runs, instrument, offset_file_name, grouping_
 
     input_ws = input_ws_list[0]
     focused = _calibration_processing(calibration_dir, calibration_runs, cross_correlate_params, get_det_offset_params,
-                                     grouping_file_name, input_ws, instrument, offset_file_name, rebin_1_params,
-                                     rebin_2_params)
+                                      grouping_file_name, input_ws, instrument, offset_file_name, rebin_1_params,
+                                      rebin_2_params)
     return focused
 
 
@@ -44,6 +43,7 @@ def adjust_calibration(calibration_runs, instrument, offset_file_name, grouping_
     :param rebin_2_params: Parameters for the second rebin step (as a string in the usual format)
     :param cross_correlate_params: Parameters for CrossCorrelate (as a dictionary PropertyName: PropertyValue)
     :param get_det_offset_params: Parameters for GetDetectorOffsets (as a dictionary PropertyName: PropertyValue)
+    :param original_cal: path to calibration file to adjust
     """
     input_ws_list = common.load_current_normalised_ws_list(run_number_string=calibration_runs, instrument=instrument,
                                                            input_batching=INPUT_BATCHING.Summed)
@@ -52,14 +52,14 @@ def adjust_calibration(calibration_runs, instrument, offset_file_name, grouping_
     input_ws = mantid.AlignDetectors(InputWorkspace=input_ws, CalibrationFile=original_cal)
     offset_file = os.path.join(calibration_dir, offset_file_name)
     focused = _calibration_processing(calibration_dir, calibration_runs, cross_correlate_params, get_det_offset_params,
-                                     grouping_file_name, input_ws, instrument, offset_file, rebin_1_params,
-                                     rebin_2_params)
+                                      grouping_file_name, input_ws, instrument, offset_file, rebin_1_params,
+                                      rebin_2_params)
     _adjust_cal_file(original_cal, offset_file)
     return focused
 
 
 def _calibration_processing(calibration_dir, calibration_runs, cross_correlate_params, get_det_offset_params,
-                           grouping_file_name, input_ws, instrument, offset_file, rebin_1_params, rebin_2_params):
+                            grouping_file_name, input_ws, instrument, offset_file, rebin_1_params, rebin_2_params):
     calibration_ws = input_ws
     if calibration_ws.getAxis(0).getUnit().unitID() != WORKSPACE_UNITS.d_spacing:
         calibration_ws = mantid.Rebin(InputWorkspace=input_ws, Params=rebin_1_params)
@@ -86,7 +86,7 @@ def _calibration_processing(calibration_dir, calibration_runs, cross_correlate_p
     grouping_file = os.path.join(calibration_dir, grouping_file_name)
     focused = mantid.DiffractionFocussing(InputWorkspace=aligned, GroupingFileName=grouping_file,
                                           OutputWorkspace=instrument._generate_output_file_name(calibration_runs)
-                                                          + "_grouped")
+                                          + "_grouped")
     print("Saved cal file to " + offset_file)
     common.remove_intermediate_workspace([calibration_ws, rebinned, cross_correlated, rebinned_tof,
                                           offsets_ws_name])
@@ -106,5 +106,3 @@ def _adjust_cal_file(original_cal, generated_cal):
     mantid.SaveCalFile(OffsetsWorkspace=out_ws, Filename=generated_cal)
     common.remove_intermediate_workspace([origin_ws.format("_offsets"), gen_ws.format("_offsets"),
                                           origin_ws.format("_cal"), gen_ws.format("_cal")])
-
-
