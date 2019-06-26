@@ -376,6 +376,7 @@ STATE_NAME = "state_name"
 STATE_MODULE = "state_module"
 SEPARATOR_SERIAL = "#"
 class_type_parameter_id = "ClassTypeParameterID#"
+enum_parameter_id = "EnumParameterID#"
 MODULE = "__module__"
 
 
@@ -430,6 +431,10 @@ def is_class_type_parameter(value):
     return isinstance(value, string_types) and class_type_parameter_id in value
 
 
+def is_enum_parameter(value):
+    return isinstance(value, string_types) and enum_parameter_id in value
+
+
 def is_vector_with_class_type_parameter(value):
     is_vector_with_class_type = True
     contains_str = is_string_vector(value)
@@ -440,6 +445,18 @@ def is_vector_with_class_type_parameter(value):
     else:
         is_vector_with_class_type = False
     return is_vector_with_class_type
+
+
+def is_vector_with_enum_parameter(value):
+    is_vector_with_enum = True
+    contains_str = is_string_vector(value)
+    if contains_str:
+        for element in value:
+            if not is_enum_parameter(element):
+                is_vector_with_enum = False
+    else:
+        is_vector_with_enum = False
+    return is_vector_with_enum
 
 
 def get_module_and_class_name_from_encoded_string(encoder, value):
@@ -527,6 +544,14 @@ def convert_state_to_dict(instance):
                     serialized_element = get_serialized_class_type_parameter(element)
                     serialized_value.append(serialized_element)
                 value = serialized_value
+        elif isinstance(descriptor_types[key], EnumParameter):
+            value = get_serialized_enum_parameter(value)
+        elif isinstance(descriptor_types[key], EnumListParameter):
+            if value:
+                serialized_value = []
+                for element in value:
+                    serialized_value.append(get_serialized_enum_parameter(element))
+                value = serialized_value
 
         state_dict.update({key: value})
     # Add information about the current state object, such as in which module it lives and what its name is
@@ -590,6 +615,15 @@ def set_state_from_property_manager(instance, property_manager):
                 class_type_parameter = get_deserialized_class_type_parameter(element)
                 class_type_list.append(class_type_parameter)
             _set_element(instance, key, class_type_list)
+        elif is_enum_parameter(value):
+            enum_parameter = get_deserialized_enum_parameter(value)
+            _set_element(instance, key, enum_parameter)
+        elif is_vector_with_enum_parameter(value):
+            enum_list = []
+            for element in value:
+                enum_parameter = get_deserialized_enum_parameter(element)
+                enum_list.append(enum_parameter)
+            _set_element(instance, key, enum_list)
         elif is_float_vector(value):
             float_list_value = list(value)
             _set_element(instance, key, float_list_value)
@@ -621,6 +655,19 @@ def get_deserialized_class_type_parameter(value):
     outer_class_type_parameter = provide_class_from_module_and_class_name(module_name, outer_class_name)
     # From the outer class we can then retrieve the inner class which normally defines the users selection
     return getattr(outer_class_type_parameter, class_name)
+
+
+def get_serialized_enum_parameter(value):
+    module_name, enum_name = get_module_and_class_name(value)
+    class_name = enum_name + SEPARATOR_SERIAL + value.name
+    return create_module_and_class_name_from_encoded_string(enum_parameter_id, module_name, class_name)
+
+
+def get_deserialized_enum_parameter(value):
+    module_name, enum_name, enum_value = \
+        get_module_and_class_name_from_encoded_string(enum_parameter_id, value)
+    enum_object = provide_class_from_module_and_class_name(module_name, enum_name)
+    return enum_object[enum_value]
 
 
 def create_deserialized_sans_state_from_property_manager(property_manager):
