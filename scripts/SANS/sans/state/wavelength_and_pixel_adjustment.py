@@ -52,8 +52,8 @@ class StateWavelengthAndPixelAdjustment(StateBase):
 
     def __init__(self):
         super(StateWavelengthAndPixelAdjustment, self).__init__()
-        self.adjustment_files = {DetectorType.to_string(DetectorType.LAB): StateAdjustmentFiles(),
-                                 DetectorType.to_string(DetectorType.HAB): StateAdjustmentFiles()}
+        self.adjustment_files = {DetectorType.LAB.name: StateAdjustmentFiles(),
+                                 DetectorType.HAB.name: StateAdjustmentFiles()}
 
     def validate(self):
         is_invalid = {}
@@ -75,8 +75,8 @@ class StateWavelengthAndPixelAdjustment(StateBase):
             is_invalid.update(entry)
 
         try:
-            self.adjustment_files[DetectorType.to_string(DetectorType.LAB)].validate()
-            self.adjustment_files[DetectorType.to_string(DetectorType.HAB)].validate()
+            self.adjustment_files[DetectorType.LAB.name].validate()
+            self.adjustment_files[DetectorType.HAB.name].validate()
         except ValueError as e:
             is_invalid.update({"adjustment_files": str(e)})
 

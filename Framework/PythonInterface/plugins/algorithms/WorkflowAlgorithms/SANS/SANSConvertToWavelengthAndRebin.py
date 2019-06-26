@@ -39,16 +39,16 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
                              doc='The step size of the wavelength binning.')
 
         # Step type
-        allowed_step_types = StringListValidator([RangeStepType.to_string(RangeStepType.Log),
-                                                  RangeStepType.to_string(RangeStepType.Lin)])
-        self.declareProperty('WavelengthStepType', RangeStepType.to_string(RangeStepType.Lin),
+        allowed_step_types = StringListValidator([RangeStepType.Log.name,
+                                                  RangeStepType.Lin.name])
+        self.declareProperty('WavelengthStepType', RangeStepType.Lin.name,
                              validator=allowed_step_types, direction=Direction.Input,
                              doc='The step type for rebinning.')
 
         # Rebin type
-        allowed_rebin_methods = StringListValidator([RebinType.to_string(RebinType.Rebin),
-                                                     RebinType.to_string(RebinType.InterpolatingRebin)])
-        self.declareProperty("RebinMode", RebinType.to_string(RebinType.Rebin),
+        allowed_rebin_methods = StringListValidator([RebinType.Rebin.name,
+                                                     RebinType.InterpolatingRebin.name])
+        self.declareProperty("RebinMode", RebinType.Rebin.name,
                              validator=allowed_rebin_methods, direction=Direction.Input,
                              doc="The method which is to be applied to the rebinning.")
 
@@ -66,7 +66,7 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         workspace = self._convert_units_to_wavelength(workspace)
 
         # Get the rebin option
-        rebin_type = RebinType.from_string(self.getProperty("RebinMode").value)
+        rebin_type = RebinType[self.getProperty("RebinMode").value]
         rebin_string = self._get_rebin_string(workspace)
         if rebin_type is RebinType.Rebin:
             rebin_options = {"InputWorkspace": workspace,
@@ -105,7 +105,7 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
 
         # Check the workspace
         workspace = self.getProperty("InputWorkspace").value
-        rebin_type = RebinType.from_string(self.getProperty("RebinMode").value)
+        rebin_type = RebinType[self.getProperty("RebinMode").value]
         if rebin_type is RebinType.InterpolatingRebin and isinstance(workspace, EventWorkspace):
             errors.update({"RebinMode": "An interpolating rebin cannot be applied to an EventWorkspace."})
         return errors
@@ -134,7 +134,7 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
             wavelength_high = max(workspace.readX(0))
 
         wavelength_step = self.getProperty("WavelengthStep").value
-        step_type = RangeStepType.from_string(self.getProperty("WavelengthStepType").value)
+        step_type = RangeStepType[self.getProperty("WavelengthStepType").value]
         pre_factor = -1 if step_type == RangeStepType.Log else 1
         wavelength_step *= pre_factor
         return str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)

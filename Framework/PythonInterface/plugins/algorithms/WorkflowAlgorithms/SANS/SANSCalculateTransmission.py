@@ -40,9 +40,9 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("DirectWorkspace", '',
                                                      optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc='The direct workspace in time-of-flight units.')
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.Sample.name,
+                                            DataType.Can.name])
+        self.declareProperty("DataType", DataType.Sample.name,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -86,7 +86,7 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
 
         # 2. Clean transmission data
         data_type_string = self.getProperty("DataType").value
-        data_type = DataType.from_string(data_type_string)
+        data_type = DataType[data_type_string]
         transmission_workspace = self._get_corrected_wavelength_workspace(transmission_workspace, all_detector_ids,
                                                                           calculate_transmission_state)
         direct_workspace = self._get_corrected_wavelength_workspace(direct_workspace, all_detector_ids,
@@ -148,7 +148,7 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
             raise RuntimeError("No transmission monitor has been provided.")
 
         # Get the fit setting for the correct data type, ie either for the Sample of the Can
-        fit_type = calculate_transmission_state.fit[DataType.to_string(data_type)].fit_type
+        fit_type = calculate_transmission_state.fit[data_type.name].fit_type
         if fit_type is FitType.Logarithmic:
             fit_string = "Log"
         elif fit_type is FitType.Polynomial:
@@ -158,7 +158,7 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
 
         trans_options.update({"FitMethod": fit_string})
         if fit_type is FitType.Polynomial:
-            polynomial_order = calculate_transmission_state.fit[DataType.to_string(data_type)].polynomial_order
+            polynomial_order = calculate_transmission_state.fit[data_type.name].polynomial_order
             trans_options.update({"PolynomialOrder": polynomial_order})
 
         trans_alg = create_unmanaged_algorithm(trans_name, **trans_options)
@@ -303,8 +303,8 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
                            "WavelengthLow": wavelength_low,
                            "WavelengthHigh": wavelength_high,
                            "WavelengthStep": wavelength_step,
-                           "WavelengthStepType": RangeStepType.to_string(wavelength_step_type),
-                           "RebinMode": RebinType.to_string(rebin_type)}
+                           "WavelengthStepType": wavelength_step_type.name,
+                           "RebinMode": rebin_type.name}
         convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
         convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
         convert_alg.setProperty("OutputWorkspace", workspace)
@@ -367,9 +367,9 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
             calculate_transmission_state = state.adjustment.calculate_transmission
             fit = calculate_transmission_state.fit
             data_type_string = self.getProperty("DataType").value
-            data_type = DataType.from_string(data_type_string)
-            sample = fit[DataType.to_string(DataType.Sample)]
-            can = fit[DataType.to_string(DataType.Can)]
+            data_type = DataType[data_type_string]
+            sample = fit[DataType.Sample.name]
+            can = fit[DataType.Can.name]
             if data_type is DataType.Sample and sample.fit_type is None:
                 errors.update({"DataType": "There does not seem to be a fit type set for the selected data type"})
             if data_type is DataType.Can and can.fit_type is None:

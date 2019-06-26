@@ -74,8 +74,8 @@ class SANSReductionCoreTest(unittest.TestCase):
         if direct:
             reduction_core_alg.setProperty("DirectWorkspace", direct)
 
-        reduction_core_alg.setProperty("Component", DetectorType.to_string(detector_type))
-        reduction_core_alg.setProperty("DataType", DataType.to_string(component))
+        reduction_core_alg.setProperty("Component", detector_type.name)
+        reduction_core_alg.setProperty("DataType", component.name)
 
         reduction_core_alg.setProperty("OutputWorkspace", EMPTY_NAME)
 

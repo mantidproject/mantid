@@ -207,7 +207,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.gui_logger = Logger("SANS GUI LOGGER")
 
         # Instrument
-        SANSDataProcessorGui.INSTRUMENTS = ",".join([SANSInstrument.to_string(item)
+        SANSDataProcessorGui.INSTRUMENTS = ",".join([item.name
                                                      for item in [SANSInstrument.SANS2D,
                                                                   SANSInstrument.LOQ,
                                                                   SANSInstrument.LARMOR,
@@ -589,7 +589,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def set_out_default_output_mode(self):
         try:
-            default_output_mode = OutputMode.from_string(load_property(self.__generic_settings, self.__output_mode_key))
+            default_output_mode = OutputMode[load_property(self.__generic_settings, self.__output_mode_key)]
         except RuntimeError:
             pass
         else:
@@ -725,7 +725,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_reduction_mode_selection_has_changed(self):
         selection = self.reduction_mode_combo_box.currentText()
-        is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
+        is_merged = selection == ReductionMode.Merged.name
         self.merged_settings.setEnabled(is_merged)
 
     def _on_q_resolution_shape_has_changed(self):
@@ -814,13 +814,13 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_transmission_fit_type_has_changed(self):
         # Check the sample settings
         fit_type_sample_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
-        fit_type_sample = FitType.from_string(fit_type_sample_as_string)
+        fit_type_sample = FitType[fit_type_sample_as_string]
         is_sample_polynomial = fit_type_sample is FitType.Polynomial
         self.fit_sample_polynomial_order_spin_box.setEnabled(is_sample_polynomial)
 
         # Check the can settings
         fit_type_can_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
-        fit_type_can = FitType.from_string(fit_type_can_as_string)
+        fit_type_can = FitType[fit_type_can_as_string]
         is_can_polynomial = fit_type_can is FitType.Polynomial
         self.fit_can_polynomial_order_spin_box.setEnabled(is_can_polynomial)
 
@@ -927,13 +927,13 @@ class SANSDataProcessorGui(QMainWindow,
 
     @staticmethod
     def _set_enum_as_element_in_combo_box(gui_element, element, expected_type):
-        value_as_string = expected_type.to_string(element)
+        value_as_string = element.name
         index = gui_element.findText(value_as_string)
         if index != -1:
             gui_element.setCurrentIndex(index)
 
     def _add_enum_as_element_in_combo_box(self, gui_element, element, expected_type):
-        value_as_string = expected_type.to_string(element)
+        value_as_string = element.name
         gui_element.addItem(value_as_string)
 
     def get_simple_line_edit_field(self, expected_type, line_edit):
@@ -1073,7 +1073,7 @@ class SANSDataProcessorGui(QMainWindow,
     def output_mode(self, value):
         self._check_output_mode(value)
         try:
-            set_setting(self.__generic_settings, self.__output_mode_key, OutputMode.to_string(value))
+            set_setting(self.__generic_settings, self.__output_mode_key, value.name)
         except RuntimeError:
             pass
 
@@ -1099,7 +1099,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @instrument.setter
     def instrument(self, value):
-        instrument_string = SANSInstrument.to_string(value)
+        instrument_string = value.name
         self.instrument_type.setText("{}".format(instrument_string))
         self._instrument_changed()
 
@@ -1266,7 +1266,7 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def wavelength_step_type(self):
         step_type_as_string = self.wavelength_step_type_combo_box.currentText().encode('utf-8')
-        return RangeStepType.from_string(step_type_as_string)
+        return RangeStepType[step_type_as_string]
 
     @wavelength_step_type.setter
     def wavelength_step_type(self, value):
@@ -1443,7 +1443,7 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def transmission_sample_fit_type(self):
         fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText().encode('utf-8')
-        return FitType.from_string(fit_type_as_string)
+        return FitType[fit_type_as_string]
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
@@ -1456,7 +1456,7 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def transmission_can_fit_type(self):
         fit_type_as_string = self.fit_can_fit_type_combo_box.currentText().encode('utf-8')
-        return FitType.from_string(fit_type_as_string)
+        return FitType[fit_type_as_string]
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):
@@ -1636,7 +1636,7 @@ class SANSDataProcessorGui(QMainWindow,
         q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText().encode('utf-8')
         # Hedge for trying to read out
         try:
-            return RangeStepType.from_string(q_1d_step_type_as_string)
+            return RangeStepType[q_1d_step_type_as_string]
         except RuntimeError:
             return None
 
@@ -1677,7 +1677,7 @@ class SANSDataProcessorGui(QMainWindow,
     def q_xy_step_type(self):
         q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText().encode('utf-8')
         try:
-            return RangeStepType.from_string(q_xy_step_type_as_string)
+            return RangeStepType[q_xy_step_type_as_string]
         except RuntimeError:
             return None
 

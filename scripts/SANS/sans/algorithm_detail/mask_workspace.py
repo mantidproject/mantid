@@ -35,8 +35,8 @@ def mask_bins(mask_info, workspace, detector_type):
     bin_mask_general_start = mask_info.bin_mask_general_start
     bin_mask_general_stop = mask_info.bin_mask_general_stop
     # Mask the bins with the detector-specific setting
-    bin_mask_start = mask_info.detectors[DetectorType.to_string(detector_type)].bin_mask_start
-    bin_mask_stop = mask_info.detectors[DetectorType.to_string(detector_type)].bin_mask_stop
+    bin_mask_start = mask_info.detectors[detector_type.name].bin_mask_start
+    bin_mask_stop = mask_info.detectors[detector_type.name].bin_mask_stop
 
     # Combine the settings and run the binning
     start_mask = []
@@ -178,7 +178,7 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
     total_spectra = []
 
     # All masks are detector-specific, hence we pull out only the relevant part
-    detector = mask_info.detectors[DetectorType.to_string(detector_type)]
+    detector = mask_info.detectors[detector_type.name]
 
     # ----------------------
     # Single spectra

@@ -76,9 +76,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                              doc='The can direct data')
 
         # The component, i.e. HAB or LAB
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.name,
+                                                 DetectorType.HAB.name])
+        self.declareProperty("Component", DetectorType.LAB.name,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -94,7 +94,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         self.declareProperty('Tolerance', 0.0001251, direction=Direction.Input, doc="The search tolerance")
 
-        self.declareProperty('Direction', FindDirectionEnum.to_string(FindDirectionEnum.All), direction=Direction.Input,
+        self.declareProperty('Direction', FindDirectionEnum.All.name, direction=Direction.Input,
                              doc="The search direction is an enumerable which can be either All, LeftRight or UpDown")
 
         self.declareProperty('Verbose', False, direction=Direction.Input,
@@ -153,9 +153,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             position_2_step = position_1_step
 
         find_direction = self.getProperty("Direction").value
-        if find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Left_Right):
+        if find_direction == FindDirectionEnum.Left_Right.name:
             position_2_step = 0.0
-        elif find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Up_Down):
+        elif find_direction == FindDirectionEnum.Up_Down.name:
             position_1_step = 0.0
         centre1 = x_start
         centre2 = y_start
@@ -252,8 +252,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def _publish_to_ADS(self, sample_quartiles):
         output_workspaces = []
         for key in sample_quartiles:
-            output_workspaces.append(MaskingQuadrant.to_string(key))
-            AnalysisDataService.addOrReplace(MaskingQuadrant.to_string(key), sample_quartiles[key])
+            output_workspaces.append(key.name)
+            AnalysisDataService.addOrReplace(key.name, sample_quartiles[key])
 
         return output_workspaces
 
@@ -312,7 +312,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
     def _get_component(self, workspace):
         component_as_string = self.getProperty("Component").value
-        component = DetectorType.from_string(component_as_string)
+        component = DetectorType[component_as_string]
         return get_component_name(workspace, component)
 
     def _get_state(self):

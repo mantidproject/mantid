@@ -49,9 +49,9 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
 
         self.declareProperty('Iterations', 10, direction=Direction.Input)
 
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.name,
+                                                 DetectorType.HAB.name])
+        self.declareProperty("Component", DetectorType.LAB.name,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -71,7 +71,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
             state.mask.phi_max = 0.0
 
         component = self.getProperty("Component").value
-        component_as_string = DetectorType.to_string(component)
+        component_as_string = component.name
 
         # Set test centre
         state.move.detectors[component_as_string].sample_centre_pos1 = self.getProperty(

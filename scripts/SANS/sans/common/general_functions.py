@@ -618,7 +618,7 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type, data_type = DataType.to_string(DataType.Sample),
+def get_standard_output_workspace_name(state, reduction_data_type, data_type = DataType.Sample.name,
                                        include_slice_limits=True):
     """
     Creates the name of the output workspace from a state object.
@@ -656,10 +656,10 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
     if reduction_data_type is ISISReductionMode.Merged:
         detector_name_short = "merged"
     elif reduction_data_type is ISISReductionMode.HAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+        det_name = detectors[DetectorType.HAB.name].detector_name_short
         detector_name_short = det_name if det_name is not None else "hab"
     elif reduction_data_type is ISISReductionMode.LAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
+        det_name = detectors[DetectorType.LAB.name].detector_name_short
         detector_name_short = det_name if det_name is not None else "lab"
     else:
         raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
@@ -715,7 +715,7 @@ def get_transmission_output_name(state, data_type=DataType.Sample, multi_reducti
     short_run_number_as_string = str(short_run_number)
 
     calculated_transmission_state = state.adjustment.calculate_transmission
-    fit = calculated_transmission_state.fit[DataType.to_string(DataType.Sample)]
+    fit = calculated_transmission_state.fit[DataType.Sample.name]
     wavelength_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
 
     trans_suffix = "_trans_Sample" if data_type == DataType.Sample else "_trans_Can"

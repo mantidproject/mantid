@@ -9,116 +9,45 @@
 # pylint: disable=too-few-public-methods, invalid-name
 
 from __future__ import (absolute_import, division, print_function)
-from inspect import isclass
-from functools import partial
-from six import PY2
+
+from mantid.py3compat import Enum
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# Serializable Enum decorator
-# ----------------------------------------------------------------------------------------------------------------------
-def serializable_enum(*inner_classes):
+class SANSEnum(Enum):
     """
-    Class decorator which changes the name of an inner class to include the name of the outer class. The inner class
-    gets a method to determine the name of the outer class. This information is needed for serialization at the
-    algorithm input boundary.
+    This class extends Enum by adding a method to check if the enum
+    contains a certain member. This method is required for compatibility
+    with the old SANS enum setup.
     """
-    def inner_class_builder(cls):
-        # Add each inner class to the outer class
-        for inner_class in inner_classes:
-            new_class = type(inner_class, (cls, ), {"outer_class_name": cls.__name__})
-            # We set the module of the inner class to the module of the outer class. We have to do this since we
-            # are dynamically adding the inner class which gets its module name from the module where it was added,
-            # but not where the outer class lives.
-            module_of_outer_class = getattr(cls, "__module__")
-            setattr(new_class, "__module__", module_of_outer_class)
-            # Add the inner class to the outer class
-            setattr(cls, inner_class, new_class)
-        return cls
-    return inner_class_builder
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# String conversion decorator
-# ----------------------------------------------------------------------------------------------------------------------
-def string_convertible(cls):
-    """
-    Class decorator to make the enum/sub-class entries string convertible.
-
-    We do this by creating a static  from_string and to_string method on the class.
-    IMPORTANT: It is important that the enum values are added to the class before applying this decorator. In general
-               the order has to be:
-               @string_convertible
-               @serializable_enum
-               class MyClass(object):
-                ...
-    :param cls: a reference to the class
-    :return: the class
-    """
-    def to_string(elements, convert_to_string):
-        for key, value in list(elements.items()):
-            if convert_to_string is value:
-                return key
-        raise RuntimeError("Could not convert {0} to string. Unknown value.".format(convert_to_string))
-
-    def from_string(elements, convert_from_string):
-        if not PY2 and isinstance(convert_from_string, bytes):
-            convert_from_string = convert_from_string.decode()
-        for key, value in list(elements.items()):
-            if convert_from_string == key:
-                return value
-        raise RuntimeError("Could not convert {0} from string. Unknown value.".format(convert_from_string))
-
-    def has_member(elements, convert):
-        if not PY2 and isinstance(convert, bytes):
-            convert = convert.decode()
-        for key, value in list(elements.items()):
-            if convert == key or convert == value:
+    @classmethod
+    def has_member(cls, member):
+        """
+        Check if member is part of the enum class
+        :param member: the thing to check if it's part of the class
+        :type member: str or Enum
+        :return: True if member in cls, else False
+        """
+        for string_value, enum_value in cls._member_map_.items():
+            if member == string_value or member == enum_value:
                 return True
         return False
-
-    # First get all enum/sub-class elements
-    convertible_elements = {}
-    for attribute_name, attribute_value in list(cls.__dict__.items()):
-        if isclass(attribute_value) and issubclass(attribute_value, cls):
-            convertible_elements.update({attribute_name: attribute_value})
-
-    # Add the new static methods to the class
-    partial_to_string = partial(to_string, convertible_elements)
-    partial_from_string = partial(from_string, convertible_elements)
-    partial_has_member = partial(has_member, convertible_elements)
-    setattr(cls, "to_string", staticmethod(partial_to_string))
-    setattr(cls, "from_string", staticmethod(partial_from_string))
-    setattr(cls, "has_member", staticmethod(partial_has_member))
-    return cls
 
 
 # --------------------------------
 #  Instrument and facility types
 # --------------------------------
-@string_convertible
-@serializable_enum("LOQ", "LARMOR", "SANS2D", "ZOOM", "NoInstrument")
-class SANSInstrument(object):
-    pass
-
-
-@serializable_enum("ISIS", "NoFacility")
-class SANSFacility(object):
-    pass
+SANSInstrument = SANSEnum("SANSInstrument", "LOQ LARMOR SANS2D ZOOM NoInstrument")
+SANSFacility = SANSEnum("SANSFacility", "ISIS NoFacility")
 
 
 # ------------------------------------
 # Data Types
 # ------------------------------------
-@string_convertible
-@serializable_enum("SampleScatter", "SampleTransmission", "SampleDirect", "CanScatter", "CanTransmission", "CanDirect",
-                   "Calibration")
-class SANSDataType(object):
-    """
-    Defines the different data types which are required for the reduction. Besides the fundamental data of the
-    sample and the can, we can also specify a calibration.
-    """
-    pass
+
+# Defines the different data types which are required for the reduction. Besides the fundamental data of the sample
+# and the can, we can also specify a calibration
+SANSDataType = SANSEnum("SANSDataType", "SampleScatter SampleTransmission SampleDirect "
+                                        "CanScatter CanTransmission CanDirect Calibration")
 
 
 # ---------------------------
@@ -128,183 +57,102 @@ class Coordinates(object):
     pass
 
 
-@serializable_enum("X", "Y", "Z")
-class CanonicalCoordinates(Coordinates):
-    pass
+CanonicalCoordinates = Enum("CanonicalCoordinates", "X Y Z")
 
 
 # --------------------------
 #  ReductionMode
 # --------------------------
-@string_convertible
-@serializable_enum("Merged", "All")
-class ReductionMode(object):
-    """
-    Defines the reduction modes which should be common to all implementations, namely All and Merged.
-    """
-    pass
+# Defines the reduction modes which should be common to all implementations, namely All and Merged
+ReductionMode = SANSEnum("ReductionMode", "Merged All")
 
-
-@string_convertible
-@serializable_enum("HAB", "LAB")
-class ISISReductionMode(ReductionMode):
-    """
-    Defines the different reduction modes. This can be the high-angle bank, the low-angle bank
-    """
-    pass
+# Defines the different reduction modes. This can be the high-angle bank, the low-angle bank
+ISISReductionMode = SANSEnum("ISISReductionMode", "HAB LAB")
 
 
 # --------------------------
 #  Reduction dimensionality
 # --------------------------
-@serializable_enum("OneDim", "TwoDim")
-class ReductionDimensionality(object):
-    """
-    Defines the dimensionality for reduction. This can be either 1D or 2D
-    """
-    pass
+# Defines the dimensionality for reduction. This can be either 1D or 2D
+ReductionDimensionality = SANSEnum("ReductionDimensionality", "OneDim TwoDim")
 
 
 # --------------------------
 #  Reduction data
 # --------------------------
-@serializable_enum("Scatter", "Transmission", "Direct")
-class ReductionData(object):
-    """
-    Defines the workspace type of the reduction data. For all known instances this can be scatter, transmission
-    or direct
-    """
-    pass
+# Defines the workspace type of the reduction data. For all known instances this can be scatter, transmission
+# or direct
+ReductionData = Enum("ReductionData", "Scatter Transmission Direct")
 
 
 # --------------------------
 #  Type of data
 # --------------------------
-@string_convertible
-@serializable_enum("Sample", "Can")
-class DataType(object):
-    """
-    Defines the type of reduction data. This can either the sample or only the can.
-    """
-    pass
+# Defines the type of reduction data. This can either the sample or only the can
+DataType = SANSEnum("DataType", "Sample Can")
 
 
 # ---------------------------------
 #  Partial reduction output setting
 # ---------------------------------
-@serializable_enum("Count", "Norm")
-class OutputParts(object):
-    """
-    Defines the partial outputs of a reduction. They are the numerator (Count) and denominator (Norm) of a division.
-    """
-    pass
+# Defines the partial outputs of a reduction. They are the numerator (Count) and denominator (Norm) of a division
+OutputParts = Enum("OutputParts", "Count Norm")
 
 
 # -----------------------------------------------------
 #  The fit type during merge of HAB and LAB reductions
 # -----------------------------------------------------
-@string_convertible
-@serializable_enum("Both", "NoFit", "ShiftOnly", "ScaleOnly")
-class FitModeForMerge(object):
-    """
-    Defines which fit operation to use during the merge of two reductions.
-    """
-    pass
+# Defines which fit operation to use during the merge of two reductions
+FitModeForMerge = SANSEnum("FitModeForMerge", "Both NoFit ShiftOnly ScaleOnly")
 
 
 # --------------------------
 #  Detectors
 # --------------------------
-@serializable_enum("Horizontal", "Vertical", "Rotated")
-class DetectorOrientation(object):
-    """
-    Defines the detector orientation.
-    """
-    pass
+DetectorOrientation = Enum("DetectorOrientation", "Horizontal Vertical Rotated")
 
 
 # --------------------------
 #  Detector Type
 # --------------------------
-@string_convertible
-@serializable_enum("HAB", "LAB")
-class DetectorType(object):
-    """
-    Defines the detector type
-    """
-    pass
+DetectorType = SANSEnum("DetectorType", "HAB LAB")
 
 
 # --------------------------
 #  Transmission Type
 # --------------------------
-@string_convertible
-@serializable_enum("Calculated", "Unfitted")
-class TransmissionType(object):
-    """
-    Defines the detector type
-    """
-    pass
+TransmissionType = SANSEnum("TransmissionType", "Calculated Unfitted")
 
 
 # --------------------------
 #  Ranges
 # --------------------------
-@string_convertible
-@serializable_enum("Lin", "Log", "RangeLin", "RangeLog")
-class RangeStepType(object):
-    """
-    Defines the step type of a range
-    """
-    pass
+# Defines the step type of a range
+RangeStepType = SANSEnum("RangeStepType", "Lin Log RangeLin RangeLog")
 
 
 # --------------------------
 #  Rebin
 # --------------------------
-@string_convertible
-@serializable_enum("Rebin", "InterpolatingRebin")
-class RebinType(object):
-    """
-    Defines the rebin types available
-    """
-    pass
+RebinType = SANSEnum("RebinType", "Rebin InterpolatingRebin")
 
 
 # --------------------------
 #  SaveType
 # --------------------------
-@string_convertible
-@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus", "NoType")
-class SaveType(object):
-    """
-    Defines the save types available
-    """
-    pass
+SaveType = SANSEnum("SaveType", "Nexus NistQxy CanSAS RKH CSV NXcanSAS NoType")
 
 
 # ------------------------------------------
 # Fit type for the transmission calculation
 # ------------------------------------------
-@string_convertible
-@serializable_enum("Linear", "Logarithmic", "Polynomial", "NoFit")
-class FitType(object):
-    """
-    Defines possible fit types
-    """
-    pass
+FitType = SANSEnum("FitType", "Linear Logarithmic Polynomial NoFit")
 
 
 # --------------------------
 #  SampleShape
 # --------------------------
-@string_convertible
-@serializable_enum("Cylinder", "FlatPlate", "Disc")
-class SampleShape(object):
-    """
-    Defines the sample shape types
-    """
-    pass
+SampleShape = SANSEnum("SampleShape", "Cylinder FlatPlate Disc")
 
 
 def convert_int_to_shape(shape_int):
@@ -326,88 +174,44 @@ def convert_int_to_shape(shape_int):
 # ---------------------------
 # FileTypes
 # ---------------------------
-@serializable_enum("ISISNexus", "ISISNexusAdded", "ISISRaw", "NoFileType")
-class FileType(object):
-    pass
+FileType = Enum("FileType", "ISISNexus ISISNexusAdded ISISRaw NoFileType")
 
 
 # ---------------------------
 # OutputMode
 # ---------------------------
-@string_convertible
-@serializable_enum("PublishToADS", "SaveToFile", "Both")
-class OutputMode(object):
-    """
-    Defines the output modes of a batch reduction.
-    """
-    pass
+OutputMode = SANSEnum("OutputMode", "PublishToADS SaveToFile Both")
 
 
 # ------------------------------
 # Entries of batch reduction file
 # -------------------------------
-@string_convertible
-@serializable_enum("SampleScatter", "SampleTransmission", "SampleDirect", "CanScatter", "CanTransmission", "CanDirect",
-                   "Output", "UserFile", "SampleScatterPeriod", "SampleTransmissionPeriod", "SampleDirectPeriod",
-                   "CanScatterPeriod", "CanTransmissionPeriod", "CanDirectPeriod",)
-class BatchReductionEntry(object):
-    """
-    Defines the entries of a batch reduction file.
-    """
-    pass
+BatchReductionEntry = SANSEnum("BatchReductionEntry", "SampleScatter SampleTransmission SampleDirect CanScatter "
+                                                      "CanTransmission CanDirect Output UserFile SampleScatterPeriod "
+                                                      "SampleTransmissionPeriod SampleDirectPeriod CanScatterPeriod "
+                                                      "CanTransmissionPeriod CanDirectPeriod")
 
 
 # ------------------------------
 # Quadrants for beam centre finder
 # -------------------------------
-@string_convertible
-@serializable_enum("Left", "Right", "Top", "Bottom")
-class MaskingQuadrant(object):
-    """
-    Defines the entries of a batch reduction file.
-    """
-    pass
+MaskingQuadrant = SANSEnum("MaskingQuadrant", "Left Right Top Bottom")
 
 
 # ------------------------------
 # Directions for Beam centre finder
 # -------------------------------
-@string_convertible
-@serializable_enum("All", "Up_Down", "Left_Right")
-class FindDirectionEnum(object):
-    """
-    Defines the entries of a batch reduction file.
-    """
-    pass
+FindDirectionEnum = SANSEnum("FindDirectionEnum", "All Up_Down Left_Right")
 
 
 # ------------------------------
 # Integrals for diagnostic tab
 # -------------------------------
-@string_convertible
-@serializable_enum("Horizontal", "Vertical", "Time")
-class IntegralEnum(object):
-    """
-    Defines the entries of a batch reduction file.
-    """
-    pass
-
-
-@string_convertible
-@serializable_enum("Unprocessed", "Processed", "Error")
-class RowState(object):
-    """
-    Defines the entries of a batch reduction file.
-    """
-    pass
+IntegralEnum = SANSEnum("IntegralEnum", "Horizontal Vertical Time")
+RowState = SANSEnum("RowState", "Unprocessed Processed Error")
 
 
 # ------------------------------
 # Binning Types for AddRuns
 # -------------------------------
-@string_convertible
-@serializable_enum("SaveAsEventData", "Custom", "FromMonitors")
-class BinningType(object):
-    """
-    Defines the types of binning when adding runs together
-    """
+BinningType = SANSEnum("BinningType", "SaveAsEventData Custom FromMonitors")

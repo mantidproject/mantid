@@ -35,9 +35,9 @@ class SANSCrop(DistributedDataProcessorAlgorithm):
                              doc='The input workspace')
 
         # The component, i.e. HAB or LAB
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB), validator=allowed_detectors,
+        allowed_detectors = StringListValidator([DetectorType.LAB.name,
+                                                 DetectorType.HAB.name])
+        self.declareProperty("Component", DetectorType.LAB.name, validator=allowed_detectors,
                              direction=Direction.Input,
                              doc="The component of the instrument to which we want to crop.")
 
@@ -71,7 +71,7 @@ class SANSCrop(DistributedDataProcessorAlgorithm):
 
     def _get_component(self, workspace):
         component_as_string = self.getProperty("Component").value
-        component = DetectorType.from_string(component_as_string)
+        component = DetectorType[component_as_string]
         return get_component_name(workspace, component)
 
 

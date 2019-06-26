@@ -29,8 +29,8 @@ class StateReductionModeTest(unittest.TestCase):
         state.merge_scale = 34.6
         state.merge_fit_mode = FitModeForMerge.ShiftOnly
 
-        state.detector_names[DetectorType.to_string(DetectorType.LAB)] = "Test1"
-        state.detector_names[DetectorType.to_string(DetectorType.HAB)] = "Test2"
+        state.detector_names[DetectorType.LAB.name] = "Test1"
+        state.detector_names[DetectorType.HAB.name] = "Test2"
 
         state.merge_mask = True
         state.merge_min = 78.89
@@ -99,7 +99,7 @@ class StateReductionModeBuilderTest(unittest.TestCase):
         self.assertEqual(state.merge_shift,  merge_shift)
         self.assertEqual(state.merge_scale,  merge_scale)
         detector_names = state.detector_names
-        self.assertEqual(detector_names[DetectorType.to_string(DetectorType.LAB)],  "main-detector-bank")
+        self.assertEqual(detector_names[DetectorType.LAB.name],  "main-detector-bank")
         self.assertTrue(state.merge_mask)
         self.assertEqual(state.merge_min,  merge_min)
         self.assertEqual(state.merge_max,  merge_max)

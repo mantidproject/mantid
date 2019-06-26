@@ -45,9 +45,9 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
                                                      optional=PropertyMode.Mandatory, direction=Direction.Input,
                                                      validator=workspace_validator),
                              doc='The monitor normalization workspace in wavelength units.')
-        allowed_detector_types = StringListValidator([DetectorType.to_string(DetectorType.HAB),
-                                                      DetectorType.to_string(DetectorType.LAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detector_types = StringListValidator([DetectorType.HAB.name,
+                                                      DetectorType.LAB.name])
+        self.declareProperty("Component", DetectorType.LAB.name,
                              validator=allowed_detector_types, direction=Direction.Input,
                              doc="The component of the instrument which is currently being investigated.")
 

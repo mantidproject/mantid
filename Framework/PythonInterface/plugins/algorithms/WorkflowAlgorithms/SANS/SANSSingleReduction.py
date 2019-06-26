@@ -283,7 +283,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
         for transmission_bundle in transmission_bundles:
-            fit_performed = fit_state[DataType.to_string(transmission_bundle.data_type)].fit_type != FitType.NoFit
+transmission_bundle.data_type.name].fit_type != FitType.NoFit
             calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
             unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
             if transmission_bundle.data_type is DataType.Can:

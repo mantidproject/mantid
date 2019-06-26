@@ -22,43 +22,43 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 class StateMoveWorkspaceTest(unittest.TestCase):
     def test_that_raises_if_the_detector_name_is_not_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
-        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name = "test"
-        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short = "test"
-        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short = "test"
+        state.detectors = {DetectorType.LAB.name: StateMoveDetector(),
+                           DetectorType.HAB.name: StateMoveDetector()}
+        state.detectors[DetectorType.LAB.name].detector_name = "test"
+        state.detectors[DetectorType.HAB.name].detector_name_short = "test"
+        state.detectors[DetectorType.LAB.name].detector_name_short = "test"
         assert_validate_error(self, ValueError, state)
-        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name = "test"
+        state.detectors[DetectorType.HAB.name].detector_name = "test"
         assert_raises_nothing(self, state)
 
     def test_that_raises_if_the_short_detector_name_is_not_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
-        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name = "test"
-        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name = "test"
-        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short = "test"
+        state.detectors = {DetectorType.LAB.name: StateMoveDetector(),
+                           DetectorType.HAB.name: StateMoveDetector()}
+        state.detectors[DetectorType.HAB.name].detector_name = "test"
+        state.detectors[DetectorType.LAB.name].detector_name = "test"
+        state.detectors[DetectorType.HAB.name].detector_name_short = "test"
         assert_validate_error(self, ValueError, state)
-        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short = "test"
+        state.detectors[DetectorType.LAB.name].detector_name_short = "test"
         assert_raises_nothing(self, state)
 
     def test_that_general_isis_default_values_are_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
+        state.detectors = {DetectorType.LAB.name: StateMoveDetector(),
+                           DetectorType.HAB.name: StateMoveDetector()}
         self.assertEqual(state.sample_offset,  0.0)
         self.assertEqual(state.sample_offset_direction, CanonicalCoordinates.Z)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].y_translation_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].z_translation_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].rotation_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].side_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].radius_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_tilt_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].y_tilt_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].z_tilt_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos1,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos2,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].x_translation_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].y_translation_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].z_translation_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].rotation_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].side_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].radius_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].x_tilt_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].y_tilt_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].z_tilt_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].sample_centre_pos1,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].sample_centre_pos2,  0.0)
 
 
 class StateMoveWorkspaceLOQTest(unittest.TestCase):
@@ -139,12 +139,12 @@ class StateMoveBuilderTest(unittest.TestCase):
         # Assert
         state = builder.build()
         self.assertEqual(state.center_position,  value)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction,  value)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short,  "HAB")
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name,  "main-detector-bank")
+        self.assertEqual(state.detectors[DetectorType.HAB.name].x_translation_correction,  value)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].detector_name_short,  "HAB")
+        self.assertEqual(state.detectors[DetectorType.LAB.name].detector_name,  "main-detector-bank")
         self.assertEqual(state.monitor_names[str(2)],  "monitor2")
         self.assertEqual(len(state.monitor_names),  2)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1,  value)
+        self.assertEqual(state.detectors[DetectorType.LAB.name].sample_centre_pos1,  value)
 
     def test_that_state_for_sans2d_can_be_built(self):
         # Arrange
@@ -162,9 +162,9 @@ class StateMoveBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction,  value)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short,  "front")
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name,  "rear-detector")
+        self.assertEqual(state.detectors[DetectorType.HAB.name].x_translation_correction,  value)
+        self.assertEqual(state.detectors[DetectorType.HAB.name].detector_name_short,  "front")
+        self.assertEqual(state.detectors[DetectorType.LAB.name].detector_name,  "rear-detector")
         self.assertEqual(state.monitor_names[str(4)],  "monitor4")
         self.assertEqual(len(state.monitor_names),  4)
 
@@ -184,9 +184,9 @@ class StateMoveBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].x_translation_correction,  value)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name,  "DetectorBench")
-        self.assertTrue(DetectorType.to_string(DetectorType.HAB) not in state.detectors)
+        self.assertEqual(state.detectors[DetectorType.LAB.name].x_translation_correction,  value)
+        self.assertEqual(state.detectors[DetectorType.LAB.name].detector_name,  "DetectorBench")
+        self.assertTrue(DetectorType.HAB.name not in state.detectors)
         self.assertEqual(state.monitor_names[str(5)],  "monitor5")
         self.assertEqual(len(state.monitor_names),  5)
 

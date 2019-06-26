@@ -51,16 +51,16 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
         self.setPropertyGroup("DirectWorkspace", 'Data')
 
         # The component
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.name,
+                                                 DetectorType.HAB.name])
+        self.declareProperty("Component", DetectorType.LAB.name,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.Sample.name,
+                                            DataType.Can.name])
+        self.declareProperty("DataType", DataType.Sample.name,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 

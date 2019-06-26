@@ -42,9 +42,9 @@ def get_detector_for_component(move_info, component):
     detectors = move_info.detectors
     selected_detector = None
     if component == "HAB":
-        selected_detector = detectors[DetectorType.to_string(DetectorType.HAB)]
+        selected_detector = detectors[DetectorType.HAB.name]
     elif component == "LAB":
-        selected_detector = detectors[DetectorType.to_string(DetectorType.LAB)]
+        selected_detector = detectors[DetectorType.LAB.name]
     else:
         # Check if the component is part of the detector names
         for _, detector in list(detectors.items()):
@@ -171,7 +171,7 @@ class SANSMove(DistributedDataProcessorAlgorithm):
 
             # If the detector is unknown take the position from the LAB
             if selected_detector is None:
-                selected_detector = detectors[DetectorType.to_string(DetectorType.LAB)]
+                selected_detector = detectors[DetectorType.LAB.name]
             pos1 = selected_detector.sample_centre_pos1
             pos2 = selected_detector.sample_centre_pos2
             coordinates = [pos1, pos2]

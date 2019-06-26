@@ -16,7 +16,7 @@ class AddRunsFilenameManager(object):
         if isinstance(inst, str):
             self.instrument_string = inst
         else:
-            self.instrument_string = SANSInstrument.to_string(inst)
+            self.instrument_string = inst.name
 
     def make_filename(self, runs):
         if runs:

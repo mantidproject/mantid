@@ -336,7 +336,7 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
         for key, workspace_list in workspaces.items():
-            if SANSDataType.to_string(key) in ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect"):
+            if key.name in ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect"):
                 is_trans = True
             else:
                 is_trans = False

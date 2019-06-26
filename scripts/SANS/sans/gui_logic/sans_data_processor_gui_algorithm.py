@@ -195,7 +195,7 @@ def create_properties(show_periods=True):
                                            algorithm_property="OutputMode",
                                            description='The output mode.',
                                            show_value=False,
-                                           default=OutputMode.to_string(OutputMode.PublishToADS),
+                                           default=OutputMode.PublishToADS.name,
                                            prefix='',
                                            property_type=bool),
                       algorithm_list_entry(column_name="",
@@ -296,7 +296,7 @@ def create_properties(show_periods=True):
                                            algorithm_property="OutputMode",
                                            description='The output mode.',
                                            show_value=False,
-                                           default=OutputMode.to_string(OutputMode.PublishToADS),
+                                           default=OutputMode.PublishToADS.name,
                                            prefix='',
                                            property_type=bool),
                       algorithm_list_entry(column_name="",
@@ -381,7 +381,7 @@ class SANSGuiDataProcessorAlgorithm(DataProcessorAlgorithm):
         # 3. Get some global settings
         use_optimizations = self.getProperty("UseOptimizations").value
         output_mode_as_string = self.getProperty("OutputMode").value
-        output_mode = OutputMode.from_string(output_mode_as_string)
+        output_mode = OutputMode[output_mode_as_string]
         plot_results = self.getProperty('PlotResults').value
         output_graph = self.getProperty('OutputGraph').value
 

@@ -81,8 +81,8 @@ def set_detector_names(state, ipf_path, invalid_detector_types=None):
     if invalid_detector_types is None:
         invalid_detector_types = []
 
-    lab_keyword = DetectorType.to_string(DetectorType.LAB)
-    hab_keyword = DetectorType.to_string(DetectorType.HAB)
+    lab_keyword = DetectorType.LAB.name
+    hab_keyword = DetectorType.HAB.name
     detector_names = {lab_keyword: "low-angle-detector-name",
                       hab_keyword: "high-angle-detector-name"}
     detector_names_short = {lab_keyword: "low-angle-detector-short-name",
@@ -96,7 +96,7 @@ def set_detector_names(state, ipf_path, invalid_detector_types=None):
 
     for detector_type in state.detectors:
         try:
-            if DetectorType.from_string(detector_type) in invalid_detector_types:
+            if DetectorType[detector_type] in invalid_detector_types:
                 continue
             detector_name_tag = detector_names[detector_type]
             detector_name_short_tag = detector_names_short[detector_type]

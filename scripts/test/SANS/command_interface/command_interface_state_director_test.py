@@ -121,9 +121,9 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         # Assert
         # We check here that the elements we set up above (except for from the user file) are being applied
         self.assertNotEqual(state, None)
-        self.assertTrue(state.mask.detectors[DetectorType.to_string(DetectorType.HAB)].range_horizontal_strip_start[-1]
+        self.assertTrue(state.mask.detectors[DetectorType.HAB.name].range_horizontal_strip_start[-1]
                         == 197)
-        self.assertTrue(state.mask.detectors[DetectorType.to_string(DetectorType.HAB)].range_horizontal_strip_stop[-1]
+        self.assertTrue(state.mask.detectors[DetectorType.HAB.name].range_horizontal_strip_stop[-1]
                         == 199)
         self.assertEqual(state.adjustment.normalize_to_monitor.incident_monitor,  1)
         self.assertEqual(state.adjustment.normalize_to_monitor.rebin_type, RebinType.InterpolatingRebin)
@@ -137,17 +137,17 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.reduction.reduction_mode, ISISReductionMode.HAB)
         self.assertTrue(state.convert_to_q.use_gravity)
         self.assertEqual(state.convert_to_q.gravity_extra_length,  12.4)
-        self.assertEqual(state.move.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos1,  12.4/1000.)
-        self.assertTrue(state.move.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos2
+        self.assertEqual(state.move.detectors[DetectorType.HAB.name].sample_centre_pos1,  12.4/1000.)
+        self.assertTrue(state.move.detectors[DetectorType.HAB.name].sample_centre_pos2
                         == 23.54/1000.)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.Can.name].fit_type
                         is FitType.Logarithmic)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.Can.name].polynomial_order
                         == 0)
 
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.Can.name].wavelength_low
                         == 10.4)
-        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high
+        self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.Can.name].wavelength_high
                         == 12.54)
 
         self.assertEqual(state.reduction.merge_scale,  1.2)
@@ -166,12 +166,12 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
             self.assertEqual(e1,  e2)
 
         self.assertTrue(state.adjustment.wavelength_and_pixel_adjustment.adjustment_files[
-                            DetectorType.to_string(DetectorType.LAB)].pixel_adjustment_file == "test")
+                            DetectorType.LAB.name].pixel_adjustment_file == "test")
         self.assertEqual(state.mask.phi_min,  12.5)
         self.assertEqual(state.mask.phi_max,  123.6)
         self.assertFalse(state.mask.use_mask_phi_mirror)
         self.assertTrue(state.adjustment.wavelength_and_pixel_adjustment.adjustment_files[
-                            DetectorType.to_string(DetectorType.HAB)].wavelength_adjustment_file == "test")
+                            DetectorType.HAB.name].wavelength_adjustment_file == "test")
         self.assertEqual(state.mask.radius_min,  23.5 / 1000.)
         self.assertEqual(state.mask.radius_max,  234.7 / 1000.)
         self.assertEqual(state.wavelength.wavelength_low,  [1.23])

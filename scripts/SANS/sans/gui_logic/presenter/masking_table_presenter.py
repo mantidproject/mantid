@@ -54,9 +54,9 @@ def mask_workspace(state, workspace_to_mask):
     masking_algorithm = create_masking_algorithm(serialized_state, workspace_to_mask)
     mask_info = state.mask
 
-    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
-                if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else\
-                [DetectorType.to_string(DetectorType.LAB)]  # noqa
+    detectors = [DetectorType.LAB.name, DetectorType.HAB.name] \
+                if DetectorType.HAB.name in mask_info.detectors else\
+                [DetectorType.LAB.name]  # noqa
 
     for detector in detectors:
         masking_algorithm.setProperty("Component", detector)
@@ -423,8 +423,8 @@ class MaskingTablePresenter(object):
         mask_info = state.mask
         masks = []
 
-        mask_info_lab = mask_info.detectors[DetectorType.to_string(DetectorType.LAB)]
-        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)] if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else None  # noqa
+        mask_info_lab = mask_info.detectors[DetectorType.LAB.name]
+        mask_info_hab = mask_info.detectors[DetectorType.HAB.name] if DetectorType.HAB.name in mask_info.detectors else None  # noqa
 
         # Add the radius mask
         radius_mask = self._get_radius(mask_info)

@@ -64,9 +64,9 @@ class StateMaskTest(unittest.TestCase):
                              "spectrum_range_start": [1, 5, 7], "spectrum_range_stop": [2, 6, 8]}
 
         StateMaskTest._set_detector(state, detector_settings, detector_entries,
-                                    DetectorType.to_string(DetectorType.LAB))
+                                    DetectorType.LAB.name)
         StateMaskTest._set_detector(state, detector_settings, detector_entries,
-                                    DetectorType.to_string(DetectorType.HAB))
+                                    DetectorType.HAB.name)
 
         return state
 
@@ -226,7 +226,7 @@ class StateMaskBuilderTest(unittest.TestCase):
         self.assertEqual(state.bin_mask_general_stop[0],  end_time[0])
         self.assertEqual(state.bin_mask_general_stop[1],  end_time[1])
 
-        strip_mask = state.detectors[DetectorType.to_string(DetectorType.LAB)].single_vertical_strip_mask
+        strip_mask = state.detectors[DetectorType.LAB.name].single_vertical_strip_mask
         self.assertEqual(len(strip_mask),  3)
         self.assertEqual(strip_mask[2],  3)
 

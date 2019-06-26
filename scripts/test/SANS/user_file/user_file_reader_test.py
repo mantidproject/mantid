@@ -123,7 +123,7 @@ class UserFileReaderTest(unittest.TestCase):
         elif isinstance(elements[0], range_entry_with_detector):
             UserFileReaderTest._sort(elements, lambda x: x.start)
         elif isinstance(elements[0], monitor_file):
-            UserFileReaderTest._sort(elements, lambda x: (x.file_path, DetectorType.to_string(x.detector_type)))
+            UserFileReaderTest._sort(elements, lambda x: (x.file_path, x.detector_type.name))
         elif isinstance(elements[0], monitor_spectrum):
             UserFileReaderTest._sort(elements, lambda x: x.spectrum)
         elif isinstance(elements[0], position_entry):

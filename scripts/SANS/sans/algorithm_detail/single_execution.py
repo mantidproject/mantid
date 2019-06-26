@@ -37,7 +37,7 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
-    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+    reduction_alg.setProperty("DataType", reduction_setting_bundle.data_type.name)
 
     reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
     reduction_alg.setProperty("OutputMonitorWorkspace", EMPTY_NAME)
@@ -83,7 +83,7 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("DummyMaskWorkspace", reduction_setting_bundle.dummy_mask_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
 
-    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+    reduction_alg.setProperty("DataType", reduction_setting_bundle.data_type.name)
 
     reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
     reduction_alg.setProperty("SumOfCounts", EMPTY_NAME)
@@ -138,7 +138,7 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
-    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+    reduction_alg.setProperty("DataType", reduction_setting_bundle.data_type.name)
 
     if reduction_setting_bundle.transmission_workspace is not None:
         reduction_alg.setProperty("TransmissionWorkspace", reduction_setting_bundle.transmission_workspace)
@@ -303,9 +303,9 @@ def get_component_to_reduce(reduction_setting_bundle):
     reduction_mode = reduction_setting_bundle.reduction_mode
 
     if reduction_mode is ISISReductionMode.LAB:
-        reduction_mode_setting = DetectorType.to_string(DetectorType.LAB)
+        reduction_mode_setting = DetectorType.LAB.name
     elif reduction_mode is ISISReductionMode.HAB:
-        reduction_mode_setting = DetectorType.to_string(DetectorType.HAB)
+        reduction_mode_setting = DetectorType.HAB.name
     else:
         raise RuntimeError("SingleExecution: An unknown reduction mode was selected: {}. "
                            "Currently only HAB and LAB are supported.".format(reduction_mode))

@@ -5,7 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from sans.common.enums import (serializable_enum, DataType)
+
+from mantid.py3compat import Enum
+from sans.common.enums import DataType
 from sans.user_file.state_director import StateDirectorISIS
 from sans.state.data import get_data_builder
 from sans.user_file.user_file_parser import (UserFileParser)
@@ -24,26 +26,41 @@ from sans.common.file_information import SANSFileInformationFactory
 # ------------------
 # IDs for commands. We use here serializable_enum since enum is not available in the current Python configuration.
 # ------------------
-@serializable_enum("sample_scatter", "sample_transmission", "sample_direct", "can_scatter", "can_transmission",
-                   "can_direct")
-class DataCommandId(object):
-    pass
+class DataCommandId(Enum):
+    sample_scatter = 1
+    sample_transmission = 2
+    sample_direct = 3
+    can_scatter = 4
+    can_transmission = 5
+    can_direct = 6
 
 
-@serializable_enum("clean", "reduction_dimensionality", "compatibility_mode",  # Null Parameter commands
-                   "user_file", "mask", "sample_offset", "detector", "event_slices",  # Single parameter commands
-                   "flood_file", "wavelength_correction_file",  # Single parameter commands
-                   "user_specified_output_name", "user_specified_output_name_suffix",  # Single parameter commands
-                   "use_reduction_mode_as_suffix",  # Single parameter commands
-                   "incident_spectrum", "gravity",  # Double parameter commands
-                   "centre", "save",   # Three parameter commands
-                   "trans_fit", "phi_limit", "mask_radius", "wavelength_limit", "qxy_limit",  # Four parameter commands
-                   "wavrange_settings",  # Five parameter commands
-                   "front_detector_rescale",  # Six parameter commands
-                   "detector_offsets"  # Nine parameter commands
-                   )
-class NParameterCommandId(object):
-    pass
+class NParameterCommandId(Enum):
+    clean = 1
+    reduction_dimensionality = 2
+    compatibility_mode = 3
+    user_file = 4
+    mask = 5
+    sample_offset = 6
+    detector = 7
+    event_slices = 8
+    flood_file = 9
+    wavelength_correction_file = 10
+    user_specified_output_name = 11
+    user_specified_output_name_suffix = 12
+    use_reduction_mode_as_suffix = 13
+    incident_spectrum = 14
+    gravity = 15
+    centre = 16
+    save = 17
+    trans_fit = 18
+    phi_limit = 19
+    mask_radius = 20
+    wavelength_limit = 21
+    qxy_limit = 22
+    wavrange_settings = 23
+    front_detector_rescale = 24
+    detector_offsets = 25
 
 
 class Command(object):

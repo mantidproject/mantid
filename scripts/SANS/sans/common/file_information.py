@@ -235,7 +235,7 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
 
     # Get the instrument
     instrument = file_information.get_instrument()
-    instrument_as_string = SANSInstrument.to_string(instrument)
+    instrument_as_string = instrument.name
 
     # Get the idf file path
     # IMPORTANT NOTE: I profiled the call to ExperimentInfo.getInstrumentFilename and it dominates
@@ -829,7 +829,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         super(SANSFileInformationISISNexus, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
-        self._instrument = SANSInstrument.from_string(instrument_name)
+        self._instrument = SANSInstrument[instrument_name]
 
         # Setup the facility
         self._facility = get_facility(self._instrument)
@@ -963,7 +963,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         super(SANSFileInformationRaw, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_raw(self._full_file_name)
-        self._instrument = SANSInstrument.from_string(instrument_name)
+        self._instrument = SANSInstrument[instrument_name]
 
         # Setup the facility
         self._facility = get_facility(self._instrument)

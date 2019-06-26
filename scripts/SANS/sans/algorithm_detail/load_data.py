@@ -728,7 +728,7 @@ class SANSLoadDataISIS(SANSLoadData):
 
         for key, value in list(file_infos.items()):
             # Loading
-            report_message = "Loading {0}".format(SANSDataType.to_string(key))
+            report_message = "Loading {0}".format(key.name)
             progress.report(report_message)
 
             workspace_pack, workspace_monitors_pack = load_isis(key, value, period_infos[key],

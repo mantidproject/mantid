@@ -39,10 +39,10 @@ def run_integral(integral_ranges, mask, integral, detector, state):
         input_workspace_name = input_workspace.name()
         if is_multi_range:
             AnalysisDataService.remove(input_workspace_name + '_ranges')
-        input_workspace = crop_workspace(DetectorType.to_string(detector), input_workspace)
+        input_workspace = crop_workspace(detector.name, input_workspace)
 
         if mask:
-            input_workspace = apply_mask(state, input_workspace, DetectorType.to_string(detector))
+            input_workspace = apply_mask(state, input_workspace, detector.name)
 
         x_dim, y_dim = get_detector_size_from_sans_file(state, detector)
 
@@ -124,8 +124,8 @@ def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_d
 
 
 def generate_output_workspace_name(range, integral, mask, detector, input_workspace_name):
-    integral_string = IntegralEnum.to_string(integral)
-    detector_string = DetectorType.to_string(detector)
+    integral_string = integral.name
+    detector_string = detector.name
 
     return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range,
                                                                          integral_string,

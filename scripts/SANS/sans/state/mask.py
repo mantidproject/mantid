@@ -262,8 +262,8 @@ class StateMaskSANS2D(StateMask):
     def __init__(self):
         super(StateMaskSANS2D, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector(),
-                          DetectorType.to_string(DetectorType.HAB): StateMaskDetector()}
+        self.detectors = {DetectorType.LAB.name: StateMaskDetector(),
+                          DetectorType.HAB.name: StateMaskDetector()}
 
     def validate(self):
         super(StateMaskSANS2D, self).validate()
@@ -274,8 +274,8 @@ class StateMaskLOQ(StateMask):
     def __init__(self):
         super(StateMaskLOQ, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector(),
-                          DetectorType.to_string(DetectorType.HAB): StateMaskDetector()}
+        self.detectors = {DetectorType.LAB.name: StateMaskDetector(),
+                          DetectorType.HAB.name: StateMaskDetector()}
 
     def validate(self):
         super(StateMaskLOQ, self).validate()
@@ -286,7 +286,7 @@ class StateMaskLARMOR(StateMask):
     def __init__(self):
         super(StateMaskLARMOR, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector()}
+        self.detectors = {DetectorType.LAB.name: StateMaskDetector()}
 
     def validate(self):
         super(StateMaskLARMOR, self).validate()
@@ -297,7 +297,7 @@ class StateMaskZOOM(StateMask):
     def __init__(self):
         super(StateMaskZOOM, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector()}
+        self.detectors = {DetectorType.LAB.name: StateMaskDetector()}
 
     def validate(self):
         super(StateMaskZOOM, self).validate()
@@ -334,12 +334,12 @@ class StateMaskBuilder(object):
         instrument = self._data.instrument
         for spectrum in single_spectra:
             detector = get_bank_for_spectrum_number(spectrum, instrument)
-            detector_mask_state = self.state.detectors[DetectorType.to_string(detector)]
+            detector_mask_state = self.state.detectors[detector.name]
             spectra = detector_mask_state.single_spectra
             if spectra is not None:
                 spectra.append(spectrum)
             else:
-                self.state.detectors[DetectorType.to_string(detector)].single_spectra = [spectrum]
+                self.state.detectors[detector.name].single_spectra = [spectrum]
 
     def set_spectrum_range_on_detector(self, spectrum_range_start, spectrum_range_stop):
         """
@@ -357,20 +357,20 @@ class StateMaskBuilder(object):
                 raise ValueError("The specified spectrum mask range S{0}{1} has spectra on more than one detector. "
                                  "Make sure that all spectra in the range are on a single detector".format(start, stop))
             else:
-                detector_mask_state = self.state.detectors[DetectorType.to_string(detector_bank_start)]
+                detector_mask_state = self.state.detectors[detector_bank_start.name]
                 spec_range_start = detector_mask_state.spectrum_range_start
                 spec_range_stop = detector_mask_state.spectrum_range_stop
                 # Set the start spectrum range
                 if spec_range_start is not None:
                     spec_range_start.append(start)
                 else:
-                    self.state.detectors[DetectorType.to_string(detector_bank_start)].spectrum_range_start = [start]
+                    self.state.detectors[detector_bank_start.name].spectrum_range_start = [start]
 
                 # Set the stop spectrum range
                 if spec_range_stop is not None:
                     spec_range_stop.append(stop)
                 else:
-                    self.state.detectors[DetectorType.to_string(detector_bank_start)].spectrum_range_stop = [stop]
+                    self.state.detectors[detector_bank_start.name].spectrum_range_stop = [stop]
 
     def build(self):
         self.state.validate()

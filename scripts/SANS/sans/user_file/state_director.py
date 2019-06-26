@@ -48,9 +48,9 @@ def log_non_existing_field(field):
 
 def convert_detector(detector_type):
     if detector_type is DetectorType.HAB:
-        detector_type_as_string = DetectorType.to_string(DetectorType.HAB)
+        detector_type_as_string = DetectorType.HAB.name
     elif detector_type is DetectorType.LAB:
-        detector_type_as_string = DetectorType.to_string(DetectorType.LAB)
+        detector_type_as_string = DetectorType.LAB.name
     else:
         raise RuntimeError("UserFileStateDirector: Cannot convert detector {0}".format(detector_type))
     return detector_type_as_string

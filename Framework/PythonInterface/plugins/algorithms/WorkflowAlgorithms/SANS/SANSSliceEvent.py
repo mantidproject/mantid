@@ -44,9 +44,9 @@ class SANSSliceEvent(DistributedDataProcessorAlgorithm):
                              doc='The monitor workspace associated with the main input workspace.')
 
         # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.Sample.name,
+                                            DataType.Can.name])
+        self.declareProperty("DataType", DataType.Sample.name,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -73,7 +73,7 @@ class SANSSliceEvent(DistributedDataProcessorAlgorithm):
         input_workspace = self.getProperty("InputWorkspace").value
 
         data_type_as_string = self.getProperty("DataType").value
-        data_type = DataType.from_string(data_type_as_string)
+        data_type = DataType[data_type_as_string]
 
         slicer = SliceEventFactory.create_slicer(state, input_workspace, data_type)
         slice_info = state.slice

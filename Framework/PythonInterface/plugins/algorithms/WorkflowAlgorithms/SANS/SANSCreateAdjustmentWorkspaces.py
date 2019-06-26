@@ -57,16 +57,16 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
                                  'This used to verify the solid angle. The workspace is not modified, just inspected.')
 
         # The component
-        allowed_detector_types = StringListValidator([DetectorType.to_string(DetectorType.HAB),
-                                                      DetectorType.to_string(DetectorType.LAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detector_types = StringListValidator([DetectorType.HAB.name,
+                                                      DetectorType.LAB.name])
+        self.declareProperty("Component", DetectorType.LAB.name,
                              validator=allowed_detector_types, direction=Direction.Input,
                              doc="The component of the instrument which is currently being investigated.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.Sample.name,
+                                            DataType.Can.name])
+        self.declareProperty("DataType", DataType.Sample.name,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 

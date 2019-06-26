@@ -55,8 +55,8 @@ LARMOR_LAB = "DetectorBench"
 
 ZOOM_LAB = "rear-detector"
 
-DEFAULT_LAB = ISISReductionMode.to_string(ISISReductionMode.LAB)
-DEFAULT_HAB = ISISReductionMode.to_string(ISISReductionMode.HAB)
+DEFAULT_LAB = ISISReductionMode.LAB.name
+DEFAULT_HAB = ISISReductionMode.HAB.name
 MERGED = "Merged"
 ALL = "All"
 

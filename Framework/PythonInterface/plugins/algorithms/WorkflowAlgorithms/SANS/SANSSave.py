@@ -115,7 +115,7 @@ class SANSSave(DataProcessorAlgorithm):
 
         progress = Progress(self, start=0.0, end=1.0, nreports=len(file_formats) + 1)
         for file_format in file_formats:
-            progress_message = "Saving to {0}.".format(SaveType.to_string(file_format.file_format))
+            progress_message = "Saving to {0}.".format(file_format.file_format.name)
             progress.report(progress_message)
             progress.report(progress_message)
             save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers)

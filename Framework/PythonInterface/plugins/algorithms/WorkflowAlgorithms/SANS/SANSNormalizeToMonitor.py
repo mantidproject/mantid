@@ -196,8 +196,8 @@ class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
                            "WavelengthLow": wavelength_low,
                            "WavelengthHigh": wavelength_high,
                            "WavelengthStep": wavelength_step,
-                           "WavelengthStepType": RangeStepType.to_string(wavelength_step_type),
-                           "RebinMode": RebinType.to_string(wavelength_rebin_mode)}
+                           "WavelengthStepType": wavelength_step_type.name,
+                           "RebinMode": wavelength_rebin_mode.name}
 
         convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
         convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)

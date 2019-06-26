@@ -217,10 +217,10 @@ def set_components_to_original_for_isis(move_info, workspace, component):
     if not component:
         component_names = list(move_info.monitor_names.values())
 
-        hab_key = DetectorType.to_string(DetectorType.HAB)
+        hab_key = DetectorType.HAB.name
         _reset_detector(hab_key, move_info, component_names)
 
-        lab_key = DetectorType.to_string(DetectorType.LAB)
+        lab_key = DetectorType.LAB.name
         _reset_detector(lab_key, move_info, component_names)
 
         component_names.append("some-sample-holder")
@@ -265,7 +265,7 @@ def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, u
         lab_detector_z = 0.
 
     # Perform x and y tilt
-    lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
+    lab_detector = move_info.detectors[DetectorType.LAB.name]
     SANSMoveSANS2D.perform_x_and_y_tilts(workspace, lab_detector)
 
     lab_detector_default_sd_m = move_info.lab_detector_default_sd_m
@@ -419,7 +419,7 @@ class SANSMoveSANS2D(SANSMove):
         hab_detector_default_sd_m = move_info.hab_detector_default_sd_m
 
         # Detector and name
-        hab_detector = move_info.detectors[DetectorType.to_string(DetectorType.HAB)]
+        hab_detector = move_info.detectors[DetectorType.HAB.name]
         detector_name = hab_detector.detector_name
 
         # Perform x and y tilt
@@ -436,7 +436,7 @@ class SANSMoveSANS2D(SANSMove):
         # Add translational corrections
         x = coordinates[0]
         y = coordinates[1]
-        lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
+        lab_detector = move_info.detectors[DetectorType.LAB.name]
         rotation_in_radians = math.pi * (hab_detector_rotation + hab_detector.rotation_correction)/180.
 
         x_shift = ((lab_detector_x + lab_detector.x_translation_correction -
@@ -472,7 +472,7 @@ class SANSMoveSANS2D(SANSMove):
             z_position_monitor = monitor_position.getZ()
 
             # The location is relative to the rear-detector, get this position
-            lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
+            lab_detector = move_info.detectors[DetectorType.LAB.name]
             detector_name = lab_detector.detector_name
             lab_detector_component = instrument.getComponentByName(detector_name)
             detector_position = lab_detector_component.getPos()
@@ -536,7 +536,7 @@ class SANSMoveLOQ(SANSMove):
             x_shift = center_position - x
             y_shift = center_position - y
 
-            detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
+            detectors = [DetectorType.LAB.name, DetectorType.HAB.name]
             for detector in detectors:
                 # Get the detector name
                 component_name = move_info.detectors[detector].detector_name
@@ -583,13 +583,13 @@ class SANSMoveLARMOROldStyle(SANSMove):
         y_shift = -coordinates[1]
         coordinates_for_only_y = [0.0, y_shift]
         apply_standard_displacement(move_info, workspace, coordinates_for_only_y,
-                                    DetectorType.to_string(DetectorType.LAB))
+                                    DetectorType.LAB.name)
 
         # Shift the low-angle bank detector in the x direction
         x_shift = -coordinates[0]
         coordinates_for_only_x = [x_shift, 0.0]
         apply_standard_displacement(move_info, workspace, coordinates_for_only_x,
-                                    DetectorType.to_string(DetectorType.LAB))
+                                    DetectorType.LAB.name)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
@@ -644,7 +644,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
         y_shift = -coordinates[1]
         coordinates_for_only_y = [0.0, y_shift]
         apply_standard_displacement(move_info, workspace, coordinates_for_only_y,
-                                    DetectorType.to_string(DetectorType.LAB))
+                                    DetectorType.LAB.name)
 
         # Shift the low-angle bank detector in the x direction
         angle = coordinates[0]
@@ -657,7 +657,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
             if log_values[bench_rot_tag] is None else log_values[bench_rot_tag]
 
         self._rotate_around_y_axis(move_info, workspace, angle,
-                                   DetectorType.to_string(DetectorType.LAB), bench_rotation)
+                                   DetectorType.LAB.name, bench_rotation)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
@@ -702,7 +702,7 @@ class SANSMoveZOOM(SANSMove):
             z_position_monitor = monitor_position.getZ()
 
             # The location is relative to the rear-detector, get this position
-            lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
+            lab_detector = move_info.detectors[DetectorType.LAB.name]
             detector_name = lab_detector.detector_name
             lab_detector_component = instrument.getComponentByName(detector_name)
             detector_position = lab_detector_component.getPos()
@@ -752,7 +752,7 @@ def create_mover(workspace):
     instrument = workspace.getInstrument()
     instrument_name = instrument.getName()
     instrument_name = sanitise_instrument_name(instrument_name)
-    instrument_type = SANSInstrument.from_string(instrument_name)
+    instrument_type = SANSInstrument[instrument_name]
     if SANSMoveLOQ.is_correct(instrument_type, run_number):
         mover = SANSMoveLOQ()
     elif SANSMoveSANS2D.is_correct(instrument_type, run_number):

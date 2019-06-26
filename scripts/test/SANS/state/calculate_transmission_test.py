@@ -58,9 +58,9 @@ class StateCalculateTransmissionTest(unittest.TestCase):
         if fit_entries is None:
             fit_entries = {}
         StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries,
-                                                DataType.to_string(DataType.Sample))
+                                                DataType.Sample.name)
         StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries,
-                                                DataType.to_string(DataType.Can))
+                                                DataType.Can.name)
         return state
 
     @staticmethod
@@ -277,15 +277,15 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertEqual(state.background_TOF_roi_start,  1.4)
         self.assertEqual(state.background_TOF_roi_stop,  34.4)
 
-        self.assertEqual(state.fit[DataType.to_string(DataType.Sample)].fit_type, FitType.Linear)
-        self.assertEqual(state.fit[DataType.to_string(DataType.Sample)].polynomial_order,  0)
-        self.assertEqual(state.fit[DataType.to_string(DataType.Sample)].wavelength_low,  10.)
-        self.assertEqual(state.fit[DataType.to_string(DataType.Sample)].wavelength_high,  20.)
+        self.assertEqual(state.fit[DataType.Sample.name].fit_type, FitType.Linear)
+        self.assertEqual(state.fit[DataType.Sample.name].polynomial_order,  0)
+        self.assertEqual(state.fit[DataType.Sample.name].wavelength_low,  10.)
+        self.assertEqual(state.fit[DataType.Sample.name].wavelength_high,  20.)
 
-        self.assertEqual(state.fit[DataType.to_string(DataType.Can)].fit_type, FitType.Polynomial)
-        self.assertEqual(state.fit[DataType.to_string(DataType.Can)].polynomial_order,  3)
-        self.assertEqual(state.fit[DataType.to_string(DataType.Can)].wavelength_low,  10.)
-        self.assertEqual(state.fit[DataType.to_string(DataType.Can)].wavelength_high,  20.)
+        self.assertEqual(state.fit[DataType.Can.name].fit_type, FitType.Polynomial)
+        self.assertEqual(state.fit[DataType.Can.name].polynomial_order,  3)
+        self.assertEqual(state.fit[DataType.Can.name].wavelength_low,  10.)
+        self.assertEqual(state.fit[DataType.Can.name].wavelength_high,  20.)
 
 if __name__ == '__main__':
     unittest.main()

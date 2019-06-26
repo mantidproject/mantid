@@ -74,7 +74,7 @@ class ISIS1DMerger(Merger):
         shift_factor, scale_factor, fit_mode, fit_min, fit_max, merge_mask, merge_min, merge_max = \
             get_shift_and_scale_parameter(reduction_mode_vs_output_bundles)
 
-        fit_mode_as_string = FitModeForMerge.to_string(fit_mode)
+        fit_mode_as_string = fit_mode.name
 
         # We need to convert NoFit to None.
         if fit_mode_as_string == "NoFit":

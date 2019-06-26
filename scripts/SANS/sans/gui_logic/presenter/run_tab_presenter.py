@@ -229,10 +229,10 @@ class RunTabPresenter(object):
         self._view.set_reduction_modes(reduction_mode_list)
 
         # Set the step type options for wavelength
-        range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
-                            RangeStepType.to_string(RangeStepType.Log),
-                            RangeStepType.to_string(RangeStepType.RangeLog),
-                            RangeStepType.to_string(RangeStepType.RangeLin)]
+        range_step_types = [RangeStepType.Lin.name,
+                            RangeStepType.Log.name,
+                            RangeStepType.RangeLog.name,
+                            RangeStepType.RangeLin.name]
         self._view.wavelength_step_type = range_step_types
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
@@ -243,15 +243,15 @@ class RunTabPresenter(object):
         self._view.sample_shape = sample_shape
 
         # Set the q range
-        self._view.q_1d_step_type = [RangeStepType.to_string(RangeStepType.Lin),
-                                     RangeStepType.to_string(RangeStepType.Log)]
-        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin),
-                                     RangeStepType.to_string(RangeStepType.Log)]
+        self._view.q_1d_step_type = [RangeStepType.Lin.name,
+                                     RangeStepType.Log.name]
+        self._view.q_xy_step_type = [RangeStepType.Lin.name,
+                                     RangeStepType.Log.name]
 
         # Set the fit options
-        fit_types = [FitType.to_string(FitType.Linear),
-                     FitType.to_string(FitType.Logarithmic),
-                     FitType.to_string(FitType.Polynomial)]
+        fit_types = [FitType.Linear.name,
+                     FitType.Logarithmic.name,
+                     FitType.Polynomial.name]
         self._view.transmission_sample_fit_type = fit_types
         self._view.transmission_can_fit_type = fit_types
 

@@ -128,13 +128,13 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
                               "OutputWorkspacePixelAdjustment": EMPTY_NAME,
                               "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
         if is_sample:
-            adjustment_options.update({"DataType": DataType.to_string(DataType.Sample)})
+            adjustment_options.update({"DataType": DataType.Sample.name})
         else:
-            adjustment_options.update({"DataType": DataType.to_string(DataType.Can)})
+            adjustment_options.update({"DataType": DataType.Can.name})
         if is_lab:
-            adjustment_options.update({"Component": DetectorType.to_string(DetectorType.LAB)})
+            adjustment_options.update({"Component": DetectorType.LAB.name})
         else:
-            adjustment_options.update({"Component": DetectorType.to_string(DetectorType.HAB)})
+            adjustment_options.update({"Component": DetectorType.HAB.name})
 
         adjustment_alg = create_unmanaged_algorithm(adjustment_name, **adjustment_options)
         adjustment_alg.execute()

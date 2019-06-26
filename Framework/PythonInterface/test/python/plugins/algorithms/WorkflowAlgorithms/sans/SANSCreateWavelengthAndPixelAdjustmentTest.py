@@ -106,9 +106,9 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
                           "OutputWorkspaceWavelengthAdjustment": "out_wavelength",
                           "OutputWorkspacePixelAdjustment": "out_pixels"}
         if is_lab:
-            adjust_options.update({"Component": DetectorType.to_string(DetectorType.LAB)})
+            adjust_options.update({"Component": DetectorType.LAB.name})
         else:
-            adjust_options.update({"Component": DetectorType.to_string(DetectorType.HAB)})
+            adjust_options.update({"Component": DetectorType.HAB.name})
         adjust_alg = create_unmanaged_algorithm(adjust_name, **adjust_options)
         adjust_alg.execute()
         wavelength_adjustment = adjust_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value

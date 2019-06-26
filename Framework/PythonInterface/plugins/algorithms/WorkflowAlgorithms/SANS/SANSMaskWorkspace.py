@@ -38,9 +38,9 @@ class SANSMaskWorkspace(DistributedDataProcessorAlgorithm):
                              doc='The sample scatter workspace. This workspace does not contain monitors.')
 
         # The component, i.e. HAB or LAB
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB), validator=allowed_detectors,
+        allowed_detectors = StringListValidator([DetectorType.LAB.name,
+                                                 DetectorType.HAB.name])
+        self.declareProperty("Component", DetectorType.LAB.name, validator=allowed_detectors,
                              direction=Direction.Input,
                              doc="The component of the instrument which is to be masked.")
 
@@ -67,7 +67,7 @@ class SANSMaskWorkspace(DistributedDataProcessorAlgorithm):
 
     def _get_component(self):
         component_as_string = self.getProperty("Component").value
-        return DetectorType.from_string(component_as_string)
+        return DetectorType[component_as_string]
 
     def validateInputs(self):
         errors = dict()

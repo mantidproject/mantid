@@ -35,8 +35,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(move.sample_offset,  53.0/1000.)
 
         # Detector specific
-        lab = move.detectors[DetectorType.to_string(DetectorType.LAB)]
-        hab = move.detectors[DetectorType.to_string(DetectorType.HAB)]
+        lab = move.detectors[DetectorType.LAB.name]
+        hab = move.detectors[DetectorType.HAB.name]
         self.assertEqual(lab.x_translation_correction,  -16.0/1000.)
         self.assertEqual(lab.z_translation_correction,  47.0/1000.)
         self.assertEqual(hab.x_translation_correction,  -44.0/1000.)
@@ -53,17 +53,17 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(mask.radius_max,  15/1000.)
         self.assertEqual(mask.clear, True)
         self.assertEqual(mask.clear_time, True)
-        self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.LAB)].single_horizontal_strip_mask,  [0])
-        self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.LAB)].single_vertical_strip_mask,  [0, 191])
-        self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.HAB)].single_horizontal_strip_mask,  [0])
-        self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.HAB)].single_vertical_strip_mask,  [0, 191])
-        self.assertTrue(mask.detectors[DetectorType.to_string(DetectorType.LAB)].range_horizontal_strip_start
+        self.assertEqual(mask.detectors[DetectorType.LAB.name].single_horizontal_strip_mask,  [0])
+        self.assertEqual(mask.detectors[DetectorType.LAB.name].single_vertical_strip_mask,  [0, 191])
+        self.assertEqual(mask.detectors[DetectorType.HAB.name].single_horizontal_strip_mask,  [0])
+        self.assertEqual(mask.detectors[DetectorType.HAB.name].single_vertical_strip_mask,  [0, 191])
+        self.assertTrue(mask.detectors[DetectorType.LAB.name].range_horizontal_strip_start
                         == [190, 167])
-        self.assertTrue(mask.detectors[DetectorType.to_string(DetectorType.LAB)].range_horizontal_strip_stop
+        self.assertTrue(mask.detectors[DetectorType.LAB.name].range_horizontal_strip_stop
                         == [191, 172])
-        self.assertTrue(mask.detectors[DetectorType.to_string(DetectorType.HAB)].range_horizontal_strip_start
+        self.assertTrue(mask.detectors[DetectorType.HAB.name].range_horizontal_strip_start
                         == [190, 156])
-        self.assertTrue(mask.detectors[DetectorType.to_string(DetectorType.HAB)].range_horizontal_strip_stop
+        self.assertTrue(mask.detectors[DetectorType.HAB.name].range_horizontal_strip_stop
                         == [191, 159])
 
     def _assert_reduction(self, state):
@@ -149,14 +149,14 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(calculate_transmission.background_TOF_monitor_stop["2"],  98000)
         self.assertEqual(calculate_transmission.background_TOF_roi_start,  123)
         self.assertEqual(calculate_transmission.background_TOF_roi_stop,  466)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].fit_type, FitType.Logarithmic)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].wavelength_low,  1.5)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].wavelength_high,  12.5)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].polynomial_order,  0)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type, FitType.Logarithmic)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low,  1.5)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high,  12.5)
-        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order,  0)
+        self.assertEqual(calculate_transmission.fit[DataType.Sample.name].fit_type, FitType.Logarithmic)
+        self.assertEqual(calculate_transmission.fit[DataType.Sample.name].wavelength_low,  1.5)
+        self.assertEqual(calculate_transmission.fit[DataType.Sample.name].wavelength_high,  12.5)
+        self.assertEqual(calculate_transmission.fit[DataType.Sample.name].polynomial_order,  0)
+        self.assertEqual(calculate_transmission.fit[DataType.Can.name].fit_type, FitType.Logarithmic)
+        self.assertEqual(calculate_transmission.fit[DataType.Can.name].wavelength_low,  1.5)
+        self.assertEqual(calculate_transmission.fit[DataType.Can.name].wavelength_high,  12.5)
+        self.assertEqual(calculate_transmission.fit[DataType.Can.name].polynomial_order,  0)
 
         # Wavelength and Pixel Adjustment
         wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment
@@ -165,10 +165,10 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step,  0.125)
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step_type, RangeStepType.Lin)
         self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
-                        DetectorType.to_string(DetectorType.LAB)].wavelength_adjustment_file ==
+                        DetectorType.LAB.name].wavelength_adjustment_file ==
                         "DIRECTM1_15785_12m_31Oct12_v12.dat")
         self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
-                        DetectorType.to_string(DetectorType.HAB)].wavelength_adjustment_file ==
+                        DetectorType.HAB.name].wavelength_adjustment_file ==
                         "DIRECTM1_15785_12m_31Oct12_v12.dat")
 
         # Assert wide angle correction

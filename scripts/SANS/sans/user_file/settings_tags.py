@@ -5,8 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 from collections import namedtuple
-from sans.common.enums import serializable_enum
+
+from mantid.py3compat import Enum
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -57,93 +59,64 @@ det_fit_range = namedtuple('det_fit_range', 'start, stop, use_fit')
 
 
 # --- DET
-@serializable_enum("reduction_mode", "rescale", "shift", "rescale_fit", "shift_fit", "correction_x", "correction_y",
-                   "correction_z", "correction_rotation", "correction_radius", "correction_translation",
-                   "correction_x_tilt", "correction_y_tilt", "merge_range", "instrument")
-class DetectorId(object):
-    pass
-
+DetectorId = Enum("DetectorId", "reduction_mode rescale shift rescale_fit shift_fit correction_x correction_y "
+                  "correction_z correction_rotation correction_radius correction_translation "
+                  "correction_x_tilt correction_y_tilt merge_range instrument")
 
 # --- LIMITS
-@serializable_enum("angle", "events_binning", "events_binning_range", "radius_cut", "wavelength_cut", "radius", "q",
-                   "qxy", "wavelength")
-class LimitsId(object):
-    pass
+LimitsId = Enum("LimitsId", "angle events_binnning events_binning_range radius_cut "
+                            "wavelength_cut radius q qxy wavelength")
 
 
 # --- MASK
-@serializable_enum("line", "time", "time_detector", "clear_detector_mask", "clear_time_mask", "single_spectrum_mask",
-                   "spectrum_range_mask", "vertical_single_strip_mask", "vertical_range_strip_mask", "file",
-                   "horizontal_single_strip_mask", "horizontal_range_strip_mask", "block", "block_cross")
-class MaskId(object):
-    pass
+MaskId = Enum("MaskId", "line time time_detector clear_detector_mask clear_time_mask single_spectrum_mask "
+                        "spectrum_range_mask vertical_single_strip_mask vertical_range_strip_mask file "
+                        "horizontal_single_strip_mask horizontal_range_strip_mask block block_cross")
 
 
 # --- SAMPLE
-@serializable_enum("path", "offset")
-class SampleId(object):
-    pass
+SampleId = Enum("SampleId", "path offset")
 
 
 # --- SET
-@serializable_enum("scales", "centre", "centre_HAB")
-class SetId(object):
-    pass
+SetId = Enum("SetId", "scales centre centre_HAB")
 
 
 # --- TRANS
-@serializable_enum("spec", "spec_shift", "radius", "roi", "mask", "sample_workspace", "can_workspace")
-class TransId(object):
-    pass
+TransId = Enum("TransId", "spec spec_shift radius roi mask sample_workspace can_workspace")
 
 
 # --- TUBECALIBFILE
-@serializable_enum("file")
-class TubeCalibrationFileId(object):
-    pass
+TubeCalibrationFileId = Enum("TubeCalibrationFileId", "file")
 
 
 # -- QRESOLUTION
-@serializable_enum("on", "delta_r", "collimation_length", "a1", "a2", "h1", "w1", "h2", "w2", "moderator")
-class QResolutionId(object):
-    pass
+QResolutionId = Enum("QResolutionId", "on delta_r collimation_length a1 a2 h1 w1 h2 w2 moderator")
 
 
 # --- FIT
-@serializable_enum("clear", "monitor_times", "general")
-class FitId(object):
-    pass
+FitId = Enum("FitId", "clear monitor_times general")
 
 
 # --- GRAVITY
-@serializable_enum("on_off", "extra_length")
-class GravityId(object):
-    pass
+GravityId = Enum("GravityId", "on_off extra_length")
 
 
 # --- MON
-@serializable_enum("length", "direct", "flat", "hab", "spectrum", "spectrum_trans", "interpolate")
-class MonId(object):
-    pass
+MonId = Enum("MonId", "length direct flat hab spectrum spectrum_trans interpolate")
 
 
 # --- PRINT
-@serializable_enum("print_line")
-class PrintId(object):
-    pass
+PrintId = Enum("PrintId", "print_line")
 
 
 # -- BACK
-@serializable_enum("all_monitors", "single_monitors", "monitor_off", "trans")
-class BackId(object):
-    pass
+BackId = Enum("BackId", "all_monitors single_monitors monitor_off trans")
 
 
 # -- OTHER - not settable in user file
-@serializable_enum("reduction_dimensionality", "use_full_wavelength_range", "event_slices",
-                   "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
-                   "user_specified_output_name_suffix", "use_reduction_mode_as_suffix", "sample_width", "sample_height",
-                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "wavelength_range",
-                   "use_event_slice_optimisation")
-class OtherId(object):
-    pass
+OtherId = Enum("OtherId", "reduction_dimensionality use_full_wavelength_range event_slices use_compatibility_mode "
+                          "save_types save_as_zero_error_free user_specified_output_name "
+                          "user_specified_output_name_suffix use_reduction_mode_as_suffix sample_width sample_height "
+                          "sample_thickness sample_shape merge_mask merge_min merge_max wavelength_range "
+                          "use_event_slice_optimisation")

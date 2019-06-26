@@ -61,8 +61,8 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     beam_centre_finder = "SANSBeamCentreFinder"
     beam_centre_finder_options = {"Iterations": iterations, "RMin": r_min/1000, "RMax": r_max/1000,
                                   "Position1Start": position_1_start, "Position2Start": position_2_start,
-                                  "Tolerance": tolerance, "Direction" : FindDirectionEnum.to_string(find_direction),
-                                  "Verbose": verbose, "Component": DetectorType.to_string(component)}
+                                  "Tolerance": tolerance, "Direction" : find_direction.name,
+                                  "Verbose": verbose, "Component": component.name}
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)
     set_properties_for_beam_centre_algorithm(beam_centre_alg, reduction_package,
@@ -116,7 +116,7 @@ def centre_finder_mass(state, r_min = 0.06, max_iter=10, position_1_start = 0.0,
     # ------------------------------------------------------------------------------------------------------------------
     beam_centre_finder = "SANSBeamCentreFinderMassMethod"
     beam_centre_finder_options = {"RMin": r_min/1000, "Centre1": position_1_start,
-                                  "Centre2": position_2_start, "Tolerance": tolerance, "Component": DetectorType.to_string(component)}
+                                  "Centre2": position_2_start, "Tolerance": tolerance, "Component": component.name}
     beam_centre_alg = create_managed_non_child_algorithm(beam_centre_finder, **beam_centre_finder_options)
     beam_centre_alg.setChild(False)
 
