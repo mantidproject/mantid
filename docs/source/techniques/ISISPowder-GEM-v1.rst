@@ -177,11 +177,16 @@ Example
 
 create_cal
 ^^^^^^^^^^
-The *create_cal* method creates the offset calibration file for GEM
-scripts. The following parameters are required:
+The *create_cal* method creates the offset calibration file for GEM, or if one is passed in, adjusts
+an existing file.
+The following parameters are required:
 
 - :ref:`calibration_mapping_file_gem_isis-powder-diffraction-ref`
 - :ref:`run_number_pearl_isis-powder-diffraction-ref`
+
+The Following parameter may also be set
+
+- :ref:`calibration_to_adjust_gem_isis-powder-diffraction-ref`
 
 Example
 =======
@@ -255,6 +260,15 @@ Parameters
 -----------
 The following parameters for GEM are intended for regular use
 when using the ISIS Powder scripts.
+
+.. _calibration_to_adjust_gem_isis-powder-diffraction-ref:
+
+calibration_to_adjust
+^^^^^^^^^^^^^^^^^^^^^
+*Optional*
+
+This Parameter contains the path to an offsets .cal file to adjust using 
+the automatic cal file generation.
 
 .. _calibration_directory_gem_isis-powder-diffraction-ref:
 

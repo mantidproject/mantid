@@ -19,7 +19,7 @@ New Algorithms
 Improvements
 ############
 
-- The Gem scripts can now be used to automatically generate a .cal file, similar to pearl.
+- The Gem scripts can now be used to automatically generate a .cal file, similar to pearl. They can also adjust a parameter file passed in using the argument "calibration_to_adjust".
 
 - The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
 

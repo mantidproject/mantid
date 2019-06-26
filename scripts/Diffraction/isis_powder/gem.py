@@ -44,7 +44,6 @@ class Gem(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_cal(self, **kwargs):
-        print(hasattr(self._inst_settings, "calibration_to_adjust"))
         self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_calibration_variables())
@@ -59,8 +58,8 @@ class Gem(AbstractInst):
                                        "Step": self._inst_settings.get_det_offsets_step,
                                        "XMin": self._inst_settings.get_det_offsets_x_min,
                                        "XMax": self._inst_settings.get_det_offsets_x_max}
-        if hasattr(self._inst_settings, "calibration_to_adjust"):
-            return gem_calibration_algs.create_calibration(calibration_runs=self._inst_settings.run_number,
+        if self._inst_settings.cal_adjust:
+            return gem_calibration_algs.adjust_calibration(calibration_runs=self._inst_settings.run_number,
                                                            instrument=self,
                                                            offset_file_name=run_details.offset_file_path,
                                                            grouping_file_name=run_details.grouping_file_path,
@@ -68,8 +67,9 @@ class Gem(AbstractInst):
                                                            rebin_1_params=self._inst_settings.cal_rebin_1,
                                                            rebin_2_params=self._inst_settings.cal_rebin_2,
                                                            cross_correlate_params=cross_correlate_params,
-                                                           get_det_offset_params=get_detector_offsets_params)
-        return gem_calibration_algs.adjust_calibration(calibration_runs=self._inst_settings.run_number,
+                                                           get_det_offset_params=get_detector_offsets_params,
+                                                           original_cal=self._inst_settings.cal_adjust)
+        return gem_calibration_algs.create_calibration(calibration_runs=self._inst_settings.run_number,
                                                        instrument=self,
                                                        offset_file_name=run_details.offset_file_path,
                                                        grouping_file_name=run_details.grouping_file_path,
@@ -77,8 +77,7 @@ class Gem(AbstractInst):
                                                        rebin_1_params=self._inst_settings.cal_rebin_1,
                                                        rebin_2_params=self._inst_settings.cal_rebin_2,
                                                        cross_correlate_params=cross_correlate_params,
-                                                       get_det_offset_params=get_detector_offsets_params,
-                                                       original_cal =self._inst_settings.cal_adjust)
+                                                       get_det_offset_params=get_detector_offsets_params)
 
     def set_sample_details(self, **kwargs):
         kwarg_name = "sample"
@@ -143,8 +142,8 @@ class Gem(AbstractInst):
                                                                              output_mode=output_mode)
         else:
             d_spacing_group, \
-                tof_group = common_output.split_into_tof_d_spacing_groups(run_details=run_details,
-                                                                          processed_spectra=processed_spectra)
+            tof_group = common_output.split_into_tof_d_spacing_groups(run_details=run_details,
+                                                                      processed_spectra=processed_spectra)
 
         if self._is_vanadium:
             return d_spacing_group, tof_group
