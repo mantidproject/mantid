@@ -513,7 +513,7 @@ the first two hours"""
                            InputWorkspace=self._samSqwWs)
 
             # additional output
-            if self.getProperty('OutputSusceptibility').value:
+            if self.getProperty('OutputSusceptibility').value is True:
                 temperature = mtd[self._samSqwWs].getRun().\
                     getProperty(TEMPERATURE_SENSOR).getStatistics().mean
                 samXqsWs = self._samSqwWs.replace('sqw', 'Xqw')
@@ -522,7 +522,9 @@ the first two hours"""
                                           Temperature=str(temperature))
                 sapi.ConvertUnits(InputWorkspace=samXqsWs,
                                   OutputWorkspace=samXqsWs,
-                                  Target='DeltaE_inFrequency')
+                                  Target='DeltaE_inFrequency',
+                                  Emode='Indirect',
+                                  Efixed=self._reflection['default_energy'])
                 self.serialize_in_log(samXqsWs)
                 susceptibility_filename = processed_filename.replace('sqw', 'Xqw')
                 sapi.SaveNexus(Filename=susceptibility_filename,
@@ -833,7 +835,6 @@ the first two hours"""
 
         wsSqwName = prefix if isSample is True else wsName
         wsSqwName += '_divided_sqw' if self._doNorm is True else '_sqw'
-
         sapi.SofQW3(InputWorkspace=wsName,
                     QAxisBinning=self._qBins,
                     EMode='Indirect',
