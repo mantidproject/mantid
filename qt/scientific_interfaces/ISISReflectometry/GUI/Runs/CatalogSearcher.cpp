@@ -10,7 +10,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 
 using namespace Mantid::API;
 
@@ -60,6 +62,13 @@ ITableWorkspace_sptr CatalogSearcher::search(const std::string &text,
   return results;
 }
 
+void CatalogSearcher::searchAsync() {
+  auto algSearch = createSearchAlgorithm(m_searchText);
+  auto algRunner = m_view->getAlgorithmRunner();
+  algRunner->startAlgorithm(algSearch);
+  m_searchInProgress = true;
+}
+
 bool CatalogSearcher::startSearchAsync(const std::string &text,
                                        const std::string &instrument,
                                        SearchType searchType) {
@@ -67,15 +76,21 @@ bool CatalogSearcher::startSearchAsync(const std::string &text,
   m_instrument = instrument;
   m_searchType = searchType;
 
-  if (!logInToCatalog())
-    return false;
-
-  auto algSearch = createSearchAlgorithm(text);
-  auto algRunner = m_view->getAlgorithmRunner();
-  algRunner->startAlgorithm(algSearch);
-  m_searchInProgress = true;
+  // Already logged in
+  if (hasActiveSession()) {
+    searchAsync();
+  } else {
+    // Else attempt to login, once login is complete finishHandle will be
+    // called.
+    logInToCatalog();
+  }
 
   return true;
+}
+
+void CatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
+  searchAsync();
+  stopObserving(alg);
 }
 
 void CatalogSearcher::notifySearchComplete() {
@@ -121,26 +136,29 @@ bool CatalogSearcher::hasActiveSession() const {
   return !sessions.empty();
 }
 
+namespace {
+void execLoginDialog(const IAlgorithm_sptr &alg) {
+  API::InterfaceManager interfaceMgr;
+  auto dlg = interfaceMgr.createDialog(alg);
+  dlg->setModal(true);
+  dlg->show();
+  dlg->raise();
+  dlg->activateWindow();
+}
+} // namespace
+
 /** Log in to the catalog
  * @returns : true if login succeeded
  */
-bool CatalogSearcher::logInToCatalog() {
+void CatalogSearcher::logInToCatalog() {
   if (hasActiveSession())
-    return true;
+    return;
 
-  try {
-    std::stringstream pythonSrc;
-    pythonSrc << "try:\n";
-    pythonSrc << "  algm = CatalogLoginDialog()\n";
-    pythonSrc << "except:\n";
-    pythonSrc << "  pass\n";
-    m_pythonRunner->runPythonAlgorithm(pythonSrc.str());
-  } catch (std::runtime_error &) {
-    return false;
-  }
-
-  // Check we logged in ok
-  return hasActiveSession();
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CatalogLogin");
+  alg->initialize();
+  alg->setProperty("KeepSessionAlive", true);
+  this->observeFinish(alg);
+  execLoginDialog(alg);
 }
 
 std::string CatalogSearcher::activeSessionId() const {
@@ -153,9 +171,6 @@ std::string CatalogSearcher::activeSessionId() const {
 
 IAlgorithm_sptr
 CatalogSearcher::createSearchAlgorithm(const std::string &text) {
-  if (!logInToCatalog())
-    throw std::runtime_error("Catalog login failed: ");
-
   auto sessionId = activeSessionId();
 
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");

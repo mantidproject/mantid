@@ -10,6 +10,7 @@
 #include "GUI/Common/IPythonRunner.h"
 #include "GUI/Runs/IRunsView.h"
 #include "ISearcher.h"
+#include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 
 namespace MantidQt {
@@ -22,7 +23,9 @@ class IMainWindowView;
 CatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class CatalogSearcher : public ISearcher, public RunsViewSearchSubscriber {
+class CatalogSearcher : public ISearcher,
+                        public RunsViewSearchSubscriber,
+                        public Mantid::API::AlgorithmObserver {
 public:
   CatalogSearcher(IPythonRunner *pythonRunner, IRunsView *m_view);
   ~CatalogSearcher() override{};
@@ -46,6 +49,9 @@ public:
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
 
+protected:
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+
 private:
   IPythonRunner *m_pythonRunner;
   IRunsView *m_view;
@@ -56,10 +62,11 @@ private:
   bool m_searchInProgress;
 
   bool hasActiveSession() const;
-  bool logInToCatalog();
+  void logInToCatalog();
   std::string activeSessionId() const;
   Mantid::API::IAlgorithm_sptr createSearchAlgorithm(const std::string &text);
   ISearchModel &results() const;
+  void searchAsync();
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
