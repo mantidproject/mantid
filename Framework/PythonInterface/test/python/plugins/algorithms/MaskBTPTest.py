@@ -113,6 +113,17 @@ class MaskBTPTest(unittest.TestCase):
         MaskBTP(Instrument='SEQUOIA', Bank="27")
         MaskBTP(Instrument='SEQUOIA', Bank="37")
         MaskBTP(Instrument='SEQUOIA', Bank="38")
+        MaskBTP(Instrument='SEQUOIA', Bank="74")
+        MaskBTP(Instrument='SEQUOIA', Bank="75")
+        MaskBTP(Instrument='SEQUOIA', Bank="98")
+        MaskBTP(Instrument='SEQUOIA', Bank="99")
+        MaskBTP(Instrument='SEQUOIA', Bank="100")
+        MaskBTP(Instrument='SEQUOIA', Bank="101")
+        MaskBTP(Instrument='SEQUOIA', Bank="102")
+        MaskBTP(Instrument='SEQUOIA', Bank="103")
+        MaskBTP(Instrument='SEQUOIA', Bank="113")
+        MaskBTP(Instrument='SEQUOIA', Bank="114")
+        MaskBTP(Instrument='SEQUOIA', Bank="150")
         return
 
     def testEdges(self):

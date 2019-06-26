@@ -8,9 +8,8 @@ import unittest
 
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
-from qtpy import QtCore
 from qtpy.QtWidgets import QApplication
-
+from qtpy import QtCore
 from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 from Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
 from Muon.GUI.Common.muon_group import MuonGroup
@@ -95,6 +94,7 @@ class PhaseTablePresenterTest(GuiTest):
     def test_handle_calculate_phase_table_clicked_behaves_correctly_for_succesful_calculation(self, run_algorith_mock):
         detector_table_mock = mock.MagicMock()
         self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
+        self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=['MUSR22222_raw_data_period_1'])
         self.context.phase_context.options_dict['input_workspace'] = 'MUSR22222_raw_data_period_1'
         self.presenter.update_view_from_model()
         run_algorith_mock.return_value = (detector_table_mock, mock.MagicMock())

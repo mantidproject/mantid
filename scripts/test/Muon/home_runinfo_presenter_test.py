@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from mantid.api import FileFinder
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
@@ -36,7 +35,7 @@ class HomeTabRunInfoPresenterTest(GuiTest):
 
     def test_runinfo_correct(self):
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
-        ws, run, filename = load_utils.load_workspace_from_filename(file_path)
+        ws, run, filename, _ = load_utils.load_workspace_from_filename(file_path)
         self.data_context._loaded_data.remove_data(run=run)
         self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
         self.data_context.current_runs = [[22725]]

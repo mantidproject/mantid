@@ -33,6 +33,8 @@ Improvements
 
 - The Pearl scripts now set now use a spline coefficient of 5 on long-mode due to the increased amount of noise.
 
+- The Pearl scripts now crop to a dspacing of 8 on long-mode to avoid negative values caused by noise after this point.
+
 Bug Fixes
 #########
 

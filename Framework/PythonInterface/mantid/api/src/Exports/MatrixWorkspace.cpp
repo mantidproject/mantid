@@ -238,6 +238,20 @@ void pythonReplaceAxis(MatrixWorkspace &self, const std::size_t &axisIndex,
   self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
 }
 
+std::vector<Mantid::signal_t>
+getSignalAtCoord(MatrixWorkspace &self, const NDArray &values,
+                 const Mantid::API::MDNormalization &normalization) {
+  std::vector<Mantid::coord_t> coords =
+      NDArrayToVector<Mantid::coord_t>(values)();
+  auto length = len(values) * 2;
+  std::vector<Mantid::signal_t> signals;
+  for (auto i = 0; i < length; i = i + 2) {
+    std::vector<Mantid::coord_t> coord = {coords[i], coords[i + 1]};
+    signals.push_back(self.getSignalAtCoord(coord.data(), normalization));
+  }
+  return signals;
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -427,6 +441,9 @@ void export_MatrixWorkspace() {
            "Note: This can fail for large workspaces as numpy will require a "
            "block "
            "of memory free that will fit all of the data.")
+      .def("getSignalAtCoord", &getSignalAtCoord,
+           args("self", "coords", "normalization"), return_readonly_numpy(),
+           "Return signal for array of coordinates")
       //-------------------------------------- Operators
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),

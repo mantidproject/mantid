@@ -40,9 +40,14 @@ class PhaseTablePresenter(object):
         self.phase_table_calculation_complete_notifier = Observable()
         self.phase_quad_calculation_complete_nofifier = Observable()
 
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+
         self.update_current_phase_tables()
 
     def update_view_from_model(self):
+        self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
+        self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
+        self.update_current_phase_tables()
         for key, item in self.context.phase_context.options_dict.items():
             setattr(self.view, key, item)
 
@@ -189,8 +194,6 @@ class PhaseTablePresenter(object):
 
         backward_group = self.context.phase_context.options_dict['backward_group']
         parameters['BackwardSpectra'] = self.context.group_pair_context[backward_group].detectors
-
-        parameters['DetectorTable'] = parameters['InputWorkspace'].replace('_raw_data', '') + "; PhaseTable"
 
         parameters['DetectorTable'] = get_phase_table_workspace_name(parameters['InputWorkspace'], forward_group,
                                                                      backward_group)

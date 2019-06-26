@@ -101,7 +101,7 @@ public:
   const std::vector<detid_t> &detectorIDs() const;
   /// Returns the index of the detector with the given detector ID.
   /// This will throw an out of range exception if the detector does not exist.
-  size_t indexOf(const detid_t id) const { return m_detIDToIndex->at(id); }
+  size_t indexOf(const detid_t id) const;
 
   size_t scanCount() const;
   const std::vector<

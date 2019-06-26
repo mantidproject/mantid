@@ -123,7 +123,8 @@ set(QT5_SRC_FILES
     src/QtPropertyBrowser/StringDialogEditor.cpp
     src/QtPropertyBrowser/StringEditorFactory.cpp
     src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
-    src/Python/Sip.cpp)
+    src/Python/Sip.cpp
+    src/Python/QHashToDict.cpp)
 
 set(
   QT5_MOC_FILES

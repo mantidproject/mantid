@@ -16,9 +16,9 @@ from matplotlib.figure import Figure
 from matplotlib import gridspec
 from .dimensionwidget import DimensionWidget
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from mantidqt.plotting.functions import use_imshow
 from matplotlib.transforms import Bbox, BboxTransform
 import numpy as np
+from .samplingimage import imshow_sampling
 
 
 class SliceViewerView(QWidget):
@@ -98,12 +98,12 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MatrixWorkspace
         """
         self.ax.clear()
-        if use_imshow(ws):
-            self.plot_MDH(ws, **kwargs) # Make same call to imshow as MDHistoWorkspace
-        else:
-            self.im = self.ax.pcolormesh(ws, transpose=self.dimensions.transpose,
-                                         norm=self.colorbar.get_norm(), **kwargs)
-            self.draw_plot()
+        self.im = imshow_sampling(self.ax, ws, origin='lower', aspect='auto',
+                                  interpolation='none',
+                                  transpose=self.dimensions.transpose,
+                                  norm=self.colorbar.get_norm(), **kwargs)
+        self.im._resample_image()
+        self.draw_plot()
 
     def draw_plot(self):
         self.ax.set_title('')

@@ -176,3 +176,6 @@ class MaxEntPresenter(object):
             if output_options[key]:
                 output = alg.getProperty(key).value
                 MuonWorkspaceWrapper(output, directory + base_name + optional_output_suffixes[key]).show()
+
+    def update_view_from_model(self):
+        self.getWorkspaceNames()
