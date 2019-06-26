@@ -51,7 +51,6 @@ namespace CustomInterfaces {
  * @param defaultInstrumentIndex The index of the instrument to have selected by
  * default.
  * @param messageHandler :: A handler to pass messages to the user
- * @param pythonRunner :: [input] Interface for running python code
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
