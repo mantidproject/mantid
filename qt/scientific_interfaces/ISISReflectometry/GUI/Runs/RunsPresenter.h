@@ -59,8 +59,7 @@ public:
                 const RunsTablePresenterFactory &makeRunsTablePresenter,
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
-                int defaultInstrumentIndex, IMessageHandler *messageHandler,
-                IPythonRunner *pythonRunner);
+                int defaultInstrumentIndex, IMessageHandler *messageHandler);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;

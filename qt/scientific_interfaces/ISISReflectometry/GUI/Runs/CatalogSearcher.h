@@ -26,7 +26,7 @@ class CatalogSearcher : public ISearcher,
                         public RunsViewSearchSubscriber,
                         public Mantid::API::AlgorithmObserver {
 public:
-  CatalogSearcher(IRunsView *m_view);
+  explicit CatalogSearcher(IRunsView *m_view);
   ~CatalogSearcher() override{};
 
   // ISearcher overrides

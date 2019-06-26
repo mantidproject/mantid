@@ -57,13 +57,11 @@ RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
-    int defaultInstrumentIndex, IMessageHandler *messageHandler,
-    IPythonRunner *pythonRunner)
+    int defaultInstrumentIndex, IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
-      m_searcher(std::make_unique<CatalogSearcher>(pythonRunner, mainView)),
-      m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments),
+      m_searcher(std::make_unique<CatalogSearcher>(mainView)), m_view(mainView),
+      m_progressView(progressableView), m_mainPresenter(nullptr),
+      m_messageHandler(messageHandler), m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_thetaTolerance(thetaTolerance) {
 
