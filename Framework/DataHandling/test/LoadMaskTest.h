@@ -446,7 +446,7 @@ public:
       // number2: number of used detectors of interestws
       size_t number1 = 0;
       size_t number0 = 0;
-      for (size_t ih = 0; ih < maskws->getNumberHistograms(); ih++) {
+      for (size_t ih = 0; ih < 6468; ih++) {  // pre-VulcanX east and west bank
         bool v1 = maskws->isMaskedIndex(ih);
         bool v2 = interestws->isMaskedIndex(ih);
         if (v1) {
