@@ -32,6 +32,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.fit_observer = GenericObserver(self.handle_fit_completed)
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
+        self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
         self.keep = False
 
     def show(self):
@@ -107,20 +108,32 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
         self._model.plot(workspace_list, self.get_plot_title())
 
+        workspace_list_inverse_binning = self.get_workspaces_to_plot(self.context.group_pair_context.selected,
+                                                                                     not self._view.if_raw(),
+                                                                                     self._view.get_selected())
+        self._model.plotted_workspaces_inverse_binning = workspace_list_inverse_binning
+
+        if self.context.fitting_context.fit_list and \
+                any([workspace in workspace_list + workspace_list_inverse_binning
+                     for workspace in self.context.fitting_context.fit_list[-1].input_workspaces]):
+            self.handle_fit_completed()
+
     def handle_fit_completed(self):
         """
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         :return:
         """
-        for plotted_workspace in self._model.plotted_workspaces:
-            list_of_workspaces_to_plot = self.context.fitting_context.find_output_workspaces_for_input_workspace_name(plotted_workspace)
+        current_fit = self.context.fitting_context.fit_list[-1]
+        list_of_output_workspaces_to_plot = [output for output, input in
+                                             zip(current_fit.output_workspace_names, current_fit.input_workspaces)
+                                             if input in self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning]
 
-            for workspace_name in list_of_workspaces_to_plot:
-                self._model.remove_workpace_from_plot(workspace_name)
+        for workspace_name in self._model.plotted_fit_workspaces:
+            self._model.remove_workpace_from_plot(workspace_name)
 
-            for workspace_name in list_of_workspaces_to_plot:
-                self._model.add_workspace_to_plot(workspace_name, 2)
-                self._model.add_workspace_to_plot(workspace_name, 3)
+        for workspace_name in list_of_output_workspaces_to_plot:
+            self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Fit')
+            self._model.add_workspace_to_plot(workspace_name, 3, workspace_name + ': Diff')
 
     def get_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """
@@ -152,3 +165,9 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         flattened_run_list = [item for sublist in self.context.data_context.current_runs for item in sublist]
         return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' + \
             self.context.group_pair_context.selected
+
+    def handle_rebin_options_set(self):
+        if self.context._do_rebin():
+            self._view.set_raw_checkbox_state(False)
+        else:
+            self._view.set_raw_checkbox_state(True)

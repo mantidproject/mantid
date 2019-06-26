@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantidqt.plotting.functions import plot
 from mantid.api import AnalysisDataService
+import numpy as np
 
 
 class HomePlotWidgetModel(object):
@@ -16,6 +17,8 @@ class HomePlotWidgetModel(object):
         """
         self.plot_figure = None
         self.plotted_workspaces = []
+        self.plotted_workspaces_inverse_binning = []
+        self.plotted_fit_workspaces = []
         self.plotted_group = ''
 
     def plot(self, workspace_list, title):
@@ -35,21 +38,27 @@ class HomePlotWidgetModel(object):
             return
 
         if self.plot_figure:
-            self.plot_figure.clear()
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
-                                    plot_kwargs={'distribution': True}, errors=True)
+                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
         else:
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title, plot_kwargs={'distribution': True},
+            self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title, plot_kwargs={'distribution': True,
+                                                                                                    'autoscale_on_update': False},
                                     errors=True)
+            self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
+            self.autoscale_y_to_data_in_view()
 
         self.plot_figure.canvas.set_window_title('Muon Analysis')
         self.plot_figure.gca().set_title(title)
 
         self.plot_figure.canvas.window().closing.connect(self._close_plot)
 
+        workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace not in workspace_list]
+        for workspace in workspaces_to_remove:
+            self.remove_workpace_from_plot(workspace)
+
         self.plotted_workspaces = workspace_list
 
-    def add_workspace_to_plot(self, workspace, specNum):
+    def add_workspace_to_plot(self, workspace, specNum, label):
         """
         Adds a plot line to the specified subplot
         :param workspace: Name of workspace to get plot data from
@@ -62,7 +71,9 @@ class HomePlotWidgetModel(object):
             return
 
         self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True,
-                                plot_kwargs={'distribution': True, 'zorder': 4})
+                                plot_kwargs={'distribution': True, 'zorder': 4, 'autoscale_on_update': False, 'label': label})
+
+        self.plotted_fit_workspaces.append(workspace)
 
     def remove_workpace_from_plot(self, workspace_name):
         """
@@ -74,6 +85,8 @@ class HomePlotWidgetModel(object):
         except RuntimeError:
             return
         self.plot_figure.gca().remove_workspace_artists(workspace)
+        self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
+        self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
 
     def _close_plot(self):
         """
@@ -82,3 +95,18 @@ class HomePlotWidgetModel(object):
         """
         self.plot_figure = None
         self.plotted_workspaces = []
+
+    def autoscale_y_to_data_in_view(self):
+        axis = self.plot_figure.gca()
+        xlim = axis.get_xlim()
+        ylim = np.inf, -np.inf
+        for line in axis.lines:
+            x, y = line.get_data()
+            start, stop = np.searchsorted(x, xlim)
+            y_within_range = y[max(start-1,0):(stop+1)]
+            ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
+
+        new_bottom = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
+        new_top = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
+
+        axis.set_ylim(bottom=new_bottom, top=new_top)
