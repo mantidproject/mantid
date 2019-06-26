@@ -41,8 +41,6 @@ Removed
 #######
 
 - Version 1 of `FindReflectometryLines` has been removed. Use :ref:`FindReflectometryLines-v2 <algm-FindReflectometryLines>` instead.
-=======
-
 
 BUGFIXES
 ########
