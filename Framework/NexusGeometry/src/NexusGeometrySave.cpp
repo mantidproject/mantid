@@ -35,6 +35,7 @@ const H5std_string SHAPE = "shape";
 
 // NEXUS COMPLIANT ATTRIBUTE VALUES
 const H5std_string NX_TRANSFORMATION = "NXtransformation";
+const H5std_string NX_CHAR = "NX_CHAR";
 
 } // namespace
 
@@ -108,7 +109,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::DataSet dataSet =
       instrumentGroup.createDataSet("name", dataType, dataSpace);
 
-  writeStrAttributeToDataSet(dataSet, shortName, "test");
+  writeStrAttributeToDataSet(dataSet, shortName, NX_CHAR);
 
   file.close();
 

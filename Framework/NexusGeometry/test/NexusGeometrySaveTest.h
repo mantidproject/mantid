@@ -212,7 +212,7 @@ public:
     HDF5FileTestUtility testUtility(destinationFile);
 
     // TS_ASSERT(testUtility.hasDataSet("/raw_data1/instrument/name", NX_CHAR));
-    TS_ASSERT(testUtility.hasDataSet("name", "short_name", "test",
+    TS_ASSERT(testUtility.hasDataSet("name", "short_name", "NX_CHAR",
                                      "/raw_data_1/instrument"));
     // TODO write hasDataSet in HDF5FileTestUtility
   }
