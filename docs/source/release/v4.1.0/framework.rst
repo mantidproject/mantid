@@ -45,6 +45,7 @@ Improvements
 - :ref:`SolidAngle <algm-SolidAngle>` is extended to accommodate few options for fast analytical calculation for SANS-type detectors.
 - :ref:`algm-FilterEvents` has a property `InformativeOutputNames` which changes the name of output workspace to include the start and end time of the slice.
 - All the ILL nexus file loaders were speeded up due to parallelization of the loading.
+- :ref:`algm-SumOverlappingTubes` was speeded up due to parallelization of the actual histogramming step.
 
 Instrument Definition Files
 ###########################
