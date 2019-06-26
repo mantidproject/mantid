@@ -318,6 +318,42 @@ class BASISReduction6Test(systemtesting.MantidSystemTest, PreppingMixin):
         return 'BSS_90146_divided_sqw', 'BASIS_90146_divided_sqw.nxs'
 
 
+class DynamicSusceptibilityTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Reduce in the new DAS using: (1)silicon 333 analyzers, (2) monitor
+    normalization, (3) Vanadium normalization"""
+
+    def __init__(self):
+        super(BASISReduction6Test, self).__init__()
+        self.config = None
+        self.prepset('BASISReduction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_333.xml',
+                'BSS_90146.nxs.h5',
+                'BSS_90175.nxs.h5',
+                'BSS_90146_divided_Xqw.nxs']
+
+    def runTest(self):
+        try:
+            BASISReduction(RunNumbers='90146',
+                           DoFluxNormalization=True,
+                           FluxNormalizationType='Monitor',
+                           MaskFile='BASIS_Mask_default_333.xml',
+                           ReflectionType='silicon_333',
+                           EnergyBins=[-330, 4.0, 330],
+                           MomentumTransferBins=[3.05, 4.30, 3.05],
+                           DivideByVanadium=True,
+                           NormRunNumbers='90175',
+                           OutputSusceptibility=True)
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'BSS_90146_divided_Xqw', 'BSS_90146_divided_Xqw.nxs'
+
+
 class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Reduction for a scan of runs probing different orientations of a
     crystal."""
