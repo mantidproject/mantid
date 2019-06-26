@@ -17,6 +17,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
@@ -241,7 +242,14 @@ void BinaryOperation::exec() {
     //   (b) it has been, but it's not the correct dimensions
     if ((m_out != m_lhs && m_out != m_rhs) ||
         (m_out == m_rhs && (m_lhs->size() > m_rhs->size()))) {
-      m_out = create<HistoWorkspace>(*m_lhs);
+      // if the input workspace are specialworkspace2d, then we need to ensure the map is set
+      auto specialLHS = dynamic_cast<const SpecialWorkspace2D *>(m_lhs.get());
+      auto specialRHS = dynamic_cast<const SpecialWorkspace2D *>(m_rhs.get());
+      if (specialLHS && specialRHS){
+        m_out = create<SpecialWorkspace2D>(*specialLHS);;
+      }else{
+        m_out = create<HistoWorkspace>(*m_lhs);
+      }
     }
   }
 

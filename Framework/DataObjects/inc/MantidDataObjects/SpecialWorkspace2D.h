@@ -42,7 +42,9 @@ public:
   }
   /// Returns a default-initialized clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> cloneEmpty() const {
-    return std::unique_ptr<SpecialWorkspace2D>(doCloneEmpty());
+    auto workspace = std::unique_ptr<SpecialWorkspace2D>(doCloneEmpty());
+    workspace->setDetMap(this->detID_to_WI);
+    return workspace;
   }
   SpecialWorkspace2D &operator=(const SpecialWorkspace2D &) = delete;
   /** Gets the name of the workspace type
@@ -64,6 +66,11 @@ public:
   void binaryOperation(const unsigned int operatortype);
 
   virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
+
+  /** set a new detector map, for use in clone empty
+   * @param map the map to set.
+   */
+  void setDetMap(std::map<detid_t, std::size_t> map){ detID_to_WI=map;}
 
 private:
   SpecialWorkspace2D *doClone() const override {
