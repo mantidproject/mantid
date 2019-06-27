@@ -1,15 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#
+
 from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialogButtonBox
 
 from mantid.api import MatrixWorkspace
@@ -52,6 +53,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     def __init__(self, workspaces, parent=None):
         super(SpectraSelectionDialog, self).__init__(parent)
+        self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.raise_error_if_workspaces_not_compatible(workspaces)
 

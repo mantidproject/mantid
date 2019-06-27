@@ -5,8 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
+
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QDialog, QHBoxLayout, QPushButton
+from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QDialog, QHBoxLayout, QPushButton, QSizePolicy
 
 
 class PlotTypeDialog(QDialog):
@@ -15,7 +17,10 @@ class PlotTypeDialog(QDialog):
 
     def __init__(self, parent=None, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
+        self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowFlags(Qt.WindowSystemMenuHint | Qt.WindowTitleHint |
+                            Qt.WindowCloseButtonHint)
 
         self.selection = None
         self.decision = None
@@ -29,6 +34,7 @@ class PlotTypeDialog(QDialog):
         self.hl.addWidget(self.btn_colorfil)
 
         self.setLayout(self.hl)
+        self.setMinimumWidth(200)
 
         self.btn_spectra.clicked.connect(self.show_spectra_selection_dialog)
         self.btn_colorfil.clicked.connect(self.make_colorfill_plot)
