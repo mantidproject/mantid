@@ -253,7 +253,6 @@ class MuonContext(object):
             for run in run_list:
                 run_string = run_list_to_string(run)
                 phasequad_names += self.phase_context.get_phase_quad(self.data_context.instrument, run_string)
-        print(group_names, "group names")
         return group_names + pair_names + phasequad_names
 
     def get_names_of_frequency_domain_workspaces_to_fit(self, runs='', group_and_pair='', phasequad = False):
