@@ -44,7 +44,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-127</y>
+        <y>-91</y>
         <width>547</width>
         <height>595</height>
        </rect>
@@ -306,7 +306,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_4">
+          <widget class="QGroupBox" name="layout_box">
            <property name="title">
             <string>Layouts</string>
            </property>

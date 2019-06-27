@@ -297,6 +297,7 @@ class MainWindow(QMainWindow):
                                   action_save_project, action_save_project_as,
                                   None, action_settings, None,
                                   action_manage_directories, None, action_quit]
+
         # view menu
         action_restore_default = create_action(
             self, "Restore Default Layout",
@@ -430,6 +431,10 @@ class MainWindow(QMainWindow):
         layout_options = []
         for item in layout_keys:
             layout_options.append(self.create_load_layout_action(item, layout_dict[item]))
+        layout_options.append(None)
+        action_settings = create_action(
+            self, "Settings", on_triggered=self.open_settings_layout_window)
+        layout_options.append(action_settings)
 
         add_actions(self.view_menu_layouts, layout_options)
 
@@ -574,6 +579,11 @@ class MainWindow(QMainWindow):
 
     def open_settings_window(self):
         settings = SettingsPresenter(self)
+        settings.show()
+
+    def open_settings_layout_window(self):
+        settings = SettingsPresenter(self)
+        settings.general_settings.focus_layout_box()
         settings.show()
 
     def config_updated(self):

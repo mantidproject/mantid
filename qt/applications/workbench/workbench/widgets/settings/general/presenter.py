@@ -164,3 +164,7 @@ class GeneralSettings(object):
             CONF.set(self.USER_LAYOUT, layout_dict)
             self.fill_layout_display()
             self.parent.populate_layout_menu()
+
+    def focus_layout_box(self):
+        self.view.scrollArea.ensureWidgetVisible(self.view.new_layout_name)
+        self.view.new_layout_name.setFocus()
