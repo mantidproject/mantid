@@ -5,10 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Slicing.h"
-#include "Common/multivisitors.hpp"
-// equivalent to
-//         #include <boost/variant/multivisitors.hpp>
-// available in boost 1.54+ - required for RHEL7.
 #include <vector>
 
 namespace MantidQt {
