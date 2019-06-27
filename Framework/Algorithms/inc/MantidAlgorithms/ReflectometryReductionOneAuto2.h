@@ -114,7 +114,8 @@ private:
                            std::vector<std::string> &IvsQBinnedGroup,
                            std::vector<std::string> &IvsQGroup);
   ReflectometryReductionOneAuto2::WorkspaceNames
-  getOutputNamesForGroups(const std::string &inputName, const std::string &runNumber,
+  getOutputNamesForGroups(const std::string &inputName,
+                          const std::string &runNumber,
                           const size_t wsGroupNumber);
 };
 
