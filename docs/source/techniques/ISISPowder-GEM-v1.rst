@@ -760,7 +760,7 @@ save_gda
 If set to **True**, this saves the focused workspace to the
 MAUD-readable `.gda` format.
 
-If:ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
+If :ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
 this is enabled, and disabled if it is set to **False**.
 
 .. _save_maud_calib_gem_isis-powder-diffraction-ref:
@@ -773,7 +773,7 @@ If set to **True**, this uses the focus output and
 to create a MAUD calibration file, using
 :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`.
 
-If:ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
+If :ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
 this is enabled, and disabled if it is set to **False**.
 
 .. _save_maud_gem_isis-powder-diffraction-ref:

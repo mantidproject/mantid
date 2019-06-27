@@ -391,7 +391,7 @@ This input uses the same syntax as
 :ref:`run_number_hrpd_isis-powder-diffraction-ref`.
 
 *Note: If this is set to anything other than* **False**,
-*:ref:`sample_empty_scale_hrpd_isis-powder-diffraction-ref` must also
+* :ref:`sample_empty_scale_hrpd_isis-powder-diffraction-ref` must also
 be specified*
      
 Example Input:
