@@ -51,19 +51,16 @@ namespace CustomInterfaces {
  * @param defaultInstrumentIndex The index of the instrument to have selected by
  * default.
  * @param messageHandler :: A handler to pass messages to the user
- * @param pythonRunner :: [input] Interface for running python code
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
-    int defaultInstrumentIndex, IMessageHandler *messageHandler,
-    IPythonRunner *pythonRunner)
+    int defaultInstrumentIndex, IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
-      m_searcher(std::make_unique<CatalogSearcher>(pythonRunner, mainView)),
-      m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments),
+      m_searcher(std::make_unique<CatalogSearcher>(mainView)), m_view(mainView),
+      m_progressView(progressableView), m_mainPresenter(nullptr),
+      m_messageHandler(messageHandler), m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_thetaTolerance(thetaTolerance) {
 
