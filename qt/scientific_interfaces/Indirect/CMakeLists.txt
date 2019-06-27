@@ -75,6 +75,9 @@ set(
   IndirectFunctionBrowser/IqtFunctionModel.cpp
   IndirectFunctionBrowser/IqtTemplateBrowser.cpp
   IndirectFunctionBrowser/IqtTemplatePresenter.cpp
+  IndirectFunctionBrowser/MSDFunctionModel.cpp
+  IndirectFunctionBrowser/MSDTemplateBrowser.cpp
+  IndirectFunctionBrowser/MSDTemplatePresenter.cpp
   JumpFit.cpp
   JumpFitAddWorkspaceDialog.cpp
   JumpFitDataPresenter.cpp
@@ -106,9 +109,10 @@ set(
   IqtFitModel.h
   IndirectFunctionBrowser/ConvFunctionModel.h
   IndirectFunctionBrowser/IqtFunctionModel.h
+  IndirectFunctionBrowser/MSDFunctionModel.h
   JumpFitModel.h
   MSDFitModel.h
-    ParameterEstimation.h
+  ParameterEstimation.h
 )
 
 set(
@@ -175,6 +179,8 @@ set(
   IndirectFunctionBrowser/ConvTemplatePresenter.h
   IndirectFunctionBrowser/IqtTemplateBrowser.h
   IndirectFunctionBrowser/IqtTemplatePresenter.h
+  IndirectFunctionBrowser/MSDTemplateBrowser.h
+  IndirectFunctionBrowser/MSDTemplatePresenter.h
   Iqt.h
   ISISCalibration.h
   ISISDiagnostics.h

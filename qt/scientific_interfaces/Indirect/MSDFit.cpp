@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MSDFit.h"
+#include "IndirectFunctionBrowser/MsdTemplateBrowser.h"
+
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -40,6 +42,8 @@ MSDFit::MSDFit(QWidget *parent)
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
+  auto templateBrowser = new MSDTemplateBrowser;
+  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(false);
