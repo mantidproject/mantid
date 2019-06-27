@@ -1637,7 +1637,7 @@ class SANSDataProcessorGui(QMainWindow,
         # Hedge for trying to read out
         try:
             return RangeStepType[q_1d_step_type_as_string]
-        except RuntimeError:
+        except KeyError:
             return None
 
     @q_1d_step_type.setter

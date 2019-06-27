@@ -83,7 +83,7 @@ class EnumMetaclass(type):
         # instance so we can return the same object on conversion.
         for attr in attributes:
             if not (attr.startswith('__') and attr.endswith('__')):
-                value  = attributes[attr]
+                value = attributes[attr]
                 enumval = factory(cls, value, attr)
                 if value in cls._enums:
                     other = cls._enums[value]
