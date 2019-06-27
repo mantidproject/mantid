@@ -21,17 +21,8 @@ window view needs to implement. It is empty and not necessary at the moment, but
 can be used in the future if widgets common to all tabs are added, for instance,
 the help button.
 */
-class MainWindowSubscriber {
-public:
-  virtual void notifyHelpPressed(){};
-  virtual void notifyNewBatchRequested(){};
-  virtual void notifyCloseBatchRequested(int){};
-  virtual ~MainWindowSubscriber() = default;
-};
-
 class IMainWindowView {
 public:
-  virtual void subscribe(MainWindowSubscriber *notifyee) = 0;
   virtual IBatchView *newBatch() = 0;
   virtual void removeBatch(int index) = 0;
   virtual std::vector<IBatchView *> batches() const = 0;

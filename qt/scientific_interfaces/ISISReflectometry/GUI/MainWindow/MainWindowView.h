@@ -32,7 +32,6 @@ class MainWindowView : public MantidQt::API::UserSubWindow,
   Q_OBJECT
 public:
   explicit MainWindowView(QWidget *parent = nullptr);
-  void subscribe(MainWindowSubscriber *notifyee) override;
 
   static std::string name() { return "ISIS Reflectometry"; }
   static QString categoryInfo() { return "Reflectometry"; }
@@ -62,7 +61,6 @@ private:
   void initLayout() override;
   /// Interface definition with widgets for the main interface window
   Ui::MainWindowWidget m_ui;
-  MainWindowSubscriber *m_notifyee;
   /// The presenter handling this view
   boost::optional<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;

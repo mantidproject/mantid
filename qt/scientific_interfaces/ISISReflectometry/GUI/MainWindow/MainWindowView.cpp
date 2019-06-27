@@ -29,8 +29,7 @@ int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
 
 DECLARE_SUBWINDOW(MainWindowView)
 
-MainWindowView::MainWindowView(QWidget *parent)
-    : UserSubWindow(parent), m_notifyee(nullptr) {}
+MainWindowView::MainWindowView(QWidget *parent) : UserSubWindow(parent) {}
 
 IBatchView *MainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
@@ -101,14 +100,10 @@ void MainWindowView::onTabCloseRequested(int tabIndex) {
 }
 
 void MainWindowView::onNewBatchRequested(bool) {
-  m_notifyee->notifyNewBatchRequested();
+  m_presenter.get().notifyNewBatchRequested();
 }
 
-void MainWindowView::subscribe(MainWindowSubscriber *notifyee) {
-  m_notifyee = notifyee;
-}
-
-void MainWindowView::helpPressed() { m_notifyee->notifyHelpPressed(); }
+void MainWindowView::helpPressed() { m_presenter.get().notifyHelpPressed(); }
 
 /**
 Runs python code

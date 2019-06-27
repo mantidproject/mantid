@@ -23,7 +23,6 @@ namespace CustomInterfaces {
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, BatchPresenterFactory batchPresenterFactory)
     : m_view(view), m_batchPresenterFactory(std::move(batchPresenterFactory)) {
-  view->subscribe(this);
   for (auto *batchView : m_view->batches())
     m_batchPresenters.emplace_back(m_batchPresenterFactory.make(batchView));
 }
