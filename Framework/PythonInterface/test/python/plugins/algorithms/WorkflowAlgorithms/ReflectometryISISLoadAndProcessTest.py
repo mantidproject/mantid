@@ -50,18 +50,20 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             'TimeInterval' : 210
         }
         self._expected_dummy_time_sliced_outputs = [
-            'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
-            'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
-            'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
-            'IvsQ_binned_38415_3', 'TOF_38415', 'TOF_38415_monitors',
-            'TOF_38415_sliced', 'TOF_38415_sliced_0_1200', 'TOF_38415_sliced_1200_2400',
-            'TOF_38415_sliced_2400_3600', 'TOF']
+            'IvsQ_38415', 'IvsQ_38415_sliced_0_1200', 'IvsQ_38415_TOF_38415_sliced_1200_2400',
+            'IvsQ_38415__2400_3600', 'IvsQ_binned_38415', 'IvsQ_binned_38415_sliced_0_1200',
+            'IvsQ_binned_38415_TOF_38415_sliced_1200_2400', 'IvsLam_38415',
+            'IvsLam_38415_sliced_0_1200', 'IvsLam_38415_TOF_38415_sliced_1200_2400',
+            'IvsLam_38415__2400_3600', 'IvsQ_binned_38415__2400_3600', 'TOF_38415',
+            'TOF_38415_monitors', 'TOF_38415_sliced', 'TOF_38415_sliced_0_1200',
+            'TOF_38415_sliced_1200_2400', 'TOF_38415_sliced_2400_3600', 'TOF']
         
         self._expected_real_time_sliced_outputs = [
-            'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
-            'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
-            'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
-            'IvsQ_binned_38415_3', 'TOF_38415', 'TOF_38415_monitors',
+            'IvsQ_38415', 'IvsQ_38415_sliced_0_210', 'IvsQ_38415_sliced_210_420',
+            'IvsQ_38415_sliced_420_610', 'IvsQ_binned_38415', 'IvsQ_binned_38415_sliced_0_210',
+            'IvsQ_binned_38415_sliced_210_420',  'IvsLam_38415', 'IvsLam_38415_sliced_0_210',
+            'IvsLam_38415_sliced_210_420', 'IvsLam_38415_sliced_420_610',
+            'IvsQ_binned_38415_sliced_420_610', 'TOF_38415', 'TOF_38415_monitors',
             'TOF_38415_sliced', 'TOF_38415_sliced_0_210', 'TOF_38415_sliced_210_420',
             'TOF_38415_sliced_420_610', 'TOF']
 
@@ -196,7 +198,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '13460'
         args['FirstTransmissionRunList'] = '13463'
         args['SecondTransmissionRunList'] = '13464'
-        # Expect IvsQ outputs from the reduction, and initermediate LAM outputs from
+        # Expect IvsQ outputs from the reduction, and intermediate LAM outputs from
         # creating the stitched transmission run
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
                    'TRANS_LAM_13463', 'TRANS_LAM_13464', 'TOF']
@@ -321,10 +323,11 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args.update(self._default_slice_options_dummy_run)
         args['InputRunList'] = '38415'
         outputs = [
-             'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
-             'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
-             'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
-             'IvsQ_binned_38415_3', '38415', '38415_monitors',
+             'IvsQ_38415', 'IvsQ_38415_sliced_0_1200', 'IvsQ_38415_sliced_1200_2400',
+             'IvsQ_38415_sliced_2400_3600', 'IvsQ_binned_38415', 'IvsQ_binned_38415_sliced_0_1200',
+             'IvsQ_binned_38415_sliced_1200_2400', 'IvsLam_38415', 'IvsLam_38415_sliced_0_1200',
+             'IvsLam_38415_sliced_1200_2400', 'IvsLam_38415_sliced_2400_3600',
+             'IvsQ_binned_38415_sliced_2400_3600', '38415', '38415_monitors',
              '38415_sliced', '38415_sliced_0_1200', '38415_sliced_1200_2400',
              '38415_sliced_2400_3600', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
@@ -369,8 +372,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '38415'
         args['SliceWorkspace'] = True
-        outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1',
-                   'IvsLam_38415', 'IvsLam_38415_1', 'TOF_38415', 'TOF_38415_monitors',
+        outputs = ['IvsQ_38415', 'IvsQ_38415_sliced_0_4200', 'IvsQ_binned_38415',
+                   'IvsQ_binned_38415_sliced_0_4200', 'IvsLam_38415',
+                   'IvsLam_38415_sliced_0_4200', 'TOF_38415', 'TOF_38415_monitors',
                    'TOF_38415_sliced', 'TOF_38415_sliced_0_4200', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -395,13 +399,15 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['SliceWorkspace'] = True
         args['LogName'] = 'proton_charge'
         args['LogValueInterval'] = 60
-        outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
-                   'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
-                   'IvsLam_38415', 'IvsLam_38415_1', 'IvsLam_38415_2', 'IvsLam_38415_3',
-                   'IvsQ_binned_38415_3', 'TOF', 'TOF_38415', 'TOF_38415_monitors',
-                   'TOF_38415_sliced', 'TOF_38415_sliced_Log.proton_charge.From.-30.To.30.Value-change-direction:both',
-                   'TOF_38415_sliced_Log.proton_charge.From.30.To.90.Value-change-direction:both',
-                   'TOF_38415_sliced_Log.proton_charge.From.90.To.150.Value-change-direction:both']
+        slice1 = '_sliced_Log.proton_charge.From.-30.To.30.Value-change-direction:both'
+        slice2 = '_sliced_Log.proton_charge.From.30.To.90.Value-change-direction:both'
+        slice3 = '_sliced_Log.proton_charge.From.90.To.150.Value-change-direction:both'
+        outputs = ['IvsQ_38415', 'IvsQ_38415'+slice1, 'IvsQ_38415'+slice2, 'IvsQ_38415'+slice3,
+                   'IvsQ_binned_38415', 'IvsQ_binned_38415'+slice1,'IvsQ_binned_38415'+slice2,
+                   'IvsQ_binned_38415'+slice3, 'IvsLam_38415', 'IvsLam_38415'+slice1,
+                   'IvsLam_38415'+slice2, 'IvsLam_38415'+slice3, 'TOF', 'TOF_38415',
+                   'TOF_38415_monitors', 'TOF_38415_sliced', 'TOF_38415'+slice1,
+                   'TOF_38415'+slice2, 'TOF_38415'+slice3]
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
@@ -413,9 +419,11 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '38415'
         args['SliceWorkspace'] = True
         args['LogName'] = 'proton_charge'
-        outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1',
-                   'IvsLam_38415', 'IvsLam_38415_1', 'TOF', 'TOF_38415', 'TOF_38415_monitors',
-                   'TOF_38415_sliced', 'TOF_38415_sliced_Log.proton_charge.From.0.To.100.Value-change-direction:both']
+        sliceName = '_sliced_Log.proton_charge.From.0.To.100.Value-change-direction:both'
+        outputs = ['IvsQ_38415', 'IvsQ_38415'+sliceName, 'IvsQ_binned_38415',
+                   'IvsQ_binned_38415'+sliceName, 'IvsLam_38415', 'IvsLam_38415'+sliceName,
+                   'TOF', 'TOF_38415', 'TOF_38415_monitors', 'TOF_38415_sliced',
+                   'TOF_38415'+sliceName]
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
