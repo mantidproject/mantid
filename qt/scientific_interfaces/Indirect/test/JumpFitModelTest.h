@@ -20,6 +20,8 @@ using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 
+using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
+
 namespace {
 
 std::vector<std::string> getParameterLabels() {
@@ -56,26 +58,26 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{1});
   }
 
   void
   test_that_removeWorkspace_will_remove_the_specified_workspace_from_the_model() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
-    m_model->removeWorkspace(0);
+    m_model->removeWorkspace(DatasetIndex{0});
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 0);
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{0});
   }
 
   void
   test_that_setFitType_will_change_the_fit_type_in_the_sequentialFitOutputName() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
     m_model->setFitType("ChudleyElliot");
@@ -86,7 +88,7 @@ public:
 
   void
   test_that_setFitType_will_change_the_fit_type_in_the_simultaneousFitOutputName() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
     m_model->setFitType("ChudleyElliot");
@@ -96,44 +98,44 @@ public:
   }
 
   void test_that_zeroWidths_returns_false_if_the_workspace_contains_widths() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT(!m_model->zeroWidths(0));
+    TS_ASSERT(!m_model->zeroWidths(DatasetIndex{0}));
   }
 
   void test_that_zeroWidths_returns_true_if_the_workspace_contains_no_widths() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(m_model->zeroWidths(1));
+    TS_ASSERT(m_model->zeroWidths(DatasetIndex{1}));
   }
 
   void test_that_zeroEISF_returns_false_if_the_workspace_contains_EISFs() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT(!m_model->zeroEISF(0));
+    TS_ASSERT(!m_model->zeroEISF(DatasetIndex{0}));
   }
 
   void test_that_zeroEISF_returns_true_if_the_workspace_contains_no_EISFs() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(m_model->zeroEISF(1));
+    TS_ASSERT(m_model->zeroEISF(DatasetIndex{1}));
   }
 
   void
   test_that_isMultiFit_returns_false_if_the_model_contains_one_workspace() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -142,7 +144,7 @@ public:
 
   void
   test_that_isMultiFit_returns_true_if_the_model_contains_multiple_workspace() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -153,7 +155,7 @@ public:
 
   void
   test_that_isMultiFit_returns_false_if_the_model_contains_multiple_workspace_which_are_identical() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace, m_workspace);
 
@@ -166,94 +168,102 @@ public:
 
   void
   test_that_getFitParameterName_will_return_the_name_of_the_expected_parameter() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getFitParameterName(0, 0), "f0.EISF");
-    TS_ASSERT_EQUALS(m_model->getFitParameterName(0, 2), "f1.FWHM");
+    TS_ASSERT_EQUALS(
+        m_model->getFitParameterName(DatasetIndex{0}, IDAWorkspaceIndex{0}),
+        "f0.EISF");
+    TS_ASSERT_EQUALS(
+        m_model->getFitParameterName(DatasetIndex{0}, IDAWorkspaceIndex{2}),
+        "f1.FWHM");
   }
 
   void
   test_that_getWidths_will_return_an_empty_vector_if_there_are_no_widths() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(m_model->getWidths(1).empty());
+    TS_ASSERT(m_model->getWidths(DatasetIndex{1}).empty());
   }
 
   void test_that_getWidths_will_return_the_width_parameter_names() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getWidths(0)[0], "f1.Width");
-    TS_ASSERT_EQUALS(m_model->getWidths(0)[1], "f1.FWHM");
+    TS_ASSERT_EQUALS(m_model->getWidths(DatasetIndex{0})[0], "f1.Width");
+    TS_ASSERT_EQUALS(m_model->getWidths(DatasetIndex{0})[1], "f1.FWHM");
   }
 
   void test_that_getEISF_will_return_an_empty_vector_if_there_are_no_EISFs() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(m_model->getEISF(1).empty());
+    TS_ASSERT(m_model->getEISF(DatasetIndex{1}).empty());
   }
 
   void test_that_getEISF_will_return_the_EISF_parameter_names() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getEISF(0)[0], "f0.EISF");
-    TS_ASSERT_EQUALS(m_model->getEISF(0)[1], "f1.EISF");
+    TS_ASSERT_EQUALS(m_model->getEISF(DatasetIndex{0})[0], "f0.EISF");
+    TS_ASSERT_EQUALS(m_model->getEISF(DatasetIndex{0})[1], "f1.EISF");
   }
 
   void test_that_getWidthSpectrum_will_return_none_when_there_are_no_widths() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(!m_model->getWidthSpectrum(0, 1));
+    TS_ASSERT(!m_model->getWidthSpectrum(0, DatasetIndex{1}));
   }
 
   void test_that_getWidthSpectrum_will_return_the_width_spectrum_number() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(0, 0).get(), 1);
-    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(1, 0).get(), 2);
+    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(0, DatasetIndex{0}).get(),
+                     IDAWorkspaceIndex{1});
+    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(1, DatasetIndex{0}).get(),
+                     IDAWorkspaceIndex{2});
   }
 
   void test_that_getEISFSpectrum_will_return_none_when_there_are_no_EISFs() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(!m_model->getEISFSpectrum(0, 1));
+    TS_ASSERT(!m_model->getEISFSpectrum(0, DatasetIndex{1}));
   }
 
   void test_that_getEISFSpectrum_will_return_the_EISF_spectrum_number() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(0, 0).get(), 0);
-    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(1, 0).get(), 3);
+    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(0, DatasetIndex{0}).get(),
+                     IDAWorkspaceIndex{0});
+    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(1, DatasetIndex{0}).get(),
+                     IDAWorkspaceIndex{3});
   }
 
   void
   test_that_sequentialFitOutputName_returns_the_correct_name_for_a_multi_fit() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -266,7 +276,7 @@ public:
 
   void
   test_that_simultaneousFitOutputName_returns_the_correct_name_for_a_multi_fit() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -279,13 +289,14 @@ public:
 
   void
   test_that_singleFitOutputName_returns_the_correct_name_for_a_single_data_set_fit() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
     m_model->setFitType("ChudleyElliot");
 
-    TS_ASSERT_EQUALS(m_model->singleFitOutputName(0, 0),
-                     "Name_HWHM_FofQFit_ChudleyElliot_s0_Results");
+    TS_ASSERT_EQUALS(
+        m_model->singleFitOutputName(DatasetIndex{0}, IDAWorkspaceIndex{0}),
+        "Name_HWHM_FofQFit_ChudleyElliot_s0_Results");
   }
 
 private:

@@ -37,7 +37,7 @@ public:
   void setParameter(const QString &paramName, double value) override {
     m_function->setParameter(paramName.toStdString(), value);
   }
-  void setParamError(const QString &paramName, double error) override {
+  void setParameterError(const QString &paramName, double error) override {
     auto const i = m_function->parameterIndex(paramName.toStdString());
     m_function->setError(i, error);
   }
@@ -61,6 +61,8 @@ public:
       m_function->removeTie(paramName.toStdString());
     }
   }
+
+  void setParameterConstraint(const QString &, const QString &) override {}
 
   void setGlobalParameters(const QStringList &globals) override {
     m_globals = globals;

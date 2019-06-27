@@ -29,7 +29,7 @@ namespace IDA {
  *
  * Holds a string and vector representation.
  */
-class Spectra {
+class MANTIDQT_INDIRECT_DLL Spectra {
 public:
   explicit Spectra(const std::string &str);
   Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum);

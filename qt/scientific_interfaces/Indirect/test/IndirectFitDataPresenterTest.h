@@ -24,6 +24,7 @@ using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
+using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace {
 
@@ -88,9 +89,12 @@ public:
 
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
+  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
+  MOCK_METHOD1(setStartX, void(double));
+  MOCK_METHOD1(setEndX, void(double));
 };
 
 /// Mock object to mock the model
@@ -102,15 +106,15 @@ public:
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
 
   MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
+  MOCK_CONST_METHOD0(numberOfWorkspaces, DatasetIndex());
 
   MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(std::size_t index,
-                                  std::size_t spectrum) const override {
+  std::string singleFitOutputName(DatasetIndex index,
+                                  IDAWorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -186,7 +190,7 @@ public:
   void
   test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_view_and_model() {
     ON_CALL(*m_view, isMultipleDataTabSelected()).WillByDefault(Return(true));
-    ON_CALL(*m_model, numberOfWorkspaces()).WillByDefault(Return(2));
+    ON_CALL(*m_model, numberOfWorkspaces()).WillByDefault(Return(DatasetIndex{2}));
 
     Expectation isMultipleData =
         EXPECT_CALL(*m_view, isMultipleDataTabSelected())
@@ -194,7 +198,7 @@ public:
             .WillOnce(Return(true));
     EXPECT_CALL(*m_model, numberOfWorkspaces()).Times(1).After(isMultipleData);
 
-    m_presenter->updateSpectraInTable(0);
+    m_presenter->updateSpectraInTable(DatasetIndex{0});
   }
 
   ///----------------------------------------------------------------------
@@ -251,7 +255,7 @@ public:
   test_that_setStartX_will_alter_the_relevant_startX_column_in_the_data_table() {
     TableItem const startX(2.3);
 
-    m_presenter->setStartX(startX.asDouble(), 0, 0);
+    m_presenter->setStartX(startX.asDouble(), DatasetIndex{0}, IDAWorkspaceIndex{0});
 
     assertValueIsGlobal(START_X_COLUMN, startX);
   }
@@ -260,7 +264,7 @@ public:
   test_that_setEndX_will_alter_the_relevant_endX_column_in_the_data_table() {
     TableItem const endX(5.5);
 
-    m_presenter->setEndX(endX.asDouble(), 0, 0);
+    m_presenter->setEndX(endX.asDouble(), DatasetIndex{0}, IDAWorkspaceIndex{0});
 
     assertValueIsGlobal(END_X_COLUMN, endX);
   }
@@ -269,7 +273,8 @@ public:
   test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
     TableItem const excludeRegion("2-3");
 
-    m_presenter->setExclude(excludeRegion.asString(), 0, 0);
+    m_presenter->setExclude(excludeRegion.asString(), DatasetIndex{0},
+                            IDAWorkspaceIndex{0});
 
     assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }

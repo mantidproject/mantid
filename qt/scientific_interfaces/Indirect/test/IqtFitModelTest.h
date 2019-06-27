@@ -16,6 +16,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
@@ -24,19 +25,21 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {
 
-std::string getFunctionString(bool multipleIntensities) {
-  return multipleIntensities
-             ? "name=ExpDecay,Height=1,Lifetime=1;name=ExpDecay,Height=1,"
-               "Lifetime=0.0247558;name=FlatBackground,A0=0"
-             : "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-               "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-               "name=Resolution,Workspace=Name,WorkspaceIndex=0;((composite="
-               "ProductFunction,NumDeriv=false;name=Lorentzian,Amplitude=1,"
-               "PeakCentre=0,FWHM=0.0175)))";
-}
-
-IFunction_sptr getFunction(std::string const &functionString) {
-  return FunctionFactory::Instance().createInitialized(functionString);
+MultiDomainFunction_sptr getFunction(bool multipleIntensities) {
+  std::string const functionString =
+      multipleIntensities
+          ? "composite=CompositeFunction,$domains=i;name=ExpDecay,Height=1,"
+            "Lifetime=1;name=ExpDecay,Height=1,"
+            "Lifetime=0.0247558;name=FlatBackground,A0=0"
+          : "composite=CompositeFunction,$domains=i;name=LinearBackground,A0=0,"
+            "A1=0,ties=(A0=0.000000,A1=0.0);"
+            "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+            "name=Resolution,Workspace=Name,WorkspaceIndex=0;((composite="
+            "ProductFunction,NumDeriv=false;name=Lorentzian,Amplitude=1,"
+            "PeakCentre=0,FWHM=0.0175)))";
+  auto fun = FunctionFactory::Instance().createInitialized(
+      "composite=MultiDomainFunction;" + functionString + ";" + functionString);
+  return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
 }
 
 } // namespace
@@ -65,11 +68,11 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{1});
   }
 
   void test_that_getSpectrumDependentAttributes_will_return_an_empty_vector() {
@@ -79,10 +82,10 @@ public:
   void
   test_that_canConstrainIntensities_returns_false_if_it_contains_less_than_2_intensity_parameters() {
     /// Intensity can either be represented by A0 or Height IqtFit
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
-    m_model->setFitFunction(getFunction(getFunctionString(false)));
+    m_model->setFitFunction(getFunction(false));
 
     TS_ASSERT(!m_model->canConstrainIntensities());
   }
@@ -90,30 +93,30 @@ public:
   void
   test_that_canConstrainIntensities_returns_true_if_it_contains_2_or_more_intensity_parameters() {
     /// Intensity can either be represented by A0 or Height in IqtFit
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
-    m_model->setFitFunction(getFunction(getFunctionString(true)));
+    m_model->setFitFunction(getFunction(true));
 
     TS_ASSERT(m_model->canConstrainIntensities());
   }
 
   void
   test_that_setConstrainIntensities_returns_false_if_there_is_not_multiple_intensities_to_be_constrained() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
-    m_model->setFitFunction(getFunction(getFunctionString(false)));
+    m_model->setFitFunction(getFunction(false));
 
     TS_ASSERT(!m_model->setConstrainIntensities(true));
   }
 
   void
   test_that_setConstrainIntensities_returns_true_if_there_are_multiple_intensities_to_be_constrained() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
-    m_model->setFitFunction(getFunction(getFunctionString(true)));
+    m_model->setFitFunction(getFunction(true));
 
     TS_ASSERT(m_model->setConstrainIntensities(true));
   }

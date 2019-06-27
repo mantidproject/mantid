@@ -19,6 +19,7 @@
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
+using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 class MSDFitModelTest : public CxxTest::TestSuite {
 public:
@@ -44,16 +45,16 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), DatasetIndex{1});
   }
 
   void
   test_that_sequentialFitOutputName_returns_the_correct_name_which_uses_the_fit_string_set() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
     m_model->setFitType("Gaussian");
@@ -63,7 +64,7 @@ public:
 
   void
   test_that_simultaneousFitOutputName_returns_the_correct_name_which_uses_the_fit_string_set() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
     m_model->setFitType("Gaussian");
@@ -73,12 +74,13 @@ public:
 
   void
   test_that_singleFitOutputName_returns_the_correct_name_which_uses_the_fit_string_set() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
     m_model->setFitType("Gaussian");
-    TS_ASSERT_EQUALS(m_model->singleFitOutputName(0, 0),
-                     "Name_MSDFit_Gaussian_s0_Results");
+    TS_ASSERT_EQUALS(
+        m_model->singleFitOutputName(DatasetIndex{0}, IDAWorkspaceIndex{0}),
+        "Name_MSDFit_Gaussian_s0_Results");
   }
 
   void test_that_getSpectrumDependentAttributes_returns_an_empty_vector() {

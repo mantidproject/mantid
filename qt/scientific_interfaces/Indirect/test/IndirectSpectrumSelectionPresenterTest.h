@@ -7,6 +7,7 @@
 #ifndef MANTIDQT_INDIRECTSPECTRUMSELECTIONPRESENTERTEST_H_
 #define MANTIDQT_INDIRECTSPECTRUMSELECTIONPRESENTERTEST_H_
 
+#include <cxxtest/GlobalFixture.h>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -24,6 +25,7 @@ using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
+using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 /// This QApplication object is required to construct the view
 class QApplicationHolder : CxxTest::GlobalFixture {
@@ -56,17 +58,18 @@ public:
     emit selectedSpectraChanged(spectra);
   }
 
-  void emitSelectedSpectraChanged(std::size_t minimum, std::size_t maximum) {
+  void emitSelectedSpectraChanged(IDAWorkspaceIndex minimum,
+                                  IDAWorkspaceIndex maximum) {
     emit selectedSpectraChanged(minimum, maximum);
   }
 
-  void emitMaskSpectrumChanged(int spectrum) {
+  void emitMaskSpectrumChanged(IDAWorkspaceIndex spectrum) {
     emit maskSpectrumChanged(spectrum);
   }
 
   /// Public methods
-  MOCK_CONST_METHOD0(minimumSpectrum, std::size_t());
-  MOCK_CONST_METHOD0(maximumSpectrum, std::size_t());
+  MOCK_CONST_METHOD0(minimumSpectrum, IDAWorkspaceIndex());
+  MOCK_CONST_METHOD0(maximumSpectrum, IDAWorkspaceIndex());
 
   MOCK_CONST_METHOD0(spectraString, std::string());
   MOCK_CONST_METHOD0(maskString, std::string());
@@ -83,8 +86,8 @@ public:
   MOCK_METHOD0(clear, void());
 
   /// Public slots
-  MOCK_METHOD1(setMinimumSpectrum, void(std::size_t spectrum));
-  MOCK_METHOD1(setMaximumSpectrum, void(std::size_t spectrum));
+  MOCK_METHOD1(setMinimumSpectrum, void(IDAWorkspaceIndex spectrum));
+  MOCK_METHOD1(setMaximumSpectrum, void(IDAWorkspaceIndex spectrum));
 
   MOCK_METHOD1(setSpectraString, void(std::string const &spectraString));
   MOCK_METHOD1(setMaskString, void(std::string const &maskString));
@@ -96,15 +99,15 @@ public:
 class MockIndirectSpectrumSelectionModel : public IndirectFittingModel {
 public:
   /// Public methods
-  MOCK_CONST_METHOD2(getExcludeRegion,
-                     std::string(std::size_t dataIndex, std::size_t index));
+  MOCK_CONST_METHOD2(getExcludeRegion, std::string(DatasetIndex dataIndex,
+                                                   IDAWorkspaceIndex index));
   MOCK_CONST_METHOD0(isMultiFit, bool());
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(std::size_t index,
-                                  std::size_t spectrum) const override {
+  std::string singleFitOutputName(DatasetIndex index,
+                                  IDAWorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -156,7 +159,7 @@ public:
   ///----------------------------------------------------------------------
 
   void test_that_the_model_and_view_have_been_instantiated_correctly() {
-    std::size_t const maxSpectrum(3);
+    IDAWorkspaceIndex const maxSpectrum{3};
 
     ON_CALL(*m_view, maximumSpectrum()).WillByDefault(Return(maxSpectrum));
     ON_CALL(*m_model, isMultiFit()).WillByDefault(Return(false));
@@ -174,12 +177,14 @@ public:
   test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view() {
     std::string const excludeRegion("0-1");
 
-    ON_CALL(*m_model, getExcludeRegion(0, 0))
+    ON_CALL(*m_model, getExcludeRegion(DatasetIndex{0}, IDAWorkspaceIndex{0}))
         .WillByDefault(Return(excludeRegion));
 
-    Expectation getMask = EXPECT_CALL(*m_model, getExcludeRegion(0, 0))
-                              .Times(1)
-                              .WillOnce(Return(excludeRegion));
+    Expectation getMask =
+        EXPECT_CALL(*m_model,
+                    getExcludeRegion(DatasetIndex{0}, IDAWorkspaceIndex{0}))
+            .Times(1)
+            .WillOnce(Return(excludeRegion));
     EXPECT_CALL(*m_view, setMaskString(excludeRegion)).Times(1).After(getMask);
 
     m_presenter->displayBinMask();
@@ -210,7 +215,8 @@ public:
     EXPECT_CALL(*m_view, hideSpectraErrorLabel()).Times(1);
     EXPECT_CALL(*m_view, setMaskSelectionEnabled(true)).Times(1);
 
-    m_view->emitSelectedSpectraChanged(0, 2);
+    m_view->emitSelectedSpectraChanged(IDAWorkspaceIndex{0},
+                                       IDAWorkspaceIndex{2});
   }
 
   void
@@ -218,15 +224,16 @@ public:
     EXPECT_CALL(*m_view, showSpectraErrorLabel()).Times(1);
     EXPECT_CALL(*m_view, setMaskSelectionEnabled(false)).Times(1);
 
-    m_view->emitSelectedSpectraChanged(0, 11);
+    m_view->emitSelectedSpectraChanged(IDAWorkspaceIndex{0},
+                                       IDAWorkspaceIndex{11});
   }
 
   void
   test_that_the_maskSpectrumChanged_signal_will_change_the_mask_by_calling_displayBinMask() {
-    std::size_t const maskSpectrum(0);
+    IDAWorkspaceIndex const maskSpectrum{0};
 
     Expectation getMask =
-        EXPECT_CALL(*m_model, getExcludeRegion(0, maskSpectrum))
+        EXPECT_CALL(*m_model, getExcludeRegion(DatasetIndex{0}, maskSpectrum))
             .Times(1)
             .WillOnce(Return("0"));
     EXPECT_CALL(*m_view, setMaskString("0")).Times(1).After(getMask);
@@ -236,10 +243,10 @@ public:
 
   void
   test_that_the_maskSpectrumChanged_signal_will_change_the_mask_to_an_empty_string_if_the_index_provided_is_out_of_range() {
-    std::size_t const maskSpectrum(11);
+    IDAWorkspaceIndex const maskSpectrum{11};
 
     Expectation getMask =
-        EXPECT_CALL(*m_model, getExcludeRegion(0, maskSpectrum))
+        EXPECT_CALL(*m_model, getExcludeRegion(DatasetIndex{0}, maskSpectrum))
             .Times(1)
             .WillOnce(Return(""));
     EXPECT_CALL(*m_view, setMaskString("")).Times(1).After(getMask);
@@ -253,7 +260,7 @@ public:
 
   void
   test_that_minimumSpectrum_returns_the_spectrum_number_that_it_is_set_as() {
-    std::size_t const minSpectrum(3);
+    IDAWorkspaceIndex const minSpectrum{3};
 
     EXPECT_CALL(*m_view, setMinimumSpectrum(minSpectrum)).Times(1);
     EXPECT_CALL(*m_view, minimumSpectrum())
@@ -266,7 +273,7 @@ public:
 
   void
   test_that_maximumSpectrum_returns_the_spectrum_number_that_it_is_set_as() {
-    std::size_t const maxSpectrum(3);
+    IDAWorkspaceIndex const maxSpectrum{3};
 
     EXPECT_CALL(*m_view, setMaximumSpectrum(maxSpectrum)).Times(1);
     EXPECT_CALL(*m_view, maximumSpectrum())
@@ -325,8 +332,12 @@ public:
     int const maxSpectrum(5);
 
     EXPECT_CALL(*m_view, setSpectraRange(minSpectrum, maxSpectrum)).Times(1);
-    EXPECT_CALL(*m_view, minimumSpectrum()).Times(1).WillOnce(Return(2));
-    EXPECT_CALL(*m_view, maximumSpectrum()).Times(1).WillOnce(Return(2));
+    EXPECT_CALL(*m_view, minimumSpectrum())
+        .Times(1)
+        .WillOnce(Return(IDAWorkspaceIndex{2}));
+    EXPECT_CALL(*m_view, maximumSpectrum())
+        .Times(1)
+        .WillOnce(Return(IDAWorkspaceIndex{2}));
 
     m_view->setSpectraRange(minSpectrum, maxSpectrum);
     m_view->minimumSpectrum();
@@ -347,12 +358,16 @@ public:
   }
 
   void test_that_clear_will_set_the_minimum_and_maximum_spectrums_to_be_zero() {
-    m_view->setMinimumSpectrum(2);
-    m_view->setMaximumSpectrum(4);
+    m_view->setMinimumSpectrum(IDAWorkspaceIndex{2});
+    m_view->setMaximumSpectrum(IDAWorkspaceIndex{4});
 
     EXPECT_CALL(*m_view, clear()).Times(1);
-    EXPECT_CALL(*m_view, minimumSpectrum()).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(*m_view, maximumSpectrum()).Times(1).WillOnce(Return(0));
+    EXPECT_CALL(*m_view, minimumSpectrum())
+        .Times(1)
+        .WillOnce(Return(IDAWorkspaceIndex{0}));
+    EXPECT_CALL(*m_view, maximumSpectrum())
+        .Times(1)
+        .WillOnce(Return(IDAWorkspaceIndex{0}));
 
     m_view->clear();
     m_view->minimumSpectrum();
