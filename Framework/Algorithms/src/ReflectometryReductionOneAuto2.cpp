@@ -897,16 +897,18 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   }
 
   std::vector<std::string> IvsQBinnedGroup, IvsQGroup, IvsLamGroup;
+  std::string runNumber = getRunNumberForWorkspaceGroup(group);
 
   // Execute algorithm over each group member
   for (size_t i = 0; i < group->size(); ++i) {
+    auto inputName = group->getItem(i)->getName();
+    auto outputNames = getOutputNamesForGroups(inputName, runNumber, i);
 
-    const std::string IvsQName = output.iVsQ + "_" + std::to_string(i + 1);
-    const std::string IvsQBinnedName =
-        output.iVsQBinned + "_" + std::to_string(i + 1);
-    const std::string IvsLamName = output.iVsLam + "_" + std::to_string(i + 1);
+    const std::string IvsQName = outputNames.iVsQ;
+    const std::string IvsQBinnedName = outputNames.iVsQBinned;
+    const std::string IvsLamName = outputNames.iVsLam;
 
-    alg->setProperty("InputWorkspace", group->getItem(i)->getName());
+    alg->setProperty("InputWorkspace", inputName);
     alg->setProperty("Debug", true);
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
@@ -973,9 +975,11 @@ bool ReflectometryReductionOneAuto2::processGroups() {
 
   auto outputIvsLamNames = workspaceNamesInGroup(output.iVsLam);
   for (size_t i = 0; i < outputIvsLamNames.size(); ++i) {
-    const std::string IvsQName = output.iVsQ + "_" + std::to_string(i + 1);
-    const std::string IvsQBinnedName =
-        output.iVsQBinned + "_" + std::to_string(i + 1);
+    auto inputName = group->getItem(i)->getName();
+    auto outputNames = getOutputNamesForGroups(inputName, runNumber, i);
+
+    const std::string IvsQName = outputNames.iVsQ;
+    const std::string IvsQBinnedName = outputNames.iVsQBinned;
     const std::string IvsLamName = outputIvsLamNames[i];
 
     // Find the spectrum processing instructions for ws index 0
@@ -998,6 +1002,40 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   setOutputWorkspaces(output, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
 
   return true;
+}
+
+/** Get the output workspace names for a workspace in a group.
+ * If an input workspace has been passed with the format
+ * TOF_<runNumber>_<otherInfo> then the output workspaces will be of the same
+ * format otherwise they are numbered according to the wsGroupNumber
+ */
+ReflectometryReductionOneAuto2::WorkspaceNames
+ReflectometryReductionOneAuto2::getOutputNamesForGroups(std::string inputName,
+                                                        std::string runNumber,
+                                                        size_t wsGroupNumber) {
+  auto const output = getOutputWorkspaceNames();
+  std::string informativeName = "TOF" + runNumber + "_";
+  bool informativeInput = false;
+  if (equal(informativeName.begin(), informativeName.end(),
+            inputName.begin())) {
+    informativeInput = true;
+  }
+
+  WorkspaceNames outputNames;
+  if (informativeInput) {
+    auto informativeTest = inputName.substr(informativeName.length());
+    outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
+    outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;
+    outputNames.iVsLam = output.iVsLam + "_" + informativeTest;
+  } else {
+    outputNames.iVsQ = output.iVsQ + "_" + std::to_string(wsGroupNumber + 1);
+    outputNames.iVsQBinned =
+        output.iVsQBinned + "_" + std::to_string(wsGroupNumber + 1);
+    outputNames.iVsLam =
+        output.iVsLam + "_" + std::to_string(wsGroupNumber + 1);
+  }
+
+  return outputNames;
 }
 
 /** Construct a polarization efficiencies workspace based on values of input

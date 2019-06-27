@@ -113,6 +113,9 @@ private:
                            std::vector<std::string> &IvsLamGroup,
                            std::vector<std::string> &IvsQBinnedGroup,
                            std::vector<std::string> &IvsQGroup);
+  ReflectometryReductionOneAuto2::WorkspaceNames
+  getOutputNamesForGroups(std::string inputName, std::string runNumber,
+                          size_t wsGroupNumber);
 };
 
 } // namespace Algorithms
