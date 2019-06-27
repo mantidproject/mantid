@@ -99,9 +99,9 @@ public:
             "VULCAN_Mask_Detectors");
 
     // 3. Check
-    for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
+    for (size_t iws = 0; iws < 6468; iws++) {
       double y = maskws->y(iws)[0];
-      if (iws == 34 || iws == 1000 || iws == 2000) {
+      if (iws == 34 || iws == 1000 || iws == 1846) {
         // These 3 workspace index are masked
         TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
       } else {
@@ -156,7 +156,7 @@ public:
     // 3. Check
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
       double y = maskws->y(iws)[0];
-      if (iws == 2000) {
+      if (iws == 1846) {
         // This 1 workspace index is masked
         TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
       } else {
