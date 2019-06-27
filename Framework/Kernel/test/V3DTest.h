@@ -418,10 +418,10 @@ public:
     NexusTestHelper th(true);
     th.createFile("V3DTest.nxs");
     V3D a(1, 2, 3);
-    a.saveNexus(th.file, "vector");
+    a.saveNexus(th.file.get(), "vector");
     th.reopenFile();
     V3D b;
-    b.loadNexus(th.file, "vector");
+    b.loadNexus(th.file.get(), "vector");
     TS_ASSERT_EQUALS(a, b);
   }
 
@@ -468,7 +468,7 @@ public:
 
   void test_toCrystllographic() {
     V3D a0;
-    TS_ASSERT_THROWS(a0.toMillerIndexes(), std::invalid_argument);
+    TS_ASSERT_THROWS(a0.toMillerIndexes(), const std::invalid_argument &);
 
     V3D a1(0.1, 0.2, 5);
     TS_ASSERT_THROWS_NOTHING(a1.toMillerIndexes());

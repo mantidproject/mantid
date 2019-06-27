@@ -1,4 +1,6 @@
-﻿Indirect Data Analysis
+﻿.. _interface-indirect-data-analysis:
+
+Indirect Data Analysis
 ======================
 
 .. contents:: Table of Contents
@@ -27,6 +29,10 @@ These interfaces do not support GroupWorkspace as input.
 
 Action Buttons
 ~~~~~~~~~~~~~~
+
+Settings
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  customize the settings for the Indirect interfaces.
 
 ?
   Opens this help page.
@@ -301,6 +307,12 @@ ELow, EHigh
 
 SampleBinning
   The number of neighbouring bins are summed.
+
+Symmetric Energy Range
+  Untick to allow an asymmetric energy range.
+
+Spectrum
+  Changes the spectrum displayed in the preview plot.
 
 Plot Current Preview
   Plots the currently selected preview plot in a separate external window

@@ -16,7 +16,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
@@ -162,11 +162,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "specified externally, the former prevail.");
 
   if (hasPostprocessing()) {
-    m_manager =
-        Mantid::Kernel::make_unique<TwoLevelTreeManager>(this, m_whitelist);
+    m_manager = std::make_unique<TwoLevelTreeManager>(this, m_whitelist);
   } else {
-    m_manager =
-        Mantid::Kernel::make_unique<OneLevelTreeManager>(this, m_whitelist);
+    m_manager = std::make_unique<OneLevelTreeManager>(this, m_whitelist);
   }
 }
 
@@ -833,7 +831,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
     // property name to value
     const auto preprocessingOptionsMap = m_preprocessing.m_options;
 
-    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
+    auto notebook = std::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist,
         m_preprocessing.m_map, m_processor, m_postprocessing,
         preprocessingOptionsMap);
@@ -1904,8 +1902,7 @@ std::vector<Command_uptr> GenericDataProcessorPresenter::getTableList() {
   workspaces.reserve(m_workspaceList.size());
   // Create a command for each of the workspaces in the ADS
   for (const auto &name : m_workspaceList) {
-    workspaces.push_back(
-        Mantid::Kernel::make_unique<WorkspaceCommand>(this, name));
+    workspaces.emplace_back(std::make_unique<WorkspaceCommand>(this, name));
   }
   return workspaces;
 }

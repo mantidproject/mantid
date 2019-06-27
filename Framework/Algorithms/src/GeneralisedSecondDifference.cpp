@@ -29,12 +29,12 @@ using namespace API;
 void GeneralisedSecondDifference::init() {
 
   // Input and output workspaces
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();

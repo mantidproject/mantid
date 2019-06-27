@@ -41,7 +41,7 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
         multipleSingleWs = PoldiLoadRuns(2013, 6903, 6904)
 
         self.assertTrue(issubclass(type(multipleSingleWs), WorkspaceGroup))
-        self.assertEquals(len(multipleSingleWs.getNames()), 2)
+        self.assertEqual(len(multipleSingleWs.getNames()), 2)
 
         self.clearAnalysisDataService()
 
@@ -51,8 +51,8 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
         self.assertTrue(issubclass(type(twoWorkspacesMerged), WorkspaceGroup))
 
         wsNames = twoWorkspacesMerged.getNames()
-        self.assertEquals(len(wsNames), 1)
-        self.assertEquals(wsNames[0], "twoWorkspacesMerged_data_6904")
+        self.assertEqual(len(wsNames), 1)
+        self.assertEqual(wsNames[0], "twoWorkspacesMerged_data_6904")
 
         self.clearAnalysisDataService()
 
@@ -62,8 +62,8 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
         self.assertTrue(issubclass(type(twoWorkspacesMergedReversed), WorkspaceGroup))
 
         wsNames = twoWorkspacesMergedReversed.getNames()
-        self.assertEquals(len(wsNames), 1)
-        self.assertEquals(wsNames[0], "twoWorkspacesMergedReversed_data_6904")
+        self.assertEqual(len(wsNames), 1)
+        self.assertEqual(wsNames[0], "twoWorkspacesMergedReversed_data_6904")
 
         PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace="twoWorkspacesMerged")
 
@@ -77,30 +77,30 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
     def loadWorkspacesMergeThreeNotWorking(self):
         try:
             PoldiLoadRuns(2013, 6903, 6904, 3, OutputWorkspace="threeWorkspacesFail")
-            self.assertTrue(False)
+            self.fail()
         except:
-            self.assertTrue(True)
+            pass
 
     def loadWorkspacesNotFound(self):
         try:
             PoldiLoadRuns(1990, 6903, OutputWorkspace="notFound")
-            self.assertTrue(False)
+            self.fail()
         except:
-            self.assertTrue(True)
+            pass
 
     def loadWorkspacesAddToGroup(self):
         wsGroup = PoldiLoadRuns(2013, 6903)
 
         wsNames = wsGroup.getNames()
-        self.assertEquals(len(wsNames), 1)
-        self.assertEquals(wsNames[0], "wsGroup_data_6903")
+        self.assertEqual(len(wsNames), 1)
+        self.assertEqual(wsNames[0], "wsGroup_data_6903")
 
         wsGroup = PoldiLoadRuns(2013, 6904, OverwriteExistingWorkspace=False)
 
         wsNames = wsGroup.getNames()
-        self.assertEquals(len(wsNames), 2)
-        self.assertEquals(wsNames[0], "wsGroup_data_6903")
-        self.assertEquals(wsNames[1], "wsGroup_data_6904")
+        self.assertEqual(len(wsNames), 2)
+        self.assertEqual(wsNames[0], "wsGroup_data_6903")
+        self.assertEqual(wsNames[1], "wsGroup_data_6904")
 
         self.clearAnalysisDataService()
 
@@ -108,14 +108,14 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
         wsGroup = PoldiLoadRuns(2013, 6903)
 
         wsNames = wsGroup.getNames()
-        self.assertEquals(len(wsNames), 1)
-        self.assertEquals(wsNames[0], "wsGroup_data_6903")
+        self.assertEqual(len(wsNames), 1)
+        self.assertEqual(wsNames[0], "wsGroup_data_6903")
 
         wsGroup = PoldiLoadRuns(2013, 6904, OverwriteExistingWorkspace=True)
 
         wsNames = wsGroup.getNames()
-        self.assertEquals(len(wsNames), 1)
-        self.assertEquals(wsNames[0], "wsGroup_data_6904")
+        self.assertEqual(len(wsNames), 1)
+        self.assertEqual(wsNames[0], "wsGroup_data_6904")
 
     def loadWorkspacesOverwriteOther(self):
         otherWs = CreateWorkspace(1.0, 1.0)
@@ -126,8 +126,8 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
 
         self.assertTrue(issubclass(type(otherWs), WorkspaceGroup))
         wsNames = otherWs.getNames()
-        self.assertEquals(len(wsNames), 1)
-        self.assertEquals(wsNames[0], "otherWs_data_6904")
+        self.assertEqual(len(wsNames), 1)
+        self.assertEqual(wsNames[0], "otherWs_data_6904")
 
     def loadWorkspacesDontOverwriteOther(self):
         otherWs = CreateWorkspace(1.0, 1.0)
@@ -146,7 +146,7 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         specInfoMerged = wsMerged.spectrumInfo()
-        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 36)
+        self.assertEqual(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 36)
 
         self.clearAnalysisDataService()
 
@@ -157,7 +157,7 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         specInfoMerged = wsMerged.spectrumInfo()
-        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 49)
+        self.assertEqual(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 49)
 
         self.clearAnalysisDataService()
 
@@ -167,7 +167,7 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         specInfoMerged = wsMerged.spectrumInfo()
-        self.assertEquals( len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 12)
+        self.assertEqual( len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 12)
 
         self.clearAnalysisDataService()
 
@@ -175,8 +175,8 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
         PoldiLoadRuns(2015, 977, OutputWorkspace='ws')
 
         ws2015 = AnalysisDataService.retrieve('ws_data_977')
-        self.assertEquals(ws2015.getNumberHistograms(), 400)
-        self.assertEquals(len(ws2015.readX(0)), 125)
+        self.assertEqual(ws2015.getNumberHistograms(), 400)
+        self.assertEqual(len(ws2015.readX(0)), 125)
         self.assertTrue(ws2015.run().hasProperty('chopperspeed'))
 
         self.clearAnalysisDataService()

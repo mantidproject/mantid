@@ -10,6 +10,7 @@
 #include "qtpropertymanager.h"
 
 #include <QMap>
+#include <QSet>
 
 /** ParameterPropertyManager : specialized version of QtDoublePropertyManager
    for fitting parameters.
@@ -21,7 +22,8 @@ class EXPORT_OPT_MANTIDQT_COMMON ParameterPropertyManager
   Q_OBJECT
 
 public:
-  ParameterPropertyManager(QObject *parent = nullptr);
+  ParameterPropertyManager(QObject *parent = nullptr,
+                           bool hasGlobalOption = false);
 
   /// Get parameter error
   double error(const QtProperty *property) const;
@@ -34,6 +36,8 @@ public:
 
   /// Returns errors enabled status
   bool areErrorsEnabled() const { return m_errorsEnabled; }
+
+  bool isGlobal(const QtProperty *property) const;
 
 public Q_SLOTS:
   /// Set property error
@@ -50,6 +54,9 @@ public Q_SLOTS:
 
   /// Enabled/disables error display
   void setErrorsEnabled(bool enabled);
+
+  /// Set parameter's global option
+  void setGlobal(QtProperty *property, bool option);
 
 protected:
   /// Text representation of the property
@@ -72,6 +79,9 @@ private:
   /// Errors enabled flag. When is false, errors can be set, but will not be
   /// displayed
   bool m_errorsEnabled;
+
+  bool m_hasGlobalOption;
+  QSet<QtProperty *> m_globals;
 };
 
 #endif // PARAMETERPROPERTYMANAGER_H

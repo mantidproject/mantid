@@ -8,7 +8,7 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
@@ -299,7 +299,7 @@ pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName,
   // with top level splitting, but this is not updated in the plugin line edit
   // field.
   // We do this here.
-  auto workspaceProvider = Mantid::Kernel::make_unique<
+  auto workspaceProvider = std::make_unique<
       Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
   if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
           wsName.toStdString(), *workspaceProvider)) {
@@ -615,13 +615,6 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src) {
 bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src) {
   if (!src) {
     return false;
-  }
-
-  QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
-                     .GetAsString());
-
-  if (wsType.isEmpty()) {
-    wsType = src->getSMName();
   }
 
   QString wsName(vtkSMPropertyHelper(src->getProxy(), "WorkspaceName", true)

@@ -4,25 +4,26 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtGui, QtCore
+from __future__ import (absolute_import, division, unicode_literals)
+from qtpy import QtWidgets, QtCore
 
 from six import iteritems
 
 from Muon.GUI.Common.checkbox import Checkbox
 
 
-class PeakSelectorView(QtGui.QListWidget):
+class PeakSelectorView(QtWidgets.QListWidget):
     sig_finished_selection = QtCore.pyqtSignal(object, object)
 
     def __init__(self, peak_data, element, parent=None):
         super(PeakSelectorView, self).__init__(parent)
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
 
         self.new_data = {}
         self.update_new_data(peak_data)
         self.element = element
         self.setWindowTitle(element)
-        self.list = QtGui.QVBoxLayout(self)
+        self.list = QtWidgets.QVBoxLayout(self)
 
         primary = peak_data["Primary"]
         self.primary_checkboxes = self._create_checkbox_list(
@@ -38,12 +39,12 @@ class PeakSelectorView(QtGui.QListWidget):
             self.gamma_checkboxes = []
 
         widget.setLayout(self.list)
-        scroll = QtGui.QScrollArea()
+        scroll = QtWidgets.QScrollArea()
         scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         scroll.setWidgetResizable(False)
         scroll.setWidget(widget)
 
-        scroll_layout = QtGui.QVBoxLayout(self)
+        scroll_layout = QtWidgets.QVBoxLayout(self)
         scroll_layout.addWidget(scroll)
 
         self.setLayout(scroll_layout)
@@ -74,7 +75,7 @@ class PeakSelectorView(QtGui.QListWidget):
         return checkbox
 
     def _create_checkbox_list(self, heading, checkbox_data, checked=True):
-        _heading = QtGui.QLabel(heading)
+        _heading = QtWidgets.QLabel(heading)
         self.list.addWidget(_heading)
         checkboxes = []
         for peak_type, value in iteritems(checkbox_data):

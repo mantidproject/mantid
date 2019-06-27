@@ -54,10 +54,10 @@ private:
                                            Direction::Input);
     in_ws->mutableRun().addLogData(testProperty);
 
-    NumericAxis *const newAxis = new NumericAxis(in_ws->getAxis(1)->length());
-    in_ws->replaceAxis(1, newAxis);
-    newAxis->unit() = boost::make_shared<Mantid::Kernel::Units::Degrees>();
+    auto newAxis = std::make_unique<NumericAxis>(in_ws->getAxis(1)->length());
 
+    newAxis->unit() = boost::make_shared<Mantid::Kernel::Units::Degrees>();
+    in_ws->replaceAxis(1, std::move(newAxis));
     auto alg = boost::make_shared<ConvertToReflectometryQ>();
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
@@ -99,7 +99,7 @@ public:
     alg->setProperty("OverrideIncidentTheta", true);
     alg->setProperty("IncidentTheta", -0.0001);
     TSM_ASSERT_THROWS("Incident theta is negative, should throw",
-                      alg->execute(), std::logic_error);
+                      alg->execute(), const std::logic_error &);
   }
 
   void test_theta_initial_too_large_throws() {
@@ -107,26 +107,26 @@ public:
     alg->setProperty("OverrideIncidentTheta", true);
     alg->setProperty("IncidentTheta", 90.001);
     TSM_ASSERT_THROWS("Incident theta is too large, should throw",
-                      alg->execute(), std::logic_error);
+                      alg->execute(), const std::logic_error &);
   }
 
   void test_wrong_number_of_extents_throws() {
     auto alg = make_standard_algorithm();
     alg->setProperty("Extents", "-1");
     TSM_ASSERT_THROWS("Should only accept 4 extents", alg->execute(),
-                      std::runtime_error);
+                      const std::runtime_error &);
   }
 
   void test_extents_with_qxmin_equals_qxmax_throws() {
     auto alg = make_standard_algorithm();
     alg->setProperty("Extents", "-1,-1,-1,1");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_extents_with_qxmin_more_than_qxmax_throws() {
     auto alg = make_standard_algorithm();
     alg->setProperty("Extents", "-1,-1.01,-1,1");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_extents_with_qxmin_less_than_qxmax() {
@@ -138,13 +138,13 @@ public:
   void test_extents_with_qzmin_equals_qzmax_throws() {
     auto alg = make_standard_algorithm();
     alg->setProperty("Extents", "-1,1,-1,-1");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_extents_with_qzmin_more_than_qzmax_throws() {
     auto alg = make_standard_algorithm();
     alg->setProperty("Extents", "-1,1,-1,-1.01");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_extents_with_qzmin_less_than_qzmax() {

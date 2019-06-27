@@ -451,12 +451,12 @@ public:
     alg.setProperty("LHSWorkspace", make_arbitrary_point_ws());
     alg.setProperty("RHSWorkspace", make_arbitrary_histogram_ws());
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
 
     alg.setProperty("LHSWorkspace", make_arbitrary_histogram_ws());
     alg.setProperty("RHSWorkspace", make_arbitrary_point_ws());
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

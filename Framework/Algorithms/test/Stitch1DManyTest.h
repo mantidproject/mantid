@@ -167,7 +167,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "ws1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 1.8"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -183,7 +183,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "-0.5, -0.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "0.5"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -198,7 +198,7 @@ public:
     alg.setProperty("StartOverlaps", "-0.5");
     alg.setProperty("EndOverlaps", "0.5, 0.6");
     alg.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -213,7 +213,7 @@ public:
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5, 0.7");
     alg.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -228,7 +228,7 @@ public:
     alg.setProperty("InputWorkspaces", "ws1, ws2");
     alg.setProperty("Params", "0.1");
     alg.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -243,14 +243,14 @@ public:
     alg.setProperty("InputWorkspaces", "group1, ws1");
     alg.setProperty("Params", "0.1");
     alg.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     Stitch1DMany alg2;
     alg2.setChild(true);
     alg2.initialize();
     alg2.setProperty("InputWorkspaces", "ws1, group1");
     alg2.setProperty("Params", "0.1");
     alg2.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -267,7 +267,7 @@ public:
     alg.setProperty("InputWorkspaces", "group1, group2");
     alg.setProperty("Params", "0.1");
     alg.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -284,7 +284,7 @@ public:
     alg.setProperty("InputWorkspaces", "group1, group2");
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -309,7 +309,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("ScaleFactorFromPeriod", 4);
     alg.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -581,7 +581,7 @@ public:
     alg.setProperty("StartOverlaps", "0.8");
     alg.setProperty("EndOverlaps", "1.1");
     alg.setProperty("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -1092,7 +1092,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("UseManualScaleFactors", "1"))
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("ScaleFactorFromPeriod", 2))
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("OutputWorkspace", "outws"))
-    TS_ASSERT_THROWS(alg0.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg0.execute(), const std::runtime_error &);
     TS_ASSERT(!alg0.isExecuted())
 
     // Will produce a group outws containing a single workspace named
@@ -1338,7 +1338,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "ws1, ws2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseManualScaleFactors", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

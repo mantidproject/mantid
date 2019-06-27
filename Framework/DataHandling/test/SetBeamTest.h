@@ -62,7 +62,7 @@ public:
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", inputWS),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_No_Geometry_Inputs_Not_Accepted() {
@@ -72,7 +72,7 @@ public:
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_Missing_Geometry_Inputs_Not_Accepted() {
@@ -85,14 +85,14 @@ public:
     alg->setProperty("InputWorkspace", inputWS);
     auto props = boost::make_shared<PropertyManager>();
     alg->setProperty("Geometry", props);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     props = createRectangularBeamProps();
     props->removeProperty("Width");
     alg->setProperty("Geometry", props);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     props->removeProperty("Height");
     alg->setProperty("Geometry", props);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   //----------------------------------------------------------------------------
@@ -100,7 +100,7 @@ public:
   //----------------------------------------------------------------------------
 private:
   Mantid::API::IAlgorithm_uptr createAlgorithm() {
-    auto alg = Mantid::Kernel::make_unique<SetBeam>();
+    auto alg = std::make_unique<SetBeam>();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();
@@ -113,12 +113,11 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
-    props->declareProperty(
-        Mantid::Kernel::make_unique<StringProperty>("Shape", "Slit"), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Width", 1.0), "");
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleProperty>("Height", 0.75), "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Slit"),
+                           "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Width", 1.0), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 0.75),
+                           "");
     return props;
   }
 };

@@ -454,7 +454,7 @@ public:
     // then check the workspace bounds testing
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "5"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -480,7 +480,7 @@ public:
     // bounds aren't checked
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "7"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm didn't run so there should be no file
     // the algorithm shouldn't have written a file to disk
@@ -516,7 +516,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "3"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "2"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -551,7 +551,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("SpectrumList", "2, 3, 1"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -645,7 +645,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CommentIndicator", "3"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -662,7 +662,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CommentIndicator", "e"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -679,7 +679,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CommentIndicator", "-"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -696,7 +696,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CommentIndicator", "+"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -714,7 +714,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator", "UserDefined"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "e"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -732,7 +732,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator", "UserDefined"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "3"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -750,7 +750,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator", "UserDefined"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "+"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -768,7 +768,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator", "UserDefined"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "-"));
 
-    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
@@ -845,10 +845,10 @@ private:
     }
 
     if (!isSpectra) {
-      auto textAxis = new TextAxis(2);
+      auto textAxis = std::make_unique<TextAxis>(2);
       textAxis->setLabel(0, "Test Axis 1");
       textAxis->setLabel(1, "Test Axis 2");
-      wsToSave->replaceAxis(1, textAxis);
+      wsToSave->replaceAxis(1, std::move(textAxis));
     }
 
     AnalysisDataService::Instance().add(m_name, wsToSave);

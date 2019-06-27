@@ -130,7 +130,7 @@ public:
     IAlgorithm_sptr alg =
         algorithmWithWorkspacePropertiesSet(setup.inputWSName);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void
@@ -188,7 +188,7 @@ public:
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void
@@ -200,7 +200,7 @@ public:
     const std::vector<int> summedPeriods = {3};
     alg->setProperty("SummedPeriods", summedPeriods);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void
@@ -212,7 +212,7 @@ public:
     const std::vector<int> subtractedPeriods = {3};
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_algorithm_fails_if_summed_periods_has_negative_entry() {
@@ -223,7 +223,7 @@ public:
     const std::vector<int> summedPeriods = {-1};
     alg->setProperty("SummedPeriods", summedPeriods);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_algorithm_fails_if_subtracted_periods_has_negative_entry() {
@@ -234,7 +234,7 @@ public:
     const std::vector<int> subtractedPeriods = {-1};
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   // --------------------------------------------------------------------------

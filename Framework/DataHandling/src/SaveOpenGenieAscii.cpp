@@ -37,14 +37,14 @@ DECLARE_ALGORITHM(SaveOpenGenieAscii)
 
 void SaveOpenGenieAscii::init() {
   declareProperty(
-      make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input),
       "The name of the workspace containing the data you wish to save");
 
   // Declare required parameters, filename with ext {.his} and input
   // workspace
   const std::vector<std::string> exts{".his", ".txt", ""};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");
   declareProperty("IncludeHeader", true,

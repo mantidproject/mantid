@@ -7,7 +7,7 @@
 #ifndef MANTID_PYTHONINTERFACE_CORE_PYTHONCOMPAT_H
 #define MANTID_PYTHONINTERFACE_CORE_PYTHONCOMPAT_H
 
-#include <boost/python/detail/wrap_python.hpp>
+#include "MantidPythonInterface/core/WrapPython.h"
 
 // Macros for 2/3 compatability
 #if PY_VERSION_HEX >= 0x03000000

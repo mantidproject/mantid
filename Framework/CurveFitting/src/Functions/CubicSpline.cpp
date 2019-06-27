@@ -12,6 +12,7 @@
 #include "MantidKernel/Logger.h"
 
 #include <algorithm>
+#include <ostream>
 #include <stdexcept>
 #include <vector>
 
@@ -162,13 +163,11 @@ bool CubicSpline::checkXInRange(double x) const {
 void CubicSpline::calculateSpline(double *out, const double *xValues,
                                   const size_t nData) const {
   // calculate spline for given input set
-  double y(0);
   bool outOfRange(false);
   for (size_t i = 0; i < nData; ++i) {
     if (checkXInRange(xValues[i])) {
       // calculate the y value
-      y = splineEval(xValues[i]);
-      out[i] = y;
+      out[i] = splineEval(xValues[i]);
     } else {
       // if out of range, set it to constant of fringe values
       outOfRange = true;

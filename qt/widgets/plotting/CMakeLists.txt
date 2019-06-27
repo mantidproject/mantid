@@ -1,5 +1,6 @@
-# Plotting support library
-#  For Qt4 this is Qwt based and
+# Plotting support library for
+#  - Qt4 this is Qwt based and
+#  - Qt5 this is matplotlib based
 
 ###########################################################################
 # Qwt5-based implementation
@@ -42,8 +43,9 @@ set ( QWT_MOC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( QWT_INC_FILES
+  inc/MantidQtWidgets/Plotting/AxisID.h
   inc/MantidQtWidgets/Plotting/DllOption.h
-  inc/MantidQtWidgets/Plotting/PreviewPlot.h
+  inc/MantidQtWidgets/Plotting/Qwt/PreviewPlot.h
   inc/MantidQtWidgets/Plotting/Qwt/MantidQwtWorkspaceData.h
   inc/MantidQtWidgets/Plotting/Qwt/QwtRasterDataMD.h
   inc/MantidQtWidgets/Plotting/Qwt/QwtRasterDataMDNonOrthogonal.h
@@ -65,7 +67,7 @@ set ( QWT_UI_FILES
   inc/MantidQtWidgets/Plotting/Qwt/ColorBarWidget.ui
   inc/MantidQtWidgets/Plotting/Qwt/DisplayCurveFit.ui
   inc/MantidQtWidgets/Plotting/Qwt/MWView.ui
-  inc/MantidQtWidgets/Plotting/Qwt/PreviewPlot.ui
+  inc/MantidQtWidgets/Plotting/PreviewPlot.ui
 )
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
@@ -130,4 +132,60 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsPlottingTest
     MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES
     GUITests
+)
+
+###########################################################################
+# Matplotlib-based implementation
+###########################################################################
+set(MPL_SRC_FILES
+    src/Mpl/PeakPicker.cpp
+    src/Mpl/PreviewPlot.cpp
+    src/Mpl/RangeSelector.cpp
+)
+
+set(MPL_MOC_FILES
+    inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
+    inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h
+    inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
+)
+
+# Include files aren't required, but this makes them appear in Visual Studio
+set(MPL_INC_FILES
+    ${MPL_MOC_FILES}
+    inc/MantidQtWidgets/Plotting/AxisID.h
+    inc/MantidQtWidgets/Plotting/PeakPicker.h
+    inc/MantidQtWidgets/Plotting/PreviewPlot.h
+)
+
+set(MPL_UI_FILES
+    inc/MantidQtWidgets/Plotting/PreviewPlot.ui)
+
+find_package(BoostPython)
+
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
+  QT_VERSION 5
+  SRC ${MPL_SRC_FILES}
+  MOC ${MPL_MOC_FILES}
+  NOMOC ${MPL_INC_FILES}
+  UI ${MPL_UI_FILES}
+  DEFS
+    IN_MANTIDQT_PLOTTING
+  INCLUDE_DIRS
+    inc
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    PythonInterfaceCore
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+    MantidQtWidgetsMplCpp
+  INSTALL_DIR
+    ${LIB_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )

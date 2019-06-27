@@ -9,8 +9,8 @@ import unittest
 from mantid.py3compat import mock
 
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.utilities.muon_test_helpers import IteratorWithException
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetModelTest(unittest.TestCase):
@@ -34,7 +34,7 @@ class LoadRunWidgetModelTest(unittest.TestCase):
     def test_execute_successfully_loads_valid_files(self, load_utils_mock):
         # Mock the load algorithm
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
-        load_return_vals = [([1, 2, 3], 19489 + i, filename) for i, filename in enumerate(files)]
+        load_return_vals = [([1, 2, 3], 19489 + i, filename, False) for i, filename in enumerate(files)]
 
         load_utils_mock.load_workspace_from_filename = mock.MagicMock()
         load_utils_mock.load_workspace_from_filename.side_effect = load_return_vals
@@ -51,7 +51,7 @@ class LoadRunWidgetModelTest(unittest.TestCase):
     @mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
     def test_model_is_cleared_correctly(self, load_utils_mock):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
-        load_return_vals = [([1, 2, 3], filename, 19489 + i) for i, filename in enumerate(files)]
+        load_return_vals = [([1, 2, 3], filename, 19489 + i, False) for i, filename in enumerate(files)]
 
         load_utils_mock.load_workspace_from_filename = mock.Mock()
         load_utils_mock.load_workspace_from_filename.side_effect = load_return_vals
@@ -67,7 +67,7 @@ class LoadRunWidgetModelTest(unittest.TestCase):
     @mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
     def test_execute_throws_if_one_file_does_not_load_correctly_but_still_loads_other_files(self, load_utils_mock):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
-        load_return_vals = [([1, 2, 3], 19489 + i, filename) for i, filename in enumerate(files)]
+        load_return_vals = [([1, 2, 3], 19489 + i, filename, False) for i, filename in enumerate(files)]
 
         load_utils_mock.load_workspace_from_filename = mock.MagicMock()
 

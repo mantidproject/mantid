@@ -127,11 +127,11 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1,
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace1", "",
-                                                            Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace1", "", Direction::Input),
                   "The name of the first input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace2", "",
-                                                            Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
   declareProperty(
@@ -174,7 +174,7 @@ void CompareWorkspaces::init() {
 
   declareProperty("Result", false, Direction::Output);
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
@@ -411,12 +411,12 @@ void CompareWorkspaces::doComparison() {
   if (ews1 && ews2) {
     // we have to create the progress before the call to compareEventWorkspaces,
     // because it uses the m_progress and it will segfault if not created
-    m_progress = make_unique<Progress>(this, 0.0, 1.0, numhist * 5);
+    m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numhist * 5);
     // Compare event lists to see whether 2 event workspaces match each other
     if (!compareEventWorkspaces(*ews1, *ews2))
       return;
   } else {
-    m_progress = make_unique<Progress>(this, 0.0, 1.0, numhist * 2);
+    m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numhist * 2);
   }
 
   // ==============================================================================

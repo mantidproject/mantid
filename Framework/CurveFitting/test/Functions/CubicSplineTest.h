@@ -61,13 +61,15 @@ public:
     CubicSpline cspline;
 
     // cubic splines must have at least 3 points
-    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 2), std::invalid_argument);
+    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 2),
+                     const std::invalid_argument &);
 
     // set the number of points to something sensible
     cspline.setAttributeValue("n", 5);
 
     // attempt to make it smaller than it already is
-    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 4), std::invalid_argument);
+    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 4),
+                     const std::invalid_argument &);
 
     size_t oldAttrN = cspline.nAttributes();
 
@@ -99,9 +101,9 @@ public:
     CubicSpline cspline;
 
     // check that an invalid index throws errors
-    TS_ASSERT_THROWS(cspline.setXAttribute(4, 0), std::range_error);
+    TS_ASSERT_THROWS(cspline.setXAttribute(4, 0), const std::range_error &);
 
-    TS_ASSERT_THROWS(cspline.setXAttribute(-1, 4), std::range_error);
+    TS_ASSERT_THROWS(cspline.setXAttribute(-1, 4), const std::range_error &);
   }
 
   void testKnownInterpolationValues() {

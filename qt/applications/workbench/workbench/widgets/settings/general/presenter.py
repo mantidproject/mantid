@@ -42,15 +42,23 @@ class GeneralSettings(object):
 
     def setup_facilities_group(self):
         facilities = ConfigService.getFacilityNames()
+        if not facilities:
+            return
         self.view.facility.addItems(facilities)
 
-        default_facility = ConfigService.getFacility().name()
+        try:
+            default_facility = ConfigService.getFacility().name()
+        except RuntimeError:
+            default_facility = facilities[0]
         self.view.facility.setCurrentIndex(self.view.facility.findText(default_facility))
         self.action_facility_changed(default_facility)
         self.view.facility.currentTextChanged.connect(self.action_facility_changed)
 
-        default_instrument = ConfigService.getInstrument().name()
-        self.view.instrument.setCurrentIndex(self.view.instrument.findText(default_instrument))
+        try:
+            default_instrument = ConfigService.getInstrument().name()
+            self.view.instrument.setCurrentIndex(self.view.instrument.findText(default_instrument))
+        except RuntimeError:
+            default_instrument = self.view.instrument.itemText(0)
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
 

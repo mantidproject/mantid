@@ -230,7 +230,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         if self._use_corrections:
             if self._corrections_workspace.size() == 1:
-                correction_name = self._corrections_workspace[0].getName()
+                correction_name = self._corrections_workspace[0].name()
                 if 'acc' in correction_name:
                     self._factors = ['acc']
                 elif 'ass' in correction_name:
@@ -309,7 +309,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 return factor_type in workspace_name
 
         for workspace in self._corrections_workspace:
-            if predicate(workspace.getName()):
+            if predicate(workspace.name()):
                 return workspace
         return None
 

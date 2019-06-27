@@ -11,8 +11,6 @@ from decimal import Decimal, InvalidOperation
 from mantid import api
 from mantid.api import ITableWorkspace
 
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-
 
 class InstrumentWidgetModel(object):
     """
@@ -24,7 +22,7 @@ class InstrumentWidgetModel(object):
     GUI.
     """
 
-    def __init__(self, context=MuonContext()):
+    def __init__(self, context=None):
         self._data = context.data_context
         self._context = context
         self._context.gui_context['RebinType'] = 'None'
@@ -51,6 +49,9 @@ class InstrumentWidgetModel(object):
     def set_first_good_data_source(self, state):
         self._context.gui_context.update_and_send_signal(FirstGoodDataFromFile=state)
 
+    def set_last_good_data_source(self, state):
+        self._context.gui_context.update_and_send_signal(LastGoodDataFromFile=state)
+
     def get_file_first_good_data(self):
         return self._data.current_data["FirstGoodData"]
 
@@ -63,11 +64,21 @@ class InstrumentWidgetModel(object):
             first_good_data = self._context.gui_context["FirstGoodData"]
         return first_good_data
 
+    def get_last_good_data(self):
+        if self._data.current_runs:
+            run = self._data.current_runs[0]
+            return self._context.last_good_data(run)
+        else:
+            return 0.0
+
     def set_user_time_zero(self, time_zero):
         self._context.gui_context.update_and_send_signal(TimeZero=time_zero)
 
     def set_user_first_good_data(self, first_good_data):
         self._context.gui_context.update_and_send_signal(FirstGoodData=first_good_data)
+
+    def set_user_last_good_data(self, last_good_data):
+        self._context.gui_context.update_and_send_signal(LastGoodData=last_good_data)
 
     def get_dead_time_table_from_data(self):
         return self._data.current_data["DataDeadTimeTable"]

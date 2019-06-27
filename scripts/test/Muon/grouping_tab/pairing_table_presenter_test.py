@@ -1,16 +1,21 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
-
-import six
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+import six
+from qtpy.QtWidgets import QWidget
 
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 def pair_name():
@@ -19,12 +24,11 @@ def pair_name():
         name.append("pair_" + str(i+1))
     return name
 
-class PairingTablePresenterTest(unittest.TestCase):
+class PairingTablePresenterTest(GuiTest):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
         setup_context_for_tests(self)
 
@@ -211,10 +215,8 @@ class PairingTablePresenterTest(unittest.TestCase):
         invalid_names = ["", "@", "name!", "+-"]
 
         for invalid_name in invalid_names:
-            print(self.view.get_table_contents())
             self.view.pairing_table.setCurrentCell(0, 0)
             self.view.pairing_table.item(0, 0).setText(invalid_name)
-            print(self.view.get_table_contents())
 
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_pair_0")
             self.assertIn("my_pair_0", self.model.pair_names)

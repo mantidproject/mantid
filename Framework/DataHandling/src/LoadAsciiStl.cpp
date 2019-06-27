@@ -6,11 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-#include <string>
 namespace Mantid {
 namespace DataHandling {
 
@@ -68,19 +65,16 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
     material = Mantid::Kernel::Material();
   }
   auto retVal = std::make_unique<Geometry::MeshObject>(
-      std::move(m_triangle), std::move(m_verticies), material);
+      std::move(m_triangle), std::move(m_vertices), material);
   return retVal;
 }
 
 bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
                                    Kernel::V3D &v2, Kernel::V3D &v3) {
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
-    const bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
-                     readSTLVertex(file, v3));
-    if (!ok) {
-      throw Kernel::Exception::ParseError("Error on reading STL triangle",
-                                          m_filename, m_lineNumber);
-    }
+    readSTLVertex(file, v1);
+    readSTLVertex(file, v2);
+    readSTLVertex(file, v3);
   } else {
     return false; // End of file
   }
@@ -95,16 +89,18 @@ bool LoadAsciiStl::readSTLVertex(std::ifstream &file, Kernel::V3D &vertex) {
     std::vector<std::string> tokens;
     boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
     if (tokens.size() == 4 && tokens[0] == "vertex") {
-      vertex.setX(std::stod(tokens[1]));
-      vertex.setY(std::stod(tokens[2]));
-      vertex.setZ(std::stod(tokens[3]));
+      double xVal = std::stod(tokens[1]);
+      double yVal = std::stod(tokens[2]);
+      double zVal = std::stod(tokens[3]);
+      vertex = createScaledV3D(xVal, yVal, zVal);
       return true;
     } else {
       throw Kernel::Exception::ParseError("Error on reading STL vertex",
                                           m_filename, m_lineNumber);
     }
   }
-  return false;
+  throw Kernel::Exception::ParseError("Error on reading STL triangle",
+                                      m_filename, m_lineNumber);
 }
 
 // Read, check and ignore line in STL file. Return true if line is read

@@ -15,7 +15,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 
 #include <Poco/Path.h>
@@ -375,7 +375,7 @@ public:
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
 
-    TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
+    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
   }
@@ -393,7 +393,7 @@ public:
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
 
-    TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
+    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
   }
@@ -410,7 +410,7 @@ public:
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
-    TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
+    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
   }
@@ -458,8 +458,7 @@ private:
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return Mantid::Kernel::make_unique<KafkaEventStreamDecoder>(broker, "", "",
-                                                                "", "");
+    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "");
   }
 
   void

@@ -53,7 +53,7 @@ public:
 
   void test_construct_from_invalid_BinEdges() {
     const BinEdges edges(1);
-    TS_ASSERT_THROWS(Points points(edges), std::logic_error);
+    TS_ASSERT_THROWS(Points points(edges), const std::logic_error &);
   }
 
   void test_construct_from_BinEdges() {

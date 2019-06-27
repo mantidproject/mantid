@@ -26,13 +26,13 @@ using namespace Mantid::DataObjects;
  */
 void CreatePeaksWorkspace::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "InstrumentWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An optional input workspace containing the default instrument for peaks "
       "in this workspace.");
   declareProperty("NumberOfPeaks", 1,
                   "Number of dummy peaks to initially create.");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

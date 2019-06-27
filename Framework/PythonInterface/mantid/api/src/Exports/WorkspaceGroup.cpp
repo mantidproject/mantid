@@ -93,7 +93,7 @@ void export_WorkspaceGroup() {
            return_value_policy<Policies::ToWeakPtr>(),
            "Returns the item at the given index")
       .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, arg("self"),
-           "Retuns true if the workspace group is multi-period")
+           "Returns true if the workspace group is multi-period")
       // ------------ Operators --------------------------------
       .def("__len__", &WorkspaceGroup::getNumberOfEntries, arg("self"),
            "Gets the number of entries in the workspace group")

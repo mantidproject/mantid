@@ -13,7 +13,7 @@ import re
 
 delimiter = ","
 range_separator = "-"
-run_string_regex = "^[0-9]*([0-9]+\s*[,-]{0,1}\s*)*[0-9]+$"
+run_string_regex = "^[0-9]*([0-9]+\s*[,-]{0,1}\s*)*[0-9]*$"
 max_run_list_size = 100
 valid_float_regex = "^[0-9]+([.][0-9]*)?$"
 valid_name_regex = "^\w+$"
@@ -87,8 +87,11 @@ def run_string_to_list(run_string, max_value = True):
     if not validate_run_string(run_string):
         raise IndexError("{} is not a valid run string".format(run_string))
     run_list = []
+    if run_string.endswith(',') or run_string.endswith('-'):
+        run_string = run_string[:-1]
     if run_string == "":
         return run_list
+
     run_string_list = run_string.split(delimiter)
     for runs in run_string_list:
         split_runs = runs.split(range_separator)

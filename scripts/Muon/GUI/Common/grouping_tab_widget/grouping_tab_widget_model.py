@@ -1,6 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group, construct_empty_pair
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -14,7 +19,7 @@ class GroupingTabModel(object):
     pairs and groups should be of type MuonGroup and MuonPair respectively.
     """
 
-    def __init__(self, context=MuonContext()):
+    def __init__(self, context=None):
         self._context = context
         self._data = context.data_context
         self._groups_and_pairs = context.group_pair_context

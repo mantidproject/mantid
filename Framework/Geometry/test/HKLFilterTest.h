@@ -56,7 +56,7 @@ public:
 
     HKLFilter_const_sptr invalid;
     TS_ASSERT_THROWS(MockHKLFilterUnaryLogicOperation op(invalid),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testBinaryLogicOperation() {
@@ -71,11 +71,11 @@ public:
 
     HKLFilter_const_sptr invalid;
     TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(invalid, rhs),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(lhs, invalid),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(invalid, invalid),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testHKLFilterNot() {

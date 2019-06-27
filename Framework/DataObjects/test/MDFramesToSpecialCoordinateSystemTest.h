@@ -34,7 +34,7 @@ public:
     // Act + Assert
     TSM_ASSERT_THROWS(
         "Should throw as only MDEvent and MDHisto workspaces are allowed",
-        converter(ws.get()), std::invalid_argument);
+        converter(ws.get()), const std::invalid_argument &);
   }
 
   void test_that_throws_for_non_uniform_Q_coodinate_system() {
@@ -55,7 +55,7 @@ public:
     // Act + Assert
     TSM_ASSERT_THROWS(
         "Should throw as coordinate system is mixed with several Q types.",
-        converter(ws.get()), std::invalid_argument);
+        converter(ws.get()), const std::invalid_argument &);
   }
 
   void test_that_doesn_not_throw_for_non_uniform_Q_coodinate_system() {

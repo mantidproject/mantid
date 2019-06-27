@@ -15,7 +15,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <MantidAPI/FrameworkManager.h>
+#include "MantidAPI/FrameworkManager.h"
 
 using Mantid::HistogramData::Histogram;
 
@@ -250,7 +250,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         scale.setPropertyValue("InstrumentParameter", "factor"));
 
-    TS_ASSERT_THROWS(scale.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(scale.execute(), const std::runtime_error &);
     TS_ASSERT(!scale.isExecuted());
 
     AnalysisDataService::Instance().remove("tomultiply");
@@ -274,7 +274,7 @@ public:
         scale.setPropertyValue("OutputWorkspace", "multiplied"));
     TS_ASSERT_THROWS_NOTHING(scale.setProperty("Combine", true));
 
-    TS_ASSERT_THROWS(scale.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(scale.execute(), const std::invalid_argument &);
     TS_ASSERT(!scale.isExecuted());
 
     AnalysisDataService::Instance().remove("tomultiply");

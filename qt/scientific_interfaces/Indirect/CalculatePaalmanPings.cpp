@@ -445,6 +445,19 @@ void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
   m_uiForm.dsContainer->readSettings(settings.group());
 }
 
+void CalculatePaalmanPings::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("CalculatePaalmanPings");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                             : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
+                                             : noSuffixes);
+}
+
 /**
  * Slot that tries to populate correction details from
  * instrument parameters on sample workspace selection
@@ -663,12 +676,12 @@ void CalculatePaalmanPings::setCanDensityUnit(QString const &text) {
 }
 
 void CalculatePaalmanPings::setSampleDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSampleDensity);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSampleDensity);
   m_uiForm.spSampleDensity->setValue(getSampleDensityValue(text));
 }
 
 void CalculatePaalmanPings::setCanDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spCanDensity);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spCanDensity);
   m_uiForm.spCanDensity->setValue(getCanDensityValue(text));
 }
 

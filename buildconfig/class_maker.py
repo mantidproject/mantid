@@ -21,7 +21,7 @@ VERSION = "1.0"
 #======================================================================
 def get_year():
     """returns the current year"""
-    return datetime.datetime.now().date().year
+    return datetime.datetime.now().year
 
 #======================================================================
 def write_header(subproject, classname, filename, args):
@@ -121,11 +121,11 @@ const std::string {algname}::summary() const {{
  */
 void {algname}::init() {{
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
+      std::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
                                                              Direction::Input),
       "An input workspace.");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
+      std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
                                                              Direction::Output),
       "An output workspace.");
 }}

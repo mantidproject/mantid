@@ -66,14 +66,14 @@ const std::string EstimateResolutionDiffraction::category() const {
 
 void EstimateResolutionDiffraction::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                           Direction::Input),
       "Name of the workspace to have detector resolution calculated");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "DivergenceWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Workspace containing the divergence");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum");
@@ -91,7 +91,7 @@ void EstimateResolutionDiffraction::init() {
                   "Wavelength setting in Angstroms. This overrides what is in "
                   "the dataset.");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "PartialResolutionWorkspaces", "", Direction::Output),
                   "Workspaces created showing the various resolution terms");
 }
@@ -231,13 +231,17 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     if (m_divergenceWS) {
       deltatheta = m_divergenceWS->y(i)[0];
     } else {
-      double solidangle = 0.0;
-      for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
-        // No scanning support for solidAngle currently, use only first
-        // component of index, ignore time index
-        if (!detectorInfo.isMasked(index.first))
-          solidangle += componentInfo.solidAngle(index.first, samplepos);
-      }
+      auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
+      const double solidangle = std::accumulate(
+          spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
+          [&componentInfo, &detectorInfo, &samplepos](const auto sum,
+                                                      const auto &index) {
+            if (!detectorInfo.isMasked(index.first)) {
+              return sum + componentInfo.solidAngle(index.first, samplepos);
+            } else {
+              return sum;
+            }
+          });
       deltatheta = sqrt(solidangle);
     }
 

@@ -44,6 +44,9 @@
   <value val="IN16B_Grouping.xml" />
   <!-- Note that equivalent IN16B_map.map file also exists. -->
 </parameter>
+<parameter name="EquatorialGroupingFile" type="string">
+  <value val="IN16B_Grouping_Equatorial.xml" />
+</parameter>
 </component-link>
 
 </parameter-file>

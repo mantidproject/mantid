@@ -18,11 +18,11 @@ set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook")
 # Choose the proper suffix for the build.
 # if the string is not empty, capitalise the first letter
 if (NOT CPACK_PACKAGE_SUFFIX STREQUAL "" )
-  # change the icon if this is not a release build - the icons have _<suffix> appended, e.g. _nightly and _unstable
+  # change the icon if this is not a release build - the icons have <suffix> appended, e.g. nightly and unstable
   # this is done before the capitalisation of the first letter
-  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}" )
-  set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}")
-  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}" )
+  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}${CPACK_PACKAGE_SUFFIX}" )
+  set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}${CPACK_PACKAGE_SUFFIX}")
+  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}${CPACK_PACKAGE_SUFFIX}" )
 
   string(LENGTH ${CPACK_PACKAGE_SUFFIX} WINDOWS_NSIS_SUFFIX_LENGTH)
   # get only first letter
@@ -57,6 +57,22 @@ mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 ###########################################################################
 # External dependency DLLs
 ###########################################################################
+# MSVC runtime & openmp libs for Visual Studio
+# They are in the locations defined by the VS***COMNTOOLS environment variable
+set ( _RT 140 )
+file ( TO_CMAKE_PATH $ENV{VS${_RT}COMNTOOLS}../../VC/redist/x64 X64_REDIST_DIR )
+# CRT libraries
+set ( CRT_DLLS concrt${_RT}.dll msvcp${_RT}.dll vccorlib${_RT}.dll vcruntime${_RT}.dll )
+foreach( DLL ${CRT_DLLS} )
+  install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.CRT/${DLL} DESTINATION bin )
+endforeach()
+# OpenMP
+set ( OMP_DLLS vcomp${_RT}.dll )
+foreach( DLL ${OMP_DLLS} )
+    install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.OpenMP/${DLL} DESTINATION bin )
+endforeach()
+
+# Other third party dependencies
 set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
     boost_filesystem-mt.dll
@@ -68,6 +84,7 @@ set ( BOOST_DIST_DLLS
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
     PocoFoundation64.dll
+    PocoJSON64.dll
     PocoNet64.dll
     PocoNetSSL64.dll
     PocoUtil64.dll

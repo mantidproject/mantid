@@ -30,7 +30,7 @@ class LoadUtilsTest(unittest.TestCase):
     def test_pad_run(self):
         tests = {123: "00123", 0: "00000", 12345: "12345", 123456: "123456"}
         for run, padded_run in iteritems(tests):
-            self.assertEquals(lutils.pad_run(run), padded_run)
+            self.assertEqual(lutils.pad_run(run), padded_run)
 
     def test_get_detector_num_from_ws(self):
         self.assertEquals(
@@ -38,13 +38,13 @@ class LoadUtilsTest(unittest.TestCase):
                 self.test_ws_name), "1")
 
     def test_get_detectors_num(self):
-        self.assertEquals(lutils.get_detectors_num(self.test_path), "1")
+        self.assertEqual(lutils.get_detectors_num(self.test_path), "1")
 
     def test_get_end_num(self):
-        self.assertEquals(lutils.get_end_num(self.test_path), "rooth2020")
+        self.assertEqual(lutils.get_end_num(self.test_path), "rooth2020")
 
     def test_get_run_type(self):
-        self.assertEquals(lutils.get_run_type(self.test_path), "Delayed")
+        self.assertEqual(lutils.get_run_type(self.test_path), "Delayed")
         with self.assertRaises(KeyError):
             lutils.get_run_type(self.bad_path)
 
@@ -57,7 +57,7 @@ class LoadUtilsTest(unittest.TestCase):
         tests = {"1-5": [1, 2, 3, 4, 5],
                  "1, 4-5": [1, 4, 5], "1-3, 5": [1, 3, 2, 5], "1, 3, 5": [1, 5, 3]}
         for out, arg in iteritems(tests):
-            self.assertEquals(lutils.hyphenise(arg), out)
+            self.assertEqual(lutils.hyphenise(arg), out)
 
     def test_group_by_detector(self):
         output, workspaces = [], []
@@ -65,7 +65,7 @@ class LoadUtilsTest(unittest.TestCase):
         for detector in detectors:
             workspace = self.var_ws_name.format(detector, self.test_run)
             workspaces.append(workspace)
-            mantid.CreateSampleWorkspace(OutputWorkspace=workspace).getName()
+            mantid.CreateSampleWorkspace(OutputWorkspace=workspace).name()
             output.append("{}; Detector {}".format(self.test_run, detector))
         self.assertEquals(
             lutils.group_by_detector(

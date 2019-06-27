@@ -460,6 +460,16 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
   AnalysisDataService::Instance().remove("IndirectDiagnostics_Workspaces");
 }
 
+void ISISDiagnostics::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffices{""};
+  auto const tabName("ISISDiagnostics");
+  m_uiForm.dsCalibration->setFBSuffixes(
+      filter ? getCalibrationFBSuffixes(tabName)
+             : getCalibrationExtensions(tabName));
+  m_uiForm.dsCalibration->setWSSuffixes(
+      filter ? getCalibrationWSSuffixes(tabName) : noSuffices);
+}
+
 /**
  * Called when a user starts to type / edit the runs to load.
  */

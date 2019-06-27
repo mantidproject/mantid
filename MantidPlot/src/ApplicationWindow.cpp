@@ -73,6 +73,7 @@
 #include "LineDialog.h"
 #include "LogisticFit.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
 #include "MatrixCommand.h"
 #include "MatrixDialog.h"
@@ -114,7 +115,6 @@
 #include "TextEditor.h"
 #include "TiledWindow.h"
 #include "importOPJ.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
 
 // TODO: move tool-specific code to an extension manager
 #include "ContourLinesEditor.h"
@@ -508,8 +508,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
         qMakePair(userSubWindowName, userSubWindowName));
 
     const QSet<QString> categories =
-        UserSubWindowFactory::Instance().getInterfaceCategories(
-            userSubWindowName);
+        UserSubWindowFactory::Instance().categories(userSubWindowName);
 
     m_interfaceCategories[userSubWindowName] = categories;
     m_allCategories += categories;
@@ -13837,7 +13836,7 @@ void ApplicationWindow::disregardCol() {
 }
 
 void ApplicationWindow::showHomePage() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
+  MantidDesktopServices::openUrl(QUrl("https://www.mantidproject.org"));
 }
 void ApplicationWindow::showMantidConcepts() { HelpWindow::showConcept(this); }
 void ApplicationWindow::showalgorithmDescriptions() {
@@ -13857,7 +13856,7 @@ void ApplicationWindow::showFirstTimeSetup() {
 void ApplicationWindow::showmantidplotHelp() { HelpWindow::showPage(this); }
 
 void ApplicationWindow::showBugTracker() {
-  MantidDesktopServices::openUrl(QUrl("http://forum.mantidproject.org/"));
+  MantidDesktopServices::openUrl(QUrl("https://forum.mantidproject.org/"));
 }
 
 /*

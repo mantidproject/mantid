@@ -38,12 +38,12 @@ if(ENABLE_WORKBENCH)
   add_subdirectory(mantidqt)
 
   # Setup dependency chain
-  add_dependencies ( mantidqt
-    mantidqt_resources
-    mantidqt_commonqt5
-    mantidqt_instrumentviewqt5
-    PythonInterface
-  )
+  add_dependencies(mantidqt
+                   mantidqt_resources
+                   mantidqt_commonqt5
+                   mantidqt_instrumentviewqt5
+                   mantidqt_iconsqt5
+                   PythonInterface)
 
   if(ENABLE_MANTIDPLOT)
     add_dependencies(mantidqt mantidqt_commonqt4)
@@ -58,7 +58,6 @@ if(ENABLE_WORKBENCH)
               ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt5
       COMMENT "Copying debug PyQt5 to bin/Debug")
   endif()
-
 
   # Testing
 
@@ -88,24 +87,16 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/codeeditor/test/test_interpreter.py
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_fitpropertybrowser.py
+    mantidqt/widgets/test/test_functionbrowser.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
     mantidqt/widgets/observers/test/test_ads_observer.py
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
     mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
-    mantidqt/widgets/workspacedisplay/test/test_data_copier.py
-    mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
     )
 
   # ctest target for widgets that only get tested in qt5, because they are only
@@ -123,12 +114,25 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
     mantidqt/widgets/test/test_jupyterconsole.py
+    mantidqt/widgets/workspacedisplay/test/test_data_copier.py
+    mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
-    mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py)
+    mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
+    mantidqt/icons/test/test_icons.py
+)
 
   # Tests
-  set(PYUNITTEST_RUN_SERIAL ON)
   set(PYUNITTEST_QT_API pyqt5)
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR}
                       mantidqt_qt5

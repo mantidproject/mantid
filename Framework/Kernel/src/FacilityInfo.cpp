@@ -18,7 +18,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
@@ -226,24 +226,23 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
     }
   }
 
-  for (const auto &instrument : m_instruments) {
-    if (boost::iequals(instrument.name(), iName)) // Case-insensitive search
-    {
-      g_log.debug() << "Instrument '" << iName << "' found as "
-                    << instrument.name() << " at " << name() << ".\n";
-      return instrument;
-    }
+  auto instrument = std::find_if(m_instruments.cbegin(), m_instruments.cend(),
+                                 [&iName](const auto &inst) {
+                                   return boost::iequals(inst.name(), iName);
+                                 });
+
+  // if unsuccessful try lookup by short name
+  if (instrument == m_instruments.cend()) {
+    instrument = std::find_if(m_instruments.cbegin(), m_instruments.cend(),
+                              [&iName](const auto &inst) {
+                                return boost::iequals(inst.shortName(), iName);
+                              });
   }
 
-  // if unsuccessful try shortname
-  for (const auto &instrument : m_instruments) {
-    if (boost::iequals(instrument.shortName(),
-                       iName)) // Case-insensitive search
-    {
-      g_log.debug() << "Instrument '" << iName << "' found as "
-                    << instrument.name() << " at " << name() << ".\n";
-      return instrument;
-    }
+  if (instrument != m_instruments.cend()) {
+    g_log.debug() << "Instrument '" << iName << "' found as "
+                  << instrument->name() << " at " << name() << ".\n";
+    return *instrument;
   }
 
   g_log.debug("Instrument " + iName + " not found in facility " + name());

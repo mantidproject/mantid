@@ -25,7 +25,7 @@ void WorkspaceAlgorithm::init() {
 
   // Declare a 1D workspace property.
   declareProperty(
-      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::Input));
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::Input));
 }
 
 /** Executes the algorithm

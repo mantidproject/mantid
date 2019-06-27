@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.observer_pattern import Observer, GenericObserver
 
 
 class HomeTabSubWidget:
@@ -39,14 +39,12 @@ class HomeTabPresenter(object):
         self.enable_observer = HomeTabPresenter.EnableWidgetObserver(self)
         self.disable_observer = HomeTabPresenter.DisableWidgetObserver(self)
 
+        self.update_view_from_model_observer = GenericObserver(self.update_all_widgets)
+
         self.update_all_widgets()
 
     def show(self):
         self._view.show()
-
-    def show_all_data(self):
-        if self._model.is_data_loaded():
-            self._model.show_all_data()
 
     def update_all_widgets(self):
         """
@@ -82,7 +80,6 @@ class HomeTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer.update_all_widgets()
-            self.outer.show_all_data()
 
     class GroupingObserver(Observer):
 

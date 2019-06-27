@@ -19,9 +19,15 @@ using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
+Mantid::Kernel::Logger g_log("ISISEnergyTransfer");
 
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
 }
 
 WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
@@ -90,6 +96,55 @@ void ungroupWorkspace(std::string const &workspaceName) {
   ungroup->initialize();
   ungroup->setProperty("InputWorkspace", workspaceName);
   ungroup->execute();
+}
+
+IAlgorithm_sptr loadAlgorithm(std::string const &filename,
+                              std::string const &outputName) {
+  auto loader = AlgorithmManager::Instance().create("Load");
+  loader->initialize();
+  loader->setProperty("Filename", filename);
+  loader->setProperty("OutputWorkspace", outputName);
+  return loader;
+}
+
+void deleteWorkspace(std::string const &name) {
+  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleter->initialize();
+  deleter->setProperty("Workspace", name);
+  deleter->execute();
+}
+
+double getSampleLog(MatrixWorkspace_const_sptr workspace,
+                    std::string const &logName, double const &defaultValue) {
+  try {
+    return workspace->getLogAsSingleValue(logName);
+  } catch (std::exception const &) {
+    return defaultValue;
+  }
+}
+
+double getSampleLog(MatrixWorkspace_const_sptr workspace,
+                    std::vector<std::string> const &logNames,
+                    double const &defaultValue) {
+  double value(defaultValue);
+  for (auto const &logName : logNames) {
+    value = getSampleLog(workspace, logName, defaultValue);
+    if (value != defaultValue)
+      break;
+  }
+  deleteWorkspace(workspace->getName());
+  return value;
+}
+
+double loadSampleLog(std::string const &filename,
+                     std::vector<std::string> const &logNames,
+                     double const &defaultValue) {
+  auto const temporaryWorkspace("__sample_log_subject");
+  auto loader = loadAlgorithm(filename, temporaryWorkspace);
+  loader->execute();
+
+  return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames,
+                      defaultValue);
 }
 
 } // namespace
@@ -234,23 +289,16 @@ bool ISISEnergyTransfer::validate() {
     int detectorMin = m_uiForm.spPlotTimeSpecMin->value();
     int detectorMax = m_uiForm.spPlotTimeSpecMax->value();
 
-    QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
-    auto pos = rawFile.lastIndexOf(".");
-    auto extension = rawFile.right(rawFile.length() - pos);
-    QFileInfo rawFileInfo(rawFile);
-    std::string name = rawFileInfo.baseName().toStdString();
+    const QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
+    const auto pos = rawFile.lastIndexOf(".");
+    const auto extension = rawFile.right(rawFile.length() - pos);
+    const QFileInfo rawFileInfo(rawFile);
+    const std::string name = rawFileInfo.baseName().toStdString();
 
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", rawFile.toStdString());
-    loadAlg->setProperty("OutputWorkspace", name);
+    auto loadAlg = loadAlgorithm(rawFile.toStdString(), name);
     if (extension.compare(".nxs") == 0) {
-      int64_t detectorMin =
-          static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());
-      int64_t detectorMax =
-          static_cast<int64_t>(m_uiForm.spPlotTimeSpecMax->value());
-      loadAlg->setProperty("SpectrumMin", detectorMin);
-      loadAlg->setProperty("SpectrumMax", detectorMax);
+      loadAlg->setProperty("SpectrumMin", static_cast<int64_t>(detectorMin));
+      loadAlg->setProperty("SpectrumMax", static_cast<int64_t>(detectorMax));
     } else {
       loadAlg->setProperty("SpectrumMin", detectorMin);
       loadAlg->setProperty("SpectrumMax", detectorMax);
@@ -259,8 +307,7 @@ bool ISISEnergyTransfer::validate() {
     loadAlg->execute();
 
     if (m_uiForm.ckBackgroundRemoval->isChecked()) {
-      MatrixWorkspace_sptr tempWs =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+      auto tempWs = getADSMatrixWorkspace(name);
       const double minBack = tempWs->x(0).front();
       const double maxBack = tempWs->x(0).back();
 
@@ -297,10 +344,14 @@ bool ISISEnergyTransfer::numberInCorrectRange(
 
 QString ISISEnergyTransfer::checkCustomGroupingNumbersInRange(
     std::vector<std::size_t> const &customGroupingNumbers) const {
-  for (const auto &number : customGroupingNumbers)
-    if (!numberInCorrectRange(number))
-      return "Please supply a custom grouping within the correct range";
-  return "";
+  if (std::any_of(customGroupingNumbers.cbegin(), customGroupingNumbers.cend(),
+                  [this](auto number) {
+                    return !this->numberInCorrectRange(number);
+                  })) {
+    return "Please supply a custom grouping within the correct range";
+  } else {
+    return "";
+  }
 }
 
 QString ISISEnergyTransfer::validateDetectorGrouping() const {
@@ -593,9 +644,6 @@ void ISISEnergyTransfer::mappingOptionSelected(const QString &groupType) {
  */
 std::pair<std::string, std::string>
 ISISEnergyTransfer::createMapFile(const std::string &groupType) {
-  QString specRange =
-      m_uiForm.spSpectraMin->text() + "," + m_uiForm.spSpectraMax->text();
-
   if (groupType == "File") {
     QString groupFile = m_uiForm.dsMapFile->getFirstFilename();
     if (groupFile == "")
@@ -683,17 +731,12 @@ void ISISEnergyTransfer::plotRaw() {
   setPlotTimeIsPlotting(true);
 
   QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
-  auto pos = rawFile.lastIndexOf(".");
-  auto extension = rawFile.right(rawFile.length() - pos);
   QFileInfo rawFileInfo(rawFile);
   std::string name = rawFileInfo.baseName().toStdString();
   auto const instName =
       getInstrumentConfiguration()->getInstrumentName().toStdString();
 
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", rawFile.toStdString());
-  loadAlg->setProperty("OutputWorkspace", name);
+  auto loadAlg = loadAlgorithm(rawFile.toStdString(), name);
   if (instName != "TOSCA") {
     loadAlg->setProperty("LoadLogFiles", false);
     loadAlg->setProperty("SpectrumMin", detectorMin);
@@ -702,8 +745,7 @@ void ISISEnergyTransfer::plotRaw() {
   loadAlg->execute();
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
-    MatrixWorkspace_sptr tempWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+    auto tempWs = getADSMatrixWorkspace(name);
 
     const double minBack = tempWs->x(0).front();
     const double maxBack = tempWs->x(0).back();
@@ -805,6 +847,16 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
   setPlotTimeIsPlotting(false);
 }
 
+void ISISEnergyTransfer::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("ISISEnergyTransfer");
+  m_uiForm.dsCalibrationFile->setFBSuffixes(
+      filter ? getCalibrationFBSuffixes(tabName)
+             : getCalibrationExtensions(tabName));
+  m_uiForm.dsCalibrationFile->setWSSuffixes(
+      filter ? getCalibrationWSSuffixes(tabName) : noSuffixes);
+}
+
 /**
  * Called when a user starts to type / edit the runs to load.
  */
@@ -830,10 +882,19 @@ void ISISEnergyTransfer::pbRunFinished() {
     updateRunButton(
         false, "unchanged", "Invalid Run(s)",
         "Cannot find data files for some of the run numbers entered.");
-  else
+  else {
+    loadDetailedBalance(m_uiForm.dsRunFiles->getFirstFilename().toStdString());
     updateRunButton();
+  }
 
   m_uiForm.dsRunFiles->setEnabled(true);
+}
+
+void ISISEnergyTransfer::loadDetailedBalance(std::string const &filename) {
+  std::vector<std::string> const logNames{"sample", "sample_top",
+                                          "sample_bottom"};
+  auto const detailedBalance = loadSampleLog(filename, logNames, 300.0);
+  m_uiForm.spDetailedBalance->setValue(detailedBalance);
 }
 
 /**

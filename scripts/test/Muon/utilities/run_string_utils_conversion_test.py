@@ -59,12 +59,12 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
             self.assertEqual(utils.validate_run_string(valid_string), True)
 
     def test_validate_run_string_returns_false_for_delimiter_typos(self):
-        invalid_strings = [",", ",,,", ",1", "1,", ",1,2,3", "1,2,3,"]
+        invalid_strings = [",,,", ",1", ",1,2,3"]
         for invalid_string in invalid_strings:
             self.assertEqual(utils.validate_run_string(invalid_string), False)
 
     def test_validate_run_string_returns_false_for_range_separator_typos(self):
-        invalid_strings = ["-", "---", "-1", "1-", "-1,2,3", "1,2,3-", "1,-4", "1-,4"]
+        invalid_strings = ["---", "-1", "-1,2,3", "1,-4", "1-,4"]
         for invalid_string in invalid_strings:
             self.assertEqual(utils.validate_run_string(invalid_string), False)
 
@@ -92,14 +92,14 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
             self.assertEqual(run_list, [1, 2, 3, 4, 5])
 
     def test_run_string_to_list_throws_for_incorrectly_placed_range_separator(self):
-        run_strings = ["-1,2,3", "1,2,3-"]
+        run_strings = ["-1,2,3"]
         for run_string in run_strings:
             with self.assertRaises(IndexError) as error:
                 utils.run_string_to_list(run_string)
             self.assertTrue(run_string + " is not a valid run string" in str(error.exception))
 
     def test_run_string_to_list_throws_for_incorrectly_placed_delimiter(self):
-        run_strings = [",1,2,3", "1,2,3,"]
+        run_strings = [",1,2,3"]
         for run_string in run_strings:
             with self.assertRaises(IndexError) as context:
                 utils.run_string_to_list(run_string)
@@ -120,6 +120,11 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
         run_string = '62260-66'
         run_list = [62260, 62261, 62262, 62263, 62264, 62265, 62266]
         self.assertEqual(utils.run_string_to_list(run_string), run_list)
+
+    def test_run_string_allows_trailing_comma(self):
+        run_string = '5,4,3,2,1,'
+        run_list = utils.run_string_to_list(run_string)
+        self.assertEqual(run_list, [1, 2, 3, 4, 5])
 
 
 if __name__ == '__main__':

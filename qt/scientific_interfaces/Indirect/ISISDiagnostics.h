@@ -21,7 +21,7 @@
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include <MantidQtWidgets/Common/QtPropertyBrowser/QtCheckBoxFactory>
+#include "MantidQtWidgets/Common/QtPropertyBrowser/QtCheckBoxFactory"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -79,6 +79,8 @@ private slots:
 
 private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
+
+  void setFileExtensionsByName(bool filter) override;
 
   Ui::ISISDiagnostics m_uiForm;
 };

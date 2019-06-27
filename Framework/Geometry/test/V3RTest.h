@@ -46,7 +46,7 @@ public:
 
     std::vector<int> bad(4, 1);
     TS_ASSERT_THROWS(V3R rationalIntVecBad(bad),
-                     Mantid::Kernel::Exception::MisMatch<size_t>);
+                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
 
     // copy constructor
     V3R copied(rational);
@@ -84,13 +84,13 @@ public:
     TS_ASSERT_EQUALS(vector[0], 1);
     TS_ASSERT_EQUALS(vector[1], 2);
     TS_ASSERT_EQUALS(vector[2], 3);
-    TS_ASSERT_THROWS(vector[3], Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS(vector[3], const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT_THROWS_NOTHING(vector[0] = RationalNumber(2, 3));
     TS_ASSERT_THROWS_NOTHING(vector[1] = RationalNumber(2, 3));
     TS_ASSERT_THROWS_NOTHING(vector[2] = RationalNumber(2, 3));
     TS_ASSERT_THROWS(vector[3] = RationalNumber(2, 3),
-                     Mantid::Kernel::Exception::IndexError);
+                     const Mantid::Kernel::Exception::IndexError &);
   }
 
   void testIntegerAddition() {
@@ -165,7 +165,7 @@ public:
     vector *= 2;
     TS_ASSERT_EQUALS(vector, originalVector);
 
-    TS_ASSERT_THROWS(vector / 0, boost::bad_rational);
+    TS_ASSERT_THROWS(vector / 0, const boost::bad_rational &);
   }
 
   void testRationalAddition() {
@@ -406,10 +406,11 @@ public:
     // wrong sizes
     IntMatrix wrongOne(3, 4);
     TS_ASSERT_THROWS(wrongOne * vector,
-                     Mantid::Kernel::Exception::MisMatch<size_t>);
+                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
 
     IntMatrix wrongTwo(4, 3);
-    TS_ASSERT_THROWS(wrongTwo * vector, Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS(wrongTwo * vector,
+                     const Mantid::Kernel::Exception::IndexError &);
 
     // Smaller works
     IntMatrix wrongThree(2, 3);

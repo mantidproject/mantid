@@ -85,8 +85,7 @@ void DetermineChunking::init() {
   exts_set.insert(RAW_EXT, RAW_EXT + NUM_EXT_RAW);
   std::vector<std::string> exts(exts_set.begin(), exts_set.end());
   this->declareProperty(
-      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "The name of the event nexus, runinfo.xml, raw, or histo nexus file to "
       "read, including its full or relative path. The Event NeXus file name is "
       "typically of the form INST_####_event.nxs (N.B. case sensitive if "
@@ -98,7 +97,7 @@ void DetermineChunking::init() {
                   "Get chunking strategy for chunks with this number of "
                   "Gbytes. File will not be loaded if this option is set.");
 
-  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

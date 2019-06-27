@@ -90,7 +90,7 @@ public:
     boost::shared_ptr<ILiveListener> l;
     auto product = boost::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
-                      new MockLiveListenerInstantiator{product});
+                      std::make_unique<MockLiveListenerInstantiator>(product));
 
     EXPECT_CALL(*product, setAlgorithm(testing::_))
         .Times(0); // variant of create below does not take an Algorithm. So we
@@ -103,7 +103,7 @@ public:
 
     // Check that unregistered class request throws
     TS_ASSERT_THROWS(factory.create("fdsfds", false),
-                     Mantid::Kernel::Exception::NotFoundError)
+                     const Mantid::Kernel::Exception::NotFoundError &)
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(product.get()));
     factory.unsubscribe("MockLiveListener");
   }
@@ -115,7 +115,7 @@ public:
     boost::shared_ptr<ILiveListener> l;
     auto product = boost::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
-                      new MockLiveListenerInstantiator{product});
+                      std::make_unique<MockLiveListenerInstantiator>(product));
 
     EXPECT_CALL(*product, setAlgorithm(testing::_)).Times(1);
     EXPECT_CALL(*product, connect(testing::_))
@@ -135,11 +135,12 @@ public:
     boost::shared_ptr<ILiveListener> l;
     auto product = boost::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
-                      new MockLiveListenerInstantiator{product});
+                      std::make_unique<MockLiveListenerInstantiator>(product));
     EXPECT_CALL(*product, connect(testing::_))
         .WillOnce(testing::Return(false /*cannot connect*/));
     Kernel::ConfigService::Instance().setFacility("TEST");
-    TS_ASSERT_THROWS(factory.create("MINITOPAZ", true), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create("MINITOPAZ", true),
+                     const std::runtime_error &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(product.get()));
     // Now test that it doesn't throw if we ask not to connect
     EXPECT_CALL(*product, connect(testing::_)).Times(0);
@@ -156,7 +157,7 @@ public:
     boost::shared_ptr<ILiveListener> l;
     auto product = boost::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
-                      new MockLiveListenerInstantiator{product});
+                      std::make_unique<MockLiveListenerInstantiator>(product));
     // Make sure this method just throws.
     // Note that you can't even access the method unless you assign to a
     // DynamicFactory reference.
@@ -164,7 +165,7 @@ public:
     Mantid::Kernel::DynamicFactory<ILiveListener> &f =
         LiveListenerFactory::Instance();
     TS_ASSERT_THROWS(f.createUnwrapped(""),
-                     Mantid::Kernel::Exception::NotImplementedError)
+                     const Mantid::Kernel::Exception::NotImplementedError &)
     factory.unsubscribe("MockLiveListener");
   }
 };

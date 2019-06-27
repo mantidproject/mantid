@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
 
 namespace MantidQt {
@@ -57,9 +57,9 @@ std::unique_ptr<CoordinateTransform>
 createCoordinateTransform(const Mantid::API::IMDWorkspace &ws, size_t dimX,
                           size_t dimY) {
   if (MantidQt::API::requiresSkewMatrix(ws)) {
-    return Mantid::Kernel::make_unique<NonOrthogonalTransform>(ws, dimX, dimY);
+    return std::make_unique<NonOrthogonalTransform>(ws, dimX, dimY);
   } else {
-    return Mantid::Kernel::make_unique<NullTransform>();
+    return std::make_unique<NullTransform>();
   }
 }
 } // namespace SliceViewer

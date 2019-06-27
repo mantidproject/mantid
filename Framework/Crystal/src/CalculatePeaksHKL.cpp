@@ -37,7 +37,7 @@ const std::string CalculatePeaksHKL::category() const {
 /** Initialize the algorithm's properties.
  */
 void CalculatePeaksHKL::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -45,9 +45,9 @@ void CalculatePeaksHKL::init() {
       "OverWrite", false,
       "Overwrite existing miller indices as well as empty ones.");
 
-  this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 }
 
 /** Execute the algorithm.

@@ -63,8 +63,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(spectrumCalculator.setDeltaT(2.0));
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 2.0);
 
-    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(0.0), std::invalid_argument);
-    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(-1.0), std::invalid_argument);
+    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(0.0),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(-1.0),
+                     const std::invalid_argument &);
   }
 
   void testSetDeltaTFromWorkspace() {
@@ -77,7 +79,7 @@ public:
     MatrixWorkspace_sptr invalidWs =
         WorkspaceCreationHelper::create2DWorkspace123(1, 1);
     TS_ASSERT_THROWS(spectrumCalculator.setDeltaTFromWorkspace(invalidWs),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testIsValidDeltaT() {
@@ -107,12 +109,12 @@ public:
     spectrumCalculator.initialize();
     // deltaT is not set, so this must fail
     TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     spectrumCalculator.setDeltaT(3.0);
 
     // still fails, because time transformer is required.
     TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     spectrumCalculator.setTimeTransformer(m_timeTransformer);
 
     // peak collection with some peaks, intensities are described by maximum,
@@ -168,7 +170,7 @@ public:
     PoldiPeakCollection_sptr invalidPeakCollection;
     TS_ASSERT_THROWS(
         spectrumCalculator.getIntegratedPeakCollection(invalidPeakCollection),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void testGetNormalizedPeakCollection() {
@@ -178,14 +180,14 @@ public:
     PoldiPeakCollection_sptr invalidPeakCollection;
     TS_ASSERT_THROWS(
         spectrumCalculator.getNormalizedPeakCollection(invalidPeakCollection),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // m_timeTransformer has not been assigned, so even a "good" PeakCollection
     // will throw
     PoldiPeakCollection_sptr testPeaks =
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
     TS_ASSERT_THROWS(spectrumCalculator.getNormalizedPeakCollection(testPeaks),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     spectrumCalculator.setTimeTransformer(m_timeTransformer);
 
@@ -210,14 +212,14 @@ public:
     PoldiPeakCollection_sptr invalidPeakCollection;
     TS_ASSERT_THROWS(
         spectrumCalculator.getCountPeakCollection(invalidPeakCollection),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // m_timeTransformer has not been assigned, so even a "good" PeakCollection
     // will throw
     PoldiPeakCollection_sptr testPeaks =
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
     TS_ASSERT_THROWS(spectrumCalculator.getCountPeakCollection(testPeaks),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     spectrumCalculator.setTimeTransformer(m_timeTransformer);
 
@@ -361,11 +363,11 @@ public:
     TestablePoldiFitPeaks2D spectrumCalculator;
 
     TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(from, invalid),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(invalid, from),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(invalid, invalid),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_DIFFERS(peak1->hkl(), peak2->hkl());
 
@@ -375,7 +377,7 @@ public:
     to->addPeak(peak1);
 
     TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(from, to),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testAddBackgroundFunctions() {
@@ -473,7 +475,7 @@ public:
 
     PointGroup_sptr invalid;
     TS_ASSERT_THROWS(alg.getLatticeSystemFromPointGroup(invalid),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
 private:
