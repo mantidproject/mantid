@@ -86,28 +86,6 @@ void RunsView::initLayout() {
   // Connect signal for when search algorithm completes
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(onSearchComplete()), Qt::UniqueConnection);
-
-  // Synchronize the instrument selection widgets
-  // Processing table in group 1
-  // connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-  //        qDataProcessorWidget_1,
-  //        SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  // connect(qDataProcessorWidget_1,
-  //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
-  //        ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
-  // connect(qDataProcessorWidget_1,
-  //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
-  //        SLOT(instrumentChanged(int)));
-  // Processing table in group 2
-  // connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-  //        qDataProcessorWidget_2,
-  //        SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  // connect(qDataProcessorWidget_2,
-  //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
-  //        ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
-  // connect(qDataProcessorWidget_2,
-  //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
-  //        SLOT(instrumentChanged(int)));
 }
 
 /**

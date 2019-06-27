@@ -19,9 +19,6 @@
 namespace MantidQt {
 
 namespace MantidWidgets {
-namespace DataProcessor {
-class Command;
-}
 } // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
@@ -29,7 +26,6 @@ class AlgorithmRunner;
 
 namespace CustomInterfaces {
 
-namespace DataProcessor = MantidWidgets::DataProcessor;
 class ISearchModel;
 
 /**
