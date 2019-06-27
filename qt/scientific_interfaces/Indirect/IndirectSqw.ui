@@ -496,14 +496,14 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLabel" name="lbPlotOutput">
+       <widget class="QLabel" name="lbWorkspaceIndex">
         <property name="text">
-         <string>Plot Spectrum:</string>
+         <string>Workspace Index:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spSpectrum">
+       <widget class="QSpinBox" name="spWorkspaceIndex">
         <property name="enabled">
          <bool>false</bool>
         </property>

@@ -195,8 +195,8 @@ void IndirectSqw::sqwAlgDone(bool error) {
 }
 
 void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
-  m_uiForm.spSpectrum->setMaximum(maximum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spWorkspaceIndex);
+  m_uiForm.spWorkspaceIndex->setMaximum(maximum);
 }
 
 /**
@@ -266,7 +266,7 @@ void IndirectSqw::runClicked() { runTab(); }
 void IndirectSqw::plotSpectrumClicked() {
   setPlotSpectrumIsPlotting(true);
 
-  auto const spectrumNumber = m_uiForm.spSpectrum->text().toInt();
+  auto const spectrumNumber = m_uiForm.spWorkspaceIndex->text().toInt();
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
     plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumNumber);
 
@@ -294,7 +294,7 @@ void IndirectSqw::setRunEnabled(bool enabled) {
 
 void IndirectSqw::setPlotSpectrumEnabled(bool enabled) {
   m_uiForm.pbPlotSpectrum->setEnabled(enabled);
-  m_uiForm.spSpectrum->setEnabled(enabled);
+  m_uiForm.spWorkspaceIndex->setEnabled(enabled);
 }
 
 void IndirectSqw::setPlotContourEnabled(bool enabled) {

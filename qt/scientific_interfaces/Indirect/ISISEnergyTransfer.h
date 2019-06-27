@@ -55,7 +55,8 @@ private slots:
       bool error); //< Called when the Plot Raw algorithmm chain completes
   /// Handles running, plotting and saving
   void runClicked();
-  void plotClicked();
+  void plotSpectrumClicked();
+  void plotContourClicked();
   void saveClicked();
 
   void updateRunButton(bool enabled = true,
@@ -88,10 +89,13 @@ private:
   void loadDetailedBalance(std::string const &filename);
 
   void setRunEnabled(bool enable);
-  void setPlotEnabled(bool enable);
+  void setPlotSpectrumEnabled(bool enable);
+  void setPlotContourEnabled(bool enable);
   void setPlotTimeEnabled(bool enable);
   void setSaveEnabled(bool enable);
-  void setPlotIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enable);
+  void setPlotSpectrumIsPlotting(bool plotting);
+  void setPlotContourIsPlotting(bool plotting);
   void setPlotTimeIsPlotting(bool plotting);
 
   std::string m_outputGroupName;
