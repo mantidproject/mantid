@@ -109,8 +109,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._model.plot(workspace_list, self.get_plot_title())
 
         workspace_list_inverse_binning = self.get_workspaces_to_plot(self.context.group_pair_context.selected,
-                                                                                     not self._view.if_raw(),
-                                                                                     self._view.get_selected())
+                                                                     not self._view.if_raw(),
+                                                                     self._view.get_selected())
         self._model.plotted_workspaces_inverse_binning = workspace_list_inverse_binning
 
         if self.context.fitting_context.fit_list and \
