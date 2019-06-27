@@ -200,7 +200,7 @@ class GeneralSettingsTest(GuiTest):
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_fill_layout_display(self, mock_CONF):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, view=Mock())
         # setup CONF.get returns dictionary
         test_dict = {'a': 1, 'b': 2, 'c': 3}
         mock_CONF.get.return_value = test_dict
@@ -214,7 +214,7 @@ class GeneralSettingsTest(GuiTest):
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_get_layout_dict(self, mock_CONF):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, view=Mock())
         # setup CONF.get returns dictionary
         test_dict = {'a': 1}
         mock_CONF.get.return_value = test_dict
@@ -223,7 +223,7 @@ class GeneralSettingsTest(GuiTest):
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_get_layout_dict_key_error(self, mock_CONF):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, view=Mock())
         # setup CONF.get to return KeyError
         mock_CONF.get.side_effect = KeyError()
 
@@ -231,15 +231,14 @@ class GeneralSettingsTest(GuiTest):
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_save_layout(self, mock_CONF):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, view=Mock())
         # setup parent
         mock_parent = Mock()
         mock_parent.saveState.return_value = "value"
         presenter.parent = mock_parent
         # setup CONF.get returns dictionary
         test_dict = {'a': 1}
-        mock_CONF.get = Mock()
-        mock_CONF.get.return_value = test_dict
+        mock_CONF.get = Mock(return_value=test_dict)
         # setup mock commands
         presenter.view.new_layout_name.text = Mock(return_value='key')
         presenter.view.new_layout_name.clear = Mock()
@@ -253,7 +252,7 @@ class GeneralSettingsTest(GuiTest):
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_load_layout(self, mock_CONF):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, view=Mock())
         # setup parent
         mock_parent = Mock()
         presenter.parent = mock_parent
@@ -263,8 +262,7 @@ class GeneralSettingsTest(GuiTest):
         presenter.view.layout_display.currentItem = Mock(return_value=list_item)
         # setup CONF.get returns dictionary
         test_dict = {'a': 1}
-        mock_CONF.get = Mock()
-        mock_CONF.get.return_value = test_dict
+        mock_CONF.get = Mock(return_value=test_dict)
 
         presenter.load_layout()
 
@@ -273,7 +271,7 @@ class GeneralSettingsTest(GuiTest):
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_delete_layout(self, mock_CONF):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, view=Mock())
         # setup parent
         mock_parent = Mock()
         presenter.parent = mock_parent
@@ -283,8 +281,7 @@ class GeneralSettingsTest(GuiTest):
         presenter.view.layout_display.currentItem = Mock(return_value=list_item)
         # setup CONF.get returns dictionary
         test_dict = {'a': 1}
-        mock_CONF.get = Mock()
-        mock_CONF.get.return_value = test_dict
+        mock_CONF.get = Mock(return_value=test_dict)
 
         presenter.delete_layout()
 

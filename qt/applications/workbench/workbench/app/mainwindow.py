@@ -426,8 +426,7 @@ class MainWindow(QMainWindow):
             layout_dict = CONF.get("MainWindow/user_layouts")
         except KeyError:
             layout_dict = {}
-        layout_keys = list(layout_dict.keys())
-        layout_keys.sort()
+        layout_keys = sorted(layout_dict.keys())
         layout_options = []
         for item in layout_keys:
             layout_options.append(self.create_load_layout_action(item, layout_dict[item]))
@@ -583,8 +582,8 @@ class MainWindow(QMainWindow):
 
     def open_settings_layout_window(self):
         settings = SettingsPresenter(self)
-        settings.general_settings.focus_layout_box()
         settings.show()
+        settings.general_settings.focus_layout_box()
 
     def config_updated(self):
         """
