@@ -595,6 +595,8 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   double gatePeriod =
       (std::round(masterRpm / slaveRpm) == 1.0 ? 0.5 * framePeriod
                                                : framePeriod);
+  AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "GatePeriod",
+                                           gatePeriod);
 
   // count total events per pixel and reserve necessary memory
   loadDetectorL2Values();
