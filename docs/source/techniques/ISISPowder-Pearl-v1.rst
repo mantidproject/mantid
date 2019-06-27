@@ -1004,8 +1004,10 @@ will need to be called again.*
 On PEARL this is set to the following:
 
 ..  code-block:: python
+
   # Long mode OFF:
     spline_coefficient: 60
+    
   # Long mode ON:
     spline_coefficient: 5
 

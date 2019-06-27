@@ -522,7 +522,7 @@ Example Input:
   # Scale sample empty to 90% of original
   gem_example.focus(sample_empty_scale=0.9, ...)
 
-  .. _save_all_gem_isis-powder-diffraction-ref:
+.. _save_all_gem_isis-powder-diffraction-ref:
 
 save_all
 ^^^^^^^^^^
