@@ -487,8 +487,8 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter.handle_fit_clicked()
         wait_for_thread(self.presenter.calculation_thread)
 
-        self.presenter.model.do_sequential_tf_fit.assert_called_once()
-        self.presenter.handle_finished.assert_called_once()
+        self.assertEqual(self.presenter.model.do_sequential_tf_fit.call_count, 1)
+        self.assertEqual(self.presenter.handle_finished.call_count, 1)
 
     def test_get_parameters_for_tf_single_fit_calculation(self):
         self.presenter.model.create_fitted_workspace_name.return_value = ('workspace', 'workspace directory')
