@@ -8,7 +8,7 @@
 from mantidqt.dialogs.spectraselectordialog import SpectraSelectionDialog, SpectraSelection
 
 
-def get_spectra_selection(workspaces, parent_widget=None):
+def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=False):
     """
     Decides whether it is necessary to request user input when asked to
     plot a list of workspaces. The input dialog will only be shown in
@@ -29,13 +29,16 @@ def get_spectra_selection(workspaces, parent_widget=None):
         selection.wksp_indices = [0]
         return selection
     else:
-        selection_dlg = SpectraSelectionDialog(workspaces, parent=parent_widget)
+        selection_dlg = SpectraSelectionDialog(workspaces, parent=parent_widget,
+                                               show_colorfill_btn=show_colorfill_btn)
         res = selection_dlg.exec_()
         if res == SpectraSelectionDialog.Rejected:
             # cancelled
             return None
         else:
             user_selection = selection_dlg.selection
+            if user_selection == 'colorfill':
+                return user_selection
             # the dialog should guarantee that only 1 of spectrum/indices is supplied
             assert user_selection.spectra is None or user_selection.wksp_indices is None
             return user_selection

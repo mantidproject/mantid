@@ -122,7 +122,7 @@ def figure_title(workspaces, fig_num):
     return wsname(first) + '-' + str(fig_num)
 
 
-def plot_from_names(names, errors, overplot, fig=None):
+def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False):
     """
     Given a list of names of workspaces, raise a dialog asking for the
     a selection of what to plot and then plot it.
@@ -140,13 +140,15 @@ def plot_from_names(names, errors, overplot, fig=None):
 
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
     try:
-        selection = get_spectra_selection(workspaces)
+        selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn)
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
         selection = None
 
     if selection is None:
         return None
+    elif selection == 'colorfill':
+        return pcolormesh_from_names(names)
 
     return plot(selection.workspaces, spectrum_nums=selection.spectra,
                 wksp_indices=selection.wksp_indices,
@@ -157,7 +159,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None):
     """
     Create a blank figure and axes, with configurable properties.
     :param overplot: If true then plotting on figure will plot over previous plotting
-    :param ax_properties: A doict of axes properties. E.g. {'yscale': 'log'} for log y-axis
+    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'} for log y-axis
     :param window_title: A string denoting the name of the GUI window which holds the graph
     :return: Matplotlib fig and axes objects
     """

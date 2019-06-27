@@ -51,7 +51,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             if not isinstance(ws, MatrixWorkspace):
                 raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
 
-    def __init__(self, workspaces, parent=None):
+    def __init__(self, workspaces, parent=None, show_colorfill_btn=False):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -63,6 +63,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.wi_min, self.wi_max = None, None
         self.selection = None
         self._ui = None
+        self._show_colorfill_button = show_colorfill_btn
 
         self._init_ui()
         self._set_placeholder_text()
@@ -77,12 +78,17 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.selection = selection
         self.accept()
 
+    def on_colorfill_clicked(self):
+        self.selection = 'colorfill'
+        self.accept()
+
     # ------------------- Private -------------------------
 
     def _init_ui(self):
         ui = SpectraSelectionDialogUI()
         ui.setupUi(self)
         self._ui = ui
+        ui.colorfillButton.setVisible(self._show_colorfill_button)
         # overwrite the "Yes to All" button text
         ui.buttonBox.button(QDialogButtonBox.YesToAll).setText('Plot All')
         # ok disabled by default
@@ -117,6 +123,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(self.on_ok_clicked)
         ui.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(self.reject)
         ui.buttonBox.button(QDialogButtonBox.YesToAll).clicked.connect(self.on_plot_all_clicked)
+        ui.colorfillButton.clicked.connect(self.on_colorfill_clicked)
 
         # line edits are mutually exclusive
         ui.wkspIndices.textChanged.connect(self._on_wkspindices_changed)

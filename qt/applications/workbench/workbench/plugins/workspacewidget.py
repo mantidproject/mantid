@@ -182,7 +182,7 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _action_double_click_workspace(self, name):
-        plot_from_names([name], errors=False, overplot=False)
+        plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()
