@@ -1010,19 +1010,15 @@ bool ReflectometryReductionOneAuto2::processGroups() {
  * format otherwise they are numbered according to the wsGroupNumber
  */
 ReflectometryReductionOneAuto2::WorkspaceNames
-ReflectometryReductionOneAuto2::getOutputNamesForGroups(std::string inputName,
-                                                        std::string runNumber,
-                                                        size_t wsGroupNumber) {
+ReflectometryReductionOneAuto2::getOutputNamesForGroups(const std::string &inputName,
+                                                        const std::string &runNumber,
+                                                        const size_t wsGroupNumber) {
   auto const output = getOutputWorkspaceNames();
   std::string informativeName = "TOF" + runNumber + "_";
-  bool informativeInput = false;
-  if (equal(informativeName.begin(), informativeName.end(),
-            inputName.begin())) {
-    informativeInput = true;
-  }
 
   WorkspaceNames outputNames;
-  if (informativeInput) {
+  if (equal(informativeName.begin(), informativeName.end(),
+            inputName.begin())) {
     auto informativeTest = inputName.substr(informativeName.length());
     outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
     outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;
