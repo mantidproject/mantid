@@ -148,16 +148,22 @@ bool hasActiveCatalogSession() {
   return !sessions.empty();
 }
 
-namespace {
-void execLoginDialog(const IAlgorithm_sptr &alg) {
+void CatalogSearcher::execLoginDialog(const IAlgorithm_sptr &alg) {
   API::InterfaceManager interfaceMgr;
-  auto dlg = interfaceMgr.createDialog(alg);
+  auto dlg = dynamic_cast<MantidQt::API::AlgorithmDialog *>(
+      interfaceMgr.createDialog(alg));
+  QObject::connect(dlg, SIGNAL(closeEventCalled()), this, SLOT(dialogClosed()));
   dlg->setModal(true);
   dlg->show();
   dlg->raise();
   dlg->activateWindow();
 }
-} // namespace
+
+void CatalogSearcher::dialogClosed() {
+  if (!hasActiveCatalogSession()) {
+    m_notifyee->notifyAutoreductionPaused();
+  }
+}
 
 /** Log in to the catalog
  * @returns : true if login succeeded

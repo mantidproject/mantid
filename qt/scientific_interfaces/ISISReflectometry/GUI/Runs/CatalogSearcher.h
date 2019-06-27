@@ -25,6 +25,7 @@ functionality.
 class CatalogSearcher : public ISearcher,
                         public RunsViewSearchSubscriber,
                         public Mantid::API::AlgorithmObserver {
+  Q_OBJECT
 public:
   explicit CatalogSearcher(IRunsView *m_view);
   ~CatalogSearcher() override{};
@@ -53,6 +54,9 @@ protected:
   void errorHandle(const Mantid::API::IAlgorithm *alg,
                    const std::string &what) override;
 
+private slots:
+  void dialogClosed();
+
 private:
   IRunsView *m_view;
   SearcherSubscriber *m_notifyee;
@@ -63,6 +67,7 @@ private:
 
   bool hasActiveSession() const;
   void logInToCatalog();
+  void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);
   std::string activeSessionId() const;
   Mantid::API::IAlgorithm_sptr createSearchAlgorithm(const std::string &text);
   ISearchModel &results() const;
