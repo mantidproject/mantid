@@ -23,9 +23,9 @@ the help button.
 */
 class MainWindowSubscriber {
 public:
-  virtual void notifyHelpPressed(){};
-  virtual void notifyNewBatchRequested(){};
-  virtual void notifyCloseBatchRequested(int){};
+  virtual void notifyHelpPressed() = 0;
+  virtual void notifyNewBatchRequested() = 0;
+  virtual void notifyCloseBatchRequested(int) = 0;
   virtual ~MainWindowSubscriber() = default;
 };
 
