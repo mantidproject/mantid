@@ -368,9 +368,15 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
 
   // The model is fine, we just need to update the view. Add a new, proper,
   // group first, then delete the original one
-  appendRowAndGroup();
+  appendEmptyGroupInView();
   removeRowsAndGroupsFromView({location});
+
+  appendRowAndGroup();
   notifyExpandAllRequested();
+
+  // After repairing the view and adding the Row and Group
+  removeGroupsFromModel({0});
+  removeGroupsFromView({0});
 }
 
 void RunsTablePresenter::notifyExpandAllRequested() {
