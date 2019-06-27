@@ -94,7 +94,7 @@ private:
 };
 
 // Gives a clean file destination and removes the file when
-// handle is out of scope. Must be stack allocated
+// handle is out of scope. Must be stack allocated.
 class ScopedFileHandle {
 
 public:
@@ -215,13 +215,11 @@ public:
     saveInstrument(*m_instrument.first, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-
     TS_ASSERT(testUtility.hasDataSet("name", "short_name", "abr_name",
                                      "/raw_data_1/instrument"));
 
-	TS_ASSERT(testUtility.hasDataSet("name", "NX_class", "NX_CHAR",
+    TS_ASSERT(testUtility.hasDataSet("name", "NX_class", "NX_CHAR",
                                      "/raw_data_1/instrument"));
-  
   }
 };
 

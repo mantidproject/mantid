@@ -119,7 +119,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writeStrAttributeToDataSet(dataSet, SHORT_NAME,
                              "abr_name"); // add short_name atribute to dataset.
 
-  writeStrAttributeToDataSet(dataSet, NX_CLASS, NX_CHAR); //add NX_class attribute to dataset
+  writeStrAttributeToDataSet(dataSet, NX_CLASS,
+                             NX_CHAR); // add NX_class attribute to dataset
 
   file.close();
 
