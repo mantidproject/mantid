@@ -128,6 +128,11 @@ public:
 
 private:
   boost::filesystem::path m_full_path; // full path to file
+
+  // prevent heap allocation for ScopedFileHandle
+protected:
+  static void *operator new(std::size_t); // prevent heap allocation of scalar.
+  static void *operator new[](std::size_t); // prevent heap allocation of array.
 };
 
 } // namespace
