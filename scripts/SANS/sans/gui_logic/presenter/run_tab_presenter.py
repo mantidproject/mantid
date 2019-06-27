@@ -893,19 +893,6 @@ class RunTabPresenter(object):
         else:
             self._beam_centre_presenter.update_all_selected()
 
-    # def _validate_rows(self):
-    #     """
-    #     Validation of the rows. A minimal setup requires that ScatterSample is set.
-    #     """
-    #     # If SampleScatter is empty, then don't run the reduction.
-    #     # We allow empty rows for now, since we cannot remove them from Python.
-    #     number_of_rows = self._table_model.get_number_of_rows()
-    #     for row in range(number_of_rows):
-    #         if not self.is_empty_row(row):
-    #             sample_scatter = self._view.get_cell(row, 0)
-    #             if not sample_scatter:
-    #                 raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
-
     # ------------------------------------------------------------------------------------------------------------------
     # Controls
     # ------------------------------------------------------------------------------------------------------------------

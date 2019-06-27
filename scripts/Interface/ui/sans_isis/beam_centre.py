@@ -156,12 +156,8 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.run_button.setEnabled(True)
 
     def enable_update_hab(self, enabled):
-        if enabled:
-            self.update_hab_check_box.setEnabled(True)
-            self.update_hab_check_box.setChecked(True)
-        else:
-            self.update_hab_check_box.setChecked(False)
-            self.update_hab_check_box.setEnabled(False)
+        self.update_hab_check_box.setEnabled(enabled)
+        self.update_hab_check_box.setChecked(enabled)
 
     def enable_update_lab(self, enabled):
         self.update_lab_check_box.setEnabled(enabled)
