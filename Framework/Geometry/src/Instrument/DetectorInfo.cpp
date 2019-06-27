@@ -317,6 +317,17 @@ const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
   return *m_detectorIDs;
 }
 
+std::size_t DetectorInfo::indexOf(const detid_t id) const {
+  try {
+    return m_detIDToIndex->at(id);
+  } catch (const std::out_of_range &) {
+    // customize the error message
+    std::stringstream msg;
+    msg << "Failed to find detector with id=" << id;
+    throw std::out_of_range(msg.str());
+  }
+}
+
 /// Returns the scan count of the detector with given detector index.
 size_t DetectorInfo::scanCount() const { return m_detectorInfo->scanCount(); }
 

@@ -12,7 +12,7 @@
 #include "DllConfig.h"
 
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QObject>
 
@@ -35,12 +35,21 @@ public:
   /**
    * @return Corrected data produced by the last fit
    */
-  virtual Mantid::API::MatrixWorkspace_const_sptr correctedData() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr correctedData() const = 0;
+
+  /**
+   * @param function The fitting function
+   * @param xValues The x values to evaluate over
+   * @return The baseline model data
+   */
+  virtual Mantid::API::MatrixWorkspace_sptr
+  baselineData(Mantid::API::IFunction_const_sptr function,
+               const std::vector<double> &xValues) const = 0;
 
   /**
    * @return Current data used for fitting
    */
-  virtual Mantid::API::MatrixWorkspace_const_sptr data() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr data() const = 0;
 
   /**
    * Perform a fit using current data and specified function and sections.

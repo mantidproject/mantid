@@ -72,12 +72,14 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
         self.fitting_context = FittingContext()
+
         self.frequency_context = FrequencyContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
                                    muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
                                    fitting_context=self.fitting_context,
                                    workspace_suffix=' FD', frequency_context=self.frequency_context)
+
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -273,4 +275,5 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
+        self.context.ads_observer = None
         super(FrequencyAnalysisGui, self).closeEvent(event)

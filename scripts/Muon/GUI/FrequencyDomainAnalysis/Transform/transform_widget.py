@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_view import TransformView
 
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_widget import TransformSelectionWidget
-from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.observer_pattern import Observer, GenericObserver
 
 from qtpy import QtWidgets
 
@@ -22,6 +22,7 @@ class TransformWidget(QtWidgets.QWidget):
         self._maxent = maxent_widget(load=load, parent=self)
         self._selector = TransformSelectionWidget(parent=self)
         self.LoadObserver = LoadObserver(self)
+        self.load = load
         self.instrumentObserver = instrumentObserver(self)
         self.GroupPairObserver = GroupPairObserver(self)
         self.enable_observer = EnableObserver(self)
@@ -34,6 +35,12 @@ class TransformWidget(QtWidgets.QWidget):
 
         self._selector.setSelectionConnection(self.updateDisplay)
         self.updateDisplay('FFT')
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+        self.load.update_view_from_model_notifier.add_subscriber(self.update_view_from_model_observer)
+
+    def update_view_from_model(self):
+        self._fft.update_view_from_model()
+        self._maxent.update_view_from_model()
 
     @property
     def widget(self):

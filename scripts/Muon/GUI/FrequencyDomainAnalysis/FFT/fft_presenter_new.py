@@ -204,3 +204,7 @@ class FFTPresenter(object):
 
             muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws, directory + fft_workspace_name + spec_type)
             muon_workspace_wrapper.show()
+
+
+    def update_view_from_model(self):
+        self.getWorkspaceNames()
