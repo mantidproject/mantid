@@ -112,9 +112,11 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
                                                                      not self._view.if_raw(),
                                                                      self._view.get_selected())
         self._model.plotted_workspaces_inverse_binning = workspace_list_inverse_binning
-
+        combined_ws_list = workspace_list + workspace_list_inverse_binning
+        # This is checking whether the latest fit performed contains a fit which matches any of the workspaces just plotted
+        # if it does then handle fit complete is also called to update the fit on the plot.
         if self.context.fitting_context.fit_list and \
-                any([workspace in workspace_list + workspace_list_inverse_binning
+                any([workspace in combined_ws_list
                      for workspace in self.context.fitting_context.fit_list[-1].input_workspaces]):
             self.handle_fit_completed()
 
@@ -124,9 +126,10 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         :return:
         """
         current_fit = self.context.fitting_context.fit_list[-1]
+        combined_ws_list = self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning
         list_of_output_workspaces_to_plot = [output for output, input in
                                              zip(current_fit.output_workspace_names, current_fit.input_workspaces)
-                                             if input in self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning]
+                                             if input in combined_ws_list]
 
         for workspace_name in self._model.plotted_fit_workspaces:
             self._model.remove_workpace_from_plot(workspace_name)

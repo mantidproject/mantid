@@ -5,9 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+import numpy as np
+
 from mantidqt.plotting.functions import plot
 from mantid.api import AnalysisDataService
-import numpy as np
 
 
 class HomePlotWidgetModel(object):
