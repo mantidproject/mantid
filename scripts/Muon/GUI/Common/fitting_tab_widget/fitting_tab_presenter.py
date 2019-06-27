@@ -151,7 +151,8 @@ class FittingTabPresenter(object):
             elif fit_type == self.view.sequential_fit:
                 sequential_fit_parameters = self.get_multi_domain_fit_parameters(
                 )
-                calculation_function = functools.partial(
+                calculation_function = functools.partial(CONFLICT (content): Merge conflict in scripts/Muon/GUI/Common/fitting_tab_widget/fitting_tab_presenter.py
+
                     self.model.do_sequential_fit, sequential_fit_parameters)
                 self.calculation_thread = self.create_thread(
                     calculation_function)
@@ -367,6 +368,9 @@ class FittingTabPresenter(object):
             self._fit_function[index] = self.view.fit_object.clone()
         else:
             self._fit_function = [self.view.fit_object] * len(self.selected_data)
+
+    def handle_undo_fit_clicked(self):
+        pass
 
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()
