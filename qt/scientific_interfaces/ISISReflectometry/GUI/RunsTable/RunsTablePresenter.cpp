@@ -112,6 +112,21 @@ RunsTablePresenter::RunsTablePresenter(
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
       m_clipboard(), m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
+
+  // Add Group to view and model, add row to this group in view and model.
+  appendRowAndGroup({0});
+  notifyExpandAllRequested();
+}
+
+void RunsTablePresenter::appendRowAndGroup(std::vector<int> localGroupIndices) {
+  if (localGroupIndices.size() == 0) {
+    // Calculate
+    localGroupIndices.emplace_back(m_model.reductionJobs().groups().size());
+  }
+  appendEmptyGroupInModel();
+  appendEmptyGroupInView();
+  appendRowsToGroupsInView(localGroupIndices);
+  appendRowsToGroupsInModel(localGroupIndices);
 }
 
 void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
@@ -353,8 +368,9 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
 
   // The model is fine, we just need to update the view. Add a new, proper,
   // group first, then delete the original one
-  appendEmptyGroupInView();
+  appendRowAndGroup();
   removeRowsAndGroupsFromView({location});
+  notifyExpandAllRequested();
 }
 
 void RunsTablePresenter::notifyExpandAllRequested() {
@@ -721,7 +737,6 @@ void RunsTablePresenter::forAllCellsAt(
 
 void RunsTablePresenter::setRowStylingForItem(
     MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
-
   switch (item.state()) {
   case State::ITEM_NOT_STARTED: // fall through
   case State::ITEM_STARTING:
