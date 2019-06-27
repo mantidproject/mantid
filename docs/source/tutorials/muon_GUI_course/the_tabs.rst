@@ -54,7 +54,7 @@ plot is set to show the asymmetry by default, which is the normalised ratio of t
 .. math:: P_z(t) = A_0G_z(t) = \frac{F(t) - \alpha B(t)}{F(t) + \alpha B(t)}
     :name: Equation 1
 
-.. figure:: /images/PlotWindow2.png
+.. figure:: /images/PlotWindow2.PNG
     :align: center
 
     Figure 2(b): The default plot window for MUSR00024563 showing raw (unbinned) data for the long pair asymmetry.
@@ -246,6 +246,7 @@ Some of the muon specific functions in MantidPlot include:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | :ref:`func-DynamicKuboToyabe` | Fitting for the parameters :math:`A`, :math:`{\sigma}` and :math:`{\nu}` (the initial asymmetry, relaxation rate and hop rate, respectively) using numerical integration techniques. |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
 Where:
 
 * :math:`{\lambda}` and :math:`{\sigma}` are in :math:`{\mu s^{-1}}`

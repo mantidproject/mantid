@@ -208,12 +208,12 @@ One can also change the axis settings, such as the maximum and minimum values, a
 The axis limits can be changed either through the Figure options menu, or by double clicking on the relevant axis, while other .
 See the instructions below for an example on how to change the X-Axis limits and set the Y-Scale to logarithmic.
 
-    1. Load the MUSR00024563 dataset using the muon analysis GUI, and plot the backward counts. How to do this is described in the Home section of :ref:`the_tabs`.  
+    1. Load the MUSR00024563 dataset using the muon analysis GUI, and plot the backward counts. How to do this is described in the Home section of :ref:`the_tabs`.
     2. Open the Figure options menu as described above, **or** double click on the X axis to Edit axis.
-    2. In the Axes tab of the Figure options, set the value in the box labelled Right to 16 **or** do the same for the box labelled Max in the Edit axis dialog.
-    3. Press Apply, **or** click the OK button.
-    4. In the Y-Axis section of the figure options, use the Scale drop-down menu and change the setting to log **or** double click on the Y axis and tick the box labelled Log.
-    5. Click OK and observe the changes to the plot, this process is shown for the Figure options in Figure 11(c), and the Edit axis in 11(d).
+    3. In the Axes tab of the Figure options, set the value in the box labelled Right to 16 **or** do the same for the box labelled Max in the Edit axis dialog.
+    4. Press Apply, **or** click the OK button.
+    5. In the Y-Axis section of the figure options, use the Scale drop-down menu and change the setting to log **or** double click on the Y axis and tick the box labelled Log.
+    6. Click OK and observe the changes to the plot, this process is shown for the Figure options in Figure 11(c), and the Edit axis in 11(d).
 
     .. figure:: /images/axis_figure_options.gif
         :align: center

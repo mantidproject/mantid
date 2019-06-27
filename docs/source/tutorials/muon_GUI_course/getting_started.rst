@@ -62,7 +62,7 @@ location can be accessed simply by referencing the run number. Download the refe
 
     Figure 1(b): The manage directories window
 
-.. figure:: /images/manage_user_directories.gif
+.. figure:: /images/manage_user_directories2.gif
     :align: center
 
     Figure 1(c): How to access the Manage User Directories window and to set up a new path. 
