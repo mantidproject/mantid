@@ -159,6 +159,7 @@ private:
   createDefaultParameters(std::size_t index) const;
 
   virtual std::string getResultXAxisUnit() const;
+  virtual std::string getResultLogValue() const;
 
   bool isPreviousModelSelected() const;
 

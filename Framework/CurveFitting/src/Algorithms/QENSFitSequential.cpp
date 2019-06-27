@@ -660,12 +660,13 @@ std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
 WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
     ITableWorkspace_sptr parameterWorkspace,
     const std::vector<std::size_t> &grouping) {
+  std::string const columnX = getProperty("LogValue");
   std::string const xAxisUnit = getProperty("ResultXAxisUnit");
   auto pifp =
       createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, false);
   pifp->setAlwaysStoreInADS(false);
   pifp->setProperty("InputWorkspace", parameterWorkspace);
-  pifp->setProperty("ColumnX", "axis-1");
+  pifp->setProperty("ColumnX", columnX);
   pifp->setProperty("XAxisUnit", xAxisUnit);
   pifp->setProperty("ParameterNames", getFitParameterNames());
   pifp->setProperty("IncludeChiSquared", true);
