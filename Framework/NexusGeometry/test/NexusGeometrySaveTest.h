@@ -38,7 +38,8 @@ public:
   MOCK_METHOD1(doReport, void(const std::string &));
 };
 
-// tests that attributes are in file.
+//  local Class used for validation of the structure of a nexus file as needed
+//  for the unit tests.
 class HDF5FileTestUtility {
 
 public:
@@ -75,27 +76,25 @@ public:
       // attribute of dataset with atrtibute name 'attrName' exists if try block
       // succeeds.
       H5::Attribute attribute = dataSet.openAttribute(attrName);
-
       std::string readClass;
       attribute.read(attribute.getDataType(), readClass);
 
-	  // if value of attribute read from file matches attrval, returns true.
-      return readClass == attrVal; 
+      // if value of attribute read from file matches attrval, returns true.
+      return readClass == attrVal;
 
-    } catch (...) {
+    } catch (H5::Exception &) {
 
-	// DataSet could not be opened.
-      return false; 
+      // DataSet could not be opened.
+      return false;
     }
-
   }
 
 private:
   H5::H5File m_file;
 };
 
-// Gives a clean file destination and removes the file when handle is out of
-// scope.
+// Gives a clean file destination and removes the file when
+// handle is out of scope. Must be stack allocated
 class ScopedFileHandle {
 
 public:
@@ -161,7 +160,8 @@ public:
 
   void test_providing_invalid_path_throws() { // deliberately fails
 
-    std::string path = "invalid_path"; // test invalid path
+    ScopedFileHandle destinationFile("invalid_path_to_file_test_file.hdf5");
+    std::string path = "false_directory\\" + destinationFile.fullPath();
 
     TS_ASSERT_THROWS(saveInstrument(*m_instrument.first, path),
                      std::invalid_argument &);
@@ -171,8 +171,10 @@ public:
 
     MockProgressBase progressRep;
     EXPECT_CALL(progressRep, doReport(testing::_)).Times(1);
-    ScopedFileHandle test("testFile.hdf5");
-    std::string path = test.fullPath();
+
+    ScopedFileHandle destinationFile("progress_report_test_file.hdf5");
+    std::string path = destinationFile.fullPath();
+
     saveInstrument(*m_instrument.first, path, &progressRep);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
@@ -180,10 +182,10 @@ public:
   void test_extension_validation() {
 
     ScopedFileHandle fileResource(
-        "testIstrument.abc"); // creates a temp directory for the file.
+        "invalid_extension_test_file.abc"); // creates a temp directory for the
+                                            // file.
     std::string destinationFile = fileResource.fullPath();
 
-    // TODO the following should not be tested. but saveInstrument should be.
     TS_ASSERT_THROWS(saveInstrument(*m_instrument.first, destinationFile),
                      std::invalid_argument &);
   }
@@ -191,7 +193,8 @@ public:
   void test_nxinstrument_class_exists() {
 
     ScopedFileHandle fileResource(
-        "testIstrument.hdf5"); // creates a temp directory for the file.
+        "check_instrument_test_file.hdf5"); // creates a temp directory for the
+                                            // file.
     std::string destinationFile = fileResource.fullPath();
     saveInstrument(*m_instrument.first,
                    destinationFile); // saves the instrument.
@@ -205,16 +208,20 @@ public:
 
   void test_instrument_has_name() {
 
-    ScopedFileHandle scopedFile("instrument.hdf5"); // temp directory
+    ScopedFileHandle scopedFile(
+        "check_instrument_name_test_file.hdf5"); // temp directory
     auto destinationFile = scopedFile.fullPath();
 
     saveInstrument(*m_instrument.first, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    // TS_ASSERT(testUtility.hasDataSet("/raw_data1/instrument/name", NX_CHAR));
-    TS_ASSERT(testUtility.hasDataSet("name", "short_name", "NX_CHAR",
+
+    TS_ASSERT(testUtility.hasDataSet("name", "short_name", "abr_name",
                                      "/raw_data_1/instrument"));
-    // TODO write hasDataSet in HDF5FileTestUtility
+
+	TS_ASSERT(testUtility.hasDataSet("name", "NX_class", "NX_CHAR",
+                                     "/raw_data_1/instrument"));
+  
   }
 };
 

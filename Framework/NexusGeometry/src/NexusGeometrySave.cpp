@@ -26,7 +26,7 @@ namespace NexusGeometry {
 namespace {
 
 // NEXUS COMPLIANT ATTRIBUTE NAMES
-const H5std_string shortName = "short_name";
+const H5std_string SHORT_NAME = "short_name";
 const H5std_string NX_CLASS = "NX_class";
 const H5std_string NX_ENTRY = "NXentry";
 const H5std_string NX_INSTRUMENT = "NXinstrument";
@@ -105,11 +105,21 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::StrType dataType(0, H5T_VARIABLE);
   H5::DataSpace dataSpace(H5S_SCALAR);
 
-  // add dataset to child group 'instrument'
-  H5::DataSet dataSet =
-      instrumentGroup.createDataSet("name", dataType, dataSpace);
+  std::string dataSetData = "testInstrument";   // value for dataset.
+  auto dataSetDataAsCStr = dataSetData.c_str(); // for plist..
 
-  writeStrAttributeToDataSet(dataSet, shortName, NX_CHAR);
+  H5::DSetCreatPropList plist;
+  plist.setFillValue(dataType, &dataSetDataAsCStr); // for dataSet.
+
+  // add dataset to child group 'instrument'
+  H5::DataSet dataSet = instrumentGroup.createDataSet(
+      "name", dataType, dataSpace,
+      plist); // name of dataset initialised with fill value.
+
+  writeStrAttributeToDataSet(dataSet, SHORT_NAME,
+                             "abr_name"); // add short_name atribute to dataset.
+
+  writeStrAttributeToDataSet(dataSet, NX_CLASS, NX_CHAR); //add NX_class attribute to dataset
 
   file.close();
 
