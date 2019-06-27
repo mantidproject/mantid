@@ -295,6 +295,7 @@ Example Input:
 mode
 ^^^^^^^^^^
 *optional*
+
 The current chopper mode to use in the 
 :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 and :ref:`focus_polaris_isis-powder-diffraction-ref` method.
@@ -448,6 +449,7 @@ Example Input:
 multiple_scattering
 ^^^^^^^^^^^^^^^^^^^
 *optional*
+
 Indicates whether to account for the effects of multiple scattering
 when calculating absorption corrections. 
 
