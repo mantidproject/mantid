@@ -20,9 +20,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "SearchModel.h"
 
-#include <QStringList>
 #include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>

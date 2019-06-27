@@ -33,7 +33,6 @@ namespace CustomInterfaces {
 // Forward decs
 class IMessageHandler;
 class IPythonRunner;
-class ISearchModel;
 
 using MantidWidgets::ProgressableView;
 

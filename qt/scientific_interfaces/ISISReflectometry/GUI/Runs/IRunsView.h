@@ -18,15 +18,12 @@
 
 namespace MantidQt {
 
-namespace MantidWidgets {
-} // namespace MantidWidgets
+namespace MantidWidgets {} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
 
 namespace CustomInterfaces {
-
-class ISearchModel;
 
 /**
 IRunsView is the base view class for the Reflectometry "Runs"
