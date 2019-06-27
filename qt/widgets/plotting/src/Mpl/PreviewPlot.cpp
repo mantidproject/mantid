@@ -15,6 +15,7 @@
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QMenu>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include <algorithm>
@@ -341,6 +342,9 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
   case QEvent::MouseMove:
     stopEvent = handleMouseMoveEvent(static_cast<QMouseEvent *>(evt));
     break;
+  case QEvent::Resize:
+    stopEvent = handleWindowResizeEvent();
+    break;
   default:
     break;
   }
@@ -386,6 +390,11 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
   return stopEvent;
 }
 
+/**
+ * Handler called when the event filter recieves a mouse move event
+ * @param evt A pointer to the event
+ * @return True if the event propagation should be stopped, false otherwise
+ */
 bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
   bool stopEvent(false);
   if (evt->buttons() == Qt::LeftButton) {
@@ -395,6 +404,15 @@ bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
       emit mouseMove(position);
   }
   return stopEvent;
+}
+
+/**
+ * Handler called when the event filter recieves a window resize event
+ * @return True if the event propagation should be stopped, false otherwise
+ */
+bool PreviewPlot::handleWindowResizeEvent() {
+  QTimer::singleShot(0, this, SLOT(replot()));
+  return false;
 }
 
 /**

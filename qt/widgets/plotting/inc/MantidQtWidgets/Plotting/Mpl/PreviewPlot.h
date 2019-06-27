@@ -84,8 +84,6 @@ public:
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
 
-  void replot();
-
 public slots:
   void clear();
   void resizeX();
@@ -93,6 +91,7 @@ public slots:
   void setCanvasColour(QColor colour);
   void setLinesWithErrors(QStringList labels);
   void showLegend(bool visible);
+  void replot();
 
 signals:
   void mouseDown(const QPoint &point);
@@ -113,6 +112,7 @@ private:
   bool handleMousePressEvent(QMouseEvent *evt);
   bool handleMouseReleaseEvent(QMouseEvent *evt);
   bool handleMouseMoveEvent(QMouseEvent *evt);
+  bool handleWindowResizeEvent();
 
   void showContextMenu(QMouseEvent *evt);
 
