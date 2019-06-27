@@ -35,7 +35,6 @@ public:
         m_savePresenterFactory(std::move(savePresenterFactory)) {}
 
   std::unique_ptr<IBatchPresenter> make(IBatchView *view) {
-    /// TODO: inject models containing defaults from the reduction algorithm
     auto runsPresenter = m_runsPresenterFactory.make(view->runs());
     auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto experimentPresenter =
