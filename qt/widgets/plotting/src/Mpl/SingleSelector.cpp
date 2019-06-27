@@ -30,7 +30,7 @@ SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
           m_plot->canvas(), colour.name(QColor::HexRgb), position,
           std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
           selectTypeAsQString(type), defaultLineKwargs())),
-      m_visible(visible) {
+      m_visible(visible), m_markerMoving(false) {
 
   m_plot->canvas()->draw();
 
@@ -109,14 +109,18 @@ void SingleSelector::setColour(const QColor &colour) {
 }
 
 void SingleSelector::handleMouseDown(const QPoint &point) {
-  if (m_visible) {
+  if (m_visible && !m_plot->selectorActive()) {
     const auto dataCoords = m_plot->toDataCoords(point);
     m_singleMarker->mouseMoveStart(dataCoords.x(), dataCoords.y());
+
+    m_markerMoving = m_singleMarker->isMoving();
+    if (m_markerMoving)
+      m_plot->setSelectorActive(true);
   }
 }
 
 void SingleSelector::handleMouseMove(const QPoint &point) {
-  if (m_visible) {
+  if (m_visible && m_markerMoving) {
     const auto dataCoords = m_plot->toDataCoords(point);
     const auto markerMoved =
         m_singleMarker->mouseMove(dataCoords.x(), dataCoords.y());
@@ -131,7 +135,11 @@ void SingleSelector::handleMouseMove(const QPoint &point) {
 
 void SingleSelector::handleMouseUp(const QPoint &point) {
   UNUSED_ARG(point);
-  m_singleMarker->mouseMoveStop();
+  if (m_markerMoving) {
+    m_singleMarker->mouseMoveStop();
+    m_plot->setSelectorActive(false);
+    m_markerMoving = false;
+  }
 }
 
 void SingleSelector::redrawMarker() {

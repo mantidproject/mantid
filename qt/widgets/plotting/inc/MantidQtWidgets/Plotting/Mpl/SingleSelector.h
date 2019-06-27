@@ -63,6 +63,8 @@ private:
   std::unique_ptr<MantidQt::Widgets::MplCpp::SingleMarker> m_singleMarker;
   /// Is the marker visible or hidden
   bool m_visible;
+  ///	Is the marker moving
+  bool m_markerMoving;
 };
 
 } // namespace MantidWidgets

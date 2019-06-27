@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::callMethodNoCheck;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
 
@@ -151,13 +151,24 @@ void RangeMarker::mouseMoveStop() {
  * @brief Notifies the relevant marker to start moving.
  * @param x The x position of the mouse press in axes coords.
  * @param y The y position of the mouse press in axes coords.
- * @return True if one of the VerticalMarker's within the RangeMarker has been
+ * @return True if one of the marker's within the RangeMarker has been
  * moved.
  */
 bool RangeMarker::mouseMove(double x, double y) {
   GlobalInterpreterLock lock;
 
   auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y));
+  return PyLong_AsLong(movedPy.ptr()) > 0;
+}
+
+/**
+ * @brief Returns true if one of the marker's is moving.
+ * @return True if one of the marker's within the RangeMarker is being moved.
+ */
+bool RangeMarker::isMoving() {
+  GlobalInterpreterLock lock;
+
+  auto const movedPy = Python::Object(pyobj().attr("is_marker_moving")());
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 

@@ -77,6 +77,9 @@ public:
                     double position = 0.0);
   SingleSelector *getSingleSelector(const QString &name) const;
 
+  void setSelectorActive(bool active);
+  bool selectorActive() const;
+
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
@@ -137,6 +140,8 @@ private:
   QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
   // Single selector's
   QMap<QString, MantidQt::MantidWidgets::SingleSelector *> m_singleSelectors;
+  // Whether or not a selector is currently being moved
+  bool m_selectorActive;
 
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;

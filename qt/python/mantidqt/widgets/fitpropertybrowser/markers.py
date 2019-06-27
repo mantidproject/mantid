@@ -733,6 +733,13 @@ class SingleMarker(QObject):
         self.marker.mouse_move_stop()
         QApplication.restoreOverrideCursor()
 
+    def is_marker_moving(self):
+        """
+        Returns true if the marker is being moved
+        :return: True if the marker is being moved.
+        """
+        return self.marker.is_marker_moving()
+
 
 class RangeMarker(QObject):
     """
@@ -862,3 +869,10 @@ class RangeMarker(QObject):
         self.min_marker.mouse_move_stop()
         self.max_marker.mouse_move_stop()
         QApplication.restoreOverrideCursor()
+
+    def is_marker_moving(self):
+        """
+        Returns true if one of the markers is being moved
+        :return: True if one of the markers is being moved.
+        """
+        return self.min_marker.is_marker_moving() or self.max_marker.is_marker_moving()

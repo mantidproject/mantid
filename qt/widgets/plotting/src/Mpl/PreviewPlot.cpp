@@ -60,6 +60,8 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
   createLayout();
   createActions();
 
+  m_selectorActive = false;
+
   m_canvas->installEventFilterToMplCanvas(this);
   watchADS(observeADS);
 }
@@ -215,6 +217,20 @@ SingleSelector *PreviewPlot::getSingleSelector(const QString &name) const {
     throw std::runtime_error("SingleSelector was not found on PreviewPlot.");
   return m_singleSelectors[name];
 }
+
+/**
+ * Set whether or not one of the selectors on the preview plot is being moved or
+ * not. This is required as we only want the user to be able to move one marker
+ * at a time, otherwise the markers could get 'stuck' together.
+ * @param active True if a selector is being moved.
+ */
+void PreviewPlot::setSelectorActive(bool active) { m_selectorActive = active; }
+
+/**
+ * Returns True if a selector is currently being moved on the preview plot.
+ * @return True if a selector is currently being moved on the preview plot.
+ */
+bool PreviewPlot::selectorActive() const { return m_selectorActive; }
 
 /**
  * Set the range of the specified axis

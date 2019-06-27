@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::callMethodNoCheck;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
 
@@ -148,6 +148,17 @@ bool SingleMarker::mouseMove(double x, double y) {
   GlobalInterpreterLock lock;
 
   auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y));
+  return PyLong_AsLong(movedPy.ptr()) > 0;
+}
+
+/**
+ * @brief Returns true if the marker is moving.
+ * @return True if the marker is being moved.
+ */
+bool SingleMarker::isMoving() {
+  GlobalInterpreterLock lock;
+
+  auto const movedPy = Python::Object(pyobj().attr("is_marker_moving")());
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 

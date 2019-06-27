@@ -42,6 +42,8 @@ public:
   void mouseMoveStart(double x, double y);
   void mouseMoveStop();
   bool mouseMove(double x, double y);
+
+  bool isMoving();
 };
 
 } // namespace MplCpp
