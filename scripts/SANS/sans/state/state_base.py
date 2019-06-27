@@ -15,7 +15,6 @@ from functools import (partial)
 from six import string_types, with_metaclass
 
 from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int, std_vector_long)
-from mantid.py3compat import Enum
 
 
 # ---------------------------------------------------------------
@@ -44,18 +43,47 @@ def all_list_elements_are_of_specific_type_and_not_empty(value, comparison_type,
     :param type_check: the method which performs type checking.
     :return: True if the list is not empty and all types are as expected, else False.
     """
-    is_of_type = True
+    if not value:
+        return False
+
     for element in value:
         # Perform type check
         if not type_check(element, comparison_type):
-            is_of_type = False
+            return False
         # Perform additional check
         if not additional_comparison(element):
-            is_of_type = False
+            return False
 
+    return True
+
+
+def all_list_elements_are_specific_enum_and_not_empty(value, enum_type):
+    """
+    Ensures that all elements of a list are value of a specific Enum and that the list is not empty
+    :param value: the list to check
+    :param enum_type: Enum class of which value should be a value
+    :return: True if the list is not empty and all types are as expected, False if the list is empty
+    :raises TypeError: If an element within value is not a value of enum_type
+    """
     if not value:
-        is_of_type = False
-    return is_of_type
+        return False
+
+    for element in value:
+        # Sometimes element can be an EnumValue, which will fail isinstance(element, enum_type)
+        # We can get the enum from the EnumValue, however, and compare to enum_type directly
+        try:
+            element = element.enum
+        except AttributeError:
+            if not isinstance(element, enum_type):
+                raise TypeError("Expected type {0}, but {1} is of type {2} instead.".format(type(enum_type),
+                                                                                            value, type(value)))
+        else:
+            # element was EnumValue. element.enum returns the enum
+            if element != enum_type:
+                raise TypeError("Expected type {0}, but {1} is of type {2} instead.".format(type(enum_type),
+                                                                                            value, type(value)))
+
+    return True
 
 
 def all_list_elements_are_of_instance_type_and_not_empty(value, comparison_type, additional_comparison=lambda x: True):
@@ -291,26 +319,8 @@ class PositiveIntegerListParameter(TypedParameter):
 
 class EnumListParameter(TypedParameter):
     def __init__(self, enum_type):
-        self.enum_type = enum_type
-        typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=enum_type,
-                                   additional_comparison=self._additional_comparison)
+        typed_comparison = partial(all_list_elements_are_specific_enum_and_not_empty, enum_type=enum_type)
         super(EnumListParameter, self).__init__(list, typed_comparison)
-
-    def _additional_comparison(self, value):
-        try:
-            value = value.enum
-        except AttributeError:
-            if isinstance(value, Enum):
-                return True
-            else:
-                raise TypeError("Expected type {0}, but {1} is of type {2} instead.".format(type(self.enum_type),
-                                                                                            value, type(value)))
-        else:
-            if value == self.enum_type:
-                return True
-            else:
-                raise TypeError("Expected type {0}, but {1} is of type {2} instead.".format(type(self.enum_type),
-                                                                                            value, type(value)))
 
 
 # ------------------------------------------------
