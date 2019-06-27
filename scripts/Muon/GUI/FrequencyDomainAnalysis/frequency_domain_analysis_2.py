@@ -125,7 +125,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.setup_phase_table_changed_notifier()
         self.setup_fitting_notifier()
 
-        self.setup_on_recalulation_finished_notifer()
+        self.setup_on_recalculation_finished_notifer()
+
+        self.transform.set_up_calculation_observers(self.fitting_tab.fitting_tab_presenter.enable_tab_observer, self.fitting_tab.fitting_tab_presenter.disable_tab_observer )
+        self.transform.new_data_observer(self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
         self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
 
@@ -159,7 +162,17 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer
+        )
+
+        self.context.gui_context.gui_variables_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.gui_context_observer)
+
+        self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.gui_context_observer)
+
+        self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
 
         self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
             self.home_tab.plot_widget.group_pair_observer)
@@ -201,12 +214,18 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
             self.load_widget.load_widget.enable_observer)
 
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
+
     def setup_group_calculation_disabler_notifer(self):
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
             self.home_tab.home_tab_widget.disable_observer)
 
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
             self.load_widget.load_widget.disable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
 
     def setup_on_load_enabler(self):
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
@@ -228,6 +247,13 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.transform.disable_observer)
 
+    def setup_on_recalculation_finished_notifer(self):
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.home_tab.plot_widget.input_workspace_observer)
+
     def setup_phase_quad_changed_notifer(self):
         self.phase_tab.phase_table_presenter.phase_quad_calculation_complete_nofifier.add_subscriber(
             self.transform.phase_quad_observer)
@@ -243,13 +269,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.fitting_context.new_fit_notifier.add_subscriber(
             self.home_tab.plot_widget.fit_observer)
-
-    def setup_on_recalulation_finished_notifer(self):
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
-
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.home_tab.plot_widget.input_workspace_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

@@ -16,7 +16,7 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name, \
     get_base_data_directory
-from Muon.GUI.Common.observer_pattern import GenericObserver
+from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
 
@@ -43,6 +43,8 @@ class MaxEntPresenter(object):
         self.view.cancelSignal.connect(self.cancel)
 
         self.phase_table_observer = GenericObserver(self.update_phase_table_options)
+        self.calculation_finished_notifier = GenericObservable()
+        self.calculation_started_notifier = GenericObservable()
 
     @property
     def widget(self):
@@ -90,12 +92,14 @@ class MaxEntPresenter(object):
         # put this on its own thread so not to freeze Mantid
         self.thread = self.createThread()
         self.thread.threadWrapperSetUp(self.deactivate, self.handleFinished, self.handle_error)
-
+        self.calculation_started_notifier.notify_subscribers()
         self.thread.start()
 
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
+        self.calculation_finished_notifier.notify_subscribers()
+
 
     def handle_error(self, error):
         self.activate()

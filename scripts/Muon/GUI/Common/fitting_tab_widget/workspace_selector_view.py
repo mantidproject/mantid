@@ -75,7 +75,7 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         # add frequency list to excluded - needed for searching
         excluded_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
                                                                     rebin=self.rebin, freq = True)
-        print("moo", excluded_list,filtered_list)
+
         excluded_list = [item for item in excluded_list if item not in filtered_list]
 
         return excluded_list

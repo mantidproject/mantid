@@ -64,7 +64,6 @@ class FrequencyContext(object):
                for run in runs:
                   if int(run) == int(maxEnt.run):
                     names.append(maxEnt.ws_freq.name())
-        print("fsadf", phasequad)
         # do FFT
         for fft in self._FFT_freq:
             for runs in run_list:

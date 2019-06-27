@@ -63,15 +63,29 @@ class FittingTabPresenter(object):
         self.update_selected_workspace_guess()
 
     def update_selected_workspace_guess(self):
-        if not self.manual_selection_made:
-            guess_selection = self.context.get_names_of_workspaces_to_fit(
-                runs='All',
-                group_and_pair=self.context.group_pair_context.selected,
-                phasequad=True,
-                rebin=not self.view.fit_to_raw)
-        else:
-            guess_selection = self.selected_data
+        if self.manual_selection_made:
+           guess_selection = self.selected_data
+           self.selected_data = guess_selection
 
+        elif self.context._frequency_context:
+           self.update_selected_frequency_workspace_guess()
+        else:
+           self.update_selected_time_workspace_guess()
+
+    def update_selected_frequency_workspace_guess(self):
+        guess_selection = self.context.get_names_of_workspaces_to_fit(
+            runs='All',
+            group_and_pair=self.context.group_pair_context.selected,
+            phasequad=True,
+            rebin=not self.view.fit_to_raw, freq = True)
+        self.selected_data = guess_selection
+
+    def update_selected_time_workspace_guess(self):
+        guess_selection = self.context.get_names_of_workspaces_to_fit(
+            runs='All',
+            group_and_pair=self.context.group_pair_context.selected,
+            phasequad=True,
+            rebin=not self.view.fit_to_raw)
         self.selected_data = guess_selection
 
     def handle_display_workspace_changed(self):

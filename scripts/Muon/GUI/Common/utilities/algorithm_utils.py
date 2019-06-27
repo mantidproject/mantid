@@ -223,4 +223,15 @@ def convert_to_field(ws):
     alg.execute()
     output = alg.getProperty("OutputWorkspace").value
     output.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')
+    return output
+
+def extract_single_spec(ws, spec):
+
+    alg = mantid.AlgorithmManager.create("ExtractSingleSpectrum")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperty("WorkspaceIndex", spec)
+    alg.execute()
     return alg.getProperty("OutputWorkspace").value

@@ -74,6 +74,14 @@ class TransformWidget(QtWidgets.QWidget):
     def enable_view(self):
         self._view.setEnabled(True)
 
+    def set_up_calculation_observers(self, enable, disable):
+        # assume FFT are cheap enough that disable/enable GUI would make no difference
+        self._maxent._presenter.calculation_finished_notifier.add_subscriber(enable)
+        self._maxent._presenter.calculation_started_notifier.add_subscriber(disable)
+
+    def new_data_observer(self, observer):
+        self._maxent._presenter.calculation_finished_notifier.add_subscriber(observer)
+        self._fft._presenter.calculation_finished_notifier.add_subscriber(observer)
 
 class LoadObserver(Observer):
 
