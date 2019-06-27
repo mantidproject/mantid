@@ -273,7 +273,6 @@ class MuonContext(object):
         group, pair = self.get_group_and_pair(group_and_pair)
         run_list = self.get_runs(runs)
         names = self._frequency_context.get_frequency_workspace_names(run_list, group, pair, phasequad)
-        print("hi",names)
         return names
      
     def get_list_of_binned_or_unbinned_workspaces_from_equivalents(self, input_list):

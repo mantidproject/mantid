@@ -13,7 +13,7 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
-
+FREQ_PLOT_TYPE = "Frequency (modulus)"
 
 class HomePlotWidgetPresenter(HomeTabSubWidget):
     def __init__(self, view, model, context):
@@ -33,6 +33,9 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.fit_observer = GenericObserver(self.handle_fit_completed)
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.keep = False
+
+        if self.context._frequency_context:
+           self._view.addItem(FREQ_PLOT_TYPE)
 
     def show(self):
         """
@@ -128,7 +131,34 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         :param is_raw: Whether to use raw or rebinned data
         :param plot_type: Whether to plot counts or asymmetry
         :return: a list of workspace names
+        """ 
+        if plot_type==FREQ_PLOT_TYPE:
+           return self.get_freq_workspaces_to_plot(current_group_pair)
+        else:
+           return self.get_time_workspaces_to_plot(current_group_pair, is_raw, plot_type)
+
+    def get_freq_workspaces_to_plot(self, current_group_pair):
         """
+        :param current_group_pair: The group/pair currently selected
+        :return: a list of workspace names
+        """ 
+        try:
+            runs = ""
+            for run in self.context.data_context.current_runs:
+               runs += ", "+str(run[0])
+            workspace_list = self.context.get_names_of_frequency_domain_workspaces_to_fit(runs, current_group_pair, False)
+            workspace_list = [ws_name for ws_name in workspace_list if ("_mod" in ws_name or "MaxEnt" in ws_name)]
+            return workspace_list
+        except AttributeError:
+            return []
+
+    def get_time_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
+        """
+        :param current_group_pair: The group/pair currently selected
+        :param is_raw: Whether to use raw or rebinned data
+        :param plot_type: Whether to plot counts or asymmetry
+        :return: a list of workspace names
+        """ 
         try:
             if is_raw:
                 workspace_list = self.context.group_pair_context[current_group_pair].get_asymmetry_workspace_names(

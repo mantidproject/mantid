@@ -121,3 +121,6 @@ class HomePlotWidgetView(QtWidgets.QWidget):
 
     def on_plot_type_changed(self, slot):
         self.plot_selector.currentIndexChanged.connect(slot)
+
+    def addItem(self, plot_type):
+        self.plot_selector.addItem(plot_type)

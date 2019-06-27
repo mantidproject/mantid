@@ -192,7 +192,6 @@ class FFTPresenter(object):
         Re = get_group_or_pair_from_name(input_workspace)
         Im = get_group_or_pair_from_name(imaginary_input_workspace)
 
-
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
         spectra = {"_Re":0+shift, "_Im":1+shift, "_mod":2+shift}
         for spec_type in list(spectra.keys()):
