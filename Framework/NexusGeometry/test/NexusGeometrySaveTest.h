@@ -20,18 +20,24 @@
 #include <fstream>
 #include <gmock/gmock.h>
 
-#include "H5cpp.h"
-#include <H5DataSet.h>
-#include <H5File.h>
-#include <H5Group.h>
-#include <H5Location.h>
-#include <H5Object.h>
-#include <H5Rpublic.h>
+#include <H5cpp.h>
 
 using namespace Mantid::NexusGeometry;
 
 //---------------------------------------------------------------
 namespace {
+
+// NEXUS COMPLIANT ATTRIBUTE NAMES
+const H5std_string SHORT_NAME = "short_name";
+const H5std_string NX_CLASS = "NX_class";
+const H5std_string NX_ENTRY = "NXentry";
+const H5std_string NX_INSTRUMENT = "NXinstrument";
+const H5std_string NX_SOURCE = "NXsource";
+const H5std_string SHAPE = "shape";
+
+// NEXUS COMPLIANT ATTRIBUTE VALUES
+const H5std_string NX_TRANSFORMATION = "NXtransformation";
+const H5std_string NX_CHAR = "NX_CHAR";
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
@@ -52,41 +58,124 @@ public:
     }
   }
 
+  // check if datatype or group has NX_class attribute. TODO: REFACTOR - SEE 'HASATTRIBUTE'
   bool hasNxClass(const std::string &attrVal, const std::string &path) const {
-
-    H5::Group parentGroup = m_file.openGroup(path);
-    H5::Attribute attribute = parentGroup.openAttribute("NX_class");
-
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-    return attributeValue == attrVal;
-  }
-
-  bool hasDataSet(const std::string name, const std::string &attrName,
-                  const std::string &attrVal, const std::string &path) const {
-
-    H5::Group parentGroup =
-        m_file.openGroup(path); // open group where DataSet should exist.
 
     try {
 
-      // dataset with name 'name' exists if try block succeeds.
-      H5::DataSet dataSet = parentGroup.openDataSet(name);
+      H5::Group parentGroup = m_file.openGroup(path);
+      H5::Attribute attribute = parentGroup.openAttribute("NX_class");
 
-      // attribute of dataset with atrtibute name 'attrName' exists if try block
-      // succeeds.
-      H5::Attribute attribute = dataSet.openAttribute(attrName);
-      std::string readClass;
-      attribute.read(attribute.getDataType(), readClass);
+      std::string attributeValue;
+      attribute.read(attribute.getDataType(), attributeValue);
 
-      // if value of attribute read from file matches attrval, returns true.
-      return readClass == attrVal;
+      return attributeValue == attrVal;
 
-    } catch (H5::Exception &) {
+    } catch (H5::GroupIException) {
 
-      // DataSet could not be opened.
+      H5::DataSet dataSet = m_file.openDataSet(path);
+      H5::Attribute attribute = dataSet.openAttribute("NX_class");
+
+      std::string attributeValue;
+      attribute.read(attribute.getDataType(), attributeValue);
+
+      return attributeValue == attrVal;
+
+    } catch (H5::DataSetIException) {
+
       return false;
     }
+  }
+
+  /*
+  // check if entry (either group or dataset) has NX_class attribute
+  bool hasNxClass(const std::string &attrVal, const std::string &path) const {
+
+    try {
+
+      H5::Group parentGroup = m_file.openGroup(path);
+      H5::Attribute attribute = parentGroup.openAttribute("NX_class");
+
+      std::string attributeValue;
+      attribute.read(attribute.getDataType(), attributeValue);
+
+      return attributeValue == attrVal;
+
+    } catch (H5::GroupIException &) { // attempt to open as  group failed.
+
+      H5::DataSet dataSet = m_file.openDataSet(path);
+      H5::Attribute attribute = dataSet.openAttribute("NX_class");
+
+      std::string attributeValue;
+      attribute.read(attribute.getDataType(), attributeValue);
+
+      return attributeValue == attrVal;
+
+    } catch (H5::DataSetIException &) { // attempt to open as dataset failed.
+
+      return false;
+    }
+  }
+  */
+
+  // check if dataset exists in group, and (optional) check if the dataset has
+  // the NX_class attribute specified.
+
+  bool hasDataSet(const std::string &dataSetName,
+                  const std::string &pathToGroup,
+                  const std::string *attrVal = nullptr) const {
+
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+
+    try {
+      H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
+
+      if (attrVal != nullptr) {
+
+        H5::Attribute attribute = dataSet.openAttribute("NX_class");
+        std::string readClass;
+
+        attribute.read(attribute.getDataType(), readClass);
+        return readClass == *attrVal;
+      } else {
+
+        // return true if dataset opened without exception and without checking
+        // for NX_class attribute.
+        return true;
+      }
+
+    } catch (H5::DataSetIException) {
+      return false;
+    }
+  }
+
+  // check if dataset or group has name-specific attribute
+  bool hasAttribute(const std::string &pathToGroup, const std::string attrName,
+                    const std::string attrVal,
+                    const std::string *dataSetname = nullptr) {
+
+    H5::Attribute attribute;
+
+    // group must be opened before accessing dataset
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+
+    if (dataSetname != nullptr) {
+
+      // treat as dataset
+
+      H5::DataSet dataSet = parentGroup.openDataSet(*dataSetname);
+      attribute = dataSet.openAttribute(attrName);
+
+    } else {
+
+      // treat as group
+      attribute = parentGroup.openAttribute(attrName);
+    }
+
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
+
+    return attributeValue == attrVal;
   }
 
 private:
@@ -217,14 +306,18 @@ public:
         "check_instrument_name_test_file.hdf5"); // temp directory
     auto destinationFile = scopedFile.fullPath();
 
-    saveInstrument(*m_instrument.first, destinationFile); // saves instrument
+    auto const &compInfo = (*m_instrument.first);
+    const std::string expectedInstrumentName =
+        "name"; //= compInfo.name(compInfo.root());
+
+    saveInstrument(compInfo, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    TS_ASSERT(testUtility.hasDataSet("name", "short_name", "abr_name",
-                                     "/raw_data_1/instrument"));
+    TS_ASSERT(testUtility.hasDataSet("name","/raw_data_1/instrument", &NX_CLASS));
 
-    TS_ASSERT(testUtility.hasDataSet("name", "NX_class", "NX_CHAR",
-                                     "/raw_data_1/instrument"));
+    // TS_ASSERT(testUtility.hasAtrribute(expectedInstrumentName,
+    //                                   "/raw_data_1/instrument/name",
+    //                                  "short_name", "abr_name"));
   }
 };
 

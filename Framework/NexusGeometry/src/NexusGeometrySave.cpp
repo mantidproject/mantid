@@ -11,14 +11,15 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
-
-#include <H5cpp.h>
+/*
 #include <H5DataSet.h>
 #include <H5FPublic.h>
 #include <H5File.h>
 #include <H5Group.h>
 #include <H5Location.h>
 #include <H5Object.h>
+*/
+#include <H5cpp.h>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -26,16 +27,16 @@ namespace NexusGeometry {
 namespace {
 
 // NEXUS COMPLIANT ATTRIBUTE NAMES
-const H5std_string SHORT_NAME = "short_name";
-const H5std_string NX_CLASS = "NX_class";
-const H5std_string NX_ENTRY = "NXentry";
-const H5std_string NX_INSTRUMENT = "NXinstrument";
-const H5std_string NX_SOURCE = "NXsource";
-const H5std_string SHAPE = "shape";
+const std::string SHORT_NAME = "short_name";
+const std::string NX_CLASS = "NX_class";
+const std::string NX_ENTRY = "NXentry";
+const std::string NX_INSTRUMENT = "NXinstrument";
+const std::string NX_SOURCE = "NXsource";
+const std::string SHAPE = "shape";
 
 // NEXUS COMPLIANT ATTRIBUTE VALUES
-const H5std_string NX_TRANSFORMATION = "NXtransformation";
-const H5std_string NX_CHAR = "NX_CHAR";
+const std::string NX_TRANSFORMATION = "NXtransformation";
+const std::string NX_CHAR = "NX_CHAR";
 
 } // namespace
 
@@ -117,7 +118,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
       plist); // name of dataset initialised with fill value.
 
   writeStrAttributeToDataSet(dataSet, SHORT_NAME,
-                             "abr_name"); // add short_name atribute to dataset.
+                             "name"); // add short_name atribute to dataset.
+                                      // compInfo.name( compInfo.root() )
 
   writeStrAttributeToDataSet(dataSet, NX_CLASS,
                              NX_CHAR); // add NX_class attribute to dataset
