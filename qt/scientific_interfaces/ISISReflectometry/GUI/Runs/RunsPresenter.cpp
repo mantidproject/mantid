@@ -190,6 +190,11 @@ bool RunsPresenter::resumeAutoreduction() {
   auto const searchString = m_view->getSearchString();
   auto const instrument = m_view->getSearchInstrument();
 
+  if (searchString == "") {
+    m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
+    return false;
+  }
+
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
   if (m_searcher->searchSettingsChanged(searchString, instrument,

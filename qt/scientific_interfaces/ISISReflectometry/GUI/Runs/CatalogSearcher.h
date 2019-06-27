@@ -50,6 +50,8 @@ public:
 
 protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg,
+                   const std::string &what) override;
 
 private:
   IRunsView *m_view;
@@ -66,6 +68,7 @@ private:
   ISearchModel &results() const;
   void searchAsync();
 };
+bool hasActiveCatalogSession();
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif

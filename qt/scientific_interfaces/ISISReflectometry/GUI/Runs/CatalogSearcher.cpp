@@ -76,7 +76,7 @@ bool CatalogSearcher::startSearchAsync(const std::string &text,
   m_searchType = searchType;
 
   // Already logged in
-  if (hasActiveSession()) {
+  if (hasActiveCatalogSession()) {
     searchAsync();
   } else {
     // Else attempt to login, once login is complete finishHandle will be
@@ -88,8 +88,21 @@ bool CatalogSearcher::startSearchAsync(const std::string &text,
 }
 
 void CatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
-  searchAsync();
   stopObserving(alg);
+  if (!hasActiveCatalogSession()) {
+    m_notifyee->notifyAutoreductionPaused();
+  } else {
+    searchAsync();
+  }
+}
+
+void CatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg,
+                                  const std::string &what) {
+  UNUSED_ARG(what)
+  stopObserving(alg);
+  if (!hasActiveCatalogSession()) {
+    m_notifyee->notifyAutoreductionPaused();
+  }
 }
 
 void CatalogSearcher::notifySearchComplete() {
@@ -130,7 +143,7 @@ bool CatalogSearcher::searchSettingsChanged(const std::string &text,
          searchType != m_searchType;
 }
 
-bool CatalogSearcher::hasActiveSession() const {
+bool hasActiveCatalogSession() {
   auto sessions = CatalogManager::Instance().getActiveSessions();
   return !sessions.empty();
 }
@@ -154,6 +167,7 @@ void CatalogSearcher::logInToCatalog() {
   alg->initialize();
   alg->setProperty("KeepSessionAlive", true);
   this->observeFinish(alg);
+  this->observeError(alg);
   execLoginDialog(alg);
 }
 
