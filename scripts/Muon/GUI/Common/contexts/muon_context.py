@@ -223,7 +223,15 @@ class MuonContext(object):
         elif self.gui_context['DeadTimeSource'] == 'None':
             return None
 
-    def get_names_of_workspaces_to_fit(self, runs='', group_and_pair='', phasequad=False, rebin=False):
+    def get_names_of_workspaces_to_fit(self, runs='', group_and_pair='', phasequad=False, rebin=False, freq = False):
+        if freq:
+           return self.get_names_of_frequency_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair, phasequad=phasequad)
+        else:       
+           return self.get_names_of_time_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair, phasequad=phasequad,rebin=rebin)
+
+    def get_group_and_pair(self, group_and_pair):
+        group = []
+        pair = []
         if group_and_pair == 'All':
             group = self.group_pair_context.group_names
             pair = self.group_pair_context.pair_names
@@ -231,7 +239,10 @@ class MuonContext(object):
             group_pair_list = group_and_pair.replace(' ', '').split(',')
             group = [group for group in group_pair_list if group in self.group_pair_context.group_names]
             pair = [pair for pair in group_pair_list if pair in self.group_pair_context.pair_names]
+        return group,pair
 
+    def get_runs(self, runs):
+        run_list = []
         if runs == 'All':
             run_list = self.data_context.current_runs
         else:
@@ -241,6 +252,11 @@ class MuonContext(object):
                 flat_list += [[run] for run in sublist if len(sublist) > 1]
             run_list += flat_list
             run_list = [run for run in run_list if run in self.data_context.current_runs]
+        return run_list
+
+    def get_names_of_time_domain_workspaces_to_fit(self, runs='', group_and_pair='', phasequad=False, rebin=False):
+        group, pair = self.get_group_and_pair(group_and_pair)
+        run_list = self.get_runs(runs)
 
         group_names = self.group_pair_context.get_group_workspace_names(run_list, group, rebin)
         pair_names = self.group_pair_context.get_pair_workspace_names(run_list, pair, rebin)
@@ -250,12 +266,16 @@ class MuonContext(object):
             for run in run_list:
                 run_string = run_list_to_string(run)
                 phasequad_names += self.phase_context.get_phase_quad(self.data_context.instrument, run_string)
+        print(group_names, "group names")
+        return group_names + pair_names + phasequad_names
 
-        frequency_names = []
-        if self._frequency_context:
-           frequency_names = self._frequency_context.maxEnt_freq + self._frequency_context.FFT_freq
-        return group_names + pair_names + phasequad_names + frequency_names
-
+    def get_names_of_frequency_domain_workspaces_to_fit(self, runs='', group_and_pair='', phasequad = False):
+        group, pair = self.get_group_and_pair(group_and_pair)
+        run_list = self.get_runs(runs)
+        names = self._frequency_context.get_frequency_workspace_names(run_list, group, pair, phasequad)
+        print("hi",names)
+        return names
+     
     def get_list_of_binned_or_unbinned_workspaces_from_equivalents(self, input_list):
         equivalent_list = []
 

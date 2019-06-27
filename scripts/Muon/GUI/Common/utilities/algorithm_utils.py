@@ -221,4 +221,6 @@ def convert_to_field(ws):
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperty("Factor", 1.e3/13.55)
     alg.execute()
+    output = alg.getProperty("OutputWorkspace").value
+    output.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')
     return alg.getProperty("OutputWorkspace").value

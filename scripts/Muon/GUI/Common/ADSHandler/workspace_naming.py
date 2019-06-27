@@ -8,6 +8,9 @@ from __future__ import (absolute_import, division, print_function)
 import re
 
 
+group_str =  "; Group; "
+pair_str = "; Pair Asym; "
+phaseQuad_str = '; PhaseQuad'
 def get_raw_data_workspace_name(context, run, period='1'):
     if context.data_context.is_multi_period():
         return context.data_context._base_run_name(run) + "_raw_data" + "_period_" + period + context.workspace_suffix
@@ -17,10 +20,10 @@ def get_raw_data_workspace_name(context, run, period='1'):
 
 def get_group_data_workspace_name(context, group_name, run, rebin):
     if context.data_context.is_multi_period():
-        name = context.data_context._base_run_name(run) + "; Group; " + group_name + \
+        name = context.data_context._base_run_name(run) +group_str + group_name + \
             "; Counts; Periods; " + context.gui_context.period_string(run) + ";"
     else:
-        name = context.data_context._base_run_name(run) + "; Group; " + group_name + "; Counts;"
+        name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
 
     if rebin:
         name += ' Rebin;'
@@ -32,10 +35,10 @@ def get_group_data_workspace_name(context, group_name, run, rebin):
 
 def get_group_asymmetry_name(context, group_name, run, rebin):
     if context.data_context.is_multi_period():
-        name = context.data_context._base_run_name(run) + "; Group; " + group_name + \
+        name = context.data_context._base_run_name(run) + group_str + group_name + \
             "; Asymmetry; Periods; " + context.gui_context.period_string(run) + ";"
     else:
-        name = context.data_context._base_run_name(run) + "; Group; " + group_name + "; Asymmetry;"
+        name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry;"
 
     if rebin:
         name += ' Rebin;'
@@ -44,13 +47,26 @@ def get_group_asymmetry_name(context, group_name, run, rebin):
 
     return name
 
+def get_group_or_pair_from_name(name):
+    if group_str in name:
+        index  = name.find(group_str)+len(group_str)
+        end = name.find(";",index)
+        group_found = name[index: end]
+        return group_found.replace(" ", "")
+    elif pair_str in name:
+        index  = name.find(pair_str)+len(pair_str)
+        end = name.find(";",index)
+        pair_found = name[index: end]
+        return pair_found.replace(" ", "")
+    return ""
+
 
 def get_pair_data_workspace_name(context, pair_name, run, rebin):
     if context.data_context.is_multi_period():
-        name = context.data_context._base_run_name(run) + "; Pair Asym; " + pair_name + "; Periods; " \
+        name = context.data_context._base_run_name(run) + pair_str + pair_name + "; Periods; " \
             + context.gui_context.period_string(run) + ";"
     else:
-        name = context.data_context._base_run_name(run) + "; Pair Asym; " + pair_name + ";"
+        name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
 
     if rebin:
         name += ' Rebin;'
@@ -118,7 +134,7 @@ def get_fft_workspace_group_name(insertion_workspace_name, instrument, workspace
 
 
 def get_phase_quad_workspace_name(input_workspace, phase_table):
-    return input_workspace.replace('_raw_data', '; PhaseQuad') + ' ' + phase_table
+    return input_workspace.replace('_raw_data', phaseQuad_str) + ' ' + phase_table
 
 
 def get_fitting_workspace_name(base_name):

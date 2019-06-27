@@ -12,7 +12,7 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, convert_to_field
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
-    get_base_data_directory
+    get_base_data_directory, get_group_or_pair_from_name
 import re
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
@@ -183,10 +183,18 @@ class FFTPresenter(object):
 
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
         run = re.search('[0-9]+', input_workspace).group()
+        Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
         group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument, self.load.workspace_suffix)
         directory = get_base_data_directory(self.load, run) + group
-        self.load._frequency_context.add_FFT(fft_workspace)
+
+        Re = get_group_or_pair_from_name(input_workspace)
+        Im = get_group_or_pair_from_name(imaginary_input_workspace)
+
+        if 'PhaseQuad' in self.view.workspace:
+            self.load._frequency_context.add_FFT(fft_workspace_name, run, Re,Im_run, Im, phasequad = True)
+        else:
+            self.load._frequency_context.add_FFT(fft_workspace_name, run, Re,Im_run, Im)
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(fft_workspace, directory + fft_workspace_name)
         muon_workspace_wrapper.show()
