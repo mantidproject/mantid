@@ -264,8 +264,6 @@ public:
   void testResumeAutoreductionCancelledIfSearchStringIsEmpty() {
     auto presenter = makePresenter();
     auto runsTable = makeRunsTableWithContent();
-    expectAutoreductionSettingsChanged();
-    expectRunsTableWithContent(runsTable);
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction("");
     verifyAndClear();

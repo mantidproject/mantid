@@ -119,6 +119,12 @@ void RunsPresenter::notifySearchComplete() {
     autoreduceNewRuns();
 }
 
+void RunsPresenter::notifySearchFailed() {
+  if (isAutoreducing()) {
+    notifyAutoreductionPaused();
+  }
+}
+
 void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
 }

@@ -90,7 +90,7 @@ bool CatalogSearcher::startSearchAsync(const std::string &text,
 void CatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
   stopObserving(alg);
   if (!hasActiveCatalogSession()) {
-    m_notifyee->notifyAutoreductionPaused();
+    m_notifyee->notifySearchFailed();
   } else {
     searchAsync();
   }
@@ -101,7 +101,7 @@ void CatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg,
   UNUSED_ARG(what)
   stopObserving(alg);
   if (!hasActiveCatalogSession()) {
-    m_notifyee->notifyAutoreductionPaused();
+    m_notifyee->notifySearchFailed();
   }
 }
 
@@ -161,7 +161,7 @@ void CatalogSearcher::execLoginDialog(const IAlgorithm_sptr &alg) {
 
 void CatalogSearcher::dialogClosed() {
   if (!hasActiveCatalogSession()) {
-    m_notifyee->notifyAutoreductionPaused();
+    m_notifyee->notifySearchFailed();
   }
 }
 

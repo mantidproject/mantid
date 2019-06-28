@@ -106,6 +106,7 @@ public:
 
   // SearcherSubscriber overrides
   void notifySearchComplete() override;
+  void notifySearchFailed() override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;
