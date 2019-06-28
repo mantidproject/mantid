@@ -22,7 +22,7 @@ from sans.algorithm_detail.single_execution import (run_initial_event_slice_redu
                                                     get_reduction_mode_vs_output_bundles, run_optimized_for_can)
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
 from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads,
-                                           get_transmission_output_name, get_output_name)
+                                           get_transmission_output_name, get_output_name, is_merged_reduction)
 
 from SANSSingleReductionBase import SANSSingleReductionBase
 
@@ -271,7 +271,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     continue
                 else:
                     AnalysisDataService.addOrReplace(output_name, output_workspace)
-                if reduction_mode is ReductionMode.Merged:
+                if is_merged_reduction(reduction_mode):
                     workspace_group_merged.addWorkspace(output_workspace)
                 elif reduction_mode is ISISReductionMode.LAB:
                     workspace_group_lab.addWorkspace(output_workspace)

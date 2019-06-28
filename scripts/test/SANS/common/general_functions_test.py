@@ -13,7 +13,7 @@ from mantid.api import AnalysisDataService, FrameworkManager
 from mantid.kernel import (V3D, Quat)
 from mantid.py3compat import mock
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
-from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
+from sans.common.enums import (ISISReductionMode, ReductionDimensionality, ReductionMode, OutputParts,
                                SANSInstrument, DetectorType, SANSFacility, DataType)
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_managed_non_child_algorithm,
                                            create_unmanaged_algorithm, add_to_sample_log,
@@ -23,7 +23,7 @@ from sans.common.general_functions import (quaternion_to_angle_and_axis, create_
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
                                            get_facility, parse_diagnostic_settings, get_transmission_output_name,
-                                           get_output_name)
+                                           get_output_name, is_merged_reduction, is_all_reduction)
 from sans.state.data import StateData
 from sans.test_helper.test_director import TestDirector
 
@@ -572,6 +572,18 @@ class SANSFunctionsTest(unittest.TestCase):
 
         decoded_obj = json.loads(text, object_hook=decode_as_enum)
         self.assertEqual(decoded_obj, data)
+
+    def test_is_merged_reduction(self):
+        self.assertTrue(is_merged_reduction(ISISReductionMode.Merged))
+        self.assertTrue(is_merged_reduction(ReductionMode.Merged))
+
+        self.assertFalse(is_merged_reduction(ReductionMode.All))
+
+    def test_is_all_reduction(self):
+        self.assertTrue(is_all_reduction(ISISReductionMode.All))
+        self.assertTrue(is_all_reduction(ReductionMode.All))
+
+        self.assertFalse(is_all_reduction(ReductionMode.Merged))
 
 
 if __name__ == '__main__':

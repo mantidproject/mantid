@@ -20,7 +20,7 @@ from sans.algorithm_detail.single_execution import (get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode)
-from sans.common.general_functions import create_child_algorithm
+from sans.common.general_functions import create_child_algorithm, is_all_reduction, is_merged_reduction
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
@@ -147,7 +147,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # Merge if required with stitching etc.
         scale_factors = []
         shift_factors = []
-        if overall_reduction_mode is ReductionMode.Merged:
+        if is_merged_reduction(overall_reduction_mode):
             progress.report("Merging reductions ...")
             for i, event_slice_part_bundle in enumerate(output_parts_bundles):
                 merge_bundle = get_merge_bundle_for_merge_request(event_slice_part_bundle, self)
@@ -246,15 +246,15 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
 
     def _get_reduction_setting_bundles(self, state, reduction_mode):
         # We need to output the parts if we request a merged reduction mode. This is necessary for stitching later on.
-        output_parts = reduction_mode is ReductionMode.Merged
+        output_parts = is_merged_reduction(reduction_mode)
 
         # If the reduction mode is MERGED, then we need to make sure that all reductions for that selection
         # are executed, i.e. we need to split it up
-        if reduction_mode is ReductionMode.Merged:
+        if is_merged_reduction(reduction_mode):
             # If we are dealing with a merged reduction we need to know which detectors should be merged.
             reduction_info = state.reduction
             reduction_modes = reduction_info.get_merge_strategy()
-        elif reduction_mode is ReductionMode.All:
+        elif is_all_reduction(reduction_mode):
             reduction_info = state.reduction
             reduction_modes = reduction_info.get_all_reduction_modes()
         else:
@@ -312,6 +312,6 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         return reduction_setting_bundles
 
     def _get_progress(self, number_of_reductions, overall_reduction_mode):
-        number_from_merge = 1 if overall_reduction_mode is ReductionMode.Merged else 0
+        number_from_merge = 1 if is_merged_reduction(overall_reduction_mode) else 0
         number_of_progress_reports = number_of_reductions + number_from_merge + 1
         return Progress(self, start=0.0, end=1.0, nreports=number_of_progress_reports)

@@ -1042,3 +1042,33 @@ def get_bank_for_spectrum_number(spectrum_number, instrument):
         if 36873 <= spectrum_number <= 73736:
             detector = DetectorType.HAB
     return detector
+
+
+def is_merged_reduction(reduction_mode):
+    """
+    Checks if reduction_mode is ReductionMode.Merged or ISISReductionMode.Merged enum value.
+    This function is for compatibilty when SANS "enums" were switched from classes to python Enums.
+    Before the refactor, ISISReductionMode.Merged == ReductionMode.Merged
+    :param reduction_mode: The reduction mode to check
+    :type reduction_mode: Enum
+    :return: True if Enum is ISISReductionMode.Merged or ReductionMode.Merged, else False
+    """
+    if reduction_mode is ISISReductionMode.Merged or reduction_mode is ReductionMode.Merged:
+        return True
+    else:
+        return False
+
+
+def is_all_reduction(reduction_mode):
+    """
+    Checks if reduction_mode is ReductionMode.All or ISISReductionMode.All enum value.
+    This function is for compatibilty when SANS "enums" were switched from classes to python Enums.
+    Before the refactor, ISISReductionMode.All == ReductionMode.All
+    :param reduction_mode: The reduction mode to check
+    :type reduction_mode: Enum
+    :return: True if Enum is ISISReductionMode.All or ReductionMode.All, else False
+    """
+    if reduction_mode is ISISReductionMode.All or reduction_mode is ReductionMode.All:
+        return True
+    else:
+        return False

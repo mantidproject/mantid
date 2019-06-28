@@ -78,8 +78,20 @@ CanonicalCoordinates = Enum("CanonicalCoordinates", "X Y Z")
 # Defines the reduction modes which should be common to all implementations, namely All and Merged
 ReductionMode = Enum("ReductionMode", "Merged All")
 
+
 # Defines the different reduction modes. This can be the high-angle bank, the low-angle bank
-ISISReductionMode = Enum("ISISReductionMode", "Merged All HAB LAB")
+class ISISReductionMode(Enum):
+    Merged = 1
+    All = 2
+    HAB = 3
+    LAB = 4
+
+    def __eq__(self, other):
+        if other is ReductionMode.Merged:
+            return True if self.name == "Merged" else False
+        elif other is ReductionMode.All:
+            return True if self.name == "All" else False
+        return super(ISISReductionMode, self).__eq__(other)
 
 
 # --------------------------

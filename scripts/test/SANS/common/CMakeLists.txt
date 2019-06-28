@@ -1,6 +1,7 @@
 # Tests for SANS
 
 set(TEST_PY_FILES
+    enums_test.py
     file_information_test.py
     log_tagger_test.py
     general_functions_test.py

@@ -15,7 +15,7 @@ from mantid.kernel import (Direction, Property)
 from mantid.simpleapi import CloneWorkspace
 from sans.algorithm_detail.single_execution import (run_core_reduction, run_optimized_for_can)
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
-from sans.common.general_functions import does_can_workspace_exist_on_ads
+from sans.common.general_functions import does_can_workspace_exist_on_ads, is_merged_reduction
 
 from SANSSingleReductionBase import SANSSingleReductionBase
 
@@ -173,7 +173,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
             # In an MPI reduction output_workspace is produced on the master rank, skip others.
             if output_workspace is None:
                 continue
-            if reduction_mode is ReductionMode.Merged:
+            if is_merged_reduction(reduction_mode):
                 self.setProperty("OutputWorkspaceMerged", output_workspace)
             elif reduction_mode is ISISReductionMode.LAB:
                 self.setProperty("OutputWorkspaceLAB", output_workspace)
