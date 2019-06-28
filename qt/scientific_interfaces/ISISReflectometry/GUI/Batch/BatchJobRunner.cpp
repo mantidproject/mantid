@@ -200,23 +200,27 @@ AlgorithmRuntimeProps BatchJobRunner::rowProcessingProperties() const {
   return createAlgorithmRuntimeProps(m_batch);
 }
 
-void BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
+Item const &
+BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   jobAlgorithm->item()->resetOutputs();
   jobAlgorithm->item()->setRunning();
+  return *jobAlgorithm->item();
 }
 
-void BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
+Item const &
+BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
 
   jobAlgorithm->updateItem();
   jobAlgorithm->item()->setSuccess();
+  return *jobAlgorithm->item();
 }
 
-void BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
-                                    std::string const &message) {
+Item const &BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
+                                           std::string const &message) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto *item = jobAlgorithm->item();
@@ -225,6 +229,7 @@ void BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
   // Mark the item as skipped so we don't reprocess it in the current round of
   // reductions.
   item->setSkipped(true);
+  return *item;
 }
 
 std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
@@ -261,20 +266,28 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
   return workspaces;
 }
 
-void BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
+boost::optional<Item const &>
+BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
   // Reset the state for the relevant row if the workspace was one of our
   // outputs
   auto item = m_batch.getItemWithOutputWorkspaceOrNone(wsName);
-  if (item)
-    item->resetState();
+  if (item.is_initialized()) {
+    item->resetState(false);
+    return boost::optional<Item const &>(item.get());
+  }
+  return boost::none;
 }
 
-void BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
-                                            std::string const &newName) {
+boost::optional<Item const &>
+BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
+                                       std::string const &newName) {
   // Update the workspace name in the model, if it is one of our outputs
   auto item = m_batch.getItemWithOutputWorkspaceOrNone(oldName);
-  if (item)
+  if (item.is_initialized()) {
     item->renameOutputWorkspace(oldName, newName);
+    return boost::optional<Item const &>(item.get());
+  }
+  return boost::none;
 }
 
 void BatchJobRunner::notifyAllWorkspacesDeleted() {

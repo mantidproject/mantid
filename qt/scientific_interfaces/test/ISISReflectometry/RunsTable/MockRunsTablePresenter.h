@@ -22,7 +22,9 @@ public:
   MOCK_CONST_METHOD0(runsTable, RunsTable const &());
   MOCK_METHOD0(mutableRunsTable, RunsTable &());
   MOCK_METHOD0(notifyRowStateChanged, void());
+  MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(notifyRowOutputsChanged, void());
+  MOCK_METHOD1(notifyRowOutputsChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(notifyRemoveAllRowsAndGroupsRequested, void());
   MOCK_METHOD1(mergeAdditionalJobs, void(ReductionJobs const &));
   MOCK_METHOD0(reductionPaused, void());

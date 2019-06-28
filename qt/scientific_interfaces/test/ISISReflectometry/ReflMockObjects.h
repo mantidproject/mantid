@@ -98,7 +98,9 @@ public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
+  MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(notifyRowOutputsChanged, void());
+  MOCK_METHOD1(notifyRowOutputsChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(resumeAutoreduction, bool());
@@ -262,17 +264,20 @@ public:
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
   MOCK_METHOD1(algorithmStarted,
-               void(MantidQt::API::IConfiguredAlgorithm_sptr));
+               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete,
-               void(MantidQt::API::IConfiguredAlgorithm_sptr));
-  MOCK_METHOD2(algorithmError, void(MantidQt::API::IConfiguredAlgorithm_sptr,
-                                    std::string const &));
+               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_METHOD2(algorithmError,
+               Item const &(MantidQt::API::IConfiguredAlgorithm_sptr,
+                            std::string const &));
   MOCK_CONST_METHOD1(
       algorithmOutputWorkspacesToSave,
       std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
-  MOCK_METHOD1(notifyWorkspaceDeleted, void(std::string const &));
+  MOCK_METHOD1(notifyWorkspaceDeleted,
+               boost::optional<Item const &>(std::string const &));
   MOCK_METHOD2(notifyWorkspaceRenamed,
-               void(std::string const &, std::string const &));
+               boost::optional<Item const &>(std::string const &,
+                                             std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms,
                std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());

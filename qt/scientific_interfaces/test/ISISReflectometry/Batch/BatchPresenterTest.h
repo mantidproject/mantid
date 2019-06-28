@@ -24,6 +24,7 @@ using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
+using testing::ReturnRef;
 using testing::_;
 
 class BatchPresenterTest : public CxxTest::TestSuite {
@@ -123,13 +124,6 @@ public:
     verifyAndClear();
   }
 
-  void testRowStateUpdatedWhenBatchCancelled() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
-    presenter.notifyBatchCancelled();
-    verifyAndClear();
-  }
-
   void testChildPresentersUpdatedWhenBatchCancelled() {
     auto presenter = makePresenter();
     expectReductionPaused();
@@ -208,6 +202,7 @@ public:
   void testAutoreductionComplete() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
     presenter.notifyAutoreductionCompleted();
     verifyAndClear();
   }
@@ -229,19 +224,16 @@ public:
     verifyAndClear();
   }
 
-  void testRowStateUpdatedWhenBatchFinished() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
-    presenter.notifyBatchComplete(false);
-    verifyAndClear();
-  }
-
   void testNotifyAlgorithmStarted() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
         boost::make_shared<MockBatchJobAlgorithm>();
-    EXPECT_CALL(*m_jobRunner, algorithmStarted(algorithm)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged()).Times(1);
+    auto row = makeRow();
+    EXPECT_CALL(*m_jobRunner, algorithmStarted(algorithm))
+        .Times(1)
+        .WillOnce(ReturnRef(row));
+    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
     presenter.notifyAlgorithmStarted(algorithm);
     verifyAndClear();
   }
@@ -250,8 +242,12 @@ public:
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm =
         boost::make_shared<MockBatchJobAlgorithm>();
-    EXPECT_CALL(*m_jobRunner, algorithmComplete(algorithm)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged()).Times(1);
+    auto row = makeRow();
+    EXPECT_CALL(*m_jobRunner, algorithmComplete(algorithm))
+        .Times(1)
+        .WillOnce(ReturnRef(row));
+    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
     presenter.notifyAlgorithmComplete(algorithm);
     verifyAndClear();
   }
@@ -264,6 +260,10 @@ public:
         .Times(1)
         .WillOnce(Return(true));
     auto const workspaces = std::vector<std::string>{"test1", "test2"};
+    auto row = makeRow();
+    EXPECT_CALL(*m_jobRunner, algorithmComplete(algorithm))
+        .Times(1)
+        .WillOnce(ReturnRef(row));
     EXPECT_CALL(*m_jobRunner, algorithmOutputWorkspacesToSave(algorithm))
         .Times(1)
         .WillOnce(Return(workspaces));
@@ -279,6 +279,10 @@ public:
     EXPECT_CALL(*m_savePresenter, shouldAutosave())
         .Times(1)
         .WillOnce(Return(false));
+    auto row = makeRow();
+    EXPECT_CALL(*m_jobRunner, algorithmComplete(algorithm))
+        .Times(1)
+        .WillOnce(ReturnRef(row));
     EXPECT_CALL(*m_jobRunner, algorithmOutputWorkspacesToSave(_)).Times(0);
     EXPECT_CALL(*m_savePresenter, saveWorkspaces(_)).Times(0);
     presenter.notifyAlgorithmComplete(algorithm);
@@ -290,8 +294,12 @@ public:
     IConfiguredAlgorithm_sptr algorithm =
         boost::make_shared<MockBatchJobAlgorithm>();
     auto const errorMessage = std::string("test error");
-    EXPECT_CALL(*m_jobRunner, algorithmError(algorithm, errorMessage)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
+    auto row = makeRow();
+    EXPECT_CALL(*m_jobRunner, algorithmError(algorithm, errorMessage))
+        .Times(1)
+        .WillOnce(ReturnRef(row));
+    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
     presenter.notifyAlgorithmError(algorithm, errorMessage);
     verifyAndClear();
   }
@@ -306,7 +314,8 @@ public:
 
   void testRowStateUpdatedWhenWorkspaceDeleted() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
     presenter.postDeleteHandle("");
     verifyAndClear();
   }
@@ -323,7 +332,8 @@ public:
 
   void testRowStateUpdatedWhenWorkspaceRenamed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
     presenter.renameHandle("", "");
     verifyAndClear();
   }
@@ -337,6 +347,7 @@ public:
 
   void testRowStateUpdatedWhenWorkspacesCleared() {
     auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
     presenter.clearADSHandle();
     verifyAndClear();
@@ -458,6 +469,7 @@ private:
     EXPECT_CALL(*m_experimentPresenter, autoreductionResumed()).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, autoreductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, autoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
   }
 
   void expectAutoreductionPaused() {

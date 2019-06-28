@@ -36,19 +36,21 @@ public:
 
   void setReprocessFailedItems(bool reprocessFailed) override;
 
-  void
+  Item const &
   algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  void algorithmComplete(
+  Item const &algorithmComplete(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                      std::string const &message) override;
+  Item const &algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+                             std::string const &message) override;
 
   std::vector<std::string> algorithmOutputWorkspacesToSave(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
 
-  void notifyWorkspaceDeleted(std::string const &wsName) override;
-  void notifyWorkspaceRenamed(std::string const &oldName,
-                              std::string const &newName) override;
+  boost::optional<Item const &>
+  notifyWorkspaceDeleted(std::string const &wsName) override;
+  boost::optional<Item const &>
+  notifyWorkspaceRenamed(std::string const &oldName,
+                         std::string const &newName) override;
   void notifyAllWorkspacesDeleted() override;
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;

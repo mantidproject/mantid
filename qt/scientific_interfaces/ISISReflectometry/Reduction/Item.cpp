@@ -15,7 +15,8 @@ State Item::state() const { return m_itemState.state(); }
 
 std::string Item::message() const { return m_itemState.message(); }
 
-void Item::resetState() {
+void Item::resetState(bool resetChildren) {
+  UNUSED_ARG(resetChildren);
   resetOutputs();
   m_itemState.reset();
 }

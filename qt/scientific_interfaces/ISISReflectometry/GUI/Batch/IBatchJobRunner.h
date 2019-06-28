@@ -27,18 +27,20 @@ public:
   virtual void autoreductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void setReprocessFailedItems(bool reprocessFailed) = 0;
-  virtual void
+  virtual Item const &
   algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
-  virtual void
+  virtual Item const &
   algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
-  virtual void
+  virtual Item const &
   algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
                  std::string const &message) = 0;
   virtual std::vector<std::string> algorithmOutputWorkspacesToSave(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const = 0;
-  virtual void notifyWorkspaceDeleted(std::string const &wsName) = 0;
-  virtual void notifyWorkspaceRenamed(std::string const &oldName,
-                                      std::string const &newName) = 0;
+  virtual boost::optional<Item const &>
+  notifyWorkspaceDeleted(std::string const &wsName) = 0;
+  virtual boost::optional<Item const &>
+  notifyWorkspaceRenamed(std::string const &oldName,
+                         std::string const &newName) = 0;
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   getAlgorithms() = 0;
