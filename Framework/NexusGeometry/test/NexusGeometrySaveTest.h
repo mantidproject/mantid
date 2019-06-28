@@ -20,7 +20,7 @@
 #include <fstream>
 #include <gmock/gmock.h>
 
-#include <H5cpp.h>
+#include <H5Cpp.h>
 
 using namespace Mantid::NexusGeometry;
 
@@ -119,7 +119,7 @@ public:
   }
 
   // check if dataset or group has name-specific attribute
-  bool hasAttribute(const std::string &pathToGroup, const std::string NX_class,
+  bool hasAttribute(const std::string &pathToGroup, const std::string attrName,
                     const std::string attrVal,
                     const std::string *dataSetname = nullptr) {
 
@@ -133,12 +133,12 @@ public:
       // treat as dataset
 
       H5::DataSet dataSet = parentGroup.openDataSet(*dataSetname);
-      attribute = dataSet.openAttribute(NX_class);
+      attribute = dataSet.openAttribute(attrName);
 
     } else {
 
       // treat as group
-      attribute = parentGroup.openAttribute(NX_class);
+      attribute = parentGroup.openAttribute(attrName);
     }
 
     std::string attributeValue;
@@ -267,12 +267,11 @@ public:
 
     std::string dataSetName = "name";
 
-    TS_ASSERT(tester.hasNxClass(
-        NX_INSTRUMENT, "/raw_data_1/instrument")); // TODO: refacter to phase
-                                                   // out hard coded parameters.
-    TS_ASSERT(tester.hasNxClass(NX_ENTRY, "/raw_data_1"));
+    TS_ASSERT(tester.hasNxClass(NX_INSTRUMENT, "/raw_data_1/instrument")); // check child group has NX_class 'NX_INSTRUMENT'
+    TS_ASSERT(tester.hasNxClass(NX_ENTRY, "/raw_data_1")); // check parent group has NX_class 'NX_ENTRY'
+
     TS_ASSERT(
-        tester.hasNxClass(NX_CHAR, "/raw_data_1/instrument", &dataSetName))
+        tester.hasNxClass(NX_CHAR, "/raw_data_1/instrument", &dataSetName)) // check dataset has NX_class 'NX_CHAR'
   }
 
   void test_instrument_has_name() {
@@ -282,16 +281,18 @@ public:
     auto destinationFile = scopedFile.fullPath();
 
     auto const &compInfo = (*m_instrument.first);
-    const std::string expectedInstrumentName =
-        "name"; //= compInfo.name(compInfo.root());
+    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
     saveInstrument(compInfo, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    TS_ASSERT(
-        testUtility.hasDataSet("name", "/raw_data_1/instrument", &NX_CHAR));
-
     std::string dataSetName = "name";
+    // expectedInstrumentName; // let dataset name have same value as component
+    // name.
+
+    TS_ASSERT(testUtility.hasDataSet(dataSetName, "/raw_data_1/instrument",
+                                     &NX_CHAR));
+
     TS_ASSERT(testUtility.hasAttribute("/raw_data_1/instrument", "short_name",
                                        "name", &dataSetName));
   }

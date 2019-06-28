@@ -8,9 +8,7 @@
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 
 #include "MantidNexusGeometry/DllConfig.h"
-
-#include <iostream>
-#include <memory>
+#include <string>
 
 namespace Mantid {
 

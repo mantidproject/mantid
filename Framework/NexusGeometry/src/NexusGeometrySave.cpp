@@ -10,7 +10,7 @@
 #include "MantidKernel/ProgressBase.h"
 
 #include <boost/filesystem/operations.hpp>
-#include <iostream>
+
 /*
 #include <H5DataSet.h>
 #include <H5FPublic.h>
@@ -19,7 +19,7 @@
 #include <H5Location.h>
 #include <H5Object.h>
 */
-#include <H5cpp.h>
+#include <H5Cpp.h>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -106,7 +106,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::StrType dataType(0, H5T_VARIABLE);
   H5::DataSpace dataSpace(H5S_SCALAR);
 
-  std::string dataSetData = "testInstrument";   // value for dataset.
+  std::string dataSetData = "test_data_for_instrument";   // value for dataset.
   auto dataSetDataAsCStr = dataSetData.c_str(); // for plist..
 
   H5::DSetCreatPropList plist;
@@ -114,12 +114,13 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
   // add dataset to child group 'instrument'
   H5::DataSet dataSet = instrumentGroup.createDataSet(
-      "name", dataType, dataSpace,
+      "name", dataType, dataSpace, // <= compInfo.name(compInfo.root())
       plist); // name of dataset initialised with fill value.
 
-  writeStrAttributeToDataSet(dataSet, SHORT_NAME,
-                             "name"); // add short_name atribute to dataset.
-                                      // compInfo.name( compInfo.root() )
+  writeStrAttributeToDataSet(
+      dataSet, SHORT_NAME,
+      "name"); // compInfo.name(compInfo.root())); // add  atribute to dataset.
+                                    
 
   writeStrAttributeToDataSet(dataSet, NX_CLASS,
                              NX_CHAR); // add NX_class attribute to dataset
