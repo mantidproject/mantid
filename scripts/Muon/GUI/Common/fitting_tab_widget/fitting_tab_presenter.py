@@ -26,6 +26,7 @@ class FittingTabPresenter(object):
         self._fit_chi_squared = [0.0]
         self._fit_function = [None]
         self._tf_asymmetry_mode = False
+        self._multi_domain_function = None
         self.manual_selection_made = False
         self.automatically_update_fit_name = True
         self.thread_success = True
@@ -78,16 +79,13 @@ class FittingTabPresenter(object):
         self.selected_data = guess_selection
 
     def handle_display_workspace_changed(self):
-        fit_type = self.view.fit_type
         current_index = self.view.get_index_for_start_end_times()
         self.view.start_time = self.start_x[current_index]
         self.view.end_time = self.end_x[current_index]
 
-        if fit_type != self.view.simultaneous_fit:
-            self.view.set_datasets_in_function_browser(
-                [self.view.display_workspace])
-        else:
-            self.view.function_browser.setCurrentDataset(current_index)
+        self.view.set_datasets_in_function_browser(
+            [self.view.display_workspace])
+        self.view.function_browser_multi.setCurrentDataset(current_index)
 
         self.update_fit_status_information_in_view()
 
@@ -105,7 +103,6 @@ class FittingTabPresenter(object):
 
     def handle_fit_type_changed(self):
         fit_type = self.view.fit_type
-        self.clear_fit_information()
 
         if fit_type == self.view.single_fit:
             self.view.workspace_combo_box_label.setText('Select Workspace')
@@ -113,15 +110,24 @@ class FittingTabPresenter(object):
             self.view.workspace_combo_box_label.setText(
                 'Display parameters for')
 
-        self.update_selected_workspace_guess()
-
+    def fitting_domain_type_changed(self):
         if self.view.fit_type == self.view.simultaneous_fit:
-            self.view.set_datasets_in_function_browser(self.selected_data)
+            multi_domain_function = self.create_multi_domain_function(self._fit_function)
+            if multi_domain_function:
+                self.view.function_browser_multi.setFunction(multi_domain_function)
+                self._fit_function = [self.view.fit_object] * len(self.selected_data) if self.selected_data else [self.view.fit_object]
+            else:
+                self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
+            self.view.switch_to_simultaneous()
+            self.clear_fit_information()
         else:
-            self.view.set_datasets_in_function_browser(
-                [self.selected_data[self.view.get_index_for_start_end_times()]] if self.selected_data else [])
-
-        self.update_fit_status_information_in_view()
+            if self.view.fit_object:
+                function_list = self.view.function_browser_multi.getGlobalFunction().createEquivalentFunctions()
+                self._fit_function = function_list
+            else:
+                self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
+            self.view.switch_to_single()
+            self.clear_fit_information()
 
     def handle_fit_clicked(self):
         if self._tf_asymmetry_mode:
@@ -151,9 +157,7 @@ class FittingTabPresenter(object):
             elif fit_type == self.view.sequential_fit:
                 sequential_fit_parameters = self.get_multi_domain_fit_parameters(
                 )
-                calculation_function = functools.partial(CONFLICT (content): Merge conflict in scripts/Muon/GUI/Common/fitting_tab_widget/fitting_tab_presenter.py
-
-                    self.model.do_sequential_fit, sequential_fit_parameters)
+                calculation_function = functools.partial(self.model.do_sequential_fit, sequential_fit_parameters)
                 self.calculation_thread = self.create_thread(
                     calculation_function)
 
@@ -305,6 +309,8 @@ class FittingTabPresenter(object):
             self.view.function_browser.blockSignals(False)
             return
 
+        self._fit_function = [self.view.fit_object.clone()] * len(self.selected_data) \
+            if self.selected_data and  self.view.fit_object else [None]
         self.clear_fit_information()
         if self.automatically_update_fit_name:
             self.view.function_name = self.model.get_function_name(
@@ -418,14 +424,12 @@ class FittingTabPresenter(object):
             self.selected_data) if self.selected_data else [None]
         self._fit_chi_squared = [0.0] * len(
             self.selected_data) if self.selected_data else [0.0]
-        self._fit_function = [None] * len(
-            self.selected_data) if self.selected_data else [None]
+        self._fit_function = [self.view.fit_object] * len(
+            self.selected_data) if self.selected_data else [self.view.fit_object]
 
-        if self.view.fit_type == self.view.simultaneous_fit:
-            self.view.set_datasets_in_function_browser(self.selected_data)
-        else:
-            self.view.set_datasets_in_function_browser(
-                [self.selected_data[0]] if self.selected_data else [])
+        single_data = [self.selected_data[0]] if self.selected_data else []
+        self.view.set_datasets_in_function_browser(single_data)
+        self.view.set_datasets_in_function_browser_multi(self.selected_data)
 
         self.reset_start_time_to_first_good_data_value()
         self.view.update_displayed_data_combo_box(self.selected_data)
@@ -436,8 +440,6 @@ class FittingTabPresenter(object):
             self.selected_data) if self.selected_data else [None]
         self._fit_chi_squared = [0.0] * len(
             self.selected_data) if self.selected_data else [0.0]
-        self._fit_function = [None] * len(
-            self.selected_data) if self.selected_data else [None]
         self.update_fit_status_information_in_view()
 
     @property
@@ -498,3 +500,10 @@ class FittingTabPresenter(object):
         return {'InputFunction': fit_function,
                 'WorkspaceList': workspace_list,
                 'Mode': mode}
+
+    def create_multi_domain_function(self, function_list):
+        modified_function_list = [';' + str(item) + ',$domains=i' for item in function_list if item]
+        if not modified_function_list:
+            return None
+        modified_function_as_string = ''.join(modified_function_list)
+        return 'composite=MultiDomainFunction,NumDeriv=1' + modified_function_as_string + ";"
