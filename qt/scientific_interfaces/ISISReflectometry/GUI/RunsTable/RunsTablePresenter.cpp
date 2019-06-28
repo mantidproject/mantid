@@ -377,14 +377,16 @@ void RunsTablePresenter::notifyFillDown() {
                  selected.end());
   std::sort(selected.begin(), selected.end());
 
+  if (selected.size() < 1)
+    return;
+
   auto const topRow = selected[0];
   auto const column = m_view->jobs().currentColumn();
   auto const cellContent = m_view->jobs().cellAt(topRow, column).contentText();
 
   for (auto const &rowLocation : selected) {
-    auto const oldCellContent =
-        m_view->jobs().cellAt(rowLocation, column).contentText();
     auto cell = m_view->jobs().cellAt(rowLocation, column);
+    auto const oldCellContent = cell.contentText();
     cell.setContentText(cellContent);
     m_view->jobs().setCellAt(rowLocation, column, cell);
     notifyCellTextChanged(rowLocation, column, oldCellContent, cellContent);
