@@ -116,6 +116,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_phase_table_changed_notifier()
 
+        self.setup_on_recalulation_finished_notifer()
+
         self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
 
     def setup_tabs(self):
@@ -150,6 +152,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
             self.home_tab.plot_widget.group_pair_observer)
+
+        self.context.gui_context.gui_variables_notifier.add_subscriber(
+            self.home_tab.plot_widget.rebin_options_set_observer)
 
     def setup_alpha_recalculated_observers(self):
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
@@ -222,6 +227,13 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def setup_phase_table_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber(
             self.transform._maxent._presenter.phase_table_observer)
+
+    def setup_on_recalulation_finished_notifer(self):
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.home_tab.plot_widget.input_workspace_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.home_tab.plot_widget.rebin_options_set_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
