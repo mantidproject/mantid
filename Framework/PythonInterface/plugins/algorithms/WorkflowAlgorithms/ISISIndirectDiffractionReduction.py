@@ -31,7 +31,7 @@ def contains_non_ascending_range(strings, delimiter):
 
 
 def find_minimum_non_zero_y_in_spectrum(y_minimum, spectrum):
-    positive_y = filter(lambda x: x > 0, spectrum)
+    positive_y = list(filter(lambda x: x > 0, spectrum))
     y_spec_min = min(positive_y) if len(positive_y) > 0 else None
     if y_spec_min and (y_minimum is None or y_spec_min < y_minimum):
         return y_spec_min
