@@ -42,10 +42,6 @@ endif()
 add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
                       -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
                       -Wno-write-strings -Wno-unused-result)
-# C++-specific flags
-add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
-  $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
-)
 
 #Linking errors on Ubuntu 18.04 with --enable-new-dtags
 if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
