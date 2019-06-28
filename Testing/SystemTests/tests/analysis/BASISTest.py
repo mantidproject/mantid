@@ -323,7 +323,7 @@ class DynamicSusceptibilityTest(systemtesting.MantidSystemTest, PreppingMixin):
     normalization, (3) Vanadium normalization"""
 
     def __init__(self):
-        super(BASISReduction6Test, self).__init__()
+        super(DynamicSusceptibilityTest, self).__init__()
         self.config = None
         self.prepset('BASISReduction')
 
