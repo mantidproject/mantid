@@ -246,14 +246,14 @@ private:
     // Set the X axes
     const auto &xVals = eventWS->x(0);
     const size_t xSize = xVals.size();
-    auto ax0 = new NumericAxis(xSize);
+    auto ax0 = std::make_unique<NumericAxis>(xSize);
     logger.information() << "xSize = " << xSize << std::endl;
     // X-axis is 1 <= wavelength <= 6 Angstrom with step of 0.05
     ax0->setUnit("Wavelength");
     for (size_t i = 0; i < xSize; i++) {
       ax0->setValue(i, 1.0 + 0.05 * xVals[i]);
     }
-    eventWS->replaceAxis(0, ax0);
+    eventWS->replaceAxis(0, std::move(ax0));
     // detector angles
     auto algc = boost::make_shared<MoveInstrumentComponent>();
     algc->initialize();

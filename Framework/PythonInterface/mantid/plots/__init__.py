@@ -25,7 +25,7 @@ from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
-from matplotlib.container import Container
+from matplotlib.container import Container, ErrorbarContainer
 from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
@@ -334,6 +334,13 @@ class MantidAxes(Axes):
         for workspace_name in is_empty_list:
             self.tracked_workspaces.pop(workspace_name)
 
+        # Catch any artists that are not tracked
+        for artist in self.artists + self.lines + self.containers + self.images:
+            if unary_predicate(artist):
+                artist.remove()
+                if isinstance(artist, ErrorbarContainer):
+                    self.containers.remove(artist)
+
         return self.is_empty(self)
 
     def _remove_artist_info_if(self, artist_info, unary_predicate):
@@ -463,6 +470,8 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
+            autoscale_on_update = kwargs.pop("autoscale_on_update", True)
+
             def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
                 if new_kwargs:
@@ -473,7 +482,8 @@ class MantidAxes(Axes):
                                                            kwargs)
                 artists[0].set_data(x, y)
                 self.relim()
-                self.autoscale()
+                if autoscale_on_update:
+                    self.autoscale()
                 return artists
 
             workspace = args[0]
@@ -481,9 +491,20 @@ class MantidAxes(Axes):
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
-            return self.track_workspace_artist(
+
+            # If we are making the first plot on an axes object
+            # i.e. self.lines is empty, axes has default ylim values.
+            # Therefore we need to autoscale regardless of autoscale_on_update.
+            if self.lines:
+                # Otherwise set autoscale to autoscale_on_update.
+                self.set_autoscaley_on(autoscale_on_update)
+
+            artist = self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized)
+
+            self.set_autoscaley_on(True)
+            return artist
         else:
             return Axes.plot(self, *args, **kwargs)
 
@@ -535,7 +556,12 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
+            autoscale_on_update = kwargs.pop("autoscale_on_update", True)
+
             def _data_update(artists, workspace, new_kwargs=None):
+                if self.lines:
+                    self.set_autoscaley_on(autoscale_on_update)
+
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -562,16 +588,23 @@ class MantidAxes(Axes):
                     artist_new.update_from(artist_orig)
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
-                self.autoscale()
+                self.set_autoscaley_on(True)
                 return container_new
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
                                                                **kwargs)
-            return self.track_workspace_artist(
+
+            if self.lines:
+                self.set_autoscaley_on(autoscale_on_update)
+
+            artist = self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized)
+
+            self.set_autoscaley_on(True)
+            return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)
 

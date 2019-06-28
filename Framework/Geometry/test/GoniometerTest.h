@@ -246,12 +246,12 @@ public:
     G.setRotationAngle("phi", 45.0);
     G.setRotationAngle("chi", 23.0);
     G.setRotationAngle("omega", 7.0);
-    G.saveNexus(th.file, "goniometer");
+    G.saveNexus(th.file.get(), "goniometer");
 
     // Reload from the file
     th.reopenFile();
     Goniometer G2;
-    G2.loadNexus(th.file, "goniometer");
+    G2.loadNexus(th.file.get(), "goniometer");
     TS_ASSERT_EQUALS(G2.getNumberAxes(), 3);
     // Rotation matrices should be the same after loading
     TS_ASSERT_EQUALS(G2.getR(), G.getR());

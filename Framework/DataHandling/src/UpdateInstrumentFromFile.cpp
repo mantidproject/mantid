@@ -126,12 +126,10 @@ void UpdateInstrumentFromFile::exec() {
   }
 
   LoadRawHelper isisRAW;
-  auto *descriptor = new Kernel::FileDescriptor(filename);
+  auto descriptor = std::make_unique<Kernel::FileDescriptor>(filename);
   if (isisRAW.confidence(*descriptor) > 0) {
-    delete descriptor;
     updateFromRaw(filename);
   } else {
-    delete descriptor;
     throw std::invalid_argument("File \"" + filename +
                                 "\" is not a valid input file.");
   }

@@ -114,7 +114,7 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_indexInfo = std::make_unique<Indexing::IndexInfo>(other.indexInfo());
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
-    m_axes[i] = other.m_axes[i]->clone(this);
+    m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
   m_isCommonBinsFlagValid.store(other.m_isCommonBinsFlagValid.load());
   // TODO: Do we need to init m_monitorWorkspace?
 }
@@ -122,11 +122,7 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 /// Destructor
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
-MatrixWorkspace::~MatrixWorkspace() {
-  for (auto &axis : m_axes) {
-    delete axis;
-  }
-}
+MatrixWorkspace::~MatrixWorkspace() {}
 
 /** Returns a const reference to the IndexInfo object of the workspace.
  *
@@ -406,7 +402,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
  *    VALUE is the Workspace Index
  */
 spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
+  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -430,7 +426,7 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
  */
 std::vector<size_t>
 MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
+  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -886,7 +882,7 @@ double MatrixWorkspace::detectorTwoTheta(const Geometry::IDetector &det) const {
 /// @return The number of axes which this workspace has
 int MatrixWorkspace::axes() const { return static_cast<int>(m_axes.size()); }
 
-/** Get a pointer to a workspace axis
+/** Get a non owning pointer to a workspace axis
  *  @param axisIndex :: The index of the axis required
  *  @throw IndexError If the argument given is outside the range of axes held by
  * this workspace
@@ -899,19 +895,20 @@ Axis *MatrixWorkspace::getAxis(const std::size_t &axisIndex) const {
         "Argument to getAxis is invalid for this workspace");
   }
 
-  return m_axes[axisIndex];
+  return m_axes[axisIndex].get();
 }
 
 /** Replaces one of the workspace's axes with the new one provided.
  *  @param axisIndex :: The index of the axis to replace
- *  @param newAxis :: A pointer to the new axis. The class will take ownership.
+ *  @param newAxis :: A Unique_ptr to the new axis. The class will take
+ * ownership.
  *  @throw IndexError If the axisIndex given is outside the range of axes held
  * by this workspace
  *  @throw std::runtime_error If the new axis is not of the correct length
  * (within one of the old one)
  */
 void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
-                                  Axis *const newAxis) {
+                                  std::unique_ptr<Axis> newAxis) {
   // First check that axisIndex is in range
   if (axisIndex >= m_axes.size()) {
     throw Kernel::Exception::IndexError(
@@ -919,8 +916,7 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
         "Value of axisIndex is invalid for this workspace");
   }
   // If we're OK, then delete the old axis and set the pointer to the new one
-  delete m_axes[axisIndex];
-  m_axes[axisIndex] = newAxis;
+  m_axes[axisIndex] = std::move(newAxis);
 }
 
 /**
@@ -1798,7 +1794,7 @@ MDMasking for a Matrix Workspace has not been implemented.
 @param :
 */
 void MatrixWorkspace::setMDMasking(
-    Mantid::Geometry::MDImplicitFunction * /*maskingRegion*/) {
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> /*maskingRegion*/) {
   throw std::runtime_error(
       "MatrixWorkspace::setMDMasking has no implementation");
 }

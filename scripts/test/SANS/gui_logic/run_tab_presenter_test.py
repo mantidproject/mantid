@@ -763,6 +763,25 @@ class RunTabPresenterTest(unittest.TestCase):
         empty_row.id = 4
         self.assertEqual(presenter._table_model.get_table_entry(2).__dict__, empty_row.__dict__)
 
+    def test_on_erase_rows_does_not_add_rows_when_table_contains_one_row(self):
+        """
+        A bug caused erase rows to add a row to a table containing only 1 row.
+        Check that this is fixed
+        """
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0])
+        presenter.set_view(view)
+
+        test_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                    'test_file', '', '1.0', '', '', '', '']
+
+        presenter.on_row_inserted(0, test_row)
+        presenter.on_erase_rows()
+
+        self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
+        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), ['']*19)
+
     def test_on_erase_rows_updates_view(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
@@ -1164,7 +1183,7 @@ class RunTabPresenterTest(unittest.TestCase):
             if PropertyManagerDataService.doesExist(element):
                 PropertyManagerDataService.remove(element)
 
-    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path = ""):
+    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path=""):
         if row_user_file_path:
             content[1].update({BatchReductionEntry.UserFile : row_user_file_path})
 

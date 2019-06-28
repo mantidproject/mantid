@@ -60,7 +60,7 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(
       m_displayNormalizationHisto(preferredNormalizationHisto),
       m_coordSystem(Kernel::None) {
   // First box is at depth 0, and has this default boxController
-  data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
+  data = std::make_unique<MDBox<MDE, nd>>(m_BoxController.get(), 0);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -74,13 +74,14 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
       m_coordSystem(other.m_coordSystem) {
 
   const MDBox<MDE, nd> *mdbox =
-      dynamic_cast<const MDBox<MDE, nd> *>(other.data);
+      dynamic_cast<const MDBox<MDE, nd> *>(other.data.get());
   const MDGridBox<MDE, nd> *mdgridbox =
-      dynamic_cast<const MDGridBox<MDE, nd> *>(other.data);
+      dynamic_cast<const MDGridBox<MDE, nd> *>(other.data.get());
   if (mdbox) {
-    data = new MDBox<MDE, nd>(*mdbox, m_BoxController.get());
+    data = std::make_unique<MDBox<MDE, nd>>(*mdbox, m_BoxController.get());
   } else if (mdgridbox) {
-    data = new MDGridBox<MDE, nd>(*mdgridbox, m_BoxController.get());
+    data =
+        std::make_unique<MDGridBox<MDE, nd>>(*mdgridbox, m_BoxController.get());
   } else {
     throw std::runtime_error(
         "MDEventWorkspace::copy_ctor(): unexpected data box type found.");
@@ -90,7 +91,7 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
 //-----------------------------------------------------------------------------------------------
 /** Destructor
  */
-TMDE(MDEventWorkspace)::~MDEventWorkspace() { delete data; }
+TMDE(MDEventWorkspace)::~MDEventWorkspace() {}
 /**Make workspace file backed if it has not been already file backed
  * @param fileName -- short or full file name of the file, which should be used
  * as the file back end
@@ -603,17 +604,17 @@ TMDE(size_t MDEventWorkspace)::addEvents(const std::vector<MDE> &events) {
  */
 TMDE(void MDEventWorkspace)::splitBox() {
   // Want MDGridBox
-  MDGridBox<MDE, nd> *gridBox = dynamic_cast<MDGridBox<MDE, nd> *>(data);
+  MDGridBox<MDE, nd> *gridBox = dynamic_cast<MDGridBox<MDE, nd> *>(data.get());
   if (!gridBox) {
     // Track how many MDBoxes there are in the overall workspace
     this->m_BoxController->trackNumBoxes(data->getDepth());
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(data);
+    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(data.get());
     if (!box)
       throw std::runtime_error("MDEventWorkspace::splitBox() expected its data "
                                "to be a MDBox* to split to MDGridBox.");
-    gridBox = new MDGridBox<MDE, nd>(box);
-    delete data;
-    data = gridBox;
+    auto tempGridBox = std::make_unique<MDGridBox<MDE, nd>>(box);
+
+    data = std::move(tempGridBox);
   }
 }
 
@@ -848,19 +849,17 @@ Setter for the masking region.
 @param maskingRegion : Implicit function defining mask region.
 */
 TMDE(void MDEventWorkspace)::setMDMasking(
-    Mantid::Geometry::MDImplicitFunction *maskingRegion) {
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) {
   if (maskingRegion) {
     std::vector<API::IMDNode *> toMaskBoxes;
 
     // Apply new masks
-    this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
+    this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion.get());
     for (const auto box : toMaskBoxes) {
       box->clear();
       box->clearFileBacked(false);
       box->mask();
     }
-
-    delete maskingRegion;
   }
 }
 

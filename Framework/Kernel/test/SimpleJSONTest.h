@@ -9,7 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/SimpleJSON.h"
 
 class SimpleJSONTest : public CxxTest::TestSuite {
 public:

@@ -845,10 +845,10 @@ private:
     }
 
     if (!isSpectra) {
-      auto textAxis = new TextAxis(2);
+      auto textAxis = std::make_unique<TextAxis>(2);
       textAxis->setLabel(0, "Test Axis 1");
       textAxis->setLabel(1, "Test Axis 2");
-      wsToSave->replaceAxis(1, textAxis);
+      wsToSave->replaceAxis(1, std::move(textAxis));
     }
 
     AnalysisDataService::Instance().add(m_name, wsToSave);

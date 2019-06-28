@@ -202,11 +202,11 @@ Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent,
   } else {
     outputWS = create<RebinnedOutput>(*parent, newYSize - 1, binEdges);
   }
-  Axis *const verticalAxis = new BinEdgeAxis(newY);
+  auto verticalAxis = std::make_unique<BinEdgeAxis>(newY);
   // Meta data
   verticalAxis->unit() = parent->getAxis(1)->unit();
   verticalAxis->title() = parent->getAxis(1)->title();
-  outputWS->replaceAxis(1, verticalAxis);
+  outputWS->replaceAxis(1, std::move(verticalAxis));
 
   return outputWS;
 }

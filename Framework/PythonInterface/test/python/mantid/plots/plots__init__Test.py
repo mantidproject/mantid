@@ -128,6 +128,17 @@ class Plots__init__Test(unittest.TestCase):
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
         self.assertEqual(self.ax.tracked_workspaces[self.ws2d_histo.name()][0]._artists, [line_ws2d_histo_spec_3])
 
+    def test_remove_if_removes_untracked_artists(self):
+        line = self.ax.plot([0], [0])[0]
+        err_cont = self.ax.errorbar([0], [0])
+        img = self.ax.imshow([[0, 1], [0, 1]])
+
+        self.ax.remove_artists_if(lambda art: art in [line, err_cont, img])
+        self.assertNotIn(line, self.ax.lines)
+        self.assertNotIn(err_cont[0], self.ax.lines)
+        self.assertNotIn(err_cont, self.ax.containers)
+        self.assertNotIn(img, self.ax.images)
+
     def test_remove_if_correctly_removes_lines_associated_with_multiple_workspaces(self):
         second_ws = CreateSampleWorkspace()
         line_ws2d_histo_spec_2 = self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)[0]
@@ -283,6 +294,75 @@ class Plots__init__Test(unittest.TestCase):
         mock_logger = self._run_check_axes_distribution_consistency(
             [False, False, False])
         self.assertEqual(0, mock_logger.call_count)
+
+    def test_that_autoscaling_can_be_turned_off_when_data_changes(self):
+        """We should be able to plot a workspace without having it
+        autoscale if the workspace changes
+        """
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 20],
+                             OutputWorkspace="ws")
+        self.ax.plot(ws, autoscale_on_update=False)
+        CreateWorkspace(DataX=[10, 20],
+                        DataY=[10, 5000],
+                        OutputWorkspace="ws")
+        self.assertLess(self.ax.get_ylim()[1], 5000)
+
+    def test_that_autoscaling_can_be_turned_off_when_plotting_multiple_workspaces(self):
+        """We should be able to plot a new workspace without having the plot scale to it"""
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 20])
+        self.ax.plot(ws)
+        ws2 = CreateWorkspace(DataX=[10, 20],
+                              DataY=[10, 5000])
+        self.ax.plot(ws2, autoscale_on_update=False)
+        self.assertLess(self.ax.get_ylim()[1], 5000)
+
+    def test_that_plot_autoscales_by_default(self):
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 20],
+                             OutputWorkspace="ws")
+        self.ax.plot(ws)
+        ws2 = CreateWorkspace(DataX=[10, 20],
+                              DataY=[10, 5000],
+                              OutputWorkspace="ws2")
+        self.ax.plot(ws2)
+        self.assertGreaterEqual(self.ax.get_ylim()[1], 5000)
+
+    def test_that_errorbar_autoscales_by_default(self):
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 20],
+                             DataE=[1, 1],
+                             OutputWorkspace="ws")
+        self.ax.errorbar(ws)
+        ws2 = CreateWorkspace(DataX=[10, 20],
+                              DataY=[10, 5000],
+                              DataE=[1, 1],
+                              OutputWorkspace="ws2")
+        self.ax.errorbar(ws2)
+        self.assertGreaterEqual(self.ax.get_ylim()[1], 5000)
+
+    def test_that_errorbar_autoscaling_can_be_turned_off_when_plotting_multiple_workspaces(self):
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 20])
+        self.ax.errorbar(ws)
+        ws2 = CreateWorkspace(DataX=[10, 20],
+                              DataY=[10, 5000])
+        self.ax.errorbar(ws2, autoscale_on_update=False)
+        self.assertLess(self.ax.get_ylim()[1], 5000)
+
+    def test_that_errorbar_autoscaling_can_be_turned_off(self):
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 20],
+                             DataE=[1, 2],
+                             OutputWorkspace="ws")
+        self.ax.errorbar(ws)
+        ws2 = CreateWorkspace(DataX=[10, 20],
+                              DataY=[10, 5000],
+                              DataE=[1, 1],
+                              OutputWorkspace="ws2")
+        self.ax.errorbar(ws2, autoscale_on_update=False)
+        self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {

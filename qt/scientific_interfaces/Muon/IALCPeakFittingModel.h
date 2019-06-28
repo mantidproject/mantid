@@ -32,13 +32,22 @@ public:
   /**
    * @return Data we are fitting peaks to
    */
-  virtual Mantid::API::MatrixWorkspace_const_sptr data() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr data() const = 0;
 
   /**
    * Fit specified peaks to the data of the model
    * @param peaks :: Function representing peaks to fit
    */
   virtual void fitPeaks(Mantid::API::IFunction_const_sptr peaks) = 0;
+
+  /**
+   * Retrieves a guess fit
+   * @param function :: Function representing peaks to fit
+   * @param xValues :: The x values for a guess fit
+   */
+  virtual Mantid::API::MatrixWorkspace_sptr
+  guessData(Mantid::API::IFunction_const_sptr function,
+            const std::vector<double> &xValues) = 0;
 
 signals:
 
