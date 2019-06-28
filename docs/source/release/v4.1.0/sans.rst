@@ -19,6 +19,12 @@ SANS Changes
 ISIS SANS Interface
 -------------------
 
+New
+###
+- Non-compatibility reduction mode has been reactivated. In non-compatibility mode, workspaces are kept as event slices for longer for a quicker reduction. To use non-compatibility mode, uncheck **Compatibility mode** in the settings tab.
+- Reductions can be optimised for event slices. To use this mode, check **Event slice optimization** and uncheck **Compatibility mode** in the settings tab.
+
+
 Improvements
 ############
 
@@ -43,5 +49,4 @@ Bug Fixes
 - The algorithm :ref:`Load <algm-Load>` can now load NXcanSAS files.
 - You can now process in **memory** mode with no file type buttons selected. A warning box will open if you process with no file types while in **file** or **both** mode, and processing will not continue.
 - A bug in which the final column in a batch file was sometimes ignored if empty, and therefore impossible to load, has been fixed.
-- The differences between non-compatibility and compatibility modes has been minimised. Compatibility mode can now be turned off in the settings tab. When off, workspaces stay as EventWorkspaces until the penultimate stage of **SANSReductionCore**. Bin masking is not performed until workspace has been converted to a histogram.
 - A bug in which a row was added if the only row is the table was erased, has been fixed.
