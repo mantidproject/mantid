@@ -25,12 +25,12 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using Mantid::DataObjects::TableWorkspace;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
-using testing::_;
 
 //=====================================================================================
 // Functional tests
@@ -210,12 +210,14 @@ public:
     verifyAndClear();
   }
 
+  const std::string autoReductionSearch = "1120015";
+
   void testResumeAutoreductionWithNewSettings() {
     auto presenter = makePresenter();
     expectAutoreductionSettingsChanged();
     expectClearExistingTable();
     expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
+    presenter.resumeAutoreduction(autoReductionSearch);
     verifyAndClear();
   }
 
@@ -224,7 +226,7 @@ public:
     expectAutoreductionSettingsUnchanged();
     expectDoNotClearExistingTable();
     expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
+    presenter.resumeAutoreduction(autoReductionSearch);
     verifyAndClear();
   }
 
@@ -235,7 +237,7 @@ public:
     expectRunsTableWithContent(runsTable);
     expectUserRespondsYes();
     expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
+    presenter.resumeAutoreduction(autoReductionSearch);
     verifyAndClear();
   }
 
@@ -244,7 +246,7 @@ public:
     expectAutoreductionSettingsChanged();
     EXPECT_CALL(m_messageHandler, askUserYesNo(_, _)).Times(0);
     expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
+    presenter.resumeAutoreduction(autoReductionSearch);
     verifyAndClear();
   }
 
@@ -255,7 +257,17 @@ public:
     expectRunsTableWithContent(runsTable);
     expectUserRespondsNo();
     expectDoNotStartAutoreduction();
-    presenter.resumeAutoreduction();
+    presenter.resumeAutoreduction(autoReductionSearch);
+    verifyAndClear();
+  }
+
+  void testResumeAutoreductionCancelledIfSearchStringIsEmpty() {
+    auto presenter = makePresenter();
+    auto runsTable = makeRunsTableWithContent();
+    expectAutoreductionSettingsChanged();
+    expectRunsTableWithContent(runsTable);
+    expectDoNotStartAutoreduction();
+    presenter.resumeAutoreduction("");
     verifyAndClear();
   }
 

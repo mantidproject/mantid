@@ -103,7 +103,7 @@ public:
   MOCK_METHOD1(notifyRowOutputsChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD0(reductionResumed, void());
-  MOCK_METHOD0(resumeAutoreduction, bool());
+  MOCK_METHOD1(resumeAutoreduction, bool(std::string searchString));
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
   MOCK_METHOD0(autoreductionCompleted, void());

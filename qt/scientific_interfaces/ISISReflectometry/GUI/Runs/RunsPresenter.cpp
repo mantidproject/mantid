@@ -186,8 +186,10 @@ void RunsPresenter::reductionPaused() {
 /** Resume autoreduction. Clears any existing table data first and then
  * starts a search to check if there are new runs.
  */
-bool RunsPresenter::resumeAutoreduction() {
-  auto const searchString = m_view->getSearchString();
+bool RunsPresenter::resumeAutoreduction(std::string searchString) {
+  if (searchString == "") {
+    searchString = m_view->getSearchString();
+  }
   auto const instrument = m_view->getSearchInstrument();
 
   if (searchString == "") {

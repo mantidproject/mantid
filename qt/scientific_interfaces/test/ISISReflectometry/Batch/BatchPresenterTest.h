@@ -20,6 +20,7 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
@@ -142,14 +143,14 @@ public:
 
   void testRunsPresenterCalledWhenAutoreductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction("")).Times(1);
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
   void testModelResetWhenAutoreductionCancelled() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction())
+    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction(""))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*m_jobRunner, autoreductionPaused()).Times(1);
@@ -166,7 +167,7 @@ public:
 
   void testChildPresentersNotUpdatedWhenAutoreductionCanelled() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction())
+    EXPECT_CALL(*m_runsPresenter, resumeAutoreduction(""))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*m_savePresenter, autoreductionResumed()).Times(0);
@@ -432,7 +433,7 @@ private:
         .WillByDefault(Return(m_mockAlgorithmsList));
     // The mock runs presenter should by default return true when autoreduction
     // is resumed
-    ON_CALL(*m_runsPresenter, resumeAutoreduction())
+    ON_CALL(*m_runsPresenter, resumeAutoreduction(""))
         .WillByDefault(Return(true));
     return presenter;
   }

@@ -84,7 +84,7 @@ public:
 
   void reductionPaused() override;
   void reductionResumed() override;
-  bool resumeAutoreduction() override;
+  bool resumeAutoreduction(std::string searchString = "") override;
   void autoreductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionCompleted() override;
