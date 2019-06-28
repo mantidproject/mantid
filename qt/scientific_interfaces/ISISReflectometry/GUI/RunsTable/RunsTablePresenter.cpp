@@ -562,9 +562,12 @@ void RunsTablePresenter::notifyCutRowsRequested() {
   if (isProcessing() || isAutoreducing())
     return;
 
+  auto selected = m_view->jobs().selectedRowLocations();
+  if (selected.size() < 1)
+    return;
+
   m_clipboard = Clipboard(m_view->jobs().selectedSubtrees(),
                           m_view->jobs().selectedSubtreeRoots());
-  auto selected = m_view->jobs().selectedRowLocations();
   if (m_clipboard.isInitialized()) {
     removeRowsAndGroupsFromView(selected);
     removeRowsFromModel(selected);
