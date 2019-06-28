@@ -570,7 +570,7 @@ void RunsTablePresenter::notifyCutRowsRequested() {
                           m_view->jobs().selectedSubtreeRoots());
   if (m_clipboard.isInitialized()) {
     removeRowsAndGroupsFromView(selected);
-    removeRowsFromModel(selected);
+    removeRowsAndGroupsFromModel(selected);
     m_view->jobs().clearSelection();
     ensureAtLeastOneGroupExists();
     notifySelectionChanged();
