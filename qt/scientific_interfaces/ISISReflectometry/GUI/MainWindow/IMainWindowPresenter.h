@@ -19,7 +19,7 @@ IMainWindowPresenter is the interface defining the functions that the main
 window presenter needs to implement. This interface is used by tab presenters to
 request information from other tabs.
 */
-class IMainWindowPresenter : public MainWindowSubscriber {
+class IMainWindowPresenter {
 public:
   virtual bool isProcessing() const = 0;
   virtual ~IMainWindowPresenter() = default;

@@ -10,6 +10,7 @@
 #include "Common/DllConfig.h"
 #include "GUI/Batch/BatchPresenterFactory.h"
 #include "IMainWindowPresenter.h"
+#include "IMainWindowView.h"
 #include <memory>
 
 namespace MantidQt {
@@ -23,12 +24,17 @@ MainWindowPresenter is the concrete main window presenter implementing the
 functionality defined by the interface IMainWindowPresenter.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowPresenter
-    : public IMainWindowPresenter {
+    : public MainWindowSubscriber,
+      public IMainWindowPresenter {
 public:
   /// Constructor
   MainWindowPresenter(IMainWindowView *view,
                       BatchPresenterFactory batchPresenterFactory);
+
+  // IMainWindowPresenter overrides
   bool isProcessing() const override;
+
+  // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
   void notifyNewBatchRequested() override;
   void notifyCloseBatchRequested(int batchIndex) override;

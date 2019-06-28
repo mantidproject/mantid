@@ -63,8 +63,11 @@ private:
   /// Interface definition with widgets for the main interface window
   Ui::MainWindowWidget m_ui;
   MainWindowSubscriber *m_notifyee;
-  /// The presenter handling this view
-  boost::optional<MainWindowPresenter> m_presenter;
+  /// The presenter handling this view. It is not normal in MVP for a view to
+  /// have ownership of its presenter, but due to the way interfaces get
+  /// instantiated this is currently necessary for MainWindowView. Direct use
+  /// of m_presenter should be avoided - use m_notifyee instead.
+  std::unique_ptr<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
 };
 } // namespace CustomInterfaces
