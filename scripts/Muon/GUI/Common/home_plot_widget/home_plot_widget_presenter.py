@@ -131,6 +131,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             list_of_output_workspaces_to_plot = [output for output, input in
                                                  zip(current_fit.output_workspace_names, current_fit.input_workspaces)
                                                  if input in combined_ws_list]
+            list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot\
+                else [current_fit.output_workspace_names[-1]]
         else:
             list_of_output_workspaces_to_plot = []
 

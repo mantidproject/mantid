@@ -27,6 +27,7 @@ class FittingTabPresenter(object):
         self._fit_function = [None]
         self._tf_asymmetry_mode = False
         self._fit_function_cache = [None]
+        self._number_of_fits_cached = 0
         self._multi_domain_function = None
         self.manual_selection_made = False
         self.automatically_update_fit_name = True
@@ -142,12 +143,14 @@ class FittingTabPresenter(object):
 
         try:
             if fit_type == self.view.single_fit:
+                self._number_of_fits_cached = 1
                 single_fit_parameters = self.get_parameters_for_single_fit()
                 calculation_function = functools.partial(
                     self.model.do_single_fit, single_fit_parameters)
                 self.calculation_thread = self.create_thread(
                     calculation_function)
             elif fit_type == self.view.simultaneous_fit:
+                self._number_of_fits_cached = 1
                 simultaneous_fit_parameters = self.get_multi_domain_fit_parameters(
                 )
                 global_parameters = self.view.get_global_parameters()
@@ -157,6 +160,7 @@ class FittingTabPresenter(object):
                 self.calculation_thread = self.create_thread(
                     calculation_function)
             elif fit_type == self.view.sequential_fit:
+                self._number_of_fits_cached = len(self.selected_data)
                 sequential_fit_parameters = self.get_multi_domain_fit_parameters(
                 )
                 calculation_function = functools.partial(self.model.do_sequential_fit, sequential_fit_parameters)
@@ -287,7 +291,7 @@ class FittingTabPresenter(object):
         self.view.undo_fit_button.setEnabled(True)
 
     def handle_error(self, error):
-        self._fit_function = self._fit_function_cache
+        self.handle_undo_fit_clicked()
         self.thread_success = False
         self.view.warning_popup(error)
         self.view.setEnabled(True)
@@ -385,7 +389,7 @@ class FittingTabPresenter(object):
         self.clear_fit_information()
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(False)
-        self.context.fitting_context.remove_latest_fit()
+        self.context.fitting_context.remove_latest_fit(self._number_of_fits_cached)
 
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()

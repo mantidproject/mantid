@@ -368,8 +368,8 @@ class FittingContext(object):
     def clear(self):
         self.fit_list = []
 
-    def remove_latest_fit(self):
-        self.fit_list.pop(-1)
+    def remove_latest_fit(self, number_of_fits_to_remove):
+        self.fit_list = self.fit_list[:-number_of_fits_to_remove]
         self.new_fit_notifier.notify_subscribers()
 
 
