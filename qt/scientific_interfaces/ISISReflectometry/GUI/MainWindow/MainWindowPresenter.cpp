@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MainWindowPresenter.h"
+#include "GUI/Common/IMessageHandler.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
@@ -21,8 +22,10 @@ namespace CustomInterfaces {
  * we will manage
  */
 MainWindowPresenter::MainWindowPresenter(
-    IMainWindowView *view, BatchPresenterFactory batchPresenterFactory)
-    : m_view(view), m_batchPresenterFactory(std::move(batchPresenterFactory)) {
+    IMainWindowView *view, IMessageHandler *messageHandler,
+    BatchPresenterFactory batchPresenterFactory)
+    : m_view(view), m_messageHandler(messageHandler),
+      m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
@@ -34,6 +37,14 @@ void MainWindowPresenter::notifyNewBatchRequested() {
 }
 
 void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
+  if (m_batchPresenters[batchIndex]->isAutoreducing() ||
+      m_batchPresenters[batchIndex]->isProcessing()) {
+    m_messageHandler->giveUserCritical(
+        "Cannot close batch while processing or autoprocessing is in progress",
+        "Error");
+    return;
+  }
+
   if (m_batchPresenters[batchIndex]->requestClose()) {
     m_batchPresenters.erase(m_batchPresenters.begin() + batchIndex);
     m_view->removeBatch(batchIndex);

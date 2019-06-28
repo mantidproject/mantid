@@ -91,14 +91,14 @@ void MainWindowView::initLayout() {
 
   // Create the presenter
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, std::move(makeBatchPresenter));
+      this, messageHandler, std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
   m_notifyee->notifyNewBatchRequested();
 }
 
 void MainWindowView::onTabCloseRequested(int tabIndex) {
-  m_ui.mainTabs->removeTab(tabIndex);
+  m_notifyee->notifyCloseBatchRequested(tabIndex);
 }
 
 void MainWindowView::onNewBatchRequested(bool) {
