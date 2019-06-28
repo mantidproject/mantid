@@ -11,6 +11,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -44,6 +45,8 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+  void initSpectrum(API::MatrixWorkspace_const_sptr, API::MatrixWorkspace_sptr,
+                    const size_t);
 };
 
 } // namespace Algorithms

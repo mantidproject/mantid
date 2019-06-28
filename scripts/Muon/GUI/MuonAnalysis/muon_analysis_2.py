@@ -155,8 +155,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer
-        )
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
@@ -240,6 +239,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.home_tab.plot_widget.input_workspace_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
+            self.home_tab.plot_widget.rebin_options_set_observer)
 
     def setup_phase_quad_changed_notifer(self):
         pass
