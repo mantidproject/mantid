@@ -43,8 +43,8 @@ void Plotter::reflectometryPlot(
 #else
   // Workbench Plotting
   QHash<QString, QVariant> ax_properties;
-  // ax_properties[QString("yscale")] = QVariant("log");
-  // ax_properties[QString("xscale")] = QVariant("log");
+  ax_properties[QString("yscale")] = QVariant("log");
+  ax_properties[QString("xscale")] = QVariant("log");
 
   // plot(workspaces, spectrum_nums, wksp_indices, fig, plot_kwargs,
   // ax_properties, windows_title, errors, overplot)
@@ -56,7 +56,7 @@ void Plotter::reflectometryPlot(
   const bool plotErrorBars = true;
   std::vector<int> wksp_indices = {0};
   plot(workspaces, boost::none, wksp_indices, boost::none, boost::none,
-       ax_properties, window_title, plotErrorBars, true);
+       ax_properties, window_title, plotErrorBars, false);
 #endif
 }
 
