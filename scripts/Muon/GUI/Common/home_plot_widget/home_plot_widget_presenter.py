@@ -125,11 +125,14 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         :return:
         """
-        current_fit = self.context.fitting_context.fit_list[-1]
-        combined_ws_list = self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning
-        list_of_output_workspaces_to_plot = [output for output, input in
-                                             zip(current_fit.output_workspace_names, current_fit.input_workspaces)
-                                             if input in combined_ws_list]
+        if self.context.fitting_context.fit_list:
+            current_fit = self.context.fitting_context.fit_list[-1]
+            combined_ws_list = self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning
+            list_of_output_workspaces_to_plot = [output for output, input in
+                                                 zip(current_fit.output_workspace_names, current_fit.input_workspaces)
+                                                 if input in combined_ws_list]
+        else:
+            list_of_output_workspaces_to_plot = []
 
         for workspace_name in self._model.plotted_fit_workspaces:
             self._model.remove_workpace_from_plot(workspace_name)
@@ -137,6 +140,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         for workspace_name in list_of_output_workspaces_to_plot:
             self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Fit')
             self._model.add_workspace_to_plot(workspace_name, 3, workspace_name + ': Diff')
+
+        self._model.force_redraw()
 
     def get_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """

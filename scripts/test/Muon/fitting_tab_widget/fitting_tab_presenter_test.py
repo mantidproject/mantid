@@ -571,6 +571,44 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual([str(item) for item in self.presenter._fit_function], [
             'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 3)
 
+    def test_undo_fit_button_disabled_until_a_succesful_fit_is_performed(self):
+        self.assertEqual(self.view.undo_fit_button.isEnabled(), False)
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.fitting_calculation_model = mock.MagicMock()
+        self.presenter.fitting_calculation_model.result = (fit_function, 'Success', 1.07)
+
+        self.presenter.handle_finished()
+
+        self.assertEqual(self.view.undo_fit_button.isEnabled(), True)
+
+    def test_after_fit_fit_cache_is_populated(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.5,Sigma=0.5,Frequency=1,Phi=0')
+        self.presenter.fitting_calculation_model = mock.MagicMock()
+        self.presenter.model.do_single_fit.return_value = (fit_function,'Fit Suceeded', 0.5)
+
+        self.presenter.handle_fit_clicked()
+        wait_for_thread(self.presenter.calculation_thread)
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function_cache], ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 3)
+
+    def test_undo_fit_resets_fit_in_view(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.5,Sigma=0.5,Frequency=1,Phi=0')
+        self.presenter.fitting_calculation_model = mock.MagicMock()
+        self.presenter.model.do_single_fit.return_value = (fit_function, 'Fit Suceeded', 0.5)
+        self.presenter.handle_fit_clicked()
+        wait_for_thread(self.presenter.calculation_thread)
+
+        self.view.undo_fit_button.clicked.emit(True)
+
+        self.assertEqual(str(self.view.fit_object), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -319,7 +319,7 @@ class FittingContext(object):
         :param fit: A new FitInformation object
         """
         if fit in self.fit_list:
-            return
+            self.fit_list.pop(self.fit_list.index(fit))
         self.fit_list.append(fit)
         self.new_fit_notifier.notify_subscribers()
 
@@ -367,6 +367,10 @@ class FittingContext(object):
 
     def clear(self):
         self.fit_list = []
+
+    def remove_latest_fit(self):
+        self.fit_list.pop(-1)
+        self.new_fit_notifier.notify_subscribers()
 
 
 # Private functions

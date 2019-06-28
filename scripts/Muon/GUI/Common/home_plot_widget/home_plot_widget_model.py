@@ -97,6 +97,12 @@ class HomePlotWidgetModel(object):
         self.plot_figure = None
         self.plotted_workspaces = []
 
+    def force_redraw(self):
+        if not self.plot_figure:
+            return
+
+        self.plot_figure.canvas.draw()
+
     def autoscale_y_to_data_in_view(self):
         axis = self.plot_figure.gca()
         xlim = axis.get_xlim()

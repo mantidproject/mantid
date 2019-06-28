@@ -26,6 +26,7 @@ class FittingTabPresenter(object):
         self._fit_chi_squared = [0.0]
         self._fit_function = [None]
         self._tf_asymmetry_mode = False
+        self._fit_function_cache = [None]
         self._multi_domain_function = None
         self.manual_selection_made = False
         self.automatically_update_fit_name = True
@@ -136,6 +137,7 @@ class FittingTabPresenter(object):
             self.perform_standard_fit()
 
     def perform_standard_fit(self):
+        self._fit_function_cache = [item.clone() for item in self._fit_function if item]
         fit_type = self.view.fit_type
 
         try:
@@ -169,6 +171,7 @@ class FittingTabPresenter(object):
             self.view.warning_popup(error)
 
     def perform_tf_asymmetry_fit(self):
+        self._fit_function_cache = [item.clone() for item in self._fit_function if item]
         fit_type = self.view.fit_type
 
         try:
@@ -281,8 +284,10 @@ class FittingTabPresenter(object):
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
 
         self.update_fit_status_information_in_view()
+        self.view.undo_fit_button.setEnabled(True)
 
     def handle_error(self, error):
+        self._fit_function = self._fit_function_cache
         self.thread_success = False
         self.view.warning_popup(error)
         self.view.setEnabled(True)
@@ -376,7 +381,11 @@ class FittingTabPresenter(object):
             self._fit_function = [self.view.fit_object] * len(self.selected_data)
 
     def handle_undo_fit_clicked(self):
-        pass
+        self._fit_function = self._fit_function_cache
+        self.clear_fit_information()
+        self.update_fit_status_information_in_view()
+        self.view.undo_fit_button.setEnabled(False)
+        self.context.fitting_context.remove_latest_fit()
 
     def get_parameters_for_single_fit(self):
         params = self._get_shared_parameters()

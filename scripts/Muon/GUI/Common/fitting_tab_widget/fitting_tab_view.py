@@ -23,6 +23,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
         self.setup_fit_options_table()
+        self.undo_fit_button.setEnabled(False)
 
         self.function_browser = FunctionBrowser(self, False)
         self.function_browser_multi = FunctionBrowser(self, True)
@@ -250,12 +251,10 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         return self.function_browser_multi.getGlobalParameters()
 
     def switch_to_simultaneous(self):
-        function_object = self.fit_object
         self.function_browser_multi.show()
         self.function_browser.hide()
 
     def switch_to_single(self):
-        function_object = self.fit_object
         self.function_browser_multi.hide()
         self.function_browser.show()
 
