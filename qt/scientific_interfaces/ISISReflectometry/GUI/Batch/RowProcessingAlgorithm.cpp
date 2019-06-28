@@ -239,7 +239,8 @@ private:
 
 void updateEventProperties(AlgorithmRuntimeProps &properties,
                            Slicing const &slicing) {
-  boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
+  if (isValid(slicing))
+    boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
 boost::optional<double> getDouble(IAlgorithm_sptr algorithm,
