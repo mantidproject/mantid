@@ -58,85 +58,54 @@ public:
     }
   }
 
-  // check if datatype or group has NX_class attribute. TODO: REFACTOR - SEE 'HASATTRIBUTE'
-  bool hasNxClass(const std::string &attrVal, const std::string &path) const {
+  // check if group has matching NX_class attribute value, or if dataype has
+  // matching NX_class attribute value if optional dataset name passed.
+  bool hasNxClass(const std::string &attrVal, const std::string &pathToGroup,
+                  std::string *dataSetname = nullptr) const {
 
-    try {
+    H5::Attribute attribute;
 
-      H5::Group parentGroup = m_file.openGroup(path);
-      H5::Attribute attribute = parentGroup.openAttribute("NX_class");
+    // group must be opened before accessing dataset
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
-      std::string attributeValue;
-      attribute.read(attribute.getDataType(), attributeValue);
+    if (dataSetname != nullptr) {
 
-      return attributeValue == attrVal;
+      // treat as dataset
 
-    } catch (H5::GroupIException) {
+      H5::DataSet dataSet = parentGroup.openDataSet(*dataSetname);
+      attribute = dataSet.openAttribute(NX_CLASS);
 
-      H5::DataSet dataSet = m_file.openDataSet(path);
-      H5::Attribute attribute = dataSet.openAttribute("NX_class");
+    } else {
 
-      std::string attributeValue;
-      attribute.read(attribute.getDataType(), attributeValue);
-
-      return attributeValue == attrVal;
-
-    } catch (H5::DataSetIException) {
-
-      return false;
+      // treat as group
+      attribute = parentGroup.openAttribute(NX_CLASS);
     }
+
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
+
+    return attributeValue == attrVal;
   }
-
-  /*
-  // check if entry (either group or dataset) has NX_class attribute
-  bool hasNxClass(const std::string &attrVal, const std::string &path) const {
-
-    try {
-
-      H5::Group parentGroup = m_file.openGroup(path);
-      H5::Attribute attribute = parentGroup.openAttribute("NX_class");
-
-      std::string attributeValue;
-      attribute.read(attribute.getDataType(), attributeValue);
-
-      return attributeValue == attrVal;
-
-    } catch (H5::GroupIException &) { // attempt to open as  group failed.
-
-      H5::DataSet dataSet = m_file.openDataSet(path);
-      H5::Attribute attribute = dataSet.openAttribute("NX_class");
-
-      std::string attributeValue;
-      attribute.read(attribute.getDataType(), attributeValue);
-
-      return attributeValue == attrVal;
-
-    } catch (H5::DataSetIException &) { // attempt to open as dataset failed.
-
-      return false;
-    }
-  }
-  */
 
   // check if dataset exists in group, and (optional) check if the dataset has
   // the NX_class attribute specified.
 
   bool hasDataSet(const std::string &dataSetName,
                   const std::string &pathToGroup,
-                  const std::string *attrVal = nullptr) const {
+                  const std::string *nxClassAttrVal = nullptr) const {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
     try {
       H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
 
-      if (attrVal != nullptr) {
+      if (nxClassAttrVal != nullptr) {
 
-        H5::Attribute attribute = dataSet.openAttribute("NX_class");
+        H5::Attribute attribute = dataSet.openAttribute(NX_CLASS);
         std::string readClass;
 
         attribute.read(attribute.getDataType(), readClass);
-        return readClass == *attrVal;
+        return readClass == *nxClassAttrVal;
       } else {
 
         // return true if dataset opened without exception and without checking
@@ -150,7 +119,7 @@ public:
   }
 
   // check if dataset or group has name-specific attribute
-  bool hasAttribute(const std::string &pathToGroup, const std::string attrName,
+  bool hasAttribute(const std::string &pathToGroup, const std::string NX_class,
                     const std::string attrVal,
                     const std::string *dataSetname = nullptr) {
 
@@ -164,12 +133,12 @@ public:
       // treat as dataset
 
       H5::DataSet dataSet = parentGroup.openDataSet(*dataSetname);
-      attribute = dataSet.openAttribute(attrName);
+      attribute = dataSet.openAttribute(NX_class);
 
     } else {
 
       // treat as group
-      attribute = parentGroup.openAttribute(attrName);
+      attribute = parentGroup.openAttribute(NX_class);
     }
 
     std::string attributeValue;
@@ -296,8 +265,14 @@ public:
     HDF5FileTestUtility tester(
         destinationFile); // tests the file has given attributes.
 
-    TS_ASSERT(tester.hasNxClass("NXinstrument", "/raw_data_1/instrument"));
-    TS_ASSERT(tester.hasNxClass("NXentry", "/raw_data_1"));
+    std::string dataSetName = "name";
+
+    TS_ASSERT(tester.hasNxClass(
+        NX_INSTRUMENT, "/raw_data_1/instrument")); // TODO: refacter to phase
+                                                   // out hard coded parameters.
+    TS_ASSERT(tester.hasNxClass(NX_ENTRY, "/raw_data_1"));
+    TS_ASSERT(
+        tester.hasNxClass(NX_CHAR, "/raw_data_1/instrument", &dataSetName))
   }
 
   void test_instrument_has_name() {
@@ -313,11 +288,12 @@ public:
     saveInstrument(compInfo, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    TS_ASSERT(testUtility.hasDataSet("name","/raw_data_1/instrument", &NX_CLASS));
+    TS_ASSERT(
+        testUtility.hasDataSet("name", "/raw_data_1/instrument", &NX_CHAR));
 
-    // TS_ASSERT(testUtility.hasAtrribute(expectedInstrumentName,
-    //                                   "/raw_data_1/instrument/name",
-    //                                  "short_name", "abr_name"));
+    std::string dataSetName = "name";
+    TS_ASSERT(testUtility.hasAttribute("/raw_data_1/instrument", "short_name",
+                                       "name", &dataSetName));
   }
 };
 

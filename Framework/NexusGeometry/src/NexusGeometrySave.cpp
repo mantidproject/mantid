@@ -40,19 +40,19 @@ const std::string NX_CHAR = "NX_CHAR";
 
 } // namespace
 
-void writeStrAttributeToGroup(H5::Group &grp, const std::string &attrName,
+void writeStrAttributeToGroup(H5::Group &grp, const std::string &NX_class,
                               const std::string &attrVal) {
   H5::StrType attrType(0, H5T_VARIABLE);
   H5::DataSpace attrSpace(H5S_SCALAR);
-  auto attribute = grp.createAttribute(attrName, attrType, attrSpace);
+  auto attribute = grp.createAttribute(NX_class, attrType, attrSpace);
   attribute.write(attrType, attrVal);
 }
 
-void writeStrAttributeToDataSet(H5::DataSet &dSet, const std::string &attrName,
+void writeStrAttributeToDataSet(H5::DataSet &dSet, const std::string &NX_class,
                                 const std::string &attrVal) {
   H5::StrType attrType(0, H5T_VARIABLE);
   H5::DataSpace attrSpace(H5S_SCALAR);
-  auto attribute = dSet.createAttribute(attrName, attrType, attrSpace);
+  auto attribute = dSet.createAttribute(NX_class, attrType, attrSpace);
   attribute.write(attrType, attrVal);
 }
 

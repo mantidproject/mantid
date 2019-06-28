@@ -232,9 +232,9 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
   if (!doErrors) {
     // Add an attribute called "errors" with value = the name of the data_errors
     // field.
-    NXname attrName = "errors";
+    NXname NX_class = "errors";
     std::string attrBuffer = errors_field_name;
-    if (NXputattr(outId, attrName, attrBuffer.c_str(),
+    if (NXputattr(outId, NX_class, attrBuffer.c_str(),
                   static_cast<int>(attrBuffer.size()), NX_CHAR) != NX_OK)
       return NX_ERROR;
   }
@@ -660,7 +660,7 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   int rank;
   int dims[4];
 #endif
-  NXname attrName;
+  NXname NX_class;
   void *attrBuffer;
 
   std::array<const char *, 6> attrs = {{"NeXus_version", "XML_version",
@@ -671,7 +671,7 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
 #ifdef NEXUS43
     status = NXgetnextattr(inId, attrName, &attrLen, &attrType);
 #else
-    status = NXgetnextattra(inId, attrName, &rank, dims, &attrType);
+    status = NXgetnextattra(inId, NX_class, &rank, dims, &attrType);
 #endif
     if (status == NX_ERROR)
       return NX_ERROR;
@@ -682,15 +682,15 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
       attrLen = dims[0];
 #endif
       if (std::none_of(attrs.cbegin(), attrs.cend(),
-                       [&attrName](const char *name) {
-                         return strcmp(attrName, name) == 0;
+                       [&NX_class](const char *name) {
+                         return strcmp(NX_class, name) == 0;
                        })) {
         attrLen++; /* Add space for string termination */
         if (NXmalloc(&attrBuffer, 1, &attrLen, attrType) != NX_OK)
           return NX_ERROR;
-        if (NXgetattr(inId, attrName, attrBuffer, &attrLen, &attrType) != NX_OK)
+        if (NXgetattr(inId, NX_class, attrBuffer, &attrLen, &attrType) != NX_OK)
           return NX_ERROR;
-        if (NXputattr(outId, attrName, attrBuffer, attrLen, attrType) != NX_OK)
+        if (NXputattr(outId, NX_class, attrBuffer, attrLen, attrType) != NX_OK)
           return NX_ERROR;
         if (NXfree(&attrBuffer) != NX_OK)
           return NX_ERROR;

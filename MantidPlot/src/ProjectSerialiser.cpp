@@ -70,7 +70,7 @@ std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
  * @return A new reference PyObject that results from the call
  * @throws std::runtime_error if any Python operation fails
  */
-PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
+PyObject *callPythonModuleAttr(const char *moduleName, const char *NX_class,
                                PyObject *arg) {
   auto throwIfPythonError = [](auto result) {
     if (!PyErr_Occurred())
@@ -97,7 +97,7 @@ PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
     launcher = throwIfPythonError(
         PyImport_ImportModule(const_cast<char *>(moduleName)));
     moduleAttr = throwIfPythonError(
-        PyObject_GetAttrString(launcher, const_cast<char *>(attrName)));
+        PyObject_GetAttrString(launcher, const_cast<char *>(NX_class)));
     callResult = throwIfPythonError(PyObject_CallObject(moduleAttr, arg));
     Py_XDECREF(moduleAttr);
     Py_XDECREF(launcher);
