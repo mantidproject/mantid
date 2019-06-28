@@ -44,15 +44,16 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         self.time_domain_combo.addItem("Frequency Domain")
         self.time_domain_combo.currentIndexChanged.connect(self.time_or_freq)
         if self.context._frequency_context:
-           self.time_domain_combo.setEnabled(True)
-           self.time_domain_combo.setCurrentIndex(1)
-
+            self.time_domain_combo.setEnabled(True)
+            self.time_domain_combo.setCurrentIndex(1)
 
     def get_workspace_list(self):
         filtered_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
                                                                     rebin=self.rebin, freq = True)
+
         filtered_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
-                                                                    rebin=self.rebin, freq = False)
+                                                                     rebin=self.rebin, freq = False)
+
         filtered_list = [item for item in filtered_list if item not in self.current_workspaces]
 
         filtered_list = self.current_workspaces + filtered_list
@@ -74,7 +75,7 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
                                                                     rebin=self.rebin, freq = False)
         # add frequency list to excluded - needed for searching
         excluded_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
-                                                                    rebin=self.rebin, freq = True)
+                                                                     rebin=self.rebin, freq = True)
 
         excluded_list = [item for item in excluded_list if item not in filtered_list]
 
@@ -128,4 +129,4 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         return state
 
     def time_or_freq(self):
-         self.update_list()
+        self.update_list()

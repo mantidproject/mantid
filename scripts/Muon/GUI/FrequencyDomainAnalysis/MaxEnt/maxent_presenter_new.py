@@ -100,7 +100,6 @@ class MaxEntPresenter(object):
         self.activate()
         self.calculation_finished_notifier.notify_subscribers()
 
-
     def handle_error(self, error):
         self.activate()
         self.view.warning_popup(error)

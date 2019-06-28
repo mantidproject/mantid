@@ -164,7 +164,8 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
-        alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+        alg.getProperty('OutputStatus').value, alg.getProperty(
+            'OutputChi2overDoF').value
 
 
 def run_AppendSpectra(ws1, ws2):
@@ -210,6 +211,7 @@ def run_Plus(parameter_dict):
     alg.execute()
     return alg.getProperty("OutputWorkspace").value
 
+
 def convert_to_field(ws):
     """
     Apply the Scale algorithm to convert from MHz to Field.
@@ -219,11 +221,12 @@ def convert_to_field(ws):
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("InputWorkspace", ws)
     alg.setProperty("OutputWorkspace", "__notUsed")
-    alg.setProperty("Factor", 1.e3/13.55)
+    alg.setProperty("Factor", 1.e3 / 13.55)
     alg.execute()
     output = alg.getProperty("OutputWorkspace").value
     output.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')
     return output
+
 
 def extract_single_spec(ws, spec):
 

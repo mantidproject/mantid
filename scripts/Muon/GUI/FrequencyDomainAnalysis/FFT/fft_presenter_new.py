@@ -15,7 +15,8 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, 
     get_base_data_directory, get_group_or_pair_from_name
 import re
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObservable
+from Muon.GUI.Common.observer_pattern import GenericObservable
+
 
 class FFTPresenter(object):
     """
@@ -204,7 +205,6 @@ class FFTPresenter(object):
 
             muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws, directory + fft_workspace_name + spec_type)
             muon_workspace_wrapper.show()
-
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

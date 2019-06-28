@@ -36,9 +36,9 @@ class HomePlotWidgetView(QtWidgets.QWidget):
         self.plot_label.setObjectName("plotLabel")
         self.plot_label.setText("Plot type : ")
 
-        self.overlay = QtWidgets.QCheckBox("overlay",self)
-        self.keep = QtWidgets.QCheckBox("append",self)
-        self.raw = QtWidgets.QCheckBox("plot raw",self)
+        self.overlay = QtWidgets.QCheckBox("overlay", self)
+        self.keep = QtWidgets.QCheckBox("append", self)
+        self.raw = QtWidgets.QCheckBox("plot raw", self)
         self.raw.setChecked(True)
 
         self.plot_selector = QtWidgets.QComboBox(self)

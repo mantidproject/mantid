@@ -15,6 +15,7 @@ import re
 
 
 class FittingTabPresenter(object):
+
     def __init__(self, view, model, context):
         self.view = view
         self.model = model
@@ -40,7 +41,8 @@ class FittingTabPresenter(object):
         self.enable_tab_observer = GenericObserver(lambda: self.view.
                                                    setEnabled(True))
 
-        self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
+        self.update_view_from_model_observer = GenericObserverWithArgPassing(
+            self.update_view_from_model)
 
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
@@ -66,20 +68,20 @@ class FittingTabPresenter(object):
 
     def update_selected_workspace_guess(self):
         if self.manual_selection_made:
-           guess_selection = self.selected_data
-           self.selected_data = guess_selection
+            guess_selection = self.selected_data
+            self.selected_data = guess_selection
 
         elif self.context._frequency_context:
-           self.update_selected_frequency_workspace_guess()
+            self.update_selected_frequency_workspace_guess()
         else:
-           self.update_selected_time_workspace_guess()
+            self.update_selected_time_workspace_guess()
 
     def update_selected_frequency_workspace_guess(self):
         guess_selection = self.context.get_names_of_workspaces_to_fit(
             runs='All',
             group_and_pair=self.context.group_pair_context.selected,
             phasequad=True,
-            rebin=not self.view.fit_to_raw, freq = True)
+            rebin=not self.view.fit_to_raw, freq=True)
         self.selected_data = guess_selection
 
     def update_selected_time_workspace_guess(self):
@@ -335,6 +337,7 @@ class FittingTabPresenter(object):
 
     def update_view_from_model(self, workspace_removed=None):
         if workspace_removed:
-            self.selected_data = [item for item in self.selected_data if item != workspace_removed]
+            self.selected_data = [
+                item for item in self.selected_data if item != workspace_removed]
         else:
             self.selected_data = []

@@ -11,6 +11,8 @@ import re
 group_str =  "; Group; "
 pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad'
+
+
 def get_raw_data_workspace_name(context, run, period='1'):
     if context.data_context.is_multi_period():
         return context.data_context._base_run_name(run) + "_raw_data" + "_period_" + period + context.workspace_suffix
@@ -44,8 +46,8 @@ def get_group_asymmetry_name(context, group_name, run, rebin):
         name += ' Rebin;'
 
     name += context.workspace_suffix
-
     return name
+
 
 def get_group_or_pair_from_name(name):
     if group_str in name:
