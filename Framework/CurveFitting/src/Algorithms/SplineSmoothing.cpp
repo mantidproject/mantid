@@ -187,12 +187,12 @@ SplineSmoothing::setupOutputWorkspace(const MatrixWorkspace_sptr &inws,
       WorkspaceFactory::Instance().create(inws, size);
 
   // create labels for output workspace
-  auto tAxis = new API::TextAxis(size);
+  auto tAxis = std::make_unique<API::TextAxis>(size);
   for (int i = 0; i < size; ++i) {
     const std::string index = std::to_string(i);
     tAxis->setLabel(i, "Y" + index);
   }
-  outputWorkspace->replaceAxis(1, tAxis);
+  outputWorkspace->replaceAxis(1, std::move(tAxis));
 
   return outputWorkspace;
 }

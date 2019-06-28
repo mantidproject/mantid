@@ -55,9 +55,12 @@ public:
   MOCK_CONST_METHOD0(peakPicker, IPeakFunction_const_sptr());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD2(setDataCurve,
-               void(const QwtData &, const std::vector<double> &));
-  MOCK_METHOD1(setFittedCurve, void(const QwtData &));
+  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
+                                  const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setFittedCurve, void(MatrixWorkspace_sptr workspace,
+                                    const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setGuessCurve, void(MatrixWorkspace_sptr workspace,
+                                   const std::size_t &workspaceIndex));
   MOCK_METHOD1(setPeakPickerEnabled, void(bool));
   MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr &));
   MOCK_METHOD1(setFunction, void(const IFunction_const_sptr &));
@@ -65,6 +68,8 @@ public:
   MOCK_METHOD1(displayError, void(const QString &));
   MOCK_METHOD0(help, void());
   MOCK_METHOD1(changePlotGuessState, void(bool));
+
+  MOCK_METHOD1(removePlot, void(const QString &plotName));
 };
 
 class MockALCPeakFittingModel : public IALCPeakFittingModel {
@@ -74,19 +79,12 @@ public:
   void setError(const QString &message) { emit errorInModel(message); }
 
   MOCK_CONST_METHOD0(fittedPeaks, IFunction_const_sptr());
-  MOCK_CONST_METHOD0(data, MatrixWorkspace_const_sptr());
+  MOCK_CONST_METHOD0(data, MatrixWorkspace_sptr());
   MOCK_METHOD1(fitPeaks, void(IFunction_const_sptr));
+  MOCK_METHOD2(guessData,
+               MatrixWorkspace_sptr(IFunction_const_sptr function,
+                                    const std::vector<double> &xValues));
 };
-
-MATCHER_P3(QwtDataX, i, value, delta, "") {
-  return fabs(arg.x(i) - value) < delta;
-}
-MATCHER_P3(QwtDataY, i, value, delta, "") {
-  return fabs(arg.y(i) - value) < delta;
-}
-MATCHER_P3(VectorValue, i, value, delta, "") {
-  return fabs(arg.at(i) - value) < delta;
-}
 
 // DoubleNear matcher was introduced in gmock 1.7 only
 MATCHER_P2(DoubleDelta, value, delta, "") { return fabs(arg - value) < delta; }
@@ -172,44 +170,39 @@ public:
   }
 
   void test_onDataChanged() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    auto dataWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspace123(1, 3));
 
-    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+    ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
 
-    EXPECT_CALL(
-        *m_view,
-        setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1, 1E-8),
-                           QwtDataX(1, 2, 1E-8), QwtDataX(2, 3, 1E-8),
-                           QwtDataY(0, 2, 1E-8), QwtDataY(1, 2, 1E-8),
-                           QwtDataY(2, 2, 1E-8)),
-                     AllOf(Property(&std::vector<double>::size, 3),
-                           VectorValue(0, 3, 1E-6), VectorValue(1, 3, 1E-6),
-                           VectorValue(2, 3, 1E-6))));
+    EXPECT_CALL(*m_view, setDataCurve(dataWorkspace, 0));
     m_model->changeData();
   }
 
   void test_onFittedPeaksChanged() {
-    ON_CALL(*m_model, fittedPeaks())
-        .WillByDefault(Return(createGaussian(1, 2, 3)));
+    IFunction_const_sptr fitFunction = createGaussian(1, 2, 3);
+    auto dataWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspace123(1, 3));
 
-    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+    ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(fitFunction));
+    ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
 
     // TODO: check better
-    EXPECT_CALL(*m_view, setFittedCurve(_));
-    EXPECT_CALL(*m_view, setFunction(_));
+    EXPECT_CALL(*m_view, setFittedCurve(dataWorkspace, 1));
+    EXPECT_CALL(*m_view, setFunction(fitFunction));
 
     m_model->changeFittedPeaks();
   }
 
   void test_onFittedPeaksChanged_toEmpty() {
+    const auto dataWorkspace =
+        WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+
     ON_CALL(*m_model, fittedPeaks())
         .WillByDefault(Return(IFunction_const_sptr()));
+    ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
 
-    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
-
-    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+    EXPECT_CALL(*m_view, removePlot(QString("Fit")));
     EXPECT_CALL(*m_view, setFunction(IFunction_const_sptr()));
 
     m_model->changeFittedPeaks();
@@ -316,11 +309,13 @@ public:
    * Test that clicking "Plot guess" with no function set plots nothing
    */
   void test_plotGuess_noFunction() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+    auto dataWorkspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+
+    ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
     ON_CALL(*m_view, function(QString("")))
         .WillByDefault(Return(IFunction_const_sptr()));
-    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+
+    EXPECT_CALL(*m_view, removePlot(QString("Guess")));
     m_view->plotGuess();
   }
 
@@ -329,10 +324,13 @@ public:
    * (and doesn't crash)
    */
   void test_plotGuess_noData() {
-    ON_CALL(*m_model, data()).WillByDefault(Return(nullptr));
     IFunction_sptr peaks = createGaussian(1, 2, 3);
+
+    ON_CALL(*m_model, data()).WillByDefault(Return(nullptr));
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
-    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+
+    EXPECT_CALL(*m_view, removePlot(QString("Guess")));
+
     TS_ASSERT_THROWS_NOTHING(m_view->plotGuess());
   }
 
@@ -340,11 +338,20 @@ public:
    * Test that "Plot guess" with a function set plots a function
    */
   void test_plotGuess() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
-    IFunction_sptr peaks = createGaussian(1, 2, 3);
+    auto dataWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspace123(1, 3));
+    auto guessWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspace123(1, 4));
+    IFunction_const_sptr peaks = createGaussian(1, 2, 3);
+    const auto xValues = dataWorkspace->x(0).rawData();
+
+    ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
-    EXPECT_CALL(*m_view, setFittedCurve(_));
+    ON_CALL(*m_model, guessData(peaks, xValues))
+        .WillByDefault(Return(guessWorkspace));
+
+    EXPECT_CALL(*m_view, setGuessCurve(guessWorkspace, 0));
+
     m_view->plotGuess();
   }
 
@@ -353,7 +360,7 @@ public:
    */
   void test_plotGuessAndThenClear() {
     test_plotGuess();
-    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+    EXPECT_CALL(*m_view, removePlot(QString("Guess")));
     m_view->plotGuess(); // click again i.e. "Remove guess"
   }
 

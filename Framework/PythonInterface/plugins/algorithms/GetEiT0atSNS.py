@@ -75,13 +75,19 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                 so=i.getSource().getPos()
                 m1=wm.getDetector(sp1).getPos()
                 m2=wm.getDetector(sp2).getPos()
-                v=437.4*numpy.sqrt(wm.getRun()['EnergyRequest'].getStatistics().mean)
-                t1=m1.distance(so)*1e6/v
-                t2=m2.distance(so)*1e6/v
-                t1f=int(t1*60e-6) #frame number for monitor 1
-                t2f=int(t2*60e-6) #frame number for monitor 2
-                wtemp=mantid.simpleapi.ChangeBinOffset(wm,t1f*16667,sp1,sp1)
-                wtemp=mantid.simpleapi.ChangeBinOffset(wtemp,t2f*16667,sp2,sp2)
+                run_starttime = wm.getRun().startTime()
+                from mantid.kernel import DateAndTime
+                SNS_DAS_changed_time_wrapping = DateAndTime("2019-06-15T00:00:00")
+                if run_starttime < SNS_DAS_changed_time_wrapping:
+                    v=437.4*numpy.sqrt(wm.getRun()['EnergyRequest'].getStatistics().mean)
+                    t1=m1.distance(so)*1e6/v
+                    t2=m2.distance(so)*1e6/v
+                    t1f=int(t1*60e-6) #frame number for monitor 1
+                    t2f=int(t2*60e-6) #frame number for monitor 2
+                    wtemp=mantid.simpleapi.ChangeBinOffset(wm,t1f*16667,sp1,sp1)
+                    wtemp=mantid.simpleapi.ChangeBinOffset(wtemp,t2f*16667,sp2,sp2)
+                else:
+                    wtemp = wm
                 wtemp=mantid.simpleapi.Rebin(InputWorkspace=wtemp,Params="1",PreserveEvents=True)
                 #Run GetEi algorithm
                 alg=mantid.simpleapi.GetEi(InputWorkspace=wtemp,Monitor1Spec=sp1+1,Monitor2Spec=sp2+1,EnergyEstimate=EGuess)

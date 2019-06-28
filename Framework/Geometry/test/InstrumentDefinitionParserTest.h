@@ -906,6 +906,45 @@ public:
     TS_ASSERT_EQUALS(instr->getDetector(5)->getName(), "det14");
   }
 
+  void testLocationsIncrement() {
+    std::string locations =
+        R"(<locations n-elements="3" name-count-start="1" name-count-increment="2" name="det" />)";
+    detid_t numDetectors = 3;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    TS_ASSERT_EQUALS(instr->getDetector(1)->getName(), "det1");
+    TS_ASSERT_EQUALS(instr->getDetector(2)->getName(), "det3");
+    TS_ASSERT_EQUALS(instr->getDetector(3)->getName(), "det5");
+  }
+
+  void testLocationsIncrementDefaultsToOne() {
+    std::string locations =
+        R"(<locations n-elements="3" name-count-start="5" name="det" />)";
+    detid_t numDetectors = 3;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    TS_ASSERT_EQUALS(instr->getDetector(1)->getName(), "det5");
+    TS_ASSERT_EQUALS(instr->getDetector(2)->getName(), "det6");
+    TS_ASSERT_EQUALS(instr->getDetector(3)->getName(), "det7");
+  }
+
+  void testLocationsIncrementFailsAtOrBelowZero() {
+    std::string locations =
+        R"(<locations n-elements="3" name-count-start="5" name-count-increment="0" name="det" />)";
+    detid_t numDetectors = 3;
+
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
+                     Exception::InstrumentDefinitionError);
+
+    locations =
+        R"(<locations n-elements="3" name-count-start="5" name-count-increment="-7" name="det" />)";
+
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
+                     Exception::InstrumentDefinitionError);
+  }
+
   void testLocationsStaticValues() {
     std::string locations =
         R"(<locations n-elements="5" x=" 1.0" y=" 2.0" z=" 3.0" />)";

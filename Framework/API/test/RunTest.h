@@ -541,7 +541,7 @@ public:
 
     run1.storeHistogramBinBoundaries(m_test_energy_bins);
 
-    run1.saveNexus(th.file, "logs");
+    run1.saveNexus(th.file.get(), "logs");
     th.file->openGroup("logs", "NXgroup");
     th.file->makeGroup("junk_to_ignore", "NXmaterial");
     th.file->makeGroup("more_junk_to_ignore", "NXsample");
@@ -549,7 +549,7 @@ public:
     // ---- Now re-load the same and compare ------
     th.reopenFile();
     Run run2;
-    run2.loadNexus(th.file, "logs");
+    run2.loadNexus(th.file.get(), "logs");
     TS_ASSERT(run2.hasProperty("double_series"));
     TS_ASSERT(run2.hasProperty("int_val"));
     TS_ASSERT(run2.hasProperty("string_val"));
@@ -566,7 +566,7 @@ public:
     // files)
     Run run3;
     th.file->openGroup("logs", "NXgroup");
-    run3.loadNexus(th.file, "");
+    run3.loadNexus(th.file.get(), "");
     TS_ASSERT(run3.hasProperty("double_series"));
     TS_ASSERT(run3.hasProperty("int_val"));
     TS_ASSERT(run3.hasProperty("string_val"));
@@ -605,7 +605,7 @@ public:
     th.reopenFile();
     th.file->openGroup("sample", "NXsample");
     Run run3;
-    run3.loadNexus(th.file, "");
+    run3.loadNexus(th.file.get(), "");
 
     TS_ASSERT_DELTA(run3.getProtonCharge(), 1.234, 1e-5);
   }

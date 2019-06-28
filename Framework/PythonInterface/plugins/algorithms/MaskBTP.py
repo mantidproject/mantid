@@ -24,7 +24,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     instname = None
     instrument = None
     bankmin = defaultdict(lambda: 1, {'SEQUOIA':23, 'TOPAZ':10})  # default is one
-    bankmax = {'ARCS':115, 'BIOSANS':2, 'CG2':1, 'CNCS':50, 'CORELLI':91, 'EQ-SANS':1, 'HYSPEC':20, 'MANDI':59,
+    bankmax = {'ARCS':115, 'BIOSANS':2, 'CG2':1, 'CNCS':50, 'CORELLI':91, 'EQ-SANS':48, 'HYSPEC':20, 'MANDI':59,
                'NOMAD':99, 'POWGEN':300, 'REF_M':1, 'SEQUOIA':150,'SNAP':64,'SXD':11,'TOPAZ':59,'WAND':8,'WISH':10}
 
     def category(self):
@@ -94,10 +94,14 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         components = self.getProperty('components').value
         if not components:
             components = self.getProperty("Bank").value
+            validFrom = str(ws.getInstrument().getValidFromDate())
             if len(components) == 0:
-                components = numpy.arange(self.bankmin[self.instname], self.bankmax[self.instname] + 1)
+                if self.instname == 'EQ-SANS' and '1900-' in validFrom:  # numbering convention changed in 2019
+                    components = numpy.arange(1, 2)
+                else:
+                    components = numpy.arange(self.bankmin[self.instname], self.bankmax[self.instname] + 1)
             # convert bank numbers into names and remove ones that couldn't be named
-            components = [self._getBankName(bank) for bank in components]
+            components = [self._getBankName(bank, validFrom) for bank in components]
             components = [bank for bank in components if bank]
 
         # get the ranges for tubes and pixels - adding the minimum back in
@@ -180,7 +184,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 raise RuntimeError('Could not generate values from "{}"'.format(value))
             return result - min_value
 
-    def _getBankName(self, banknum):
+    def _getBankName(self, banknum, validFrom):  # noqa: C901
         banknum=int(banknum)
         if not (self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]):
             raise ValueError("Out of range index={} for {} instrument bank numbers".format(banknum, self.instname))
@@ -199,6 +203,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 raise ValueError("Out of range index for ARCS instrument bank numbers: {}".format(banknum))
             return '{}{}'.format(label, banknum)
         elif self.instname == 'SEQUOIA':
+            ToB = '' # top/bottom for short packs
             # there are only banks 23-26 in A row
             if self.bankmin[self.instname] <= banknum <= 37:
                 label = 'A'
@@ -208,19 +213,34 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             elif 37 < banknum <= 74:
                 label = 'B'
                 banknum = banknum - 37
-            elif 74 < banknum <= 113:
+            elif 74 < banknum <= 98:
                 label = 'C'
                 banknum = banknum-74
+            elif banknum in range(99, 102+1):
+                label = 'C'
+                d = {99: (25, 'T'),
+                     100: (26, 'T'),
+                     101: (25, 'B'),
+                     102: (26, 'B')}
+                banknum, ToB = d[banknum]
+            elif 102 < banknum <= 113:
+                label = 'C'
+                banknum = banknum-76
             elif 113 <banknum <= self.bankmax[self.instname]:
                 label = 'D'
                 banknum = banknum-113
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers: {}".format(banknum))
-            return '{}{}'.format(label, banknum)
+            return '{}{}{}'.format(label, banknum, ToB)
         elif self.instname == "WISH":
             return "panel" + "%02d" % banknum
-        elif self.instname in ['CG2', 'EQ-SANS', 'REF_M']:
+        elif self.instname in ['CG2', 'REF_M']:
             return "detector{}".format(banknum)
+        elif self.instname == 'EQ-SANS':
+            if '2019-' in validFrom:
+                return "bank{}".format(banknum)
+            else:
+                return "detector{}".format(banknum)
         elif self.instname == 'BIOSANS':
             if banknum == 1:
                 return 'detector1'

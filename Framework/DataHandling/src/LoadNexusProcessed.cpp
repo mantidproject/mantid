@@ -1533,17 +1533,19 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
   // Setting a unit onto a TextAxis makes no sense.
   if (unit2 == "TextAxis") {
-    auto newAxis = new Mantid::API::TextAxis(nspectra);
-    local_workspace->replaceAxis(1, newAxis);
+    auto newAxis = std::make_unique<Mantid::API::TextAxis>(nspectra);
+    local_workspace->replaceAxis(1, std::move(newAxis));
   } else if (unit2 != "spectraNumber") {
     try {
-      auto *newAxis = (verticalHistogram) ? new API::BinEdgeAxis(nspectra + 1)
-                                          : new API::NumericAxis(nspectra);
-      local_workspace->replaceAxis(1, newAxis);
-      newAxis->unit() = UnitFactory::Instance().create(unit2);
+      auto newAxis = (verticalHistogram)
+                         ? std::make_unique<API::BinEdgeAxis>(nspectra + 1)
+                         : std::make_unique<API::NumericAxis>(nspectra);
+      auto newAxisRaw = newAxis.get();
+      local_workspace->replaceAxis(1, std::move(newAxis));
+      newAxisRaw->unit() = UnitFactory::Instance().create(unit2);
       if (unit2 == "Label") {
         auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-            newAxis->unit());
+            newAxisRaw->unit());
         auto ax = wksp_cls.openNXDouble("axis2");
         label->setLabel(ax.attributes("caption"), ax.attributes("label"));
       }

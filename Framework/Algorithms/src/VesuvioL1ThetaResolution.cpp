@@ -122,12 +122,12 @@ void VesuvioL1ThetaResolution::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", 4, numHist, numHist);
 
   // Set vertical axis to statistic labels
-  auto specAxis = new TextAxis(4);
+  auto specAxis = std::make_unique<TextAxis>(4);
   specAxis->setLabel(0, "l1_Mean");
   specAxis->setLabel(1, "l1_StdDev");
   specAxis->setLabel(2, "theta_Mean");
   specAxis->setLabel(3, "theta_StdDev");
-  m_outputWorkspace->replaceAxis(1, specAxis);
+  m_outputWorkspace->replaceAxis(1, std::move(specAxis));
 
   // Set X axis to spectrum numbers
   m_outputWorkspace->getAxis(0)->setUnit("Label");

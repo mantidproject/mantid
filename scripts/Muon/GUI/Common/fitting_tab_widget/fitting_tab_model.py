@@ -10,7 +10,7 @@ from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_
 import mantid
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fit_workspace_directory
-from mantid.simpleapi import RenameWorkspace
+from mantid.simpleapi import RenameWorkspace, CopyLogs
 
 
 class FittingTabModel(object):
@@ -40,7 +40,9 @@ class FittingTabModel(object):
     def do_single_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
-        return run_Fit(parameters_dict, alg)
+        output_workspace, output_parameters, function_object, output_status, output_chi = run_Fit(parameters_dict, alg)
+        CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'], OutputWorkspace=output_workspace, StoreInADS=False)
+        return output_workspace, output_parameters, function_object, output_status, output_chi
 
     def add_workspace_to_ADS(self, workspace, name, directory):
         workspace_wrapper = MuonWorkspaceWrapper(workspace, directory + name)
@@ -97,9 +99,17 @@ class FittingTabModel(object):
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
-        return run_simultaneous_Fit(parameters_dict, alg)
+
+        output_workspace, output_parameters, function_object, output_status, output_chi = run_simultaneous_Fit(parameters_dict, alg)
+        if len(parameters_dict['InputWorkspace']) > 1:
+            for input_workspace, output in zip(parameters_dict['InputWorkspace'], output_workspace.getNames()):
+                CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
+        else:
+            CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'][0], OutputWorkspace=output_workspace, StoreInADS=False)
+        return output_workspace, output_parameters, function_object, output_status, output_chi
 
     def rename_members_of_fitted_workspace_group(self, group_workspace, inputworkspace_list, function, group_name):
+        self.context.ads_observer.observeRename(False)
         output_workspace_list = []
         for index, workspace_name in enumerate(group_workspace.getNames()):
             new_name, _ = self.create_fitted_workspace_name(inputworkspace_list[index], function, group_name)
@@ -108,6 +118,8 @@ class FittingTabModel(object):
             output_workspace_list.append(new_name)
             RenameWorkspace(InputWorkspace=workspace_name,
                             OutputWorkspace=new_name)
+
+        self.context.ads_observer.observeRename(True)
 
         return output_workspace_list
 

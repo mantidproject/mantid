@@ -630,14 +630,14 @@ public:
     inst1->setXmlText("");
     ws.setInstrument(inst1);
 
-    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file););
+    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file.get()););
 
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(
-        ws2.loadExperimentInfoNexus(filename, th.file, parameterStr));
+        ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT(inst->getFilename().find("GEM_Definition.xml", 0) !=
@@ -656,14 +656,14 @@ public:
     inst1->setXmlText("");
     ws.setInstrument(inst1);
 
-    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file););
+    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file.get()););
 
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(
-        ws2.loadExperimentInfoNexus(filename, th.file, parameterStr));
+        ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "");
     TS_ASSERT_EQUALS(parameterStr, "");
@@ -689,14 +689,14 @@ public:
     // this occurs in ConvertToMD, copy methadata
     ei.mutableRun().addProperty("W_MATRIX", wTrVector, true);
 
-    TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(th.file));
+    TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(th.file.get()));
 
     th.reopenFile();
 
     ExperimentInfo other;
     std::string InstrParameters;
-    TS_ASSERT_THROWS_NOTHING(
-        other.loadExperimentInfoNexus(filename, th.file, InstrParameters));
+    TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(
+        filename, th.file.get(), InstrParameters));
 
     std::vector<double> wMatrRestored =
         other.run().getPropertyValueAsType<std::vector<double>>("W_MATRIX");

@@ -73,16 +73,18 @@ AnalysisDataServiceImpl::isValid(const std::string &name) const {
 void AnalysisDataServiceImpl::add(
     const std::string &name,
     const boost::shared_ptr<API::Workspace> &workspace) {
-  verifyName(name);
+  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  verifyName(name, group);
+
   // Attach the name to the workspace
   if (workspace)
     workspace->setName(name);
   Kernel::DataService<API::Workspace>::add(name, workspace);
 
   // if a group is added add its members as well
-  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   if (!group)
     return;
+
   group->observeADSNotifications(true);
   for (size_t i = 0; i < group->size(); ++i) {
     auto ws = group->getItem(i);
@@ -111,15 +113,14 @@ void AnalysisDataServiceImpl::add(
 void AnalysisDataServiceImpl::addOrReplace(
     const std::string &name,
     const boost::shared_ptr<API::Workspace> &workspace) {
-  verifyName(name);
+  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  verifyName(name, group);
 
   // Attach the name to the workspace
   if (workspace)
     workspace->setName(name);
   Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);
 
-  // if a group is added add its members as well
-  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   if (!group)
     return;
   group->observeADSNotifications(true);
@@ -147,6 +148,14 @@ void AnalysisDataServiceImpl::addOrReplace(
  */
 void AnalysisDataServiceImpl::rename(const std::string &oldName,
                                      const std::string &newName) {
+
+  auto oldWorkspace = retrieve(oldName);
+  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(oldWorkspace);
+  if (group && group->containsInChildren(newName)) {
+    throw std::invalid_argument(
+        "Unable to rename group as the new name matches its members");
+  }
+
   Kernel::DataService<API::Workspace>::rename(oldName, newName);
   // Attach the new name to the workspace
   auto ws = retrieve(newName);
@@ -237,6 +246,11 @@ void AnalysisDataServiceImpl::addToGroup(const std::string &groupName,
     throw std::runtime_error("Workspace " + groupName +
                              " is not a workspace group.");
   }
+
+  if (groupName == wsName) {
+    throw std::runtime_error("The group name and workspace name are the same");
+  }
+
   auto ws = retrieve(wsName);
   group->addWorkspace(ws);
   notificationCenter.postNotification(new GroupUpdatedNotification(groupName));
@@ -362,12 +376,23 @@ void AnalysisDataServiceImpl::setIllegalCharacterList(
 /**
  * Checks the name is valid
  * @param name A string containing the name to check. If the name is invalid a
- * std::invalid_argument is thrown
+ * std::invalid_argument or std::runtime_error is thrown
+ * @param group A WorkspaceGroup shared ptr which will be evaluated if it is
+ * valid then it will check it's container for the same name that is passed if
+ * true throws std::runtime_error else nothing.
  */
-void AnalysisDataServiceImpl::verifyName(const std::string &name) {
+
+void AnalysisDataServiceImpl::verifyName(
+    const std::string &name,
+    const boost::shared_ptr<API::WorkspaceGroup> &group) {
   const std::string error = isValid(name);
   if (!error.empty()) {
     throw std::invalid_argument(error);
+  }
+
+  if (group && group->containsInChildren(name)) {
+    throw std::invalid_argument(
+        "Unable to add group as name matches its members");
   }
 }
 

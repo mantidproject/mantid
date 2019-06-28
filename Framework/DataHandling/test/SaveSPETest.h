@@ -167,12 +167,12 @@ private:
         WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
     inputWS = setUpWorkspace(input, inputWS);
     API::Axis *axisOne = inputWS->getAxis(1);
-    API::NumericAxis *newAxisOne = new NumericAxis(axisOne->length());
+    auto newAxisOne = std::make_unique<NumericAxis>(axisOne->length());
     for (std::size_t i = 0; i < axisOne->length(); ++i) {
       newAxisOne->setValue(i, axisOne->operator()((i)));
     }
     // Set the units
-    inputWS->replaceAxis(1, newAxisOne);
+    inputWS->replaceAxis(1, std::move(newAxisOne));
     inputWS->getAxis(1)->unit() = UnitFactory::Instance().create("Energy");
     inputWS->setYUnit("MyCaption");
     return inputWS;

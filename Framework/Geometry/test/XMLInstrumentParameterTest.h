@@ -166,7 +166,7 @@ public:
     series.addValue("2000-11-30T01:01:03", 2);
     series.addValue("2000-11-30T01:01:04", 3);
 
-    XMLInstrumentParameter_sptr logFile = make_logfile_object("position 1");
+    XMLInstrumentParameter_sptr logFile = make_logfile_object("position 2");
     const double actualFilteredValue = logFile->createParamValue(&series);
     TSM_ASSERT_EQUALS("Filtering by Nth position is not performed correctly",
                       expectedFilteredValue, actualFilteredValue);

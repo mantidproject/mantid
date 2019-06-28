@@ -127,6 +127,18 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         self.log().debug('Preparing to mask with DetectorList='+mask[:-1])
         return mask[:-1]
 
+    def _validate_instrument(self, instrument_name):
+
+        supported_instruments = ['D2B', 'D20']
+        if instrument_name not in supported_instruments:
+            self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
+                             + str(supported_instruments))
+        if instrument_name == 'D20':
+            if self.getProperty('Output2DTubes').value:
+                raise RuntimeError('Output2DTubes is not supported for D20 (1D detector)')
+            if self.getProperty('Output2D').value:
+                raise RuntimeError('Output2D is not supported for D20 (1D detector)')
+
     def _reduce_1D(self, input_group):
         output1D = SumOverlappingTubes(InputWorkspaces=input_group,
                                        OutputType='1D',
@@ -166,7 +178,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
 
         return output2D
 
-    def PyExec(self): # noqa C901
+    def PyExec(self):
         data_type = 'Raw'
         if self.getProperty('UseCalibratedData').value:
             data_type = 'Calibrated'
@@ -184,20 +196,13 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
         instrument = input_group[0].getInstrument()
-        supported_instruments = ['D2B', 'D20']
-        if instrument.getName() not in supported_instruments:
-            self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
-                             + str(supported_instruments))
-        if instrument.getName() == 'D20':
-            if self.getProperty('Output2DTubes').value:
-                raise RuntimeError('Output2DTubes is not supported for D20 (1D detector)')
-            if self.getProperty('Output2D').value:
-                raise RuntimeError('Output2D is not supported for D20 (1D detector)')
+        instrument_name = instrument.getName()
+        self._validate_instrument(instrument_name)
 
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
             input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
-            if instrument.getName() == 'D2B':
+            if instrument_name == 'D2B':
                 input_group = Scale(InputWorkspace=input_group, Factor=1e+6)
 
         calib_file = self.getPropertyValue('CalibrationFile')

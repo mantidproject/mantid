@@ -23,6 +23,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/LogarithmicGenerator.h"
@@ -553,9 +554,11 @@ public:
   }
 
   void testReplaceAxis() {
-    Axis *ax = new SpectraAxis(ws.get());
-    TS_ASSERT_THROWS(ws->replaceAxis(2, ax), const Exception::IndexError &);
-    TS_ASSERT_THROWS_NOTHING(ws->replaceAxis(0, ax));
+    auto ax = std::make_unique<SpectraAxis>(ws.get());
+    auto ax1 = std::make_unique<SpectraAxis>(ws.get());
+    TS_ASSERT_THROWS(ws->replaceAxis(2, std::move(ax)),
+                     const Exception::IndexError &);
+    TS_ASSERT_THROWS_NOTHING(ws->replaceAxis(0, std::move(ax1)));
     TS_ASSERT(ws->getAxis(0)->isSpectra());
   }
 
@@ -827,7 +830,7 @@ public:
     TS_ASSERT_EQUALS(map.size(), 2);
 
     // Check it throws for non-spectra axis
-    ws.replaceAxis(1, new NumericAxis(1));
+    ws.replaceAxis(1, std::make_unique<NumericAxis>(1));
     TS_ASSERT_THROWS(ws.getSpectrumToWorkspaceIndexMap(),
                      const std::runtime_error &);
   }
@@ -958,7 +961,7 @@ public:
     const int nBins = 2;
     const int nYValues = 1;
     ws.initialize(nVertical, nBins, nYValues);
-    NumericAxis *verticalAxis = new NumericAxis(nVertical);
+    auto verticalAxis = std::make_unique<NumericAxis>(nVertical);
     for (int i = 0; i < nVertical; ++i) {
       for (int j = 0; j < nBins; ++j) {
         if (j < nYValues) {
@@ -969,7 +972,7 @@ public:
       }
       verticalAxis->setValue(i, double(i)); // Vertical axis increments by 1.
     }
-    ws.replaceAxis(1, verticalAxis);
+    ws.replaceAxis(1, std::move(verticalAxis));
     // Signal is always 1 and volume of each box is 1. Therefore normalized
     // signal values by volume should always be 1.
 

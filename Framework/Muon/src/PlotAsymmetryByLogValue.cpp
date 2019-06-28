@@ -393,7 +393,7 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
 void PlotAsymmetryByLogValue::populateOutputWorkspace(
     MatrixWorkspace_sptr &outWS, int nplots) {
 
-  auto tAxis = new TextAxis(nplots);
+  auto tAxis = std::make_unique<TextAxis>(nplots);
   if (nplots == 1) {
     size_t i = 0;
     for (auto &value : m_logValue) {
@@ -426,7 +426,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
     tAxis->setLabel(2, "Green");
     tAxis->setLabel(3, "Red+Green");
   }
-  outWS->replaceAxis(1, tAxis);
+  outWS->replaceAxis(1, std::move(tAxis));
   outWS->getAxis(0)->title() = m_logName;
   outWS->setYUnitLabel("Asymmetry");
 }

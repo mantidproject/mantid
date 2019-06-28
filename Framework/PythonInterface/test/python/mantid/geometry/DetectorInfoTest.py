@@ -42,6 +42,16 @@ class DetectorInfoTest(unittest.TestCase):
         info = self._ws.detectorInfo()
         self.assertEqual(info.size(), 2)
 
+    def test_indexOf(self):
+        """ Check if detector is a monitor """
+        info = self._ws.detectorInfo()
+        print(str(info.detectorIDs()))
+        self.assertEqual(info.indexOf(1), 0)
+        self.assertEqual(info.indexOf(2), 1)
+
+        with self.assertRaises(IndexError):
+            info.indexOf(3)
+
     def test_isMonitor(self):
         """ Check if detector is a monitor """
         info = self._ws.detectorInfo()
@@ -87,7 +97,7 @@ class DetectorInfoTest(unittest.TestCase):
     	workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
     	info = workspace.detectorInfo()
     	self.assertEqual(info.size(), 0)
-    
+
     def test_detectorIds(self):
         info = self._ws.detectorInfo()
         ids = info.detectorIDs()
@@ -121,7 +131,7 @@ class DetectorInfoTest(unittest.TestCase):
         l1_calc = sample_pos.distance(source_pos)
         det_info = self._ws.detectorInfo()
         self.assertEqual(det_info.l1(), l1_calc)
-        
+
     """
     ---------------
     Iteration
@@ -130,7 +140,7 @@ class DetectorInfoTest(unittest.TestCase):
 
     def test_basic_iteration(self):
         info = self._ws.detectorInfo()
-        expected_iterations = len(info) 
+        expected_iterations = len(info)
         actual_iterations = len(list(iter(info)))
         self.assertEqual(expected_iterations, actual_iterations)
         it = iter(info)
@@ -142,13 +152,13 @@ class DetectorInfoTest(unittest.TestCase):
         # check no monitors in instrument
         for item in info:
             self.assertFalse(item.isMonitor)
-            
+
     def test_iterator_for_masked(self):
         info = self._ws.detectorInfo()
-        # nothing should be masked 
+        # nothing should be masked
         for item in info:
             self.assertFalse(item.isMasked)
-    
+
     def test_iterator_for_masked(self):
         info = self._ws.detectorInfo()
         it = iter(info)

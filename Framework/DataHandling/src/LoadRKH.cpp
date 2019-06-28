@@ -483,11 +483,12 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   outWrksp->getAxis(0)->unit() = UnitFactory::Instance().create(XUnit);
   outWrksp->setYUnitLabel(intensityUnit);
 
-  auto const axis1 = new Mantid::API::NumericAxis(nAxis1Boundaries);
+  auto axis1 = std::make_unique<Mantid::API::NumericAxis>(nAxis1Boundaries);
+  auto axis1Raw = axis1.get();
   axis1->unit() = Mantid::Kernel::UnitFactory::Instance().create(YUnit);
-  outWrksp->replaceAxis(1, axis1);
+  outWrksp->replaceAxis(1, std::move(axis1));
   for (int i = 0; i < nAxis1Boundaries; ++i) {
-    axis1->setValue(i, axis1Data[i]);
+    axis1Raw->setValue(i, axis1Data[i]);
   }
 
   outWrksp->setTitle(title);
