@@ -329,8 +329,8 @@ PrivateFittingData::PrivateFittingData(
     std::vector<std::unique_ptr<IndirectFitData>> &&data)
     : m_data(std::move(data)) {}
 
-PrivateFittingData &
-PrivateFittingData::operator=(PrivateFittingData &&fittingData) {
+PrivateFittingData &PrivateFittingData::
+operator=(PrivateFittingData &&fittingData) {
   m_data = std::move(fittingData.m_data);
   return *this;
 }
