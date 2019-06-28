@@ -32,6 +32,7 @@ Improvements
 - File type buttons are disabled when memory mode is selected to make it clearer that SANS will not save to file.
 - The path to the user file used to reduce the data is now added to the workspace sample logs. This user file path is added to canSAS file metadata.
 - The **diagnostic** page icon has been changed from a question mark to a stethoscope, to distinguish it from the **Help** page icon. The **Export Table** button now has an icon. There have been minor icon changes elsewhere on the interface.
+- The run numbers for sample transmission, sample direct, can scatter, and can direct workspaces are now added to NXCanSAS and CanSAS files.
 
 Bug Fixes
 #########
