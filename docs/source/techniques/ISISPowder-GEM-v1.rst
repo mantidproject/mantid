@@ -123,7 +123,7 @@ The following parameters may also be optionally set:
 - :ref:`suffix_gem_isis-powder-diffraction-ref`
 - :ref:`texture_mode_isis-powder-diffraction-ref`
 - :ref:`unit_to_keep_gem_isis-powder-diffraction-ref`
-- :ref:`save_angles_gem_isis-powder-diffraction-ref`
+- :ref:`save_all_gem_isis-powder-diffraction-ref`
 
 If :ref:`sample_empty_gem_isis-powder-diffraction-ref` is
 set then the following parameter is also required:
@@ -522,6 +522,22 @@ Example Input:
   # Scale sample empty to 90% of original
   gem_example.focus(sample_empty_scale=0.9, ...)
 
+.. _save_all_gem_isis-powder-diffraction-ref:
+
+save_all
+^^^^^^^^^^
+*Optional*
+
+This parameter specifies whether or not all files should be saved on
+texture mode, if this is set to false then the .nxs and .gsas files will not be 
+saved out. If unset then this defaults to True.
+
+Example Input:
+
+..  code-block:: python
+
+  gem_example.focus(save_all=False, ...)
+
 .. _texture_mode_isis-powder-diffraction-ref:
 
 texture_mode
@@ -736,17 +752,15 @@ On GEM this is set to the following:
 
   raw_tof_cropping_values: (500, 20000)
 
-.. _save_angles_gem_isis-powder-diffraction-ref:
+.. _save_gda_gem_isis-powder-diffraction-ref:
 
-save_angles
+save_gda
 ^^^^^^^^^^^
 
-If set to **True**, this saves the scattering angles (theta and eta)
-of each focused bank to the 4-column MAUD format (the old
-``grouping.new`` format) using :ref:`SaveBankScatteringAngles
-<algm-SaveBankScatteringAngles>`.
+If set to **True**, this saves the focused workspace to the
+MAUD-readable `.gda` format.
 
-If:ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
+If :ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
 this is enabled, and disabled if it is set to **False**.
 
 .. _save_maud_calib_gem_isis-powder-diffraction-ref:
@@ -759,7 +773,7 @@ If set to **True**, this uses the focus output and
 to create a MAUD calibration file, using
 :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`.
 
-If:ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
+If :ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
 this is enabled, and disabled if it is set to **False**.
 
 .. _save_maud_gem_isis-powder-diffraction-ref:
@@ -788,6 +802,23 @@ On GEM this is set to the following:
 ..  code-block:: python
 
   spline_coefficient: 30
+
+.. _subtract_empty_instrument_gem_isis-powder-diffraction-ref:
+
+subtract_empty_instrument
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Provides the option to disable subtracting empty instrument runs from
+the run being focused. This is useful for focusing empties, as
+subtracting an empty from itself, or subtracting the previous cycle's
+empty from this cycle's, creates meaningless data. Set to **False** to
+disable empty subtraction.
+
+On Gem this is set to the following:
+
+.. code-block:: python
+
+  subtract_empty_instrument: True
+
 
 .. _vanadium_cropping_values_gem_isis-powder-diffraction-ref:
 
