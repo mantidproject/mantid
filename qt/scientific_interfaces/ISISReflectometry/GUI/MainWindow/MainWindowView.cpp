@@ -128,7 +128,8 @@ Handles attempt to close main window
 */
 void MainWindowView::closeEvent(QCloseEvent *event) {
   // Close only if reduction has been paused
-  if (!m_presenter->isProcessing()) {
+  if (!m_presenter->isAnyBatchProcessing() ||
+      m_presenter->isAnyBatchAutoreducing()) {
     event->accept();
   } else {
     event->ignore();

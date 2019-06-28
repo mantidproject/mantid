@@ -88,6 +88,8 @@ public:
   void autoreductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionCompleted() override;
+  void anyBatchAutoreductionResumed() override;
+  void anyBatchAutoreductionPaused() override;
   void instrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
@@ -136,6 +138,8 @@ private:
   /// The name to use for the live data workspace
   Mantid::API::IAlgorithm_sptr m_monitorAlg;
   double m_thetaTolerance;
+
+  bool isAnyBatchAutoreducing() const;
 
   /// searching
   bool search(ISearcher::SearchType searchType);

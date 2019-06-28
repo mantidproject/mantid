@@ -90,6 +90,30 @@ public:
     verifyAndClear();
   }
 
+  void testChildPresentersUpdatedWhenAnyBatchAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, anyBatchAutoreductionResumed()).Times(1);
+    presenter.anyBatchAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testChildPresentersUpdatedWhenAnyBatchAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, anyBatchAutoreductionPaused()).Times(1);
+    presenter.anyBatchAutoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testMainPresenterQueriedWhenCheckingAnyBatchAutoreducing() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .Times(1)
+        .WillOnce(Return(true));
+    auto result = presenter.isAnyBatchAutoreducing();
+    TS_ASSERT_EQUALS(result, true);
+    verifyAndClear();
+  }
+
   void testAutoreductionCompletedWhenReductionResumedWithNoRemainingJobs() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_jobRunner, getAlgorithms())
@@ -366,6 +390,7 @@ public:
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobRunner> *m_jobRunner;
+  NiceMock<MockMainWindowPresenter> m_mainPresenter;
   NiceMock<MockRunsPresenter> *m_runsPresenter;
   NiceMock<MockEventPresenter> *m_eventPresenter;
   NiceMock<MockExperimentPresenter> *m_experimentPresenter;
@@ -424,6 +449,7 @@ private:
         &m_view, makeModel(), std::move(runsPresenter),
         std::move(eventPresenter), std::move(experimentPresenter),
         std::move(instrumentPresenter), std::move(savePresenter));
+    presenter.acceptMainPresenter(&m_mainPresenter);
     // Replace the constructed job runner with a mock
     m_jobRunner = new NiceMock<MockBatchJobRunner>();
     presenter.m_jobRunner.reset(m_jobRunner);

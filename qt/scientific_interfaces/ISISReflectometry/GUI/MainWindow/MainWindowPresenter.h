@@ -32,7 +32,10 @@ public:
                       BatchPresenterFactory batchPresenterFactory);
 
   // IMainWindowPresenter overrides
-  bool isProcessing() const override;
+  bool isAnyBatchProcessing() const override;
+  bool isAnyBatchAutoreducing() const override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
@@ -41,6 +44,8 @@ public:
 
 private:
   void showHelp();
+  void addNewBatch(IBatchView *batchView);
+
   IMainWindowView *m_view;
   BatchPresenterFactory m_batchPresenterFactory;
   std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
