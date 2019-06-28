@@ -9,17 +9,8 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ProgressBase.h"
 
-#include <boost/filesystem/operations.hpp>
-
-/*
-#include <H5DataSet.h>
-#include <H5FPublic.h>
-#include <H5File.h>
-#include <H5Group.h>
-#include <H5Location.h>
-#include <H5Object.h>
-*/
 #include <H5Cpp.h>
+#include <boost/filesystem/operations.hpp>
 
 namespace Mantid {
 namespace NexusGeometry {
