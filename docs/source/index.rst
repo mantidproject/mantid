@@ -53,6 +53,7 @@ This is the documentation for Mantid |release|.
   * :ref:`mantid_basic_course`, takes you through installing and basic use of Mantid through Mantidplot, including loading, visualising and fitting data.
   * :ref:`training`, links to further self paced courses and learning resources.
   * :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`, details of how to make pretty plots and manioukate them via Python.
+  * :ref:`muon_GUI_course`, focuses on the reduction and analysis of muon data collected from any of the ISIS muon spectrometers via a Graphical User Interface (GUI).
 
 **Reference Documentation:**
   * :ref:`Algorithms List`, specific details for all of our algorithms including descriptions of all inputs and parameters .
