@@ -267,11 +267,15 @@ public:
 
     std::string dataSetName = "name";
 
-    TS_ASSERT(tester.hasNxClass(NX_INSTRUMENT, "/raw_data_1/instrument")); // check child group has NX_class 'NX_INSTRUMENT'
-    TS_ASSERT(tester.hasNxClass(NX_ENTRY, "/raw_data_1")); // check parent group has NX_class 'NX_ENTRY'
+    TS_ASSERT(tester.hasNxClass(
+        NX_INSTRUMENT, "/raw_data_1/instrument")); // check child group has
+                                                   // NX_class 'NX_INSTRUMENT'
+    TS_ASSERT(tester.hasNxClass(
+        NX_ENTRY, "/raw_data_1")); // check parent group has NX_class 'NX_ENTRY'
 
     TS_ASSERT(
-        tester.hasNxClass(NX_CHAR, "/raw_data_1/instrument", &dataSetName)) // check dataset has NX_class 'NX_CHAR'
+        tester.hasNxClass(NX_CHAR, "/raw_data_1/instrument",
+                          &dataSetName)) // check dataset has NX_class 'NX_CHAR'
   }
 
   void test_instrument_has_name() {

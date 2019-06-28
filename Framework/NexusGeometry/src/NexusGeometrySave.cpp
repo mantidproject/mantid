@@ -106,8 +106,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::StrType dataType(0, H5T_VARIABLE);
   H5::DataSpace dataSpace(H5S_SCALAR);
 
-  std::string dataSetData = "test_data_for_instrument";   // value for dataset.
-  auto dataSetDataAsCStr = dataSetData.c_str(); // for plist..
+  std::string dataSetData = "test_data_for_instrument"; // value for dataset.
+  auto dataSetDataAsCStr = dataSetData.c_str();         // for plist..
 
   H5::DSetCreatPropList plist;
   plist.setFillValue(dataType, &dataSetDataAsCStr); // for dataSet.
@@ -120,7 +120,6 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writeStrAttributeToDataSet(
       dataSet, SHORT_NAME,
       "name"); // compInfo.name(compInfo.root())); // add  atribute to dataset.
-                                    
 
   writeStrAttributeToDataSet(dataSet, NX_CLASS,
                              NX_CHAR); // add NX_class attribute to dataset
