@@ -26,6 +26,7 @@ New
 The Runs Table
 ^^^^^^^^^^^^^^
 
+- Added a "Fill Down" functionality similar to Excel
 - Filtering by run or group name is now possible using the search bar above the table. This accepts regular expressions.
 
 - Navigation by keyboard shortcuts has been added:
