@@ -165,5 +165,6 @@ class GeneralSettings(object):
             self.parent.populate_layout_menu()
 
     def focus_layout_box(self):
-        self.view.scrollArea.ensureWidgetVisible(self.view.new_layout_name)
+        # scroll the settings to the layout box. High yMargin ensures the box is always at the top of the window.
+        self.view.scrollArea.ensureWidgetVisible(self.view.new_layout_name, yMargin=1000)
         self.view.new_layout_name.setFocus()
