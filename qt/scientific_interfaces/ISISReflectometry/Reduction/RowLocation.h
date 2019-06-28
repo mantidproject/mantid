@@ -8,6 +8,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_ROWLOCATION_H
 #define MANTID_ISISREFLECTOMETRY_ROWLOCATION_H
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
+#include "MantidQtWidgets/Common/Batch/Subtree.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

@@ -35,6 +35,8 @@ The Runs Table
   - Enter adds a new row/group at the same level
   - Ctrl-I inserts a new child row to a group
   - Ctrl-X/Ctrl-C/Ctrl-V perform cut/copy/paste
+  - The Delete key removes the selected rows/groups
+  - Copy/paste functionality is more intuitive - you can select the destination rows/groups to paste over or paste into the "root" of the table to create a new group
 
 - Additional highlighting has been added for rows in the table:
 

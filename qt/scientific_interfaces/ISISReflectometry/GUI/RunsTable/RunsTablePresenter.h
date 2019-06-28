@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #include "../Runs/IRunsPresenter.h"
+#include "Common/Clipboard.h"
 #include "Common/DllConfig.h"
 #include "GUI/Common/IPlotter.h"
 #include "IRunsTablePresenter.h"
@@ -127,9 +128,18 @@ private:
                  std::string const &newValue);
   void updateWidgetEnabledState();
 
+  void pasteRowsOntoRows(
+      std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots);
+  void pasteRowsOntoGroup(
+      std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots);
+  void pasteGroupsOntoGroups(
+      std::vector<MantidWidgets::Batch::RowLocation> &replacementRoots);
+  void pasteGroupsAtEnd();
+
   using UpdateCellFunc = void (*)(MantidWidgets::Batch::Cell &cell);
   using UpdateCellWithTooltipFunc = void (*)(MantidWidgets::Batch::Cell &cell,
                                              std::string const &tooltip);
+
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
                      UpdateCellFunc updateFunc);
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
@@ -146,8 +156,7 @@ private:
 
   IRunsTableView *m_view;
   RunsTable m_model;
-  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
-      m_clipboard;
+  Clipboard m_clipboard;
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;

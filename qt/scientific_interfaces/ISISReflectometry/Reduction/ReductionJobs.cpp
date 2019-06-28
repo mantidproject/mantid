@@ -51,7 +51,7 @@ Group &ReductionJobs::appendGroup(Group group) {
 }
 
 boost::optional<int>
-ReductionJobs::indexOfGroupWithName(std::string const &groupName) {
+ReductionJobs::indexOfGroupWithName(std::string const &groupName) const {
   return indexOf(m_groups, [&groupName](Group const &group) -> bool {
     return group.name() == groupName;
   });

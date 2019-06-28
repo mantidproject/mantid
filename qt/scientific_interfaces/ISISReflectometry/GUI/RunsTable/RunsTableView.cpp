@@ -52,7 +52,7 @@ void RunsTableView::invalidSelectionForCopy() {
 
 void RunsTableView::invalidSelectionForPaste() {
   QMessageBox::critical(this, "Bad selection for paste",
-                        "All selected rows must share a common group.");
+                        "Please ensure destination is the same depth and size");
 }
 
 void RunsTableView::invalidSelectionForCut() {
