@@ -516,11 +516,14 @@ void JobTreeView::enableFiltering() {
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
   switch (event->key()) {
-  case Qt::Key_Return:
-  case Qt::Key_Enter: {
+  case Qt::Key_I:
     if (event->modifiers() & Qt::ControlModifier) {
       appendAndEditAtChildRowRequested();
-    } else if (event->modifiers() & Qt::ShiftModifier) {
+      break;
+    }
+  case Qt::Key_Return:
+  case Qt::Key_Enter: {
+    if (event->modifiers() & Qt::ShiftModifier) {
       editAtRowAboveRequested();
     } else {
       appendAndEditAtRowBelowRequested();

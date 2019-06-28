@@ -33,7 +33,7 @@ The Runs Table
   - Tab/Shift-Tab moves to the next/previous cell
   - Pressing Tab when in the last cell of a row adds a new row and moves to the first cell in it
   - Enter adds a new row/group at the same level
-  - Ctrl-Enter adds a new child row to a group
+  - Ctrl-I inserts a new child row to a group
   - Ctrl-X/Ctrl-C/Ctrl-V perform cut/copy/paste
 
 - Additional highlighting has been added for rows in the table:
