@@ -96,7 +96,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             MaxEntWidget,
             parent=self)
         self.fitting_tab = FittingTabWidget(self.context, self)
-        self.results_tab = ResultsTabWidget(self.context.fitting_context, self)
+        self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget("Frequency Domain Analysis")
@@ -145,7 +145,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.transform.new_data_observer(
             self.home_tab.plot_widget.input_workspace_observer)
         
-        self.setup_on_recalulation_finished_notifer()
         self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
 
     def setup_tabs(self):
