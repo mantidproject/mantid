@@ -55,6 +55,7 @@ The following methods can be executed on a GEM object:
 - :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
 - :ref:`focus_gem_isis-powder-diffraction-ref`
 - :ref:`set_sample_gem_isis-powder-diffraction-ref`
+- :ref:`create_cal_gem_isis-powder-diffraction-ref`
 
 For information on creating a GEM object see:
 :ref:`creating_gem_object-isis-powder-diffraction-ref`
@@ -172,6 +173,34 @@ Example
 
   gem_example.set_sample(sample=sample_obj)
 
+.. _create_cal_gem_isis-powder-diffraction-ref:
+
+create_cal
+^^^^^^^^^^
+The *create_cal* method creates the offset calibration file for GEM, or if one is passed in, adjusts
+an existing file.
+The following parameters are required:
+
+- :ref:`calibration_mapping_file_gem_isis-powder-diffraction-ref`
+- :ref:`run_number_gem_isis-powder-diffraction-ref`
+
+The Following parameter may also be set
+
+- :ref:`calibration_to_adjust_gem_isis-powder-diffraction-ref`
+
+Example
+=======
+
+.. code-block:: python
+
+  # Notice how the filename ends with .yaml
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+  
+  gem_example.create_cal(run_number=87618, 
+                           calibration_mapping_file=cal_mapping_file)
+
+
+
 .. _calibration_mapping_gem-isis-powder-ref:
 
 Calibration Mapping File
@@ -231,6 +260,15 @@ Parameters
 -----------
 The following parameters for GEM are intended for regular use
 when using the ISIS Powder scripts.
+
+.. _calibration_to_adjust_gem_isis-powder-diffraction-ref:
+
+calibration_to_adjust
+^^^^^^^^^^^^^^^^^^^^^
+*Optional*
+
+This Parameter contains the path to an offsets .cal file to adjust using 
+the automatic cal file generation.
 
 .. _calibration_directory_gem_isis-powder-diffraction-ref:
 
@@ -645,6 +683,154 @@ All values changed in the advanced configuration file
 requires the user to restart Mantid for the new values to take effect.
 Please read :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
 before proceeding to change values within the advanced configuration file.
+
+
+.. _create_cal_rebin_1_params_gem_isis-powder-diffraction-ref:
+
+create_cal_rebin_1_params
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The rebin parameters to use in the first rebin operation in
+:ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this is
+set to the following:
+
+.. code-block:: python
+
+  # Long mode OFF:
+        create_cal_rebin_1_params: "100,-0.0006,19950"
+
+
+.. _create_cal_rebin_2_params_gem_isis-powder-diffraction-ref:
+
+create_cal_rebin_2_params
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The rebin parameters to use in the second rebin operation in
+:ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this is
+set to the following:
+
+.. code-block:: python
+
+  create_cal_rebin_2_params: "1.05,0.002,1.3"
+
+
+.. _cross_corr_reference_spectra_gem_isis-powder-diffraction-ref:
+
+cross_corr_reference_spectra
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The Workspace Index of the spectra to correlate all other spectra
+against in the cross-correlation step of
+:ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_reference_spectra: 5000
+
+  
+.. _cross_corr_ws_index_max_gem_isis-powder-diffraction-ref:
+
+cross_corr_ws_index_max
+^^^^^^^^^^^^^^^^^^^^^^^
+The workspace index of the last member of the range of spectra to
+cross-correlate against in
+:ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_ws_index_max: 6450
+
+  
+.. _cross_corr_ws_index_min_gem_isis-powder-diffraction-ref:
+
+cross_corr_ws_index_min
+^^^^^^^^^^^^^^^^^^^^^^^
+The workspace index of the first member of the range of spectra to
+cross-correlate against in
+:ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_ws_index_min: 11
+
+  
+.. _cros_cor_x_max_gem_isis-powder-diffraction-ref:
+
+cross_cor_x_max
+^^^^^^^^^^^^^^^
+The ending point of the region to be cross correlated in
+:ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_x_max: 1.3
+
+
+.. _cros_corr_x_min_gem_isis-powder-diffraction-ref:
+
+cross_cor_x_min
+^^^^^^^^^^^^^^^
+The starting point of the region to be cross correlated in
+:ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_x_min: 1.0
+
+.. _get_det_offsets_d_ref_gem_isis-powder-diffraction-ref:
+
+get_det_offsets_d_ref
+^^^^^^^^^^^^^^^^^^^^^
+Center of reference peak in d-space for GetDetectorOffsets in
+:ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this is
+set to the following:
+
+.. code-block:: python
+
+  get_det_offsets_d_ref: 1.912795
+
+
+.. _get_det_offsets_step_gem_isis-powder-diffraction-ref:
+
+get_det_offsets_step
+^^^^^^^^^^^^^^^^^^^^
+Step size used to bin d-spacing data in GetDetectorOffsets when
+running :ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM
+this is set to the following:
+
+.. code-block:: python
+
+  get_det_offsets_step: 0.002
+
+
+.. _get_det_offsets_x_max_gem_isis-powder-diffraction-ref:
+
+get_det_offsets_x_max
+^^^^^^^^^^^^^^^^^^^^^
+Maximum of CrossCorrelation data to search for peak, usually negative,
+in :ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this
+is set to the following:
+
+.. code-block:: python
+
+  get_det_offsets_x_max: 200
+
+  
+.. _get_det_offsets_x_min_gem_isis-powder-diffraction-ref:
+
+get_det_offsets_x_min
+^^^^^^^^^^^^^^^^^^^^^
+Minimum of CrossCorrelation data to search for peak, usually negative,
+in :ref:`create_cal_gem_isis-powder-diffraction-ref`. On GEM this
+is set to the following:
+
+.. code-block:: python
+
+  get_det_offsets_x_min: -200
+		
+
 
 .. _focused_cropping_values_gem_isis-powder-diffraction-ref:
 
