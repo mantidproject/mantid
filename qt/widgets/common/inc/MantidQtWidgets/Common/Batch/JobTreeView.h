@@ -99,6 +99,8 @@ public:
   QModelIndexList
   findImplicitlySelected(QModelIndexList const &selectedRows) const;
 
+  int currentColumn() const override;
+
   Cell deadCell() const override;
   using QTreeView::edit;
 

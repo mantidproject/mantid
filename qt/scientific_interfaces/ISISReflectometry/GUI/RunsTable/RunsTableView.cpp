@@ -211,6 +211,11 @@ void RunsTableView::addToolbarActions() {
   connect(addToolbarItem(Action::Cut, "mdi.content-cut",
                          "Cut the current selection"),
           SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
+
+  // In case of FillUp use "mdi.arrow-expand-up"
+  connect(addToolbarItem(Action::FillDown, "mdi.arrow-expand-down",
+                         "Fill down selected rows for selected column"),
+          SIGNAL(triggered(bool)), this, SLOT(onFillDownPressed(bool)));
 }
 
 MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
@@ -277,6 +282,8 @@ void RunsTableView::onPlotSelectedPressed(bool) {
 void RunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
   m_notifyee->notifyPlotSelectedStitchedOutputPressed();
 }
+
+void RunsTableView::onFillDownPressed(bool) { m_notifyee->notifyFillDown(); }
 
 /** Set a combo box to the given value
  */

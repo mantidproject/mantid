@@ -365,6 +365,32 @@ void RunsTablePresenter::notifyCollapseAllRequested() {
   m_view->jobs().collapseAll();
 }
 
+namespace {
+bool isGroup(MantidWidgets::Batch::RowLocation const &location) {
+  return isGroupLocation(location);
+}
+} // namespace
+
+void RunsTablePresenter::notifyFillDown() {
+  auto selected = m_view->jobs().selectedRowLocations();
+  selected.erase(std::remove_if(selected.begin(), selected.end(), isGroup),
+                 selected.end());
+  std::sort(selected.begin(), selected.end());
+
+  auto const topRow = selected[0];
+  auto const column = m_view->jobs().currentColumn();
+  auto const cellContent = m_view->jobs().cellAt(topRow, column).contentText();
+
+  for (auto const &rowLocation : selected) {
+    auto const oldCellContent =
+        m_view->jobs().cellAt(rowLocation, column).contentText();
+    auto cell = m_view->jobs().cellAt(rowLocation, column);
+    cell.setContentText(cellContent);
+    m_view->jobs().setCellAt(rowLocation, column, cell);
+    notifyCellTextChanged(rowLocation, column, oldCellContent, cellContent);
+  }
+}
+
 std::vector<std::string> RunsTablePresenter::cellTextFromViewAt(
     MantidWidgets::Batch::RowLocation const &location) const {
   return map(m_view->jobs().cellsAt(location),

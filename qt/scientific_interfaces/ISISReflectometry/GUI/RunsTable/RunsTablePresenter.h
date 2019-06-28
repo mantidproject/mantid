@@ -53,6 +53,7 @@ public:
   void notifyCollapseAllRequested() override;
   void notifyPlotSelectedPressed() override;
   void notifyPlotSelectedStitchedOutputPressed() override;
+  void notifyFillDown() override;
   void reductionPaused() override;
   void reductionResumed() override;
   void autoreductionPaused() override;
