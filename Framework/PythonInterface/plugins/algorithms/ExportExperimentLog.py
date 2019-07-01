@@ -95,7 +95,7 @@ class ExportExperimentLog(PythonAlgorithm):
         """ Main execution body
         """
         # Process inputs
-        self._processInputs()
+        self._process_inputs()
 
         # Get sample log's value
         sample_log_dict = self._get_sample_logs_value()
@@ -129,7 +129,7 @@ class ExportExperimentLog(PythonAlgorithm):
         return
 
     #pylint: disable=too-many-branches
-    def _processInputs(self):
+    def _process_inputs(self):
         """ Process input properties
         """
 
@@ -144,7 +144,6 @@ class ExportExperimentLog(PythonAlgorithm):
 
         self._sampleLogNames = self.getProperty("SampleLogNames").value
         ops = self.getProperty("SampleLogOperation").value
-
 
         if len(self._sampleLogNames) != len(ops):
             raise RuntimeError("Size of sample log names and sample operations are unequal!")
@@ -310,7 +309,7 @@ class ExportExperimentLog(PythonAlgorithm):
         # else:
         #     skip = False
 
-        headertitle = None
+        # headertitle = None
         for il in range(len(self._sampleLogNames)):
             # if skip is False:
             #     headertitle = self._headerTitles[il]
