@@ -91,55 +91,49 @@ public:
   // the NX_class attribute specified.
 
   bool hasDataSet(const std::string &dataSetName,
-                  const std::string &pathToGroup,
-                  const std::string *nxClassAttrVal = nullptr) const {
+                  const std::string &pathToGroup) const {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
     try {
       H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
 
-      if (nxClassAttrVal != nullptr) {
-
-        H5::Attribute attribute = dataSet.openAttribute(NX_CLASS);
-        std::string readClass;
-
-        attribute.read(attribute.getDataType(), readClass);
-        return readClass == *nxClassAttrVal;
-      } else {
-
-        // return true if dataset opened without exception and without checking
-        // for NX_class attribute.
-        return true;
-      }
-
+      return true;
     } catch (H5::DataSetIException) {
       return false;
     }
   }
 
   // check if dataset or group has name-specific attribute
-  bool hasAttribute(const std::string &pathToGroup, const std::string attrName,
-                    const std::string attrVal,
-                    const std::string *dataSetname = nullptr) {
+  bool hasAttributeInGroup(const std::string &pathToGroup,
+                           const std::string attrName,
+                           const std::string attrVal) {
 
     H5::Attribute attribute;
 
     // group must be opened before accessing dataset
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
-    if (dataSetname != nullptr) {
+    // treat as group
+    attribute = parentGroup.openAttribute(attrName);
 
-      // treat as dataset
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
 
-      H5::DataSet dataSet = parentGroup.openDataSet(*dataSetname);
-      attribute = dataSet.openAttribute(attrName);
+    return attributeValue == attrVal;
+  }
 
-    } else {
+  bool hasAttributeInDataSet(const std::string dataSetname,
+                             const std::string &pathToGroup,
+                             const std::string attrName,
+                             const std::string attrVal) {
 
-      // treat as group
-      attribute = parentGroup.openAttribute(attrName);
-    }
+    H5::Attribute attribute;
+
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+
+    H5::DataSet dataSet = parentGroup.openDataSet(dataSetname);
+    attribute = dataSet.openAttribute(attrName);
 
     std::string attributeValue;
     attribute.read(attribute.getDataType(), attributeValue);
@@ -151,7 +145,7 @@ private:
   H5::H5File m_file;
 };
 
-// Gives a clean file destination and removes the file when
+// RAII: Gives a clean file destination and removes the file when
 // handle is out of scope. Must be stack allocated.
 class ScopedFileHandle {
 
@@ -216,17 +210,20 @@ public:
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
         Mantid::Kernel::V3D(1, 1, 1));
-
+    instrument->setName("test_instrument");
     m_instrument =
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
   }
 
   void test_providing_invalid_path_throws() { // deliberately fails
 
-    ScopedFileHandle destinationFile("invalid_path_to_file_test_file.hdf5");
-    std::string path = "false_directory\\" + destinationFile.fullPath();
+    ScopedFileHandle fileResource("invalid_path_to_file_test_file.hdf5");
+    std::string destinationFile = "false_directory\\" + fileResource.fullPath();
 
-    TS_ASSERT_THROWS(saveInstrument(*m_instrument.first, path),
+    auto const &compInfo = (*m_instrument.first);
+    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
+
+    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -235,54 +232,48 @@ public:
     MockProgressBase progressRep;
     EXPECT_CALL(progressRep, doReport(testing::_)).Times(1);
 
-    ScopedFileHandle destinationFile("progress_report_test_file.hdf5");
-    std::string path = destinationFile.fullPath();
+    ScopedFileHandle fileResource("progress_report_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
 
-    saveInstrument(*m_instrument.first, path, &progressRep);
+    saveInstrument(*m_instrument.first, destinationFile, &progressRep);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
 
   void test_extension_validation() {
 
-    ScopedFileHandle fileResource(
-        "invalid_extension_test_file.abc"); // creates a temp directory for the
-                                            // file.
+    ScopedFileHandle fileResource("invalid_extension_test_file.abc");
     std::string destinationFile = fileResource.fullPath();
 
-    TS_ASSERT_THROWS(saveInstrument(*m_instrument.first, destinationFile),
+    auto const &compInfo = (*m_instrument.first);
+    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
+
+    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
                      std::invalid_argument &);
   }
 
   void test_nxinstrument_class_exists() {
 
-    ScopedFileHandle fileResource(
-        "check_instrument_test_file.hdf5"); // creates a temp directory for the
-                                            // file.
+    ScopedFileHandle fileResource("check_instrument_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
-    saveInstrument(*m_instrument.first,
-                   destinationFile); // saves the instrument.
 
-    HDF5FileTestUtility tester(
-        destinationFile); // tests the file has given attributes.
+    auto const &compInfo = (*m_instrument.first);
+    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    std::string dataSetName = "name";
+    saveInstrument(compInfo, destinationFile);
 
-    TS_ASSERT(tester.hasNxClass(
-        NX_INSTRUMENT, "/raw_data_1/instrument")); // check child group has
-                                                   // NX_class 'NX_INSTRUMENT'
-    TS_ASSERT(tester.hasNxClass(
-        NX_ENTRY, "/raw_data_1")); // check parent group has NX_class 'NX_ENTRY'
+    HDF5FileTestUtility tester(destinationFile);
+    std::string dataSetName = compInfo.name(compInfo.root());
 
+    TS_ASSERT(tester.hasNxClass(NX_INSTRUMENT, "/raw_data_1/instrument"));
+    TS_ASSERT(tester.hasNxClass(NX_ENTRY, "/raw_data_1"));
     TS_ASSERT(
-        tester.hasNxClass(NX_CHAR, "/raw_data_1/instrument",
-                          &dataSetName)) // check dataset has NX_class 'NX_CHAR'
+        tester.hasNxClass(NX_CHAR, "/raw_data_1/instrument", &dataSetName))
   }
 
   void test_instrument_has_name() {
 
-    ScopedFileHandle scopedFile(
-        "check_instrument_name_test_file.hdf5"); // temp directory
-    auto destinationFile = scopedFile.fullPath();
+    ScopedFileHandle fileResource("check_instrument_name_test_file.hdf5");
+    auto destinationFile = fileResource.fullPath();
 
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
@@ -290,15 +281,15 @@ public:
     saveInstrument(compInfo, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    std::string dataSetName = "name";
     // expectedInstrumentName; // let dataset name have same value as component
     // name.
 
-    TS_ASSERT(testUtility.hasDataSet(dataSetName, "/raw_data_1/instrument",
-                                     &NX_CHAR));
+    TS_ASSERT(testUtility.hasDataSet(expectedInstrumentName,
+                                     "/raw_data_1/instrument"));
 
-    TS_ASSERT(testUtility.hasAttribute("/raw_data_1/instrument", "short_name",
-                                       "name", &dataSetName));
+    TS_ASSERT(testUtility.hasAttributeInDataSet(
+        expectedInstrumentName, "/raw_data_1/instrument", SHORT_NAME,
+        expectedInstrumentName));
   }
 };
 

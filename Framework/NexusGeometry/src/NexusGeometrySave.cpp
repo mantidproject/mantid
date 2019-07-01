@@ -103,14 +103,15 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::DSetCreatPropList plist;
   plist.setFillValue(dataType, &dataSetDataAsCStr); // for dataSet.
 
+
   // add dataset to child group 'instrument'
   H5::DataSet dataSet = instrumentGroup.createDataSet(
-      "name", dataType, dataSpace, // <= compInfo.name(compInfo.root())
+      compInfo.name(compInfo.root()), dataType, dataSpace, // <= compInfo.name(compInfo.root())
       plist); // name of dataset initialised with fill value.
 
   writeStrAttributeToDataSet(
       dataSet, SHORT_NAME,
-      "name"); // compInfo.name(compInfo.root())); // add  atribute to dataset.
+      compInfo.name(compInfo.root())); // compInfo.name(compInfo.root())); // add  atribute to dataset.
 
   writeStrAttributeToDataSet(dataSet, NX_CLASS,
                              NX_CHAR); // add NX_class attribute to dataset
