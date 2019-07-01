@@ -6,12 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
+import numpy as np
 import mantid
 from mantid.api import *
 from mantid.kernel import *
 import datetime
 import time
 import os
+from dateutil import tz
 from six.moves import range
 
 #pylint: disable=too-many-instance-attributes
@@ -26,7 +28,7 @@ class ExportExperimentLog(PythonAlgorithm):
     _sampleLogNames = None
     _sampleLogOperations = None
     _fileformat = None
-    _valuesep = None
+    _csv_separator = None
     _logfilename = None
     _reorderOld = None
     _timezone = None
@@ -34,7 +36,6 @@ class ExportExperimentLog(PythonAlgorithm):
     _orderRecord = None
     titleToOrder = None
     _removeDupRecord = None
-    _ovrdTitleValueDict = None
     _headerTitles = None
     _filemode = None
 
@@ -47,7 +48,7 @@ class ExportExperimentLog(PythonAlgorithm):
         return 'DataHandling\\Logs'
 
     def seeAlso(self):
-        return [ "ExportSampleLogsToCSVFile" ]
+        return ["ExportSampleLogsToCSVFile"]
 
     def PyInit(self):
         """ Declaration of properties
@@ -97,8 +98,8 @@ class ExportExperimentLog(PythonAlgorithm):
         self._processInputs()
 
         # Get sample log's value
-        valuedict = self._getSampleLogsValue()
-        if valuedict is None:
+        sample_log_dict = self._get_sample_logs_value()
+        if len(sample_log_dict) == 0:
             return
 
         # Load input
@@ -119,7 +120,7 @@ class ExportExperimentLog(PythonAlgorithm):
             self._createLogFile()
 
         # Append the new experiment log
-        self._appendExpLog(valuedict)
+        self._append_experiment_log(sample_log_dict)
 
         # Order the record file
         if self._orderRecord is True:
@@ -138,8 +139,12 @@ class ExportExperimentLog(PythonAlgorithm):
 
         # Field and keys
         self._headerTitles = self.getProperty("SampleLogTitles").value
+        if len(self._headerTitles) == 0:
+            raise RuntimeError('Header titles must be given!')
+
         self._sampleLogNames = self.getProperty("SampleLogNames").value
         ops = self.getProperty("SampleLogOperation").value
+
 
         if len(self._sampleLogNames) != len(ops):
             raise RuntimeError("Size of sample log names and sample operations are unequal!")
@@ -155,9 +160,9 @@ class ExportExperimentLog(PythonAlgorithm):
         # Output file format
         self._fileformat = self.getProperty("FileFormat").value
         if self._fileformat == "tab":
-            self._valuesep = "\t"
+            self._csv_separator = "\t"
         else:
-            self._valuesep = ","
+            self._csv_separator = ","
 
         # Output file's postfix
         if self._fileformat == "comma (csv)":
@@ -203,19 +208,6 @@ class ExportExperimentLog(PythonAlgorithm):
         if self._orderRecord is False:
             self._removeDupRecord = False
 
-        # Override log values: it will not work in fastappend mode to override
-        overridelist = self.getProperty("OverrideLogValue").value
-        if len(self._headerTitles) > 0:
-            if len(overridelist) % 2 != 0:
-                raise RuntimeError("Number of items in OverrideLogValue must be even.")
-            self._ovrdTitleValueDict = {}
-            for i in range(int(len(overridelist)/2)):
-                title = overridelist[2*i]
-                if title in self._headerTitles:
-                    self._ovrdTitleValueDict[title] = overridelist[2*i+1]
-                else:
-                    self.log().warning("Override title %s is not recognized. " % (title))
-
         return
 
     def _createLogFile(self):
@@ -229,7 +221,7 @@ class ExportExperimentLog(PythonAlgorithm):
             title = self._headerTitles[ititle]
             wbuf += "%s" % (title)
             if ititle < len(self._headerTitles)-1:
-                wbuf += self._valuesep
+                wbuf += self._csv_separator
 
         try:
             ofile = open(self._logfilename, "w")
@@ -302,7 +294,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return
 
-    def _appendExpLog(self, logvaluedict):
+    def _append_experiment_log(self, log_value_dict):
         """ Append experiment log values to log file
         """
         self.log().information("Appending is called once.")
@@ -313,31 +305,39 @@ class ExportExperimentLog(PythonAlgorithm):
         self.log().debug("Samlpe Log Names: %s" % (self._sampleLogNames))
         self.log().debug("Title      Names: %s" % (self._headerTitles))
 
-        if len(self._headerTitles) == 0:
-            skip = True
-        else:
-            skip = False
+        # if len(self._headerTitles) == 0:
+        #     skip = True
+        # else:
+        #     skip = False
 
         headertitle = None
         for il in range(len(self._sampleLogNames)):
-            if skip is False:
-                headertitle = self._headerTitles[il]
-            if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
-                # overriden
-                value = self._ovrdTitleValueDict[headertitle]
+            # if skip is False:
+            #     headertitle = self._headerTitles[il]
 
+            # if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
+            #     # overriden
+            #     # TODO / FIXME - override shall be executed before and result in log value dict already!
+            #     value = self._ovrdTitleValueDict[headertitle]
+
+            # from log value dictionary (including from overridden and workspace)
+            log_name_i = self._sampleLogNames[il]
+            operation_type = self._sampleLogOperations[il]
+            key = log_name_i + "-" + operation_type
+            if key in log_value_dict.keys():
+                value = log_value_dict[key]
+            elif log_name_i in log_value_dict.keys():
+                value = log_value_dict[log_name_i]
             else:
-                # from input workspace
-                logname = self._sampleLogNames[il]
-                optype = self._sampleLogOperations[il]
-                key = logname + "-" + optype
-                if key in logvaluedict.keys():
-                    value = logvaluedict[key]
-                elif logname in logvaluedict.keys():
-                    value = logvaluedict[logname]
-            # ENDIFELSE
+                raise RuntimeError('Log {} with operation {} cannot be found in log value dict'
+                                   ''.format(log_name_i, operation_type))
+            # END-IF-ELSE
 
-            wbuf += "%s%s" % (str(value), self._valuesep)
+            # append line
+            wbuf += "%s%s" % (str(value), self._csv_separator)
+        # END-FOR
+
+        # remove last separator
         wbuf = wbuf[0:-1]
 
         # Append to file
@@ -376,7 +376,7 @@ class ExportExperimentLog(PythonAlgorithm):
             else:
                 # value line
                 try:
-                    keyvalue = line.split(self._valuesep)[ilog].strip()
+                    keyvalue = line.split(self._csv_separator)[ilog].strip()
                 except IndexError:
                     self.log().error("Order record failed.")
                     return
@@ -447,72 +447,132 @@ class ExportExperimentLog(PythonAlgorithm):
         """
         raise RuntimeError("Too complicated")
 
-    #pylint: disable=too-many-branches
-    def _getSampleLogsValue(self):
-        """ From the workspace to get the value
+    def _parse_overriding_logs(self):
+        """ Parse the input overriding log value list
+        :return: dictionary ([log name] = log value)
         """
-        import numpy as np
+        # log value dict init
+        log_value_dict = dict()
 
-        valuedict = {}
+        # Override log values: it will not work in 'FastAppend' mode (which hasn't been implemented) to override
+        override_list = self.getProperty("OverrideLogValue").value
+        if len(override_list) == 0:
+            # empty
+            pass
+        elif len(override_list) % 2 == 1:
+            # incomplete
+            raise RuntimeError("Number of items in OverrideLogValue must be even. Now there are {}"
+                               "items.".format(len(override_list)))
+        else:
+            # parse
+            for i in range(int(len(override_list)/2)):
+                title = override_list[2*i]
+                if title in self._headerTitles:
+                    log_value_dict[title] = override_list[2*i+1]
+                else:
+                    self.log().warning("Override title {} is not recognized. ".format(title))
+            # END-FOR
+        # END-IF-ELSE
+
+        return log_value_dict
+
+    #pylint: disable=too-many-branches
+    def _get_sample_logs_value(self):
+        """ Get sample logs' value from overriding dictionary and then wokspace
+        :return: dictionary: key = sample log, value = log value
+        """
+        # set value dictionary from overriding
+        value_dict = self._parse_overriding_logs()
+
+        # read data from workspace
         run = self._wksp.getRun()
         if run is None:
             self.log().error("There is no Run object associated with workspace %s. " % (
                 str(self._wksp)))
-            return None
+            return value_dict
 
-        #for logname in self._sampleLogNames:
         for il in range(len(self._sampleLogNames)):
-            logname = self._sampleLogNames[il]
-            isexist = run.hasProperty(logname)
+            # get log name, check and operation type
+            log_name = self._sampleLogNames[il]
 
-            operationtype = self._sampleLogOperations[il]
-            # check whether this property does exist.
-            if isexist is False:
-                # If not exist, use 0.00 as default
-                self.log().warning("Sample log %s does not exist in given workspace %s. " % (logname, str(self._wksp)))
-                valuedict[logname] = 0.0
+            # check log name
+            if log_name is None or log_name.lower() == 'none':
+                # real log name is None or 'None' means overriding works
+                continue
+            elif  log_name in value_dict:
+                # overridden already: no need to read
                 continue
 
-            logproperty = run.getProperty(logname)
-            logclass = logproperty.__class__.__name__
+            does_exist = run.hasProperty(log_name)
+            # check whether this property does exist.
+            if not does_exist:
+                # If not exist and not overridden: use 0.00 as default
+                self.log().warning("Sample log %s does not exist in given workspace %s."
+                                   "" % (log_name, str(self._wksp)))
+                value_dict[log_name] = 0.0
+                continue
+            else:
+                log_property = run.getProperty(log_name)
+
+            # operation type and value
+            operation_type = self._sampleLogOperations[il]
 
             # Get log value according to type
-            if logclass == "StringPropertyWithValue":
-                propertyvalue = logproperty.value
-                # operationtype = self._sampleLogOperations[il]
-                if operationtype.lower().count("time") > 0:
-                    propertyvalue = self._convertLocalTimeString(propertyvalue)
-            elif logclass == "FloatPropertyWithValue":
-                propertyvalue = logproperty.value
-            elif logclass == "FloatTimeSeriesProperty":
-                # operationtype = self._sampleLogOperations[il]
-                if operationtype.lower() == "min":
-                    propertyvalue = min(logproperty.value)
-                elif operationtype.lower() == "max":
-                    propertyvalue = max(logproperty.value)
-                elif operationtype.lower() == "average":
-                    propertyvalue = np.average(logproperty.value)
-                elif operationtype.lower() == "sum":
-                    propertyvalue = np.sum(logproperty.value)
-                elif operationtype.lower() == "0":
-                    propertyvalue = logproperty.value[0]
-                else:
-                    raise RuntimeError("Operation %s for FloatTimeSeriesProperty %s is not supported." % (operationtype, logname))
+            property_value = self._retrieve_log_value(log_property, operation_type)
+
+            key = log_name + "-" + operation_type
+            value_dict[key] = property_value
+        # END-FOR
+
+        return value_dict
+
+    #pylint: disable=too-many-branches
+    def _retrieve_log_value(self, log_property, value_operation_type):
+        """
+        ge the log value from workspace'run object
+        :param log_property:
+        :param value_operation_type:
+        :return:
+        """
+        log_class = log_property.__class__.__name__
+
+        if log_class == "StringPropertyWithValue":
+            # string
+            log_value = log_property.value
+            # special case for 'time'
+            if value_operation_type.lower().count("time") > 0:
+                log_value = self._convert_to_local_time(log_value)
+
+        elif log_class.endswith("PropertyWithValue"):
+            # single float value
+            log_value = log_property.value
+
+        elif log_class.endswith('TimeSeriesProperty'):
+            # time series property
+            if value_operation_type.lower() == "min":
+                log_value = min(log_property.value)
+            elif value_operation_type.lower() == "max":
+                log_value = max(log_property.value)
+            elif value_operation_type.lower() == "average":
+                log_value = np.average(log_property.value)
+            elif value_operation_type.lower() == "sum":
+                log_value = np.sum(log_property.value)
+            elif value_operation_type.lower() == "0":
+                log_value = log_property.value[0]
             else:
-                raise RuntimeError("Class type %d is not supported." % (logclass))
+                # unsupported TSP value operation
+                raise RuntimeError("Operation {} for FloatTimeSeriesProperty {} is not supported."
+                                   "".format(value_operation_type, log_property.name))
+        else:
+            # unsupported log type
+            raise RuntimeError("Class type %d is not supported.".format(log_class))
 
-            key = logname + "-" + operationtype
-            valuedict[key] = propertyvalue
-        # ENDFOR
+        return log_value
 
-        return valuedict
-
-    def _convertLocalTimeString(self, utctimestr, addtimezone=True):
+    def _convert_to_local_time(self, utctimestr, addtimezone=True):
         """ Convert a UTC time in string to the local time in string
         and add
         """
-        from dateutil import tz
-
         # Make certain that the input is utc time string
         utctimestr = str(utctimestr)
 
