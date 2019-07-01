@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
@@ -94,14 +95,16 @@ public:
   // the NX_class attribute specified.
 
   bool hasDataSet(const std::string &dataSetName,
+                  const std::string dataSetValue,
                   const std::string &pathToGroup) const {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
     try {
       H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
-
-      return true;
+      std::string dataSetVal;
+      dataSet.read(dataSetVal, dataSet.getDataType());
+      return dataSetVal == dataSetValue;
     } catch (H5::DataSetIException) {
       return false;
     }
@@ -284,15 +287,167 @@ public:
     saveInstrument(compInfo, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    // expectedInstrumentName; // let dataset name have same value as component
-    // name.
+    std::string expectedDataSetValue = "test_data_for_instrument";
 
     TS_ASSERT(testUtility.hasDataSet(expectedInstrumentName,
+                                     expectedDataSetValue,
                                      "/raw_data_1/instrument"));
 
     TS_ASSERT(testUtility.hasAttributeInDataSet(
         expectedInstrumentName, "/raw_data_1/instrument", SHORT_NAME,
         expectedInstrumentName));
+  }
+
+  void test_translation() {
+
+    // local copy of instrument.
+    /*
+
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+        Mantid::Kernel::V3D(1, 1, 1));
+    instrument->setName("test_instrument");
+
+    auto instrumentCopy =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    // Test setup.
+    auto &compInfo = (*instrumentCopy.first);
+
+    // translate source.
+    Eigen::Vector3d absSourceLocation(5, 0, 0);
+    compInfo.setPosition(compInfo.source(),
+                         Mantid::Kernel::toV3D(absSourceLocation));
+
+    auto relativeSourceTranslation = Mantid::Kernel::toVector3d(
+        compInfo.relativePosition(compInfo.source())); // eigen type.
+
+    TS_ASSERT(relativeSourceTranslation.isApprox(absSourceLocation));
+
+    // TODO. Either reset the test instrument for the next test, or ideally make
+    // a local copy!
+        */
+
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+
+    auto beamline =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*beamline.first);
+
+    // translate source
+    Eigen::Vector3d absoluteBankLocation(5, 0, 0);
+
+    compInfo.setPosition(compInfo.indexOfAny("bank1"),
+                         Mantid::Kernel::toV3D(absoluteBankLocation));
+
+    auto relativeSourcePosition = Mantid::Kernel::toVector3d(
+        compInfo.relativePosition(compInfo.indexOfAny("bank1")));
+
+    TS_ASSERT(relativeSourcePosition.isApprox(absoluteBankLocation));
+  }
+
+  // local copy of instrument.
+
+  // auto instrument =
+  // ComponentCreationHelper::createTestInstrumentRectangular(
+  //         1 /*banks*/, 10 /*pixels*/);
+  // auto beamline =
+  // Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+  //  auto &compInfo = (*beamline.first);
+
+  // compInfo.setPostion(compInfo.indexOfAny("bank1"), {0,0,0}));
+  // compInfo.setRotation(compInfo.indexOfAny("bank1"), quat);
+
+  void test_rotation() {
+
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+
+    auto beamline =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*beamline.first);
+
+    Eigen::Quaterniond absoluteBankRotation(
+        Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d(0, 1, 0)));
+
+    compInfo.setRotation(
+        compInfo.indexOfAny("bank1"), // bank1 defined as in
+                                      // ComponentCreationHelper.cpp
+                                      // line 584 01.07.19
+        Mantid::Kernel::toQuat(absoluteBankRotation));
+
+    auto relativeBankRotation = Mantid::Kernel::toQuaterniond(
+        compInfo.relativeRotation(compInfo.indexOfAny("bank1")));
+
+    TS_ASSERT(relativeBankRotation.isApprox(absoluteBankRotation));
+  }
+
+  void
+  test_bank_absolute_rotation_is_equal_to_detector_in_bank_absolute_rotation() {
+
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+
+    auto beamline =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*beamline.first);
+
+    // set abosolute bank rotation (rotate about y)
+    Eigen::Quaterniond absoluteBankRotation(
+        Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d(0, 1, 0)));
+
+    Eigen::Quaterniond zeroRotation(
+        Eigen::AngleAxisd(0, Eigen::Vector3d(0, 0, 0)));
+
+    // relative position of detector
+    auto relativeDetectorRotation =
+        Mantid::Kernel::toQuaterniond(compInfo.relativeRotation(0));
+
+    TS_ASSERT(relativeDetectorRotation.isApprox(zeroRotation));
+  }
+
+  void test_detector_position_is_expected_value_after_rotation() {
+
+    auto rotY =  M_PI / 2; 
+    Eigen::Vector3d originVector(0, 0, 0);
+
+    // test rotation
+    Eigen::Matrix3d testRotationAboutXMatrix;
+    testRotationAboutXMatrix << 1,0,0,0,cos(rotY),-sin(rotY),0,sin(rotY),cos(rotY); // rotation matrix
+
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+
+    auto beamline =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*beamline.first);
+
+    auto detPosa1 = compInfo.position(0); 
+    auto detPosb1 = compInfo.position(1);
+   // set position of bank to origin
+    // compInfo.setPosition(compInfo.indexOfAny("bank1"),
+     //                    Mantid::Kernel::toV3D(originVector));
+
+    // get detector position before rotation.
+    auto absDetectorPositionBeforeRotation = compInfo.position(0);
+    auto bankIndex = compInfo.indexOfAny("bank1");
+
+    // set abosolute bank rotation (rotate about x)
+    Eigen::Quaterniond absoluteBankRotation(
+        Eigen::AngleAxisd(rotY, Eigen::Vector3d(1, 0, 0)));
+
+    compInfo.setRotation(bankIndex,
+                         Mantid::Kernel::toQuat(absoluteBankRotation));
+
+    // absolute position of detector after rotation
+    auto absDetectorPositionAfterRotation = compInfo.position(0);
+
+    Eigen::Vector3d expectedDetectorPositionAfterRotation =
+        testRotationAboutXMatrix * Mantid::Kernel::toVector3d (absDetectorPositionBeforeRotation);
+
+    TS_ASSERT( Mantid::Kernel::toVector3d(absDetectorPositionAfterRotation).isApprox(
+        expectedDetectorPositionAfterRotation) );
   }
 };
 

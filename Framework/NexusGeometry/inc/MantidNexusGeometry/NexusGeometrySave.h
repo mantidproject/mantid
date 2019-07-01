@@ -22,6 +22,8 @@ class ComponentInfo;
 }
 
 namespace NexusGeometry {
+	//toEigenTransformation
+
 
 MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,

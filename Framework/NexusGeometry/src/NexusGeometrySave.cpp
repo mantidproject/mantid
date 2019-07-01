@@ -114,6 +114,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writeStrAttributeToDataSet(dataSet, NX_CLASS,
                              NX_CHAR); // add NX_class attribute to dataset
 
+  // TODO: make a source group NX_class NXsource, containing transformations group NX_class NXtransformations
+
   file.close();
 
 } // saveInstrument
