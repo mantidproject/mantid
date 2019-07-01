@@ -441,7 +441,8 @@ class RunTabPresenter(object):
         def get_string_period(_tag):
             return "" if _tag == ALL_PERIODS else str(_tag)
 
-        # 1. Pull out the entries
+        # ----Pull out the entries----
+        # Run numbers
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
         sample_scatter_period = get_string_period(
             get_string_entry(BatchReductionEntry.SampleScatterPeriod, row))
@@ -460,15 +461,24 @@ class RunTabPresenter(object):
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
         can_direct_period = get_string_period(
             get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
+
+        # Other information
         output_name = get_string_entry(BatchReductionEntry.Output, row)
         user_file = get_string_entry(BatchReductionEntry.UserFile, row)
 
+        # Sample geometries
+        sample_thickness = get_string_entry(BatchReductionEntry.SampleThickness, row)
+        sample_height = get_string_entry(BatchReductionEntry.SampleHeight, row)
+        sample_width = get_string_entry(BatchReductionEntry.SampleWidth, row)
+
+        # ----Form a row----
         row_entry = [sample_scatter, sample_scatter_period, sample_transmission,
                      sample_transmission_period,
                      sample_direct, sample_direct_period, can_scatter, can_scatter_period,
                      can_transmission, can_transmission_period,
                      can_direct, can_direct_period,
-                     output_name, user_file, '', '']
+                     output_name, user_file,
+                     sample_thickness, sample_height, sample_width]
 
         table_index_model = TableIndexModel(*row_entry)
 
@@ -1333,8 +1343,9 @@ class RunTabPresenter(object):
         """
         Take the current table model, and create a comma delimited csv file
         :param filewriter: File object to be written to
+        :type filewrite: csv.writer object
         :param rows: list of indices for non-empty rows
-        :return: Nothing
+        :type rows: list of ints
         """
         for row in rows:
             table_row = self._table_model.get_table_entry(row).to_batch_list()
@@ -1350,7 +1361,10 @@ class RunTabPresenter(object):
                                "can_trans",
                                "can_direct_beam",
                                "output_as",
-                               "user_file"]
+                               "user_file",
+                               "sample_thickness",
+                               "sample_height",
+                               "sample_width"]
         new_row = []
         for key, value in zip(batch_file_keywords, row):
             new_row.append(key)

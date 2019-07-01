@@ -35,7 +35,8 @@ BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
                               BatchReductionEntry.SampleDirect: 'SANS2D00022048',
                               BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
+                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.Output: 'test_file2'}]
 
 BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
                               BatchReductionEntry.SampleScatterPeriod: '3',
@@ -45,7 +46,16 @@ BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
                               BatchReductionEntry.SampleDirect: 'SANS2D00022048',
                               BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
+                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.Output: 'test_file2'}]
+
+BATCH_FILE_TEST_CONTENT_5 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
+                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
+                              BatchReductionEntry.Output: 'test_file',
+                              BatchReductionEntry.SampleThickness: '5',
+                              BatchReductionEntry.SampleHeight: '2',
+                              BatchReductionEntry.SampleWidth: '8'}]
 
 
 def get_non_empty_row_mock(value):
@@ -446,7 +456,7 @@ class RunTabPresenterTest(unittest.TestCase):
         index = 0
         expected_table_index_model = TableIndexModel(*row)
         expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = True
+        expected_table_index_model.file_finding = False
 
         presenter.on_row_inserted(index, row)
 
@@ -483,7 +493,7 @@ class RunTabPresenterTest(unittest.TestCase):
         value = '74040'
         expected_table_index_model = TableIndexModel(*expected_row)
         expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = True
+        expected_table_index_model.file_finding = False
 
         presenter.on_data_changed(row, column, value, '')
 
@@ -509,17 +519,18 @@ class RunTabPresenterTest(unittest.TestCase):
         rows = [0, 2]
         expected_row_0 = TableIndexModel(*row_1)
         expected_row_0.id = 1
-        expected_row_0.file_finding = True
+        expected_row_0.file_finding = False
         expected_row_1 = TableIndexModel(*row_3)
         expected_row_1.id = 3
-        expected_row_1.file_finding = True
-
+        expected_row_1.file_finding = False
 
         presenter.on_rows_removed(rows)
 
         self.assertEqual(presenter._table_model.get_number_of_rows(), 2)
+
         model_row_0 = presenter._table_model.get_table_entry(0)
         self.assertEqual(model_row_0, expected_row_0)
+
         model_row_1 = presenter._table_model.get_table_entry(1)
         self.assertEqual(model_row_1, expected_row_1)
 
@@ -560,6 +571,18 @@ class RunTabPresenterTest(unittest.TestCase):
 
         table_entry_1 = presenter._table_model.get_table_entry(1)
         self.assertEqual(table_entry_1.output_name, 'test_file2')
+
+    def test_add_row_to_table_model_adds_sample_geometries(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        parsed_data = BATCH_FILE_TEST_CONTENT_5
+
+        presenter._add_row_to_table_model(parsed_data[0], 0)
+
+        table_entry_0 = presenter._table_model.get_table_entry(0)
+        self.assertEqual(table_entry_0.sample_thickness, '5')
+        self.assertEqual(table_entry_0.sample_height, '2')
+        self.assertEqual(table_entry_0.sample_width, '8')
 
     def test_update_view_from_table_model_updated_view_based_on_model(self):
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
@@ -958,11 +981,12 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.set_view(view)
 
         test_row = ["SANS2D00022025", "SANS2D00022052", "SANS2D00022022",
-                    "", "", "", "another_file", "a_user_file.txt"]
+                    "", "", "", "another_file", "a_user_file.txt", "1.0", "5.0", "5.4"]
 
         expected_list = ["sample_sans", "SANS2D00022025", "sample_trans", "SANS2D00022052",
                          "sample_direct_beam", "SANS2D00022022", "can_sans", "", "can_trans", "", "can_direct_beam", "",
-                         "output_as", "another_file", "user_file", "a_user_file.txt"]
+                         "output_as", "another_file", "user_file", "a_user_file.txt", "sample_thickness", "1.0",
+                         "sample_height", "5.0", "sample_width", "5.4"]
 
         actual_list = presenter._create_batch_entry_from_row(test_row)
 
