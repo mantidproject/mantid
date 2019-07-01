@@ -38,6 +38,7 @@ New features
 Improvements
 ############
 
+- New instrument geometry for CNCS.
 
 Bugfixes
 ########
