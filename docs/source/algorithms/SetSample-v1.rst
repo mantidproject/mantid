@@ -167,6 +167,24 @@ The following example uses a test file called ``CRYO-01.xml`` in the
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
                        'SampleNumberDensity': 0.1})
 
+**Example - Specify shape using CSG object**
+
+.. testcode:: Ex4
+
+   # A fake host workspace, replace this with your real one.
+   ws = CreateSampleWorkspace()
+   # Specify a Sphere geometry using CSG
+   sphere_xml = " \
+   <sphere id='some-sphere'> \
+       <centre x='0.0'  y='0.0' z='0.0' /> \
+       <radius val='0.5' /> \
+   </sphere> \
+   <algebra val='some-sphere' /> \
+   "
+   # Set sample geometry of workspace to this CSG object Sphere
+   SetSample(ws, Geometry={'Shape': 'CSG', 'Value': sphere_xml})
+
+
 .. categories::
 
 .. sourcelink::
