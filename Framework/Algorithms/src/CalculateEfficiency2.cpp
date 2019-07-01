@@ -198,7 +198,8 @@ void CalculateEfficiency2::averageAndNormalizePixels(
     auto &e = workspace.mutableE(i);
     const auto yOriginal = y.front();
 
-    // Skip if we have a monitor or if the detector is masked.
+    // Skip if we have a monitor, the detector is masked, or it has already been
+    // marked as outside of the threashold by being set to EMPTY_DBL
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i) ||
         isEmpty(yOriginal))
       continue;
