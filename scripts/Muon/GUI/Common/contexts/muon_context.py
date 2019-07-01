@@ -67,7 +67,6 @@ class MuonContext(object):
         group_workspace = calculate_group_data(self, group_name, run, rebin)
         group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin)
 
-
         return group_workspace, group_asymmetry, group_asymmetry_unnormalised
 
     def calculate_pair(self, pair_name, run, rebin=False):
@@ -319,6 +318,8 @@ class MuonContext(object):
 
     def get_names_of_frequency_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', phasequad=False):
+        if self._frequency_context is None:
+            return []
         group, pair = self.get_group_and_pair(group_and_pair)
         run_list = self.get_runs(runs)
         names = self._frequency_context.get_frequency_workspace_names(

@@ -48,7 +48,7 @@ def get_group_asymmetry_name(context, group_name, run, rebin):
     name += context.workspace_suffix
     return name
 
-  
+
 def get_group_or_pair_from_name(name):
     if group_str in name:
         index  = name.find(group_str)+len(group_str)
@@ -62,9 +62,9 @@ def get_group_or_pair_from_name(name):
         return pair_found.replace(" ", "")
     return ""
 
+
 def get_group_asymmetry_unnorm_name(context, group_name, run, rebin):
     return '__' + get_group_asymmetry_name(context, group_name, run, rebin) + '_unnorm'
-
 
 
 def get_pair_data_workspace_name(context, pair_name, run, rebin):
@@ -81,7 +81,7 @@ def get_pair_data_workspace_name(context, pair_name, run, rebin):
 
     return name
 
-  
+
 def get_base_data_directory(context, run):
     if context.data_context.is_multi_period():
         return context.data_context.base_directory + "/" + context.data_context._base_run_name(run) + context.workspace_suffix + "/"

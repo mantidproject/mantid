@@ -144,7 +144,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
         self.transform.new_data_observer(
             self.home_tab.plot_widget.input_workspace_observer)
-        
+
         self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
 
     def setup_tabs(self):
@@ -276,7 +276,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.home_tab.plot_widget.input_workspace_observer)
-        
+
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.home_tab.plot_widget.rebin_options_set_observer)
 
@@ -295,7 +295,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.fitting_context.new_fit_notifier.add_subscriber(
             self.home_tab.plot_widget.fit_observer)
-
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

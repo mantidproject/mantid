@@ -32,7 +32,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._view.on_rebin_options_changed(
             self.handle_use_raw_workspaces_changed)
         self._view.on_plot_type_changed(self.handle_plot_type_changed)
-        
+
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.fit_observer = GenericObserver(self.handle_fit_completed)
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
