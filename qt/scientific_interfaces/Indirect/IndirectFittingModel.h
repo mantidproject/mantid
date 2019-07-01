@@ -71,13 +71,12 @@ public:
                                DatasetIndex dataIndex) const;
   virtual bool isMultiFit() const;
   bool isPreviouslyFit(DatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-  bool hasZeroSpectra(DatasetIndex dataIndex) const;
   virtual boost::optional<std::string> isInvalidFunction() const;
   virtual DatasetIndex numberOfWorkspaces() const;
   SpectrumRowIndex getNumberOfSpectra(DatasetIndex index) const;
   SpectrumRowIndex getNumberOfDomains() const;
-  SpectrumRowIndex getDomainIndex(DatasetIndex dataIndex,
-                                  WorkspaceIndex spectrum) const;
+  virtual SpectrumRowIndex getDomainIndex(DatasetIndex dataIndex,
+                                          WorkspaceIndex spectrum) const;
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::MultiDomainFunction_sptr getFittingFunction() const;
 

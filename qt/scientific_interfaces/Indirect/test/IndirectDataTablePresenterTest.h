@@ -74,6 +74,8 @@ public:
   MOCK_METHOD3(setExcludeRegion,
                void(std::string const &exclude, DatasetIndex dataIndex,
                     IDAWorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getDomainIndex,
+                     SpectrumRowIndex(DatasetIndex, IDAWorkspaceIndex));
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
@@ -108,11 +110,15 @@ public:
   void setUp() override {
     m_model = std::make_unique<NiceMock<MockIndirectDataTableModel>>();
     m_table = createEmptyTableWidget(5, 5);
-    m_presenter = std::make_unique<IndirectDataTablePresenter>(
-        std::move(m_model.get()), std::move(m_table.get()));
 
     SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
+    ON_CALL(*m_model, numberOfWorkspaces())
+        .WillByDefault(Return(DatasetIndex{1}));
+
+    m_presenter = std::make_unique<IndirectDataTablePresenter>(
+        std::move(m_model.get()), std::move(m_table.get()));
+    m_presenter->addData(DatasetIndex{0});
   }
 
   void tearDown() override {
@@ -141,11 +147,13 @@ public:
   void
   test_that_invoking_setStartX_will_alter_the_relevant_column_in_the_table() {
     TableItem const startX(2.2);
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{2}))
+        .WillByDefault(Return(SpectrumRowIndex{2}));
 
     m_presenter->setStartX(startX.asDouble(), DatasetIndex{0},
-                           IDAWorkspaceIndex{0});
+                           IDAWorkspaceIndex{2});
 
-    assertValueIsGlobal(START_X_COLUMN, startX);
+    assertValueIsNotGlobal(2, START_X_COLUMN, startX);
   }
 
   ///----------------------------------------------------------------------
@@ -180,25 +188,25 @@ public:
 
     m_table->item(0, START_X_COLUMN)->setText(startX.asQString());
 
-    assertValueIsGlobal(START_X_COLUMN, startX);
+    assertValueIsNotGlobal(0, START_X_COLUMN, startX);
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_endX_in_every_row_when_the_relevant_column_is_changed() {
     TableItem const endX(2.5);
 
-    m_table->item(0, END_X_COLUMN)->setText(endX.asQString());
+    m_table->item(1, END_X_COLUMN)->setText(endX.asQString());
 
-    assertValueIsGlobal(END_X_COLUMN, endX);
+    assertValueIsNotGlobal(1, END_X_COLUMN, endX);
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_excludeRegion_in_every_row_when_the_relevant_column_is_changed() {
     TableItem const excludeRegion("2-4");
 
-    m_table->item(0, EXCLUDE_REGION_COLUMN)->setText(excludeRegion.asQString());
+    m_table->item(1, EXCLUDE_REGION_COLUMN)->setText(excludeRegion.asQString());
 
-    assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
+    assertValueIsNotGlobal(1, EXCLUDE_REGION_COLUMN, excludeRegion);
   }
 
   ///----------------------------------------------------------------------
@@ -222,29 +230,8 @@ public:
   test_that_tableDatasetsMatchModel_returns_true_if_the_table_datasets_match_the_model() {
     EXPECT_CALL(*m_model, numberOfWorkspaces())
         .Times(1)
-        .WillOnce(Return(DatasetIndex{0}));
+        .WillOnce(Return(DatasetIndex{1}));
     TS_ASSERT(m_presenter->tableDatasetsMatchModel());
-  }
-
-  void
-  test_that_addData_will_add_new_data_if_the_index_is_smaller_than_the_number_of_data_positions() {
-    DatasetIndex const index{0};
-
-    ON_CALL(*m_model, numberOfWorkspaces()).WillByDefault(Return(DatasetIndex{2}));
-
-    EXPECT_CALL(*m_model, numberOfWorkspaces()).Times(1);
-
-    ExpectationSet getRanges =
-        EXPECT_CALL(*m_model, getFittingRange(index, IDAWorkspaceIndex{0}))
-            .Times(1);
-    for (auto spectrum = 1; spectrum < m_table->rowCount(); ++spectrum)
-      getRanges +=
-          EXPECT_CALL(*m_model,
-                      getFittingRange(index, IDAWorkspaceIndex{spectrum}))
-              .Times(1)
-              .After(getRanges);
-
-    m_presenter->addData(index);
   }
 
   void
@@ -253,7 +240,7 @@ public:
 
     m_presenter->setStartX(startX.asDouble(), SpectrumRowIndex{0});
 
-    assertValueIsGlobal(START_X_COLUMN, startX);
+    assertValueIsNotGlobal(0, START_X_COLUMN, startX);
   }
 
   void
@@ -262,7 +249,7 @@ public:
 
     m_presenter->setEndX(endX.asDouble(), SpectrumRowIndex{0});
 
-    assertValueIsGlobal(END_X_COLUMN, endX);
+    assertValueIsNotGlobal(0, END_X_COLUMN, endX);
   }
 
   void
@@ -365,8 +352,10 @@ public:
 
 private:
   void assertValueIsGlobal(int column, TableItem const &value) const {
-    for (auto row = 0; row < m_table->rowCount(); ++row)
-      TS_ASSERT_EQUALS(value, getTableItem(row, column));
+    for (auto row = 0; row < m_table->rowCount(); ++row) {
+      auto const item = getTableItem(row, column);
+      TS_ASSERT_EQUALS(value, item);
+    }
   }
 
   void assertValueIsNotGlobal(int valueRow, int column,

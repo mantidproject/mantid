@@ -406,12 +406,6 @@ bool IndirectFittingModel::isPreviouslyFit(DatasetIndex dataIndex,
   return m_fitOutput->isSpectrumFit(fitData, spectrum);
 }
 
-bool IndirectFittingModel::hasZeroSpectra(DatasetIndex dataIndex) const {
-  if (m_fittingData.size() > dataIndex)
-    return m_fittingData[dataIndex]->zeroSpectra();
-  return true;
-}
-
 boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
   if (!m_activeFunction)
     return std::string("No fit function has been defined");

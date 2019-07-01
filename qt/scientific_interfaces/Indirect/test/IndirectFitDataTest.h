@@ -160,7 +160,7 @@ public:
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_workspace() {
     auto workspace = boost::make_shared<Workspace2D>();
-    Spectra const spec = Spectra(IDAWorkspaceIndex{0}, IDAWorkspaceIndex{0});
+    Spectra const spec = Spectra("");
     IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);

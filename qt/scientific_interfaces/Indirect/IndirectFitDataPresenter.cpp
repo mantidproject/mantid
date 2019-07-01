@@ -271,8 +271,10 @@ void IndirectFitDataPresenter::setSingleModelData(const std::string &name) {
   addModelData(name);
   auto const dataIndex = DatasetIndex{0};
   auto const spectra = m_model->getSpectra(dataIndex);
-  auto const range = m_model->getFittingRange(dataIndex, spectra.front());
-  m_view->setXRange(range);
+  if (!spectra.empty()) {
+    auto const range = m_model->getFittingRange(dataIndex, spectra.front());
+    m_view->setXRange(range);
+  }
 }
 
 void IndirectFitDataPresenter::addModelData(const std::string &name) {

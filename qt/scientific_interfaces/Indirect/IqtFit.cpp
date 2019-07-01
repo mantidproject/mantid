@@ -80,26 +80,7 @@ EstimationDataSelector IqtFit::getEstimationDataSelector() const {
 }
 
 void IqtFit::fitFunctionChanged() {
-  setConstrainIntensitiesEnabled(m_iqtFittingModel->canConstrainIntensities());
   m_iqtFittingModel->setFitTypeString(fitTypeString());
-}
-
-void IqtFit::setConstrainIntensitiesEnabled(bool enabled) {
-  //setCustomSettingEnabled("ConstrainIntensities", enabled);
-  //if (!enabled)
-  //  setCustomBoolSetting("ConstrainIntensities", false);
-  //else if (boolSettingValue("ConstrainIntensities")) {
-  //  if (m_iqtFittingModel->setConstrainIntensities(true))
-  //    updateTies();
-  //}
-}
-
-void IqtFit::customBoolUpdated(const QString &key, bool value) {
-  //if (key == "Constrain Intensities") {
-  //  if (m_iqtFittingModel->setConstrainIntensities(value))
-  //    updateTies();
-  //} else if (key == "Make Beta Global")
-  //  m_iqtFittingModel->setBetaIsGlobal(value);
 }
 
 std::string IqtFit::fitTypeString() const {

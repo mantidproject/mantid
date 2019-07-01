@@ -53,6 +53,7 @@ private slots:
   void updateSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum);
   void displaySpectraList(std::string const &spectra);
   void setMaskIndex(WorkspaceIndex index);
+  void initSpectraSelectionWidget(int index);
 
 private:
   void setSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum);

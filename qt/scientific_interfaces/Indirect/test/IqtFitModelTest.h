@@ -79,47 +79,6 @@ public:
     TS_ASSERT(m_model->getSpectrumDependentAttributes().empty());
   }
 
-  void
-  test_that_canConstrainIntensities_returns_false_if_it_contains_less_than_2_intensity_parameters() {
-    /// Intensity can either be represented by A0 or Height IqtFit
-    Spectra const spectra = Spectra("0-1");
-
-    m_model->addWorkspace(m_workspace, spectra);
-    m_model->setFitFunction(getFunction(false));
-
-    TS_ASSERT(!m_model->canConstrainIntensities());
-  }
-
-  void
-  test_that_canConstrainIntensities_returns_true_if_it_contains_2_or_more_intensity_parameters() {
-    /// Intensity can either be represented by A0 or Height in IqtFit
-    Spectra const spectra = Spectra("0-1");
-
-    m_model->addWorkspace(m_workspace, spectra);
-    m_model->setFitFunction(getFunction(true));
-
-    TS_ASSERT(m_model->canConstrainIntensities());
-  }
-
-  void
-  test_that_setConstrainIntensities_returns_false_if_there_is_not_multiple_intensities_to_be_constrained() {
-    Spectra const spectra = Spectra("0-1");
-
-    m_model->addWorkspace(m_workspace, spectra);
-    m_model->setFitFunction(getFunction(false));
-
-    TS_ASSERT(!m_model->setConstrainIntensities(true));
-  }
-
-  void
-  test_that_setConstrainIntensities_returns_true_if_there_are_multiple_intensities_to_be_constrained() {
-    Spectra const spectra = Spectra("0-1");
-
-    m_model->addWorkspace(m_workspace, spectra);
-    m_model->setFitFunction(getFunction(true));
-
-    TS_ASSERT(m_model->setConstrainIntensities(true));
-  }
 
 private:
   MatrixWorkspace_sptr m_workspace;

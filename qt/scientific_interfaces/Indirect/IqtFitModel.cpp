@@ -250,22 +250,6 @@ void IqtFitModel::setFitFunction(
     constrainIntensities(function);
 }
 
-bool IqtFitModel::canConstrainIntensities() const {
-  return hasConstrainableIntensities(getFittingFunction());
-}
-
-bool IqtFitModel::setConstrainIntensities(bool constrain) {
-  if (constrain != m_constrainIntensities) {
-    m_constrainIntensities = constrain;
-    if (constrain)
-      return constrainIntensities(getFittingFunction());
-    return unconstrainIntensities(getFittingFunction());
-  }
-  return true;
-}
-
-void IqtFitModel::setBetaIsGlobal(bool global) { m_makeBetaGlobal = global; }
-
 std::unordered_map<std::string, ParameterValue>
 IqtFitModel::createDefaultParameters(DatasetIndex index) const {
   std::unordered_map<std::string, ParameterValue> parameters;

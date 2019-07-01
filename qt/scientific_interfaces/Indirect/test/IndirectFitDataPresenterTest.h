@@ -109,6 +109,8 @@ public:
   MOCK_CONST_METHOD0(numberOfWorkspaces, DatasetIndex());
 
   MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
+  MOCK_CONST_METHOD2(getDomainIndex,
+               SpectrumRowIndex(DatasetIndex, IDAWorkspaceIndex));
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
@@ -145,14 +147,18 @@ public:
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
 
+    SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
+    m_model->addWorkspace("WorkspaceName");
+    ON_CALL(*m_model, numberOfWorkspaces())
+        .WillByDefault(Return(DatasetIndex{1}));
+
     m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
         std::move(m_model.get()), std::move(m_table.get()));
+    m_dataTablePresenter->addData(DatasetIndex{0});
+
     m_presenter = std::make_unique<IndirectFitDataPresenter>(
         std::move(m_model.get()), std::move(m_view.get()),
         std::move(m_dataTablePresenter));
-
-    SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
-    m_model->addWorkspace("WorkspaceName");
   }
 
   void tearDown() override {
@@ -190,13 +196,13 @@ public:
   void
   test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_view_and_model() {
     ON_CALL(*m_view, isMultipleDataTabSelected()).WillByDefault(Return(true));
-    ON_CALL(*m_model, numberOfWorkspaces()).WillByDefault(Return(DatasetIndex{2}));
+    ON_CALL(*m_model, numberOfWorkspaces())
+        .WillByDefault(Return(DatasetIndex{2}));
 
     Expectation isMultipleData =
         EXPECT_CALL(*m_view, isMultipleDataTabSelected())
             .Times(1)
             .WillOnce(Return(true));
-    EXPECT_CALL(*m_model, numberOfWorkspaces()).Times(1).After(isMultipleData);
 
     m_presenter->updateSpectraInTable(DatasetIndex{0});
   }
@@ -254,8 +260,27 @@ public:
   void
   test_that_setStartX_will_alter_the_relevant_startX_column_in_the_data_table() {
     TableItem const startX(2.3);
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{0}))
+        .WillByDefault(Return(SpectrumRowIndex{0}));
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{1}))
+        .WillByDefault(Return(SpectrumRowIndex{1}));
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{2}))
+        .WillByDefault(Return(SpectrumRowIndex{2}));
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{3}))
+        .WillByDefault(Return(SpectrumRowIndex{3}));
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{4}))
+        .WillByDefault(Return(SpectrumRowIndex{4}));
 
-    m_presenter->setStartX(startX.asDouble(), DatasetIndex{0}, IDAWorkspaceIndex{0});
+    m_presenter->setStartX(startX.asDouble(), DatasetIndex{0},
+                           IDAWorkspaceIndex{0});
+    m_presenter->setStartX(startX.asDouble(), DatasetIndex{0},
+                           IDAWorkspaceIndex{1});
+    m_presenter->setStartX(startX.asDouble(), DatasetIndex{0},
+                           IDAWorkspaceIndex{2});
+    m_presenter->setStartX(startX.asDouble(), DatasetIndex{0},
+                           IDAWorkspaceIndex{3});
+    m_presenter->setStartX(startX.asDouble(), DatasetIndex{0},
+                           IDAWorkspaceIndex{4});
 
     assertValueIsGlobal(START_X_COLUMN, startX);
   }
@@ -263,8 +288,27 @@ public:
   void
   test_that_setEndX_will_alter_the_relevant_endX_column_in_the_data_table() {
     TableItem const endX(5.5);
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{0}))
+        .WillByDefault(Return(SpectrumRowIndex{0}));
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{1}))
+        .WillByDefault(Return(SpectrumRowIndex{1}));
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{2}))
+        .WillByDefault(Return(SpectrumRowIndex{2}));
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{3}))
+        .WillByDefault(Return(SpectrumRowIndex{3}));
+    ON_CALL(*m_model, getDomainIndex(DatasetIndex{0}, IDAWorkspaceIndex{4}))
+        .WillByDefault(Return(SpectrumRowIndex{4}));
 
-    m_presenter->setEndX(endX.asDouble(), DatasetIndex{0}, IDAWorkspaceIndex{0});
+    m_presenter->setEndX(endX.asDouble(), DatasetIndex{0},
+                         IDAWorkspaceIndex{0});
+    m_presenter->setEndX(endX.asDouble(), DatasetIndex{0},
+                         IDAWorkspaceIndex{1});
+    m_presenter->setEndX(endX.asDouble(), DatasetIndex{0},
+                         IDAWorkspaceIndex{2});
+    m_presenter->setEndX(endX.asDouble(), DatasetIndex{0},
+                         IDAWorkspaceIndex{3});
+    m_presenter->setEndX(endX.asDouble(), DatasetIndex{0},
+                         IDAWorkspaceIndex{4});
 
     assertValueIsGlobal(END_X_COLUMN, endX);
   }
@@ -307,8 +351,10 @@ private:
   }
 
   void assertValueIsGlobal(int column, TableItem const &value) const {
-    for (auto row = 0; row < m_table->rowCount(); ++row)
-      TS_ASSERT_EQUALS(value, getTableItem(row, column));
+    for (auto row = 0; row < m_table->rowCount(); ++row) {
+      auto const item = getTableItem(row, column);
+      TS_ASSERT_EQUALS(value, item);
+    }
   }
 
   std::string getTableItem(int row, int column) const {

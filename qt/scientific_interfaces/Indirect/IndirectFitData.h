@@ -18,6 +18,7 @@
 
 #include <cctype>
 #include <numeric>
+#include <set>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -51,8 +52,11 @@ public:
   bool operator==(Spectra const &spec) const;
   bool isContinuous() const;
   SpectrumRowIndex indexOf(WorkspaceIndex i) const;
+  Spectra combine(const Spectra &other) const;
 
 private:
+  explicit Spectra(const std::set<WorkspaceIndex> &indices);
+  void checkContinuous();
   std::vector<WorkspaceIndex> m_vec;
   bool m_isContinuous;
 };

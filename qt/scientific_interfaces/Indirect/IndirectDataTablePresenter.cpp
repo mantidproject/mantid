@@ -229,7 +229,6 @@ boost::optional<SpectrumRowIndex>
 IndirectDataTablePresenter::getRowIndex(DatasetIndex dataIndex,
                                         WorkspaceIndex spectrumIndex) const {
   if (!m_dataPositions.empty()) {
-    // const auto position = m_dataPositions[dataIndex] + spectrumIndex;
     const auto position = m_model->getDomainIndex(dataIndex, spectrumIndex);
     if (getNextPosition(dataIndex) > position)
       return position;
@@ -240,16 +239,16 @@ IndirectDataTablePresenter::getRowIndex(DatasetIndex dataIndex,
 void IndirectDataTablePresenter::setStartX(double startX,
                                            DatasetIndex dataIndex,
                                            WorkspaceIndex spectrumIndex) {
-  auto const row = getRowIndex(dataIndex, spectrumIndex);
-  setStartX(startX, *row);
+  if (auto const row = getRowIndex(dataIndex, spectrumIndex))
+    setStartX(startX, *row);
 }
 
 void IndirectDataTablePresenter::setStartX(double startX,
                                            DatasetIndex dataIndex) {
   if (auto const spectra = getSpectra(dataIndex)) {
     for (auto const spectrumIndex : *spectra) {
-      auto const row = getRowIndex(dataIndex, spectrumIndex);
-      setStartX(startX, *row);
+      if (auto const row = getRowIndex(dataIndex, spectrumIndex))
+        setStartX(startX, *row);
     }
   }
 }
@@ -273,7 +272,8 @@ void IndirectDataTablePresenter::setEndX(double endX, DatasetIndex dataIndex,
 void IndirectDataTablePresenter::setEndX(double endX, DatasetIndex dataIndex) {
   if (auto const spectra = getSpectra(dataIndex)) {
     for (auto const spectrumIndex : *spectra) {
-      setEndX(endX, *getRowIndex(dataIndex, spectrumIndex));
+      if (auto const row = getRowIndex(dataIndex, spectrumIndex))
+        setEndX(endX, *row);
     }
   }
 }

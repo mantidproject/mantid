@@ -170,10 +170,8 @@ public:
   MOCK_CONST_METHOD0(numberOfWorkspaces, DatasetIndex());
   MOCK_CONST_METHOD0(getFittingFunction, MultiDomainFunction_sptr());
 
-  MOCK_METHOD3(setStartX, void(double startX, DatasetIndex dataIndex,
-                               IDAWorkspaceIndex spectrum));
-  MOCK_METHOD3(setEndX, void(double endX, DatasetIndex dataIndex,
-                             IDAWorkspaceIndex spectrum));
+  MOCK_METHOD2(setStartX, void(double startX, DatasetIndex dataIndex));
+  MOCK_METHOD2(setEndX, void(double endX, DatasetIndex dataIndex));
 
   MOCK_METHOD3(setDefaultParameterValue,
                void(std::string const &name, double value,
@@ -468,16 +466,14 @@ public:
             getFittingRange(DatasetIndex{0}, IDAWorkspaceIndex{0}))
         .WillByDefault(Return(range));
 
-    EXPECT_CALL(*m_fittingModel,
-                setStartX(1.0, DatasetIndex{0}, IDAWorkspaceIndex{0}))
-        .Times(1);
+    EXPECT_CALL(*m_fittingModel, setStartX(1.0, DatasetIndex{0})).Times(1);
 
     m_view->emitStartXChanged(1.0);
   }
 
   void test_that_the_endXChanged_signal_will_set_the_fitting_models_endX() {
     EXPECT_CALL(*m_fittingModel,
-                setEndX(2.0, DatasetIndex{0}, IDAWorkspaceIndex{0}))
+                setEndX(2.0, DatasetIndex{0}))
         .Times(1);
     m_view->emitEndXChanged(2.0);
   }

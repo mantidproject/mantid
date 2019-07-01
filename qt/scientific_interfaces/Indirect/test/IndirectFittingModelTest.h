@@ -477,35 +477,6 @@ public:
     TS_ASSERT(model->getResultGroup());
   }
 
-  // void
-  // test_that_isPreviouslyFit_returns_true_if_the_spectrum_has_been_fitted_previously()
-  // {
-  //  auto const model = getModelWithFitOutputData();
-  //  TS_ASSERT(model->isPreviouslyFit(0, 0));
-  //}
-
-  void test_that_hasZeroSpectra_returns_true_if_workspace_has_zero_spectra() {
-    auto model = getEmptyModel();
-    auto const workspace = boost::make_shared<Workspace2D>();
-    SetUpADSWithWorkspace ads("WorkspaceEmpty", workspace);
-
-    model->addWorkspace("WorkspaceEmpty");
-
-    TS_ASSERT(model->hasZeroSpectra(DatasetIndex{0}));
-  }
-
-  void
-  test_that_hasZeroSpectra_returns_true_if_the_dataIndex_provided_is_out_of_range() {
-    auto const model = createModelWithSingleWorkspace("WorkspaceName", 1);
-    TS_ASSERT(model->hasZeroSpectra(DatasetIndex{1}));
-  }
-
-  void
-  test_that_hasZeroSpectra_returns_false_if_workspace_contains_one_or_more_spectra() {
-    auto const model = createModelWithSingleWorkspace("WorkspaceName", 1);
-    TS_ASSERT(!model->hasZeroSpectra(DatasetIndex{0}));
-  }
-
   void
   test_that_isInvalidFunction_returns_a_message_when_no_activeFunction_exists() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 1);
@@ -610,35 +581,44 @@ public:
   }
 
   void
-  test_that_setStartX_will_set_the_startX_at_the_first_dataIndex_when_the_fit_is_sequential() {
+  test_setStartX() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
-    model->setStartX(4.0, DatasetIndex{3}, IDAWorkspaceIndex{0});
+    model->setStartX(4.0, DatasetIndex{0}, IDAWorkspaceIndex{3});
 
     TS_ASSERT_EQUALS(
         model->getFittingRange(DatasetIndex{0}, IDAWorkspaceIndex{0}).first,
+        0.0);
+    TS_ASSERT_EQUALS(
+        model->getFittingRange(DatasetIndex{0}, IDAWorkspaceIndex{3}).first,
         4.0);
   }
 
   void
-  test_that_setEndX_will_set_the_endX_at_the_first_dataIndex_when_the_fit_is_sequential() {
+  test_setEndX() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
-    model->setEndX(4.0, DatasetIndex{3}, IDAWorkspaceIndex{0});
+    model->setEndX(4.0, DatasetIndex{0}, IDAWorkspaceIndex{3});
 
     TS_ASSERT_EQUALS(
         model->getFittingRange(DatasetIndex{0}, IDAWorkspaceIndex{0}).second,
+        10.0);
+    TS_ASSERT_EQUALS(
+        model->getFittingRange(DatasetIndex{0}, IDAWorkspaceIndex{3}).second,
         4.0);
   }
 
   void
-  test_that_setExcludeRegion_set_the_excludeRegion_at_the_first_dataIndex_when_the_fit_is_sequential() {
+  test_setExcludeRegion() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
-    model->setExcludeRegion("0,1,3,4", DatasetIndex{3}, IDAWorkspaceIndex{0});
+    model->setExcludeRegion("0,1,3,4", DatasetIndex{0}, IDAWorkspaceIndex{3});
 
     TS_ASSERT_EQUALS(
         model->getExcludeRegion(DatasetIndex{0}, IDAWorkspaceIndex{0}),
+        "");
+    TS_ASSERT_EQUALS(
+        model->getExcludeRegion(DatasetIndex{0}, IDAWorkspaceIndex{3}),
         "0.000,1.000,3.000,4.000");
   }
 

@@ -26,7 +26,8 @@ using namespace MantidQt::CustomInterfaces::IDA;
 namespace {
 
 std::string getFunctionString(std::string const &workspaceName) {
-  return "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+  return "composite=CompositeFunction,$domains=i;name=LinearBackground,A0=0,A1="
+         "0,ties=(A0=0.000000,A1=0.0);"
          "(composite=Convolution,FixResolution=true,NumDeriv=true;"
          "name=Resolution,Workspace=" +
          workspaceName +
@@ -36,9 +37,8 @@ std::string getFunctionString(std::string const &workspaceName) {
 }
 
 MultiDomainFunction_sptr getFunction(std::string const &functionString) {
-  auto const initStr = functionString + ",$domains=i";
   auto fun = FunctionFactory::Instance().createInitialized(
-      "composite=MultiDomainFunction;" + initStr + ";" + initStr);
+      "composite=MultiDomainFunction;" + functionString + ";" + functionString);
   return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
 }
 
