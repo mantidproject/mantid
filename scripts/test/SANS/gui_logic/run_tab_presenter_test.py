@@ -1153,6 +1153,36 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
         presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
 
+    def test_that_on_reduction_mode_changed_calls_update_hab_if_selection_is_HAB(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter._beam_centre_presenter = mock.MagicMock()
+
+        presenter.on_reduction_mode_selection_has_changed("Hab")
+        presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("front")
+        presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+
+    def test_that_on_reduction_mode_changed_calls_update_lab_if_selection_is_LAB(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter._beam_centre_presenter = mock.MagicMock()
+
+        presenter.on_reduction_mode_selection_has_changed("rear")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("main-detector")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("DetectorBench")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("rear-detector")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():
