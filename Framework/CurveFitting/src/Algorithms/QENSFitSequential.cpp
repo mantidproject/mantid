@@ -398,7 +398,7 @@ void QENSFitSequential::init() {
   declareProperty(
       std::make_unique<FunctionProperty>("Function", Direction::InOut),
       "The fitting function, common for all workspaces in the input.");
-  declareProperty("LogValue", "",
+  declareProperty("LogValue", "axis-1",
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
                   "numbers.");
