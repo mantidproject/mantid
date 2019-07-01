@@ -30,6 +30,8 @@ class MuonGroup(object):
         self._asymmetry_estimate = {}
         self._counts_workspace_rebin = {}
         self._asymmetry_estimate_rebin = {}
+        self._asymmetry_estimate_unormalised = {}
+        self._asymmetry_estimate_rebin_unormalised = {}
 
     @property
     def workspace(self):
@@ -73,21 +75,27 @@ class MuonGroup(object):
         else:
             raise ValueError("detectors must be a list of ints.")
 
-    def show_raw(self, run, name, asym_name):
+    def show_raw(self, run, name, asym_name, asym_name_unnorm):
         str(run) not in self._counts_workspace or self._counts_workspace[str(run)].show(name)
         str(run) not in self._asymmetry_estimate or self._asymmetry_estimate[str(run)].show(asym_name)
+        str(run) not in self._asymmetry_estimate_unormalised or\
+            self._asymmetry_estimate_unormalised[str(run)].show(asym_name_unnorm)
 
-    def show_rebin(self, run, name, asym_name):
+    def show_rebin(self, run, name, asym_name, asym_name_unnorm):
         str(run) not in self._counts_workspace_rebin or self._counts_workspace_rebin[str(run)].show(name)
         str(run) not in self._asymmetry_estimate_rebin or self._asymmetry_estimate_rebin[str(run)].show(asym_name)
+        str(run) not in self._asymmetry_estimate_rebin_unormalised or \
+            self._asymmetry_estimate_rebin_unormalised[str(run)].show(asym_name_unnorm)
 
-    def update_workspaces(self, run, counts_workspace, asymmetry_workspace, rebin):
+    def update_workspaces(self, run, counts_workspace, asymmetry_workspace, asymmetry_workspace_unnorm, rebin):
         if rebin:
             self._counts_workspace_rebin.update({str(run): MuonWorkspaceWrapper(counts_workspace)})
             self._asymmetry_estimate_rebin.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._asymmetry_estimate_rebin_unormalised.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace_unnorm)})
         else:
             self._counts_workspace.update({str(run): MuonWorkspaceWrapper(counts_workspace)})
             self._asymmetry_estimate.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._asymmetry_estimate_unormalised.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace_unnorm)})
 
     def update_counts_workspace(self, counts_workspace, run):
         self._counts_workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})
@@ -154,3 +162,12 @@ class MuonGroup(object):
         _remove_workspace_from_dict_by_name(workspace_name, self._asymmetry_estimate)
         _remove_workspace_from_dict_by_name(workspace_name, self._counts_workspace_rebin)
         _remove_workspace_from_dict_by_name(workspace_name, self._asymmetry_estimate_rebin)
+
+    def find_unormalised(self, workspace):
+        for key, value in self._asymmetry_estimate.items():
+            if value.workspace_name == workspace:
+                return self._asymmetry_estimate_unormalised[key].workspace_name
+
+        for key, value in self._asymmetry_estimate_rebin.items():
+            if value.workspace_name == workspace:
+                return self._asymmetry_estimate_rebin_unormalised[key].workspace_name

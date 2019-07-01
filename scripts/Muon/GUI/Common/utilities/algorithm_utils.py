@@ -71,7 +71,7 @@ def run_MuonGroupingAsymmetry(parameter_dict):
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperties(parameter_dict)
     alg.execute()
-    return alg.getProperty("OutputWorkspace").value
+    return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputUnNormWorkspace").value
 
 
 def run_CalMuonDetectorPhases(parameter_dict, alg):
@@ -165,6 +165,17 @@ def run_simultaneous_Fit(parameters_dict, alg):
 
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
         alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+
+
+def run_CalculateMuonAsymmetry(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value,\
+        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
+        alg.getProperty('ChiSquared').value
 
 
 def run_AppendSpectra(ws1, ws2):

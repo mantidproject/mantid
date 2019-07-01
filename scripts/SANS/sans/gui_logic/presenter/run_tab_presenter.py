@@ -24,10 +24,11 @@ from mantid.py3compat import csv_open_type
 
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, FitType, RangeStepType, RowState, SampleShape,
+from sans.common.enums import (BatchReductionEntry, FitType, ISISReductionMode, RangeStepType, RowState, SampleShape,
                                SaveType, SANSInstrument)
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
-                                       add_dir_to_datasearch, remove_dir_from_datasearch, SANSGuiPropertiesHandler)
+from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
+                                       get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
+                                       remove_dir_from_datasearch, SANSGuiPropertiesHandler)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
@@ -102,6 +103,9 @@ class RunTabPresenter(object):
 
         def on_batch_file_load(self):
             self._presenter.on_batch_file_load()
+
+        def on_reduction_mode_selection_has_changed(self, selection):
+            self._presenter.on_reduction_mode_selection_has_changed(selection)
 
         def on_process_selected_clicked(self):
             self._presenter.on_process_selected_clicked()
@@ -890,18 +894,16 @@ class RunTabPresenter(object):
         self.save_other_presenter.set_view(save_other_view)
         self.save_other_presenter.show()
 
-    # def _validate_rows(self):
-    #     """
-    #     Validation of the rows. A minimal setup requires that ScatterSample is set.
-    #     """
-    #     # If SampleScatter is empty, then don't run the reduction.
-    #     # We allow empty rows for now, since we cannot remove them from Python.
-    #     number_of_rows = self._table_model.get_number_of_rows()
-    #     for row in range(number_of_rows):
-    #         if not self.is_empty_row(row):
-    #             sample_scatter = self._view.get_cell(row, 0)
-    #             if not sample_scatter:
-    #                 raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
+    def on_reduction_mode_selection_has_changed(self, selection):
+        if not selection:
+            return
+        mode = get_reduction_mode_from_gui_selection(selection)
+        if mode == ISISReductionMode.HAB:
+            self._beam_centre_presenter.update_hab_selected()
+        elif mode == ISISReductionMode.LAB:
+            self._beam_centre_presenter.update_lab_selected()
+        else:
+            self._beam_centre_presenter.update_all_selected()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Controls
