@@ -63,6 +63,10 @@ def get_group_or_pair_from_name(name):
     return ""
 
 
+def get_group_asymmetry_unnorm_name(context, group_name, run, rebin):
+    return '__' + get_group_asymmetry_name(context, group_name, run, rebin) + '_unnorm'
+
+
 def get_pair_data_workspace_name(context, pair_name, run, rebin):
     if context.data_context.is_multi_period():
         name = context.data_context._base_run_name(run) + pair_str + pair_name + "; Periods; " \

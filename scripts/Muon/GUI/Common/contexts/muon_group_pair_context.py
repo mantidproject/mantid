@@ -225,3 +225,12 @@ class MuonGroupPairContext(object):
     def remove_workspace_by_name(self, workspace_name):
         for item in self.groups + self.pairs:
             item.remove_workspace_by_name(workspace_name)
+
+    def get_unormalisised_workspace_list(self, workspace_list):
+        return [self.find_unormalised_workspace(workspace) for workspace in workspace_list]
+
+    def find_unormalised_workspace(self, workspace):
+        for group in self.groups:
+            unnormalised_workspace = group.find_unormalised(workspace)
+            if unnormalised_workspace:
+                return unnormalised_workspace
