@@ -251,7 +251,7 @@ class ResultsTabModelTest(unittest.TestCase):
                                             model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [],
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, ('ws1', ),
                                      self.logs)
         selected_results = [('ws1', 0)]
         table = model.create_results_table(self.log_names, selected_results)
@@ -350,10 +350,10 @@ class ResultsTabModelTest(unittest.TestCase):
         parameters = OrderedDict([('f0.Height', (100, 0.1))])
         logs = [('log1', (1., 2.)), ('log2', (3., 4.)), ('log3', (4., 5.)),
                 ('log4', (5., 6.))]
-        fits_logs1 = create_test_fits(('ws1', ), 'func1', parameters)
+        fits_logs1 = create_test_fits(('ws1', ), 'func1', parameters, output_workspace_names=('ws1', ))
         add_logs(fits_logs1[0].input_workspaces[0], logs[:2])
 
-        fits_logs2 = create_test_fits(('ws2', ), 'func1', parameters)
+        fits_logs2 = create_test_fits(('ws2', ), 'func1', parameters, output_workspace_names=('ws2', ))
         add_logs(fits_logs2[0].input_workspaces[0], logs[2:])
         model = ResultsTabModel(FittingContext(fits_logs1 + fits_logs2))
 

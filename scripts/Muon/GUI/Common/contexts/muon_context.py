@@ -9,23 +9,21 @@ from __future__ import (absolute_import, division, unicode_literals)
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_raw_data_directory, get_group_data_directory,
-                                                         get_pair_data_directory, get_group_asymmetry_name)
+                                                         get_pair_data_directory, get_group_asymmetry_name,
+                                                         get_group_asymmetry_unnorm_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.contexts.fitting_context import FittingContext
-from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
+from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
+from Muon.GUI.Common.observer_pattern import Observable
 
 
 class MuonContext(object):
-    def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
-                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext(),
-                 workspace_suffix=' MA', fitting_context=FittingContext()):
+    def __init__(self, muon_data_context=None, muon_gui_context=None,
+                 muon_group_context=None, base_directory='Muon Data', muon_phase_context=None,
+                 workspace_suffix=' MA', fitting_context=None):
 
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
@@ -34,8 +32,11 @@ class MuonContext(object):
         self.fitting_context = fitting_context
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
+        self.ads_observer = MuonContextADSObserver(self.remove_workspace_by_name, self.clear_context)
 
         self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
+
+        self.update_view_from_model_notifier = Observable()
 
     @property
     def data_context(self):
@@ -55,9 +56,9 @@ class MuonContext(object):
 
     def calculate_group(self, group_name, run, rebin=False):
         group_workspace = calculate_group_data(self, group_name, run, rebin)
-        group_asymmetry = estimate_group_asymmetry_data(self, group_name, run, rebin)
+        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin)
 
-        return group_workspace, group_asymmetry
+        return group_workspace, group_asymmetry, group_asymmetry_unnormalised
 
     def calculate_pair(self, pair_name, run, rebin=False):
         return calculate_pair_data(self, pair_name, run, rebin)
@@ -71,13 +72,16 @@ class MuonContext(object):
 
                 name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=False)
                 asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=False)
+                asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=False)
 
-                self.group_pair_context[group_name].show_raw(run, directory + name, directory + asym_name)
+                self.group_pair_context[group_name].show_raw(run, directory + name, directory + asym_name, asym_name_unnorm)
 
                 if self._do_rebin():
                     name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=True)
                     asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=True)
-                    self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name)
+                    asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=True)
+
+                    self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name, asym_name_unnorm)
 
     def show_all_pairs(self):
         self.calculate_all_pairs()
@@ -106,12 +110,14 @@ class MuonContext(object):
     def calculate_all_groups(self):
         for run in self._data_context.current_runs:
             for group_name in self._group_pair_context.group_names:
-                group_workspace, group_asymmetry = self.calculate_group(group_name, run)
-                self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry, rebin=False)
+                group_workspace, group_asymmetry, group_asymmetry_unormalised = self.calculate_group(group_name, run)
+                self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry,
+                                                                      group_asymmetry_unormalised, rebin=False)
 
                 if self._do_rebin():
-                    group_workspace, group_asymmetry = self.calculate_group(group_name, run, rebin=True)
-                    self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry, rebin=True)
+                    group_workspace, group_asymmetry, group_asymmetry_unormalised = self.calculate_group(group_name, run, rebin=True)
+                    self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry,
+                                                                          group_asymmetry_unormalised, rebin=True)
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
@@ -149,23 +155,8 @@ class MuonContext(object):
                 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
     def get_workspace_names_for_FFT_analysis(self, use_raw=True):
-        pair_names = list(self.group_pair_context.pair_names)
-        group_names = list(self.group_pair_context.group_names)
-        run_numbers = self.data_context.current_runs
-        workspace_options = []
-
-        for run in run_numbers:
-            workspace_options += self.phase_context.get_phase_quad(self.data_context.instrument, run_list_to_string(run))
-
-            for name in pair_names:
-                workspace_options.append(
-                    wsName.get_pair_data_workspace_name(self,
-                                                        str(name),
-                                                        run_list_to_string(run), not use_raw))
-            for group_name in group_names:
-                workspace_options.append(
-                    wsName.get_group_asymmetry_name(self, str(group_name), run_list_to_string(run),
-                                                    not use_raw))
+        workspace_options = self.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+                                                                     rebin=not use_raw)
         return workspace_options
 
     def get_detectors_excluded_from_default_grouping_tables(self):
@@ -264,3 +255,17 @@ class MuonContext(object):
                 equivalent_list.append(equivalent_group_pair)
 
         return equivalent_list
+
+    def remove_workspace_by_name(self, workspace_name):
+        self.data_context.remove_workspace_by_name(workspace_name)
+        self.group_pair_context.remove_workspace_by_name(workspace_name)
+        self.phase_context.remove_workspace_by_name(workspace_name)
+        self.fitting_context.remove_workspace_by_name(workspace_name)
+        self.update_view_from_model_notifier.notify_subscribers(workspace_name)
+
+    def clear_context(self):
+        self.data_context.clear()
+        self.group_pair_context.clear()
+        self.phase_context.clear()
+        self.fitting_context.clear()
+        self.update_view_from_model_notifier.notify_subscribers()

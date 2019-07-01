@@ -73,6 +73,7 @@ public:
       return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))
           ->firstValue();
     };
+    TS_ASSERT_DELTA(logpm("GatePeriod"), 5000.8, 1.0);
     TS_ASSERT_DELTA(logpm("DetectorTankAngle"), 57.513, 1.0e-3);
     TS_ASSERT_DELTA(logpm("TOFCorrection"), -256.456, 1.0e-3);
     TS_ASSERT_DELTA(logpm("Wavelength"), 4.6866, 1.0e-4);

@@ -249,6 +249,7 @@ QStringList FunctionMultiDomainPresenter::getGlobalParameters() const {
 void FunctionMultiDomainPresenter::setGlobalParameters(
     const QStringList &globals) {
   m_model->setGlobalParameters(globals);
+  m_view->setGlobalParameters(m_model->getGlobalParameters());
 }
 
 QStringList FunctionMultiDomainPresenter::getLocalParameters() const {
