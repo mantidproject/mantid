@@ -345,3 +345,4 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def minor_peaks_unchecked(self):
         for element, selector in iteritems(self.element_widgets):
             self.checked_data(element, selector.secondary_checkboxes, False)
+
