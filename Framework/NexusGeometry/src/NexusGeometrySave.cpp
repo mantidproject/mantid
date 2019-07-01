@@ -103,22 +103,20 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::DSetCreatPropList plist;
   plist.setFillValue(dataType, &dataSetDataAsCStr); // for dataSet.
 
-
   // add dataset to child group 'instrument'
   H5::DataSet dataSet = instrumentGroup.createDataSet(
-      compInfo.name(compInfo.root()), dataType, dataSpace, // <= compInfo.name(compInfo.root())
+      compInfo.name(compInfo.root()), dataType, dataSpace,
       plist); // name of dataset initialised with fill value.
 
-  writeStrAttributeToDataSet(
-      dataSet, SHORT_NAME,
-      compInfo.name(compInfo.root())); // compInfo.name(compInfo.root())); // add  atribute to dataset.
+  writeStrAttributeToDataSet(dataSet, SHORT_NAME,
+                             compInfo.name(compInfo.root()));
 
   writeStrAttributeToDataSet(dataSet, NX_CLASS,
                              NX_CHAR); // add NX_class attribute to dataset
 
   file.close();
 
-}; // saveInstrument
+} // saveInstrument
 
 } // namespace NexusGeometry
 } // namespace Mantid

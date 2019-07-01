@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -41,7 +42,9 @@ const H5std_string NX_CHAR = "NX_CHAR";
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(doReport, void(const std::string &));
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 };
 
 //  local Class used for validation of the structure of a nexus file as needed
