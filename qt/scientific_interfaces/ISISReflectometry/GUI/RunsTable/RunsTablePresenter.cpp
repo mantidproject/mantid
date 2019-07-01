@@ -371,6 +371,8 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   appendEmptyGroupInView();
   removeRowsAndGroupsFromView({location});
 
+  // Insert a new group (and include an expanded row, for usability) and then
+  // delete the original "bad" group
   appendRowAndGroup();
   notifyExpandAllRequested();
 
