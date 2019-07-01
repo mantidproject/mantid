@@ -28,6 +28,9 @@ class Prop:
     OUTPUT_WS='OutputWorkspace'
     OUTPUT_WS_BINNED='OutputWorkspaceBinned'
     OUTPUT_WS_LAM='OutputWorkspaceWavelength'
+    QMIN='MomentumTransferMin'
+    QSTEP='MomentumTransferStep'
+    QMAX='MomentumTransferMax'
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -369,17 +372,30 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _finalize(self, child_alg):
         """Set our output properties from the results in the given child algorithm"""
-        self._setOutputWorkspace(Prop.OUTPUT_WS, child_alg)
-        self._setOutputWorkspace(Prop.OUTPUT_WS_BINNED, child_alg)
-        self._setOutputWorkspace(Prop.OUTPUT_WS_LAM, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QMIN, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
 
-    def _setOutputWorkspace(self, property_name, child_alg):
+    def _setOutputProperty(self, property_name, child_alg):
         """Set the given output property from the result in the given child algorithm,
-        if it exists"""
+        if it exists in the child algorithm's outputs"""
         value = child_alg.getPropertyValue(property_name)
         if value:
             self.setPropertyValue(property_name, value)
             self.setProperty(property_name, child_alg.getProperty(property_name).value)
+
+    def _setOutputPropertyIfInputNotSet(self, property_name, child_alg):
+        """Set the given output property from the result in the given child algorithm,
+        if it was not set as an input to this algorithm and if it exists in the
+        child algorithm's outputs"""
+        if self.getProperty(property_name).isDefault:
+            value = child_alg.getPropertyValue(property_name)
+            if value:
+                self.setPropertyValue(property_name, value)
+                self.setProperty(property_name, child_alg.getProperty(property_name).value)
 
 
 def _throwIfNotValidReflectometryEventWorkspace(workspace_name):
