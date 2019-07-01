@@ -190,11 +190,11 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             raise ValueError("Out of range index={} for {} instrument bank numbers".format(banknum, self.instname))
 
         if self.instname == 'ARCS':
-            ARCS_bank_names=['B{}'.format(b)for b in range(1,39)]+
-                            ['M{}'.format(b)for b in range(1,32)]+
-                            ['M32A','M32B']+
-                            ['M{}'.format(b)for b in range(33,39)]+
-                            ['T{}'.format(b)for b in range(1,39)]
+            ARCS_bank_names=['B{}'.format(b) for b in range(1,39)] + \
+                            ['M{}'.format(b) for b in range(1,32)] + \
+                            ['M32A','M32B'] + \
+                            ['M{}'.format(b) for b in range(33,39)] + \
+                            ['T{}'.format(b) for b in range(1,39)]
             if self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]:
                 return ARCS_bank_names[banknum-1]
             else:
