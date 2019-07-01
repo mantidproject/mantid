@@ -6,11 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
 
-from Muon.GUI.Common.ADSHandler.workspace_naming import (
-    get_raw_data_workspace_name, get_group_data_workspace_name,
-    get_pair_data_workspace_name, get_base_data_directory,
-    get_raw_data_directory, get_group_data_directory,
-    get_pair_data_directory, get_group_asymmetry_name)
+
+from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
+                                                         get_pair_data_workspace_name, get_base_data_directory,
+                                                         get_raw_data_directory, get_group_data_directory,
+                                                         get_pair_data_directory, get_group_asymmetry_name,
+                                                         get_group_asymmetry_unnorm_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
@@ -64,10 +65,10 @@ class MuonContext(object):
 
     def calculate_group(self, group_name, run, rebin=False):
         group_workspace = calculate_group_data(self, group_name, run, rebin)
-        group_asymmetry = estimate_group_asymmetry_data(
-            self, group_name, run, rebin)
+        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin)
 
-        return group_workspace, group_asymmetry
+
+        return group_workspace, group_asymmetry, group_asymmetry_unnormalised
 
     def calculate_pair(self, pair_name, run, rebin=False):
         return calculate_pair_data(self, pair_name, run, rebin)
@@ -77,42 +78,21 @@ class MuonContext(object):
         for run in self._data_context.current_runs:
             for group_name in self._group_pair_context.group_names:
                 run_as_string = run_list_to_string(run)
-                directory = get_base_data_directory(
-                    self,
-                    run_as_string) + get_group_data_directory(
-                        self,
-                        run_as_string)
 
-                name = get_group_data_workspace_name(
-                    self,
-                    group_name,
-                    run_as_string,
-                    rebin=False)
-                asym_name = get_group_asymmetry_name(
-                    self,
-                    group_name,
-                    run_as_string,
-                    rebin=False)
+                directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
 
-                self.group_pair_context[group_name].show_raw(
-                    run, directory + name, directory + asym_name)
+                name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=False)
+                asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=False)
+                asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=False)
+
+                self.group_pair_context[group_name].show_raw(run, directory + name, directory + asym_name, asym_name_unnorm)
 
                 if self._do_rebin():
-                    name = get_group_data_workspace_name(
-                        self,
-                        group_name,
-                        run_as_string,
-                        rebin=True)
-                    asym_name = get_group_asymmetry_name(
-                        self,
-                        group_name,
-                        run_as_string,
-                        rebin=True)
-                    self.group_pair_context[
-                        group_name].show_rebin(
-                            run,
-                            directory + name,
-                            directory + asym_name)
+                    name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=True)
+                    asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=True)
+                    asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=True)
+
+                    self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name, asym_name_unnorm)
 
     def show_all_pairs(self):
         self.calculate_all_pairs()
@@ -163,20 +143,15 @@ class MuonContext(object):
     def calculate_all_groups(self):
         for run in self._data_context.current_runs:
             for group_name in self._group_pair_context.group_names:
-                group_workspace, group_asymmetry = self.calculate_group(
-                    group_name, run)
-                self.group_pair_context[
-                    group_name].update_workspaces(
-                        run,
-                        group_workspace,
-                        group_asymmetry,
-                        rebin=False)
+
+                group_workspace, group_asymmetry, group_asymmetry_unormalised = self.calculate_group(group_name, run)
+                self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry,
+                                                                      group_asymmetry_unormalised, rebin=False)
 
                 if self._do_rebin():
-                    group_workspace, group_asymmetry = self.calculate_group(
-                        group_name, run, rebin=True)
-                    self.group_pair_context[group_name].update_workspaces(
-                        run, group_workspace, group_asymmetry, rebin=True)
+                    group_workspace, group_asymmetry, group_asymmetry_unormalised = self.calculate_group(group_name, run, rebin=True)
+                    self.group_pair_context[group_name].update_workspaces(run, group_workspace, group_asymmetry,
+                                                                          group_asymmetry_unormalised, rebin=True)
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their

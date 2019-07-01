@@ -115,6 +115,10 @@ There are a number of URLs via which the code can be checked out using various p
     git clone git@github.com:mantidproject/mantid.git
 
 
+Setting up GitHub
+#################
+Please install the ZenHub Browser extension from this `page <https://www.zenhub.com/extension>`_. 
+
 Building Mantid
 ###############
 See :ref:`BuildingWithCMake` for information about building Mantid.
