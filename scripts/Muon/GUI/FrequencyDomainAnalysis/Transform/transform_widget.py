@@ -41,7 +41,7 @@ class TransformWidget(QtWidgets.QWidget):
         try:
             self.load.update_view_from_model_notifier.add_subscriber(
                 self.update_view_from_model_observer)
-        except: 
+        except:
             pass
 
     def update_view_from_model(self):
