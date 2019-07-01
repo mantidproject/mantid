@@ -113,6 +113,19 @@ to refer to either an issue or a PR on this page*)
   PR is still ongoing, and you don't want a review yet. **REMEMBER TO
   REMOVE IT ONCE YOUR WORK IS READY FOR REVIEW**
 
+
+.. _IssueTrackingZenHub:
+
+ZenHub
+^^^^^^
+
+Using the ZenHub browser extension set an estimate, this should be the number of 
+days you expect to take from begining to work on an issue, to opening a pull-request about it.
+Once you actually begin working on the issue change the pipeline to In Progress, 
+then again to Review/QA when you open a pull-request for it. This will be used to to aid with 
+future estimations of time for an issue.
+
+
 Filtering Issues
 ^^^^^^^^^^^^^^^^
 

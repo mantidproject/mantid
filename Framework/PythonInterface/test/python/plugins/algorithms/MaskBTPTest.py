@@ -126,6 +126,15 @@ class MaskBTPTest(unittest.TestCase):
         MaskBTP(Instrument='SEQUOIA', Bank="150")
         return
 
+    def testEQSANSMaskBTP(self):
+        w = LoadEmptyInstrument(InstrumentName='EQ-SANS',
+                                OutputWorkspace='empty_eqsans')
+        m1 = MaskBTP(w, Bank='1-48', Pixel='1-8,249-256')  # tube tips
+        m2 = MaskBTP(w, Bank='17', Tube='2')  # rogue tube
+        m3 = MaskBTP(w, Components='back-panel')  # whole back panel
+        for mask, n_masked in zip((m1, m2, m3), (3072, 256, 24576)):
+            self.assertEqual(len(mask), n_masked)
+
     def testEdges(self):
         # this combined option should probably be called corners
         masking = MaskBTP(Instrument='TOPAZ', Tube='edges', Pixel='EdGes')  # funny case just b/c
@@ -186,10 +195,21 @@ class MaskBTPTest(unittest.TestCase):
             this_tube_first_id = start_id + 256*tube
             self.checkDetectorIndexes(wksp, list(range(this_tube_first_id, this_tube_first_id+256)))
 
+    def test_eqsans_simple(self):
+        ws_name = 'eqsans'
+        LoadEmptyInstrument(InstrumentName='EQ-SANS', OutputWorkspace=ws_name)
+
+        # every other tube in a "bank"
+        masked = MaskBTP(Workspace=ws_name, Tube="1,3")
+        wksp = mtd[ws_name]
+        self.assertEqual(int(192*256/2), len(masked))
+        self.checkConsistentMask(wksp, masked)
+
     def test_eqsans_interleaved(self):
         ws_name = 'eqsans'
-        LoadEmptyInstrument(InstrumentName='EQSANS', OutputWorkspace=ws_name)
+        LoadEmptyInstrument(Filename='EQ-SANS_Definition_19000131_20190614.xml', OutputWorkspace=ws_name)
 
+        # legacy instrument had wacky numbering
         masked = MaskBTP(Workspace=ws_name, Tube="5:200:8,6:200:8,7:200:8,8:200:8")
         wksp = mtd[ws_name]
         self.assertEqual(int(192*256/2), len(masked))
