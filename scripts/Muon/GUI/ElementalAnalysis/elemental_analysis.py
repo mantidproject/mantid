@@ -284,7 +284,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     # sets data file for periodic table
     def select_data_file(self):
-        old_lines = deepcopy(self.element_lines.keys())
+        old_lines = deepcopy(list(self.element_lines.keys()))
 
         filename = QtWidgets.QFileDialog.getOpenFileName()
         if isinstance(filename, tuple):
@@ -297,9 +297,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         #self._clear_lines_after_data_file_selected()
         self._generate_element_widgets()
         for element in old_lines:
-            if element in self.element_widgets.keys():
-                continue
-            self._remove_element_lines(element)
+            if element not in self.element_widgets.keys():
+                self._remove_element_lines(element)
         #self._generate_element_data()
 
     # general checked data
