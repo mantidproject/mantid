@@ -98,7 +98,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter()
         line = self._get_no_errors_line()
         err_bars = self.fig.get_axes()[0].containers[0]
-        presenter.set_curve_label(err_bars, 'new_label')
+        presenter.set_new_curve_name_in_dict_and_combo_box(err_bars, 'new_label')
         self.assertEqual({'new_label': err_bars, 'noerrors': line},
                          presenter.curve_names_dict)
 

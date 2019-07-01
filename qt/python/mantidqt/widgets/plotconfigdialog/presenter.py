@@ -51,13 +51,13 @@ class PlotConfigDialogPresenter:
         self.view.cancel_button.clicked.connect(self.exit)
 
     def _add_tab_widget_views(self):
-        for tab in self.tab_widget_views:
-            if tab:
-                self.view.add_tab_widget(tab)
+        for tab_view in self.tab_widget_views:
+            if tab_view:
+                self.view.add_tab_widget(tab_view)
 
     def apply_properties(self):
-        for tab in self.tab_widget_presenters:
-            if tab:
+        for tab in reversed(self.tab_widget_presenters):
+            if tab and tab.view:
                 tab.apply_properties()
         self.fig.canvas.draw()
 

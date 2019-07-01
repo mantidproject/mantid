@@ -75,16 +75,6 @@ def curve_hidden(curve):
         return not curve.get_visible()
 
 
-def set_curve_hidden(curve, hide):
-    """Set all lines in a curve to non-visible"""
-    if isinstance(curve, ErrorbarContainer):
-        if curve[0]:
-            curve[0].set_visible(not hide)
-        set_errorbars_hidden(curve, hide)
-    else:
-        curve.set_visible(not hide)
-
-
 def set_errorbars_hidden(container, hide):
     """Set all lines in an ErrorbarContainer to non-visible"""
     if not isinstance(container, ErrorbarContainer):
@@ -144,6 +134,7 @@ class CurveProperties(dict):
         for k, v in self.items():
             if k not in ['hide', 'hide_errors']:
                 kwargs[k] = v
+        kwargs['visible'] = not self.hide
         return kwargs
 
     @classmethod

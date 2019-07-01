@@ -16,7 +16,7 @@ from mantid.plots.helperfunctions import get_data_from_errorbar_container
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
-    CurveProperties, set_curve_hidden, set_errorbars_hidden, curve_has_errors,
+    CurveProperties, set_errorbars_hidden, curve_has_errors,
     remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 
@@ -51,8 +51,7 @@ class CurvesTabWidgetPresenter:
         self.replot_selected_curve(view_props.get_plot_kwargs())
         # Set the curve's label, hide if necessary and redraw legend
         curve = self.get_selected_curve()
-        self.set_curve_label(curve, view_props.label)
-        set_curve_hidden(curve, view_props.hide)
+        self.set_new_curve_name_in_dict_and_combo_box(curve, view_props.label)
         # No need to hide errors if they're already hidden
         if not view_props.hide:
             set_errorbars_hidden(curve, view_props.hide_errors)
@@ -80,7 +79,7 @@ class CurvesTabWidgetPresenter:
 
     def get_view_properties(self):
         """Get top level properties from view"""
-        return CurveProperties.from_view(self.view)
+        return self.view.get_properties()
 
     @staticmethod
     def replot_curve(ax, curve, plot_kwargs):
@@ -181,12 +180,11 @@ class CurvesTabWidgetPresenter:
                     self.close_tab()
                     return True
 
-    def set_curve_label(self, curve, label):
-        """Set label on curve and update its entry in the combo box"""
+    def set_new_curve_name_in_dict_and_combo_box(self, curve, new_label):
+        """Update a curve name in the curve names dict and combo box"""
         old_name = self.view.get_selected_curve_name()
-        curve.set_label(label)
-        if label:
-            curve_name = self._generate_curve_name(curve, label)
+        if new_label:
+            curve_name = self._generate_curve_name(curve, new_label)
             self.view.set_selected_curve_selector_text(curve_name)
             self.curve_names_dict[curve_name] = self.curve_names_dict.pop(old_name)
 
