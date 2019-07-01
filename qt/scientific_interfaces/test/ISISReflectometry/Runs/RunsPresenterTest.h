@@ -25,12 +25,12 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using Mantid::DataObjects::TableWorkspace;
-using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
+using testing::_;
 
 //=====================================================================================
 // Functional tests
