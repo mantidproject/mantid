@@ -235,8 +235,8 @@ class subplot(QtWidgets.QWidget):
         # if all of the lines have been removed -> delete subplot
         if remove_subplot:
             self._remove_subplot(self._rm_window.subplot)
-
-        self.canvas.draw()
+        else:
+            self.canvas.draw()
         # if no subplots then close plotting window
         if len(self._context.subplots.keys()) == 0:
             self._close_rm_window()
