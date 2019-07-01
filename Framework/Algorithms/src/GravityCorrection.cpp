@@ -30,13 +30,13 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Quat.h"
-#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <iterator>
 #include <memory>
 #include <utility>
 
+using boost::make_shared;
 using Mantid::API::AlgorithmHistories;
 using Mantid::API::AlgorithmHistory_const_sptr;
 using Mantid::API::HistogramValidator;
@@ -48,8 +48,8 @@ using Mantid::API::SpectrumInfo;
 using Mantid::API::WorkspaceHistory;
 using Mantid::API::WorkspaceProperty;
 using Mantid::API::WorkspaceUnitValidator;
-using Mantid::DataObjects::Workspace2D;
 using Mantid::DataObjects::create;
+using Mantid::DataObjects::Workspace2D;
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Geometry::IComponent_const_sptr;
@@ -63,11 +63,10 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::Property;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
-using Mantid::Kernel::make_unique;
 using Mantid::PhysicalConstants::g;
-using boost::make_shared;
 using std::abs;
 using std::find_if;
+using std::make_unique;
 using std::map;
 using std::pair;
 using std::pow;
@@ -607,8 +606,8 @@ void GravityCorrection::exec() {
       auto j = this->spectrumNumber(angle, theta);
       if (j > m_finalAngles.size() - 2) {
         this->g_log.debug("Count(s) not present in final workspace since not "
-                          "detected, skip bin " + to_string(i_tofit) +
-                          " of spectrum " + to_string(i));
+                          "detected, skip bin " +
+                          to_string(i_tofit) + " of spectrum " + to_string(i));
         continue;
       }
 

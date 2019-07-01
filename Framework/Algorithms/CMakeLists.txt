@@ -162,7 +162,7 @@ set(SRC_FILES
     src/GetEiMonDet3.cpp
     src/GetQsInQENSData.cpp
     src/GetTimeSeriesLogInformation.cpp
-    scr/GravityCorrection.cpp
+    src/GravityCorrection.cpp
     src/GravitySANSHelper.cpp
     src/GroupToXResolution.cpp
     src/GroupWorkspaces.cpp
