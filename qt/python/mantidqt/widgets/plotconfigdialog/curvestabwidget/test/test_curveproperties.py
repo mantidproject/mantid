@@ -15,8 +15,10 @@ mpl_use('Agg')  # noqa
 from matplotlib import rcParams
 from matplotlib.pyplot import figure
 
+from mantid.py3compat.mock import Mock
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
+from mantidqt.widgets.plotconfigdialog import curvestabwidget as funcs
 
 
 class CurvePropertiesTest(unittest.TestCase):
@@ -44,6 +46,15 @@ class CurvePropertiesTest(unittest.TestCase):
                      yerr=[0, 0.1, 0.2], fmt='none', label='ax1')
         cls.props = CurveProperties.from_curve(ax0.get_lines()[0])
         cls.error_props = CurveProperties.from_curve(ax1.containers[0])
+
+    def _create_artist(self, errors=False):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        if errors:
+            artist = ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.1])
+        else:
+            artist = ax.plot([0, 1], [0, 1])[0]
+        return artist
 
     def test_label_set(self):
         self.assertEqual(self.props_dict['label'], self.props.label)
@@ -94,3 +105,40 @@ class CurvePropertiesTest(unittest.TestCase):
                          'markerfacecolor': '#000000',
                          'markersize': 10}
         self.assertEqual(expected_dict, self.props.get_plot_kwargs())
+
+    def test_errorbars_hidden_returns_true_for_non_errorbar_container_object(self):
+        self.assertTrue(funcs.errorbars_hidden(Mock()))
+
+    def test_errorbars_hidden_returns_correctly_on_errorbar_container(self):
+        container = self._create_artist(errors=True)
+        self.assertFalse(funcs.errorbars_hidden(container))
+        container[2][0].set_visible(False)
+        self.assertTrue(funcs.errorbars_hidden(container))
+
+    def test_errorbars_hidden_returns_false_on_container_with_connecting_line_with_include_true(self):
+        container = self._create_artist(errors=True)
+        # Hide errorbars
+        [bars.set_visible(False) for bars in container[2]]
+        self.assertFalse(funcs.errorbars_hidden(container, include_connecting_line=True))
+
+    def test_errorbars_hidden_returns_true_on_container_with_connecting_line_with_include_false(self):
+        container = self._create_artist(errors=True)
+        # Hide errorbars but not connecting line
+        [bars.set_visible(False) for bars in container[2]]
+        self.assertTrue(funcs.errorbars_hidden(container))
+
+    def test_curve_hidden_on_line2d(self):
+        line2d = self._create_artist(errors=False)
+        self.assertFalse(funcs.curve_hidden(line2d))
+        line2d.set_visible(False)
+        self.assertTrue(funcs.curve_hidden(line2d))
+
+    def test_curve_hidden_on_errorbar_container(self):
+        container = self._create_artist(errors=True)
+        self.assertFalse(funcs.curve_hidden(container))
+        # Hide errorbars but not connecting line
+        [bars.set_visible(False) for bars in container[2]]
+        self.assertFalse(funcs.curve_hidden(container))
+        # Now hide connecting line
+        container[0].set_visible(False)
+        self.assertTrue(funcs.curve_hidden(container))

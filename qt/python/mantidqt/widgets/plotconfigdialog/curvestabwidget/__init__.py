@@ -33,11 +33,14 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
               'caretdown (centered at base)': 11, 'None': 'None'}
 
 
-def errorbars_hidden(err_container):
+def errorbars_hidden(err_container, include_connecting_line=False):
     """Return True if all lines in ErrorbarContainer are not visible"""
     hidden = True
+    if not isinstance(err_container, ErrorbarContainer):
+        return True
+    err_lines = err_container.lines if include_connecting_line else err_container[1:]
     try:
-        for lines in err_container.lines:
+        for lines in err_lines:
             try:
                 for line in lines:
                     hidden = hidden and (not line.get_visible())
@@ -67,7 +70,7 @@ def get_marker_name(marker):
 def curve_hidden(curve):
     """Return True if curve is not visible"""
     if isinstance(curve, ErrorbarContainer):
-        return errorbars_hidden(curve)
+        return errorbars_hidden(curve, include_connecting_line=True)
     else:
         return not curve.get_visible()
 
