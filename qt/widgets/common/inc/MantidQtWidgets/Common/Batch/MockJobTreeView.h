@@ -16,9 +16,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockJobTreeView : public IJobTreeView {
+class DLLExport MockJobTreeView : public IJobTreeView {
 public:
   MockJobTreeView() : m_deadCell("", "white", 0, "transparent", 0, false) {
     ON_CALL(*this, deadCell()).WillByDefault(Return(m_deadCell));
@@ -32,7 +32,7 @@ public:
   MOCK_METHOD0(resetFilter, void());
   MOCK_CONST_METHOD0(hasFilter, bool());
 
-  MOCK_METHOD1(subscribe, void(JobTreeViewSubscriber &));
+  MOCK_METHOD1(subscribe, void(JobTreeViewSubscriber *));
 
   MOCK_METHOD3(insertChildRowOf, RowLocation(RowLocation const &, int,
                                              std::vector<Cell> const &));
@@ -40,9 +40,13 @@ public:
   MOCK_METHOD1(appendChildRowOf, RowLocation(RowLocation const &));
   MOCK_METHOD2(appendChildRowOf,
                RowLocation(RowLocation const &, std::vector<Cell> const &));
+  MOCK_METHOD0(appendAndEditAtChildRow, void());
+  MOCK_METHOD0(appendAndEditAtRowBelow, void());
+  MOCK_METHOD0(editAtRowAbove, void());
 
   MOCK_METHOD1(removeRowAt, void(RowLocation const &));
   MOCK_METHOD1(removeRows, void(std::vector<RowLocation>));
+  MOCK_METHOD0(removeAllRows, void());
   MOCK_CONST_METHOD1(isOnlyChildOfRoot, bool(RowLocation const &));
 
   MOCK_METHOD2(replaceRows,
@@ -85,7 +89,7 @@ private:
   Cell m_deadCell;
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

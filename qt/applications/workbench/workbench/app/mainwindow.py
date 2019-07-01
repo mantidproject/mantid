@@ -355,7 +355,7 @@ class MainWindow(QMainWindow):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
         interfaces = self._discover_python_interfaces(interface_dir)
-        interfaces.update(self._discover_cpp_interfaces())
+        self._discover_cpp_interfaces(interfaces)
 
         keys = list(interfaces.keys())
         keys.sort()
@@ -395,9 +395,8 @@ class MainWindow(QMainWindow):
 
         return interfaces
 
-    def _discover_cpp_interfaces(self):
+    def _discover_cpp_interfaces(self, interfaces):
         """Return a dictionary mapping a category to a set of named C++ interfaces"""
-        interfaces = {}
         cpp_interface_factory = UserSubWindowFactory.Instance()
         interface_names = cpp_interface_factory.keys()
         for name in interface_names:
@@ -405,7 +404,10 @@ class MainWindow(QMainWindow):
             if len(categories) == 0:
                 categories = ["General"]
             for category in categories:
-                interfaces.setdefault(category, []).append(name)
+                if category in interfaces.keys():
+                    interfaces[category].append(name)
+                else:
+                    interfaces[category] = [name]
 
         return interfaces
 

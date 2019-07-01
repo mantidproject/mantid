@@ -11,6 +11,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
+#include "MantidQtWidgets/Common/Python/Sip.h"
 
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;

@@ -224,7 +224,6 @@ public:
   GenericDialog(QWidget *parent = nullptr);
 };
 
-
 class UserSubWindow : QMainWindow {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/UserSubWindow.h"
@@ -541,7 +540,11 @@ public:
                                      int column,
                                      const std::string& oldValue,
                                      const std::string& newValue) = 0;
+  virtual void notifySelectionChanged() = 0;
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex) = 0;
+  virtual void notifyAppendAndEditAtChildRowRequested() = 0;
+  virtual void notifyAppendAndEditAtRowBelowRequested() = 0;
+  virtual void notifyEditAtRowAboveRequested() = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
@@ -560,7 +563,7 @@ public:
     JobTreeView(const QStringList &columnHeadings, const Cell& defaultCellStyle,
      QWidget *parent = nullptr);
 
-    void subscribe(JobTreeViewSubscriber& subscriber);
+    void subscribe(JobTreeViewSubscriber *subscriber);
     MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
      &parent, int beforeRow,
                           const std::vector<Cell> &rowText);
@@ -571,6 +574,9 @@ public:
     MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
     &parentLocation,
                           const std::vector<Cell> &rowText);
+    void appendAndEditAtChildRow();
+    void appendAndEditAtRowBelow();
+    void editAtRowAbove();
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
     void removeAllRows();
@@ -663,7 +669,11 @@ public:
                                      int column,
                                      const std::string &oldValue,
                                      const std::string &newValue);
+  virtual void notifySelectionChanged();
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  virtual void notifyAppendAndEditAtChildRowRequested();
+  virtual void notifyAppendAndEditAtRowBelowRequested();
+  virtual void notifyEditAtRowAboveRequested();
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested();
@@ -677,11 +687,13 @@ signals:
                        std::string newValue);
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   void filterReset();
+  void appendAndEditAtChildRowRequested();
+  void appendAndEditAtRowBelowRequested();
+  void editAtRowAboveRequested();
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
   void cutRowsRequested();
-
 };
 
 

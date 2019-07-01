@@ -6,13 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/ReflectometryHelper.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/CreateWorkspace.h"
-#include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/BinEdges.h"
@@ -23,7 +20,6 @@
 
 namespace Mantid {
 
-using namespace Algorithms;
 using namespace API;
 using namespace DataHandling;
 using namespace DataObjects;
@@ -44,16 +40,17 @@ MatrixWorkspace_sptr createHistoWS(size_t nBins, double startX, double endX,
               values[i]);
   }
 
-  CreateWorkspace creator;
-  creator.setChild(true);
-  creator.initialize();
-  creator.setProperty("DataX", xVals.rawData());
-  creator.setProperty("DataY", yVals);
-  creator.setProperty("NSpec", int(nSpec));
-  creator.setProperty("UnitX", unitX);
-  creator.setPropertyValue("OutputWorkspace", "dummy");
-  creator.execute();
-  MatrixWorkspace_sptr workspace = creator.getProperty("OutputWorkspace");
+  auto creator =
+      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+  creator->setChild(true);
+  creator->initialize();
+  creator->setProperty("DataX", xVals.rawData());
+  creator->setProperty("DataY", yVals);
+  creator->setProperty("NSpec", int(nSpec));
+  creator->setProperty("UnitX", unitX);
+  creator->setPropertyValue("OutputWorkspace", "dummy");
+  creator->execute();
+  MatrixWorkspace_sptr workspace = creator->getProperty("OutputWorkspace");
   return workspace;
 }
 
@@ -62,21 +59,23 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
                                    std::string const &paramsType) {
   MatrixWorkspace_sptr workspace = createHistoWS(nBins, startX, endX, values);
 
-  LoadInstrument instrumentLoader;
-  instrumentLoader.initialize();
-  instrumentLoader.setPropertyValue("Filename",
-                                    "unit_testing/REFL_Definition.xml");
-  instrumentLoader.setProperty("Workspace", workspace);
-  instrumentLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-  instrumentLoader.execute();
+  auto instrumentLoader =
+      AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+  instrumentLoader->initialize();
+  instrumentLoader->setPropertyValue("Filename",
+                                     "unit_testing/REFL_Definition.xml");
+  instrumentLoader->setProperty("Workspace", workspace);
+  instrumentLoader->setProperty("RewriteSpectraMap", OptionalBool(true));
+  instrumentLoader->execute();
 
   if (!paramsType.empty()) {
-    LoadParameterFile paramLoader;
-    paramLoader.initialize();
-    paramLoader.setPropertyValue("Filename", "unit_testing/REFL_Parameters_" +
-                                                 paramsType + ".xml");
-    paramLoader.setProperty("Workspace", workspace);
-    paramLoader.execute();
+    auto paramLoader =
+        AlgorithmManager::Instance().createUnmanaged("LoadParameterFile");
+    paramLoader->initialize();
+    paramLoader->setPropertyValue("Filename", "unit_testing/REFL_Parameters_" +
+                                                  paramsType + ".xml");
+    paramLoader->setProperty("Workspace", workspace);
+    paramLoader->execute();
   }
 
   return workspace;
@@ -105,11 +104,12 @@ void prepareInputGroup(std::string const &name, std::string const &paramsType,
     names.append(name1);
   }
 
-  GroupWorkspaces mkGroup;
-  mkGroup.initialize();
-  mkGroup.setProperty("InputWorkspaces", names);
-  mkGroup.setProperty("OutputWorkspace", name);
-  mkGroup.execute();
+  auto mkGroup =
+      AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  mkGroup->initialize();
+  mkGroup->setProperty("InputWorkspaces", names);
+  mkGroup->setProperty("OutputWorkspace", name);
+  mkGroup->execute();
 }
 
 std::vector<MatrixWorkspace_sptr> groupToVector(WorkspaceGroup_sptr group) {
