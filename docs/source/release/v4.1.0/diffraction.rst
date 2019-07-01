@@ -46,6 +46,8 @@ Bug Fixes
 
 - Pearl no longer produces an output of NaN when long-mode is changed after focusing.
 
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` no longer errors out if the first chunk has no events
+
 Engineering Diffraction
 -----------------------
 
