@@ -37,8 +37,12 @@ class TransformWidget(QtWidgets.QWidget):
         self.updateDisplay('FFT')
         self.update_view_from_model_observer = GenericObserver(
             self.update_view_from_model)
-        self.load.update_view_from_model_notifier.add_subscriber(
-            self.update_view_from_model_observer)
+        # to make it compatable with the old GUI
+        try:
+            self.load.update_view_from_model_notifier.add_subscriber(
+                self.update_view_from_model_observer)
+        except: 
+            pass
 
     def update_view_from_model(self):
         self._fft.update_view_from_model()
