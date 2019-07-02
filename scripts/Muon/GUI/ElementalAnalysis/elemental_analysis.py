@@ -90,7 +90,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # plotting
         self.plot_window = None
-        self.colors = ['b', 'g', 'r', 'y']
+        self.colors = ['b', 'g', 'r', 'y', 'c', 'm', 'b']
         self.color_index = 0
 
         # layout
