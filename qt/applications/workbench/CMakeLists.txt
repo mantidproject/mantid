@@ -1,5 +1,14 @@
 # Create egg link to binary output directory
-add_python_package(workbench EXECUTABLE "EXCLUDE_RESOURCES")
+if(WIN32)
+  # handled separately below
+  set(_exclude_on_install "resources\.pyc?")
+else()
+  set(_exclude_on_install "")
+endif()
+add_python_package(workbench
+  EXECUTABLE
+  EXCLUDE_FROM_INSTALL ${_exclude_on_install}
+)
 
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
@@ -46,7 +55,7 @@ else()
                      COMMENT "Generating workbench resources module"
                      DEPENDS ${_images_qrc_file})
   add_custom_target(workbench_resources ALL DEPENDS ${_output_res_py})
-endif()     
+endif()
 
 # Dependency chain
 add_dependencies(workbench workbench_resources mantidqt)
