@@ -154,7 +154,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'TransmissionProcessingInstructions', 'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax', 'ScaleFactor',
             'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha', 'FloodCorrection',
-            'FloodWorkspace', 'Debug']
+            'FloodWorkspace', 'Debug', 'ScaleRHSWorkspace']
         self.copyProperties('ReflectometryReductionOneAuto', self._reduction_properties)
 
     def _getInputWorkspaces(self, runs, isTrans):
