@@ -8,7 +8,12 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+
+namespace {
+Mantid::Kernel::Logger g_log("FitFunction");
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -380,13 +385,22 @@ void MultiDomainFunctionModel::setLocalParameterFixed(const QString &parName,
 
 void MultiDomainFunctionModel::setLocalParameterTie(const QString &parName,
                                                     int i, const QString &tie) {
+  auto logError = [&parName](const std::string &msg) {
+    g_log.error() << "Tie " << parName.toStdString() << ": " << msg << '\n';
+  };
   auto fun = getSingleFunction(i);
   auto const name = parName.toStdString();
   if (tie.isEmpty()) {
     fun->removeTie(fun->parameterIndex(name));
   } else {
     auto const j = tie.indexOf('=');
-    fun->tie(name, tie.mid(j + 1).toStdString());
+    try {
+      fun->tie(name, tie.mid(j + 1).toStdString());
+    } catch (const std::invalid_argument &e) {
+      logError(e.what());
+    } catch (const std::runtime_error &e) {
+      logError(e.what());
+    }
   }
 }
 
