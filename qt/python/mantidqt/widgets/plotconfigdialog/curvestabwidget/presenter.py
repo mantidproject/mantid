@@ -49,14 +49,14 @@ class CurvesTabWidgetPresenter:
         view_props = self.get_view_properties()
         # Re-plot curve
         self.replot_selected_curve(view_props.get_plot_kwargs())
-        # Set the curve's label, hide if necessary and redraw legend
         curve = self.get_selected_curve()
+        # Set the curve's new name in the names dict and combo box
         self.set_new_curve_name_in_dict_and_combo_box(curve, view_props.label)
-        # No need to hide errors if they're already hidden
-        if not view_props.hide:
-            set_errorbars_hidden(curve, view_props.hide_errors)
+        set_errorbars_hidden(curve, view_props.hide_errors)
         if self.get_selected_ax().legend_:
             self.get_selected_ax().legend().draggable()
+        self.get_selected_ax().relim()
+        self.get_selected_ax().autoscale()
 
     def close_tab(self):
         """Close the tab and set the view to None"""

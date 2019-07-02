@@ -103,7 +103,8 @@ class CurvePropertiesTest(unittest.TestCase):
                          'marker': 'triangle_down',
                          'markeredgecolor': '#008000',
                          'markerfacecolor': '#000000',
-                         'markersize': 10}
+                         'markersize': 10,
+                         'visible': False}
         self.assertEqual(expected_dict, self.props.get_plot_kwargs())
 
     def test_errorbars_hidden_returns_true_for_non_errorbar_container_object(self):

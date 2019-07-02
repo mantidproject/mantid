@@ -116,6 +116,7 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
     mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
     mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
+    mantidqt/widgets/plotconfigdialog/test/test_apply_all_properties.py
     mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
     mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
