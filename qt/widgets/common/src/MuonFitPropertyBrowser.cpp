@@ -1242,7 +1242,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       }
     } // single fit
     else {
-      m_functionBrowser->clear();
+      FitPropertyBrowser::clear();
       m_functionBrowser->setFunction(func);
     }
 
