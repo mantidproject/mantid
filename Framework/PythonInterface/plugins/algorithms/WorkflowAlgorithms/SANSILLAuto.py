@@ -65,7 +65,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
     """
 
     def category(self):
-        return 'ILL\\SANS'
+        return 'ILL\\SANS;ILL\\Auto'
 
     def summary(self):
         return 'Performs complete SANS data reduction at the ILL.'
@@ -124,6 +124,11 @@ class SANSILLAuto(DataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='The output workspace in Q space.')
 
+        self.setPropertyGroup('SampleTransmissionRuns', 'Transmissions')
+        self.setPropertyGroup('ContainerTransmissionRuns', 'Transmissions')
+        self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
+        self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
+
     def PyExec(self):
 
         sample = self.getPropertyValue('SampleRuns')
@@ -140,35 +145,45 @@ class SANSILLAuto(DataProcessorAlgorithm):
         output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         type = self.getPropertyValue('ReductionType')
 
-        progress = Progress(self, start=0.0, end=1.0, nreports=9)
+        progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
         [process_transmission_absorber, transmission_absorber_name] = needs_processing(absorber_transmission, 'Absorber')
         if process_transmission_absorber:
             progress.report('Processing transmission absorber')
             SANSILLReduction(Run=absorber_transmission, ProcessAs='Absorber', OutputWorkspace=transmission_absorber_name)
+        else:
+            progress.report('Using transmission absorber from ADS')
 
         [process_transmission_beam, transmission_beam_name] = needs_processing(beam_transmission, 'Beam')
         if process_transmission_beam:
-            progress.report('Processing beam')
+            progress.report('Processing transmission beam')
             SANSILLReduction(Run=beam_transmission, ProcessAs='Beam', OutputWorkspace=transmission_beam_name,
                              AbsorberInputWorkspace=transmission_absorber_name)
+        else:
+            progress.report('Using transmission beam from ADS')
 
         [process_container_transmission, container_transmission_name] = needs_processing(ctransmission, 'Transmission')
         if process_container_transmission:
             progress.report('Processing container transmission')
             SANSILLReduction(Run=ctransmission, ProcessAs='Transmission', OutputWorkspace=container_transmission_name,
                              AbsorberInputWorkspace=transmission_absorber_name, BeamInputWorkspace=transmission_beam_name)
+        else:
+            progress.report('Using container transmission from ADS')
 
         [process_sample_transmission, sample_transmission_name] = needs_processing(stransmission, 'Transmission')
         if process_sample_transmission:
             progress.report('Processing sample transmission')
             SANSILLReduction(Run=stransmission, ProcessAs='Transmission', OutputWorkspace=sample_transmission_name,
                              AbsorberInputWorkspace=transmission_absorber_name, BeamInputWorkspace=transmission_beam_name)
+        else:
+            progress.report('Using sample transmission from ADS')
 
         [process_absorber, absorber_name] = needs_processing(absorber, 'Absorber')
         if process_absorber:
             progress.report('Processing absorber')
             SANSILLReduction(Run=absorber, ProcessAs='Absorber', OutputWorkspace=absorber_name)
+        else:
+            progress.report('Using absorber from ADS')
 
         [process_beam, beam_name] = needs_processing(beam, 'Beam')
         flux_name = beam_name + '_Flux'
@@ -176,22 +191,29 @@ class SANSILLAuto(DataProcessorAlgorithm):
             progress.report('Processing beam')
             SANSILLReduction(Run=beam, ProcessAs='Beam', OutputWorkspace=beam_name,
                              AbsorberInputWorkspace=absorber_name, FluxOutputWorkspace=flux_name)
+        else:
+            progress.report('Using beam from ADS')
 
         [process_container, container_name] = needs_processing(container, 'Container')
         if process_container:
             progress.report('Processing container')
             SANSILLReduction(Run=container, ProcessAs='Container', OutputWorkspace=container_name, AbsorberInputWorkspace=absorber_name,
                              BeamInputWorkspace=beam_name, TransmissionInputWorkspace=container_transmission_name)
+        else:
+            progress.report('Using container from ADS')
 
         [load_sensitivity, sensitivity_name] = needs_loading(sensitivity, 'Sensitivity')
         if load_sensitivity:
             progress.report('Loading sensitivity')
             LoadNexusProcessed(Filename=sensitivity, OutputWorkspace=sensitivity_name)
+        progress.report('Using sensitivity from ADS')
 
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
         if load_mask:
             progress.report('Loading mask')
             LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
+        else:
+            progress.report('Using mask from ADS')
 
         [_, sample_name] = needs_processing(sample, 'Sample')
         progress.report('Processing sample')
@@ -201,7 +223,6 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              ContainerInputWorkspace=container_name, TransmissionInputWorkspace=sample_transmission_name,
                              MaskedInputWorkspace=mask_name, SensitivityInputWorkspace=sensitivity_name, FluxInputWorkspace=flux_name)
 
-            progress.report('Performing azimuthal averaging')
             SANSILLIntegration(InputWorkspace=sample_name, OutputWorkspace=output, CalculateResolution='None')
             self.setProperty('OutputWorkspace', mtd[output])
         elif type == 'ReduceWater':
