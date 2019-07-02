@@ -613,7 +613,7 @@ void RunsTablePresenter::pasteRowsOntoRows(
     auto replacementRows = m_clipboard.createRowsForAllRoots();
     auto replacementRow = replacementRows.begin();
     auto replacementPoint = replacementRoots.cbegin();
-    for (; replacementRow < replacementRows.end(),
+    for (; replacementRow < replacementRows.end() &&
            replacementPoint < replacementRoots.cend();
          ++replacementRow, ++replacementPoint) {
       auto &group = groups[groupOf(*replacementPoint)];

@@ -15,6 +15,7 @@ SANS Changes
 - New IDF for ``EQ-SANS``
 - Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
 - New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
+- New version of algorithm :ref:`CalculateEfficiency <algm-CalculateEfficiency-v2>`
 
 ISIS SANS Interface
 -------------------

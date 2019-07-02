@@ -17,6 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class IMainWindowView;
+class IMessageHandler;
 
 /** @class MainWindowPresenter
 
@@ -28,11 +29,14 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowPresenter
       public IMainWindowPresenter {
 public:
   /// Constructor
-  MainWindowPresenter(IMainWindowView *view,
+  MainWindowPresenter(IMainWindowView *view, IMessageHandler *messageHandler,
                       BatchPresenterFactory batchPresenterFactory);
 
   // IMainWindowPresenter overrides
-  bool isProcessing() const override;
+  bool isAnyBatchProcessing() const override;
+  bool isAnyBatchAutoreducing() const override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
@@ -41,7 +45,10 @@ public:
 
 private:
   void showHelp();
+  void addNewBatch(IBatchView *batchView);
+
   IMainWindowView *m_view;
+  IMessageHandler *m_messageHandler;
   BatchPresenterFactory m_batchPresenterFactory;
   std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
 };
