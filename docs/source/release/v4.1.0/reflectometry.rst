@@ -26,7 +26,7 @@ New
 The Runs Table
 ^^^^^^^^^^^^^^
 
-- Added a "Fill Down" functionality similar to Excel
+- Added a "Fill Down" functionality which allows filling all selected cells below the highest selected cell, in the column that is selected.
 - Filtering by run or group name is now possible using the search bar above the table. This accepts regular expressions.
 
 - Navigation by keyboard shortcuts has been added:
