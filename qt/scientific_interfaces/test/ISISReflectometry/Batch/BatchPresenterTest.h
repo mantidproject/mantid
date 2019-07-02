@@ -20,12 +20,12 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
-using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
+using testing::_;
 using testing::_;
 
 class BatchPresenterTest : public CxxTest::TestSuite {
