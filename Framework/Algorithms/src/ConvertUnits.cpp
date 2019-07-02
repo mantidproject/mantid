@@ -38,10 +38,10 @@ using namespace HistogramData;
 void ConvertUnits::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
 
@@ -731,13 +731,13 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
 
     result = create<MatrixWorkspace>(*workspace, BinEdges(bins));
 
-    for (size_t i = 0; i < numSpec; ++i) {
-      auto &X = workspace->x(i);
-      auto &Y = workspace->y(i);
-      auto &E = workspace->e(i);
-      result->mutableX(i).assign(X.begin() + first, X.end());
-      result->mutableY(i).assign(Y.begin() + first, Y.end());
-      result->mutableE(i).assign(E.begin() + first, E.end());
+    for (size_t wsIndex = 0; wsIndex < numSpec; ++wsIndex) {
+      auto &X = workspace->x(wsIndex);
+      auto &Y = workspace->y(wsIndex);
+      auto &E = workspace->e(wsIndex);
+      result->mutableX(wsIndex).assign(X.begin() + first, X.end());
+      result->mutableY(wsIndex).assign(Y.begin() + first, Y.end());
+      result->mutableE(wsIndex).assign(E.begin() + first, E.end());
     }
   } else if (emode == "Indirect") {
     // Now the indirect instruments. In this case we could want to keep a

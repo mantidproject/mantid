@@ -227,6 +227,19 @@ class TOSCAReduction(ISISIndirectInelasticReduction):
         return ["II.TOSCAReductionFromFile.nxs"]
 
 
+class TOSCASimpleReductionUsingOldRunNumber(ISISIndirectInelasticReduction):
+
+    def __init__(self):
+        ISISIndirectInelasticReduction.__init__(self)
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC04970.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+
+    def get_reference_files(self):
+        return ["II.TOSCAReductionOfOldRunNumber.nxs"]
+
+
 class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
 
     def __init__(self):
@@ -862,14 +875,11 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.118877
 
     def get_reference_files(self):
-        # gsl v2 gives a slightly different result than v1 for II.OSIRISFuryFitSeq
-        self.tolerance = 1e-3
-        reference_files = ['II.OSIRISFury.nxs']
-        if current_OS_has_GSLv2():
-            reference_files += ['II.OSIRISFuryFitSeq_gslv2.nxs']
-        else:
-            reference_files += ['II.OSIRISFuryFitSeq.nxs']
-        return reference_files
+        # Relative tolerance is used because the calculation of Monte Carlo errors means the Iqt errors are randomized
+        # within a set amount. Also, gsl v2 gives a slightly different result than v1 for II.OSIRISFuryFitSeq.
+        self.tolerance = 5.0
+        self.tolerance_is_rel_err = True
+        return ['II.OSIRISFury.nxs', 'II.OSIRISFuryFitSeq.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
 
@@ -895,14 +905,11 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.169171
 
     def get_reference_files(self):
-        # gsl v2 gives a slightly different result than v1 for II.IRISFuryFitSeq
-        self.tolerance = 1e-1
-        reference_files = ['II.IRISFury.nxs']
-        if current_OS_has_GSLv2():
-            reference_files += ['II.IRISFuryFitSeq_gslv2.nxs']
-        else:
-            reference_files += ['II.IRISFuryFitSeq.nxs']
-        return reference_files
+        # Relative tolerance is used because the calculation of Monte Carlo errors means the Iqt errors are randomized
+        # within a set amount. Also, gsl v2 gives a slightly different result than v1 for II.IRISFuryFitSeq.
+        self.tolerance = 5.0
+        self.tolerance_is_rel_err = True
+        return ['II.IRISFury.nxs', 'II.IRISFuryFitSeq.nxs']
 
 #==============================================================================
 
@@ -999,7 +1006,10 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 41
 
     def get_reference_files(self):
-        self.tolerance = 1e-2
+        # Relative tolerance is used because the calculation of Monte Carlo errors means the Iqt errors are randomized
+        # within a set amount
+        self.tolerance = 5.0
+        self.tolerance_is_rel_err = True
         return ['II.OSIRISIqt.nxs',
                 'II.OSIRISIqtFitMulti.nxs']
 
@@ -1028,7 +1038,10 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.endx = 0.156250
 
     def get_reference_files(self):
-        self.tolerance = 1e-3
+        # Relative tolerance is used because the calculation of Monte Carlo errors means the Iqt errors are randomized
+        # within a set amount
+        self.tolerance = 5.0
+        self.tolerance_is_rel_err = True
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitMulti.nxs']
 

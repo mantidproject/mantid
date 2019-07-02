@@ -80,7 +80,10 @@ class TableModel(object):
         self._table_entries.insert(row, table_index_model)
         if row >= self.get_number_of_rows():
             row = self.get_number_of_rows() - 1
-        self.get_thickness_for_rows([row])
+
+        # If we did not provide a sample thickness, get it from file information
+        if table_index_model.sample_thickness == '':
+            self.get_thickness_for_rows([row])
         self.notify_subscribers()
 
     def append_table_entry(self, table_index_model):
@@ -92,7 +95,7 @@ class TableModel(object):
 
     def remove_table_entries(self, rows):
         # For speed rows should be a Set here but don't think it matters for the list sizes involved.
-        self._table_entries[:] = [item for i,item in enumerate(self._table_entries) if i not in rows]
+        self._table_entries[:] = [item for i, item in enumerate(self._table_entries) if i not in rows]
         if not self._table_entries:
             row_index_model = self.create_empty_row()
             self.append_table_entry(row_index_model)
@@ -321,7 +324,7 @@ class TableIndexModel(object):
 
     def to_list(self):
         return [self.sample_scatter, self._string_period(self.sample_scatter_period), self.sample_transmission,
-                self._string_period(self.sample_transmission_period),self.sample_direct,
+                self._string_period(self.sample_transmission_period), self.sample_direct,
                 self._string_period(self.sample_direct_period), self.can_scatter,
                 self._string_period(self.can_scatter_period), self.can_transmission,
                 self._string_period(self.can_transmission_period), self.can_direct,
@@ -332,15 +335,14 @@ class TableIndexModel(object):
 
     def to_batch_list(self):
         """
-        :return: a list of data in the order as would typically appear
-        in a batch file
+        Return a list of data in the order as would typically appear in the batch file
+        :return: a list containing entries in the row present in the batch file
         """
-        return_list = [self.sample_scatter, self.output_name, self.sample_transmission,
+        return_list = [self.sample_scatter, self.sample_transmission,
                        self.sample_direct, self.can_scatter, self.can_transmission,
-                       self.can_direct, self.user_file]
-        return_list = list(map(str, return_list))
-        return_list = list(map(str.strip, return_list))
-        return return_list
+                       self.can_direct, self.output_name, self.user_file, self.sample_thickness, self.sample_height,
+                       self.sample_width]
+        return list(map(lambda item: str(item).strip(), return_list))
 
     def isMultiPeriod(self):
         return any((self.sample_scatter_period, self.sample_transmission_period, self.sample_direct_period,

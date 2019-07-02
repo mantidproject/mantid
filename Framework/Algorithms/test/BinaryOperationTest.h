@@ -153,9 +153,9 @@ void run_parallel_AllowDifferentNumberSpectra_fail(
                      create<Workspace2D>(indexInfo, HistogramData::Points(1)));
   } else {
     alg->setProperty("LHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
+                     std::make_unique<Workspace2D>(StorageMode::MasterOnly));
     alg->setProperty("RHSWorkspace",
-                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
+                     std::make_unique<Workspace2D>(StorageMode::MasterOnly));
   }
   alg->setProperty("AllowDifferentNumberSpectra", true);
   if (comm.size() > 1) {
@@ -306,7 +306,7 @@ public:
     if (expect_throw) {
       TS_ASSERT_THROWS(
           table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS),
-          std::runtime_error);
+          const std::runtime_error &);
     } else {
       TS_ASSERT_THROWS_NOTHING(
           table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS));

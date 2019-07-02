@@ -53,12 +53,12 @@ void SaveNXSPE::init() {
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the workspace to save.");
 
   declareProperty(
-      Kernel::make_unique<API::FileProperty>(
+      std::make_unique<API::FileProperty>(
           "Filename", "", FileProperty::Save,
           std::vector<std::string>(1, ".nxspe")),
       "The name of the NXSPE file to write, as a full or relative path");
@@ -73,8 +73,8 @@ void SaveNXSPE::init() {
   // optional par or phx file
   std::vector<std::string> fileExts{".par", ".phx"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("ParFile", "not_used.par",
-                                        FileProperty::OptionalLoad, fileExts),
+      std::make_unique<FileProperty>("ParFile", "not_used.par",
+                                     FileProperty::OptionalLoad, fileExts),
       "If provided, will replace detectors parameters in resulting nxspe file with the values taken from the file. \n\
         Should be used only if the parameters, calculated by the [[FindDetectorsPar]] algorithm are not suitable for some reason. \n\
         See [[FindDetectorsPar]] description for the details.");
@@ -128,8 +128,7 @@ void SaveNXSPE::exec() {
   // TODO: Check that this is the way round we want to do it.
   const API::Run &run = inputWS->run();
   if (run.hasProperty("Ei")) {
-    Kernel::Property *propEi = run.getProperty("Ei");
-    efixed = boost::lexical_cast<double, std::string>(propEi->value());
+    efixed = run.getPropertyValueAsType<double>("Ei");
   }
   nxFile.writeData("fixed_energy", efixed);
   nxFile.openData("fixed_energy");

@@ -1,14 +1,23 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+
 from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets, QtCore
 
+from copy import deepcopy
+
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
 from MultiPlotting.edit_windows.select_subplot import SelectSubplot
-
+from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 # use this to manage lines and workspaces directly
 
@@ -29,6 +38,8 @@ class subplot(QtWidgets.QWidget):
         self._selector_window = None
         # update quick edit from tool bar
         self.canvas.mpl_connect("draw_event", self.draw_event_callback)
+
+        self._ADSObserver = SubplotADSObserver(self)
 
         grid = QtWidgets.QGridLayout()
         # add toolbar
@@ -100,7 +111,7 @@ class subplot(QtWidgets.QWidget):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
         self.plotObjects[subplotName] = self.figure.add_subplot(
-            gridspec[number], label=subplotName)
+            gridspec[number], label=subplotName, projection ='mantid')
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         self._update()
@@ -223,10 +234,9 @@ class subplot(QtWidgets.QWidget):
                 remove_subplot = False
         # if all of the lines have been removed -> delete subplot
         if remove_subplot:
-            # add a signal to this method - so we can catch it
             self._remove_subplot(self._rm_window.subplot)
-
-        self.canvas.draw()
+        else:
+            self.canvas.draw()
         # if no subplots then close plotting window
         if len(self._context.subplots.keys()) == 0:
             self._close_rm_window()
@@ -245,3 +255,19 @@ class subplot(QtWidgets.QWidget):
         self._context.update_gridspec(len(list(self.plotObjects.keys())))
         self._update()
         self.rmSubplotSignal.emit(subplotName)
+
+    def _rm_ws_from_plots(self, workspace_name):
+        keys = deepcopy(self._context.subplots.keys())
+        for subplot in keys:
+            labels = self._context.get_lines_from_WS(subplot, workspace_name)
+            for label in labels:
+                self._context.removePlotLine(subplot, label)
+                self.canvas.draw()
+            if self._context.is_subplot_empty(subplot):
+                self._remove_subplot(subplot)
+
+    def _replaced_ws(self, workspace):
+        for subplot in self._context.subplots.keys():
+            redraw = self._context.subplots[subplot].replace_ws(workspace)
+            if redraw:
+                self.canvas.draw()

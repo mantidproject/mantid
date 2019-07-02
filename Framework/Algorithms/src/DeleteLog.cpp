@@ -30,7 +30,7 @@ const std::string DeleteLog::category() const { return "DataHandling\\Logs"; }
  */
 void DeleteLog::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "In/out workspace containing the logs. The workspace is "
       "modified in place");
   declareProperty("Name", "",

@@ -33,7 +33,6 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
@@ -199,10 +198,9 @@ void LoadNexusProcessed::init() {
   // Declare required input parameters for algorithm
   const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "The name of the Nexus file to read, as a full or relative path.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
@@ -220,7 +218,7 @@ void LoadNexusProcessed::init() {
                   "Number of first spectrum to read.");
   declareProperty("SpectrumMax", static_cast<int>(Mantid::EMPTY_INT()),
                   mustBePositive, "Number of last spectrum to read.");
-  declareProperty(make_unique<ArrayProperty<int>>("SpectrumList"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", static_cast<int>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
@@ -230,8 +228,8 @@ void LoadNexusProcessed::init() {
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("FastMultiPeriod", true,
+                                                Direction::Input),
       "For multiperiod workspaces. Copy instrument, parameter and x-data "
       "rather than loading it directly for each workspace. Y, E and log "
       "information is always loaded.");
@@ -494,7 +492,7 @@ void LoadNexusProcessed::exec() {
                       1. / nWorkspaceEntries_d);
       }
 
-      declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
           prop_name + indexStr, wsName, Direction::Output));
 
       wksp_group->addWorkspace(local_workspace);
@@ -1535,17 +1533,19 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
   // Setting a unit onto a TextAxis makes no sense.
   if (unit2 == "TextAxis") {
-    auto newAxis = new Mantid::API::TextAxis(nspectra);
-    local_workspace->replaceAxis(1, newAxis);
+    auto newAxis = std::make_unique<Mantid::API::TextAxis>(nspectra);
+    local_workspace->replaceAxis(1, std::move(newAxis));
   } else if (unit2 != "spectraNumber") {
     try {
-      auto *newAxis = (verticalHistogram) ? new API::BinEdgeAxis(nspectra + 1)
-                                          : new API::NumericAxis(nspectra);
-      local_workspace->replaceAxis(1, newAxis);
-      newAxis->unit() = UnitFactory::Instance().create(unit2);
+      auto newAxis = (verticalHistogram)
+                         ? std::make_unique<API::BinEdgeAxis>(nspectra + 1)
+                         : std::make_unique<API::NumericAxis>(nspectra);
+      auto newAxisRaw = newAxis.get();
+      local_workspace->replaceAxis(1, std::move(newAxis));
+      newAxisRaw->unit() = UnitFactory::Instance().create(unit2);
       if (unit2 == "Label") {
         auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-            newAxis->unit());
+            newAxisRaw->unit());
         auto ax = wksp_cls.openNXDouble("axis2");
         label->setLabel(ax.attributes("caption"), ax.attributes("label"));
       }

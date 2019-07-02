@@ -20,11 +20,14 @@ class BatchCsvParser(object):
                            "can_sans": BatchReductionEntry.CanScatter,
                            "can_trans": BatchReductionEntry.CanTransmission,
                            "can_direct_beam": BatchReductionEntry.CanDirect,
-                           "user_file": BatchReductionEntry.UserFile}
+                           "user_file": BatchReductionEntry.UserFile,
+                           "sample_thickness": BatchReductionEntry.SampleThickness,
+                           "sample_height": BatchReductionEntry.SampleHeight,
+                           "sample_width": BatchReductionEntry.SampleWidth}
     batch_file_keywords_which_are_dropped = {"background_sans": None,
                                              "background_trans": None,
                                              "background_direct_beam": None,
-                                             "":None}
+                                             "": None}
 
     data_keys = {BatchReductionEntry.SampleScatter: BatchReductionEntry.SampleScatterPeriod,
                  BatchReductionEntry.SampleTransmission: BatchReductionEntry.SampleTransmissionPeriod,
@@ -71,6 +74,10 @@ class BatchCsvParser(object):
     def _parse_row(self, row, row_number):
         # Clean all elements of the row
         row = list(map(str.strip, row))
+
+        # If the reader has ignored the final empty row, we add it back here
+        if len(row) % 2 == 1 and row[-1] in self.batch_file_keywords:
+            row.append("")
 
         # Go sequentially through the row with a stride of two. The user can either leave entries away, or he can leave
         # them blank, ie ... , sample_direct_beam, , can_sans, XXXXX, ...  or even ..., , ,...

@@ -7,17 +7,14 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 
-//----------------------
-// Includes
-//----------------------
+#include "IndirectInterface.h"
 #include "ui_IndirectDiffractionReduction.h"
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDiffractionReduction : public MantidQt::API::UserSubWindow {
+class IndirectDiffractionReduction : public IndirectInterface {
   Q_OBJECT
 
 public:
@@ -36,8 +33,6 @@ public slots:
                           const QString &analyserName,
                           const QString &reflectionName);
   void run();
-  void openDirectoryDialog();
-  void help();
   void plotResults();
   void saveReductions();
   void runFilesChanged();
@@ -46,8 +41,12 @@ public slots:
   void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
   void deleteGroupingWorkspace();
+  void validateSpectrumMin(int value);
+  void validateSpectrumMax(int value);
 
 private:
+  std::string documentationPage() const override;
+
   void initLayout() override;
   void initLocalPython() override;
 
@@ -90,6 +89,7 @@ private:
   void setSaveEnabled(bool enabled);
 
 private:
+  /// The settings dialog
   Ui::IndirectDiffractionReduction
       m_uiForm; /// The form generated using Qt Designer
   QDoubleValidator *m_valDbl;

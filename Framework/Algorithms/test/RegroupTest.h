@@ -38,12 +38,12 @@ public:
     regroup.setPropertyValue("InputWorkspace", "test_in1D");
     regroup.setPropertyValue("OutputWorkspace", "test_out");
     // Check it fails if "params" property not set
-    TS_ASSERT_THROWS(regroup.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(regroup.execute(), const std::runtime_error &)
     TS_ASSERT(!regroup.isExecuted())
     // Trying to set the property with an error fails
     TS_ASSERT_THROWS(
         regroup.setPropertyValue("Params", "1.5,2.0,20,-0.1,15,1.0,35"),
-        std::invalid_argument)
+        const std::invalid_argument &)
     // Now set the property
     TS_ASSERT_THROWS_NOTHING(
         regroup.setPropertyValue("Params", "1.5,1,19,-0.1,30,1,35"))

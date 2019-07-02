@@ -94,12 +94,12 @@ void DetectorEfficiencyCor::init() {
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, val),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input, val),
                   "The workspace to correct for detector efficiency");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace in which to store the result. Each histogram "
       "from the input workspace maps to a histogram in this workspace that has "
       "just one value which indicates if there was a bad detector.");
@@ -175,8 +175,7 @@ void DetectorEfficiencyCor::retrieveProperties() {
   // If we're not given an Ei, see if one has been set.
   if (m_Ei == EMPTY_DBL()) {
     if (m_inputWS->run().hasProperty("Ei")) {
-      Kernel::Property *eiprop = m_inputWS->run().getProperty("Ei");
-      m_Ei = boost::lexical_cast<double>(eiprop->value());
+      m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
       g_log.debug() << "Using stored Ei value " << m_Ei << "\n";
     } else {
       throw std::invalid_argument(

@@ -20,7 +20,7 @@ from mantid.kernel import Logger
 from mantid.simpleapi import AnalysisDataService
 
 from mantid.kernel import ConfigService
-from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.pyplot import (Figure, setp)
 import os
 

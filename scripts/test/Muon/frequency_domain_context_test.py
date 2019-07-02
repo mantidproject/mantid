@@ -9,10 +9,11 @@ import unittest
 
 from mantid.api import AnalysisDataService
 from mantid.api import FileFinder
+
 from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 if sys.version_info.major < 2:
     from unittest import mock
@@ -34,7 +35,7 @@ class MuonDataContextTest(unittest.TestCase):
 
         filepath = FileFinder.findRuns('CHRONUS00003422.nxs')[0]
 
-        load_result, run, filename = load_workspace_from_filename(filepath)
+        load_result, run, filename, _ = load_workspace_from_filename(filepath)
 
         self.loaded_data.add_data(workspace=load_result, run=[run], filename=filename, instrument='CHRONUS')
         self.data_context.current_runs = [[run]]

@@ -71,8 +71,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
     //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument );
-    TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), const std::invalid_argument &);
+    TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace","test_out2") );
     delete alg;
   }

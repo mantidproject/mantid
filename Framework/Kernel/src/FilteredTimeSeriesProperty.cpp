@@ -17,20 +17,32 @@ namespace Kernel {
  * Construct with a source time series & a filter property
  * @param seriesProp :: A pointer to a property to filter.
  * @param filterProp :: A boolean series property to filter on
- * @param transferOwnership :: Flag marking whether this object takes
- * ownership of the time series (default = false). Avoids unnecessary
- * clones when the original is going to be deleted anyway
  */
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
     TimeSeriesProperty<HeldType> *seriesProp,
-    const TimeSeriesProperty<bool> &filterProp, const bool transferOwnership)
+    const TimeSeriesProperty<bool> &filterProp)
     : TimeSeriesProperty<HeldType>(*seriesProp), m_unfiltered(nullptr) {
-  if (transferOwnership)
-    m_unfiltered = seriesProp;
-  else
-    m_unfiltered = seriesProp->clone();
 
+  m_unfiltered =
+      std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp->clone());
+
+  // Now filter us with the filter
+  this->filterWith(&filterProp);
+}
+
+/**
+ * Construct with a source time series & a filter property
+ * @param seriesProp :: A smart pointer to take ownership of pointer to a
+ * property to filter.
+ * @param filterProp :: A boolean series property to filter on
+ */
+template <typename HeldType>
+FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
+    std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
+    const TimeSeriesProperty<bool> &filterProp)
+    : TimeSeriesProperty<HeldType>(*seriesProp) {
+  m_unfiltered = std::move(seriesProp);
   // Now filter us with the filter
   this->filterWith(&filterProp);
 }
@@ -39,9 +51,7 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
  * Destructor
  */
 template <typename HeldType>
-FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {
-  delete m_unfiltered;
-}
+FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {}
 
 /**
  * Access the unfiltered log
@@ -50,7 +60,7 @@ FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {
 template <typename HeldType>
 const TimeSeriesProperty<HeldType> *
 FilteredTimeSeriesProperty<HeldType>::unfiltered() const {
-  return m_unfiltered;
+  return m_unfiltered.get();
 }
 
 /// @cond

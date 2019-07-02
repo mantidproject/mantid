@@ -48,8 +48,8 @@ void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
 
   const auto parameter =
       m_jumpFitModel->getFitParameterName(dataIndex, spectrum);
-  auto cell = Mantid::Kernel::make_unique<QTableWidgetItem>(
-      QString::fromStdString(parameter));
+  auto cell =
+      std::make_unique<QTableWidgetItem>(QString::fromStdString(parameter));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);

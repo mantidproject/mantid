@@ -28,7 +28,7 @@ from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
-                                       load_file, load_default_file, load_property, set_setting,
+                                       load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
@@ -109,6 +109,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_reduction_mode_selection_has_changed(self, selection):
+            pass
+
+        @abstractmethod
         def on_mask_file_add(self):
             pass
 
@@ -134,6 +138,10 @@ class SANSDataProcessorGui(QMainWindow,
 
         @abstractmethod
         def on_reduction_dimensionality_changed(self, is_1d):
+            pass
+
+        @abstractmethod
+        def on_output_mode_changed(self):
             pass
 
         @abstractmethod
@@ -180,10 +188,6 @@ class SANSDataProcessorGui(QMainWindow,
         def on_save_other(self):
             pass
 
-        @abstractmethod
-        def on_compatibility_unchecked(self):
-            pass
-
     def __init__(self):
         """
         Initialise the interface
@@ -198,6 +202,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.__generic_settings = GENERIC_SETTINGS
         self.__path_key = "sans_path"
         self.__user_file_key = "user_file"
+        self.__batch_file_key = "batch_file"
         self.__mask_file_input_path_key = "mask_files"
         self.__output_mode_key = "output_mode"
         self.__save_can_key = "save_can"
@@ -214,22 +219,23 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.instrument = SANSInstrument.NoInstrument
 
-        self.paste_button.setIcon(icons.get_icon("fa.paste"))
-        self.copy_button.setIcon(icons.get_icon("fa.copy"))
-        self.cut_button.setIcon(icons.get_icon("fa.cut"))
-        self.erase_button.setIcon(icons.get_icon("fa.eraser"))
-        self.delete_row_button.setIcon(icons.get_icon("fa.trash"))
-        self.insert_row_button.setIcon(icons.get_icon("fa.table"))
+        self.paste_button.setIcon(icons.get_icon("mdi.content-paste"))
+        self.copy_button.setIcon(icons.get_icon("mdi.content-copy"))
+        self.cut_button.setIcon(icons.get_icon("mdi.content-cut"))
+        self.erase_button.setIcon(icons.get_icon("mdi.eraser"))
+        self.delete_row_button.setIcon(icons.get_icon("mdi.table-row-remove"))
+        self.insert_row_button.setIcon(icons.get_icon("mdi.table-row-plus-after"))
+        self.export_table_button.setIcon(icons.get_icon("mdi.file-export"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
         self.copy_button.clicked.connect(self._copy_rows_requested)
         self.erase_button.clicked.connect(self._erase_rows)
         self.cut_button.clicked.connect(self._cut_rows)
-
         self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
         self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
-        self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
+        self.export_table_button.clicked.connect(self._export_table_clicked)
 
+        self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
         self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
         self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
 
@@ -280,19 +286,19 @@ class SANSDataProcessorGui(QMainWindow,
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
 
-        runs_icon = icons.get_icon("fa.play-circle-o")
+        runs_icon = icons.get_icon("mdi.play")
         _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
-        settings_icon = icons.get_icon("fa.cog")
+        settings_icon = icons.get_icon("mdi.settings")
         _ = QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
-        centre_icon = icons.get_icon("fa.dot-circle-o")
+        centre_icon = icons.get_icon("mdi.adjust")
         _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon = icons.get_icon("fa.plus-circle")
+        add_runs_page_icon = icons.get_icon("mdi.plus")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon = icons.get_icon("fa.question-circle")
+        diagnostic_icon = icons.get_icon("mdi.stethoscope")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
@@ -315,8 +321,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.process_all_button.clicked.connect(self._process_all_clicked)
 
         self.load_button.clicked.connect(self._load_clicked)
-
-        self.export_table_button.clicked.connect(self._export_table_clicked)
 
         self.help_button.clicked.connect(self._on_help_button_clicked)
 
@@ -445,6 +449,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
         self.table_signals.cellTextChanged.connect(self._data_changed)
         self.table_signals.rowInserted.connect(self._row_inserted)
+        self.table_signals.appendAndEditAtChildRowRequested.connect(self._append_and_edit_at_child_row_requested)
+        self.table_signals.appendAndEditAtRowBelowRequested.connect(self._append_and_edit_at_row_below_requested)
+        self.table_signals.editAtRowAboveRequested.connect(self._edit_at_row_above_requested)
         self.table_signals.removeRowsRequested.connect(self._remove_rows_requested)
         self.table_signals.copyRowsRequested.connect(self._copy_rows_requested)
         self.table_signals.pasteRowsRequested.connect(self._paste_rows_requested)
@@ -507,6 +514,15 @@ class SANSDataProcessorGui(QMainWindow,
             row = self.get_row(row_location)
             self._call_settings_listeners(lambda listener: listener.on_row_inserted(index, row))
 
+    def _append_and_edit_at_child_row_requested(self):
+        self.data_processor_table.appendAndEditAtChildRow()
+
+    def _append_and_edit_at_row_below_requested(self):
+        self.data_processor_table.appendAndEditAtRowBelow()
+
+    def _edit_at_row_above_requested(self):
+        self.data_processor_table.editAtRowAbove()
+
     def _remove_rows_requested(self, rows):
         rows = [item.rowRelativeToParent() for item in rows]
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
@@ -536,14 +552,12 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_save_other_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_save_other())
 
-    def _on_compatibility_unchecked(self):
-        self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
-
     def _on_help_button_clicked(self):
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_output_mode_clicked(self):
+        """This method is called when an output mode is clicked on the gui"""
         if self.output_mode_memory_radio_button.isChecked():
             output_mode = "PublishToADS"
         elif self.output_mode_file_radio_button.isChecked():
@@ -553,6 +567,9 @@ class SANSDataProcessorGui(QMainWindow,
         else:
             output_mode = None
         set_setting(self.__generic_settings, self.__output_mode_key, output_mode)
+
+        # Notify the presenter
+        self._call_settings_listeners(lambda listener: listener.on_output_mode_changed())
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
@@ -570,21 +587,19 @@ class SANSDataProcessorGui(QMainWindow,
                   self.get_user_file_path)
 
         # Set full user file path for default loading
-        set_setting(self.__generic_settings, self.__user_file_key, self.get_user_file_path())
+        self.gui_properties_handler.set_setting("user_file", self.get_user_file_path())
 
         # Notify presenters
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def on_user_file_load_failure(self):
-        set_setting(self.__generic_settings, self.__user_file_key, "")
+        self.gui_properties_handler.set_setting("user_file", "")
         self.user_file_line_edit.setText("")
 
     def set_out_default_user_file(self):
         """
         Load a default user file, called on view set-up
         """
-        load_default_file(self.user_file_line_edit, self.__generic_settings, self.__user_file_key)
-
         if self.get_user_file_path() != "":
             self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
@@ -597,12 +612,22 @@ class SANSDataProcessorGui(QMainWindow,
             self._check_output_mode(default_output_mode)
 
     def _check_output_mode(self, value):
+        """
+        Set the output mode radio button from a SANS enum.
+        This method is called when:
+        1. The gui is launched
+        2. Via the presenter, from state
+        :param value: An OutputMode (SANS enum) object
+        """
         if value is OutputMode.PublishToADS:
             self.output_mode_memory_radio_button.setChecked(True)
         elif value is OutputMode.SaveToFile:
             self.output_mode_file_radio_button.setChecked(True)
         elif value is OutputMode.Both:
             self.output_mode_both_radio_button.setChecked(True)
+
+        # Notify the presenter
+        self._call_settings_listeners(lambda listener: listener.on_output_mode_changed())
 
     def set_out_default_save_can(self):
         try:
@@ -616,12 +641,11 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
-        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__path_key,
+        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
     def disable_buttons(self):
-
         self.process_selected_button.setEnabled(False)
         self.process_all_button.setEnabled(False)
         self.batch_button.setEnabled(False)
@@ -638,6 +662,16 @@ class SANSDataProcessorGui(QMainWindow,
         self.manage_directories_button.setEnabled(True)
         self.load_button.setEnabled(True)
         self.export_table_button.setEnabled(True)
+
+    def disable_file_type_buttons(self):
+        self.can_sas_checkbox.setEnabled(False)
+        self.nx_can_sas_checkbox.setEnabled(False)
+        self.rkh_checkbox.setEnabled(False)
+
+    def enable_file_type_buttons(self):
+        self.can_sas_checkbox.setEnabled(True)
+        self.nx_can_sas_checkbox.setEnabled(True)
+        self.rkh_checkbox.setEnabled(True)
 
     def disable_process_buttons(self):
         self.process_selected_button.setEnabled(False)
@@ -709,6 +743,7 @@ class SANSDataProcessorGui(QMainWindow,
         selection = self.reduction_mode_combo_box.currentText()
         is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
         self.merged_settings.setEnabled(is_merged)
+        self._call_settings_listeners(lambda listener: listener.on_reduction_mode_selection_has_changed(selection))
 
     def _on_q_resolution_shape_has_changed(self):
         shape_selection = self.q_resolution_shape_combo_box.currentIndex()
@@ -964,6 +999,9 @@ class SANSDataProcessorGui(QMainWindow,
             checked_save_types.append(SaveType.NXcanSAS)
         if self.rkh_checkbox.isChecked():
             checked_save_types.append(SaveType.RKH)
+        # If empty, provide the NoType type
+        if not checked_save_types:
+            checked_save_types = [SaveType.NoType]
         return checked_save_types
 
     @save_types.setter
@@ -1063,8 +1101,14 @@ class SANSDataProcessorGui(QMainWindow,
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
-        if not value:
-            self._on_compatibility_unchecked()
+
+    @property
+    def event_slice_optimisation(self):
+        return self.event_slice_optimisation_checkbox.isChecked()
+
+    @event_slice_optimisation.setter
+    def event_slice_optimisation(self, value):
+        self.event_slice_optimisation_checkbox.setChecked(value)
 
     @property
     def instrument(self):

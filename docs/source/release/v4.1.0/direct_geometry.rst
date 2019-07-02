@@ -18,6 +18,11 @@ New Instruments
 Algorithms
 ----------
 
+New Algorithms
+##############
+
+- :ref:`algm-FlippingRatioCorrectionMD` algorithm was introduced to account for polarization effects on HYSPEC, but it's not instrument specific.
+
 Removed
 #######
 
@@ -33,9 +38,21 @@ New features
 Improvements
 ############
 
+- The :ref:`GetEiT0atSNS <algm-GetEiT0atSNS>` algorithm was improved to handle monitors where TOF is not wrapped to the first frame.
+
 
 Bugfixes
 ########
+
+- :ref:`MDNorm <algm-MDNorm>` now allows completely integrating the energy transfer dimension.
+
+Python
+------
+
+Improvements
+############
+
+- :func:`directtools.plotSofQW` now supports plotting of transposed and non-transposed workspaces.
 
 - In :ref:`PyChop <PyChop>`, the sample-size effect calculation was improved to account for the annular shape.
 

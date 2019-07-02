@@ -34,25 +34,40 @@ set(TEST_FILES
     test/EnggDiffractionPresenterTest.h
     test/EnggVanadiumCorrectionsModelTest.h
     test/IO_MuonGroupingTest.h
-    test/MDFLogValueFinderTest.h
-    test/MeasurementItemTest.h
     test/MuonAnalysisDataLoaderTest.h
     test/MuonAnalysisFitDataPresenterTest.h
     test/MuonAnalysisFitFunctionPresenterTest.h
     test/MuonAnalysisHelperTest.h
     test/MuonAnalysisResultTableCreatorTest.h
-    test/ReflDataProcessorPresenterTest.h
-    test/ReflEventPresenterTest.h
-    test/ReflEventTabPresenterTest.h
-    test/ReflLegacyTransferStrategyTest.h
-    test/ReflMainWindowPresenterTest.h
-    test/ReflMeasureTransferStrategyTest.h
-    test/ReflNexusMeasurementItemSourceTest.h
-    test/ReflRunsTabPresenterTest.h
-    test/ReflSaveTabPresenterTest.h
-    test/ReflSettingsPresenterTest.h
-    test/ReflSettingsTabPresenterTest.h
-    test/RunMapTest.h)
+    test/RunMapTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
+    test/ISISReflectometry/Batch/BatchPresenterTest.h
+    test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
+    test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
+    test/ISISReflectometry/Reduction/GroupTest.h
+    test/ISISReflectometry/Reduction/ValidateRowTest.h
+    test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
+    test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
+    test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterMergeJobsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterProcessingTest.h
+    test/ISISReflectometry/Event/EventPresenterTest.h
+    test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
+    test/ISISReflectometry/Experiment/ExperimentOptionDefaultsTest.h
+    test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
+    test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
+    test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
+    test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
+    test/ISISReflectometry/Runs/RunsPresenterTest.h
+    test/ISISReflectometry/Save/SavePresenterTest.h
+    test/ISISReflectometry/Common/PlotterTestQt4.h
+)
 
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 4
@@ -65,6 +80,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
                    ../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
                    ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                   ../../Framework/TestHelpers/src/ReflectometryHelper.cpp
                    ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                    ../../Framework/TestHelpers/src/ScopedFileHelper.cpp
                    ../../Framework/TestHelpers/src/TearDownWorld.cpp
@@ -85,5 +101,61 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    MantidScientificInterfacesEnggDiffraction
                    MantidScientificInterfacesMultiDatasetFit
                    MantidQtWidgetsCommon
+                 PARENT_DEPENDENCIES
+                   GUITests)
+
+set(QT5_TEST_FILES     
+    test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
+    test/ISISReflectometry/Batch/BatchPresenterTest.h
+    test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
+    test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
+    test/ISISReflectometry/Reduction/GroupTest.h
+    test/ISISReflectometry/Reduction/ValidateRowTest.h
+    test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
+    test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
+    test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
+    test/ISISReflectometry/Event/EventPresenterTest.h
+    test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
+    test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
+    test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
+    test/ISISReflectometry/Runs/RunsPresenterTest.h
+    test/ISISReflectometry/Save/SavePresenterTest.h
+    test/ISISReflectometry/Common/PlotterTestQt5.h)
+
+find_package(BoostPython REQUIRED)
+
+mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
+                 QT_VERSION 5
+                 SRC ${QT5_TEST_FILES}
+                 INCLUDE_DIRS
+                   ../../Framework/DataObjects/inc
+                   ../../Framework/TestHelpers/inc
+                   inc
+                 TEST_HELPER_SRCS
+                   ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                   ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                   ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                   ../../Framework/TestHelpers/src/ScopedFileHelper.cpp
+                   ../../Framework/TestHelpers/src/TearDownWorld.cpp
+                 LINK_LIBS
+                   ${TCMALLOC_LIBRARIES_LINKTIME}
+                   ${CORE_MANTIDLIBS}
+                   DataObjects
+                   PythonInterfaceCore
+                   ${GMOCK_LIBRARIES}
+                   ${GTEST_LIBRARIES}
+                   ${POCO_LIBRARIES}
+                   ${Boost_LIBRARIES}
+                   ${PYTHON_LIBRARIES}
+                 MTD_QT_LINK_LIBS
+                   MantidScientificInterfacesISISReflectometry
+                   MantidQtWidgetsCommon
+                   MantidQtWidgetsMplCpp
                  PARENT_DEPENDENCIES
                    GUITests)

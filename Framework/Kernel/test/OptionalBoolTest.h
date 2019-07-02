@@ -134,7 +134,7 @@ public:
     using Mantid::Kernel::Exception::NotImplementedError;
     using Mantid::Kernel::OptionalBool;
     OptionalBool truth{OptionalBool::True};
-    TS_ASSERT_THROWS(encodeAsJson(truth), NotImplementedError);
+    TS_ASSERT_THROWS(encodeAsJson(truth), const NotImplementedError &);
   }
 };
 

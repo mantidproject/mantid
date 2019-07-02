@@ -23,8 +23,6 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
 
-#include <boost/lexical_cast.hpp>
-
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -95,10 +93,10 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init() {
-  declareProperty(make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the CanSAS1D file to load");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
 }
@@ -310,7 +308,7 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
   // the following code registers the workspace with the AnalysisDataService and
   // with the workspace group, I'm taking this oone trust I don't know why it's
   // done this way sorry, Steve
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
       propName, newWorkName, Direction::Output));
   container->addWorkspace(newWork);
   setProperty(propName, newWork);

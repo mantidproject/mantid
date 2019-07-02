@@ -24,7 +24,6 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
@@ -250,7 +249,7 @@ void LoadMuonNexus2::doExec() {
       suffix << (period + 1);
       outws = outputWorkspace + "_" + suffix.str();
       std::string WSName = localWSName + "_" + suffix.str();
-      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
           outws, WSName, Direction::Output));
       if (wsGrpSptr)
         wsGrpSptr->addWorkspace(localWorkspace);

@@ -61,6 +61,7 @@ private:
   std::unordered_map<std::string, JumpFitParameters>::const_iterator
   findJumpFitParameters(std::size_t dataIndex) const;
   std::string getResultXAxisUnit() const override;
+  std::string getResultLogName() const override;
 
   std::string m_fitType;
   std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;

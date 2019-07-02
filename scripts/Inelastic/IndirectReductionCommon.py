@@ -224,7 +224,7 @@ def chop_workspace(workspace, monitor_index):
     """
     from mantid.simpleapi import ChopData
 
-    workspace_name = workspace.getName()
+    workspace_name = workspace.name()
 
     # Chop data if required
     try:
@@ -276,10 +276,14 @@ def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, 
         # Crop to the detectors required
         workspace = mtd[workspace_name]
 
-        CropWorkspace(InputWorkspace=workspace_name,
-                      OutputWorkspace=workspace_name,
-                      StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
-                      EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
+        try:
+            CropWorkspace(InputWorkspace=workspace_name,
+                          OutputWorkspace=workspace_name,
+                          StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
+                          EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
+        except RuntimeError:
+            raise RuntimeError('The spectra min {0} or spectra max {1} could not be found in workspace {2}.'
+                               .format(str(spec_min), str(spec_max), workspace_name))
 
 
 # -------------------------------------------------------------------------------
@@ -399,7 +403,7 @@ def add_workspace_names(workspace_names, workspace):
     if isinstance(workspace, WorkspaceGroup):
         workspace_names.extend(workspace.getNames())
     else:
-        workspace_names.append(workspace.getName())
+        workspace_names.append(workspace.name())
     return workspace_names
 
 
@@ -484,7 +488,6 @@ def unwrap_monitor(workspace_name):
         elif unwrap == 'BaseOnTimeRegime':
             mon_time = mtd[monitor_workspace_name].readX(0)[0]
             det_time = mtd[workspace_name].readX(0)[0]
-            logger.notice(str(mon_time) + " " + str(det_time))
             should_unwrap = mon_time == det_time
         else:
             should_unwrap = False
@@ -694,7 +697,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         # Otherwise use the value of GroupingPolicy
         grouping_method = method
 
-    logger.information('Grouping method for workspace %s is %s' % (workspace.getName(), grouping_method))
+    logger.information('Grouping method for workspace %s is %s' % (workspace.name(), grouping_method))
 
     if grouping_method == 'Individual':
         # Nothing to do here
@@ -744,7 +747,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         return group_on_string(group_detectors, group_string)
 
     else:
-        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
+        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.name()))
 
     group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
@@ -1003,7 +1006,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     @param multi_frame_rebin_string Rebin string for multiple frame rebinning
     @param num_bins Max number of bins in input frames
     """
-    from mantid.simpleapi import (Rebin, SortXAxis)
+    from mantid.simpleapi import (Rebin, SortXAxis, RemoveSpectra)
 
     if rebin_string is not None:
         if multi_frame_rebin_string is not None and num_bins is not None:
@@ -1018,9 +1021,11 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
                       Params=multi_frame_rebin_string)
         else:
             # Regular data
+            RemoveSpectra(InputWorkspace=workspace_name,
+                          OutputWorkspace=workspace_name,
+                          RemoveSpectraWithNoDetector=True)
             SortXAxis(InputWorkspace=workspace_name,
-                      OutputWorkspace=workspace_name,
-                      IgnoreHistogramValidation=True)
+                      OutputWorkspace=workspace_name)
             Rebin(InputWorkspace=workspace_name,
                   OutputWorkspace=workspace_name,
                   Params=rebin_string)

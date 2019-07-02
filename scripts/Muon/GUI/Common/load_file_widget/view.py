@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets
 from qtpy.QtCore import Signal
 import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
 
 
 class BrowseFileWidgetView(QtWidgets.QWidget):
@@ -78,8 +79,6 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addWidget(self.file_path_edit)
 
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
-        self.horizontal_layout.setMargin(0)
-
         self.setLayout(self.horizontal_layout)
 
     def getLayout(self):
@@ -92,16 +91,8 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.file_path_edit.returnPressed.connect(slot)
 
     def show_file_browser_and_return_selection(
-           self, file_filter, search_directories, multiple_files=False):
-        default_directory = search_directories[0]
-        if multiple_files:
-            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(
-                self, "Select files", default_directory, file_filter)
-            return [str(chosen_file) for chosen_file in chosen_files]
-        else:
-            chosen_file = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Select file", default_directory, file_filter)
-            return [str(chosen_file)]
+            self, file_filter, search_directories, multiple_files=False):
+        return show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files)
 
     def disable_loading(self):
         self.disable_load_buttons()

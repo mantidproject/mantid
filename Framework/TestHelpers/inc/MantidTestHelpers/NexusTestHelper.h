@@ -13,6 +13,7 @@
 #ifndef MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
 #define MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
 
+#include <memory>
 #include <string>
 
 namespace NeXus {
@@ -32,7 +33,7 @@ public:
   void reopenFile();
 
   /// Nexus file handle
-  ::NeXus::File *file;
+  std::unique_ptr<::NeXus::File> file;
 
   /// Created filename (full path)
   std::string filename;

@@ -36,48 +36,38 @@ public:
 
   /// Notify this receiver with the list of table workspaces in the ADS that can
   /// be loaded into the interface
-  virtual void notifyADSChanged(const QSet<QString> & /*unused*/,
-                                int /*unused*/) {}
+  virtual void notifyADSChanged(const QSet<QString> & /*unused*/) {}
 
   /// Return global options for pre-processing
-  virtual ColumnOptionsQMap getPreprocessingOptions(int /*unused*/) const {
+  virtual ColumnOptionsQMap getPreprocessingOptions() const {
     return ColumnOptionsQMap();
   }
   /// Return global options for reduction
-  virtual OptionsQMap getProcessingOptions(int /*unused*/) const {
-    return OptionsQMap();
-  }
+  virtual OptionsQMap getProcessingOptions() const { return OptionsQMap(); }
   /// Return global options for post-processing as a string
-  virtual QString getPostprocessingOptionsAsString(int /*unused*/) const {
-    return QString();
-  }
+  virtual QString getPostprocessingOptionsAsString() const { return QString(); }
   /// Return time-slicing values
-  virtual QString getTimeSlicingValues(int /*unused*/) const {
-    return QString();
-  }
+  virtual QString getTimeSlicingValues() const { return QString(); }
   /// Return time-slicing type
-  virtual QString getTimeSlicingType(int /*unused*/) const { return QString(); }
+  virtual QString getTimeSlicingType() const { return QString(); }
   /// Return transmission runs for a particular angle
-  virtual OptionsQMap getOptionsForAngle(const double /*unused*/,
-                                         int /*unused*/) const {
+  virtual OptionsQMap getOptionsForAngle(const double) const {
     return OptionsQMap();
   }
   /// Return true if there are per-angle transmission runs set
-  virtual bool hasPerAngleOptions(int /*unused*/) const { return false; }
+  virtual bool hasPerAngleOptions() const { return false; }
 
-  /// Return true if autoreduction is in progress for any group
+  /// Return true if autoreduction is in progress
   virtual bool isAutoreducing() const { return false; }
-  /// Return true if autoreduction is in progress for a specific group
-  virtual bool isAutoreducing(int /*unused*/) const { return false; }
 
   /// Handle data reduction paused/resumed
-  virtual void pause(int /*unused*/) {}
-  virtual void resume(int /*unused*/) const {}
+  virtual void pause() {}
+  virtual void resume() const {}
 
   /// Handle data reduction paused/resumed confirmation
-  virtual void confirmReductionCompleted(int /*unused*/) {}
-  virtual void confirmReductionPaused(int /*unused*/){};
-  virtual void confirmReductionResumed(int /*unused*/){};
+  virtual void confirmReductionCompleted() {}
+  virtual void confirmReductionPaused(){};
+  virtual void confirmReductionResumed(){};
   virtual void
   completedGroupReductionSuccessfully(GroupData const & /*unused*/,
                                       std::string const & /*unused*/){};

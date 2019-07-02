@@ -37,10 +37,10 @@ const std::string SortPeaksWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void SortPeaksWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 

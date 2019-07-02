@@ -25,7 +25,11 @@ As a result, two workspaces are created:
 
 - `NormalizationWorkspace` contains the chosen normalization data (either monitor counts or experiment duration time).
 
-Both workspaces have :math:`(H,K,L,dE)` dimensions. The metadata are loaded into time series sample logs.
+If *LoadAs* is set to *HKL*, both workspaces have :math:`(H,K,L,dE)` dimensions. If *LoadAs* is set to *raw*,
+both workspaces will have :math:`\theta, \omega, t` dimensions, where :math:`\theta` is the scattering angle,
+:math:`\omega` is the sample rotation angle, and :math:`t` is the time of flight. In the latter case, parameters
+*a, b, c, alpha, beta, gamma, OmegaOffset, HKL1, HKL2, DeltaEmin* will be ignored.
+The metadata are loaded into time series sample logs.
 
 .. note::
 
@@ -102,10 +106,10 @@ Usage
 
     Output Workspace Type is:  MDEventWorkspace<MDEvent,4>
     It has 24 events and 4 dimensions:
-    Dimension 0 has name: H, id: H, Range: -15.22 to 15.22 r.l.u
-    Dimension 1 has name: K, id: K, Range: -15.22 to 15.22 r.l.u
-    Dimension 2 has name: L, id: L, Range: -41.95 to 41.95 r.l.u
-    Dimension 3 has name: DeltaE, id: DeltaE, Range: -10.00 to 4.64 r.l.u
+    Dimension 0 has name: H, id: H, Range: -15.22 to 15.22 r.l.u.
+    Dimension 1 has name: K, id: K, Range: -15.22 to 15.22 r.l.u.
+    Dimension 2 has name: L, id: L, Range: -41.95 to 41.95 r.l.u.
+    Dimension 3 has name: DeltaE, id: DeltaE, Range: -10.00 to 4.64 r.l.u.
     TableWorkspace 'huber_ws' has 1 row in the column 'Huber(degrees)'.
     It contains sample rotation angle 79.0 degrees
 

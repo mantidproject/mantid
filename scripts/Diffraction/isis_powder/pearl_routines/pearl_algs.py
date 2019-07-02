@@ -94,7 +94,7 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
 
     spline_identifier = [inst_settings.tt_mode]
     if inst_settings.long_mode:
-        spline_identifier.append("_long")
+        spline_identifier.append("long")
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,

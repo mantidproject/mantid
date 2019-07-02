@@ -120,7 +120,7 @@ public:
 
     std::vector<MDLeanEvent<4>> transfEvents4;
     TS_ASSERT_THROWS(MDLeanEvent<4>::dataToEvents(data, transfEvents4),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     std::vector<MDLeanEvent<3>> transfEvents;
     TS_ASSERT_THROWS_NOTHING(MDLeanEvent<3>::dataToEvents(data, transfEvents));
@@ -199,7 +199,7 @@ public:
 
     std::vector<MDEvent<3>> transfEvents3;
     TS_ASSERT_THROWS(MDEvent<3>::dataToEvents(data, transfEvents3),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     std::vector<MDEvent<4>> transfEvents;
     TS_ASSERT_THROWS_NOTHING(MDEvent<4>::dataToEvents(data, transfEvents));

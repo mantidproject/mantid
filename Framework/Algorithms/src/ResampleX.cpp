@@ -46,18 +46,18 @@ const std::string ResampleX::alias() const { return ""; }
 /** Initialize the algorithm's properties.
  */
 void ResampleX::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("XMin"),
+      std::make_unique<ArrayProperty<double>>("XMin"),
       "A comma separated list of the XMin for every spectrum. (Optional)");
   declareProperty(
-      make_unique<ArrayProperty<double>>("XMax"),
+      std::make_unique<ArrayProperty<double>>("XMax"),
       "A comma separated list of the XMax for every spectrum. (Optional)");
 
   auto min = boost::make_shared<BoundedValidator<int>>();
@@ -419,7 +419,9 @@ void ResampleX::exec() {
 
       // Copy all the axes
       for (int i = 1; i < inputWS->axes(); i++) {
-        outputWS->replaceAxis(i, inputWS->getAxis(i)->clone(outputWS.get()));
+        outputWS->replaceAxis(
+            i,
+            std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       }
 
@@ -446,9 +448,6 @@ void ResampleX::exec() {
       inputWS = ChildAlg->getProperty("OutputWorkspace");
     }
 
-    // This will be the output workspace (exact type may vary)
-    API::MatrixWorkspace_sptr outputWS;
-
     // make output Workspace the same type is the input, but with new length of
     // signal array
     outputWS = API::WorkspaceFactory::Instance().create(
@@ -456,7 +455,8 @@ void ResampleX::exec() {
 
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
-      outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
+      outputWS->replaceAxis(
+          1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
 
     Progress prog(this, 0.0, 1.0, numSpectra);
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))

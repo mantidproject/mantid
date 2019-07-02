@@ -34,7 +34,7 @@ template <class T> class DLLExport MRUList {
 private:
   /// hideous typedef for the container holding the list
   using item_list = typename boost::multi_index::multi_index_container<
-      T *,
+      std::shared_ptr<T>,
       boost::multi_index::indexed_by<
           boost::multi_index::sequenced<>,
           boost::multi_index::hashed_unique<::boost::multi_index::const_mem_fun<
@@ -78,9 +78,9 @@ public:
    *     do stuff to it (save it) and needs to delete it. NULL if nothing needs
    *to be dropped.
    */
-  T *insert(T *item) {
+  std::shared_ptr<T> insert(std::shared_ptr<T> item) {
     std::lock_guard<std::mutex> _lock(m_mutex);
-    auto p = this->il.push_front(item);
+    auto p = this->il.push_front(std::move(item));
 
     if (!p.second) {
       /* duplicate item */
@@ -92,13 +92,13 @@ public:
     exceeding_size = this->il.size() > max_num_items;
 
     if (exceeding_size) {
-      T *toWrite;
+      std::shared_ptr<T> toWrite;
       /* keep the length <= max_num_items */
       // This is dropping an item - you may need to write it to disk (if it's
       // changed) and delete
       // but this is left up to the calling class to do,
       // by returning the to-be-dropped item pointer.
-      toWrite = this->il.back();
+      toWrite = std::move(this->il.back());
       this->il.pop_back();
       return toWrite;
     }
@@ -109,9 +109,6 @@ public:
   /// Delete all the T's pointed to by the list, and empty the list itself
   void clear() {
     std::lock_guard<std::mutex> _lock(m_mutex);
-    for (auto it = this->il.begin(); it != this->il.end(); ++it) {
-      delete (*it);
-    }
     this->il.clear();
   }
 
@@ -125,7 +122,6 @@ public:
 
     auto it = il.template get<1>().find(index);
     if (it != il.template get<1>().end()) {
-      delete (*it);
       il.template get<1>().erase(it);
     }
   }
@@ -146,7 +142,7 @@ public:
     if (it == il.template get<1>().end()) {
       return nullptr;
     } else {
-      return *it;
+      return it->get();
     }
   }
 

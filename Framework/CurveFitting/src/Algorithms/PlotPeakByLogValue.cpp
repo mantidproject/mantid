@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <algorithm>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
@@ -72,7 +72,7 @@ void PlotPeakByLogValue::init() {
       "However, if spectra lists (or workspace-indices/values lists) are "
       "specified in the Input parameter string, \n"
       "or the Spectrum parameter integer, these take precedence.");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output TableWorkspace");
   declareProperty("Function", "",
@@ -142,11 +142,11 @@ void PlotPeakByLogValue::init() {
                   "If true and CreateOutput is true then the value of each "
                   "member of a Composite Function is also output.");
 
-  declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and OutputCompositeMembers is true members of any "
-      "Convolution are output convolved\n"
-      "with corresponding resolution");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "ConvolveMembers", false),
+                  "If true and OutputCompositeMembers is true members of any "
+                  "Convolution are output convolved\n"
+                  "with corresponding resolution");
 
   std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
   declareProperty(
@@ -156,7 +156,7 @@ void PlotPeakByLogValue::init() {
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
 
-  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
 
@@ -188,7 +188,7 @@ void PlotPeakByLogValue::exec() {
   ITableWorkspace_sptr result =
       WorkspaceFactory::Instance().createTable("TableWorkspace");
   if (logName == "SourceName") {
-    result->addColumn("str", "Source name");
+    result->addColumn("str", "SourceName");
     isDataName = true;
   } else if (logName.empty()) {
     auto col = result->addColumn("double", "axis-1");
@@ -261,7 +261,7 @@ void PlotPeakByLogValue::exec() {
       // Find the log value: it is either a log-file value or simply the
       // workspace number
       double logValue = 0;
-      if (logName.empty()) {
+      if (logName.empty() || logName == "axis-1") {
         API::Axis *axis = data.ws->getAxis(1);
         if (dynamic_cast<BinEdgeAxis *>(axis)) {
           double lowerEdge((*axis)(j));
@@ -376,8 +376,8 @@ void PlotPeakByLogValue::exec() {
       interruption_point();
 
       if (individual) {
-        for (size_t i = 0; i < initialParams.size(); ++i) {
-          ifun->setParameter(i, initialParams[i]);
+        for (size_t k = 0; k < initialParams.size(); ++k) {
+          ifun->setParameter(k, initialParams[k]);
         }
       }
     } // for(;j < jend;++j)
@@ -631,14 +631,14 @@ PlotPeakByLogValue::makeNames() const {
       API::WorkspaceGroup_sptr wsg =
           boost::dynamic_pointer_cast<API::WorkspaceGroup>(ws);
       if (wsg) {
-        std::vector<std::string> wsNames = wsg->getNames();
-        for (auto &wsName : wsNames) {
-          nameList.push_back(InputData(wsName, wi, -1, period, start, end));
+        const std::vector<std::string> wsNames = wsg->getNames();
+        for (const auto &wsName : wsNames) {
+          nameList.emplace_back(InputData(wsName, wi, -1, period, start, end));
         }
         continue;
       }
     }
-    nameList.push_back(InputData(name, wi, spec, period, start, end));
+    nameList.emplace_back(name, wi, spec, period, start, end);
   }
   return nameList;
 }

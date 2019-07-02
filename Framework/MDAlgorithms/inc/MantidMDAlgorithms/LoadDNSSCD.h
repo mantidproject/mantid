@@ -63,6 +63,9 @@ private:
   /// number of workspace dimensions
   size_t m_nDims;
 
+  /// maximal TOF (for extends)
+  double m_tof_max;
+
   /// type of normalization;
   std::string m_normtype;
   /// factor to multiply the error^2 for normalization
@@ -90,6 +93,7 @@ private:
                  std::map<std::string, std::string> &str_metadata,
                  std::map<std::string, double> &num_metadata);
   void fillOutputWorkspace(double wavelength);
+  void fillOutputWorkspaceRaw(double wavelength);
   API::ITableWorkspace_sptr saveHuber();
   void loadHuber(API::ITableWorkspace_sptr tws);
   template <class T>

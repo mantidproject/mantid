@@ -39,7 +39,7 @@ public:
     ResolutionConvolvedCrossSection *conv = new ResolutionConvolvedCrossSection;
 
     TS_ASSERT_THROWS(TobyFitResolutionModel(*conv, "_NotAKnownModel"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     delete conv;
   }

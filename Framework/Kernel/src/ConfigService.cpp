@@ -20,7 +20,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
@@ -1276,41 +1276,40 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
   args.emplace_back("/value");  // windows
 #endif
 
-  if (!cmd.empty()) {
-    try {
-      Poco::Pipe outPipe, errorPipe;
-      Poco::ProcessHandle ph =
-          Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
-      const int rc = ph.wait();
-      // Only if the command returned successfully.
-      if (rc == 0) {
-        Poco::PipeInputStream pipeStream(outPipe);
-        std::stringstream stringStream;
-        Poco::StreamCopier::copyStream(pipeStream, stringStream);
-        const std::string result = stringStream.str();
+#if defined __APPLE__ || defined _WIN32
+  try {
+    Poco::Pipe outPipe, errorPipe;
+    Poco::ProcessHandle ph =
+        Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
+    const int rc = ph.wait();
+    // Only if the command returned successfully.
+    if (rc == 0) {
+      Poco::PipeInputStream pipeStream(outPipe);
+      std::stringstream stringStream;
+      Poco::StreamCopier::copyStream(pipeStream, stringStream);
+      const std::string result = stringStream.str();
 #ifdef __APPLE__
-        const std::string product_name =
-            getValueFromStdOut(result, "ProductName:");
-        const std::string product_vers =
-            getValueFromStdOut(result, "ProductVersion:");
+      const std::string product_name =
+          getValueFromStdOut(result, "ProductName:");
+      const std::string product_vers =
+          getValueFromStdOut(result, "ProductVersion:");
 
-        description = product_name + " " + product_vers;
+      description = product_name + " " + product_vers;
 #elif _WIN32
-        description = getValueFromStdOut(result, "Caption=");
+      description = getValueFromStdOut(result, "Caption=");
 #else
-        UNUSED_ARG(result); // only used on mac and windows
+      UNUSED_ARG(result); // only used on mac and windows
 #endif
-      } else {
-        std::stringstream messageStream;
-        messageStream << "command \"" << cmd << "\" failed with code: " << rc;
-        g_log.debug(messageStream.str());
-      }
-    } catch (Poco::SystemException &e) {
-      g_log.debug("command \"" + cmd + "\" failed");
-      g_log.debug(e.what());
+    } else {
+      std::stringstream messageStream;
+      messageStream << "command \"" << cmd << "\" failed with code: " << rc;
+      g_log.debug(messageStream.str());
     }
+  } catch (Poco::SystemException &e) {
+    g_log.debug("command \"" + cmd + "\" failed");
+    g_log.debug(e.what());
   }
-
+#endif
   return description;
 }
 
@@ -1592,7 +1591,10 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
     try {
       newDirPath = Poco::Path(path);
       newDirPath.append(subDirPath);
-      newDataDirs.push_back(newDirPath.toString());
+      // only add new path if it isn't already there
+      if (std::find(newDataDirs.begin(), newDataDirs.end(),
+                    newDirPath.toString()) == newDataDirs.end())
+        newDataDirs.push_back(newDirPath.toString());
     } catch (Poco::PathSyntaxException &) {
       continue;
     }
@@ -1927,10 +1929,12 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
   if (facilityName.empty())
     return this->getFacility();
 
-  for (auto facility : m_facilities) {
-    if ((*facility).name() == facilityName) {
-      return *facility;
-    }
+  auto facility = std::find_if(
+      m_facilities.cbegin(), m_facilities.cend(),
+      [&facilityName](const auto f) { return f->name() == facilityName; });
+
+  if (facility != m_facilities.cend()) {
+    return **facility;
   }
 
   throw Exception::NotFoundError("Facilities", facilityName);

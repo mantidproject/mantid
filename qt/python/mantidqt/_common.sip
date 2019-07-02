@@ -33,7 +33,6 @@ qRegisterMetaType<Message>("Message");
     SIP_UNBLOCK_THREADS
 %End
 };
-
 // ----------------------------------------------------------------------------
 // Classes
 // ----------------------------------------------------------------------------
@@ -225,6 +224,35 @@ public:
   GenericDialog(QWidget *parent = nullptr);
 };
 
+class UserSubWindow : QMainWindow {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+using namespace MantidQt::API;
+%End
+private:
+  UserSubWindow(QWidget *parent = nullptr);
+};
+
+class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/UserSubWindowFactory.h"
+%End
+public:
+    static SIP_PYOBJECT Instance() const;
+    %MethodCode
+        auto &cppInstance = MantidQt::API::UserSubWindowFactory::Instance();
+        return sipConvertFromType(&cppInstance, sipType_UserSubWindowFactoryImpl, nullptr);
+    %End
+    UserSubWindow *createUnwrapped(const std::string &name) const;
+    QSet<QString> categories(const QString &interfaceName) const;
+    QStringList keys() const;
+
+private:
+  UserSubWindowFactoryImpl();
+  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &);
+  ~UserSubWindowFactoryImpl();
+};
+
 
 class InterfaceManager {
 %TypeHeaderCode
@@ -240,6 +268,20 @@ public:
       const QString &optionalMsg = QString(),
       const QStringList &enabled = QStringList(),
       const QStringList &disabled = QStringList());
+
+  UserSubWindow *createSubWindow(
+      const QString &interface_name,
+      QWidget *parent = nullptr);
+  QStringList getUserSubWindowKeys() const;
+
+  void showHelpPage(const QString &url=QString());
+  void showWikiPage(const QString &page=QString());
+  void showAlgorithmHelp(const QString &name, const int version=-1);
+  void showConceptHelp(const QString &name);
+  void showFitFunctionHelp(const QString &name=QString());
+  void showCustomInterfaceHelp(const QString &name);
+  void showWebPage(const QString &url);
+  void closeHelpWindow();
 };
 
 // ---------------------------------
@@ -290,6 +332,7 @@ signals:
   void overplotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
   void plotColorfillClicked(const QStringList &workspaceNames);
   void sampleLogsClicked(const QStringList &workspaceNames);
+  void sliceViewerClicked(const QStringList &workspaceNames);
   void showInstrumentClicked(const QStringList &workspaceNames);
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
 };
@@ -497,7 +540,11 @@ public:
                                      int column,
                                      const std::string& oldValue,
                                      const std::string& newValue) = 0;
+  virtual void notifySelectionChanged() = 0;
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex) = 0;
+  virtual void notifyAppendAndEditAtChildRowRequested() = 0;
+  virtual void notifyAppendAndEditAtRowBelowRequested() = 0;
+  virtual void notifyEditAtRowAboveRequested() = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
@@ -516,7 +563,7 @@ public:
     JobTreeView(const QStringList &columnHeadings, const Cell& defaultCellStyle,
      QWidget *parent = nullptr);
 
-    void subscribe(JobTreeViewSubscriber& subscriber);
+    void subscribe(JobTreeViewSubscriber *subscriber);
     MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
      &parent, int beforeRow,
                           const std::vector<Cell> &rowText);
@@ -527,6 +574,9 @@ public:
     MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
     &parentLocation,
                           const std::vector<Cell> &rowText);
+    void appendAndEditAtChildRow();
+    void appendAndEditAtRowBelow();
+    void editAtRowAbove();
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
     void removeAllRows();
@@ -619,7 +669,11 @@ public:
                                      int column,
                                      const std::string &oldValue,
                                      const std::string &newValue);
+  virtual void notifySelectionChanged();
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  virtual void notifyAppendAndEditAtChildRowRequested();
+  virtual void notifyAppendAndEditAtRowBelowRequested();
+  virtual void notifyEditAtRowAboveRequested();
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested();
@@ -633,9 +687,110 @@ signals:
                        std::string newValue);
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   void filterReset();
+  void appendAndEditAtChildRowRequested();
+  void appendAndEditAtRowBelowRequested();
+  void editAtRowAboveRequested();
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
   void cutRowsRequested();
+};
 
+
+// ---------------------------------
+// Function Browser
+// ---------------------------------
+class FunctionBrowser : public QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FunctionBrowser.h"
+#include <boost/python/extract.hpp>
+#include <boost/python/to_python_value.hpp>
+using namespace MantidQt::API;
+%End
+public:
+    FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
+    FunctionTreeView *view() const;
+    void setFunction(const QString &funStr);
+    QString getFunctionString();
+    QString getFitFunctionString() const;
+    void setParameter(const QString &funStr, double value);
+    double getParameter(const QString &funStr);
+    int getNumberOfDatasets() const;
+    void setNumberOfDatasets(int n);
+    void setCurrentDataset(int i);
+    int getCurrentDataset() const;
+    void setDatasetNames(const QStringList &names);
+    void addDatasets(const QStringList &names);
+    void removeDatasets(QList<int> indices);
+    QStringList getDatasetNames() const;
+    void setErrorsEnabled(bool enabled);
+    QStringList getGlobalParameters() const;
+    void setGlobalParameters(const QStringList &globals);
+    void clear();
+    void updateParameters(SIP_PYOBJECT);
+    %MethodCode
+    try{
+      auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+      sipCpp->updateParameters(*function);
+      }
+      catch (std::invalid_argument &sipExceptionRef)
+      {
+         const char *detail = sipExceptionRef.what();
+         SIP_BLOCK_THREADS
+         PyErr_SetString(PyExc_ValueError, detail);
+         SIP_UNBLOCK_THREADS
+         return NULL;
+      }
+      catch (...)
+      {
+         sipRaiseUnknownException();
+         return NULL;
+      }
+    %End
+    void updateMultiDatasetParameters(SIP_PYOBJECT);
+    %MethodCode
+    try{
+      auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+      sipCpp->updateMultiDatasetParameters(*function);
+      }
+      catch (std::invalid_argument &sipExceptionRef)
+      {
+         const char *detail = sipExceptionRef.what();
+         SIP_BLOCK_THREADS
+         PyErr_SetString(PyExc_ValueError, detail);
+         SIP_UNBLOCK_THREADS
+         return NULL;
+      }
+      catch (...)
+      {
+         sipRaiseUnknownException();
+         return NULL;
+      }
+    %End
+    SIP_PYOBJECT getGlobalFunction();
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
+    %End
+signals:
+    void functionStructureChanged();
+    void parameterChanged(const QString &funcIndex, const QString &paramName);
+};
+
+// ---------------------------------
+// FunctionTreeView
+// ---------------------------------
+class FunctionTreeView : public QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FunctionTreeView.h"
+%End
+public:
+    FunctionTreeView(QWidget *parent, bool multi);
+    int getNumberOfQtProperties() const;
+    int getNumberOfTieProperties() const;
+    int getNumberOfConstraintProperties() const;
+    QRect getVisualRectFunctionProperty(const QString &index) const;
+    QRect getVisualRectParameterProperty(const QString &index) const;
+    QTreeWidget *treeWidget() const;
+    QWidget *getParamWidget(const QString &paramName) const;
+    double getParameter(const QString &paramName) const;
 };

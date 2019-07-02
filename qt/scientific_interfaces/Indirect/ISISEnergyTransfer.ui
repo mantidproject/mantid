@@ -1075,6 +1075,13 @@
          </spacer>
         </item>
         <item>
+         <widget class="QCheckBox" name="ckGroupOutput">
+          <property name="text">
+           <string>Group Output</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="ckFold">
           <property name="enabled">
            <bool>true</bool>

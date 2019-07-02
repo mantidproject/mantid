@@ -14,7 +14,7 @@ include (InstallRequiredSystemLibraries)
 add_definitions ( -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
-add_definitions ( -DPOCO_NO_UNWINDOWS )
+add_definitions ( -DPOCO_DLL -DPOCO_NO_UNWINDOWS )
 add_definitions ( -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
   # Prevent deprecation errors from std::tr1 in googletest until it is fixed upstream. In MSVC 2017 and later
@@ -81,7 +81,7 @@ else ( USE_TCMALLOC )
   message ( STATUS "TCMalloc will not be included." )
 endif ()
 
-set ( CONSOLE ON CACHE BOOL "Switch for enabling/disabling the console" )
+option ( CONSOLE "Switch for enabling/disabling the console" ON )
 
 ###########################################################################
 # Windows import library needs to go to bin as well

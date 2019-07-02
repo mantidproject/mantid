@@ -16,7 +16,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
@@ -162,11 +162,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "specified externally, the former prevail.");
 
   if (hasPostprocessing()) {
-    m_manager =
-        Mantid::Kernel::make_unique<TwoLevelTreeManager>(this, m_whitelist);
+    m_manager = std::make_unique<TwoLevelTreeManager>(this, m_whitelist);
   } else {
-    m_manager =
-        Mantid::Kernel::make_unique<OneLevelTreeManager>(this, m_whitelist);
+    m_manager = std::make_unique<OneLevelTreeManager>(this, m_whitelist);
   }
 }
 
@@ -330,13 +328,13 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
 void GenericDataProcessorPresenter::settingsChanged() {
   try {
     m_preprocessing.m_options = convertColumnOptionsFromQMap(
-        m_mainPresenter->getPreprocessingOptions(m_group));
+        m_mainPresenter->getPreprocessingOptions());
     m_processingOptions =
-        convertOptionsFromQMap(m_mainPresenter->getProcessingOptions(m_group));
+        convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
 
     if (hasPostprocessing())
       m_postprocessing->m_options =
-          m_mainPresenter->getPostprocessingOptionsAsString(m_group);
+          m_mainPresenter->getPostprocessingOptionsAsString();
 
     m_manager->invalidateAllProcessed();
   } catch (std::runtime_error &e) {
@@ -833,7 +831,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
     // property name to value
     const auto preprocessingOptionsMap = m_preprocessing.m_options;
 
-    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
+    auto notebook = std::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist,
         m_preprocessing.m_map, m_processor, m_postprocessing,
         preprocessingOptionsMap);
@@ -1520,7 +1518,7 @@ void GenericDataProcessorPresenter::addHandle(
     return;
 
   m_workspaceList.insert(QString::fromStdString(name));
-  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -1528,7 +1526,7 @@ Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.remove(QString::fromStdString(name));
-  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
   handleWorkspaceRemoved(name, "Workspace deleted");
 }
 
@@ -1538,7 +1536,7 @@ Handle ADS clear events
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
   handleAllWorkspacesRemoved("Workspaces cleared");
-  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -1558,7 +1556,7 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
     m_workspaceList.insert(qNewName);
   }
 
-  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -1822,7 +1820,7 @@ the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
   m_pauseReduction = true;
-  m_mainPresenter->pause(m_group);
+  m_mainPresenter->pause();
 }
 
 /** Resumes reduction if currently paused
@@ -1832,8 +1830,8 @@ void GenericDataProcessorPresenter::resume() {
   m_reductionPaused = false;
   updateWidgetEnabledState(true);
 
-  m_mainPresenter->resume(m_group);
-  m_mainPresenter->confirmReductionResumed(m_group);
+  m_mainPresenter->resume();
+  m_mainPresenter->confirmReductionResumed();
 
   processNextItem();
 }
@@ -1841,7 +1839,7 @@ void GenericDataProcessorPresenter::resume() {
 void GenericDataProcessorPresenter::setReductionPaused() {
   m_reductionPaused = true;
   confirmReductionPaused();
-  m_mainPresenter->confirmReductionPaused(m_group);
+  m_mainPresenter->confirmReductionPaused();
 }
 
 void GenericDataProcessorPresenter::confirmReductionPaused() {
@@ -1890,9 +1888,9 @@ void GenericDataProcessorPresenter::accept(
   // is registered
   settingsChanged();
 
-  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
   // Presenter should initially be in the paused state
-  m_mainPresenter->pause(m_group);
+  m_mainPresenter->pause();
 }
 
 /** Returs the list of valid workspaces currently in the ADS
@@ -1904,8 +1902,7 @@ std::vector<Command_uptr> GenericDataProcessorPresenter::getTableList() {
   workspaces.reserve(m_workspaceList.size());
   // Create a command for each of the workspaces in the ADS
   for (const auto &name : m_workspaceList) {
-    workspaces.push_back(
-        Mantid::Kernel::make_unique<WorkspaceCommand>(this, name));
+    workspaces.emplace_back(std::make_unique<WorkspaceCommand>(this, name));
   }
   return workspaces;
 }

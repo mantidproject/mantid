@@ -67,7 +67,7 @@ public:
     TS_ASSERT(outws);
 
     int numrows = static_cast<int>(outws->rowCount());
-    TS_ASSERT_EQUALS(numrows, 7392);
+    TS_ASSERT_EQUALS(numrows, 24900);
 
     // get some value to check
     double l1 = 43.754;
@@ -155,7 +155,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", inpws),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_not_allowed_output_workspace_same_as_input() {

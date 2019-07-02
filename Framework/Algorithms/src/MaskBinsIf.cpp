@@ -52,14 +52,14 @@ DECLARE_ALGORITHM(MaskBinsIf)
 /** Initialize the algorithm's properties.
  */
 void MaskBinsIf::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   declareProperty("Criterion", "",
                   "Masking criterion as a muparser expression; y: bin count, "
                   "e: bin error, x: bin center, dx: bin center error, s: "
                   "spectrum axis value.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -73,8 +73,8 @@ std::map<std::string, std::string> MaskBinsIf::validateInputs() {
   mu::Parser parser = makeParser(y, e, x, dx, s, getPropertyValue("Criterion"));
   try {
     parser.Eval();
-  } catch (mu::Parser::exception_type &e) {
-    issues["Criterion"] = "Invalid expression given: " + e.GetMsg();
+  } catch (mu::Parser::exception_type &exception) {
+    issues["Criterion"] = "Invalid expression given: " + exception.GetMsg();
   }
   return issues;
 }
@@ -89,22 +89,22 @@ void MaskBinsIf::exec() {
   if (inputWorkspace != outputWorkspace) {
     outputWorkspace = inputWorkspace->clone();
   }
-  const auto spectrumAxis = outputWorkspace->getAxis(1);
-  const auto numeric = dynamic_cast<NumericAxis *>(spectrumAxis);
-  const auto spectrum = dynamic_cast<SpectraAxis *>(spectrumAxis);
-  const bool spectrumOrNumeric = numeric || spectrum;
+  const auto verticalAxis = outputWorkspace->getAxis(1);
+  const auto numericAxis = dynamic_cast<NumericAxis *>(verticalAxis);
+  const auto spectrumAxis = dynamic_cast<SpectraAxis *>(verticalAxis);
+  const bool spectrumOrNumeric = numericAxis || spectrumAxis;
   if (!spectrumOrNumeric) {
     throw std::runtime_error(
         "Vertical axis must be NumericAxis or SpectraAxis");
   }
   const int64_t numberHistograms =
       static_cast<int64_t>(outputWorkspace->getNumberHistograms());
-  auto progress = make_unique<Progress>(this, 0., 1., numberHistograms);
+  auto progress = std::make_unique<Progress>(this, 0., 1., numberHistograms);
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (int64_t index = 0; index < numberHistograms; ++index) {
     PARALLEL_START_INTERUPT_REGION
     double y, e, x, dx;
-    double s = spectrumOrNumeric ? spectrumAxis->getValue(index) : 0.;
+    double s = spectrumOrNumeric ? verticalAxis->getValue(index) : 0.;
     mu::Parser parser = makeParser(y, e, x, dx, s, criterion);
     const auto &spectrum = outputWorkspace->histogram(index);
     const bool hasDx = outputWorkspace->hasDx(index);

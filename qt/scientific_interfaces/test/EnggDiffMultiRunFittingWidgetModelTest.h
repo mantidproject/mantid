@@ -22,7 +22,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     TS_ASSERT_THROWS_NOTHING(model.addFittedPeaks(runLabel, ws));
 
     boost::optional<Mantid::API::MatrixWorkspace_sptr> retrievedWS(boost::none);
@@ -35,7 +35,7 @@ public:
     EnggDiffMultiRunFittingWidgetModel model;
     boost::optional<Mantid::API::MatrixWorkspace_sptr> retrievedWS(boost::none);
     TS_ASSERT_THROWS_NOTHING(retrievedWS =
-                                 model.getFittedPeaks(RunLabel(123, 1)));
+                                 model.getFittedPeaks(RunLabel("123", 1)));
     TS_ASSERT(!retrievedWS);
   }
 
@@ -44,7 +44,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     TS_ASSERT_THROWS_NOTHING(model.addFocusedRun(runLabel, ws));
 
     boost::optional<Mantid::API::MatrixWorkspace_sptr> retrievedWS(boost::none);
@@ -57,7 +57,7 @@ public:
     EnggDiffMultiRunFittingWidgetModel model;
     boost::optional<Mantid::API::MatrixWorkspace_sptr> retrievedWS(boost::none);
     TS_ASSERT_THROWS_NOTHING(retrievedWS =
-                                 model.getFocusedRun(RunLabel(123, 1)));
+                                 model.getFocusedRun(RunLabel("123", 1)));
     TS_ASSERT(!retrievedWS);
   }
 
@@ -67,9 +67,9 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
 
-    const RunLabel label1(123, 1);
+    const RunLabel label1("123", 1);
     model.addFocusedRun(label1, ws);
-    const RunLabel label2(456, 2);
+    const RunLabel label2("456", 2);
     model.addFocusedRun(label2, ws);
 
     const std::vector<RunLabel> expectedLabels1({label1, label2});
@@ -78,9 +78,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(retrievedLabels = model.getAllWorkspaceLabels());
     TS_ASSERT_EQUALS(expectedLabels1, retrievedLabels);
 
-    const RunLabel label3(456, 1);
+    const RunLabel label3("456", 1);
     model.addFocusedRun(label3, ws);
-    model.addFittedPeaks(RunLabel(123, 2), ws);
+    model.addFittedPeaks(RunLabel("123", 2), ws);
     const std::vector<RunLabel> expectedLabels2 = {label1, label3, label2};
     TS_ASSERT_THROWS_NOTHING(retrievedLabels = model.getAllWorkspaceLabels());
     TS_ASSERT_EQUALS(expectedLabels2, retrievedLabels);
@@ -92,13 +92,13 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
 
-    const RunLabel label1(123, 1);
+    const RunLabel label1("123", 1);
     model.addFocusedRun(label1, ws);
 
     TS_ASSERT_THROWS_NOTHING(model.removeRun(label1));
     TS_ASSERT(!model.getFocusedRun(label1));
 
-    TS_ASSERT_THROWS_ANYTHING(model.removeRun(RunLabel(456, 2)));
+    TS_ASSERT_THROWS_ANYTHING(model.removeRun(RunLabel("456", 2)));
   }
 };
 

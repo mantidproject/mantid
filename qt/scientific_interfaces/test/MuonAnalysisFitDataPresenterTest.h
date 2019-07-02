@@ -503,7 +503,7 @@ public:
     const std::string baseName("MuonSimulFit_UniqueLabelThatIsNotInTheADS");
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(baseName));
     TS_ASSERT_THROWS(m_presenter->handleFittedWorkspaces(baseName),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_extractFittedWorkspaces_defaultGroupName() {
@@ -569,7 +569,7 @@ public:
     const std::string baseName = "MuonSimulFit_UniqueLabelThatIsNotInTheADS";
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(baseName));
     TS_ASSERT_THROWS(m_presenter->extractFittedWorkspaces(baseName),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_checkAndUpdateFitLabel_Simultaneous_NoOverwrite_ShouldUpdate() {

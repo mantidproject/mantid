@@ -219,11 +219,9 @@ std::string shortParameterName(const std::string &longName) {
 
 bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   const auto &first = workspaces.front();
-  for (const auto &workspace : workspaces) {
-    if (workspace != first)
-      return true;
-  }
-  return false;
+  return std::any_of(
+      workspaces.cbegin(), workspaces.cend(),
+      [&first](const auto &workspace) { return workspace != first; });
 }
 
 template <typename F, typename Renamer>
@@ -348,8 +346,8 @@ const std::vector<std::string> QENSFitSequential::seeAlso() const {
 
 void QENSFitSequential::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "The input workspace for the fit. This property will be ignored if "
       "'Input' is provided.");
 
@@ -385,22 +383,22 @@ void QENSFitSequential::init() {
                   "The unit to assign to the X Axis of the result workspace, "
                   "defaults to MomentumTransfer");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output result workspace(s)");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputParameterWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "The output parameter workspace");
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspaceGroup", "", Direction::Output,
                       PropertyMode::Optional),
                   "The output group workspace");
 
   declareProperty(
-      make_unique<FunctionProperty>("Function", Direction::InOut),
+      std::make_unique<FunctionProperty>("Function", Direction::InOut),
       "The fitting function, common for all workspaces in the input.");
-  declareProperty("LogValue", "",
+  declareProperty("LogName", "axis-1",
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
                   "numbers.");
@@ -452,11 +450,11 @@ void QENSFitSequential::init() {
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
 
-  declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and OutputCompositeMembers is true members of any "
-      "Convolution are output convolved\n"
-      "with corresponding resolution");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "ConvolveMembers", false),
+                  "If true and OutputCompositeMembers is true members of any "
+                  "Convolution are output convolved\n"
+                  "with corresponding resolution");
 
   const std::array<std::string, 2> evaluationTypes = {
       {"CentrePoint", "Histogram"}};
@@ -467,7 +465,7 @@ void QENSFitSequential::init() {
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
 
-  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
 
@@ -662,12 +660,13 @@ std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
 WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
     ITableWorkspace_sptr parameterWorkspace,
     const std::vector<std::size_t> &grouping) {
+  std::string const columnX = getProperty("LogName");
   std::string const xAxisUnit = getProperty("ResultXAxisUnit");
   auto pifp =
       createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, false);
   pifp->setAlwaysStoreInADS(false);
   pifp->setProperty("InputWorkspace", parameterWorkspace);
-  pifp->setProperty("ColumnX", "axis-1");
+  pifp->setProperty("ColumnX", columnX);
   pifp->setProperty("XAxisUnit", xAxisUnit);
   pifp->setProperty("ParameterNames", getFitParameterNames());
   pifp->setProperty("IncludeChiSquared", true);
@@ -734,7 +733,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("Minimizer", getPropertyValue("Minimizer"));
   plotPeaks->setProperty("PassWSIndexToFunction", passWsIndex);
   plotPeaks->setProperty("PeakRadius", getPropertyValue("PeakRadius"));
-  plotPeaks->setProperty("LogValue", getPropertyValue("LogValue"));
+  plotPeaks->setProperty("LogValue", getPropertyValue("LogName"));
   plotPeaks->setProperty("EvaluationType", getPropertyValue("EvaluationType"));
   plotPeaks->setProperty("CostFunction", getPropertyValue("CostFunction"));
   plotPeaks->executeAsChildAlg();

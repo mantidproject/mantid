@@ -59,16 +59,16 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
 
     def _test_corrections_workspace(self, corr_ws):
         x_unit = corr_ws.getAxis(0).getUnit().unitID()
-        self.assertEquals(x_unit, self._expected_unit)
+        self.assertEqual(x_unit, self._expected_unit)
 
         y_unit = corr_ws.YUnitLabel()
-        self.assertEquals(y_unit, 'Attenuation factor')
+        self.assertEqual(y_unit, 'Attenuation factor')
 
         num_hists = corr_ws.getNumberHistograms()
-        self.assertEquals(num_hists, self._expected_hist)
+        self.assertEqual(num_hists, self._expected_hist)
 
         blocksize = corr_ws.blocksize()
-        self.assertEquals(blocksize, self._expected_blocksize)
+        self.assertEqual(blocksize, self._expected_blocksize)
 
     def _test_corrections_workspaces(self, workspaces):
         self.assertNotEquals(workspaces, None)

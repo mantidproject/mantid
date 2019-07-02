@@ -15,7 +15,6 @@
 
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -482,7 +481,7 @@ double BivariateNormal::initCommon() {
 
     if (getConstraint(0) == nullptr) {
 
-      addConstraint((Kernel::make_unique<BoundaryConstraint>(
+      addConstraint((std::make_unique<BoundaryConstraint>(
           this, "Background", 0, Attrib[S_int] / Attrib[S_1])));
     }
 
@@ -492,23 +491,23 @@ double BivariateNormal::initCommon() {
       maxIntensity = 100;
 
     if (getConstraint(1) == nullptr) {
-      addConstraint(Kernel::make_unique<BoundaryConstraint>(this, "Intensity",
-                                                            0, maxIntensity));
+      addConstraint(std::make_unique<BoundaryConstraint>(this, "Intensity", 0,
+                                                         maxIntensity));
     }
 
     double minMeany = MinY * .9 + .1 * MaxY;
     double maxMeany = MinY * .1 + .9 * MaxY;
 
     if (getConstraint(3) == nullptr) {
-      addConstraint(Kernel::make_unique<BoundaryConstraint>(
-          this, "Mrow", minMeany, maxMeany));
+      addConstraint(std::make_unique<BoundaryConstraint>(this, "Mrow", minMeany,
+                                                         maxMeany));
     }
 
     double minMeanx = MinX * .9 + .1 * MaxX;
     double maxMeanx = MinX * .1 + .9 * MaxX;
     if (getConstraint(2) == nullptr) {
-      addConstraint(Kernel::make_unique<BoundaryConstraint>(
-          this, "Mcol", minMeanx, maxMeanx));
+      addConstraint(std::make_unique<BoundaryConstraint>(this, "Mcol", minMeanx,
+                                                         maxMeanx));
     }
 
     if (CalcVariances && nParams() > 6) {
@@ -619,10 +618,10 @@ double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X,
              (getParameter("Mcol") - (mx)) * TotN) /
         (TotI - getParameter("Background") * TotN);
 
-    if (Varx0 > 0)
+    if (Varx0 > 0) {
       Varxx = std::min<double>(Varxx, 1.21 * Varx0);
-    if (Varx0 > 0)
       Varxx = std::max<double>(Varxx, .79 * Varx0);
+    }
 
   } else {
     Varxx = getParameter(IVXX);
@@ -636,11 +635,10 @@ double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X,
              getParameter("Background") * (Syy)-Background * (Mrow - (my)) *
                  (Mrow - (my)) * TotN) /
             (TotI - Background * TotN);
-    if (Vary0 > 0)
+    if (Vary0 > 0) {
       Varyy = std::min<double>(Varyy, 1.21 * Vary0);
-    if (Vary0 > 0)
       Varyy = std::max<double>(Varyy, .79 * Vary0);
-
+    }
   } else {
     Varyy = getParameter(IVYY);
   }

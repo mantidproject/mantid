@@ -28,14 +28,14 @@ using namespace std;
 /** Initialize the algorithm's properties.
  */
 void SaveIsawUB::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace containing the orientation matrix.");
 
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, exts),
-                  "Path to an ISAW-style UB matrix text file.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
+      "Path to an ISAW-style UB matrix text file.");
 }
 
 double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
@@ -166,7 +166,7 @@ void SaveIsawUB::exec() {
       out << "Modulation Vector 1 error:   " << setw(6) << setprecision(4)
           << lattice.getdherr(0) << setw(12) << setprecision(4)
           << lattice.getdkerr(0) << setw(12) << setprecision(4)
-          << lattice.getdlerr(0) << " \n\n";
+          << lattice.getdlerr(0) << " \n";
     }
     if (ModDim >= 2) {
       out << "Modulation Vector 2:   " << setw(12) << setprecision(4)
@@ -176,7 +176,7 @@ void SaveIsawUB::exec() {
       out << "Modulation Vector 2 error:   " << setw(6) << setprecision(4)
           << lattice.getdherr(1) << setw(12) << setprecision(4)
           << lattice.getdkerr(1) << setw(12) << setprecision(4)
-          << lattice.getdlerr(1) << " \n\n";
+          << lattice.getdlerr(1) << " \n";
     }
     if (ModDim == 3) {
       out << "Modulation Vector 3:   " << setw(12) << setprecision(4)
@@ -186,9 +186,10 @@ void SaveIsawUB::exec() {
       out << "Modulation Vector 3 error:   " << setw(6) << setprecision(4)
           << lattice.getdherr(2) << setw(12) << setprecision(4)
           << lattice.getdkerr(2) << setw(12) << setprecision(4)
-          << lattice.getdlerr(2) << " \n\n";
+          << lattice.getdlerr(2) << " \n";
     }
     if (ModDim >= 1) {
+      out << "\n";
       out << "Max Order:        " << lattice.getMaxOrder() << " \n";
       out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
     }

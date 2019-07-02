@@ -23,6 +23,10 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
@@ -467,6 +471,7 @@ public:
   void testEmptyWorkspace() {
     WorkspaceTester ws;
     TS_ASSERT(ws.isCommonBins());
+    TS_ASSERT_EQUALS(ws.isCommonLogBins(), false);
     TS_ASSERT_EQUALS(ws.blocksize(), 0);
     TS_ASSERT_EQUALS(ws.size(), 0);
   }
@@ -476,6 +481,7 @@ public:
     ws.initialize(10, 10, 10);
     // After initialization, ws should contain a shared HistogramX.
     TS_ASSERT(ws.isCommonBins());
+    TS_ASSERT_EQUALS(ws.isCommonLogBins(), false);
     // Modifying the value of one Spectrum will cause this Histogram to detach.
     // Since the value is identical, isCommonBins is still true.
     ws.mutableX(0)[0] = 1.;
@@ -483,6 +489,26 @@ public:
     // Once we change the the value, however, isCommonsBins should return false
     ws.mutableX(0)[0] = 2.;
     TS_ASSERT_EQUALS(ws.isCommonBins(), false);
+  }
+
+  void testIsCommonLogAxis() {
+    WorkspaceTester ws;
+    ws.initialize(10, 10, 10);
+    TS_ASSERT_EQUALS(ws.isCommonLogBins(), false);
+
+    auto logAxis = Kernel::make_cow<Mantid::HistogramData::HistogramX>(
+        10, Mantid::HistogramData::LogarithmicGenerator(1., 0.1));
+    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+      ws.setSharedX(i, logAxis);
+    }
+    TS_ASSERT_EQUALS(ws.isCommonLogBins(), true);
+
+    auto linearAxis = Kernel::make_cow<Mantid::HistogramData::HistogramX>(
+        10, Mantid::HistogramData::LinearGenerator(1., 0.1));
+    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+      ws.setSharedX(i, linearAxis);
+    }
+    TS_ASSERT_EQUALS(ws.isCommonLogBins(), false);
   }
 
   void test_updateSpectraUsing() {
@@ -520,17 +546,19 @@ public:
   void testAxes() { TS_ASSERT_EQUALS(ws->axes(), 2); }
 
   void testGetAxis() {
-    TS_ASSERT_THROWS(ws->getAxis(-1), Exception::IndexError);
+    TS_ASSERT_THROWS(ws->getAxis(-1), const Exception::IndexError &);
     TS_ASSERT_THROWS_NOTHING(ws->getAxis(0));
     TS_ASSERT(ws->getAxis(0));
     TS_ASSERT(ws->getAxis(0)->isNumeric());
-    TS_ASSERT_THROWS(ws->getAxis(2), Exception::IndexError);
+    TS_ASSERT_THROWS(ws->getAxis(2), const Exception::IndexError &);
   }
 
   void testReplaceAxis() {
-    Axis *ax = new SpectraAxis(ws.get());
-    TS_ASSERT_THROWS(ws->replaceAxis(2, ax), Exception::IndexError);
-    TS_ASSERT_THROWS_NOTHING(ws->replaceAxis(0, ax));
+    auto ax = std::make_unique<SpectraAxis>(ws.get());
+    auto ax1 = std::make_unique<SpectraAxis>(ws.get());
+    TS_ASSERT_THROWS(ws->replaceAxis(2, std::move(ax)),
+                     const Exception::IndexError &);
+    TS_ASSERT_THROWS_NOTHING(ws->replaceAxis(0, std::move(ax1)));
     TS_ASSERT(ws->getAxis(0)->isSpectra());
   }
 
@@ -709,15 +737,18 @@ public:
     TS_ASSERT(!ws2->hasMaskedBins(-1));
 
     // Will throw if nothing masked for spectrum
-    TS_ASSERT_THROWS(ws2->maskedBins(0), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS(ws2->maskedBins(0),
+                     const Mantid::Kernel::Exception::IndexError &);
     // Will throw if attempting to mask invalid spectrum
     TS_ASSERT_THROWS(ws2->maskBin(-1, 1),
-                     Mantid::Kernel::Exception::IndexError);
-    TS_ASSERT_THROWS(ws2->maskBin(1, 1), Mantid::Kernel::Exception::IndexError);
+                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(ws2->maskBin(1, 1),
+                     const Mantid::Kernel::Exception::IndexError &);
     // ...or an invalid bin
     TS_ASSERT_THROWS(ws2->maskBin(0, -1),
-                     Mantid::Kernel::Exception::IndexError);
-    TS_ASSERT_THROWS(ws2->maskBin(0, 2), Mantid::Kernel::Exception::IndexError);
+                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(ws2->maskBin(0, 2),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     // Now do a valid masking
     TS_ASSERT_THROWS_NOTHING(ws2->maskBin(0, 1, 0.5));
@@ -799,8 +830,9 @@ public:
     TS_ASSERT_EQUALS(map.size(), 2);
 
     // Check it throws for non-spectra axis
-    ws.replaceAxis(1, new NumericAxis(1));
-    TS_ASSERT_THROWS(ws.getSpectrumToWorkspaceIndexMap(), std::runtime_error);
+    ws.replaceAxis(1, std::make_unique<NumericAxis>(1));
+    TS_ASSERT_THROWS(ws.getSpectrumToWorkspaceIndexMap(),
+                     const std::runtime_error &);
   }
 
   void test_getDetectorIDToWorkspaceIndexMap() {
@@ -816,7 +848,7 @@ public:
 
     ws->getSpectrum(2).addDetectorID(99); // Set a second ID on one spectrum
     TS_ASSERT_THROWS(ws->getDetectorIDToWorkspaceIndexMap(true),
-                     std::runtime_error);
+                     const std::runtime_error &);
     detid2index_map idmap2 = ws->getDetectorIDToWorkspaceIndexMap();
     TS_ASSERT_EQUALS(idmap2.size(), 6);
   }
@@ -835,8 +867,7 @@ public:
 
     // Create some discontinuities and check that the default value is there
     // Have to create a whole new instrument to keep things consistent, since
-    // the detector ID
-    // is stored in at least 3 places
+    // the detector ID is stored in at least 3 places
     auto inst = boost::make_shared<Instrument>("TestInstrument");
     // We get a 1:1 map by default so the detector ID should match the spectrum
     // number
@@ -930,7 +961,7 @@ public:
     const int nBins = 2;
     const int nYValues = 1;
     ws.initialize(nVertical, nBins, nYValues);
-    NumericAxis *verticalAxis = new NumericAxis(nVertical);
+    auto verticalAxis = std::make_unique<NumericAxis>(nVertical);
     for (int i = 0; i < nVertical; ++i) {
       for (int j = 0; j < nBins; ++j) {
         if (j < nYValues) {
@@ -941,7 +972,7 @@ public:
       }
       verticalAxis->setValue(i, double(i)); // Vertical axis increments by 1.
     }
-    ws.replaceAxis(1, verticalAxis);
+    ws.replaceAxis(1, std::move(verticalAxis));
     // Signal is always 1 and volume of each box is 1. Therefore normalized
     // signal values by volume should always be 1.
 
@@ -964,13 +995,13 @@ public:
   void test_setMDMasking() {
     WorkspaceTester ws;
     TSM_ASSERT_THROWS("Characterisation test. This is not implemented.",
-                      ws.setMDMasking(nullptr), std::runtime_error);
+                      ws.setMDMasking(nullptr), const std::runtime_error &);
   }
 
   void test_clearMDMasking() {
     WorkspaceTester ws;
     TSM_ASSERT_THROWS("Characterisation test. This is not implemented.",
-                      ws.clearMDMasking(), std::runtime_error);
+                      ws.clearMDMasking(), const std::runtime_error &);
   }
 
   void test_getSpecialCoordinateSystem_default() {
@@ -1015,11 +1046,11 @@ public:
   void
   test_getFirstPulseTime_getLastPulseTime_throws_if_protoncharge_missing_or_empty() {
     WorkspaceTester ws;
-    TS_ASSERT_THROWS(ws.getFirstPulseTime(), std::runtime_error);
-    TS_ASSERT_THROWS(ws.getLastPulseTime(), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getFirstPulseTime(), const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getLastPulseTime(), const std::runtime_error &);
     ws.mutableRun().addLogData(new TimeSeriesProperty<double>("proton_charge"));
-    TS_ASSERT_THROWS(ws.getFirstPulseTime(), std::runtime_error);
-    TS_ASSERT_THROWS(ws.getLastPulseTime(), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getFirstPulseTime(), const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getLastPulseTime(), const std::runtime_error &);
   }
 
   void
@@ -1029,13 +1060,13 @@ public:
     proton_charge->addValue("2013-04-21T10:19:10", 1);
     proton_charge->addValue("2013-04-21T10:19:12", 2);
     ws.mutableRun().addLogData(proton_charge);
-    TS_ASSERT_THROWS(ws.getFirstPulseTime(), std::invalid_argument);
-    TS_ASSERT_THROWS(ws.getLastPulseTime(), std::invalid_argument);
+    TS_ASSERT_THROWS(ws.getFirstPulseTime(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(ws.getLastPulseTime(), const std::invalid_argument &);
 
     ws.mutableRun().addProperty(
         new PropertyWithValue<double>("proton_charge", 99.0), true);
-    TS_ASSERT_THROWS(ws.getFirstPulseTime(), std::invalid_argument);
-    TS_ASSERT_THROWS(ws.getLastPulseTime(), std::invalid_argument);
+    TS_ASSERT_THROWS(ws.getFirstPulseTime(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(ws.getLastPulseTime(), const std::invalid_argument &);
   }
 
   void test_getXMinMax() {
@@ -1185,7 +1216,8 @@ public:
     const size_t start = 0;
     const size_t stop = 8;
     size_t width = 0;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
+                     const std::runtime_error &);
     width = 3;
     TS_ASSERT_THROWS_NOTHING(ws.getImageY(start, stop, width));
   }
@@ -1199,9 +1231,11 @@ public:
     size_t start = 10;
     size_t stop = 8;
     size_t width = 3;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
+                     const std::runtime_error &);
     start = 9;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
+                     const std::runtime_error &);
     start = 0;
     TS_ASSERT_THROWS_NOTHING(ws.getImageY(start, stop, width));
   }
@@ -1215,9 +1249,11 @@ public:
     size_t start = 0;
     size_t stop = 18;
     size_t width = 3;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
+                     const std::runtime_error &);
     stop = 9;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
+                     const std::runtime_error &);
     stop = 8;
     TS_ASSERT_THROWS_NOTHING(ws.getImageY(start, stop, width));
   }
@@ -1231,7 +1267,8 @@ public:
     size_t start = 1;
     size_t stop = 0;
     size_t width = 1;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
+                     const std::runtime_error &);
     stop = 1;
     TS_ASSERT_THROWS_NOTHING(ws.getImageY(start, stop, width));
   }
@@ -1245,7 +1282,8 @@ public:
     size_t start = 0;
     size_t stop = 7;
     size_t width = 3;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), std::runtime_error);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
+                     const std::runtime_error &);
   }
 
   void test_getImage_wrong_indexStart() {
@@ -1260,14 +1298,14 @@ public:
     double startX = 3;
     double endX = 4;
     TS_ASSERT_THROWS(ws.getImageY(start, stop, width, startX, endX),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     WorkspaceTester wsh;
     wsh.initialize(9, 1, 1);
     startX = 2;
     endX = 2;
     TS_ASSERT_THROWS(wsh.getImageY(start, stop, width, startX, endX),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_getImage_wrong_indexEnd() {
@@ -1282,7 +1320,7 @@ public:
     double startX = 1.0;
     double endX = 0.0;
     TS_ASSERT_THROWS(ws.getImageY(start, stop, width, startX, endX),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     WorkspaceTester wsh;
     wsh.initialize(9, 2, 2);
@@ -1292,7 +1330,7 @@ public:
     startX = 1.0;
     endX = 0.0;
     TS_ASSERT_THROWS(wsh.getImageY(start, stop, width, startX, endX),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_getImage_single_bin_histo() {
@@ -1439,14 +1477,14 @@ public:
     auto image = createImage(2, 3);
     WorkspaceTester ws;
     ws.initialize(2, 2, 1);
-    TS_ASSERT_THROWS(ws.setImageY(*image), std::runtime_error);
+    TS_ASSERT_THROWS(ws.setImageY(*image), const std::runtime_error &);
   }
 
   void test_setImage_not_single_bin() {
     auto image = createImage(2, 3);
     WorkspaceTester ws;
     ws.initialize(20, 3, 2);
-    TS_ASSERT_THROWS(ws.setImageY(*image), std::runtime_error);
+    TS_ASSERT_THROWS(ws.setImageY(*image), const std::runtime_error &);
   }
 
   void test_setImageY() {
@@ -1620,15 +1658,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(specInfo.detector(0));
     const auto &det = specInfo.detector(0);
     // Failing legacy methods (use DetectorInfo/SpectrumInfo instead):
-    TS_ASSERT_THROWS(det.getPos(), std::runtime_error);
-    TS_ASSERT_THROWS(det.getRelativePos(), std::runtime_error);
-    TS_ASSERT_THROWS(det.getRotation(), std::runtime_error);
-    TS_ASSERT_THROWS(det.getRelativeRot(), std::runtime_error);
-    TS_ASSERT_THROWS(det.getPhi(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getPos(), const std::runtime_error &);
+    TS_ASSERT_THROWS(det.getRelativePos(), const std::runtime_error &);
+    TS_ASSERT_THROWS(det.getRotation(), const std::runtime_error &);
+    TS_ASSERT_THROWS(det.getRelativeRot(), const std::runtime_error &);
+    TS_ASSERT_THROWS(det.getPhi(), const std::runtime_error &);
     // Failing methods, currently without replacement:
-    TS_ASSERT_THROWS(det.solidAngle(V3D(0, 0, 0)), std::runtime_error);
+    TS_ASSERT_THROWS(det.solidAngle(V3D(0, 0, 0)), const std::runtime_error &);
     BoundingBox bb;
-    TS_ASSERT_THROWS(det.getBoundingBox(bb), std::runtime_error);
+    TS_ASSERT_THROWS(det.getBoundingBox(bb), const std::runtime_error &);
     // Moving parent not possible since non-detector components do not have time
     // indices and thus DetectorInfo cannot tell which set of detector positions
     // to adjust.
@@ -1639,12 +1677,12 @@ public:
     TS_ASSERT_THROWS(compInfo.setPosition(compInfo.parent(compInfo.indexOf(
                                               det.getComponentID())),
                                           V3D(1, 2, 3)),
-                     std::runtime_error);
+                     const std::runtime_error &);
     // Try to rotate the parent
     TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(compInfo.indexOf(
                                               det.getComponentID())),
                                           Quat(1, 2, 3, 4)),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_legacy_setting_spectrum_numbers_with_MPI() {
@@ -1711,8 +1749,8 @@ public:
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
     TS_ASSERT_EQUALS(workspace.getNumberHistograms(), 1);
-    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, 1), std::out_of_range);
-    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, -1), std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, 1), const std::out_of_range &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, -1), const std::out_of_range &);
   }
 
   void
@@ -1720,8 +1758,8 @@ public:
     std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
-    TS_ASSERT_THROWS(workspace.yIndexOfX(5.), std::out_of_range);
-    TS_ASSERT_THROWS(workspace.yIndexOfX(0.), std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(5.), const std::out_of_range &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(0.), const std::out_of_range &);
   }
 
   void
@@ -1786,8 +1824,8 @@ public:
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
     TS_ASSERT_EQUALS(workspace.getNumberHistograms(), 1);
-    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, 1), std::out_of_range);
-    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, -1), std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, 1), const std::out_of_range &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, -1), const std::out_of_range &);
   }
 
   void
@@ -1796,11 +1834,11 @@ public:
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
     TS_ASSERT_THROWS(workspace.yIndexOfX(std::nextafter(5.3, 10.0)),
-                     std::out_of_range);
-    TS_ASSERT_THROWS(workspace.yIndexOfX(5.4), std::out_of_range);
+                     const std::out_of_range &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(5.4), const std::out_of_range &);
     TS_ASSERT_THROWS(workspace.yIndexOfX(std::nextafter(2.3, 0.0)),
-                     std::out_of_range);
-    TS_ASSERT_THROWS(workspace.yIndexOfX(0.), std::out_of_range);
+                     const std::out_of_range &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(0.), const std::out_of_range &);
   }
 
   void
@@ -1865,7 +1903,7 @@ public:
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
     TS_ASSERT_THROWS(workspace.yIndexOfX(2.0, 0, 0.0002),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -1874,7 +1912,7 @@ public:
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
     TS_ASSERT_THROWS(workspace.yIndexOfX(1.9992, 0, 0.0002),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -1882,7 +1920,7 @@ public:
     std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
-    TS_ASSERT_THROWS(workspace.yIndexOfX(3.5), std::invalid_argument);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(3.5), const std::invalid_argument &);
   }
 
   void
@@ -1915,7 +1953,7 @@ public:
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
     TS_ASSERT_THROWS(workspace.yIndexOfX(1.9994, 0, 0.0002),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -1924,7 +1962,7 @@ public:
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
     TS_ASSERT_THROWS(workspace.yIndexOfX(2.0, 0, 0.0002),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -1932,10 +1970,88 @@ public:
     std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
-    TS_ASSERT_THROWS(workspace.yIndexOfX(3.5), std::invalid_argument);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(3.5), const std::invalid_argument &);
+  }
+
+  void
+  test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
+    auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(true, "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false),
+                     "Counts per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Counts per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false),
+                     "Counts ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
+                     "Counts ($\\mu s$)$^{-1}$");
+  }
+
+  void
+  test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
+    auto testWS =
+        generateTestWorkspaceWithDistributionAndLabelSet(true, "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Custom Label");
+  }
+
+  void
+  test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
+    auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(false, "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Counts");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Counts per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Counts");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
+                     "Counts ($\\mu s$)$^{-1}$");
+  }
+
+  void
+  test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
+    auto testWS =
+        generateTestWorkspaceWithDistributionAndLabelSet(false, "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true),
+                     "Custom Label per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
+                     "Custom Label ($\\mu s$)$^{-1}$");
+  }
+
+  void test_YUnitLabel_Correct_For_Empty_Y_Labels() {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1, 2, 1);
+    testWS->setDistribution(false);
+    testWS->getAxis(0)->setUnit("TOF");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), " per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "($\\mu s$)$^{-1}$");
+  }
+
+  void test_YUnitLabel_Correct_For_Empty_X_And_Y_Labels() {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1, 2, 1);
+    testWS->setDistribution(false);
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "");
   }
 
 private:
+  boost::shared_ptr<WorkspaceTester>
+  generateTestWorkspaceWithDistributionAndLabelSet(const bool distribution,
+                                                   const std::string &yLabel) {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1, 2, 1);
+    testWS->setDistribution(distribution);
+    testWS->setYUnit("Counts");
+    if (!yLabel.empty())
+      testWS->setYUnitLabel(yLabel);
+    testWS->getAxis(0)->setUnit("TOF");
+    return testWS;
+  }
+
   WorkspaceTester getWorkspaceWithPopulatedX(
       std::size_t const &nVectors, std::size_t const &xLength,
       std::size_t const &yLength, std::vector<double> const &xValues) {

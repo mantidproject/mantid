@@ -301,7 +301,7 @@ class CrystalFieldTests(unittest.TestCase):
         cf.peaks.param[1]['Sigma'] = 0.1
         cf.peaks.param[2]['Sigma'] = 0.2
         cf.peaks.param[3]['Sigma'] = 0.3
-        cf.background = Background(peak=Function('PseudoVoigt', Height=10*c_mbsr, FWHM=1, Mixing=0.5),
+        cf.background = Background(peak=Function('PseudoVoigt', Intensity=10*c_mbsr, FWHM=1, Mixing=0.5),
                                    background=Function('LinearBackground', A0=1.0*c_mbsr, A1=0.1*c_mbsr))
         self.assertEqual(cf.background.peak.param['Mixing'], 0.5)
         self.assertAlmostEqual(cf.background.background.param['A0'], 1.0*c_mbsr, 4)
@@ -314,8 +314,8 @@ class CrystalFieldTests(unittest.TestCase):
 
         x, y = cf.getSpectrum()
         y = y / c_mbsr
-        self.assertAlmostEqual(y[80], 2.5853144348907442, 8)
-        self.assertAlmostEqual(y[90], 6.6726254910965057, 8)
+        self.assertAlmostEqual(y[80], 2.1309638244891764, 8)
+        self.assertAlmostEqual(y[90], 5.47632096610588, 8)
 
     def test_api_CrystalField_spectrum_background_no_peak(self):
         from CrystalField import CrystalField, PeaksFunction, Background, Function
@@ -348,7 +348,7 @@ class CrystalFieldTests(unittest.TestCase):
             cf.peaks.param[1]['Sigma'] = 0.1
             cf.peaks.param[2]['Sigma'] = 0.2
             cf.peaks.param[3]['Sigma'] = 0.3
-            cf.background = Background(peak=Function('PseudoVoigt', Height=10*c_mbsr, FWHM=1, Mixing=0.5))
+            cf.background = Background(peak=Function('PseudoVoigt', Intensity=10*c_mbsr, FWHM=1, Mixing=0.5))
             self.assertEqual(cf.background.peak.param['Mixing'], 0.5)
             self.assertEqual(cf.peaks.param[1]['Sigma'], 0.1)
             self.assertEqual(cf.peaks.param[2]['Sigma'], 0.2)
@@ -359,8 +359,11 @@ class CrystalFieldTests(unittest.TestCase):
 
             x, y = cf.getSpectrum()
             y = y / c_mbsr
-            self.assertAlmostEqual(y[80], 1.6760206483896094, 8)
-            self.assertAlmostEqual(y[90], 5.7168155143063295, 8)
+            # FIXME - 20181214 - Whether this change makes sense?
+            # self.assertAlmostEqual(y[80], 1.6760206483896094, 8)
+            # self.assertAlmostEqual(y[90], 5.7168155143063295, 8)
+            self.assertAlmostEqual(y[80], 1.2216700379880412, 8)
+            self.assertAlmostEqual(y[90], 4.5205109893157038, 8)
 
     def test_api_CrystalField_multi_spectrum_background(self):
         from CrystalField import CrystalField, PeaksFunction, Background, Function
@@ -680,7 +683,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1], MaxIterations=10)
         fit.fit()
 
-        self.assertTrue(cf.chi2 < chi2)
+        self.assertLess(cf.chi2, chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
@@ -799,7 +802,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
 
-        self.assertTrue(cf.chi2 < chi2)
+        self.assertLess(cf.chi2, chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
@@ -823,10 +826,10 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertRaises(ValueError, fit.fit)
         cf = CrystalField('Nd', 'C2v', B20=-0.4, Temperature=[5], FWHM=0.5, IntensityScaling=[1])
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=1)
-        self.assertEquals(fit.check_consistency(), None)
+        self.assertEqual(fit.check_consistency(), None)
         cf = CrystalField('Nd', 'C2v', B20=-0.4, Temperature=[5], FWHM=0.5, IntensityScaling = 1)
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws], MaxIterations=1)
-        self.assertEquals(fit.check_consistency(), None)
+        self.assertEqual(fit.check_consistency(), None)
 
     def test_constraints_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -861,7 +864,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_ties_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -879,7 +882,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_ties_single_spectrum_range(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -899,7 +902,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_constraints_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -917,7 +920,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_constraints_single_spectrum_range(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -935,7 +938,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_constraints_multi_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -997,7 +1000,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_constraints_multi_spectrum_range(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -1022,7 +1025,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_bad_input(self):
         from CrystalField import CrystalField
@@ -1104,8 +1107,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         def func(x):
             return np.sin(x)
         rm = ResolutionModel(func, 0, np.pi)
-        self.assertEquals(len(rm.model[0]), 129)
-        self.assertEquals(len(rm.model[1]), 129)
+        self.assertEqual(len(rm.model[0]), 129)
+        self.assertEqual(len(rm.model[1]), 129)
         self.assertTrue(np.all(func(rm.model[0]) == rm.model[1]))
 
     def test_ResolutionModel_func_multi(self):
@@ -1123,13 +1126,13 @@ class CrystalFieldFitTest(unittest.TestCase):
         func2 = func1.model
         rm = ResolutionModel([func0, func1, func2], -np.pi/2, np.pi/2, accuracy = 0.01)
 
-        self.assertEquals(len(rm.model), 3)
-        self.assertEquals(len(rm.model[0][0]), 17)
-        self.assertEquals(len(rm.model[0][1]), 17)
-        self.assertEquals(len(rm.model[1][0]), 9)
-        self.assertEquals(len(rm.model[1][1]), 9)
-        self.assertEquals(len(rm.model[2][0]), 17)
-        self.assertEquals(len(rm.model[2][1]), 17)
+        self.assertEqual(len(rm.model), 3)
+        self.assertEqual(len(rm.model[0][0]), 17)
+        self.assertEqual(len(rm.model[0][1]), 17)
+        self.assertEqual(len(rm.model[1][0]), 9)
+        self.assertEqual(len(rm.model[1][1]), 9)
+        self.assertEqual(len(rm.model[2][0]), 17)
+        self.assertEqual(len(rm.model[2][1]), 17)
         self.assertTrue(np.all(func0(rm.model[0][0]) == rm.model[0][1]))
         self.assertTrue(np.all(func1(rm.model[1][0]) == rm.model[1][1]))
         self.assertTrue(np.all(func2(rm.model[2][0]) == rm.model[2][1]))
@@ -1140,8 +1143,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         x = [1, 2, 3]
         y = [3, 2, 1]
         rm = ResolutionModel((x, y))
-        self.assertEquals(rm.model[0], x)
-        self.assertEquals(rm.model[1], y)
+        self.assertEqual(rm.model[0], x)
+        self.assertEqual(rm.model[1], y)
 
     def test_ResolutionModel_array_multi(self):
         from CrystalField import ResolutionModel
@@ -1152,11 +1155,11 @@ class CrystalFieldFitTest(unittest.TestCase):
         y1 = [6, 5, 4]
         rm = ResolutionModel([(x0, y0), (x1, y1)])
 
-        self.assertEquals(len(rm.model), 2)
-        self.assertEquals(rm.model[0][0], x0)
-        self.assertEquals(rm.model[0][1], y0)
-        self.assertEquals(rm.model[1][0], x1)
-        self.assertEquals(rm.model[1][1], y1)
+        self.assertEqual(len(rm.model), 2)
+        self.assertEqual(rm.model[0][0], x0)
+        self.assertEqual(rm.model[0][1], y0)
+        self.assertEqual(rm.model[1][0], x1)
+        self.assertEqual(rm.model[1][1], y1)
 
     def test_ResolutionModel_set_single(self):
         from CrystalField import ResolutionModel, CrystalField
@@ -1278,8 +1281,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit.monte_carlo(NSamples=100, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', Seed=123)
         # Run fit
         fit.fit()
-        self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, 100.0)
 
     def test_monte_carlo_multi_spectrum(self):
         from CrystalField.fitting import makeWorkspace
@@ -1303,8 +1306,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit.monte_carlo(NSamples=100, Constraints='20<f0.f1.PeakCentre<45,20<f0.f2.PeakCentre<45', Seed=123)
         # Run fit
         fit.fit()
-        self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < 200.0)
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, 200.0)
 
     def test_normalisation(self):
         from CrystalField.normalisation import split2range
@@ -1343,7 +1346,7 @@ class CrystalFieldFitTest(unittest.TestCase):
                                 Type='Cross Entropy', NSamples=10, Seed=123)
         # Run fit
         fit.fit()
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertLess(cf.chi2, 100.0)
 
     def test_estimate_parameters_multiple_results(self):
         from CrystalField.fitting import makeWorkspace
@@ -1365,9 +1368,9 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(cf, InputWorkspace=ws)
         fit.estimate_parameters(50, ['B22', 'B40', 'B42', 'B44'],
                                 constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', NSamples=100, Seed=123)
-        self.assertTrue(fit.get_number_estimates() > 1)
+        self.assertGreater(fit.get_number_estimates(), 1)
         fit.fit()
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertLess(cf.chi2, 100.0)
 
     def test_intensity_scaling_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function

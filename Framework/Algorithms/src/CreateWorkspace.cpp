@@ -42,18 +42,18 @@ void CreateWorkspace::init() {
   unitOptions.emplace_back("SpectraNumber");
   unitOptions.emplace_back("Text");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name to be given to the created workspace.");
 
   auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DataX", required),
+  declareProperty(std::make_unique<ArrayProperty<double>>("DataX", required),
                   "X-axis data values for workspace.");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DataY", required),
+  declareProperty(std::make_unique<ArrayProperty<double>>("DataY", required),
                   "Y-axis data values for workspace (measures).");
-  declareProperty(make_unique<ArrayProperty<double>>("DataE"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("DataE"),
                   "Error values for workspace.");
-  declareProperty(make_unique<PropertyWithValue<int>>("NSpec", 1),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpec", 1),
                   "Number of spectra to divide data into.");
   declareProperty("UnitX", "", "The unit to assign to the XAxis");
 
@@ -61,21 +61,22 @@ void CreateWorkspace::init() {
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the second Axis (leave blank for "
                   "default Spectra number)");
-  declareProperty(make_unique<ArrayProperty<std::string>>("VerticalAxisValues"),
-                  "Values for the VerticalAxis.");
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>("VerticalAxisValues"),
+      "Values for the VerticalAxis.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("Distribution", false),
+      std::make_unique<PropertyWithValue<bool>>("Distribution", false),
       "Whether OutputWorkspace should be marked as a distribution.");
   declareProperty("YUnitLabel", "", "Label for Y Axis");
 
   declareProperty("WorkspaceTitle", "", "Title for Workspace");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("ParentWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ParentWorkspace", "",
+                                                        Direction::Input,
+                                                        PropertyMode::Optional),
                   "Name of a parent workspace.");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Dx"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Dx"),
                   "X error values for workspace (optional).");
   std::vector<std::string> propOptions{
       Parallel::toString(Parallel::StorageMode::Cloned),
@@ -86,7 +87,7 @@ void CreateWorkspace::init() {
       boost::make_shared<StringListValidator>(propOptions),
       "The parallel storage mode of the output workspace for MPI builds");
   setPropertySettings("ParallelStorageMode",
-                      Kernel::make_unique<InvisibleProperty>());
+                      std::make_unique<InvisibleProperty>());
 }
 
 /// Input validation
@@ -256,27 +257,29 @@ void CreateWorkspace::exec() {
   // mapping
   if (vUnit != "SpectraNumber") {
     if (vUnit == "Text") {
-      auto const newAxis = new TextAxis(vAxis.size());
-      outputWS->replaceAxis(1, newAxis);
+      auto newAxis = std::make_unique<TextAxis>(vAxis.size());
+      auto newAxisRaw = newAxis.get();
+      outputWS->replaceAxis(1, std::move(newAxis));
       for (size_t i = 0; i < vAxis.size(); i++) {
-        newAxis->setLabel(i, vAxis[i]);
+        newAxisRaw->setLabel(i, vAxis[i]);
       }
     } else {
-      NumericAxis *newAxis(nullptr);
+      std::unique_ptr<NumericAxis> newAxis(nullptr);
       if (vAxisSize == nSpec)
-        newAxis = new NumericAxis(vAxisSize); // treat as points
+        newAxis = std::make_unique<NumericAxis>(vAxisSize); // treat as points
       else if (vAxisSize == nSpec + 1)
-        newAxis = new BinEdgeAxis(vAxisSize); // treat as bin edges
+        newAxis =
+            std::make_unique<BinEdgeAxis>(vAxisSize); // treat as bin edges
       else
         throw std::range_error("Invalid vertical axis length. It must be the "
                                "same length as NSpec or 1 longer.");
-
+      auto newAxisRaw = newAxis.get();
       newAxis->unit() = UnitFactory::Instance().create(vUnit);
-      outputWS->replaceAxis(1, newAxis);
+      outputWS->replaceAxis(1, std::move(newAxis));
       for (size_t i = 0; i < vAxis.size(); i++) {
         try {
-          newAxis->setValue(i,
-                            boost::lexical_cast<double, std::string>(vAxis[i]));
+          newAxisRaw->setValue(
+              i, boost::lexical_cast<double, std::string>(vAxis[i]));
         } catch (boost::bad_lexical_cast &) {
           throw std::invalid_argument("CreateWorkspace - YAxisValues property "
                                       "could not be converted to a double.");

@@ -40,8 +40,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>530</width>
-         <height>586</height>
+         <width>533</width>
+         <height>755</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -851,6 +851,19 @@
        <number>9</number>
       </property>
       <item>
+       <widget class="QPushButton" name="pbSettings">
+        <property name="maximumSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbHelp">
         <property name="enabled">
          <bool>true</bool>
@@ -863,8 +876,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>20</width>
-          <height>20</height>
+          <width>25</width>
+          <height>25</height>
          </size>
         </property>
         <property name="text">

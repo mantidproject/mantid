@@ -174,18 +174,18 @@ void CorrectTOFAxis::init() {
   mustBePositiveInt->setLower(0);
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           PropertyNames::INPUT_WORKSPACE, "", Direction::Input, tofWorkspace),
       "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
                   "An output workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       PropertyNames::REFERENCE_WORKSPACE, "", Direction::Input,
                       API::PropertyMode::Optional, tofWorkspace),
                   "A reference workspace from which to copy the TOF axis as "
                   "well as the 'Ei' and 'wavelength' sample logs.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       PropertyNames::EPP_TABLE.c_str(), "", Direction::Input,
                       API::PropertyMode::Optional),
                   "An input EPP table.");
@@ -198,7 +198,7 @@ void CorrectTOFAxis::init() {
                       PropertyNames::REFERENCE_SPECTRA + " or " +
                       PropertyNames::ELASTIC_BIN_INDEX + " (default: '" +
                       IndexTypes::DETECTOR_ID + "').");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>(
                       PropertyNames::REFERENCE_SPECTRA.c_str()),
                   "A list of reference spectra.");
   declareProperty(

@@ -37,6 +37,9 @@ QString EXPORT_OPT_MANTIDQT_COMMON
 convertMapToString(const std::map<QString, QString> &optionsMap,
                    const char separator = ',', const bool quoteValues = true);
 std::string EXPORT_OPT_MANTIDQT_COMMON
+convertMapToString(const std::map<std::string, std::string> &optionsMap,
+                   const char separator, const bool quoteValues);
+std::string EXPORT_OPT_MANTIDQT_COMMON
 optionsToString(std::map<std::string, std::string> const &options);
 } // namespace MantidWidgets
 } // namespace MantidQt

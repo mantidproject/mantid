@@ -183,7 +183,7 @@ public:
     alg.setPropertyValue("Dimensions", "UnknownId, Axis1, Axis2");
     alg.setPropertyValue("Extents", "0,10,0,10,0,10");
     TSM_ASSERT_THROWS("Using an unknown name/id should throw", alg.execute(),
-                      std::runtime_error);
+                      const std::runtime_error &);
   }
 
   void test_mask_everything() {

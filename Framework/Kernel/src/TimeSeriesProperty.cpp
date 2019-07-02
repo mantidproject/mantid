@@ -9,11 +9,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/make_unique.h"
+
 #include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/regex.hpp>
+#include <numeric>
 
 namespace Mantid {
 using namespace Types::Core;
@@ -31,6 +32,20 @@ template <typename TYPE>
 TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name)
     : Property(name, typeid(std::vector<TimeValueUnit<TYPE>>)), m_values(),
       m_size(), m_propSortedFlag(), m_filterApplied() {}
+
+/**
+ * Constructor
+ * @param name :: The name to assign to the property
+ * @param times :: A vector of DateAndTime objects
+ * @param values :: A vector of TYPE
+ */
+template <typename TYPE>
+TimeSeriesProperty<TYPE>::TimeSeriesProperty(
+    const std::string &name, const std::vector<Types::Core::DateAndTime> &times,
+    const std::vector<TYPE> &values)
+    : TimeSeriesProperty(name) {
+  addValues(times, values);
+}
 
 /// Virtual destructor
 template <typename TYPE> TimeSeriesProperty<TYPE>::~TimeSeriesProperty() {}
@@ -55,6 +70,9 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
   auto times = timeSeriesProperty->timesAsVector();
   // Shift the time
   for (auto it = times.begin(); it != times.end(); ++it) {
+    // There is a known issue which can cause cloneWithTimeShift to be called
+    // with a large (~9e+9 s) shift. Actual shifting is capped to be ~4.6e+19
+    // seconds in DateAndTime::operator+=
     (*it) += timeShift;
   }
   timeSeriesProperty->clear();
@@ -84,7 +102,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
   TYPE v0 = it->value();
 
   it++;
-  auto timeSeriesDeriv = Kernel::make_unique<TimeSeriesProperty<double>>(
+  auto timeSeriesDeriv = std::make_unique<TimeSeriesProperty<double>>(
       this->name() + "_derivative");
   timeSeriesDeriv->reserve(this->m_values.size() - 1);
   for (; it != m_values.end(); it++) {
@@ -1964,6 +1982,14 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
     }
     size_t nvalues = m_filterQuickRef.empty() ? m_values.size()
                                               : m_filterQuickRef.back().second;
+    // The filter logic can end up with the quick ref having a duplicate of the
+    // last time and value at the end if the last filter time is past the log
+    // time See "If it is out of upper boundary, still record it.  but make the
+    // log entry to mP.size()+1" in applyFilter
+    // Make the log seem the full size
+    if (nvalues == m_values.size() + 1) {
+      --nvalues;
+    }
     m_size = static_cast<int>(nvalues);
   }
 }
@@ -2021,10 +2047,11 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
   out.maximum = raw_stats.maximum;
   if (this->size() > 0) {
     const auto &intervals = this->getSplittingIntervals();
-    double duration_sec = 0.0;
-    for (const auto &interval : intervals) {
-      duration_sec += interval.duration();
-    }
+    const double duration_sec =
+        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                        [](double sum, const auto &interval) {
+                          return sum + interval.duration();
+                        });
     out.duration = duration_sec;
     const auto time_weighted = this->timeAverageValueAndStdDev();
     out.time_mean = time_weighted.first;
@@ -2312,6 +2339,13 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
   // 6. Re-count size
   countSize();
+
+  if (name() == "proton_charge") {
+    for (const auto &item : m_filterQuickRef) {
+      std::cerr << "first=" << item.first << ",  second=" << item.second
+                << "\n";
+    }
+  }
 }
 
 /*

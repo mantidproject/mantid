@@ -252,8 +252,8 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
         fit.fit()
 
-        self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < chi2)
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, chi2)
 
     def test_fit_multi_ion_and_spectra(self):
         from CrystalField.fitting import makeWorkspace
@@ -287,65 +287,65 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2], MaxIterations=10)
         fit.fit()
 
-        self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < chi2)
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, chi2)
 
     def test_set_background(self):
         cf = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHM=[1.0], Background='name=LinearBackground,A0=1')
-        self.assertEquals('"name=LinearBackground,A0=1"', cf['Background'])
-        self.assertEquals(cf.background.param['A0'], 1)
-        self.assertEquals(cf.background.background.param['A0'], 1)
+        self.assertEqual('"name=LinearBackground,A0=1"', cf['Background'])
+        self.assertEqual(cf.background.param['A0'], 1)
+        self.assertEqual(cf.background.background.param['A0'], 1)
         cf.background.param['A0'] = 0
-        self.assertEquals(cf.background.background.param['A0'], 0)
+        self.assertEqual(cf.background.background.param['A0'], 0)
 
     def test_set_background_as_function(self):
         from mantid.simpleapi import LinearBackground
         cf = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHM=[1.0],
                                    Background=LinearBackground(A0=1))
-        self.assertEquals('"name=LinearBackground,A0=1,A1=0"', cf['Background'])
-        self.assertEquals(cf.background.param['A0'], 1)
-        self.assertEquals(cf.background.background.param['A0'], 1)
+        self.assertEqual('"name=LinearBackground,A0=1,A1=0"', cf['Background'])
+        self.assertEqual(cf.background.param['A0'], 1)
+        self.assertEqual(cf.background.background.param['A0'], 1)
         cf.background.param['A0'] = 0
-        self.assertEquals(cf.background.background.param['A0'], 0)
+        self.assertEqual(cf.background.background.param['A0'], 0)
 
     def test_set_background_with_peak(self):
         from mantid.simpleapi import Gaussian
         cf = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHM=[1.0], Background='name=LinearBackground', BackgroundPeak=Gaussian(Height=1))
-        self.assertEquals('"name=Gaussian,Height=1,PeakCentre=0,Sigma=0;name=LinearBackground"', cf['Background'])
-        self.assertEquals(cf.background.peak.param['Height'], 1)
-        self.assertEquals(cf.background.param['f0.Height'], 1)
-        self.assertEquals(cf.background.background.param['A0'], 0)
+        self.assertEqual('"name=Gaussian,Height=1,PeakCentre=0,Sigma=0;name=LinearBackground"', cf['Background'])
+        self.assertEqual(cf.background.peak.param['Height'], 1)
+        self.assertEqual(cf.background.param['f0.Height'], 1)
+        self.assertEqual(cf.background.background.param['A0'], 0)
         cf.background.peak.param['Height'] = 0
         cf.background.background.param['A0'] = 1
-        self.assertEquals(cf.background.peak.param['Height'], 0)
-        self.assertEquals(cf.background.background.param['A0'], 1)
+        self.assertEqual(cf.background.peak.param['Height'], 0)
+        self.assertEqual(cf.background.background.param['A0'], 1)
 
     def test_set_background_peak_only(self):
         from mantid.simpleapi import Gaussian
         cf = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHM=[1.0], BackgroundPeak=Gaussian(Sigma=1))
-        self.assertEquals('"name=Gaussian,Height=0,PeakCentre=0,Sigma=1"', cf['Background'])
-        self.assertEquals(cf.background.peak.param['Sigma'], 1)
-        self.assertEquals(cf.background.param['Sigma'], 1)
+        self.assertEqual('"name=Gaussian,Height=0,PeakCentre=0,Sigma=1"', cf['Background'])
+        self.assertEqual(cf.background.peak.param['Sigma'], 1)
+        self.assertEqual(cf.background.param['Sigma'], 1)
         cf.background.peak.param['Sigma'] = 0
-        self.assertEquals(cf.background.param['Sigma'], 0)
+        self.assertEqual(cf.background.param['Sigma'], 0)
 
     def test_set_background_composite(self):
         from mantid.simpleapi import Gaussian, LinearBackground
         cf = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHM=[1.0],
                                    Background= Gaussian(PeakCentre=1) + LinearBackground())
-        self.assertEquals('"name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0"', cf['Background'])
+        self.assertEqual('"name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0"', cf['Background'])
         cf.background.param['f1.A0'] = 1
         cf.background.param['f0.PeakCentre'] = 0.5
-        self.assertEquals(cf.background.param['f1.A0'], 1)
-        self.assertEquals(cf.background.param['f0.PeakCentre'], 0.5)
+        self.assertEqual(cf.background.param['f1.A0'], 1)
+        self.assertEqual(cf.background.param['f0.PeakCentre'], 0.5)
 
     def test_set_background_composite_as_string(self):
         cf = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHM=[1.0],
                                    Background='name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0')
-        self.assertEquals('"name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0"', cf['Background'])
-        self.assertEquals(cf.background.param['f0.Sigma'], 0)
+        self.assertEqual('"name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0"', cf['Background'])
+        self.assertEqual(cf.background.param['f0.Sigma'], 0)
         cf.background.param['f1.A0'] = 1
-        self.assertEquals(cf.background.param['f1.A0'], 1)
+        self.assertEqual(cf.background.param['f1.A0'], 1)
 
     def test_constraints_single_spectrum(self):
         from mantid.simpleapi import Gaussian, LinearBackground, FunctionFactory
@@ -377,7 +377,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_constraints_multi_spectrum(self):
         from mantid.simpleapi import FlatBackground, Gaussian

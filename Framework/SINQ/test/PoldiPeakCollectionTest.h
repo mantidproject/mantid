@@ -214,7 +214,8 @@ public:
     TS_ASSERT_DIFFERS(peaks.pointGroup(), m3m);
 
     PointGroup_sptr invalid;
-    TS_ASSERT_THROWS(peaks.setPointGroup(invalid), std::invalid_argument);
+    TS_ASSERT_THROWS(peaks.setPointGroup(invalid),
+                     const std::invalid_argument &);
   }
 
   void testUnitCell() {
@@ -281,8 +282,8 @@ public:
     PoldiPeak_sptr peak = peaks.peak(0);
     TS_ASSERT_EQUALS(peak, newPeak);
 
-    TS_ASSERT_THROWS(peaks.peak(1), std::range_error);
-    TS_ASSERT_THROWS(peaks.peak(-2), std::range_error);
+    TS_ASSERT_THROWS(peaks.peak(1), const std::range_error &);
+    TS_ASSERT_THROWS(peaks.peak(-2), const std::range_error &);
   }
 
   void testPeaksVector() {
@@ -385,7 +386,7 @@ public:
 
     dValues.pop_back();
     TS_ASSERT_THROWS(p.setPeaks(hkls, dValues, fSquared),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
 private:

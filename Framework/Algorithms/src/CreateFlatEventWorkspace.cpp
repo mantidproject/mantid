@@ -38,7 +38,7 @@ const std::string CreateFlatEventWorkspace::category() const {
  */
 void CreateFlatEventWorkspace::init() {
   this->declareProperty(
-      Kernel::make_unique<Mantid::API::WorkspaceProperty<EventWorkspace>>(
+      std::make_unique<Mantid::API::WorkspaceProperty<EventWorkspace>>(
           "InputWorkspace", "", Mantid::Kernel::Direction::Input),
       "An input event workspace to use as a source for the events.");
 
@@ -48,7 +48,7 @@ void CreateFlatEventWorkspace::init() {
                         "Set the upper bound for sampling the background.");
 
   this->declareProperty(
-      Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
+      std::make_unique<Mantid::API::WorkspaceProperty<>>(
           "OutputWorkspace", "", Mantid::Kernel::Direction::Output),
       "Output event workspace containing a flat background.");
 }

@@ -93,7 +93,7 @@ includedRanges(const std::vector<double> &ranges,
   }
   // Sort the range edges keeping the information whether the edge
   // 'starts' or 'ends' a range.
-  enum class Edge { start, end };
+  enum class Edge { start = -1, end = 1 };
   std::vector<std::pair<double, Edge>> edges(ranges.size());
   for (size_t i = 0; i < ranges.size(); ++i) {
     edges[i].first = ranges[i];
@@ -103,7 +103,7 @@ includedRanges(const std::vector<double> &ranges,
       edges.begin(), edges.end(),
       [](const std::pair<double, Edge> &p1, const std::pair<double, Edge> &p2) {
         if (p1.first == p2.first)
-          return p1.second == Edge::start;
+          return p1.second < p2.second;
         return p1.first < p2.first;
       });
   // If an 'end' edge is followed by a 'start', we have a new range. Everything
@@ -272,16 +272,16 @@ void CalculatePolynomialBackground::init() {
   auto orderedPairs =
       boost::make_shared<Kernel::ArrayOrderedPairsValidator<double>>();
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, increasingAxis),
       "An input workspace.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A workspace containing the fitted background.");
   declareProperty(Prop::POLY_DEGREE, 0, nonnegativeInt,
                   "Degree of the fitted polynomial.");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       Prop::XRANGES, std::vector<double>(), orderedPairs),
                   "A list of fitting ranges given as pairs of X values.");
   std::array<std::string, 2> costFuncOpts{

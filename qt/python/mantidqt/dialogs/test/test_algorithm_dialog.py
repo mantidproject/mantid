@@ -58,7 +58,7 @@ class TestAlgorithmDialog(GuiTest):
     def test_interface_manager(self):
         manager = InterfaceManager()
         dialog = manager.createDialogFromName("AlgorithmDialogMockAlgorithm", -1)
-        self.assertTrue(dialog is not None)
+        self.assertNotEqual(dialog, None)
         input_widgets = dialog.findChildren(QLineEdit)
         self.assertEqual(len(input_widgets), 3)
 

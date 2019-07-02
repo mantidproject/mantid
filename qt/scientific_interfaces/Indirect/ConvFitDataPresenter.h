@@ -36,6 +36,9 @@ private:
   void addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
                     IndirectFittingModel *model);
 
+  void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
+  void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
+
   ConvFitModel *m_convModel;
 };
 

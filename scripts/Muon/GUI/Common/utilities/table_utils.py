@@ -8,8 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 from functools import wraps
-from qtpy import QtWidgets, QtCore
-
+import sys
+from qtpy import QtWidgets, QtCore, QtGui
 
 """
 This module contains the methods for
@@ -90,10 +90,11 @@ def addComboToTable(table,row,options,col=1):
     return combo
 
 
-def addDoubleToTable(table,value,row,col=1):
-    numberWidget = QtWidgets.QTableWidgetItem(str(value))
-    table.setItem(row,col, numberWidget)
-    return numberWidget
+def addDoubleToTable(table,value,row,col=1, minimum=0.0):
+    number_widget = QtWidgets.QLineEdit(str(value))
+    number_widget.setValidator(QtGui.QDoubleValidator(minimum, sys.float_info.max, 3))
+    table.setCellWidget(row,col, number_widget)
+    return number_widget
 
 
 def addCheckBoxToTable(table,state,row,col=1):
@@ -105,6 +106,20 @@ def addCheckBoxToTable(table,state,row,col=1):
         box.setCheckState(QtCore.Qt.Unchecked)
 
     table.setItem(row,col, box)
+    return box
+
+
+def addCheckBoxWidgetToTable(table,state,row,col=1):
+    check_box_widget = QtWidgets.QWidget()
+    layout = QtWidgets.QHBoxLayout(check_box_widget)
+    layout.setAlignment(QtCore.Qt.AlignCenter)
+    layout.setContentsMargins(0, 0, 0, 0)
+    box = QtWidgets.QCheckBox()
+    box.setChecked(state)
+
+    layout.addWidget(box)
+
+    table.setCellWidget(row,col, check_box_widget)
     return box
 
 

@@ -22,7 +22,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/make_unique.h"
 
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
@@ -44,19 +43,19 @@ void RemoveBackground::init() {
   auto sourceValidator = boost::make_shared<CompositeValidator>();
   sourceValidator->add<InstrumentValidator>();
   sourceValidator->add<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, sourceValidator),
                   "Workspace containing the input data");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to give the output workspace");
 
   auto vsValidator = boost::make_shared<CompositeValidator>();
   vsValidator->add<WorkspaceUnitValidator>("TOF");
   vsValidator->add<HistogramValidator>();
   declareProperty(
-      make_unique<WorkspaceProperty<>>("BkgWorkspace", "", Direction::Input,
-                                       vsValidator),
+      std::make_unique<WorkspaceProperty<>>("BkgWorkspace", "",
+                                            Direction::Input, vsValidator),
       "An optional histogram workspace in the units of TOF defining background "
       "for removal during rebinning."
       "The workspace has to have single value or contain the same number of "
@@ -158,16 +157,6 @@ BackgroundHelper::BackgroundHelper()
       m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
       m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
-/// Destructor
-BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
-
-/** The method deletes all units converter allocated*/
-void BackgroundHelper::deleteUnitsConverters() {
-  for (auto &unit : m_WSUnit) {
-    delete unit;
-    unit = nullptr;
-  }
-}
 
 /** Initialization method:
 *@param bkgWS    -- shared pointer to the workspace which contains background
@@ -211,13 +200,12 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
 
   m_spectrumInfo = &sourceWS->spectrumInfo();
 
-  // just in case.
-  this->deleteUnitsConverters();
   // allocate the array of units converters to avoid units reallocation within a
   // loop
-  m_WSUnit.assign(nThreads, nullptr);
+  m_WSUnit.clear();
+  m_WSUnit.reserve(nThreads);
   for (int i = 0; i < nThreads; i++) {
-    m_WSUnit[i] = WSUnit->clone();
+    m_WSUnit.emplace_back(std::unique_ptr<Kernel::Unit>(WSUnit->clone()));
   }
 
   m_singleValueBackground = false;
@@ -279,7 +267,7 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
     auto &YErrors = m_wkWS->e(nHist);
 
     // use thread-specific unit conversion class to avoid multithreading issues
-    Kernel::Unit *unitConv = m_WSUnit[threadNum];
+    Kernel::Unit *unitConv = m_WSUnit[threadNum].get();
     unitConv->initialize(L1, L2, twoTheta, m_Emode, m_Efix, delta);
 
     x_data[0] = XValues[0];

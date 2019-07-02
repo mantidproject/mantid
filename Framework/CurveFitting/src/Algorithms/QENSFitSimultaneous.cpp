@@ -362,7 +362,7 @@ void QENSFitSimultaneous::initConcrete() {
       ", into their own workspace. These workspaces will have a histogram"
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "ConvolveMembers", false),
                   "If true members of any "
                   "Convolution are output convolved\n"
@@ -375,14 +375,14 @@ void QENSFitSimultaneous::initConcrete() {
                   "The unit to assign to the X Axis of the result workspace, "
                   "defaults to MomentumTransfer");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output result workspace(s)");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputParameterWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "The output parameter workspace");
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspaceGroup", "", Direction::Output,
                       PropertyMode::Optional),
                   "The output group workspace");
@@ -507,10 +507,10 @@ void QENSFitSimultaneous::copyLogs(
     WorkspaceGroup_sptr resultWorkspace,
     const std::vector<MatrixWorkspace_sptr> &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
-  for (auto &&workspace : *resultWorkspace) {
+  for (auto &&result : *resultWorkspace) {
     logCopier->setProperty(
         "OutputWorkspace",
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result));
     for (const auto &workspace : workspaces) {
       logCopier->setProperty("InputWorkspace", workspace);
       logCopier->executeAsChildAlg();
@@ -561,7 +561,7 @@ void QENSFitSimultaneous::addAdditionalLogs(Workspace_sptr resultWorkspace) {
 
   Progress logAdderProg(this, 0.99, 1.00, 6);
   logAdder->setProperty("LogType", "String");
-  for (const auto log : getAdditionalLogStrings()) {
+  for (const auto &log : getAdditionalLogStrings()) {
     logAdder->setProperty("LogName", log.first);
     logAdder->setProperty("LogText", log.second);
     logAdder->executeAsChildAlg();
@@ -569,7 +569,7 @@ void QENSFitSimultaneous::addAdditionalLogs(Workspace_sptr resultWorkspace) {
   }
 
   logAdder->setProperty("LogType", "Number");
-  for (const auto log : getAdditionalLogNumbers()) {
+  for (const auto &log : getAdditionalLogNumbers()) {
     logAdder->setProperty("LogName", log.first);
     logAdder->setProperty("LogText", log.second);
     logAdder->executeAsChildAlg();

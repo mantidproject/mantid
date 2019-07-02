@@ -5,35 +5,35 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
-
 from mantid.api import FileFinder
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QApplication, QWidget
 
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from mantid.simpleapi import CreateSampleWorkspace, LoadInstrument
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
-class LoadRunWidgetPresenterTest(unittest.TestCase):
+class LoadRunWidgetPresenterTest(GuiTest):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            self._qapp.processEvents()
+            QApplication.instance().processEvents()
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
         setup_context_for_tests(self)
         self.context.instrument = 'EMU'
@@ -70,36 +70,40 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.addCleanup(self.popup_patcher.stop)
         self.popup_mock = self.popup_patcher.start()
 
+        def setGroupAndPairsToEmptyList(grouping_context):
+            grouping_context._groups = []
+            grouping_context._pairs = []
+        self.group_context.reset_group_and_pairs_to_default = mock.MagicMock(
+            side_effect=setGroupAndPairsToEmptyList(self.group_context))
+
     def tearDown(self):
         self.obj = None
 
     def create_fake_workspace(self, name):
-        workspace_mock = mock.MagicMock()
-        instrument_mock = mock.MagicMock()
-        instrument_mock.getName.return_value = 'EMU'
-        workspace_mock.workspace.getInstrument.return_value = instrument_mock
+        workspace_mock = CreateSampleWorkspace(StoreInADS=False)
+        LoadInstrument(Workspace=workspace_mock, InstrumentName='EMU', RewriteSpectraMap=False, StoreInADS=False)
 
-        return {'OutputWorkspace': [workspace_mock], 'MainFieldDirection': 'transverse'}
+        return {'OutputWorkspace': [MuonWorkspaceWrapper(workspace_mock)], 'MainFieldDirection': 'transverse'}
 
     def mock_loading_from_browse(self, workspace, filename, run):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
             return_value=[filename])
-        self.load_mock.return_value = (workspace, run, filename)
-        self.load_run_mock.return_value = (workspace, run, filename)
+        self.load_mock.return_value = (workspace, run, filename, False)
+        self.load_run_mock.return_value = (workspace, run, filename, False)
 
     def mock_loading_from_current_run(self, workspace, filename, run):
         file_utils.get_current_run_filename = mock.Mock(return_value=filename)
-        self.load_run_mock.return_value = (workspace, run, filename)
-        self.load_mock.return_value = (workspace, run, filename)
+        self.load_run_mock.return_value = (workspace, run, filename, False)
+        self.load_mock.return_value = (workspace, run, filename, False)
 
     def mock_user_input_single_run(self, workspace, filename, run):
         self.load_run_view.get_run_edit_text = mock.Mock(return_value=str(run))
-        self.load_run_mock.return_value = (workspace, run, filename)
-        self.load_mock.return_value = (workspace, run, filename)
+        self.load_run_mock.return_value = (workspace, run, filename, False)
+        self.load_mock.return_value = (workspace, run, filename, False)
 
     def mock_user_input_single_file(self, workspace, filename, run):
-        self.load_run_mock.return_value = (workspace, run, filename)
-        self.load_mock.return_value = (workspace, run, filename)
+        self.load_run_mock.return_value = (workspace, run, filename, False)
+        self.load_mock.return_value = (workspace, run, filename, False)
 
         self.load_file_view.get_file_edit_text = mock.Mock(
             return_value=filename)

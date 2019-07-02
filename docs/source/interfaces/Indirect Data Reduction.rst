@@ -1,3 +1,5 @@
+.. _interface-indirect-data-reduction:
+
 Indirect Data Reduction
 =======================
 
@@ -37,6 +39,10 @@ Reflection
 
 Action Buttons
 ~~~~~~~~~~~~~~
+
+Settings
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  customize the settings for the Indirect interfaces.
 
 ?
   Opens this help page.
@@ -101,7 +107,8 @@ Background Removal
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
-  been converted to Energy based on the temperature.
+  been converted to Energy based on the temperature. This is automatically loaded 
+  from the sample logs of the input file if available.
 
 Scale by Factor
   Gives the option to scale the output by a given factor.
@@ -128,6 +135,9 @@ Run
 
 Plot Output
   Allows the result to be plotted as either a spectrum plot or contour plot.
+
+Group Output
+  This will place the output reduced files from a reduction into a group workspace.
 
 Fold Multiple Frames
   This option is only relevant for TOSCA. If checked, then multiple-framed data

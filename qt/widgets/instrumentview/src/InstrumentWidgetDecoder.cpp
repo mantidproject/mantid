@@ -185,6 +185,7 @@ void InstrumentWidgetDecoder::decodeBinMasks(const QList<QVariant> &list,
 
     const auto spectraList = itemMap["spectra"].toList();
     std::vector<size_t> spectra;
+    spectra.reserve(static_cast<size_t>(spectraList.size()));
     for (const auto &spec : spectraList) {
       spectra.emplace_back(spec.value<size_t>());
     }

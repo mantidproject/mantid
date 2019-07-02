@@ -20,11 +20,18 @@ from collections import Iterable
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
+from mantid.plots.scales import PowerScale, SquareScale
 from matplotlib import cbook
 from matplotlib.axes import Axes
-from matplotlib.container import Container
-from matplotlib.projections import register_projection
+from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
+from matplotlib.container import Container, ErrorbarContainer
+from matplotlib.image import AxesImage
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+from matplotlib.projections import register_projection
+from matplotlib.scale import register_scale
+from matplotlib.table import Table
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -45,6 +52,8 @@ except ImportError:
     import sys
     del sys.modules['mpl_toolkits']
     from mpl_toolkits.mplot3d.axes3d import Axes3D
+
+from mantid.plots.helperfunctions import get_normalize_by_bin_width
 
 
 def plot_decorator(func):
@@ -67,16 +76,19 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-    def __init__(self, artists, data_replace_cb, spec_num=None):
+    def __init__(self, artists, data_replace_cb, is_normalized,
+                 spec_num=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
+        :param is_normalized: bool specifying whether the line being plotted is a distribution
         :param spec_num: The spectrum number of the spectrum used to plot the artist
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
         self.spec_num = spec_num
+        self.is_normalized = is_normalized
 
     def remove(self, axes):
         """
@@ -84,7 +96,31 @@ class _WorkspaceArtists(object):
         :param axes: A reference to the axes instance the artists are attached to
         """
         # delete the artists from the axes
+        self._remove(axes, self._artists)
+
+    def remove_if(self, axes, predicate):
+        """
+        Remove the tracked artists from the given axes if they return true from predicate
+        :param axes: A reference to the axes instance the artists are attached to
+        :param predicate: A function which takes a matplotlib artist object and returns a boolean
+        :returns: Returns a bool specifying whether the class is now empty
+        """
+        artists_to_remove = []
+        artists_to_keep = []
         for artist in self._artists:
+            if predicate(artist):
+                artists_to_remove.append(artist)
+            else:
+                artists_to_keep.append(artist)
+
+        self._remove(axes, artists_to_remove)
+        self._artists = artists_to_keep
+
+        return len(self._artists) == 0
+
+    def _remove(self, axes, artists):
+        # delete the artists from the axes
+        for artist in artists:
             artist.remove()
             # Remove doesn't catch removing the container for errorbars etc
             if isinstance(artist, Container):
@@ -94,13 +130,19 @@ class _WorkspaceArtists(object):
                     pass
 
         if (not axes.is_empty(axes)) and axes.legend_ is not None:
-            axes.legend()
+            axes.legend().draggable()
 
-    def replace_data(self, workspace):
+    def replace_data(self, workspace, plot_kwargs=None):
         """Replace or replot artists based on a new workspace
         :param workspace: The new workspace containing the data
+        :param plot_kwargs: Key word args to pass to plotting function
         """
-        self._set_artists(self._data_replace_cb(self._artists, workspace))
+        if plot_kwargs:
+            new_artists = self._data_replace_cb(self._artists, workspace,
+                                                plot_kwargs)
+        else:
+            new_artists = self._data_replace_cb(self._artists, workspace)
+        self._set_artists(new_artists)
 
     def _set_artists(self, artists):
         """Ensure the stored artists is an iterable"""
@@ -143,6 +185,63 @@ class MantidAxes(Axes):
         self.tracked_workspaces = dict()
         self.creation_args = []
 
+    def add_artist_correctly(self, artist):
+        """
+        Add an artist via the correct function.
+        MantidAxes will not correctly track artists added via :code:`add_artist`.
+        They must be added via the correct function for features like
+        autoscaling to work.
+
+        :param artist: A Matplotlib Artist object
+        """
+        artist.set_transform(self.transData)
+        if artist.axes:
+            artist.remove()
+        if isinstance(artist, Line2D):
+            self.add_line(artist)
+        elif isinstance(artist, Collection):
+            self.add_collection(artist)
+        elif isinstance(artist, Container):
+            self.add_container(artist)
+        elif isinstance(artist, AxesImage):
+            self.add_image(artist)
+        elif isinstance(artist, Patch):
+            self.add_patch(artist)
+        elif isinstance(artist, Table):
+            self.add_table(artist)
+        else:
+            self.add_artist(artist)
+
+    @staticmethod
+    def from_mpl_axes(ax, ignore_artists=None):
+        """
+        Returns a MantidAxes from an Axes object.
+        Transfers all transferable artists from a Matplotlib.Axes
+        instance to a MantidAxes instance on the same figure. Then
+        removes the Matplotlib.Axes.
+
+        :param ax: An Axes object
+        :param ignore_artists: List of Artist types to ignore
+        :returns: A MantidAxes object
+        """
+        if not ignore_artists:
+            ignore_artists = []
+        prop_cycler = ax._get_lines.prop_cycler  # tracks line color cycle
+        artists = ax.get_children()
+        mantid_axes = ax.figure.add_subplot(111, projection='mantid',
+                                            label='mantid')
+        for artist in artists:
+            if not any(isinstance(artist, artist_type) for artist_type in
+                       ignore_artists):
+                try:
+                    mantid_axes.add_artist_correctly(artist)
+                except NotImplementedError:
+                    pass
+        mantid_axes.set_title(ax.get_title())
+        mantid_axes._get_lines.prop_cycler = prop_cycler
+        ax.remove()
+        return mantid_axes
+
     @staticmethod
     def get_spec_num_from_wksp_index(workspace, wksp_index):
         return workspace.getSpectrum(wksp_index).getSpectrumNo()
@@ -157,7 +256,7 @@ class MantidAxes(Axes):
             return None
 
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
-                               spec_num=None):
+                               spec_num=None, is_normalized=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -166,7 +265,9 @@ class MantidAxes(Axes):
         :param data_replace_cb: A function to call when the data is replaced to update
         the artist (optional)
         :param spec_num: The spectrum number associated with the artist (optional)
-
+        :param is_normalized: bool. The line being plotted is normalized by bin width
+            This can be from either a distribution workspace or a workspace being
+            plotted as a distribution
         :returns: The artists variable as it was passed in.
         """
         name = workspace.name()
@@ -175,10 +276,29 @@ class MantidAxes(Axes):
                 def data_replace_cb(_, __):
                     logger.warning("Updating data on this plot type is not yet supported")
             artist_info = self.tracked_workspaces.setdefault(name, [])
-            artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
-                                                 spec_num))
 
+            artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
+                                                 is_normalized,
+                                                 spec_num))
+            self.check_axes_distribution_consistency()
         return artists
+
+    def check_axes_distribution_consistency(self):
+        """
+        Checks if the curves on the axes are all normalized or all
+        non-normalized and displays a warning if not.
+        """
+        tracked_ws_distributions = []
+        for artists in self.tracked_workspaces.values():
+            for artist in artists:
+                if artist.is_normalized is not None:
+                    tracked_ws_distributions.append(artist.is_normalized)
+
+        if len(tracked_ws_distributions) > 0:
+            num_normalized = sum(tracked_ws_distributions)
+            if not (num_normalized == 0 or num_normalized == len(tracked_ws_distributions)):
+                logger.warning("You are overlaying distribution and "
+                               "non-distribution data!")
 
     def remove_workspace_artists(self, workspace):
         """
@@ -195,14 +315,58 @@ class MantidAxes(Axes):
 
         for workspace_artist in artist_info:
             workspace_artist.remove(self)
+
         return self.is_empty(self)
+
+    def remove_artists_if(self, unary_predicate):
+        """
+        Remove any artists which satisfy the predicate and return True
+        if the axes is then empty
+        :param unary_predicate: A predicate taking a single matplotlib artist object
+        :return: True if the axes is empty, false if artists remain
+        """
+        is_empty_list = []
+        for workspace_name, artist_info in self.tracked_workspaces.items():
+            is_empty = self._remove_artist_info_if(artist_info, unary_predicate)
+            if is_empty:
+                is_empty_list.append(workspace_name)
+
+        for workspace_name in is_empty_list:
+            self.tracked_workspaces.pop(workspace_name)
+
+        # Catch any artists that are not tracked
+        for artist in self.artists + self.lines + self.containers + self.images:
+            if unary_predicate(artist):
+                artist.remove()
+                if isinstance(artist, ErrorbarContainer):
+                    self.containers.remove(artist)
+
+        return self.is_empty(self)
+
+    def _remove_artist_info_if(self, artist_info, unary_predicate):
+        """
+        Remove any artists which satisfy the predicate from the artist_info_list
+        :param artist_info: A list of _WorkspaceArtists objects
+        :param unary_predicate: A predicate taking a single matplotlib artist object
+        :return: True if the artist_info is empty, false if artist_info remain
+        """
+        is_empty_list = []
+        for workspace_artist in artist_info:
+            empty = workspace_artist.remove_if(self, unary_predicate)
+            is_empty_list.append(empty)
+
+        for index, empty in reversed(list(enumerate(is_empty_list))):
+            if empty:
+                artist_info.pop(index)
+
+        return len(artist_info) == 0
 
     def replace_workspace_artists(self, workspace):
         """
         Replace the data of any artists relating to this workspace.
         The axes are NOT redrawn
         :param workspace: The workspace containing the new data
-        :return : True if data was replace, false otherwise
+        :return : True if data was replaced, false otherwise
         """
         try:
             artist_info = self.tracked_workspaces[workspace.name()]
@@ -306,19 +470,41 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _data_update(artists, workspace):
+            autoscale_on_update = kwargs.pop("autoscale_on_update", True)
+
+            def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
-                x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
+                if new_kwargs:
+                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
+                                                           new_kwargs)
+                else:
+                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
+                                                           kwargs)
                 artists[0].set_data(x, y)
                 self.relim()
-                self.autoscale()
+                if autoscale_on_update:
+                    self.autoscale()
                 return artists
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            return self.track_workspace_artist(
+            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
+                workspace, self, **kwargs)
+            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+
+            # If we are making the first plot on an axes object
+            # i.e. self.lines is empty, axes has default ylim values.
+            # Therefore we need to autoscale regardless of autoscale_on_update.
+            if self.lines:
+                # Otherwise set autoscale to autoscale_on_update.
+                self.set_autoscaley_on(autoscale_on_update)
+
+            artist = self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
-                _data_update, spec_num)
+                _data_update, spec_num, is_normalized)
+
+            self.set_autoscaley_on(True)
+            return artist
         else:
             return Axes.plot(self, *args, **kwargs)
 
@@ -370,7 +556,12 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _data_update(artists, workspace):
+            autoscale_on_update = kwargs.pop("autoscale_on_update", True)
+
+            def _data_update(artists, workspace, new_kwargs=None):
+                if self.lines:
+                    self.set_autoscaley_on(autoscale_on_update)
+
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -384,23 +575,36 @@ class MantidAxes(Axes):
                 except ValueError:
                     pass
                 # this gets pushed back onto the containers list
-                container_new = plotfunctions.errorbar(self, workspace, **kwargs)
+                if new_kwargs:
+                    container_new = plotfunctions.errorbar(self, workspace,
+                                                           **new_kwargs)
+                else:
+                    container_new = plotfunctions.errorbar(self, workspace,
+                                                           **kwargs)
                 self.containers.insert(orig_idx, container_new)
                 self.containers.pop()
-                # update line properties to match original
                 orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
                 for artist_orig, artist_new in zip(orig_flat, new_flat):
                     artist_new.update_from(artist_orig)
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
-                self.autoscale()
+                self.set_autoscaley_on(True)
                 return container_new
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.errorbar(self, *args, **kwargs),
-                                               _data_update, spec_num=spec_num)
+            is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
+                                                               **kwargs)
+
+            if self.lines:
+                self.set_autoscaley_on(autoscale_on_update)
+
+            artist = self.track_workspace_artist(
+                workspace, plotfunctions.errorbar(self, *args, **kwargs),
+                _data_update, spec_num, is_normalized)
+
+            self.set_autoscaley_on(True)
+            return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)
 
@@ -515,7 +719,10 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _update_data(artists, workspace):
+            def _update_data(artists, workspace, new_kwargs=None):
+                if new_kwargs:
+                    return self._redraw_colorplot(plotfunctions_func,
+                                                  artists, workspace, **new_kwargs)
                 return self._redraw_colorplot(plotfunctions_func,
                                               artists, workspace, **kwargs)
             workspace = args[0]
@@ -891,3 +1098,5 @@ class MantidAxes3D(Axes3D):
 
 register_projection(MantidAxes)
 register_projection(MantidAxes3D)
+register_scale(PowerScale)
+register_scale(SquareScale)

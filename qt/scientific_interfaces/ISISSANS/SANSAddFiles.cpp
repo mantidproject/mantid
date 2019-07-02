@@ -199,9 +199,8 @@ void SANSAddFiles::add2Runs2Add() {
       "unusedName", m_SANSForm->new2Add_edit->text().toStdString());
   const std::vector<std::string> &nam = commaSep;
 
-  for (const auto &i :
-       nam) { // each comma separated item could be a range of run numbers
-              // specified with a ':' or '-'
+  for (const auto &i : nam) { // each comma separated item could be a range of
+                              // run numbers specified with a ':' or '-'
     QStringList ranges;
     std::vector<int> runNumRanges;
     try { // if the entry is in the form 454:456, runNumRanges will be filled
@@ -226,7 +225,7 @@ void SANSAddFiles::add2Runs2Add() {
       std::string isValid;
       try {
         isValid = search.isValid();
-      } catch (Poco::PathSyntaxException) {
+      } catch (const Poco::PathSyntaxException &) {
         QString message =
             QString("The file entry ") + *k +
             QString(" is not a valid file path on your operating system");

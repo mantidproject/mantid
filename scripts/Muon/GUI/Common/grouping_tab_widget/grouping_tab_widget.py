@@ -1,3 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
 
@@ -25,3 +33,5 @@ class GroupingTabWidget(object):
                                                         self.group_tab_model,
                                                         self.grouping_table_widget,
                                                         self.pairing_table_widget)
+
+        context.update_view_from_model_notifier.add_subscriber(self.group_tab_presenter.update_view_from_model_observer)

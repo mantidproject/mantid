@@ -83,22 +83,22 @@
        </item>
       </layout>
      </widget>
-     <widget class="QwtPlot" name="plot"/>
+     <widget class="MantidQt::MantidWidgets::PreviewPlot" name="plot" native="true"/>
     </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::FunctionBrowser</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/FunctionBrowser.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

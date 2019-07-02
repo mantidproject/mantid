@@ -141,7 +141,7 @@ class PlotSelectorWidgetTest(GuiTest):
         self.view.set_plot_list(plot_numbers)
 
         selected_plot = self.view.get_currently_selected_plot_number()
-        self.assertEquals(selected_plot, None)
+        self.assertEqual(selected_plot, None)
 
     def test_select_all_button(self):
         plot_numbers = [0, 1, 2]
@@ -179,13 +179,13 @@ class PlotSelectorWidgetTest(GuiTest):
 
     def test_filter_text_typing_calls_presenter_and_sets_filter_text(self):
         QTest.keyClicks(self.view.filter_box, 'plot1')
-        self.assertEquals(self.presenter.filter_text_changed.call_count, 5)
-        self.assertEquals(self.view.get_filter_text(), 'plot1')
+        self.assertEqual(self.presenter.filter_text_changed.call_count, 5)
+        self.assertEqual(self.view.get_filter_text(), 'plot1')
 
     def test_programtic_filter_box_change_calls_presenter_and_sets_filter_text(self):
         self.view.filter_box.setText('plot1')
-        self.assertEquals(self.presenter.filter_text_changed.call_count, 1)
-        self.assertEquals(self.view.get_filter_text(), 'plot1')
+        self.assertEqual(self.presenter.filter_text_changed.call_count, 1)
+        self.assertEqual(self.view.get_filter_text(), 'plot1')
 
     def test_filtering_plot_list_hides_plots(self):
         plot_numbers = [0, 1, 2]
@@ -251,9 +251,9 @@ class PlotSelectorWidgetTest(GuiTest):
 
     def test_show_plot_by_pressing_show_button(self):
         QTest.mouseClick(self.view.show_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.show_multiple_selected.call_count, 1)
+        self.assertEqual(self.presenter.show_multiple_selected.call_count, 1)
         QTest.mouseClick(self.view.show_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.show_multiple_selected.call_count, 2)
+        self.assertEqual(self.presenter.show_multiple_selected.call_count, 2)
 
     def test_show_context_menu(self):
         plot_numbers = [0, 1, 2]
@@ -267,11 +267,11 @@ class PlotSelectorWidgetTest(GuiTest):
 
     def test_hide_button_pressed_calls_presenter(self):
         QTest.mouseClick(self.view.hide_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.hide_selected_plots.call_count, 1)
+        self.assertEqual(self.presenter.hide_selected_plots.call_count, 1)
 
     def test_hide_context_menu_calls_presenter(self):
         self.view.context_menu.actions()[1].trigger()
-        self.assertEquals(self.presenter.hide_selected_plots.call_count, 1)
+        self.assertEqual(self.presenter.hide_selected_plots.call_count, 1)
 
     def test_set_visibility_icon_to_visible(self):
         plot_numbers = [0, 1, 2]
@@ -279,7 +279,7 @@ class PlotSelectorWidgetTest(GuiTest):
         self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, True)
 
-        self.mock_get_icon.assert_called_once_with('fa.eye')
+        self.mock_get_icon.assert_called_once_with('mdi.eye')
 
     def test_set_visibility_icon_to_hidden(self):
         plot_numbers = [0, 1, 2]
@@ -287,7 +287,7 @@ class PlotSelectorWidgetTest(GuiTest):
         self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, False)
 
-        self.mock_get_icon.assert_called_once_with('fa.eye', color='lightgrey')
+        self.mock_get_icon.assert_called_once_with('mdi.eye', 'lightgrey')
 
     # ------------------------ Plot Renaming ------------------------
 
@@ -331,15 +331,15 @@ class PlotSelectorWidgetTest(GuiTest):
 
     def test_close_button_pressed_calls_presenter(self):
         QTest.mouseClick(self.view.close_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.close_action_called.call_count, 1)
+        self.assertEqual(self.presenter.close_action_called.call_count, 1)
         QTest.mouseClick(self.view.close_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.close_action_called.call_count, 2)
+        self.assertEqual(self.presenter.close_action_called.call_count, 2)
 
     def test_delete_key_pressed_calls_presenter(self):
         QTest.keyClick(self.view.close_button, Qt.Key_Delete)
-        self.assertEquals(self.presenter.close_action_called.call_count, 1)
+        self.assertEqual(self.presenter.close_action_called.call_count, 1)
         QTest.keyClick(self.view.close_button, Qt.Key_Delete)
-        self.assertEquals(self.presenter.close_action_called.call_count, 2)
+        self.assertEqual(self.presenter.close_action_called.call_count, 2)
 
     def test_name_widget_close_button_pressed_calls_presenter(self):
         plot_numbers = [0, 1, 2]
@@ -361,7 +361,7 @@ class PlotSelectorWidgetTest(GuiTest):
         # Something goes wrong in QTest here and the selection is
         # not set with the control key modifier.
         plots_selected_old = self.view.get_all_selected_plot_numbers()
-        self.assertEquals(plots_selected_old, [])
+        self.assertEqual(plots_selected_old, [])
 
         widget = self.view.table_widget.cellWidget(1, Column.Name)
         QTest.mouseClick(widget.close_button, Qt.LeftButton)
@@ -374,7 +374,7 @@ class PlotSelectorWidgetTest(GuiTest):
         # Expected result: [0, 2]
         # Something goes wrong in QTest here and the selection is
         # not set with the control key modifier.
-        self.assertEquals(plots_selected_old, plots_selected_new)
+        self.assertEqual(plots_selected_old, plots_selected_new)
 
     def test_close_plot_context_menu(self):
         plot_numbers = [0, 1, 2]
@@ -388,19 +388,19 @@ class PlotSelectorWidgetTest(GuiTest):
 
     def test_choosing_sort_ascending(self):
         self.view.set_sort_order(True)
-        self.assertEquals(self.view.sort_order(), Qt.AscendingOrder)
+        self.assertEqual(self.view.sort_order(), Qt.AscendingOrder)
 
     def test_choosing_sort_descending(self):
         self.view.set_sort_order(False)
-        self.assertEquals(self.view.sort_order(), Qt.DescendingOrder)
+        self.assertEqual(self.view.sort_order(), Qt.DescendingOrder)
 
     def test_choosing_sort_by_name(self):
         self.view.set_sort_type(Column.Name)
-        self.assertEquals(self.view.sort_type(), Column.Name)
+        self.assertEqual(self.view.sort_type(), Column.Name)
 
     def test_choosing_sort_by_last_active(self):
         self.view.set_sort_type(Column.LastActive)
-        self.assertEquals(self.view.sort_type(), Column.LastActive)
+        self.assertEqual(self.view.sort_type(), Column.LastActive)
 
     def test_set_sort_by_number(self):
         self.view.table_widget.setSortingEnabled(True)

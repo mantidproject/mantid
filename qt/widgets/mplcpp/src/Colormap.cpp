@@ -11,6 +11,7 @@
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

@@ -133,7 +133,7 @@ public:
     TS_ASSERT(group->contains("ws0"));
     // cannot add a workspace which doesn't exist
     TS_ASSERT_THROWS(group->add("noworkspace"),
-                     Kernel::Exception::NotFoundError);
+                     const Kernel::Exception::NotFoundError &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -206,8 +206,8 @@ public:
     Workspace_sptr ws11 = group->getItem("ws1");
     TS_ASSERT_EQUALS(ws1, ws11);
     // Test for failure too
-    TS_ASSERT_THROWS(group->getItem("non-existent"), std::out_of_range);
-    TS_ASSERT_THROWS(group->getItem(""), std::out_of_range);
+    TS_ASSERT_THROWS(group->getItem("non-existent"), const std::out_of_range &);
+    TS_ASSERT_THROWS(group->getItem(""), const std::out_of_range &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -222,7 +222,7 @@ public:
 
   void test_removeItem() {
     WorkspaceGroup_sptr group1 = makeGroup();
-    TS_ASSERT_THROWS(group1->removeItem(1), std::runtime_error);
+    TS_ASSERT_THROWS(group1->removeItem(1), const std::runtime_error &);
 
     WorkspaceGroup_sptr group(new WorkspaceGroup());
     Workspace_sptr ws1(new WorkspaceTester());
@@ -373,7 +373,7 @@ public:
     // catch a cycle
     group1->addWorkspace(group);
     Workspace_sptr b = boost::make_shared<WorkspaceTester>();
-    TS_ASSERT_THROWS(group->isInGroup(*b), std::runtime_error);
+    TS_ASSERT_THROWS(group->isInGroup(*b), const std::runtime_error &);
     group1->removeAll();
   }
 
@@ -439,6 +439,49 @@ public:
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (Workspace_sptr)val);
     TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  void test_unableToAddAGroupToItself() {
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr wsInput(new WorkspaceTester());
+    group->addWorkspace(wsInput);
+    group->addWorkspace(group);
+    TS_ASSERT(group->contains(wsInput));
+    TS_ASSERT(!group->contains(group));
+  }
+
+  void test_containsInChildrenFindsChildrenWithGivenName1LayerDown() {
+    WorkspaceGroup_sptr group0(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group0", group0);
+    WorkspaceGroup_sptr group1(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group1", group1);
+    Workspace_sptr wsInput(new WorkspaceTester());
+    AnalysisDataService::Instance().addOrReplace("wsInput", wsInput);
+    group1->addWorkspace(wsInput);
+    group0->addWorkspace(group1);
+
+    TS_ASSERT(group0->containsInChildren("wsInput"));
+  }
+
+  void test_containsInChildrenFindsChildrenWithGivenName4LayersDown() {
+    WorkspaceGroup_sptr group0(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group0", group0);
+    WorkspaceGroup_sptr group1(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group1", group1);
+    WorkspaceGroup_sptr group2(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group2", group2);
+    WorkspaceGroup_sptr group3(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group3", group3);
+    WorkspaceGroup_sptr group4(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group4", group4);
+    Workspace_sptr wsInput(new WorkspaceTester());
+    AnalysisDataService::Instance().addOrReplace("wsInput", wsInput);
+    group4->addWorkspace(wsInput);
+    group3->addWorkspace(group4);
+    group2->addWorkspace(group3);
+    group1->addWorkspace(group2);
+    group0->addWorkspace(group1);
+    TS_ASSERT(group0->containsInChildren("wsInput"));
   }
 };
 

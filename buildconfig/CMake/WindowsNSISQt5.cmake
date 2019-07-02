@@ -8,6 +8,18 @@ set ( QT5_DIST_DLLS
     Qt5PrintSupport.dll
     Qt5Svg.dll
     Qt5OpenGL.dll
+    Qt5Help.dll
+    Qt5Network.dll
+    Qt5Positioning.dll
+    Qt5Qml.dll
+    Qt5Quick.dll
+    Qt5QuickWidgets.dll
+    Qt5Sql.dll
+    Qt5Xml.dll
+    Qt5WebChannel.dll
+    Qt5WebEngine.dll
+    Qt5WebEngineCore.dll
+    Qt5WebEngineWidgets.dll
 )
 
 set ( QT5_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt5 )
@@ -29,3 +41,9 @@ install ( FILES ${QT5_PLUGIN_DIR}/sqldrivers/qsqlite.dll DESTINATION plugins/qt5
 install ( FILES ${QT5_PLUGIN_DIR}/styles/qwindowsvistastyle.dll DESTINATION plugins/qt5/styles )
 
 install ( FILES ${QT5_INSTALL_PREFIX}/lib/qscintilla2_qt5.dll DESTINATION bin )
+
+###########################################################################
+# Qt Resource Files for QtWebEngine
+###########################################################################
+install ( FILES ${QT5_INSTALL_PREFIX}/bin/QtWebEngineProcess.exe DESTINATION lib/qt5/bin )
+install ( DIRECTORY ${QT5_INSTALL_PREFIX}/resources DESTINATION lib/qt5 )

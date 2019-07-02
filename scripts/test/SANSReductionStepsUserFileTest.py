@@ -201,7 +201,7 @@ class TestQResolutionInUserFile(unittest.TestCase):
         # Act
         error = user_file._read_q_resolution_line(value, reducer)
         # Assert
-        self.assertTrue(error != None)
+        self.assertNotEqual(error,  None)
 
 
 

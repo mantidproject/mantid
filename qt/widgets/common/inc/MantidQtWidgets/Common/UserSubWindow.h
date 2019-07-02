@@ -24,11 +24,12 @@
 // Includes
 //----------------------------------
 #include "DllOption.h"
-#include "InterfaceFactory.h"
 #include "PythonRunner.h"
+#include "UserSubWindowFactory.h"
 
 #include <QLabel>
 #include <QMainWindow>
+#include <QPointer>
 #include <QStringList>
 #include <QWidget>
 #include <set>
@@ -95,13 +96,21 @@ signals:
   setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser *browser);
 
 protected:
-  /**@name Virtual Functions */
-  //@{
   /// To be overridden to set the appropriate layout
   virtual void initLayout() = 0;
   /// Run local Python setup code
   virtual void initLocalPython() {}
-  //@}
+
+  /// To be overridden in order to connect a signal between two interfaces
+  virtual void otherUserSubWindowCreated(QPointer<UserSubWindow> window) {
+    UNUSED_ARG(window);
+  }
+
+  /// To be overridden in order to connect a signal between two interfaces
+  virtual void
+  otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) {
+    UNUSED_ARG(windows);
+  }
 
   /// Raise a dialog box giving some information
   void showInformationBox(const QString &message) const;
@@ -118,8 +127,9 @@ private:
   // the DynamicFactory
   friend class InterfaceManager;
 
-  /// Set the interface name
+  /// Set the interface name, made public so possible from Python
   void setInterfaceName(const QString &iface_name);
+
   /// Has this already been initialized
   bool m_bIsInitialized;
   /// Has the python initialization been run

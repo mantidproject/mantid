@@ -9,8 +9,8 @@
 
 #include "MantidCatalog/DllConfig.h"
 #include "MantidCatalog/Exception.h"
-#include "MantidKernel/make_unique.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 

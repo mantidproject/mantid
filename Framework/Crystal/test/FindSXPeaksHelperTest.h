@@ -55,7 +55,7 @@ public:
     std::vector<int> spectra(1, 1);
     TSM_ASSERT_THROWS("SXPeak: Should not construct with a negative intensity",
                       SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   // Test out of bounds construction arguments.
@@ -68,7 +68,7 @@ public:
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
         SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void testSXPeakGetters() {
@@ -127,20 +127,18 @@ public:
    */
   void testThatFindsStrongestPeakWhenPerSpectrumBackgroundStrategyIsUsed() {
     auto backgroundStrategy =
-        Mantid::Kernel::make_unique<PerSpectrumBackgroundStrategy>(1.);
+        std::make_unique<PerSpectrumBackgroundStrategy>(1.);
     doRunStrongestPeakTest(backgroundStrategy.get());
   }
 
   void testThatFindsStrongestPeakWhenAbsoluteBackgroundStrategyIsUsed() {
-    auto backgroundStrategy =
-        Mantid::Kernel::make_unique<AbsoluteBackgroundStrategy>(3.);
+    auto backgroundStrategy = std::make_unique<AbsoluteBackgroundStrategy>(3.);
     doRunStrongestPeakTest(backgroundStrategy.get());
   }
 
   void testThatFindsAllPeaksWhenAbsoluteBackgroundStrategyIsUsed() {
     // GIVEN
-    auto backgroundStrategy =
-        Mantid::Kernel::make_unique<AbsoluteBackgroundStrategy>(3.);
+    auto backgroundStrategy = std::make_unique<AbsoluteBackgroundStrategy>(3.);
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             1 /*nhist*/, 15 /*nbins*/);
@@ -153,7 +151,7 @@ public:
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // WHEN
-    auto peakFindingStrategy = Mantid::Kernel::make_unique<AllPeaksStrategy>(
+    auto peakFindingStrategy = std::make_unique<AllPeaksStrategy>(
         backgroundStrategy.get(), spectrumInfo);
     auto peaks = peakFindingStrategy->findSXPeaks(x, y, workspaceIndex);
 
@@ -172,7 +170,7 @@ public:
     // background strategy
     // GIVEN
     auto backgroundStrategy =
-        Mantid::Kernel::make_unique<PerSpectrumBackgroundStrategy>(3.);
+        std::make_unique<PerSpectrumBackgroundStrategy>(3.);
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             1 /*nhist*/, 15 /*nbins*/);
@@ -181,9 +179,9 @@ public:
     // WHEN + THEN
     TSM_ASSERT_THROWS("Should throw a invalid argument error when background "
                       "strategy is not AbsoluteBackgroundStrategy",
-                      Mantid::Kernel::make_unique<AllPeaksStrategy>(
+                      std::make_unique<AllPeaksStrategy>(
                           backgroundStrategy.get(), spectrumInfo);
-                      , std::invalid_argument);
+                      , const std::invalid_argument &);
   }
 
   void testThatCanReduceWithSimpleReduceStrategy() {
@@ -194,9 +192,9 @@ public:
 
     const auto resolution = 0.001;
     auto compareStrategy =
-        Mantid::Kernel::make_unique<RelativeCompareStrategy>(resolution);
-    auto simpleStrategy = Mantid::Kernel::make_unique<SimpleReduceStrategy>(
-        compareStrategy.get());
+        std::make_unique<RelativeCompareStrategy>(resolution);
+    auto simpleStrategy =
+        std::make_unique<SimpleReduceStrategy>(compareStrategy.get());
 
     std::vector<SXPeak> peaks;
     peaks.emplace_back(1 /*TOF*/, 1 /*phi*/, 0.1 /*intensity*/,
@@ -243,10 +241,9 @@ public:
 
     const auto resolution = 0.001;
     auto compareStrategy =
-        Mantid::Kernel::make_unique<RelativeCompareStrategy>(resolution);
+        std::make_unique<RelativeCompareStrategy>(resolution);
     auto findMaxReduceStrategy =
-        Mantid::Kernel::make_unique<FindMaxReduceStrategy>(
-            compareStrategy.get());
+        std::make_unique<FindMaxReduceStrategy>(compareStrategy.get());
 
     std::vector<SXPeak> peaks;
     peaks.emplace_back(1 /*TOF*/, 0.99 /*phi*/, 0.1 /*intensity*/,
@@ -304,7 +301,7 @@ public:
 
     const auto resolution = 0.1;
     auto compareStrategy =
-        Mantid::Kernel::make_unique<RelativeCompareStrategy>(resolution);
+        std::make_unique<RelativeCompareStrategy>(resolution);
 
     // WHEN
     auto result12 = compareStrategy->compare(peak1, peak2);
@@ -339,7 +336,7 @@ public:
     const auto tofResolution = 1.;
     const auto thetaResolution = 1.;
     const auto phiResolution = 1.;
-    auto compareStrategy = Mantid::Kernel::make_unique<AbsoluteCompareStrategy>(
+    auto compareStrategy = std::make_unique<AbsoluteCompareStrategy>(
         tofResolution, thetaResolution, phiResolution);
 
     // WHEN
@@ -381,7 +378,7 @@ public:
     const auto dResolution = 0.01;
     const auto thetaResolution = 1.;
     const auto phiResolution = 1.;
-    auto compareStrategy = Mantid::Kernel::make_unique<AbsoluteCompareStrategy>(
+    auto compareStrategy = std::make_unique<AbsoluteCompareStrategy>(
         dResolution, thetaResolution, phiResolution, XAxisUnit::DSPACING);
 
     // WHEN
@@ -413,9 +410,8 @@ private:
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // WHEN
-    auto peakFindingStrategy =
-        Mantid::Kernel::make_unique<StrongestPeaksStrategy>(backgroundStrategy,
-                                                            spectrumInfo);
+    auto peakFindingStrategy = std::make_unique<StrongestPeaksStrategy>(
+        backgroundStrategy, spectrumInfo);
     auto peaks = peakFindingStrategy->findSXPeaks(x, y, workspaceIndex);
 
     // THEN

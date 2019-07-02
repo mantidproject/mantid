@@ -35,7 +35,8 @@ BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
                               BatchReductionEntry.SampleDirect: 'SANS2D00022048',
                               BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
+                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.Output: 'test_file2'}]
 
 BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
                               BatchReductionEntry.SampleScatterPeriod: '3',
@@ -45,7 +46,16 @@ BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
                               BatchReductionEntry.SampleDirect: 'SANS2D00022048',
                               BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
+                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.Output: 'test_file2'}]
+
+BATCH_FILE_TEST_CONTENT_5 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
+                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
+                              BatchReductionEntry.Output: 'test_file',
+                              BatchReductionEntry.SampleThickness: '5',
+                              BatchReductionEntry.SampleHeight: '2',
+                              BatchReductionEntry.SampleWidth: '8'}]
 
 
 def get_non_empty_row_mock(value):
@@ -98,56 +108,56 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert
         # Note that the event slices are not set in the user file
         self.assertFalse(view.event_slices)
-        self.assertTrue(view.reduction_dimensionality is ReductionDimensionality.OneDim)
-        self.assertTrue(view.save_types[0] is SaveType.NXcanSAS)
+        self.assertEqual(view.reduction_dimensionality, ReductionDimensionality.OneDim)
+        self.assertEqual(view.save_types[0], SaveType.NXcanSAS)
         self.assertTrue(view.zero_error_free)
         self.assertTrue(view.use_optimizations)
-        self.assertTrue(view.reduction_mode is ISISReductionMode.LAB)
-        self.assertTrue(view.merge_scale == 1.)
-        self.assertTrue(view.merge_shift == 0.)
+        self.assertEqual(view.reduction_mode, ISISReductionMode.LAB)
+        self.assertEqual(view.merge_scale, 1.)
+        self.assertEqual(view.merge_shift, 0.)
         self.assertFalse(view.merge_scale_fit)
         self.assertFalse(view.merge_shift_fit)
-        self.assertTrue(view.event_binning == "7000.0,500.0,60000.0")
-        self.assertTrue(view.wavelength_step_type is RangeStepType.Lin)
-        self.assertTrue(view.wavelength_min == 1.5)
-        self.assertTrue(view.wavelength_max == 12.5)
-        self.assertTrue(view.wavelength_step == 0.125)
-        self.assertTrue(view.absolute_scale == 0.074)
-        self.assertTrue(view.z_offset == 53.)
-        self.assertTrue(view.normalization_incident_monitor == 1)
+        self.assertEqual(view.event_binning, "7000.0,500.0,60000.0")
+        self.assertEqual(view.wavelength_step_type, RangeStepType.Lin)
+        self.assertEqual(view.wavelength_min, 1.5)
+        self.assertEqual(view.wavelength_max, 12.5)
+        self.assertEqual(view.wavelength_step, 0.125)
+        self.assertEqual(view.absolute_scale, 0.074)
+        self.assertEqual(view.z_offset, 53.)
+        self.assertEqual(view.normalization_incident_monitor, 1)
         self.assertTrue(view.normalization_interpolate)
-        self.assertTrue(view.transmission_incident_monitor == 1)
+        self.assertEqual(view.transmission_incident_monitor, 1)
         self.assertTrue(view.transmission_interpolate)
-        self.assertTrue(view.transmission_roi_files == "test2.xml")
-        self.assertTrue(view.transmission_mask_files == "test4.xml")
-        self.assertTrue(view.transmission_radius == 7.)
-        self.assertTrue(view.transmission_monitor == 4)
-        self.assertTrue(view.transmission_mn_shift == -70)
+        self.assertEqual(view.transmission_roi_files, "test2.xml")
+        self.assertEqual(view.transmission_mask_files, "test4.xml")
+        self.assertEqual(view.transmission_radius, 7.)
+        self.assertEqual(view.transmission_monitor, 4)
+        self.assertEqual(view.transmission_mn_shift, -70)
         self.assertTrue(view.transmission_sample_use_fit)
-        self.assertTrue(view.transmission_sample_fit_type is FitType.Logarithmic)
-        self.assertTrue(view.transmission_sample_polynomial_order == 2)
-        self.assertTrue(view.transmission_sample_wavelength_min == 1.5)
-        self.assertTrue(view.transmission_sample_wavelength_max == 12.5)
+        self.assertEqual(view.transmission_sample_fit_type, FitType.Logarithmic)
+        self.assertEqual(view.transmission_sample_polynomial_order, 2)
+        self.assertEqual(view.transmission_sample_wavelength_min, 1.5)
+        self.assertEqual(view.transmission_sample_wavelength_max, 12.5)
         self.assertTrue(view.transmission_sample_use_wavelength)
         self.assertFalse(view.pixel_adjustment_det_1)
         self.assertFalse(view.pixel_adjustment_det_2)
         self.assertFalse(view.wavelength_adjustment_det_1)
         self.assertFalse(view.wavelength_adjustment_det_2)
-        self.assertTrue(view.q_1d_min_or_rebin_string == "0.001,0.001,0.0126,-0.08,0.2")
-        self.assertTrue(view.q_xy_max == 0.05)
-        self.assertTrue(view.q_xy_step == 0.001)
-        self.assertTrue(view.q_xy_step_type == RangeStepType.Lin)
+        self.assertEqual(view.q_1d_min_or_rebin_string, "0.001,0.001,0.0126,-0.08,0.2")
+        self.assertEqual(view.q_xy_max, 0.05)
+        self.assertEqual(view.q_xy_step, 0.001)
+        self.assertEqual(view.q_xy_step_type, RangeStepType.Lin)
         self.assertTrue(view.gravity_on_off)
         self.assertTrue(view.use_q_resolution)
-        self.assertTrue(view.q_resolution_sample_a == 14.)
-        self.assertTrue(view.q_resolution_source_a == 13.)
-        self.assertTrue(view.q_resolution_delta_r == 11.)
-        self.assertTrue(view.q_resolution_collimation_length == 12.)
-        self.assertTrue(view.q_resolution_moderator_file == "moderator_rkh_file.txt")
+        self.assertEqual(view.q_resolution_sample_a, 14.)
+        self.assertEqual(view.q_resolution_source_a, 13.)
+        self.assertEqual(view.q_resolution_delta_r, 11.)
+        self.assertEqual(view.q_resolution_collimation_length, 12.)
+        self.assertEqual(view.q_resolution_moderator_file, "moderator_rkh_file.txt")
         self.assertTrue(view.phi_limit_use_mirror)
-        self.assertTrue(view.radius_limit_min == 12.)
-        self.assertTrue(view.radius_limit_min == 12.)
-        self.assertTrue(view.radius_limit_max == 15.)
+        self.assertEqual(view.radius_limit_min, 12.)
+        self.assertEqual(view.radius_limit_min, 12.)
+        self.assertEqual(view.radius_limit_max, 15.)
         self.assertTrue(view.compatibility_mode)
 
         # Assert that Beam Centre View is updated correctly
@@ -302,27 +312,27 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Check state 0
         state0 = states[0]
-        self.assertTrue(state0.data.sample_scatter == "SANS2D00022024")
-        self.assertTrue(state0.data.sample_transmission == "SANS2D00022048")
-        self.assertTrue(state0.data.sample_direct == "SANS2D00022048")
-        self.assertTrue(state0.data.can_scatter is None)
-        self.assertTrue(state0.data.can_transmission is None)
-        self.assertTrue(state0.data.can_direct is None)
+        self.assertEqual(state0.data.sample_scatter, "SANS2D00022024")
+        self.assertEqual(state0.data.sample_transmission, "SANS2D00022048")
+        self.assertEqual(state0.data.sample_direct, "SANS2D00022048")
+        self.assertEqual(state0.data.can_scatter, None)
+        self.assertEqual(state0.data.can_transmission, None)
+        self.assertEqual(state0.data.can_direct, None)
 
         # Check state 1
         state1 = states[1]
-        self.assertTrue(state1.data.sample_scatter == "SANS2D00022024")
-        self.assertTrue(state1.data.sample_transmission is None)
-        self.assertTrue(state1.data.sample_direct is None)
-        self.assertTrue(state1.data.can_scatter is None)
-        self.assertTrue(state1.data.can_transmission is None)
-        self.assertTrue(state1.data.can_direct is None)
+        self.assertEqual(state1.data.sample_scatter, "SANS2D00022024")
+        self.assertEqual(state1.data.sample_transmission, None)
+        self.assertEqual(state1.data.sample_direct, None)
+        self.assertEqual(state1.data.can_scatter, None)
+        self.assertEqual(state1.data.can_transmission, None)
+        self.assertEqual(state1.data.can_direct, None)
 
         # Check some entries
-        self.assertTrue(state0.slice.start_time is None)
-        self.assertTrue(state0.slice.end_time is None)
+        self.assertEqual(state0.slice.start_time, None)
+        self.assertEqual(state0.slice.end_time, None)
 
-        self.assertTrue(state0.reduction.reduction_dimensionality is ReductionDimensionality.OneDim)
+        self.assertEqual(state0.reduction.reduction_dimensionality, ReductionDimensionality.OneDim)
         self.assertEqual(state0.move.detectors['LAB'].sample_centre_pos1, 0.15544999999999998)
 
         # Clean up
@@ -359,12 +369,12 @@ class RunTabPresenterTest(unittest.TestCase):
         state = presenter.get_state_for_row(1)
 
         # Assert
-        self.assertTrue(state.data.sample_scatter == "SANS2D00022024")
-        self.assertTrue(state.data.sample_transmission is None)
-        self.assertTrue(state.data.sample_direct is None)
-        self.assertTrue(state.data.can_scatter is None)
-        self.assertTrue(state.data.can_transmission is None)
-        self.assertTrue(state.data.can_direct is None)
+        self.assertEqual(state.data.sample_scatter, "SANS2D00022024")
+        self.assertEqual(state.data.sample_transmission, None)
+        self.assertEqual(state.data.sample_direct, None)
+        self.assertEqual(state.data.can_scatter, None)
+        self.assertEqual(state.data.can_transmission, None)
+        self.assertEqual(state.data.can_direct, None)
 
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
@@ -381,7 +391,7 @@ class RunTabPresenterTest(unittest.TestCase):
         state = presenter.get_state_for_row(3)
 
         # Assert
-        self.assertTrue(state is None)
+        self.assertEqual(state, None)
 
         # Clean up
         remove_file(batch_file_path)
@@ -404,7 +414,7 @@ class RunTabPresenterTest(unittest.TestCase):
         state = presenter.get_state_for_row(0)
         mask_info = state.mask
         mask_files = mask_info.mask_files
-        self.assertTrue(mask_files == [user_file_path])
+        self.assertEqual(mask_files, [user_file_path])
 
         # clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
@@ -446,7 +456,7 @@ class RunTabPresenterTest(unittest.TestCase):
         index = 0
         expected_table_index_model = TableIndexModel(*row)
         expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = True
+        expected_table_index_model.file_finding = False
 
         presenter.on_row_inserted(index, row)
 
@@ -483,7 +493,7 @@ class RunTabPresenterTest(unittest.TestCase):
         value = '74040'
         expected_table_index_model = TableIndexModel(*expected_row)
         expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = True
+        expected_table_index_model.file_finding = False
 
         presenter.on_data_changed(row, column, value, '')
 
@@ -509,17 +519,18 @@ class RunTabPresenterTest(unittest.TestCase):
         rows = [0, 2]
         expected_row_0 = TableIndexModel(*row_1)
         expected_row_0.id = 1
-        expected_row_0.file_finding = True
+        expected_row_0.file_finding = False
         expected_row_1 = TableIndexModel(*row_3)
         expected_row_1.id = 3
-        expected_row_1.file_finding = True
-
+        expected_row_1.file_finding = False
 
         presenter.on_rows_removed(rows)
 
         self.assertEqual(presenter._table_model.get_number_of_rows(), 2)
+
         model_row_0 = presenter._table_model.get_table_entry(0)
         self.assertEqual(model_row_0, expected_row_0)
+
         model_row_1 = presenter._table_model.get_table_entry(1)
         self.assertEqual(model_row_1, expected_row_1)
 
@@ -560,6 +571,18 @@ class RunTabPresenterTest(unittest.TestCase):
 
         table_entry_1 = presenter._table_model.get_table_entry(1)
         self.assertEqual(table_entry_1.output_name, 'test_file2')
+
+    def test_add_row_to_table_model_adds_sample_geometries(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        parsed_data = BATCH_FILE_TEST_CONTENT_5
+
+        presenter._add_row_to_table_model(parsed_data[0], 0)
+
+        table_entry_0 = presenter._table_model.get_table_entry(0)
+        self.assertEqual(table_entry_0.sample_thickness, '5')
+        self.assertEqual(table_entry_0.sample_height, '2')
+        self.assertEqual(table_entry_0.sample_width, '8')
 
     def test_update_view_from_table_model_updated_view_based_on_model(self):
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
@@ -739,6 +762,25 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(presenter._table_model.get_table_entry(1).__dict__, empty_row.__dict__)
         empty_row.id = 4
         self.assertEqual(presenter._table_model.get_table_entry(2).__dict__, empty_row.__dict__)
+
+    def test_on_erase_rows_does_not_add_rows_when_table_contains_one_row(self):
+        """
+        A bug caused erase rows to add a row to a table containing only 1 row.
+        Check that this is fixed
+        """
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0])
+        presenter.set_view(view)
+
+        test_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                    'test_file', '', '1.0', '', '', '', '']
+
+        presenter.on_row_inserted(0, test_row)
+        presenter.on_erase_rows()
+
+        self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
+        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), ['']*19)
 
     def test_on_erase_rows_updates_view(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -938,13 +980,13 @@ class RunTabPresenterTest(unittest.TestCase):
         view = mock.MagicMock()
         presenter.set_view(view)
 
-        test_row = ["SANS2D00022025", "another_file", "SANS2D00022052", "SANS2D00022022",
-                    "", "", "", "a_user_file.txt"]
+        test_row = ["SANS2D00022025", "SANS2D00022052", "SANS2D00022022",
+                    "", "", "", "another_file", "a_user_file.txt", "1.0", "5.0", "5.4"]
 
-        expected_list = ["sample_sans", "SANS2D00022025", "output_as", "another_file",
-                         "sample_trans", "SANS2D00022052", "sample_direct_beam", "SANS2D00022022",
-                         "can_sans", "", "can_trans", "", "can_direct_beam", "",
-                         "user_file", "a_user_file.txt"]
+        expected_list = ["sample_sans", "SANS2D00022025", "sample_trans", "SANS2D00022052",
+                         "sample_direct_beam", "SANS2D00022022", "can_sans", "", "can_trans", "", "can_direct_beam", "",
+                         "output_as", "another_file", "user_file", "a_user_file.txt", "sample_thickness", "1.0",
+                         "sample_height", "5.0", "sample_width", "5.4"]
 
         actual_list = presenter._create_batch_entry_from_row(test_row)
 
@@ -962,14 +1004,14 @@ class RunTabPresenterTest(unittest.TestCase):
         try:
             presenter.on_export_table_clicked()
         except Exception as e:
-            self.assertTrue(False, "Exceptions should have been caught in the method. "
-                                   "Exception thrown is {}".format(str(e)))
+            self.fail("Exceptions should have been caught in the method. "
+                      "Exception thrown is {}".format(str(e)))
         else:
             self.assertEqual(presenter._view.enable_buttons.call_count, 1,
                              "Expected enable buttons to be called once, "
                              "was called {} times.".format(presenter._view.enable_buttons.call_count))
 
-    def test_that_verify_output_types_disables_canSAS_if_2D_reduction(self):
+    def test_that_canSAS_is_disabled_if_2D_reduction(self):
         """This test checks that if you are running a 2D reduction and have canSAS output mode checked,
         the GUI will automatically uncheck canSAS to avoid data dimension errors."""
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -978,42 +1020,192 @@ class RunTabPresenterTest(unittest.TestCase):
         view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
         view.can_sas_checkbox.setChecked = mock.Mock()
         view.can_sas_checkbox.setEnabled = mock.Mock()
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
 
         presenter.set_view(view)
-        presenter.verify_output_modes(False)
+        presenter.on_reduction_dimensionality_changed(False)
+        presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(False)
 
-        setchecked_calls = presenter._view.can_sas_checkbox.setChecked.call_args_list
-        self.assertEqual(len(setchecked_calls), 1, "We expected canSAS setChecked to only be called once, was called "
-                                                   "{} times instead.".format(len(setchecked_calls)))
-
-        args, _ = setchecked_calls[-1]  # The last call to can_sas_checkbox.setEnabled is from _verify_output_types
-        self.assertFalse(args[0], "Can SAS checkbox should have been turned off, since we were in 2D reduction mode.")
-
-        setenabled_calls = presenter._view.can_sas_checkbox.setEnabled.call_args_list
-        self.assertEqual(len(setenabled_calls), 1, "We expected canSAS setEnabled to only be called once, was called "
-                                                   "{} times instead.".format(len(setenabled_calls)))
-
-        args, _ = setenabled_calls[-1]  # The last call to can_sas_checkbox.setEnabled is from _verify_output_types
-        self.assertFalse(args[0], "Can SAS checkbox should have been disabled, since we were in 2D reduction mode.")
-
-    def test_that_verify_output_types_does_not_disable_canSAS_if_1D_reduction(self):
-        """This test checks that you can still run a 1D reduction with canSAS output."""
+    def test_that_canSAS_is_unchecked_if_2D_reduction(self):
+        """This tests that the canSAS checkbox is unchecked when switching from 1D to 2D reduction"""
         presenter = RunTabPresenter(SANSFacility.ISIS)
 
         view = mock.MagicMock()
         view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
         view.can_sas_checkbox.setChecked = mock.Mock()
         view.can_sas_checkbox.setEnabled = mock.Mock()
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
 
         presenter.set_view(view)
-        presenter.verify_output_modes(True)
+        presenter.on_reduction_dimensionality_changed(False)
+        presenter._view.can_sas_checkbox.setChecked.assert_called_once_with(False)
 
-        self.assertEqual(presenter._view.can_sas_checkbox.setChecked.call_count, 0,
-                         "Did not expect can_sas_checkbox.setChecked to be called. "
-                         "It was called {} times".format(presenter._view.can_sas_checkbox.setChecked.call_count))
+    def test_that_canSAS_is_enabled_if_1D_reduction_and_not_in_memory_mode(self):
+        """This test checks that if you are not in memory mode and switch to 1D reduction, then
+        can sas file type is enabled."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
 
-        args, _ = presenter._view.can_sas_checkbox.setEnabled.call_args_list[-1]
-        self.assertTrue(args[0], "Can SAS checkbox should have been enabled, since we switched to 1D reduction mode.")
+        view = mock.MagicMock()
+        view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
+        view.can_sas_checkbox.setChecked = mock.Mock()
+        view.can_sas_checkbox.setEnabled = mock.Mock()
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
+
+        presenter.set_view(view)
+        presenter.on_reduction_dimensionality_changed(True)
+
+        presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        presenter._view.can_sas_checkbox.setChecked.assert_not_called()
+
+    def test_that_canSAS_is_not_enabled_if_switch_to_1D_reduction_and_in_memory_mode(self):
+        """This test checks that if you are in memory mode, the can sas file type is not
+        re-enabled if you switch to 1D reduction."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+
+        view = mock.MagicMock()
+        view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
+        view.can_sas_checkbox.setChecked = mock.Mock()
+        view.can_sas_checkbox.setEnabled = mock.Mock()
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
+
+        presenter.set_view(view)
+        presenter.on_reduction_dimensionality_changed(True)
+
+        presenter._view.can_sas_checkbox.setChecked.assert_not_called()
+        presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
+
+    def test_that_updating_default_save_directory_also_updates_add_runs_save_directory(self):
+        """This test checks that add runs presenter's save directory update method is called
+        when the defaultsave directory is updated."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter._handle_output_directory_changed("a_new_directory")
+        presenter._view.add_runs_presenter.handle_new_save_directory.assert_called_once_with("a_new_directory")
+
+    def test_that_validate_output_modes_raises_if_no_file_types_selected_for_file_mode(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.save_types = [SaveType.NoType]
+
+        view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
+        view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=True)
+        view.output_mode_both_radio_button.isChecked = mock.MagicMock(return_value=False)
+        presenter.set_view(view)
+
+        self.assertRaises(RuntimeError, presenter._validate_output_modes)
+
+    def test_that_validate_output_modes_raises_if_no_file_types_selected_for_both_mode(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.save_types = [SaveType.NoType]
+
+        view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
+        view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=False)
+        view.output_mode_both_radio_button.isChecked = mock.MagicMock(return_value=True)
+        presenter.set_view(view)
+
+        self.assertRaises(RuntimeError, presenter._validate_output_modes)
+
+    def test_that_validate_output_modes_does_not_raise_if_no_file_types_selected_for_memory_mode(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.save_types = [SaveType.NoType]
+
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
+        view.output_mode_file_radio_button.isChecked = mock.Mock(return_value=False)
+        view.output_mode_both_radio_button.isChecked = mock.Mock(return_value=False)
+        presenter.set_view(view)
+
+        try:
+            presenter._validate_output_modes()
+        except RuntimeError:
+            self.fail("Did not expect _validate_output_modes to fail when no file types are selected "
+                      "for memory output mode.")
+
+    def test_that_switching_to_memory_mode_disables_all_file_type_buttons(self):
+        """This tests that all file type buttons are disabled when memory mode is selected."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
+        view.disable_file_type_buttons = mock.Mock()
+
+        presenter.set_view(view)
+
+        presenter.on_output_mode_changed()
+        presenter._view.disable_file_type_buttons.assert_called_once_with()
+
+    def test_that_all_file_type_buttons_are_enabled_if_switching_to_non_memory_mode_and_in_1D_reduction_mode(self):
+        """This tests that all file type buttons are enabled if switching to file or both mode, when reduction
+        dimensionality is 1D"""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
+        view.reduction_dimensionality_1D.isChecked = mock.Mock(return_value=True)
+        view.can_sas_checkbox.setEnabled = mock.Mock()
+        view.nx_can_sas_checkbox.setEnabled = mock.Mock()
+        view.rkh_checkbox.setEnabled = mock.Mock()
+
+        presenter.set_view(view)
+
+        presenter.on_output_mode_changed()
+        presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
+
+    def test_that_rkh_and_nx_can_sas_are_enabled_if_switching_to_non_memory_mode_and_in_2D_reduction_mode(self):
+        """This tests that nx_can_sas and rkh file type buttons are enabled if switching to file or both mode, when
+         reduction dimensionality is 1D, but can sas is not enabled"""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
+        view.reduction_dimensionality_1D.isChecked = mock.Mock(return_value=False)
+        view.can_sas_checkbox.setEnabled = mock.Mock()
+        view.nx_can_sas_checkbox.setEnabled = mock.Mock()
+        view.rkh_checkbox.setEnabled = mock.Mock()
+
+        presenter.set_view(view)
+
+        presenter.on_output_mode_changed()
+        presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
+        presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
+
+    def test_that_on_reduction_mode_changed_calls_update_hab_if_selection_is_HAB(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter._beam_centre_presenter = mock.MagicMock()
+
+        presenter.on_reduction_mode_selection_has_changed("Hab")
+        presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("front")
+        presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+
+    def test_that_on_reduction_mode_changed_calls_update_lab_if_selection_is_LAB(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter._beam_centre_presenter = mock.MagicMock()
+
+        presenter.on_reduction_mode_selection_has_changed("rear")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("main-detector")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("DetectorBench")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("rear-detector")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
 
     @staticmethod
     def _clear_property_manager_data_service():
@@ -1021,7 +1213,7 @@ class RunTabPresenterTest(unittest.TestCase):
             if PropertyManagerDataService.doesExist(element):
                 PropertyManagerDataService.remove(element)
 
-    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path = ""):
+    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path=""):
         if row_user_file_path:
             content[1].update({BatchReductionEntry.UserFile : row_user_file_path})
 
@@ -1049,6 +1241,7 @@ class RunTabPresenterTest(unittest.TestCase):
     @staticmethod
     def get_file_information_mock():
         return SANSFileInformationMock(instrument=SANSInstrument.SANS2D)
+
 
 if __name__ == '__main__':
     unittest.main()

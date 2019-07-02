@@ -66,7 +66,7 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   triangles.insert(triangles.end(), {3, 6, 2});
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
       std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
@@ -114,7 +114,7 @@ std::unique_ptr<MeshObject> createOctahedron() {
   triangles.insert(triangles.end(), {3, 1, 5});
 
   // Use flexible constructor
-  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
       triangles, vertices, Mantid::Kernel::Material());
   return retVal;
 }
@@ -168,7 +168,7 @@ std::unique_ptr<MeshObject> createLShape() {
   triangles.insert(triangles.end(), {11, 0, 6});
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
       std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
@@ -224,13 +224,12 @@ public:
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
 
     // Test material through flexible constructor
-    auto obj1 = Mantid::Kernel::make_unique<MeshObject>(triangles, vertices,
-                                                        testMaterial);
+    auto obj1 = std::make_unique<MeshObject>(triangles, vertices, testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      obj1->material().numberDensity(), 1e-12);
     // Test material through efficient constructor
-    auto obj2 = Mantid::Kernel::make_unique<MeshObject>(
-        std::move(triangles), std::move(vertices), testMaterial);
+    auto obj2 = std::make_unique<MeshObject>(std::move(triangles),
+                                             std::move(vertices), testMaterial);
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      obj2->material().numberDensity(), 1e-12);
   }
@@ -854,7 +853,7 @@ public:
     auto geom_obj = createOctahedron();
     size_t maxAttempts(1);
     TS_ASSERT_THROWS(geom_obj->generatePointInObject(rng, maxAttempts),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testVolumeOfCube() {

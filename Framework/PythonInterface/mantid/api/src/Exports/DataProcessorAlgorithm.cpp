@@ -16,10 +16,7 @@ using namespace boost::python;
 
 namespace {
 template <class Base>
-using loadOverload1 =
-    Workspace_sptr (DataProcessorAdapter<Base>::*)(const std::string &);
-template <class Base>
-using loadOverload2 = Workspace_sptr (DataProcessorAdapter<Base>::*)(
+using loadOverload = Workspace_sptr (DataProcessorAdapter<Base>::*)(
     const std::string &, const bool);
 
 template <class Base> void do_export(const std::string &name) {
@@ -59,13 +56,8 @@ template <class Base> void do_export(const std::string &name) {
       .def("loadChunk", &Adapter::loadChunkProxy,
            (arg("self"), arg("row_index")), "Load a chunk of data")
 
-      .def("load", (loadOverload1<Base>)&Adapter::loadProxy,
-           (arg("self"), arg("input_data")),
-           "Loads the given file or workspace data and returns the workspace. "
-           "The output is not stored in the AnalysisDataService.")
-
-      .def("load", (loadOverload2<Base>)&Adapter::loadProxy,
-           (arg("self"), arg("input_data"), arg("load_quite")),
+      .def("load", (loadOverload<Base>)&Adapter::loadProxy,
+           (arg("self"), arg("input_data"), arg("load_quiet") = false),
            "Loads the given file or workspace data and returns the workspace. "
            "If loadQuiet=True then output is not stored in the "
            "AnalysisDataService.")

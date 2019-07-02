@@ -108,7 +108,7 @@ public:
                             2 * 2);
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
     TS_ASSERT_THROWS(alg->setProperty("Dimensionality", 0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_throws_if_dimensionality_greater_than_nine() {
@@ -116,7 +116,7 @@ public:
                             2 * 2);
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
     TS_ASSERT_THROWS(alg->setProperty("Dimensionality", 10),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_set_dimensionality() {
@@ -130,7 +130,8 @@ public:
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt",
                             2 * 2);
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
-    TS_ASSERT_THROWS(alg->setProperty("Filename", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("Filename", ""),
+                     const std::invalid_argument &);
   }
 
   void test_throws_with_non_existant_filename() {
@@ -138,7 +139,7 @@ public:
                             2 * 2);
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
     TS_ASSERT_THROWS(alg->setProperty("Filename", "does_not_exist.txt"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_throws_when_wrong_number_of_extent_entries() {
@@ -147,7 +148,7 @@ public:
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Extents",
                           "1,-1"); // Extents only provided for 1Dimension!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_throws_when_wrong_number_of_name_entries() {
@@ -155,7 +156,7 @@ public:
                             2 * 2);
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Names", "A"); // Names only provided for 1Dimension!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_throws_when_wrong_number_of_unit_entries() {
@@ -163,7 +164,7 @@ public:
                             2 * 2);
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Units", "U1"); // Units only provided for 1Dimension!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_throws_when_wrong_number_of_bin_entries() {
@@ -172,7 +173,7 @@ public:
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
     alg->setPropertyValue("Names",
                           "2"); // bin numbers only provided for 1Dimension!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_throws_when_more_bins_expected_than_entries_in_file() {
@@ -188,7 +189,7 @@ public:
     alg->setPropertyValue("Units", "U1,U2,U3");
     alg->setProperty("Dimensionality",
                      3); // but dimensionality has been set to 3 also!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_throws_when_less_bins_expected_than_entries_in_file() {
@@ -206,7 +207,7 @@ public:
     alg->setPropertyValue("Units", "U1,U2,U3");
     alg->setProperty("Dimensionality",
                      3); // but dimensionality has been set to 3 also!
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   /// Test execution with as specific output dimensionality required.
