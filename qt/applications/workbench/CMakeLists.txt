@@ -26,6 +26,7 @@ if (WIN32)
       set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
     elseif(${BUILD_TYPE} STREQUAL "install")
       file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5/\n")
+      file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.webengine "[Paths]\nPrefix = ../\n")
       set(_output_res_py ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install)
     endif()
 
