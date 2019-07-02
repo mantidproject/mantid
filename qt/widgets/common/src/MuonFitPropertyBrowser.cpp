@@ -1175,9 +1175,10 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
           "MuonAnalysisTFNormalizations") &&
       m_compositeFunction->nFunctions() > 0) {
     alg->initialize();
+    auto das = FitPropertyBrowser::getFittingFunction();
+    auto dasd = das->asString();
+    IFunction_sptr old = boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
 
-    IFunction_sptr old =
-        boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
     QStringList globals;
 
     if (m_isMultiFittingMode) {
@@ -1185,10 +1186,9 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       old = m_functionBrowser->getGlobalFunction();
       globals = m_functionBrowser->getGlobalParameters();
     } else if (!enabled && !m_isMultiFittingMode) {
-      // to extract in single fit we have an extra composite -> so remove it
-      auto tmp = boost::dynamic_pointer_cast<CompositeFunction>(old);
-      old = tmp->getFunction(0);
-    }
+      old = boost::dynamic_pointer_cast<CompositeFunction>(old);
+	  }
+    auto non = old->asString();
     alg->setProperty("InputFunction", old);
     alg->setProperty("NormalizationTable", "MuonAnalysisTFNormalizations");
     alg->setProperty("WorkspaceList", m_workspacesToFit);
@@ -1244,12 +1244,11 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       }
     } // single fit
     else {
-      m_functionBrowser->clear();
+	  m_functionBrowser->clear();
       m_functionBrowser->setFunction(func);
     }
 
     updateTFPlot();
-    // m_enumManager->setValue(m_workspace,j);
   }
 }
 
