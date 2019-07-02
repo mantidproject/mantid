@@ -259,8 +259,15 @@ void JobTreeView::replaceSubtreeAt(RowLocation const &rootToRemove,
                                    Subtree const &toInsert) {
   auto const insertionParent = rootToRemove.parent();
   auto insertionIndex = rootToRemove.rowRelativeToParent();
-  removeRowAt(rootToRemove);
+  // Insert the new row first (to avoid possibility of an empty table, which
+  // will cause problems because it is not allowed and will insert an empty
+  // group which we don't want)
   insertSubtreeAt(insertionParent, insertionIndex, toInsert);
+  // Now find the new index of the root we're replacing and remove it. It is
+  // now the sibling below.
+  auto originalRootIndexToRemove = rowLocation().indexAt(rootToRemove);
+  auto newRootIndexToRemove = below(originalRootIndexToRemove.untyped());
+  removeRowAt(rowLocation().atIndex(fromMainModel(newRootIndexToRemove)));
 }
 
 void JobTreeView::insertSubtreeAt(RowLocation const &parent, int index,
