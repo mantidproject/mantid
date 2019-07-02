@@ -10,6 +10,9 @@
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "../Common/IPythonRunner.h"
 #else
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
 #include <QHash>
@@ -54,8 +57,27 @@ void Plotter::reflectometryPlot(
   }
 
   const bool plotErrorBars = true;
-  std::vector<int> wksp_indices = {0};
-  plot(workspaces, boost::none, wksp_indices, boost::none, boost::none,
+  const std::vector<int> wksp_indices = {0};
+
+  std::vector<std::string> actualWorkspaces;
+  actualWorkspaces.reserve(workspaces.size());
+  for (const auto &workspace : workspaces) {
+    const Mantid::API::Workspace_sptr workspaceObject =
+        Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::Workspace>(workspace);
+    if (const auto workspaceGroup =
+            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+                workspaceObject)) {
+      for (auto index = 0u; index < workspaceGroup->size(); ++index) {
+        actualWorkspaces.emplace_back(
+            workspaceGroup->getItem(index)->getName());
+      }
+    } else {
+      actualWorkspaces.emplace_back(workspace);
+    }
+  }
+
+  plot(actualWorkspaces, boost::none, wksp_indices, boost::none, boost::none,
        ax_properties, window_title, plotErrorBars, false);
 #endif
 }
