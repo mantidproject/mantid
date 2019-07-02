@@ -43,9 +43,8 @@ Bug Fixes
 #########
 
 - HRPD Absorption corrections now correctly takes into account the thickness of the slab.
-
 - Pearl no longer produces an output of NaN when long-mode is changed after focusing.
-
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` if fixed to load also single point scans.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` no longer errors out if the first chunk has no events
 
 Engineering Diffraction

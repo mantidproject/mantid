@@ -211,8 +211,8 @@ void LoadILLDiffraction::loadDataScan() {
     m_scanVar[i].setScanned(scanned[static_cast<int>(i)]);
   }
 
-  resolveScanType();
   resolveInstrument();
+  resolveScanType();
   computeThetaOffset();
 
   std::string start_time = firstEntry.getString("start_time");
@@ -721,13 +721,17 @@ LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
  */
 void LoadILLDiffraction::resolveScanType() {
   ScanType result = NoScan;
-  if (m_numberScanPoints != 1) {
-    for (const auto &scanVar : m_scanVar) {
-      if (scanVar.scanned == 1) {
-        result = OtherScan;
-        if (scanVar.name == "2theta") {
-          result = DetectorScan;
-          break;
+  if (m_instName == "D2B") {
+    result = DetectorScan;
+  } else {
+    if (m_numberScanPoints != 1) {
+      for (const auto &scanVar : m_scanVar) {
+        if (scanVar.scanned == 1) {
+          result = OtherScan;
+          if (scanVar.name == "2theta") {
+            result = DetectorScan;
+            break;
+          }
         }
       }
     }

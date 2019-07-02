@@ -11,6 +11,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -437,6 +438,22 @@ public:
   }
 
   void test_D2B_single_file_raw() { do_test_D2B_single_file("Raw"); }
+
+  void test_D2B_single_point_scan() {
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "543614.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    const auto run = outputWS->run();
+    TS_ASSERT(run.hasProperty("ScanType"));
+    const auto type = run.getLogData("ScanType");
+    TS_ASSERT_EQUALS(type->value(), "DetectorScan");
+  }
 
 private:
   const double RAD_2_DEG = 180.0 / M_PI;
