@@ -202,13 +202,13 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         v_axis_is_sample = self._input_size == len(sample_param)
 
         if v_axis_is_sample:
-            logger.notice('Vertical axis is in units of {}'.format(unit))
+            logger.information('Vertical axis is in units of {}'.format(unit))
             unit = (self._sample_log_name, unit)
 
             def axis_value(index):
                 return float(sample_param[index])
         else:
-            logger.notice('Vertical axis is in run number')
+            logger.information('Vertical axis is in run number')
             unit = ('Run No', 'last 3 digits')
 
             def axis_value(index):

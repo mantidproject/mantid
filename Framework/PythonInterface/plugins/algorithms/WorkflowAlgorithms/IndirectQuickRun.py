@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-locals
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileFinder, NumericAxis, Progress)
+from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, FileFinder, NumericAxis,
+                        Progress)
 from mantid.simpleapi import (CreateWorkspace, DeleteWorkspace, GroupWorkspaces, mtd, IndirectTwoPeakFit, LoadLog,
                               SaveNexusProcessed)
 from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty, IntArrayMandatoryValidator, IntArrayProperty,
@@ -14,6 +15,10 @@ from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty, IntArr
 from mantid import config, logger
 
 import os
+
+
+def exists_in_ads(workspace_name):
+    return AnalysisDataService.doesExist(workspace_name)
 
 
 def get_log_filename(instrument_name, run_number):
@@ -86,8 +91,8 @@ class IndirectQuickRun(DataProcessorAlgorithm):
     _total_range = None
     _sample_log_name = None
     _sample_log_value = None
-    _msdfit = False
-    _widthfit = False
+    _msd_fit = False
+    _width_fit = False
     _output_ws = None
     _scan_ws = None
     _ipf_filename = None
@@ -222,9 +227,9 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
         self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
-        self._msdfit = self.getProperty('msdFit').value
+        self._msd_fit = self.getProperty('msdFit').value
 
-        self._widthfit = self.getProperty('WidthFit').value
+        self._width_fit = self.getProperty('WidthFit').value
 
         self._output_ws = first_file + '-' + last_file + '_scan_red'
         self._scan_ws = first_file + '-' + last_file + '_scan'
@@ -240,14 +245,14 @@ class IndirectQuickRun(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
-        progress_end = 0.3 if self._widthfit else 1.0
+        progress_end = 0.3 if self._width_fit else 1.0
         progress_tracker = Progress(self, 0.0, progress_end, 1)
         progress_tracker.report('Running EnergyWindowScan...')
         self._energy_window_scan()
         self._group_energy_window_scan_output()
 
-        if self._widthfit:
-            self._width_fit()
+        if self._width_fit:
+            self._perform_width_fit()
 
         if self._plot:
             self._plot_output()
@@ -268,7 +273,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         scan_algorithm.setProperty('DetailedBalance', Property.EMPTY_DBL)
         scan_algorithm.setProperty('SampleEnvironmentLogName', self._sample_log_name)
         scan_algorithm.setProperty('SampleEnvironmentLogValue', self._sample_log_value)
-        scan_algorithm.setProperty('MSDFit', self._msdfit)
+        scan_algorithm.setProperty('MSDFit', self._msd_fit)
         scan_algorithm.setProperty('ReducedWorkspace', self._output_ws)
         scan_algorithm.setProperty('ScanWorkspace', self._scan_ws)
         scan_algorithm.execute()
@@ -279,11 +284,12 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         """
         suffixes = ['_el_elf', '_inel_elf', '_total_elf', '_el_elt', '_inel_elt', '_total_elt', '_el_eq1', '_inel_eq1',
                     '_total_eq1', '_el_eq2', '_inel_eq2', '_total_eq2']
-        energy_window_scan_workspaces = [self._scan_ws + suffix for suffix in suffixes]
+        energy_window_scan_workspaces = [self._scan_ws + suffix for suffix in suffixes
+                                         if exists_in_ads(self._scan_ws + suffix)]
 
         group_workspaces(energy_window_scan_workspaces, self._scan_ws + '_q')
 
-    def _width_fit(self):
+    def _perform_width_fit(self):
         input_workspace_names = mtd[self._output_ws].getNames()
         x = mtd[input_workspace_names[0]].readX(0)
 
@@ -425,11 +431,11 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         save_workspaces_in_group(self._scan_ws + '_eq2', save_directory)
         save_workspace(self._scan_ws + '_eisf', save_directory + self._scan_ws + '_eisf.nxs')
 
-        if self._msdfit:
+        if self._msd_fit:
             save_workspace(self._scan_ws + '_msd', save_directory + self._scan_ws + '_msd.nxs')
             save_workspaces_in_group(self._scan_ws + '_msd_fit', save_directory)
 
-        if self._widthfit:
+        if self._width_fit:
             save_workspace(self._scan_ws + '_red_Diffusion', save_directory + self._scan_ws + '_red_Diffusion.nxs')
             save_workspace(self._scan_ws + '_red_Width1', save_directory + self._scan_ws + '_red_Width1.nxs')
 
@@ -442,16 +448,16 @@ class IndirectQuickRun(DataProcessorAlgorithm):
             for workspace_name in workspace_names:
                 plotSpectrum(workspace_name, 0, error_bars=True)
 
-            if self._msdfit:
+            if self._msd_fit:
                 plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True)
-            if self._widthfit:
+            if self._width_fit:
                 plotSpectrum(self._output_ws + '_Diffusion', 0, error_bars=True)
         except ImportError:
             from mantidqt.plotting.functions import plot
             plot(workspace_names, wksp_indices=[0]*len(workspace_names), errors=True)
-            if self._msdfit:
+            if self._msd_fit:
                 plot([self._scan_ws + '_msd'], wksp_indices=[1], errors=True)
-            if self._widthfit:
+            if self._width_fit:
                 plot([self._output_ws + '_Diffusion'], wksp_indices=[0], errors=True)
 
     def _format_runs(self, runs):
