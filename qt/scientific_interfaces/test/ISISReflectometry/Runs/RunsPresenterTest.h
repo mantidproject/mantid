@@ -284,6 +284,20 @@ public:
     verifyAndClear();
   }
 
+  void testAutoreductionDisabledWhenAnotherBatchAutoreducing() {
+    auto presenter = makePresenter();
+    expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing();
+    presenter.anyBatchAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionDisabledWhenAnotherBatchNotAutoreducing() {
+    auto presenter = makePresenter();
+    expectAutoreduceButtonEnabledWhenAnotherBatchNotAutoreducing();
+    presenter.anyBatchAutoreductionPaused();
+    verifyAndClear();
+  }
+
   void testNotifyCheckForNewRuns() {
     auto presenter = makePresenter();
     expectCheckForNewRuns();
@@ -674,16 +688,40 @@ private:
     EXPECT_CALL(m_view, setTransferButtonEnabled(true));
   }
 
+  void expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing() {
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+  }
+
+  void expectAutoreduceButtonEnabledWhenAnotherBatchNotAutoreducing() {
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+  }
+
   void expectIsAutoreducing() {
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(true));
+    ON_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .WillByDefault(Return(true));
   }
 
   void expectIsNotAutoreducing() {
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
+    ON_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .WillByDefault(Return(false));
   }
 
   void expectIsProcessing() {

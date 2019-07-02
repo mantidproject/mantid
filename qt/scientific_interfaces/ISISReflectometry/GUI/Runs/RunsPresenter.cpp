@@ -223,6 +223,14 @@ void RunsPresenter::autoreductionPaused() {
   tablePresenter()->autoreductionPaused();
 }
 
+void RunsPresenter::anyBatchAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsPresenter::anyBatchAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
+
 void RunsPresenter::autoreductionCompleted() {
   // Return to polling state
   m_runNotifier->startPolling();
@@ -284,6 +292,10 @@ bool RunsPresenter::isProcessing() const {
 
 bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+bool RunsPresenter::isAnyBatchAutoreducing() const {
+  return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
 bool RunsPresenter::searchInProgress() const {
@@ -402,8 +414,8 @@ void RunsPresenter::updateWidgetEnabledState() const {
   m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
-  m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing() &&
-                                     !searchInProgress());
+  m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&
+                                     !isProcessing() && !searchInProgress());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
   m_view->setTransferButtonEnabled(!isProcessing() && !isAutoreducing());
 }

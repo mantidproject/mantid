@@ -17,6 +17,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IMainWindowPresenter;
+
 /** @class IBatchPresenter
 
 IBatchPresenter is the interface defining the functions that the main
@@ -28,6 +30,8 @@ public:
   /// Destructor
   virtual ~IBatchPresenter() = default;
 
+  virtual void acceptMainPresenter(IMainWindowPresenter *mainPresenter) = 0;
+
   virtual void notifyReductionPaused() = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyAutoreductionResumed() = 0;
@@ -36,6 +40,8 @@ public:
   virtual void notifyInstrumentChanged(const std::string &instName) = 0;
   virtual void notifyRestoreDefaultsRequested() = 0;
   virtual void notifySettingsChanged() = 0;
+  virtual void anyBatchAutoreductionResumed() = 0;
+  virtual void anyBatchAutoreductionPaused() = 0;
 
   /// Transmission runs for a specific run angle
   virtual MantidWidgets::DataProcessor::OptionsQMap
@@ -45,6 +51,7 @@ public:
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
+  virtual bool isAnyBatchAutoreducing() const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;

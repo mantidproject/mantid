@@ -9,6 +9,7 @@
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
+#include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchView.h"
@@ -71,6 +72,13 @@ BatchPresenter::BatchPresenter(
   observePostDelete();
   observeRename();
   observeADSClear();
+}
+
+/** Accept a main presenter
+ * @param mainPresenter :: [input] A main presenter
+ */
+void BatchPresenter::acceptMainPresenter(IMainWindowPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
 }
 
 bool BatchPresenter::requestClose() const { return true; }
@@ -218,6 +226,7 @@ void BatchPresenter::autoreductionResumed() {
   m_runsPresenter->autoreductionResumed();
 
   m_runsPresenter->notifyRowStateChanged();
+  m_mainPresenter->notifyAutoreductionResumed();
 }
 
 void BatchPresenter::pauseAutoreduction() {
@@ -236,11 +245,21 @@ void BatchPresenter::autoreductionPaused() {
   m_experimentPresenter->autoreductionPaused();
   m_instrumentPresenter->autoreductionPaused();
   m_runsPresenter->autoreductionPaused();
+
+  m_mainPresenter->notifyAutoreductionResumed();
 }
 
 void BatchPresenter::autoreductionCompleted() {
   m_runsPresenter->autoreductionCompleted();
   m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::anyBatchAutoreductionResumed() {
+  m_runsPresenter->anyBatchAutoreductionResumed();
+}
+
+void BatchPresenter::anyBatchAutoreductionPaused() {
+  m_runsPresenter->anyBatchAutoreductionPaused();
 }
 
 void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
@@ -306,6 +325,15 @@ bool BatchPresenter::isProcessing() const {
    */
 bool BatchPresenter::isAutoreducing() const {
   return m_jobRunner->isAutoreducing();
+}
+
+/**
+   Checks whether or not autoprocessing is currently running in this batch
+   * i.e. whether we are polling for new runs
+   * @return : Bool on whether data is being processed
+   */
+bool BatchPresenter::isAnyBatchAutoreducing() const {
+  return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
 /** Get the percent of jobs that have been completed out of the current

@@ -91,14 +91,14 @@ void MainWindowView::initLayout() {
 
   // Create the presenter
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, std::move(makeBatchPresenter));
+      this, messageHandler, std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
   m_notifyee->notifyNewBatchRequested();
 }
 
 void MainWindowView::onTabCloseRequested(int tabIndex) {
-  m_ui.mainTabs->removeTab(tabIndex);
+  m_notifyee->notifyCloseBatchRequested(tabIndex);
 }
 
 void MainWindowView::onNewBatchRequested(bool) {
@@ -128,7 +128,8 @@ Handles attempt to close main window
 */
 void MainWindowView::closeEvent(QCloseEvent *event) {
   // Close only if reduction has been paused
-  if (!m_presenter->isProcessing()) {
+  if (!m_presenter->isAnyBatchProcessing() ||
+      m_presenter->isAnyBatchAutoreducing()) {
     event->accept();
   } else {
     event->ignore();
