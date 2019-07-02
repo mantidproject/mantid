@@ -217,55 +217,64 @@ public:
     expectAutoreductionSettingsChanged();
     expectClearExistingTable();
     expectCheckForNewRuns();
-    presenter.resumeAutoreduction(autoReductionSearch);
+    presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
   void testResumeAutoreductionWithSameSettings() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsUnchanged();
     expectDoNotClearExistingTable();
     expectCheckForNewRuns();
-    presenter.resumeAutoreduction(autoReductionSearch);
+    presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
   void testResumeAutoreductionWarnsUserIfTableChanged() {
     auto presenter = makePresenter();
     auto runsTable = makeRunsTableWithContent();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsChanged();
     expectRunsTableWithContent(runsTable);
     expectUserRespondsYes();
     expectCheckForNewRuns();
-    presenter.resumeAutoreduction(autoReductionSearch);
+    presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
   void testResumeAutoreductionDoesNotWarnUserIfTableEmpty() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsChanged();
     EXPECT_CALL(m_messageHandler, askUserYesNo(_, _)).Times(0);
     expectCheckForNewRuns();
-    presenter.resumeAutoreduction(autoReductionSearch);
+    presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
   void testResumeAutoreductionCancelledByUserIfTableChanged() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     auto runsTable = makeRunsTableWithContent();
     expectAutoreductionSettingsChanged();
     expectRunsTableWithContent(runsTable);
     expectUserRespondsNo();
     expectDoNotStartAutoreduction();
-    presenter.resumeAutoreduction(autoReductionSearch);
+    presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
   void testResumeAutoreductionCancelledIfSearchStringIsEmpty() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString()).WillByDefault(Return(""));
     auto runsTable = makeRunsTableWithContent();
     expectDoNotStartAutoreduction();
-    presenter.resumeAutoreduction("");
+    presenter.resumeAutoreduction();
     verifyAndClear();
   }
 

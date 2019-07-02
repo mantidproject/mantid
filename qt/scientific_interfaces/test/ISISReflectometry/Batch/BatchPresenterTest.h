@@ -26,7 +26,6 @@ using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
 using testing::_;
-using testing::_;
 
 class BatchPresenterTest : public CxxTest::TestSuite {
 public:
