@@ -100,6 +100,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         if output_status == 'success':
             self.fit_status_success_failure.setText('Success')
             self.fit_status_success_failure.setStyleSheet('color: green')
+        elif output_status is None:
+            self.fit_status_success_failure.setText('No Fit')
+            self.fit_status_success_failure.setStyleSheet('color: black')
         else:
             self.fit_status_success_failure.setText('Failure: {}'.format(output_status))
             self.fit_status_success_failure.setStyleSheet('color: red')

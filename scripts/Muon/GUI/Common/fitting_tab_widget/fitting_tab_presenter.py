@@ -132,6 +132,7 @@ class FittingTabPresenter(object):
             self.clear_fit_information()
 
     def handle_fit_clicked(self):
+        self.context.fitting_context.number_of_fits = 0
         if self._tf_asymmetry_mode:
             self.perform_tf_asymmetry_fit()
         else:
@@ -272,6 +273,8 @@ class FittingTabPresenter(object):
 
         self.view.setEnabled(True)
         fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
+        if any([not fit_function, not fit_status, not fit_chi_squared]):
+            return
         index = self.view.get_index_for_start_end_times()
 
         if self.view.fit_type == self.view.sequential_fit:
@@ -336,6 +339,8 @@ class FittingTabPresenter(object):
                 return tf_asymmetry_parameters['InputFunction']
             return tf_function
 
+        self.view.undo_fit_button.setEnabled(False)
+
         groups_only = self.check_workspaces_are_tf_asymmetry_compliant(self.selected_data)
         if (not groups_only and self.view.tf_asymmetry_mode) or not self.view.fit_object and self.view.tf_asymmetry_mode:
             self.view.tf_asymmetry_mode = False
@@ -361,15 +366,20 @@ class FittingTabPresenter(object):
                 new_function = calculate_tf_fit_function(fit_function)
 
                 self._fit_function[index] = new_function.clone()
+            self.view.function_browser.blockSignals(True)
+            self.view.function_browser.clear()
+            self.view.function_browser.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
+            self.view.function_browser.setGlobalParameters(new_global_parameters)
+            self.view.function_browser.blockSignals(False)
         else:
             new_function = calculate_tf_fit_function(self.view.fit_object)
             self._fit_function = [new_function.clone()] * len(self.selected_data)
+            self.view.function_browser_multi.blockSignals(True)
+            self.view.function_browser_multi.clear()
+            self.view.function_browser_multi.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
+            self.view.function_browser_multi.setGlobalParameters(new_global_parameters)
+            self.view.function_browser_multi.blockSignals(False)
 
-        self.view.function_browser.blockSignals(True)
-        self.view.function_browser.clear()
-        self.view.function_browser.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
-        self.view.function_browser.setGlobalParameters(new_global_parameters)
-        self.view.function_browser.blockSignals(False)
         self.update_fit_status_information_in_view()
         self.handle_display_workspace_changed()
         if self.automatically_update_fit_name:
