@@ -17,8 +17,6 @@ class FittingTabWidget(object):
         self.fitting_tab_model = FittingTabModel(context)
 
         self.fitting_tab_presenter = FittingTabPresenter(self.fitting_tab_view, self.fitting_tab_model, context)
-
-        # self.fitting_tab_view.simul_fit_radio.toggled.connect(self.fitting_tab_presenter.clear_and_reset_gui_state)
         self.fitting_tab_view.set_slot_for_select_workspaces_to_fit(self.fitting_tab_presenter.handle_select_fit_data_clicked)
         self.fitting_tab_view.set_slot_for_display_workspace_changed(self.fitting_tab_presenter.handle_display_workspace_changed)
         self.fitting_tab_view.set_slot_for_use_raw_changed(self.fitting_tab_presenter.handle_use_rebin_changed)

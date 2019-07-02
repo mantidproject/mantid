@@ -291,7 +291,6 @@ class FittingTabPresenter(object):
         self.view.undo_fit_button.setEnabled(True)
 
     def handle_error(self, error):
-        self.handle_undo_fit_clicked()
         self.thread_success = False
         self.view.warning_popup(error)
         self.view.setEnabled(True)
@@ -433,16 +432,17 @@ class FittingTabPresenter(object):
         self.clear_and_reset_gui_state()
 
     def clear_and_reset_gui_state(self):
+        single_data = [self.selected_data[0]] if self.selected_data else []
+        self.view.set_datasets_in_function_browser(single_data)
+        self.view.set_datasets_in_function_browser_multi(self.selected_data)
+
         self._fit_status = [None] * len(
             self.selected_data) if self.selected_data else [None]
         self._fit_chi_squared = [0.0] * len(
             self.selected_data) if self.selected_data else [0.0]
         self._fit_function = [self.view.fit_object] * len(
             self.selected_data) if self.selected_data else [self.view.fit_object]
-
-        single_data = [self.selected_data[0]] if self.selected_data else []
-        self.view.set_datasets_in_function_browser(single_data)
-        self.view.set_datasets_in_function_browser_multi(self.selected_data)
+        self.view.undo_fit_button.setEnabled(False)
 
         self.reset_start_time_to_first_good_data_value()
         self.view.update_displayed_data_combo_box(self.selected_data)
@@ -454,6 +454,7 @@ class FittingTabPresenter(object):
         self._fit_chi_squared = [0.0] * len(
             self.selected_data) if self.selected_data else [0.0]
         self.update_fit_status_information_in_view()
+        self.view.undo_fit_button.setEnabled(False)
 
     @property
     def start_x(self):

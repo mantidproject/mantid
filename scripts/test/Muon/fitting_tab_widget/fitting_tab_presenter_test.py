@@ -119,7 +119,6 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser_multi.getGlobalFunction(),
                                                                  'Fit Suceeded', 0.5)
 
-
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
 

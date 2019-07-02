@@ -76,7 +76,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.function_browser.addDatasets(data_set_name_list)
 
     def set_datasets_in_function_browser_multi(self, data_set_name_list):
-        number_of_data_sets = self.function_browser.getNumberOfDatasets()
+        number_of_data_sets = self.function_browser_multi.getNumberOfDatasets()
         index_list = range(number_of_data_sets)
         self.function_browser_multi.removeDatasets(index_list)
         self.function_browser_multi.addDatasets(data_set_name_list)
