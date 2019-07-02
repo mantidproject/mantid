@@ -634,6 +634,8 @@ JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult const &result) {
   }
 }
 
+int JobTreeView::currentColumn() const { return currentIndex().column(); }
+
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

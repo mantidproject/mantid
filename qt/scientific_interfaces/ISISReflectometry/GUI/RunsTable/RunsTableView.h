@@ -62,6 +62,7 @@ private slots:
   void onInstrumentChanged(int index);
   void onPlotSelectedPressed(bool);
   void onPlotSelectedStitchedOutputPressed(bool);
+  void onFillDownPressed(bool);
 
 private:
   void addToolbarActions();

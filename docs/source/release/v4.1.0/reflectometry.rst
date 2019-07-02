@@ -25,7 +25,9 @@ New
 
 The Runs Table
 ^^^^^^^^^^^^^^
+.. |filldown| image:: ../../images/arrow-expand-down.png
 
+- Added a "Fill Down" (|filldown|) functionality which allows filling all selected cells below the highest selected cell, in the column that is selected.
 - Filtering by run or group name is now possible using the search bar above the table. This accepts regular expressions.
 
 - Navigation by keyboard shortcuts has been added:

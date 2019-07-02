@@ -98,6 +98,7 @@ public:
   virtual boost::optional<std::vector<Subtree>> selectedSubtrees() const = 0;
   virtual boost::optional<std::vector<RowLocation>>
   selectedSubtreeRoots() const = 0;
+  virtual int currentColumn() const = 0;
   virtual Cell deadCell() const = 0;
   virtual ~IJobTreeView() = default;
 };
