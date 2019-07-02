@@ -38,6 +38,10 @@ class SANSILLReduction(PythonAlgorithm):
         return issues
 
     @staticmethod
+    def _make_solid_angle_name(ws):
+        return mtd[ws].getInstrument().getName()+'_'+str(int(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
+
+    @staticmethod
     def _check_distances_match(ws1, ws2):
         """
             Checks if the detector distance between two workspaces are close enough
@@ -192,6 +196,8 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='The name of the output direct beam flux workspace.')
 
         self.setPropertySettings('FluxOutputWorkspace', beam)
+
+        self.declareProperty('CacheSolidAngle', False, doc='Whether or not to cache the solid angle workspace.')
 
     def _normalise(self, ws):
         """
@@ -476,10 +482,15 @@ class SANSILLReduction(PythonAlgorithm):
                     transmission_ws = self.getProperty('TransmissionInputWorkspace').value
                     if transmission_ws:
                         self._apply_transmission(ws, transmission_ws)
-                    solid_angle = ws + '_sa'
-                    SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                    solid_angle = self._make_solid_angle_name(ws)
+                    cache = self.getProperty('CacheSolidAngle').value
+                    if cache and not mtd.doesExist(solid_angle):
+                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                    else:
+                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws)
-                    DeleteWorkspace(solid_angle)
+                    if not cache:
+                        DeleteWorkspace(solid_angle)
                     progress.report()
                     if process in ['Reference', 'Sample']:
                         container_ws = self.getProperty('ContainerInputWorkspace').value

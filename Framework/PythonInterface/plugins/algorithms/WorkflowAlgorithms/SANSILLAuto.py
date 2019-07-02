@@ -219,11 +219,11 @@ class SANSILLAuto(DataProcessorAlgorithm):
         progress.report('Processing sample')
         if type == 'ReduceSample':
             SANSILLReduction(Run=sample, ProcessAs='Sample', OutputWorkspace=sample_name,
-                             AbsorberInputWorkspace=absorber_name, BeamInputWorkspace=beam_name,
+                             AbsorberInputWorkspace=absorber_name, BeamInputWorkspace=beam_name, CacheSolidAngle=True,
                              ContainerInputWorkspace=container_name, TransmissionInputWorkspace=sample_transmission_name,
                              MaskedInputWorkspace=mask_name, SensitivityInputWorkspace=sensitivity_name, FluxInputWorkspace=flux_name)
 
-            SANSILLIntegration(InputWorkspace=sample_name, OutputWorkspace=output, CalculateResolution='None')
+            SANSILLIntegration(InputWorkspace=sample_name, OutputWorkspace=output)
             self.setProperty('OutputWorkspace', mtd[output])
         elif type == 'ReduceWater':
             SANSILLReduction(Run=sample, ProcessAs='Reference', OutputWorkspace=sample_name,
