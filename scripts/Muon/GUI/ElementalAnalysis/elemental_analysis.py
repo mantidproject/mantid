@@ -90,6 +90,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # plotting
         self.plot_window = None
+        self.colors = ['b', 'g', 'r', 'y']
+        self.color_index = 0
 
         # layout
         self.box = QtWidgets.QHBoxLayout()
@@ -125,16 +127,18 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # make sure the names are strings and x values are numbers
         return Label(str(name), float(x_value), False, offset, True, rotation=-90, protected=True)
 
-    def _plot_line(self, name, x_value_in, element=None):
+    # todo: add color selection
+    def _plot_line(self, name, x_value_in, color, element=None):
         label = self._gen_label(name, x_value_in, element)
         if self.plot_window is None:
             return
         for subplot in self.plotting.get_subplots():
             self.plotting.add_vline_and_annotate(
-                subplot, float(x_value_in), label)
+                subplot, float(x_value_in), label, color)
 
-    def _plot_line_once(self, subplot, x_value, label):
-        self.plotting.add_vline_and_annotate(subplot, float(x_value), label)
+    # todo: add color selection
+    def _plot_line_once(self, subplot, x_value, label, color):
+        self.plotting.add_vline_and_annotate(subplot, float(x_value), label, color)
 
     def _rm_line(self, name):
         if self.plot_window is None:
@@ -173,9 +177,14 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             data = self.element_widgets[element].get_checked()
         if element not in self.element_lines:
             self.element_lines[element] = []
+
+        # Select a different color, if all used then use the first
+        color = self.colors[self.color_index]
+        self.color_index = (self.color_index + 1) % len(self.colors)
+
         for name, x_value in iteritems(data):
             full_name = gen_name(element, name)
-            self._plot_line(full_name, x_value, element)
+            self._plot_line(full_name, x_value, color, element)
 
     def _remove_element_lines(self, element):
         if element not in self.element_lines:
@@ -244,10 +253,12 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # if already selected add to just new plot
         if data is None:
             data = self.element_widgets[element].get_checked()
+        color = self.colors[self.color_index]
+        self.color_index = (self.color_index + 1) % len(self.colors)
         for name, x_value in iteritems(data):
             full_name = gen_name(element, name)
             label = self._gen_label(full_name, x_value, element)
-            self._plot_line_once(subplot, float(x_value), label)
+            self._plot_line_once(subplot, float(x_value), label, color)
 
     def _update_peak_data(self, element, data=None):
         if self.ptable.is_selected(element):
