@@ -77,12 +77,6 @@ void Plotter::reflectometryPlot(
     }
   }
 
-  // get wksp from ADS
-  // Check if group
-  // if group  get all of contents and add to list
-  // do for all groups
-  // plot this list
-
   plot(actualWorkspaces, boost::none, wksp_indices, boost::none, boost::none,
        ax_properties, window_title, plotErrorBars, false);
 #endif
