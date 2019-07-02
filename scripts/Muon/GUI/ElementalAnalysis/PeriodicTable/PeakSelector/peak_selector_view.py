@@ -25,12 +25,18 @@ class PeakSelectorView(QtWidgets.QListWidget):
         self.setWindowTitle(element)
         self.list = QtWidgets.QVBoxLayout(self)
 
-        primary = peak_data["Primary"]
-        self.primary_checkboxes = self._create_checkbox_list(
-            "Primary", primary)
-        secondary = peak_data["Secondary"]
-        self.secondary_checkboxes = self._create_checkbox_list(
-            "Secondary", secondary, checked=False)
+        try:
+            primary = peak_data["Primary"]
+            self.primary_checkboxes = self._create_checkbox_list(
+                "Primary", primary)
+        except KeyError:
+            self.primary_checkboxes = []
+        try:
+            secondary = peak_data["Secondary"]
+            self.secondary_checkboxes = self._create_checkbox_list(
+                "Secondary", secondary, checked=False)
+        except KeyError:
+            self.secondary_checkboxes = []
         try:
             gammas = peak_data["Gammas"]
             self.gamma_checkboxes = self._create_checkbox_list(
