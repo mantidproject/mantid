@@ -447,7 +447,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter.selected_data = new_workspace_list
         fit_function_2 = self.view.fit_object.clone()
         self.presenter.model.calculate_tf_function.return_value = fit_function_2
-        self.view.function_browser.setGlobalParameters(['A'])
+        self.view.function_browser_multi.setGlobalParameters(['A'])
 
         self.view.tf_asymmetry_mode = True
 
