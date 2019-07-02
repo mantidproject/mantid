@@ -97,9 +97,6 @@ protected slots:
   void singleFit();
   void singleFit(DatasetIndex dataIndex, WorkspaceIndex spectrum);
   void executeFit();
-  // std::unordered_map<std::string, Mantid::API::IFunction::Attribute>
-  // getAttributes(Mantid::API::IFunction_sptr const &function,
-  //              std::vector<std::string> const &attributeNames);
   void updateParameterValues();
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);

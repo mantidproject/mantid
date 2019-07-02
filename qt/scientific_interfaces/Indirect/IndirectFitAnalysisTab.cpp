@@ -291,36 +291,6 @@ void IndirectFitAnalysisTab::setDataTableExclude(const std::string &exclude) {
                               m_plotPresenter->getSelectedSpectrum());
 }
 
-//void IndirectFitAnalysisTab::setBrowserStartX(double startX) {
-//  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
-//  m_fitPropertyBrowser->setStartX(startX);
-//}
-//
-//void IndirectFitAnalysisTab::setBrowserEndX(double endX) {
-//  MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
-//  m_fitPropertyBrowser->setEndX(endX);
-//}
-//
-//void IndirectFitAnalysisTab::updateBrowserFittingRange() {
-//  const auto range = m_fittingModel->getFittingRange(getSelectedDataIndex(),
-//                                                     getSelectedSpectrum());
-//  setBrowserStartX(range.first);
-//  setBrowserEndX(range.second);
-//}
-//
-//void IndirectFitAnalysisTab::setBrowserWorkspace() {
-//  if (m_fittingModel->numberOfWorkspaces() > 0) {
-//    auto const name =
-//        m_fittingModel->getWorkspace(getSelectedDataIndex())->getName();
-//    m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
-//  }
-//}
-//
-//void IndirectFitAnalysisTab::setBrowserWorkspace(std::size_t dataIndex) {
-//  const auto name = m_fittingModel->getWorkspace(dataIndex)->getName();
-//  m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
-//}
-
 void IndirectFitAnalysisTab::tableStartXChanged(double startX,
                                                 DatasetIndex dataIndex,
                                                 WorkspaceIndex spectrum) {
@@ -363,9 +333,10 @@ void IndirectFitAnalysisTab::updateFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(updateFitOutput(bool)));
 
-  if (error)
+  if (error) {
     m_fittingModel->cleanFailedRun(m_fittingAlgorithm);
-  else
+    m_fittingAlgorithm.reset();
+  } else
     m_fittingModel->addOutput(m_fittingAlgorithm);
 }
 
@@ -373,9 +344,10 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(updateSingleFitOutput(bool)));
 
-  if (error)
+  if (error) {
     m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, DatasetIndex{0});
-  else
+    m_fittingAlgorithm.reset();
+  } else
     m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, DatasetIndex{0});
 }
 
@@ -394,33 +366,9 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   }
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
-
-  // connect(m_fitPropertyBrowser,
-  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-  //        m_plotPresenter.get(), SLOT(updateGuess()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(fitAlgorithmComplete(bool)));
 }
-
-/**
- * Gets the new attribute values to be updated in the function and in the fit
- * property browser.
- * @param function        The function containing the attributes
- * @param attributeNames  The names of the attributes to update
- */
-// std::unordered_map<std::string, IFunction::Attribute>
-// IndirectFitAnalysisTab::getAttributes(
-//    IFunction_sptr const &function,
-//    std::vector<std::string> const &attributeNames) {
-//  std::unordered_map<std::string, IFunction::Attribute> attributes;
-//  for (auto const &name : attributeNames)
-//    if (function->hasAttribute(name))
-//      attributes[name] =
-//          name == "WorkspaceIndex"
-//              ? IFunction::Attribute(m_fitPropertyBrowser->currentDataset())
-//              : function->getAttribute(name);
-//  return attributes;
-//}
 
 /**
  * Updates the parameter values and errors in the fit property browser.
@@ -438,14 +386,7 @@ void IndirectFitAnalysisTab::updateParameterValues() {
 void IndirectFitAnalysisTab::updateParameterValues(
     const std::unordered_map<std::string, ParameterValue> &parameters) {
   try {
-    // auto fitFunction = m_fitPropertyBrowser->getFittingFunction();
-    // updateParameters(fitFunction, parameters);
     updateFitBrowserParameterValues();
-    // if (m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
-    //                                    getSelectedSpectrum()))
-    //  m_fitPropertyBrowser->updateErrors();
-    // else
-    //  m_fitPropertyBrowser->clearErrors();
   } catch (const std::out_of_range &) {
   } catch (const std::invalid_argument &) {
   }

@@ -65,8 +65,6 @@ void IqtFit::setupFitTab() {
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
-  connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
-          SLOT(customBoolUpdated(const QString &, bool)));
 }
 
 EstimationDataSelector IqtFit::getEstimationDataSelector() const {
