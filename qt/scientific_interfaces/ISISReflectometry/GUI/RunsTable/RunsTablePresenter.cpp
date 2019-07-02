@@ -520,9 +520,11 @@ void RunsTablePresenter::notifySelectionChanged() {
 void RunsTablePresenter::applyGroupStylingToRow(
     MantidWidgets::Batch::RowLocation const &location) {
   auto cells = m_view->jobs().cellsAt(location);
-  boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()),
-              m_view->jobs().deadCell());
-  m_view->jobs().setCellsAt(location, cells);
+  if (cells.size() > 0) {
+    boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()),
+                m_view->jobs().deadCell());
+    m_view->jobs().setCellsAt(location, cells);
+  }
 }
 
 void RunsTablePresenter::notifyRowInserted(
