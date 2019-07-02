@@ -64,7 +64,7 @@ Bug Fixes
   interface.
 - Fixed a bug causing the errors calculated on Iqt to be too small towards the end of the spectra.
 
-.. figure:: ../../images/Iqt_Errors_Bug.png
+.. figure:: ../../images/Iqt_Errors_Bug.PNG
   :class: screenshot
   :align: center
   :figwidth: 90%
