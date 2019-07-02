@@ -78,7 +78,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
             return
 
+        self.function_browser.blockSignals(True)
         self.function_browser.updateMultiDatasetParameters(fit_function)
+        self.function_browser.blockSignals(False)
 
         if output_status == 'success':
             self.fit_status_success_failure.setText('Success')
