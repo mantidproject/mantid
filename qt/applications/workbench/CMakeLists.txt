@@ -22,10 +22,10 @@ if (WIN32)
 
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if (${BUILD_TYPE} STREQUAL "build")
-      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n") 
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5/\n") 
       set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
     elseif(${BUILD_TYPE} STREQUAL "install")
-      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5/\n")
       set(_output_res_py ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install)
     endif()
 
