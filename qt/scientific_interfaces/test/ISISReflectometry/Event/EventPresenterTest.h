@@ -97,9 +97,8 @@ public:
     auto presenter = makePresenter();
     auto const sliceType = SliceType::LogValue;
     auto const logBlockName = std::string("Param");
-    auto const expectedSliceValues =
-        std::vector<double>({11.0, 0.1, 12.0, 33.0, 23.2});
-    auto const sliceValuesList = std::string("11,0.1, 12,33, 23.2");
+    auto const expectedSliceValues = std::vector<double>({11.0});
+    auto const sliceValuesList = std::string("11");
 
     EXPECT_CALL(m_view, logBreakpoints()).WillOnce(Return(sliceValuesList));
     EXPECT_CALL(m_view, logBlockName()).WillOnce(Return(logBlockName));

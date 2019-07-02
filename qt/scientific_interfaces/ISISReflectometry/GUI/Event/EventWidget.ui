@@ -234,7 +234,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Python list</string>
+         <string>Log value interval</string>
         </property>
        </widget>
       </item>
@@ -244,7 +244,7 @@
          <bool>false</bool>
         </property>
         <property name="toolTip">
-         <string>A comma separated list of values indicating the log values at which to slice the data</string>
+         <string>Delta of log value to be sliced into</string>
         </property>
        </widget>
       </item>
