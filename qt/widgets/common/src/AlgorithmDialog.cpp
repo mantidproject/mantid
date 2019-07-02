@@ -725,6 +725,11 @@ void AlgorithmDialog::accept() {
   }
 }
 
+void AlgorithmDialog::reject() {
+  emit closeEventCalled();
+  QDialog::reject();
+}
+
 //-------------------------------------------------------------------------------------------------
 
 /**

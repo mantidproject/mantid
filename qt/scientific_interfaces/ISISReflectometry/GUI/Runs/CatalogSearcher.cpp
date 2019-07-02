@@ -152,7 +152,7 @@ void CatalogSearcher::execLoginDialog(const IAlgorithm_sptr &alg) {
   API::InterfaceManager interfaceMgr;
   auto dlg = dynamic_cast<MantidQt::API::AlgorithmDialog *>(
       interfaceMgr.createDialog(alg));
-  QObject::connect(dlg, SIGNAL(destroyed()), this, SLOT(dialogClosed()));
+  QObject::connect(dlg, SIGNAL(closeEventCalled()), this, SLOT(dialogClosed()));
   dlg->setModal(true);
   dlg->show();
   dlg->raise();
