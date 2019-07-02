@@ -1175,8 +1175,6 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
           "MuonAnalysisTFNormalizations") &&
       m_compositeFunction->nFunctions() > 0) {
     alg->initialize();
-    auto das = FitPropertyBrowser::getFittingFunction();
-    auto dasd = das->asString();
     IFunction_sptr old = boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
 
     QStringList globals;
@@ -1188,7 +1186,6 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
     } else if (!enabled && !m_isMultiFittingMode) {
       old = boost::dynamic_pointer_cast<CompositeFunction>(old);
 	  }
-    auto non = old->asString();
     alg->setProperty("InputFunction", old);
     alg->setProperty("NormalizationTable", "MuonAnalysisTFNormalizations");
     alg->setProperty("WorkspaceList", m_workspacesToFit);
