@@ -114,8 +114,7 @@ RunsTablePresenter::RunsTablePresenter(
   m_view->subscribe(this);
 
   // Add Group to view and model, add row to this group in view and model.
-  appendRowAndGroup({0});
-  notifyExpandAllRequested();
+  ensureAtLeastOneGroupExists();
 }
 
 void RunsTablePresenter::appendRowAndGroup(std::vector<int> localGroupIndices) {
@@ -354,6 +353,13 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   // If we have more than one group/row then it's ok
   if (m_model.reductionJobs().groups().size() > 1)
     return;
+
+  if (m_model.reductionJobs().groups().size() == 0) {
+    appendRowAndGroup({0});
+    notifyExpandAllRequested();
+    return;
+  }
+
   auto const &group = m_model.reductionJobs().groups()[0];
   if (group.rows().size() > 0)
     return;
