@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-
+from re import findall
 
 class MaxEnt(object):
 
@@ -59,7 +59,7 @@ class FrequencyContext(object):
     def FFT_freq(self):
         return [FFT.ws_freq_name for FFT in self._FFT_freq]
 
-    def get_frequency_workspace_names(self, run_list, group, pair, phasequad):
+    def get_frequency_workspace_names(self, run_list, group, pair, phasequad,frequency_type):
         # do MaxEnt first as it only has run number
         names = []
         for maxEnt in self._maxEnt_freq:
@@ -77,5 +77,17 @@ class FrequencyContext(object):
                     # do phaseQuad - will only have one run
                     elif int(run) == int(fft.Re_run) and phasequad and fft.phasequad:
                         names.append(fft.ws_freq_name)
-
-        return names
+        if frequency_type == "All":
+            return names
+        else:
+            output = []
+            count = 1
+            """ if Re or Im then the count will be 2
+            appears as part of the FFT name"""
+            if len(frequency_type) == 2:
+               count = 2
+            for name in names:
+                num = len(findall(frequency_type, name))
+                if frequency_type in name and count == num:
+                   output.append(name)
+            return output

@@ -82,7 +82,7 @@ class FittingTabPresenter(object):
             runs='All',
             group_and_pair=self.context.group_pair_context.selected,
             phasequad=True,
-            rebin=not self.view.fit_to_raw, freq=True)
+            rebin=not self.view.fit_to_raw, freq="All")
         self.selected_data = guess_selection
 
     def update_selected_time_workspace_guess(self):

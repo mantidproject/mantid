@@ -262,12 +262,12 @@ class MuonContext(object):
             return None
 
     def get_names_of_workspaces_to_fit(
-            self, runs='', group_and_pair='', phasequad=False, rebin=False, freq=False):
-        if freq:
-            return self.get_names_of_frequency_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair, phasequad=phasequad)
-        else:
+            self, runs='', group_and_pair='', phasequad=False, rebin=False, freq="None"):
+        if freq == "None":
             return self.get_names_of_time_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
                                                                    phasequad=phasequad, rebin=rebin)
+        else:
+            return self.get_names_of_frequency_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair, phasequad=phasequad, frequency_type=freq)
 
     def get_group_and_pair(self, group_and_pair):
         group = []
@@ -317,13 +317,13 @@ class MuonContext(object):
         return group_names + pair_names + phasequad_names
 
     def get_names_of_frequency_domain_workspaces_to_fit(
-            self, runs='', group_and_pair='', phasequad=False):
+            self, runs='', group_and_pair='', phasequad=False, frequency_type = "None"):
         if self._frequency_context is None:
             return []
         group, pair = self.get_group_and_pair(group_and_pair)
         run_list = self.get_runs(runs)
         names = self._frequency_context.get_frequency_workspace_names(
-            run_list, group, pair, phasequad)
+            run_list, group, pair, phasequad,frequency_type)
         return names
 
     def get_list_of_binned_or_unbinned_workspaces_from_equivalents(
