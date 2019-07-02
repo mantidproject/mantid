@@ -194,6 +194,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
 
+        self.home_tab.plot_widget.plot_type_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.selected_plot_type_observer)
+
         self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
             self.home_tab.plot_widget.group_pair_observer)
 

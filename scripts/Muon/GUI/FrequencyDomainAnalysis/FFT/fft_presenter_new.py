@@ -16,6 +16,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, 
 import re
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.observer_pattern import GenericObservable
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
 
 
 class FFTPresenter(object):
@@ -194,7 +195,7 @@ class FFTPresenter(object):
         Im = get_group_or_pair_from_name(imaginary_input_workspace)
 
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
-        spectra = {"_Re":0+shift, "_Im":1+shift, "_mod":2+shift}
+        spectra = {"_"+FREQUENCY_EXTENSIONS["RE"]:0+shift, "_"+FREQUENCY_EXTENSIONS["IM"]:1+shift, "_"+FREQUENCY_EXTENSIONS["MOD"]:2+shift}
         for spec_type in list(spectra.keys()):
             extracted_ws = extract_single_spec(fft_workspace,spectra[spec_type])
 

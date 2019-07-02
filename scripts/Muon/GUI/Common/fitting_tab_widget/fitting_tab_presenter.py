@@ -35,6 +35,8 @@ class FittingTabPresenter(object):
             self.handle_gui_changes_made)
         self.selected_group_pair_observer = GenericObserver(
             self.handle_selected_group_pair_changed)
+        self.selected_plot_type_observer = GenericObserver(
+            self.handle_selected_plot_type_changed)
         self.input_workspace_observer = GenericObserver(
             self.handle_new_data_loaded)
         self.disable_tab_observer = GenericObserver(lambda: self.view.
@@ -67,6 +69,9 @@ class FittingTabPresenter(object):
     def handle_selected_group_pair_changed(self):
         self.update_selected_workspace_guess()
 
+    def handle_selected_plot_type_changed(self):
+        self.update_selected_workspace_guess()
+
     def update_selected_workspace_guess(self):
         if self.manual_selection_made:
             guess_selection = self.selected_data
@@ -82,7 +87,7 @@ class FittingTabPresenter(object):
             runs='All',
             group_and_pair=self.context.group_pair_context.selected,
             phasequad=True,
-            rebin=not self.view.fit_to_raw, freq="All")
+            rebin=not self.view.fit_to_raw, freq=self.context._frequency_context.plot_type)
         self.selected_data = guess_selection
 
     def update_selected_time_workspace_guess(self):

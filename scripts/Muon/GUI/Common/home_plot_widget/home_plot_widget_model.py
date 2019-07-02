@@ -22,11 +22,13 @@ class HomePlotWidgetModel(object):
         self.plotted_fit_workspaces = []
         self.plotted_group = ''
 
-    def plot(self, workspace_list, title):
+    def plot(self, workspace_list, title, domain, force_redraw):
         """
         Plots a list of workspaces in a new plot window, closing any existing plot windows.
         :param workspace_list: A list of workspace name to plot. They must be in the ADS
         :param title: The name to give to the subplot created, currently only one subplot is ever created
+        :param domain: if frequency or time domain
+        :param force_redraw: if to force a redraw
         :return: A reference to the newly created plot window is passed back
         """
         if not workspace_list:
@@ -38,15 +40,20 @@ class HomePlotWidgetModel(object):
         except RuntimeError:
             return
 
-        if self.plot_figure:
+        if force_redraw and self.plot_figure:
+            self.plot_figure.clear()
+            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
+                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
+            self.set_x_lim(domain)
+            
+        elif self.plot_figure:
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
         else:
             self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title, plot_kwargs={'distribution': True,
                                                                                                     'autoscale_on_update': False},
                                     errors=True)
-            self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
-            self.autoscale_y_to_data_in_view()
+            self.set_x_lim(domain)
 
         self.plot_figure.canvas.set_window_title('Muon Analysis')
         self.plot_figure.gca().set_title(title)
@@ -58,6 +65,12 @@ class HomePlotWidgetModel(object):
             self.remove_workpace_from_plot(workspace)
 
         self.plotted_workspaces = workspace_list
+
+    def set_x_lim(self,domain):
+        if domain == "Time":
+            self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
+            self.autoscale_y_to_data_in_view()
+            self.plot_figure.canvas.draw()
 
     def add_workspace_to_plot(self, workspace, specNum, label):
         """

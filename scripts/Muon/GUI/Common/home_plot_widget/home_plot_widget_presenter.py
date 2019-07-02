@@ -7,14 +7,19 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-from Muon.GUI.Common.observer_pattern import GenericObserver
+from Muon.GUI.Common.observer_pattern import GenericObservable, GenericObserver
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
+
 
 COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
-FREQ_PLOT_TYPE = "Frequency (modulus)"
+FREQ_PLOT_TYPE = "Frequency "
 
+# to do list:
+# 1. allow user to pick, maxent, mod, Re or Im, all FFT
+# 2. get correct default
 
 class HomePlotWidgetPresenter(HomeTabSubWidget):
 
@@ -36,12 +41,18 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.fit_observer = GenericObserver(self.handle_fit_completed)
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
+        self.plot_type_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
 
-        self.keep = False
+        self.plot_type_changed_notifier = GenericObservable()
 
+        self.keep = False
+        self._force_redraw = True
         if self.context._frequency_context:
-            self._view.addItem(FREQ_PLOT_TYPE)
+            for ext in FREQUENCY_EXTENSIONS.keys():
+                self._view.addItem(FREQ_PLOT_TYPE+FREQUENCY_EXTENSIONS[ext])
+            self._view.addItem(FREQ_PLOT_TYPE+"All")
+
 
     def show(self):
         """
@@ -84,6 +95,11 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the plot type being changed on the view
         """
+        # force the plot to update
+        self._force_redraw = True
+        self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
+        self.plot_type_changed_notifier.notify_subscribers()
+
         current_group_pair = self.context.group_pair_context[
             self.context.group_pair_context.selected]
         current_plot_type = self._view.get_selected()
@@ -118,8 +134,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
 
-        self._model.plot(workspace_list, self.get_plot_title())
-
+        self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw)
+        self._force_redraw = False
         workspace_list_inverse_binning = self.get_workspaces_to_plot(self.context.group_pair_context.selected,
                                                                      not self._view.if_raw(),
                                                                      self._view.get_selected())
@@ -157,14 +173,15 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         :param plot_type: Whether to plot counts or asymmetry
         :return: a list of workspace names
         """
-        if plot_type == FREQ_PLOT_TYPE:
-            return self.get_freq_workspaces_to_plot(current_group_pair)
+        if FREQ_PLOT_TYPE in plot_type:
+            return self.get_freq_workspaces_to_plot(current_group_pair, plot_type)
         else:
             return self.get_time_workspaces_to_plot(current_group_pair, is_raw, plot_type)
 
-    def get_freq_workspaces_to_plot(self, current_group_pair):
+    def get_freq_workspaces_to_plot(self, current_group_pair, plot_type):
         """
         :param current_group_pair: The group/pair currently selected
+        :param plot_type: Whether to plot counts or asymmetry
         :return: a list of workspace names
         """
         try:
@@ -172,10 +189,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             for run in self.context.data_context.current_runs:
                 runs += ", " + str(run[0])
             workspace_list = self.context.get_names_of_frequency_domain_workspaces_to_fit(
-                runs, current_group_pair, False)
-            workspace_list = [
-                ws_name for ws_name in workspace_list if (
-                    "_mod" in ws_name or "MaxEnt" in ws_name)]
+                runs, current_group_pair, False, plot_type[len(FREQ_PLOT_TYPE):])
+
             return workspace_list
         except AttributeError:
             return []
@@ -218,3 +233,9 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             self._view.set_raw_checkbox_state(False)
         else:
             self._view.set_raw_checkbox_state(True)
+
+    def get_domain(self):
+        if FREQ_PLOT_TYPE in self._view.get_selected():
+           return "Frequency"
+        else:
+           return "Time"

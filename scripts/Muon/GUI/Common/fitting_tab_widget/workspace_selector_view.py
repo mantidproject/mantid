@@ -11,6 +11,8 @@ from qtpy import QtWidgets
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
+
 ui_workspace_selector, _ = load_ui(__file__, "workspace_selector.ui")
 
 frequency_domain = "Frequency Domain "
@@ -42,10 +44,11 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         self.run_line_edit.editingFinished.connect(self.handle_run_edit_changed)
         self.phase_quad_checkbox.stateChanged.connect(self.handle_phase_quad_changed)
 
-        self.time_domain_combo.addItem(frequency_domain+"mod")
-        self.time_domain_combo.addItem(frequency_domain+"MaxEnt")
-        self.time_domain_combo.addItem(frequency_domain+"Re")
-        self.time_domain_combo.addItem(frequency_domain+"Im")
+        self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["MOD"])
+        self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["MAXENT"])
+        self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["RE"])
+        self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["IM"])
+
         self.time_domain_combo.currentIndexChanged.connect(self.time_or_freq)
         if self.context._frequency_context:
             self.time_domain_combo.setEnabled(True)

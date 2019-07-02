@@ -27,6 +27,9 @@ class FFT(object):
         self.phasequad = phasequad
 
 
+FREQUENCY_EXTENSIONS ={"MOD":"mod", "RE":"Re", "IM":"Im", "MAXENT":"MaxEnt", "FFT":"FFT All" }
+
+
 class FrequencyContext(object):
 
     """
@@ -38,6 +41,7 @@ class FrequencyContext(object):
     def __init__(self):
         self._maxEnt_freq = []
         self._FFT_freq = []
+        self.plot_type = "None"
 
     def add_maxEnt(self, run, ws_freq):
         self._maxEnt_freq.append(MaxEnt(run, ws_freq))
@@ -59,7 +63,7 @@ class FrequencyContext(object):
     def FFT_freq(self):
         return [FFT.ws_freq_name for FFT in self._FFT_freq]
 
-    def get_frequency_workspace_names(self, run_list, group, pair, phasequad,frequency_type):
+    def get_frequency_workspace_names(self, run_list, group, pair, phasequad, frequency_type):
         # do MaxEnt first as it only has run number
         names = []
         for maxEnt in self._maxEnt_freq:
@@ -79,6 +83,8 @@ class FrequencyContext(object):
                         names.append(fft.ws_freq_name)
         if frequency_type == "All":
             return names
+        elif frequency_type ==FREQUENCY_EXTENSIONS["FFT"]:
+		    return [name for name in names if FREQUENCY_EXTENSIONS["MAXENT"] not in name]
         else:
             output = []
             count = 1
