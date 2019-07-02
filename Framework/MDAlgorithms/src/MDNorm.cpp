@@ -889,21 +889,20 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
         }
       }
 
-    } else if ((key != "OutputBins") && (key !="OutputExtents")) {
+    } else if ((key != "OutputBins") && (key != "OutputExtents")) {
       nonDimensionIndex.push_back(parametersIndex);
     }
     parametersIndex++;
   }
-  for (auto &idx:dimensionIndex) {
+  for (auto &idx : dimensionIndex) {
     if (idx > numDimsTemp)
       throw(std::invalid_argument("Cannot find at least one of QDimension0, "
                                   "QDimension1, or QDimension2"));
   }
 
-
   // make sure the names of non-directional dimensions are the same
   if (!(nonDimensionIndex.empty())) {
-    for (auto &indexID:nonDimensionIndex) {
+    for (auto &indexID : nonDimensionIndex) {
       const std::string nameInput = m_inputWS->getDimension(indexID)->getName();
       const std::string nameData = tempDataWS->getDimension(indexID)->getName();
       if (nameInput != nameData) {
@@ -966,7 +965,8 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
       auto value = p.second;
       std::stringstream basisVector;
       std::vector<double> projection(m_inputWS->getNumDims(), 0.);
-      // value is a string that can start with QDimension0, etc, but contain other stuff
+      // value is a string that can start with QDimension0, etc, but contain
+      // other stuff. Do not use ==
       if (value.find("QDimension0") != std::string::npos) {
         m_hIdx = qindex;
         if (!m_isRLU) {
