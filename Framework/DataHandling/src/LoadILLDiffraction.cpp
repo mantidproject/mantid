@@ -486,8 +486,9 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   }
 
   // Then load the detector spectra
-  for (size_t i = NUMBER_MONITORS;
-       i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
+  for (int i = NUMBER_MONITORS;
+       i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
       auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
@@ -527,8 +528,9 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                  [](double e) { return sqrt(e); });
 
   // Assign detector counts
-  for (size_t i = NUMBER_MONITORS;
-       i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
+  for (int i = NUMBER_MONITORS;
+       i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
     const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
