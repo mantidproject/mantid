@@ -26,7 +26,7 @@ public:
 ISearcher is an interface for search implementations used by
 IRunsPresenter implementations.
 */
-class ISearcher : public QObject {
+class ISearcher {
 public:
   enum class SearchType { NONE, MANUAL, AUTO };
   virtual ~ISearcher(){};

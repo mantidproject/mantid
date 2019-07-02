@@ -22,7 +22,8 @@ class IMainWindowView;
 CatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class CatalogSearcher : public ISearcher,
+class CatalogSearcher : public QObject,
+                        public ISearcher,
                         public RunsViewSearchSubscriber,
                         public Mantid::API::AlgorithmObserver {
   Q_OBJECT
