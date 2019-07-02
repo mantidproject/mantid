@@ -16,7 +16,9 @@ set(
   src/MantidAxes.cpp
   src/MantidColorMap.cpp
   src/PanZoomTool.cpp
+  src/PeakMarker.cpp
   src/Plot.cpp
+  src/RangeMarker.cpp
   src/ScalarMappable.cpp
 )
 
@@ -40,7 +42,9 @@ set(
   inc/MantidQtWidgets/MplCpp/MantidAxes.h
   inc/MantidQtWidgets/MplCpp/MantidColorMap.h
   inc/MantidQtWidgets/MplCpp/PanZoomTool.h
+  inc/MantidQtWidgets/MplCpp/PeakMarker.h
   inc/MantidQtWidgets/MplCpp/Plot.h
+  inc/MantidQtWidgets/MplCpp/RangeMarker.h
   inc/MantidQtWidgets/MplCpp/ScalarMappable.h
 )
 

@@ -278,7 +278,7 @@ void ProcessIndirectFitParameters::init() {
  */
 void ProcessIndirectFitParameters::exec() {
   ITableWorkspace_sptr const inputWs = getProperty("InputWorkspace");
-  std::string const xColumn = getProperty("ColumnX");
+  std::string xColumn = getProperty("ColumnX");
   std::string const xUnit = getProperty("XAxisUnit");
   bool const includeChiSquared = getProperty("IncludeChiSquared");
   std::vector<std::string> parameterNames = getProperty("ParameterNames");

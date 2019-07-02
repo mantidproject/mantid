@@ -44,6 +44,7 @@ Improvements
 - :ref:`SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
 - :ref:`SolidAngle <algm-SolidAngle>` is extended to accommodate few options for fast analytical calculation for SANS-type detectors.
 - :ref:`algm-FilterEvents` has a property `InformativeOutputNames` which changes the name of output workspace to include the start and end time of the slice.
+- Updated the clone method of IFunction to copy parameter errors across as well as parameter values.
 
 Instrument Definition Files
 ###########################
@@ -73,6 +74,7 @@ New
 - The ``mantid.plots`` module now registers a ``power`` and ``square`` scale type to be used with ``set_xscale`` and ``set_xscale`` functions.
 - In :class:`mantid.kernel.DateAndTime`, the method :py:meth:`~mantid.kernel.DateAndTime.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.DateAndTime.totalNanoseconds` should be used instead.
 - In :class:`mantid.kernel.time_duration`, The method :py:meth:`~mantid.kernel.time_duration.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.time_duration.totalNanoseconds` should be used instead.
+- :py:obj:`mantid.geometry.DetectorInfo.indexOf` has been exposed to python
 
 Bugfixes
 ########

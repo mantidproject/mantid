@@ -23,6 +23,8 @@ class ResultsTabPresenter(QObject):
         self.new_fit_performed_observer = GenericObserver(
             self.on_new_fit_performed)
 
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+
         self._init_view()
 
     # callbacks
@@ -87,3 +89,6 @@ class ResultsTabPresenter(QObject):
         self.view.set_log_values(
             self.model.log_selection(
                 existing_selection=self.view.log_values()))
+
+    def update_view_from_model(self):
+        self.on_new_fit_performed()

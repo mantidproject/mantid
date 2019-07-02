@@ -95,9 +95,17 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     endif ()
 
     # Registers the "installed" components with CMake so it will carry them over
-    install(DIRECTORY ${_package_source_directory}
-            DESTINATION ${_package_install_destination}
-            PATTERN "test" EXCLUDE )
+    if ( ARGC GREATER 2 AND "${ARGV2}" STREQUAL "EXCLUDE_RESOURCES" )
+      install(DIRECTORY ${_package_source_directory}
+              DESTINATION ${_package_install_destination}
+              PATTERN "test" EXCLUDE
+              PATTERN "resources.py" EXCLUDE
+              PATTERN "resources.pyc" EXCLUDE)
+    else ()
+      install(DIRECTORY ${_package_source_directory}
+              DESTINATION ${_package_install_destination}
+              PATTERN "test" EXCLUDE)
+    endif()
 
     if (APPLE AND "${pkg_name}" STREQUAL "mantidqt")
       # Horrible hack to get mantidqt into the MantidPlot.app bundle too.

@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
 
+#include "MantidQtWidgets/Common/Python/QHashToDict.h"
+
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 
@@ -27,18 +29,25 @@ MantidAxes::MantidAxes(Python::Object pyObj) : Axes{std::move(pyObj)} {}
  * @param wkspIndex The workspace index to plot
  * @param lineColour Set the line colour to this string name
  * @param label A label for the curve
+ * @param otherKwargs Other kwargs to use for the line
  * @return A new Line2D artist object
  */
-Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                        const size_t wkspIndex, const QString lineColour,
-                        const QString label) {
+Line2D
+MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                 const size_t wkspIndex, const QString lineColour,
+                 const QString label,
+                 const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
+
   Python::Dict kwargs;
+  if (otherKwargs)
+    kwargs = Python::qHashToDict(otherKwargs.get());
   kwargs["wkspIndex"] = wkspIndex;
   kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
+
   return Line2D{pyobj().attr("plot")(*args, **kwargs)[0]};
 }
 
@@ -50,17 +59,21 @@ Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
  * @param label A label for the curve
  * @return A new ErrorbarContainer object
  */
-ErrorbarContainer
-MantidAxes::errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                     const size_t wkspIndex, const QString lineColour,
-                     const QString label) {
+ErrorbarContainer MantidAxes::errorbar(
+    const Mantid::API::MatrixWorkspace_sptr &workspace, const size_t wkspIndex,
+    const QString lineColour, const QString label,
+    const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
+
   Python::Dict kwargs;
+  if (otherKwargs)
+    kwargs = Python::qHashToDict(otherKwargs.get());
   kwargs["wkspIndex"] = wkspIndex;
   kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
+
   return ErrorbarContainer{pyobj().attr("errorbar")(*args, **kwargs)};
 }
 

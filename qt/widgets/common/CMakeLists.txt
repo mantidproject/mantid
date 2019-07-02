@@ -53,10 +53,12 @@ set(QT5_SRC_FILES
     src/MultifitSetupDialog.cpp
     src/MWRunFiles.cpp
     src/OptionsPropertyWidget.cpp
+    src/ParseKeyValueString.cpp
     src/pixmaps.cpp
     src/PluginLibraries.cpp
     src/pqHelpWindow.cxx
     src/ProcessingAlgoWidget.cpp
+    src/ProgressableView.cpp
     src/PropertyHandler.cpp
     src/PropertyWidget.cpp
     src/PropertyWidgetFactory.cpp
@@ -67,6 +69,7 @@ set(QT5_SRC_FILES
     src/SequentialFitDialog.cpp
     src/SelectFunctionDialog.cpp
     src/SelectWorkspacesDialog.cpp
+    src/SlitCalculator.cpp
     src/TextPropertyWidget.cpp
     src/TSVSerialiser.cpp
     src/UserFunctionDialog.cpp
@@ -120,7 +123,8 @@ set(QT5_SRC_FILES
     src/QtPropertyBrowser/StringDialogEditor.cpp
     src/QtPropertyBrowser/StringEditorFactory.cpp
     src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
-    src/Python/Sip.cpp)
+    src/Python/Sip.cpp
+    src/Python/QHashToDict.cpp)
 
 set(
   QT5_MOC_FILES
@@ -175,6 +179,7 @@ set(
   inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/SelectFunctionDialog.h
   inc/MantidQtWidgets/Common/SelectWorkspacesDialog.h
+  inc/MantidQtWidgets/Common/SlitCalculator.h
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
@@ -229,7 +234,9 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
+    inc/MantidQtWidgets/Common/ParseKeyValueString.h
     inc/MantidQtWidgets/Common/pixmaps.h
+    inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -274,6 +281,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/SequentialFitDialog.ui
     inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
+    inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui)
 
 set(SRC_FILES
@@ -666,6 +674,7 @@ set(
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
   inc/MantidQtWidgets/Common/ProgressableView.h
+  inc/MantidQtWidgets/Common/MockProgressableView.h
   inc/MantidQtWidgets/Common/ProgressPresenter.h
   inc/MantidQtWidgets/Common/ProjectSavePresenter.h
   inc/MantidQtWidgets/Common/ProjectSaveModel.h
@@ -709,7 +718,9 @@ set(
   inc/MantidQtWidgets/Common/Batch/CellDelegate.h
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
   inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
-  inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h)
+  inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
+  inc/MantidQtWidgets/Common/Batch/MockJobTreeView.h
+  inc/MantidQtWidgets/Common/Python/Object.h)
 
 set(UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
@@ -939,6 +950,11 @@ set(QT5_TEST_FILES
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
     test/InterfaceManagerTest.h
+    test/Batch/BuildSubtreeItemsTest.h
+    test/Batch/ExtractSubtreesTest.h
+    test/Batch/FindSubtreeRootsTest.h
+    test/Batch/QtAdaptedModelTest.h
+    test/Batch/RowLocationTest.h
     test/AlgorithmProgress/AlgorithmProgressPresenterTest.h
     test/AlgorithmProgress/AlgorithmProgressDialogPresenterTest.h
     test/WorkspacePresenter/ADSAdapterTest.h

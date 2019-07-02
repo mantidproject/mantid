@@ -1625,7 +1625,11 @@ public:
                                      int column,
                                      const std::string& oldValue,
                                      const std::string& newValue) = 0;
+  virtual void notifySelectionChanged() = 0;
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex) = 0;
+  virtual void notifyAppendAndEditAtChildRowRequested() = 0;
+  virtual void notifyAppendAndEditAtRowBelowRequested() = 0;
+  virtual void notifyEditAtRowAboveRequested() = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
@@ -1644,17 +1648,16 @@ public:
     JobTreeView(const QStringList &columnHeadings, const MantidQt::MantidWidgets::Batch::Cell& defaultCellStyle,
      QWidget *parent = nullptr);
 
-    void subscribe(MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber& subscriber);
-    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
-     &parent, int beforeRow,
+    void subscribe(MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber *subscriber);
+    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow,
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
-    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
-    &parent, int beforeRow);
-    MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
-    &parent);
-    MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
-    &parentLocation,
+    void insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow);
+    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent);
+    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parentLocation,
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
+    void appendAndEditAtChildRow();
+    void appendAndEditAtRowBelow();
+    void editAtRowAbove();
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
     void removeAllRows();
@@ -1747,7 +1750,11 @@ public:
                                      int column,
                                      const std::string &oldValue,
                                      const std::string &newValue);
+  virtual void notifySelectionChanged();
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  virtual void notifyAppendAndEditAtChildRowRequested();
+  virtual void notifyAppendAndEditAtRowBelowRequested();
+  virtual void notifyEditAtRowAboveRequested();
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested();
@@ -1759,13 +1766,13 @@ signals:
                        int column,
                        std::string oldValue,
                        std::string newValue);
+  void selectionChanged();
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   void filterReset();
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
   void cutRowsRequested();
-
 };
 
 };
@@ -1871,13 +1878,13 @@ class DataProcessorMainPresenter
 public:
 DataProcessorMainPresenter();
 
-virtual QVariantMap getPreprocessingOptions(int) const;
-virtual QVariantMap getProcessingOptions(int) const;
-virtual QString getPostprocessingOptionsAsString(int) const;
-virtual void confirmReductionPaused(int);
-virtual void confirmReductionResumed(int);
+virtual QVariantMap getPreprocessingOptions() const;
+virtual QVariantMap getProcessingOptions() const;
+virtual QString getPostprocessingOptionsAsString() const;
+virtual void confirmReductionPaused();
+virtual void confirmReductionResumed();
 
-virtual void notifyADSChanged(const QSet<QString> &, int);
+virtual void notifyADSChanged(const QSet<QString> &);
 };
 
 class AppendRowCommand
