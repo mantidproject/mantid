@@ -14,6 +14,7 @@ set(SRC_FILES
     src/ArchiveSearchFactory.cpp
     src/Axis.cpp
     src/BinEdgeAxis.cpp
+    src/BoostOptionalToAlgorithmProperty.cpp
     src/BoxController.cpp
     src/CatalogManager.cpp
     src/CatalogSession.cpp
@@ -180,6 +181,7 @@ set(INC_FILES
     inc/MantidAPI/ArchiveSearchFactory.h
     inc/MantidAPI/Axis.h
     inc/MantidAPI/BinEdgeAxis.h
+    inc/MantidAPI/BoostOptionalToAlgorithmProperty.h
     inc/MantidAPI/BoxController.h
     inc/MantidAPI/CatalogFactory.h
     inc/MantidAPI/CatalogManager.h

@@ -19,6 +19,8 @@ New Algorithms
 Improvements
 ############
 
+- The Gem scripts can now be used to automatically generate a .cal file, similar to pearl. They can also adjust a parameter file passed in using the argument "calibration_to_adjust".
+
 - The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
 
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has a new property, ``OffsetData``, which adds a constant to the data at the very end of the reduction.
@@ -33,6 +35,8 @@ Improvements
 
 - The Pearl scripts now set now use a spline coefficient of 5 on long-mode due to the increased amount of noise.
 
+- New IDF have been added for VULCAN.
+
 - The Pearl scripts now crop to a dspacing of 8 on long-mode to avoid negative values caused by noise after this point.
 
 Bug Fixes
@@ -41,6 +45,8 @@ Bug Fixes
 - HRPD Absorption corrections now correctly takes into account the thickness of the slab.
 
 - Pearl no longer produces an output of NaN when long-mode is changed after focusing.
+
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` no longer errors out if the first chunk has no events
 
 Engineering Diffraction
 -----------------------

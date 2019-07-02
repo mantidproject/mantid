@@ -16,6 +16,8 @@
 
 #include <Poco/NObserver.h>
 
+#include <QHash>
+#include <QVariant>
 #include <QWidget>
 #include <list>
 
@@ -47,16 +49,23 @@ public:
   ~PreviewPlot();
 
   void watchADS(bool on);
-  void addSpectrum(const QString &lineLabel,
-                   const Mantid::API::MatrixWorkspace_sptr &ws,
-                   const size_t wsIndex = 0,
-                   const QColor &lineColour = QColor());
-  void addSpectrum(const QString &lineName, const QString &wsName,
-                   const size_t wsIndex = 0,
-                   const QColor &lineColour = QColor());
+
+  Widgets::MplCpp::FigureCanvasQt *canvas() const;
+
+  void addSpectrum(
+      const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws,
+      const size_t wsIndex = 0, const QColor &lineColour = QColor(),
+      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(
+      const QString &lineName, const QString &wsName, const size_t wsIndex = 0,
+      const QColor &lineColour = QColor(),
+      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
   void removeSpectrum(const QString &lineName);
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
+  std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
+
+  void replot();
 
 public slots:
   void clear();
@@ -64,7 +73,14 @@ public slots:
   void resetView();
   void setCanvasColour(QColor colour);
   void setLinesWithErrors(QStringList labels);
-  void showLegend(const bool visible);
+  void showLegend(bool visible);
+
+signals:
+  void mouseDown(const QPoint &point);
+  void mouseUp(const QPoint &point);
+  void mouseMove(const QPoint &point);
+
+  void redraw();
 
 public:
   QColor canvasColour() const;
@@ -77,6 +93,8 @@ protected:
 private:
   bool handleMousePressEvent(QMouseEvent *evt);
   bool handleMouseReleaseEvent(QMouseEvent *evt);
+  bool handleMouseMoveEvent(QMouseEvent *evt);
+
   void showContextMenu(QMouseEvent *evt);
 
   void createLayout();

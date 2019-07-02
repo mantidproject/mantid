@@ -9,15 +9,42 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "Poco/ActiveResult.h"
 #include <QApplication>
 
 using namespace Mantid::API;
+
+namespace {
+
+MatrixWorkspace_sptr extractSpectrum(MatrixWorkspace_sptr inputWorkspace,
+                                     const int workspaceIndex) {
+  auto extracter = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+  extracter->setChild(true);
+  extracter->setProperty("InputWorkspace", inputWorkspace);
+  extracter->setProperty("WorkspaceIndex", workspaceIndex);
+  extracter->setPropertyValue("OutputWorkspace", "__NotUsed__");
+  extracter->execute();
+  MatrixWorkspace_sptr output = extracter->getProperty("OutputWorkspace");
+  return output;
+}
+
+MatrixWorkspace_sptr evaluateFunction(IFunction_const_sptr function,
+                                      MatrixWorkspace_sptr inputWorkspace) {
+  auto fit = AlgorithmManager::Instance().create("Fit");
+  fit->setChild(true);
+  fit->setProperty("Function", function->asString());
+  fit->setProperty("InputWorkspace", inputWorkspace);
+  fit->setProperty("MaxIterations", 0);
+  fit->setProperty("CreateOutput", true);
+  fit->execute();
+  MatrixWorkspace_sptr output = fit->getProperty("OutputWorkspace");
+  return output;
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -68,7 +95,7 @@ void ALCBaselineModellingModel::fit(IFunction_const_sptr function,
   m_sections = sections;
 }
 
-void ALCBaselineModellingModel::setData(MatrixWorkspace_const_sptr data) {
+void ALCBaselineModellingModel::setData(MatrixWorkspace_sptr data) {
   m_data = data;
   emit dataChanged();
 }
@@ -180,8 +207,7 @@ ITableWorkspace_sptr ALCBaselineModellingModel::exportModel() {
   }
 }
 
-void ALCBaselineModellingModel::setCorrectedData(
-    MatrixWorkspace_const_sptr data) {
+void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_sptr data) {
   m_data = data;
   emit correctedDataChanged();
 }
@@ -192,38 +218,30 @@ void ALCBaselineModellingModel::setFittedFunction(
   emit fittedFunctionChanged();
 }
 
-MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const {
+MatrixWorkspace_sptr ALCBaselineModellingModel::data() const {
   if (m_data) {
-    IAlgorithm_sptr extract =
-        AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace",
-                         boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    extract->setProperty("WorkspaceIndex", 0);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
-    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
-    return result;
-  } else {
-    return MatrixWorkspace_const_sptr();
+    return extractSpectrum(boost::const_pointer_cast<MatrixWorkspace>(m_data),
+                           0);
   }
+  return MatrixWorkspace_sptr();
 }
 
-MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const {
+MatrixWorkspace_sptr ALCBaselineModellingModel::correctedData() const {
   if (m_data && (m_data->getNumberHistograms() == 3)) {
-    IAlgorithm_sptr extract =
-        AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace",
-                         boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    extract->setProperty("WorkspaceIndex", 2);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
-    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
-    return result;
-  } else {
-    return MatrixWorkspace_const_sptr();
+    return extractSpectrum(boost::const_pointer_cast<MatrixWorkspace>(m_data),
+                           2);
   }
+  return MatrixWorkspace_sptr();
+}
+
+MatrixWorkspace_sptr ALCBaselineModellingModel::baselineData(
+    IFunction_const_sptr function, const std::vector<double> &xValues) const {
+  const auto inputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
+                                          xValues.size()));
+
+  inputWorkspace->mutableX(0) = xValues;
+  return extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
 }
 
 } // namespace CustomInterfaces

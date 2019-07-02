@@ -136,7 +136,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.instrument_selector.setSizePolicy(
             self._fixed_aspect_ratio_size_policy(
                 self.instrument_selector))
-        self.instrument_selector.addItems(["None"] + allowed_instruments)
+        self.instrument_selector.addItems(allowed_instruments)
 
         self.instrument_label = QtWidgets.QLabel(self)
         self.instrument_label.setText("Instrument : ")

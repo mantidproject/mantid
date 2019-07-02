@@ -317,8 +317,15 @@ void ApplyAbsorptionCorrections::run() {
     geometryType = "_cyl";
   }
 
+  QString correctionType;
+  if (correctionsWsName.contains("PP")) {
+    correctionType = "_PP";
+  } else if (correctionsWsName.contains("MC")) {
+    correctionType = "_MC";
+  }
+
   QString outputWsName = QStrSampleWsName.left(nameCutIndex);
-  outputWsName += geometryType + "_Corrected";
+  outputWsName += geometryType + correctionType + "_Corrected";
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
