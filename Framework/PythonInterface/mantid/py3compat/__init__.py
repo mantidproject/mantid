@@ -67,6 +67,28 @@ else:
 # -----------------------------------------------------------------------------
 # Strings
 # -----------------------------------------------------------------------------
+if not hasattr(six, "ensure_str"):
+    # Ubuntu 16.04, Windows, and OSX Mantid builds have a version of six which
+    # doesn't include ensure_str
+    # ensure_str was added in six 1.12.0
+    def ensure_str(s, encoding='utf-8', errors='strict'):
+        """Coerce *s* to `str`.
+        For Python 2:
+          - `unicode` -> encoded to `str`
+          - `str` -> `str`
+        For Python 3:
+          - `str` -> `str`
+          - `bytes` -> decoded to `str`
+        """
+        if not isinstance(s, (text_type, binary_type)):
+            raise TypeError("not expecting type '%s'" % type(s))
+        if PY2 and isinstance(s, text_type):
+            s = s.encode(encoding, errors)
+        elif PY3 and isinstance(s, binary_type):
+            s = s.decode(encoding, errors)
+        return s
+
+
 def is_text_string(obj):
     """Return True if `obj` is a text string, False if it is anything else,
     like binary data (Python 3) or QString (Python 2, PyQt API #1)"""

@@ -17,6 +17,10 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -82,7 +86,8 @@ void ConvertFitFunctionForMuonTFAsymmetry::init() {
   // if construct -> read relevant norms into sorted list
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalizationTable", "", Direction::Input),
+          "NormalizationTable", "", Direction::Input,
+          API::PropertyMode::Optional),
       "Name of the table containing the normalizations for the asymmetries.");
   // list of workspaces
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
@@ -117,43 +122,59 @@ ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
   std::map<std::string, std::string> result;
   // check norm table is correct
   API::ITableWorkspace_const_sptr tabWS = getProperty("NormalizationTable");
-
-  if (tabWS->columnCount() == 0) {
-    result["NormalizationTable"] =
-        "Please provide a non-empty NormalizationTable.";
-  }
-
-  // NormalizationTable should have three columns: (norm, name, method)
-  if (tabWS->columnCount() != 3) {
-    result["NormalizationTable"] = "NormalizationTable must have three columns";
-  }
-  auto names = tabWS->getColumnNames();
-  int normCount = 0;
-  int wsNamesCount = 0;
-  for (const std::string &name : names) {
-
-    if (name == "norm") {
-      normCount += 1;
+  if (tabWS) {
+    if (tabWS->columnCount() == 0) {
+      result["NormalizationTable"] =
+          "Please provide a non-empty NormalizationTable.";
     }
 
-    if (name == "name") {
-      wsNamesCount += 1;
+    // NormalizationTable should have three columns: (norm, name, method)
+    if (tabWS->columnCount() != 3) {
+      result["NormalizationTable"] =
+          "NormalizationTable must have three columns";
     }
-  }
-  if (normCount == 0) {
-    result["NormalizationTable"] = "NormalizationTable needs norm column";
-  }
-  if (wsNamesCount == 0) {
-    result["NormalizationTable"] = "NormalizationTable needs a name column";
-  }
-  if (normCount > 1) {
-    result["NormalizationTable"] =
-        "NormalizationTable has " + std::to_string(normCount) + " norm columns";
-  }
-  if (wsNamesCount > 1) {
-    result["NormalizationTable"] = "NormalizationTable has " +
-                                   std::to_string(wsNamesCount) +
-                                   " name columns";
+    auto names = tabWS->getColumnNames();
+    int normCount = 0;
+    int wsNamesCount = 0;
+    for (const std::string &name : names) {
+
+      if (name == "norm") {
+        normCount += 1;
+      }
+
+      if (name == "name") {
+        wsNamesCount += 1;
+      }
+    }
+    if (normCount == 0) {
+      result["NormalizationTable"] = "NormalizationTable needs norm column";
+    }
+    if (wsNamesCount == 0) {
+      result["NormalizationTable"] = "NormalizationTable needs a name column";
+    }
+    if (normCount > 1) {
+      result["NormalizationTable"] = "NormalizationTable has " +
+                                     std::to_string(normCount) +
+                                     " norm columns";
+    }
+    if (wsNamesCount > 1) {
+      result["NormalizationTable"] = "NormalizationTable has " +
+                                     std::to_string(wsNamesCount) +
+                                     " name columns";
+    }
+  } else {
+    const std::vector<std::string> wsNames = getProperty("WorkspaceList");
+    for (std::string name : wsNames) {
+      API::MatrixWorkspace_const_sptr ws =
+          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+              name);
+      const Mantid::API::Run &run = ws->run();
+      if (!run.hasProperty("analysis_asymmetry_norm")) {
+        result["NormalizationTable"] = "NormalizationTable has not been "
+                                       "included and no sample logs for "
+                                       "nrmalization.";
+      }
+    }
   }
   // Check units, should be microseconds
   return result;
@@ -282,19 +303,31 @@ IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(
 std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
   API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
   const std::vector<std::string> wsNames = getProperty("WorkspaceList");
-
   std::vector<double> norms(wsNames.size(), 0);
-  auto colNames = table->getColumnNames();
-  auto wsNamesIndex = findName(colNames, "name");
-  auto normIndex = findName(colNames, "norm");
 
-  for (size_t row = 0; row < table->rowCount(); row++) {
+  if (table) {
+    auto colNames = table->getColumnNames();
+    auto wsNamesIndex = findName(colNames, "name");
+    auto normIndex = findName(colNames, "norm");
+
+    for (size_t row = 0; row < table->rowCount(); row++) {
+      for (size_t wsPosition = 0; wsPosition < wsNames.size(); wsPosition++) {
+        std::string wsName = wsNames[wsPosition];
+        std::replace(wsName.begin(), wsName.end(), ' ', ';');
+        if (table->String(row, wsNamesIndex) == wsName) {
+          norms[wsPosition] = table->Double(row, normIndex);
+        }
+      }
+    }
+  } else {
     for (size_t wsPosition = 0; wsPosition < wsNames.size(); wsPosition++) {
       std::string wsName = wsNames[wsPosition];
-      std::replace(wsName.begin(), wsName.end(), ' ', ';');
-      if (table->String(row, wsNamesIndex) == wsName) {
-        norms[wsPosition] = table->Double(row, normIndex);
-      }
+      API::MatrixWorkspace_const_sptr ws =
+          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+              wsName);
+      const Mantid::API::Run &run = ws->run();
+      norms[wsPosition] =
+          std::stod(run.getProperty("analysis_asymmetry_norm")->value());
     }
   }
 

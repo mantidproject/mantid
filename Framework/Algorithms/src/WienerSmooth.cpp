@@ -109,13 +109,13 @@ void WienerSmooth::exec() {
   // not possible
   // at he moment and as it turned out not straight-forward to implement
   auto inAxis = inputWS->getAxis(1);
-  auto outAxis = inAxis->clone(nOutputSpectra, outputWS.get());
-  outputWS->replaceAxis(1, outAxis);
+  auto outAxis =
+      std::unique_ptr<API::Axis>(inAxis->clone(nOutputSpectra, outputWS.get()));
 
   bool isSpectra = outAxis->isSpectra();
   bool isNumeric = outAxis->isNumeric();
   auto inTextAxis = dynamic_cast<API::TextAxis *>(inAxis);
-  auto outTextAxis = dynamic_cast<API::TextAxis *>(outAxis);
+  auto outTextAxis = dynamic_cast<API::TextAxis *>(outAxis.get());
 
   // Initialise the progress reporting object
   API::Progress progress(this, 0.0, 1.0, nOutputSpectra);
@@ -141,7 +141,7 @@ void WienerSmooth::exec() {
     }
     progress.report();
   }
-
+  outputWS->replaceAxis(1, std::move(outAxis));
   // set the output
   setProperty("OutputWorkspace", outputWS);
 }

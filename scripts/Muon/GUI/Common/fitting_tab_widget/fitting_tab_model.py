@@ -6,11 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
 
-from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_Fit
+from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_Fit, run_CalculateMuonAsymmetry
 import mantid
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fit_workspace_directory
-from mantid.simpleapi import RenameWorkspace
+from mantid.simpleapi import RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CopyLogs
 
 
 class FittingTabModel(object):
@@ -23,24 +23,38 @@ class FittingTabModel(object):
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared = \
             self.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
-        workspace_name, workspace_directory = self.create_fitted_workspace_name(parameter_dict['InputWorkspace'],
-                                                                                parameter_dict['Function'],
-                                                                                fit_group_name)
-        table_name, table_directory = self.create_parameter_table_name(parameter_dict['InputWorkspace'],
-                                                                       parameter_dict['Function'], fit_group_name)
-
-        self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
-        wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name, table_directory)
-        self.add_fit_to_context(wrapped_parameter_workspace,
-                                parameter_dict['Function'],
-                                parameter_dict['InputWorkspace'])
+        self._handle_single_fit_results(parameter_dict['InputWorkspace'], function_object,
+                                        fitting_parameters_table, output_workspace, fit_group_name)
 
         return function_object.clone(), output_status, output_chi_squared
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
-        return run_Fit(parameters_dict, alg)
+        output_workspace, output_parameters, function_object, output_status, output_chi = run_Fit(parameters_dict, alg)
+        CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'], OutputWorkspace=output_workspace, StoreInADS=False)
+        return output_workspace, output_parameters, function_object, output_status, output_chi
+
+    def do_single_tf_fit(self, parameter_dict, output_workspace_group):
+        alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
+        output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared =\
+            run_CalculateMuonAsymmetry(parameter_dict, alg)
+
+        self._handle_single_fit_results(parameter_dict['ReNormalizedWorkspaceList'], function_object,
+                                        fitting_parameters_table, output_workspace, output_workspace_group)
+
+        return function_object.clone(), output_status, output_chi_squared
+
+    def do_simultaneous_tf_fit(self, parameter_dict, global_parameters, fit_group_name):
+        alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
+        output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared =\
+            run_CalculateMuonAsymmetry(parameter_dict, alg)
+
+        self._handle_simultaneous_fit_results(parameter_dict['ReNormalizedWorkspaceList'], function_object,
+                                              fitting_parameters_table, output_workspace,
+                                              fit_group_name, global_parameters)
+
+        return function_object, output_status, output_chi_squared
 
     def add_workspace_to_ADS(self, workspace, name, directory):
         workspace_wrapper = MuonWorkspaceWrapper(workspace, directory + name)
@@ -68,42 +82,43 @@ class FittingTabModel(object):
 
         return name, directory
 
-    def do_simultaneous_fit(self, parameter_dict):
+    def do_simultaneous_fit(self, parameter_dict, global_parameters):
         fit_group_name = parameter_dict.pop('FitGroupName')
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared = \
             self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
-        workspace_name, workspace_directory = self.create_multi_domain_fitted_workspace_name(
-            parameter_dict['InputWorkspace'][0],
-            parameter_dict['Function'], fit_group_name)
-        table_name, table_directory = self.create_parameter_table_name(parameter_dict['InputWorkspace'][0] + '+ ...',
-                                                                       parameter_dict['Function'], fit_group_name)
-
-        self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
-        if len(parameter_dict['InputWorkspace']) > 1:
-            self.rename_members_of_fitted_workspace_group(output_workspace, parameter_dict['InputWorkspace'],
-                                                          parameter_dict['Function'],
-                                                          fit_group_name)
-            wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
-                                                                    table_directory)
-            self.add_fit_to_context(wrapped_parameter_workspace,
-                                    parameter_dict['Function'],
-                                    parameter_dict['InputWorkspace'])
+        self._handle_simultaneous_fit_results(parameter_dict['InputWorkspace'], function_object,
+                                              fitting_parameters_table, output_workspace,
+                                              fit_group_name, global_parameters)
 
         return function_object, output_status, output_chi_squared
 
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
-        return run_simultaneous_Fit(parameters_dict, alg)
+
+        output_workspace, output_parameters, function_object, output_status, output_chi = run_simultaneous_Fit(parameters_dict, alg)
+        if len(parameters_dict['InputWorkspace']) > 1:
+            for input_workspace, output in zip(parameters_dict['InputWorkspace'], output_workspace.getNames()):
+                CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
+        else:
+            CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'][0], OutputWorkspace=output_workspace, StoreInADS=False)
+        return output_workspace, output_parameters, function_object, output_status, output_chi
 
     def rename_members_of_fitted_workspace_group(self, group_workspace, inputworkspace_list, function, group_name):
+        self.context.ads_observer.observeRename(False)
+        output_workspace_list = []
         for index, workspace_name in enumerate(group_workspace.getNames()):
             new_name, _ = self.create_fitted_workspace_name(inputworkspace_list[index], function, group_name)
 
             new_name += '; Simultaneous'
+            output_workspace_list.append(new_name)
             RenameWorkspace(InputWorkspace=workspace_name,
                             OutputWorkspace=new_name)
+
+        self.context.ads_observer.observeRename(True)
+
+        return output_workspace_list
 
     def do_sequential_fit(self, parameter_dict):
         function_object_list = []
@@ -119,6 +134,30 @@ class FittingTabModel(object):
             sub_parameter_dict['Function'] = function_object
 
             function_object, output_status, output_chi_squared = self.do_single_fit(sub_parameter_dict)
+            # This is required so that a new function object is created that is not overwritten in subsequent iterations
+            new_function = function_object.clone()
+            function_object_list.append(new_function)
+
+            output_status_list.append(output_status)
+            output_chi_squared_list.append(output_chi_squared)
+
+        return function_object_list, output_status_list, output_chi_squared_list
+
+    def do_sequential_tf_fit(self, parameter_dict, output_workspace_group):
+        function_object_list = []
+        output_status_list = []
+        output_chi_squared_list = []
+        function_object = parameter_dict['InputFunction']
+        for input_workspace, un_normalised_workspace, fit_name in zip(parameter_dict['ReNormalizedWorkspaceList'],
+                                                                      parameter_dict['UnNormalizedWorkspaceList'],
+                                                                      parameter_dict['OutputFitWorkspace']):
+            sub_parameter_dict = parameter_dict.copy()
+            sub_parameter_dict['ReNormalizedWorkspaceList'] = input_workspace
+            sub_parameter_dict['UnNormalizedWorkspaceList'] = un_normalised_workspace
+            sub_parameter_dict['OutputFitWorkspace'] = fit_name
+            sub_parameter_dict['InputFunction'] = function_object
+
+            function_object, output_status, output_chi_squared = self.do_single_tf_fit(sub_parameter_dict, output_workspace_group)
             # This is required so that a new function object is created that is not overwritten in subsequent iterations
             new_function = function_object.clone()
             function_object_list.append(new_function)
@@ -150,7 +189,51 @@ class FittingTabModel(object):
             return function_temp.name()
 
     def add_fit_to_context(self, parameter_workspace, function,
-                           input_workspace):
+                           input_workspace, output_workspace_name, global_parameters=None):
         self.context.fitting_context.add_fit_from_values(
             parameter_workspace, self.function_name,
-            input_workspace)
+            input_workspace, output_workspace_name, global_parameters)
+
+    def calculate_tf_function(self, algorithm_parameters):
+        return ConvertFitFunctionForMuonTFAsymmetry(StoreInADS=False, **algorithm_parameters)
+
+    def _handle_simultaneous_fit_results(self, input_workspace_list, fit_function, fitting_parameters_table,
+                                         output_workspace, fit_group_name, global_parameters):
+        workspace_name, workspace_directory = self.create_multi_domain_fitted_workspace_name(
+            input_workspace_list[0],
+            fit_function, fit_group_name)
+        table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0] + '+ ...',
+                                                                       fit_function, fit_group_name)
+
+        self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
+        if len(input_workspace_list) > 1:
+            workspace_name = self.rename_members_of_fitted_workspace_group(output_workspace,
+                                                                           input_workspace_list,
+                                                                           fit_function,
+                                                                           fit_group_name)
+        else:
+            workspace_name = [workspace_name]
+
+        wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
+                                                                table_directory)
+        self.add_fit_to_context(wrapped_parameter_workspace,
+                                fit_function,
+                                input_workspace_list,
+                                workspace_name,
+                                global_parameters)
+
+    def _handle_single_fit_results(self, input_workspace, fit_function, fitting_parameters_table,
+                                   output_workspace, fit_group_name):
+        workspace_name, workspace_directory = self.create_fitted_workspace_name(
+            input_workspace,
+            fit_function,
+            fit_group_name)
+        table_name, table_directory = self.create_parameter_table_name(input_workspace,
+                                                                       fit_function,
+                                                                       fit_group_name)
+
+        self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
+        wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name, table_directory)
+        self.add_fit_to_context(wrapped_parameter_workspace,
+                                fit_function,
+                                input_workspace, [workspace_name])

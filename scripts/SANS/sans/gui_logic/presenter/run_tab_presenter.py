@@ -24,10 +24,11 @@ from mantid.py3compat import csv_open_type
 
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, FitType, RangeStepType, RowState, SampleShape,
+from sans.common.enums import (BatchReductionEntry, FitType, ISISReductionMode, RangeStepType, RowState, SampleShape,
                                SaveType, SANSInstrument)
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
-                                       add_dir_to_datasearch, remove_dir_from_datasearch, SANSGuiPropertiesHandler)
+from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
+                                       get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
+                                       remove_dir_from_datasearch, SANSGuiPropertiesHandler)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
@@ -103,6 +104,9 @@ class RunTabPresenter(object):
         def on_batch_file_load(self):
             self._presenter.on_batch_file_load()
 
+        def on_reduction_mode_selection_has_changed(self, selection):
+            self._presenter.on_reduction_mode_selection_has_changed(selection)
+
         def on_process_selected_clicked(self):
             self._presenter.on_process_selected_clicked()
 
@@ -159,9 +163,6 @@ class RunTabPresenter(object):
 
         def on_sample_geometry_selection(self, show_geometry):
             self._presenter.on_sample_geometry_view_changed(show_geometry)
-
-        def on_compatibility_unchecked(self):
-            self._presenter.on_compatibility_unchecked()
 
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
@@ -440,7 +441,8 @@ class RunTabPresenter(object):
         def get_string_period(_tag):
             return "" if _tag == ALL_PERIODS else str(_tag)
 
-        # 1. Pull out the entries
+        # ----Pull out the entries----
+        # Run numbers
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
         sample_scatter_period = get_string_period(
             get_string_entry(BatchReductionEntry.SampleScatterPeriod, row))
@@ -459,15 +461,24 @@ class RunTabPresenter(object):
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
         can_direct_period = get_string_period(
             get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
+
+        # Other information
         output_name = get_string_entry(BatchReductionEntry.Output, row)
         user_file = get_string_entry(BatchReductionEntry.UserFile, row)
 
+        # Sample geometries
+        sample_thickness = get_string_entry(BatchReductionEntry.SampleThickness, row)
+        sample_height = get_string_entry(BatchReductionEntry.SampleHeight, row)
+        sample_width = get_string_entry(BatchReductionEntry.SampleWidth, row)
+
+        # ----Form a row----
         row_entry = [sample_scatter, sample_scatter_period, sample_transmission,
                      sample_transmission_period,
                      sample_direct, sample_direct_period, can_scatter, can_scatter_period,
                      can_transmission, can_transmission_period,
                      can_direct, can_direct_period,
-                     output_name, user_file, '', '']
+                     output_name, user_file,
+                     sample_thickness, sample_height, sample_width]
 
         table_index_model = TableIndexModel(*row_entry)
 
@@ -794,10 +805,12 @@ class RunTabPresenter(object):
         Make all selected rows empty.
         """
         selected_rows = self._view.get_selected_rows()
-        empty_row = self._table_model.create_empty_row()
-        for row in selected_rows:
-            empty_row = TableModel.create_empty_row()
-            self._table_model.replace_table_entries([row], [empty_row])
+        if len(selected_rows) == 1 and self._table_model.get_number_of_rows() == 1:
+            self._table_model.replace_table_entries(selected_rows, [])
+        else:
+            for row in selected_rows:
+                empty_row = self._table_model.create_empty_row()
+                self._table_model.replace_table_entries([row], [empty_row])
 
     def on_rows_removed(self, rows):
         """
@@ -832,11 +845,6 @@ class RunTabPresenter(object):
             self._view.show_geometry()
         else:
             self._view.hide_geometry()
-
-    def on_compatibility_unchecked(self):
-        self.display_warning_box('Warning', 'Are you sure you want to uncheck compatibility mode?',
-                                 'Non-compatibility mode has known issues. DO NOT USE if applying bin masking'
-                                 ' to event workspaces.')
 
     def get_row_indices(self):
         """
@@ -886,18 +894,16 @@ class RunTabPresenter(object):
         self.save_other_presenter.set_view(save_other_view)
         self.save_other_presenter.show()
 
-    # def _validate_rows(self):
-    #     """
-    #     Validation of the rows. A minimal setup requires that ScatterSample is set.
-    #     """
-    #     # If SampleScatter is empty, then don't run the reduction.
-    #     # We allow empty rows for now, since we cannot remove them from Python.
-    #     number_of_rows = self._table_model.get_number_of_rows()
-    #     for row in range(number_of_rows):
-    #         if not self.is_empty_row(row):
-    #             sample_scatter = self._view.get_cell(row, 0)
-    #             if not sample_scatter:
-    #                 raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
+    def on_reduction_mode_selection_has_changed(self, selection):
+        if not selection:
+            return
+        mode = get_reduction_mode_from_gui_selection(selection)
+        if mode == ISISReductionMode.HAB:
+            self._beam_centre_presenter.update_hab_selected()
+        elif mode == ISISReductionMode.LAB:
+            self._beam_centre_presenter.update_lab_selected()
+        else:
+            self._beam_centre_presenter.update_all_selected()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Controls
@@ -1179,6 +1185,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("zero_error_free", state_model)
         self._set_on_state_model("save_types", state_model)
         self._set_on_state_model("compatibility_mode", state_model)
+        self._set_on_state_model("event_slice_optimisation", state_model)
         self._set_on_state_model("merge_scale", state_model)
         self._set_on_state_model("merge_shift", state_model)
         self._set_on_state_model("merge_scale_fit", state_model)
@@ -1336,8 +1343,9 @@ class RunTabPresenter(object):
         """
         Take the current table model, and create a comma delimited csv file
         :param filewriter: File object to be written to
+        :type filewrite: csv.writer object
         :param rows: list of indices for non-empty rows
-        :return: Nothing
+        :type rows: list of ints
         """
         for row in rows:
             table_row = self._table_model.get_table_entry(row).to_batch_list()
@@ -1353,7 +1361,10 @@ class RunTabPresenter(object):
                                "can_trans",
                                "can_direct_beam",
                                "output_as",
-                               "user_file"]
+                               "user_file",
+                               "sample_thickness",
+                               "sample_height",
+                               "sample_width"]
         new_row = []
         for key, value in zip(batch_file_keywords, row):
             new_row.append(key)

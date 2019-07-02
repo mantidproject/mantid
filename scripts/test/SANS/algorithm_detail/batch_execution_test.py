@@ -10,7 +10,9 @@ import unittest
 
 from mantid.simpleapi import CreateSampleWorkspace
 from mantid.py3compat import mock
-from sans.algorithm_detail.batch_execution import get_all_names_to_save, get_transmission_names_to_save, ReductionPackage
+from sans.algorithm_detail.batch_execution import (get_all_names_to_save, get_transmission_names_to_save,
+                                                   ReductionPackage, select_reduction_alg, save_workspace_to_file)
+from sans.common.enums import SaveType
 
 
 class ADSMock(object):
@@ -201,6 +203,104 @@ class GetAllNamesToSaveTest(unittest.TestCase):
                           ('reduced_hab_sample', 'transmission', '')}
 
         self.assertEqual(names_to_save, names_expected)
+
+    def test_does_not_use_event_slice_optimisation_when_not_requiring_event_slices(self):
+        require_event_slices = False
+        compatibility_mode = False
+        event_slice_optimisation_checkbox = True
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
+                                                                        event_slice_optimisation_checkbox, [])
+        self.assertEqual(actual_using_event_slice_optimisation, False)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.split_reduction_packages_for_event_slice_packages")
+    def test_does_not_use_event_slice_optimisation_when_compatibility_mode_turned_on(self, event_slice_splitter_mock):
+        require_event_slices = True
+        compatibility_mode = True
+        event_slice_optimisation_checkbox = True
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
+                                                                        event_slice_optimisation_checkbox, [])
+        self.assertEqual(actual_using_event_slice_optimisation, False)
+        # Test that reduction packages have been split into event slices
+        event_slice_splitter_mock.assert_called_once_with([])
+
+    @mock.patch("sans.algorithm_detail.batch_execution.split_reduction_packages_for_event_slice_packages")
+    def test_does_not_use_event_slice_optimisation_when_optimisation_not_selected(self, event_slice_splitter_mock):
+        require_event_slices = True
+        compatibility_mode = False
+        event_slice_optimisation_checkbox = False
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
+                                                                        event_slice_optimisation_checkbox, [])
+        self.assertEqual(actual_using_event_slice_optimisation, False)
+        # Test that reduction packages have been split into event slices
+        event_slice_splitter_mock.assert_called_once_with([])
+
+    def test_use_event_slice_optimisation_when_using_event_slice_optimisation_is_checked(self):
+        require_event_slices = True
+        compatibility_mode = False
+        event_slice_optimisation_checkbox = True
+        actual_using_event_slice_optimisation, _ = select_reduction_alg(require_event_slices, compatibility_mode,
+                                                                        event_slice_optimisation_checkbox, [])
+        self.assertEqual(actual_using_event_slice_optimisation, True)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_that_save_workspace_to_file_includes_run_numbers_in_options(self, mock_alg_manager):
+        ws_name = "wsName"
+        filename = "fileName"
+        additional_run_numbers = {"SampleTransmissionRunNumber": "5",
+                                  "SampleDirectRunNumber": "6",
+                                  "CanScatterRunNumber": "7",
+                                  "CanDirectRunNumber": "8"}
+
+        save_workspace_to_file(ws_name, [], filename, additional_run_numbers)
+
+        expected_options = {"InputWorkspace": ws_name,
+                            "Filename": filename,
+                            "Transmission": "",
+                            "TransmissionCan": "",
+                            "SampleTransmissionRunNumber": "5",
+                            "SampleDirectRunNumber": "6",
+                            "CanScatterRunNumber": "7",
+                            "CanDirectRunNumber": "8"}
+        mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_that_save_workspace_to_file_can_set_file_types(self, mock_alg_manager):
+        ws_name = "wsName"
+        filename = "fileName"
+        additional_run_numbers = {}
+        file_types = [SaveType.Nexus, SaveType.CanSAS, SaveType.NXcanSAS, SaveType.NistQxy, SaveType.RKH, SaveType.CSV]
+
+        save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers)
+
+        expected_options = {"InputWorkspace": ws_name,
+                            "Filename": filename,
+                            "Transmission": "",
+                            "TransmissionCan": "",
+                            "Nexus": True,
+                            "CanSAS": True,
+                            "NXcanSAS": True,
+                            "NistQxy": True,
+                            "RKH": True,
+                            "CSV": True}
+        mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_that_save_workspace_to_file_can_set_transmission_workspace_names(self, mock_alg_manager):
+        ws_name = "wsName"
+        filename = "fileName"
+        additional_run_numbers = {}
+        file_types = []
+        transmission_name = "transName"
+        transmission_can_name = "transCanName"
+
+        save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers,
+                               transmission_name=transmission_name, transmission_can_name=transmission_can_name)
+
+        expected_options = {"InputWorkspace": ws_name,
+                            "Filename": filename,
+                            "Transmission": transmission_name,
+                            "TransmissionCan": transmission_can_name}
+        mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
 
 if __name__ == '__main__':

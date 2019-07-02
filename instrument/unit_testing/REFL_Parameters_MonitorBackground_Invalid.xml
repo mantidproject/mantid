@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="MonitorBackgroundMin">
+    <value val="16.0"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMax">
+    <value val="15.0"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

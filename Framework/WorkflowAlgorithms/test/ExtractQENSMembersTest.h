@@ -194,7 +194,7 @@ private:
       resultWorkspace = appendSpectra(resultWorkspace, memberWS);
       axis->setLabel(i, members[i]);
     }
-    resultWorkspace->replaceAxis(1, axis.release());
+    resultWorkspace->replaceAxis(1, std::move(axis));
     return resultWorkspace;
   }
 

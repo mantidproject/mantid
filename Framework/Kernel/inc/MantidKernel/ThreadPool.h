@@ -43,7 +43,7 @@ public:
 
   void start(double waitSec = 0.0);
 
-  void schedule(Task *task, bool start = false);
+  void schedule(std::shared_ptr<Task> task, bool start = false);
 
   void joinAll();
 

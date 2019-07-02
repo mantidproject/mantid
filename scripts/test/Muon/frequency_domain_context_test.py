@@ -35,7 +35,7 @@ class MuonDataContextTest(unittest.TestCase):
 
         filepath = FileFinder.findRuns('CHRONUS00003422.nxs')[0]
 
-        load_result, run, filename = load_workspace_from_filename(filepath)
+        load_result, run, filename, _ = load_workspace_from_filename(filepath)
 
         self.loaded_data.add_data(workspace=load_result, run=[run], filename=filename, instrument='CHRONUS')
         self.data_context.current_runs = [[run]]

@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
-            name="CG2"
-            valid-from="2016-04-22 00:00:00"
-            valid-to="2100-01-31 23:59:59"
-		        last-modified="2018-12-07 13:07:00.000">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+  name="CG2"
+  valid-from="2016-04-22 00:00:00"
+  valid-to="2100-01-31 23:59:59"
+  last-modified="2019-01-09 09:07:00.000">
 
   <defaults>
     <length unit="metre"/>
@@ -29,84 +29,86 @@
   <type is="SamplePos" name="sample-position"/>
 
   <!-- ***************************************************************** -->
-	<!--MONITOR 1 -->
-	<component type="monitors" idlist="monitor1">
-		<location/>
-	</component>
-	<type name="monitors">
-	    <component type="monitor">
-    		<location z="-0.5" name="monitor1"/>
-    	</component>
-	</type>
-	<idlist idname="monitor1">
-		<id val="1" />
-	</idlist>
+  <!--MONITOR 1 -->
+  <component type="monitors" idlist="monitor1">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="-0.5" name="monitor1"/>
+    </component>
+  </type>
+  <idlist idname="monitor1">
+    <id val="1" />
+  </idlist>
 
-	<!--MONITOR 2: Timer -->
-	<component type="timers" idlist="timer1">
-		<location/>
-	</component>
-	<type name="timers">
-	    <component type="monitor">
-    		<location z="-0.5" name="timer1"/>
-    	</component>
-	</type>
-	<idlist idname="timer1">
-		<id val="2" />
-	</idlist>
+  <!--MONITOR 2: Timer -->
+  <component type="timers" idlist="timer1">
+    <location/>
+  </component>
+  <type name="timers">
+    <component type="monitor">
+      <location z="-0.5" name="timer1"/>
+    </component>
+  </type>
+  <idlist idname="timer1">
+    <id val="2" />
+  </idlist>
 
-	<!--MONITOR SHAPE-->
-	<!--FIXME: Do something real here.-->
-	<type is="monitor" name="monitor">
-		<cylinder id="cyl-approx">
-		<centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
-		<axis y="0.0" x="0.0" z="1.0"/>
-		<radius val="0.01"/>
-		<height val="0.03"/>
-		</cylinder>
-		<algebra val="cyl-approx"/>
-	</type>
+  <!--MONITOR SHAPE-->
+  <!--FIXME: Do something real here.-->
+  <type is="monitor" name="monitor">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
 
   <!-- ***************************************************************** -->
   <component type="sample_aperture">
     <location z="0.0"/>
-    <parameter name="Size"> <value val="14.0" /> </parameter>
+    <parameter name="Size">
+      <value val="14.0" />
+    </parameter>
   </component>
   <type name="sample_aperture" />
 
-<!-- ***************************************************************** -->
-<!-- Main Detector -->
-	<component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
-		<location name="detector1">
-			<parameter name="z">
-				<logfile eq="0.001*value" id="sdd"/>
-			</parameter>
-			<parameter name="x">
-				<logfile eq="0.001*value" id="detector-translation"/>
-			</parameter>
+  <!-- ***************************************************************** -->
+  <!-- Main Detector -->
+  <component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
+    <location name="detector1">
+      <parameter name="x">
+        <logfile eq="0.001*value" id="detector-translation"/>
+      </parameter>
       <parameter name="y">
         <value val="0.0"/>
       </parameter>
-		</location>
-	</component>
+      <parameter name="z">
+        <logfile eq="0.001*value" id="sdd"/>
+      </parameter>
+    </location>
+  </component>
 
-<!-- Detector: -->
-<type name="detector1" is="rectangular_detector" type="pixel"
+  <!-- Detector: -->
+  <type name="detector1" is="rectangular_detector" type="pixel"
     xpixels="192" xstart="-0.52425" xstep="0.00550"
     ypixels="256" ystart="-0.54825" ystep="0.00430">
     <properties />
-</type>
+  </type>
 
-	<!-- Pixel for Detectors: 5.5x4.3 mm -->
-	<type is="detector" name="pixel">
-		<cuboid id="pixel-shape">
-			<left-front-bottom-point y="-0.00215" x="-0.00275" z="0.0" />
-			<left-front-top-point y="0.00215" x="-0.00275" z="0.0" />
-			<left-back-bottom-point y="-0.00215" x="-0.00275" z="-0.0001" />
-			<right-front-bottom-point y="-0.00215" x="0.00275" z="0.0" />
-		</cuboid>
-		<algebra val="pixel-shape" />
-	</type>
+  <!-- Pixel for Detectors: 5.5x4.3 mm -->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point y="-0.00215" x="-0.00275" z="0.0" />
+      <left-front-top-point y="0.00215" x="-0.00275" z="0.0" />
+      <left-back-bottom-point y="-0.00215" x="-0.00275" z="-0.0001" />
+      <right-front-bottom-point y="-0.00215" x="0.00275" z="0.0" />
+    </cuboid>
+    <algebra val="pixel-shape" />
+  </type>
 
 </instrument>
 

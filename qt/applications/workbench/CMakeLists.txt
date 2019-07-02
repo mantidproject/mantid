@@ -1,5 +1,5 @@
 # Create egg link to binary output directory
-add_python_package(workbench EXECUTABLE)
+add_python_package(workbench EXECUTABLE "EXCLUDE_RESOURCES")
 
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
@@ -36,6 +36,9 @@ if (WIN32)
   endforeach()
   add_custom_target(workbench_resources ALL
                     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+  # Install rule for package's resources.py
+  install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install
+            DESTINATION bin/workbench/app RENAME resources.py)
 else()
   set (_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
   add_custom_command(OUTPUT ${_output_res_py}
@@ -52,6 +55,7 @@ add_dependencies(workbench workbench_resources mantidqt)
 set(TEST_FILES
     workbench/config/test/test_user.py
     workbench/test/test_import.py
+    workbench/plotting/test/test_figureinteraction.py
     workbench/plotting/test/test_figuremanager.py
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plugins/test/test_editor.py

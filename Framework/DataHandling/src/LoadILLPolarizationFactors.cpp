@@ -316,7 +316,7 @@ void LoadILLPolarizationFactors::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  outWS->replaceAxis(1, outVertAxis.release());
+  outWS->replaceAxis(1, std::move(outVertAxis));
   setUnits(*outWS);
   outWS->setTitle("Polarization efficiency factors");
   setProperty(Prop::OUT_WS, outWS);

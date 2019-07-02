@@ -109,6 +109,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_reduction_mode_selection_has_changed(self, selection):
+            pass
+
+        @abstractmethod
         def on_mask_file_add(self):
             pass
 
@@ -182,10 +186,6 @@ class SANSDataProcessorGui(QMainWindow,
 
         @abstractmethod
         def on_save_other(self):
-            pass
-
-        @abstractmethod
-        def on_compatibility_unchecked(self):
             pass
 
     def __init__(self):
@@ -449,6 +449,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
         self.table_signals.cellTextChanged.connect(self._data_changed)
         self.table_signals.rowInserted.connect(self._row_inserted)
+        self.table_signals.appendAndEditAtChildRowRequested.connect(self._append_and_edit_at_child_row_requested)
+        self.table_signals.appendAndEditAtRowBelowRequested.connect(self._append_and_edit_at_row_below_requested)
+        self.table_signals.editAtRowAboveRequested.connect(self._edit_at_row_above_requested)
         self.table_signals.removeRowsRequested.connect(self._remove_rows_requested)
         self.table_signals.copyRowsRequested.connect(self._copy_rows_requested)
         self.table_signals.pasteRowsRequested.connect(self._paste_rows_requested)
@@ -511,6 +514,15 @@ class SANSDataProcessorGui(QMainWindow,
             row = self.get_row(row_location)
             self._call_settings_listeners(lambda listener: listener.on_row_inserted(index, row))
 
+    def _append_and_edit_at_child_row_requested(self):
+        self.data_processor_table.appendAndEditAtChildRow()
+
+    def _append_and_edit_at_row_below_requested(self):
+        self.data_processor_table.appendAndEditAtRowBelow()
+
+    def _edit_at_row_above_requested(self):
+        self.data_processor_table.editAtRowAbove()
+
     def _remove_rows_requested(self, rows):
         rows = [item.rowRelativeToParent() for item in rows]
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
@@ -539,9 +551,6 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_save_other_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_save_other())
-
-    def _on_compatibility_unchecked(self):
-        self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
 
     def _on_help_button_clicked(self):
         if PYQT4:
@@ -734,6 +743,7 @@ class SANSDataProcessorGui(QMainWindow,
         selection = self.reduction_mode_combo_box.currentText()
         is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
         self.merged_settings.setEnabled(is_merged)
+        self._call_settings_listeners(lambda listener: listener.on_reduction_mode_selection_has_changed(selection))
 
     def _on_q_resolution_shape_has_changed(self):
         shape_selection = self.q_resolution_shape_combo_box.currentIndex()
@@ -1091,8 +1101,14 @@ class SANSDataProcessorGui(QMainWindow,
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
-        if not value:
-            self._on_compatibility_unchecked()
+
+    @property
+    def event_slice_optimisation(self):
+        return self.event_slice_optimisation_checkbox.isChecked()
+
+    @event_slice_optimisation.setter
+    def event_slice_optimisation(self, value):
+        self.event_slice_optimisation_checkbox.setChecked(value)
 
     @property
     def instrument(self):

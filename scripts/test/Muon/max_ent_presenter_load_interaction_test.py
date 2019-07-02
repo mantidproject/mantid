@@ -45,7 +45,8 @@ class MaxEntPresenterTest(GuiTest):
         self.presenter = maxent_presenter_new.MaxEntPresenter(self.view, self.context)
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
-        ws, run, filename = load_utils.load_workspace_from_filename(file_path)
+        ws, run, filename, _ = load_utils.load_workspace_from_filename(file_path)
+        self.context.data_context._loaded_data.remove_data(run=run)
         self.context.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
         self.context.data_context.current_runs = [[22725]]
 

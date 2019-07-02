@@ -54,15 +54,14 @@ public:
         value2(prop2Value)
 
   {
-    Prop1 = new Kernel::EnabledWhenProperty(propName1, Criteria1, value1);
-    Prop2 = new Kernel::EnabledWhenProperty(propName2, Criteria2, value2);
+    Prop1 = std::make_unique<Kernel::EnabledWhenProperty>(propName1, Criteria1,
+                                                          value1);
+    Prop2 = std::make_unique<Kernel::EnabledWhenProperty>(propName2, Criteria2,
+                                                          value2);
   }
   ~OrEnabledWhenProperties() override // responsible for deleting all supplied
                                       // EnabledWhenProperites
-  {
-    delete Prop1;
-    delete Prop2;
-  }
+  {}
 
   IPropertySettings *clone() const override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,
@@ -77,7 +76,7 @@ private:
   std::string propName1, propName2;
   ePropertyCriterion Criteria1, Criteria2;
   std::string value1, value2;
-  Kernel::EnabledWhenProperty *Prop1, *Prop2;
+  std::unique_ptr<Kernel::EnabledWhenProperty> Prop1, Prop2;
 };
 
 void OptimizeCrystalPlacement::init() {

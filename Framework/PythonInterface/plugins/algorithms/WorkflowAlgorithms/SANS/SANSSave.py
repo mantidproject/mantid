@@ -79,6 +79,17 @@ class SANSSave(DataProcessorAlgorithm):
         self.declareProperty("UseZeroErrorFree", True, direction=Direction.Input,
                              doc="This allows the user to artificially inflate zero error values.")
 
+        self.declareProperty("SampleTransmissionRunNumber", "", direction=Direction.Input,
+                             doc="The run number for the Sample Transmission workspace used in "
+                                 "the reduction. Can be blank.")
+        self.declareProperty("SampleDirectRunNumber", "", direction=Direction.Input,
+                             doc="The run number for the Sample Direct workspace used in "
+                                 "the reduction. Can be blank.")
+        self.declareProperty("CanScatterRunNumber", "", direction=Direction.Input,
+                             doc="The run number for the Can Scatter workspace used in the reduction. Can be blank.")
+        self.declareProperty("CanDirectRunNumber", "", direction=Direction.Input,
+                             doc="The run number for the Can Direct workspace used in the reduction. Can be blank.")
+
     def PyExec(self):
         use_zero_error_free = self.getProperty("UseZeroErrorFree").value
         file_formats = self._get_file_formats()
@@ -97,11 +108,17 @@ class SANSSave(DataProcessorAlgorithm):
         transmission_workspaces = {"Transmission": transmission,
                                    "TransmissionCan": transmission_can}
 
+        additional_run_numbers = {"SampleTransmissionRunNumber": self.getProperty("SampleTransmissionRunNumber").value,
+                                  "SampleDirectRunNumber": self.getProperty("SampleDirectRunNumber").value,
+                                  "CanScatterRunNumber": self.getProperty("CanScatterRunNumber").value,
+                                  "CanDirectRunNumber": self.getProperty("CanDirectRunNumber").value}
+
         progress = Progress(self, start=0.0, end=1.0, nreports=len(file_formats) + 1)
         for file_format in file_formats:
             progress_message = "Saving to {0}.".format(SaveType.to_string(file_format.file_format))
             progress.report(progress_message)
-            save_to_file(workspace, file_format, file_name, transmission_workspaces)
+            progress.report(progress_message)
+            save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers)
         progress.report("Finished saving workspace to files.")
 
     def validateInputs(self):

@@ -327,7 +327,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   outputWorkspace->getAxis(0)->unit() = labelX;
 
   // set the second axis
-  auto yAxis = new BinEdgeAxis(ny + 1);
+  auto yAxis = std::make_unique<BinEdgeAxis>(ny + 1);
   for (size_t i = 0; i <= ny; ++i) {
     yAxis->setValue(i, yDim->getX(i));
   }
@@ -335,7 +335,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
       Kernel::UnitFactory::Instance().create("Label"));
   labelY->setLabel(yDim->getName());
   yAxis->unit() = labelY;
-  outputWorkspace->replaceAxis(1, yAxis);
+  outputWorkspace->replaceAxis(1, std::move(yAxis));
 
   // set the "units" for the y values
   outputWorkspace->setYUnitLabel("Signal");

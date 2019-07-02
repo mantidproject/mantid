@@ -205,10 +205,10 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
 }
 
 /**
- * @return lowest and highest values for the position of the minimum and maximum
+ * @return the min and max of the range
  */
 std::pair<double, double> RangeSelector::getRange() {
-  std::pair<double, double> range(m_lower, m_higher);
+  std::pair<double, double> range(m_min, m_max);
   return range;
 }
 

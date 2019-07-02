@@ -194,7 +194,7 @@ void MaskMD::exec() {
     }
 
     // Add new masking.
-    ws->setMDMasking(new MDBoxImplicitFunction(mins, maxs));
+    ws->setMDMasking(std::make_unique<MDBoxImplicitFunction>(mins, maxs));
     this->interruption_point();
     double group_double = static_cast<double>(group);
     this->progress(group_double / nGroups_double);

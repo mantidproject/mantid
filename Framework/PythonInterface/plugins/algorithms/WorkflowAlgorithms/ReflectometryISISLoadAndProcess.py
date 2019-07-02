@@ -28,6 +28,9 @@ class Prop:
     OUTPUT_WS='OutputWorkspace'
     OUTPUT_WS_BINNED='OutputWorkspaceBinned'
     OUTPUT_WS_LAM='OutputWorkspaceWavelength'
+    QMIN='MomentumTransferMin'
+    QSTEP='MomentumTransferStep'
+    QMAX='MomentumTransferMax'
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -39,7 +42,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._transPrefix = "TRANS_"
 
     def category(self):
-        """Return the categories of the algrithm."""
+        """Return the categories of the algorithm."""
         return 'ISIS\\Reflectometry;Workflow\\Reflectometry'
 
     def name(self):
@@ -111,6 +114,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Perform the reduction
         alg = self._reduce(input_workspace, first_trans_workspace, second_trans_workspace)
         self._finalize(alg)
+        if len(inputWorkspaces) >= 2:
+            inputWorkspaces.append(input_workspace)
+        self._group_workspaces(inputWorkspaces, "TOF")
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -148,7 +154,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'TransmissionProcessingInstructions', 'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax', 'ScaleFactor',
             'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha', 'FloodCorrection',
-            'FloodWorkspace', 'Debug']
+            'FloodWorkspace', 'Debug', 'ScaleRHSWorkspace']
         self.copyProperties('ReflectometryReductionOneAuto', self._reduction_properties)
 
     def _getInputWorkspaces(self, runs, isTrans):
@@ -213,6 +219,28 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return workspace_name
         # Not found
         return None
+
+    def _group_workspaces(self, workspaces, output_ws_name):
+        """
+        Groups all the given workspaces into a group with the given name. If the group
+        already exists it will add them to that group.
+        """
+        if AnalysisDataService.doesExist(output_ws_name):
+            ws_group = AnalysisDataService.retrieve(output_ws_name)
+            if not isinstance(ws_group, WorkspaceGroup):
+                raise RuntimeError('Cannot group TOF workspaces, a workspace called TOF already exists')
+            else:
+                for ws in workspaces:
+                    if ws not in ws_group:
+                        ws_group.add(ws)
+        else:
+            alg = self.createChildAlgorithm("GroupWorkspaces")
+            alg.setProperty("InputWorkspaces", workspaces)
+            alg.setProperty("OutputWorkspace", output_ws_name)
+            alg.execute()
+            ws_group = alg.getProperty("OutputWorkspace").value
+        AnalysisDataService.addOrReplace(output_ws_name, ws_group)
+        return ws_group
 
     def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
         """Rename the given workspace based on its run number and a standard prefix"""
@@ -344,17 +372,30 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _finalize(self, child_alg):
         """Set our output properties from the results in the given child algorithm"""
-        self._setOutputWorkspace(Prop.OUTPUT_WS, child_alg)
-        self._setOutputWorkspace(Prop.OUTPUT_WS_BINNED, child_alg)
-        self._setOutputWorkspace(Prop.OUTPUT_WS_LAM, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QMIN, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
 
-    def _setOutputWorkspace(self, property_name, child_alg):
+    def _setOutputProperty(self, property_name, child_alg):
         """Set the given output property from the result in the given child algorithm,
-        if it exists"""
+        if it exists in the child algorithm's outputs"""
         value = child_alg.getPropertyValue(property_name)
         if value:
             self.setPropertyValue(property_name, value)
             self.setProperty(property_name, child_alg.getProperty(property_name).value)
+
+    def _setOutputPropertyIfInputNotSet(self, property_name, child_alg):
+        """Set the given output property from the result in the given child algorithm,
+        if it was not set as an input to this algorithm and if it exists in the
+        child algorithm's outputs"""
+        if self.getProperty(property_name).isDefault:
+            value = child_alg.getPropertyValue(property_name)
+            if value:
+                self.setPropertyValue(property_name, value)
+                self.setProperty(property_name, child_alg.getProperty(property_name).value)
 
 
 def _throwIfNotValidReflectometryEventWorkspace(workspace_name):

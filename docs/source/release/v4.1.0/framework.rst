@@ -17,6 +17,11 @@ Concepts
 Algorithms
 ----------
 
+New
+###
+
+- :ref: `RemoveSpectra <algm-RemoveSpectra>` is a new general purpose algorithm that enables you to optionally remove spectra from an algorithm given one of 3 criteria, if it's masked, if it doesn't have a detector, and if presented in a user defined list.
+
 Improvements
 ############
 
@@ -38,6 +43,13 @@ Improvements
 - 10x performance improvement in calls to ``Mantid::PhysicalConstants::getAtom``.
 - ARCS, CNCS, HYSPEC, NOMAD, POWGEN, SEQUOIA, SNAP, and VULCAN have had the axis that signed two-theta is calculated against changed from ``+y`` to ``+x``
 - :ref:`SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
+- :ref:`SolidAngle <algm-SolidAngle>` is extended to accommodate few options for fast analytical calculation for SANS-type detectors.
+- :ref:`algm-FilterEvents` has a property `InformativeOutputNames` which changes the name of output workspace to include the start and end time of the slice.
+
+Instrument Definition Files
+###########################
+
+- A new attribute, name-count-increment, has been introduced to the <locations> tag which allows the auto-generated location names to be incremented by a user-defined amount.
 
 Bug fixes
 #########
@@ -62,6 +74,7 @@ New
 - The ``mantid.plots`` module now registers a ``power`` and ``square`` scale type to be used with ``set_xscale`` and ``set_xscale`` functions.
 - In :class:`mantid.kernel.DateAndTime`, the method :py:meth:`~mantid.kernel.DateAndTime.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.DateAndTime.totalNanoseconds` should be used instead.
 - In :class:`mantid.kernel.time_duration`, The method :py:meth:`~mantid.kernel.time_duration.total_nanoseconds` has been deprecated, :py:meth:`~mantid.kernel.time_duration.totalNanoseconds` should be used instead.
+- :py:obj:`mantid.geometry.DetectorInfo.indexOf` has been exposed to python
 
 Bugfixes
 ########

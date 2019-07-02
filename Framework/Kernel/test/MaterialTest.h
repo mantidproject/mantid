@@ -134,11 +134,11 @@ public:
     NexusTestHelper th(true);
     th.createFile("MaterialTest.nxs");
 
-    TS_ASSERT_THROWS_NOTHING(testA.saveNexus(th.file, "material"););
+    TS_ASSERT_THROWS_NOTHING(testA.saveNexus(th.file.get(), "material"););
 
     Material testB;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING(testB.loadNexus(th.file, "material"););
+    TS_ASSERT_THROWS_NOTHING(testB.loadNexus(th.file.get(), "material"););
 
     TS_ASSERT_EQUALS(testB.name(), "testMaterial");
     TS_ASSERT_DELTA(testB.numberDensity(), 0.072, 1e-6);
@@ -155,10 +155,10 @@ public:
     Material testA;
     NexusTestHelper th(true);
     th.createFile("MaterialTest.nxs");
-    TS_ASSERT_THROWS_NOTHING(testA.saveNexus(th.file, "material"););
+    TS_ASSERT_THROWS_NOTHING(testA.saveNexus(th.file.get(), "material"););
     Material testB;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING(testB.loadNexus(th.file, "material"););
+    TS_ASSERT_THROWS_NOTHING(testB.loadNexus(th.file.get(), "material"););
   }
 
   void test_parseMaterial() {

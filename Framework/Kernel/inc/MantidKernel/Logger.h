@@ -11,11 +11,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/ThreadSafeLogStream.h"
 
 #include <Poco/Message.h>
 
 #include <iosfwd>
 
+#include <memory>
 #include <string>
 
 //----------------------------------------------------------------------
@@ -29,7 +31,6 @@ class Logger;
 
 namespace Mantid {
 namespace Kernel {
-class ThreadSafeLogStream;
 
 /** @class Logger Logger.h Kernel/Logger.h
 
@@ -58,8 +59,6 @@ public:
 
   /// Constructor giving the logger name
   Logger(const std::string &name);
-  /// Destructor
-  ~Logger();
   /// Update the name of the logger
   void setName(const std::string &name);
 
@@ -143,7 +142,7 @@ private:
   /// Internal handle to third party logging objects
   Poco::Logger *m_log;
   /// Allows stream operators for a logger
-  ThreadSafeLogStream *m_logStream;
+  std::unique_ptr<ThreadSafeLogStream> m_logStream;
 
   /// The offset of the logger
   int m_levelOffset;
