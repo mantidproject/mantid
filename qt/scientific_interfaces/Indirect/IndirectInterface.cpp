@@ -54,9 +54,8 @@ void IndirectInterface::manageUserDirectories() {
     m_manageUserDirectories = std::make_unique<ManageUserDirectories>(this);
     m_manageUserDirectories->setAttribute(Qt::WA_DeleteOnClose, false);
   }
-  m_manageUserDirectories->show();
-  m_manageUserDirectories->setFocus();
   m_manageUserDirectories->setModal(true);
+  m_manageUserDirectories->show();
 }
 
 void IndirectInterface::showMessageBox(QString const &message) {
