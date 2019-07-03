@@ -697,10 +697,9 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
 }
 
 /*
-an instrument creation helper allowing you to include/omit
-source/detector/sample. from createMinimalInstrument.
+An instrument creation helper allowing you to include/omit
+source/detector/sample. From createMinimalInstrument.
 */
-
 Instrument_sptr createInstrumentWithOptionalComponents(
     bool haveSource, bool haveSample, bool haveDetector,
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,

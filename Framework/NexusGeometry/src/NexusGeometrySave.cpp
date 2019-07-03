@@ -98,7 +98,9 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   { // so i dont forget they exist.
     // compInfo.samplePosition();
     // compInfo.sourcePosition();
-    // compinfo.sourcePosition()
+    // compinfo.sourcePosition();
+    // compInfo.hasSample();
+    // compInfo.hasSource();
   }
 
   H5::H5File file(fullPath, H5F_ACC_TRUNC);
@@ -133,31 +135,30 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     }
   }
 
-  auto n = compInfo.hasSample();
-  auto m = compInfo.hasSource();
+  /*
 
-  // get all detectors of component
+    // create DataSet 'data' in instrument.
 
-  // create DataSet 'data' in instrument.
+    H5::StrType dataType(0, H5T_VARIABLE);
+    H5::DataSpace dataSpace(H5S_SCALAR);
 
-  H5::StrType dataType(0, H5T_VARIABLE);
-  H5::DataSpace dataSpace(H5S_SCALAR);
+    std::string dataSetData = "test_data_for_instrument"; // value for dataset.
+    auto dataSetDataAsCStr = dataSetData.c_str();         // for plist..
 
-  std::string dataSetData = "test_data_for_instrument"; // value for dataset.
-  auto dataSetDataAsCStr = dataSetData.c_str();         // for plist..
+    H5::DSetCreatPropList plist;
+    plist.setFillValue(dataType, &dataSetDataAsCStr); // for dataSet.
 
-  H5::DSetCreatPropList plist;
-  plist.setFillValue(dataType, &dataSetDataAsCStr); // for dataSet.
+    // add dataset to child group 'instrument'
+    H5::DataSet dataSet = instrumentGroup.createDataSet(
+        compInfo.name(compInfo.root()), dataType, dataSpace,
+        plist); // name of dataset initialised with fill value.
 
-  // add dataset to child group 'instrument'
-  H5::DataSet dataSet = instrumentGroup.createDataSet(
-      compInfo.name(compInfo.root()), dataType, dataSpace,
-      plist); // name of dataset initialised with fill value.
+    writeStrAttributeToDataSet(dataSet, SHORT_NAME,
+                               compInfo.name(compInfo.root()));
+    writeStrAttributeToDataSet(dataSet, NX_CLASS,
+                               NX_CHAR); // add NX_class attribute to dataset
 
-  writeStrAttributeToDataSet(dataSet, SHORT_NAME,
-                             compInfo.name(compInfo.root()));
-  writeStrAttributeToDataSet(dataSet, NX_CLASS,
-                             NX_CHAR); // add NX_class attribute to dataset
+  */
 
   file.close();
 

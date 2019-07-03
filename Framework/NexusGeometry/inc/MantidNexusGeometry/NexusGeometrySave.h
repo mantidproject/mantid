@@ -10,7 +10,6 @@
 #include "MantidNexusGeometry/DllConfig.h"
 #include <string>
 
-
 namespace Mantid {
 
 namespace Kernel {
@@ -26,7 +25,6 @@ class ComponentInfo;
 }
 
 namespace NexusGeometry {
-
 
 MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,

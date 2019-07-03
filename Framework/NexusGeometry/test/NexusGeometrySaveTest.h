@@ -313,14 +313,56 @@ public:
 
   void test_instrument_without_sample_throws() {
 
-    auto instrument =
+    auto const &instrument =
         ComponentCreationHelper::createInstrumentWithOptionalComponents(
             true, false, true);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
     auto &compInfo = (*instr.first);
 
-    TS_ASSERT(compInfo.hasDetectorInfo());
-    TS_ASSERT(compInfo.hasSource());
+    ScopedFileHandle fileResource("check_no_sample_throws_test_file.hdf5");
+    auto destinationFile = fileResource.fullPath();
+
+    TS_ASSERT(compInfo.hasDetectorInfo()); // rule out throw by no detector
+                                           // info.
+    TS_ASSERT(compInfo.hasSource());       // rule out throw by no source.
+    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+                     std::invalid_argument &);
+  }
+
+  void test_instrument_without_source_throws() {
+
+    auto const &instrument =
+        ComponentCreationHelper::createInstrumentWithOptionalComponents(
+            false, true, true);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*instr.first);
+
+    ScopedFileHandle fileResource("check_no_source_throws_test_file.hdf5");
+    auto destinationFile = fileResource.fullPath();
+
+    TS_ASSERT(compInfo.hasDetectorInfo()); // rule out throw by no detector
+                                           // info.
+    TS_ASSERT(compInfo.hasSample());       // rule out throw by no sample.
+    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+                     std::invalid_argument &);
+  }
+
+  void test_instrument_without_detector_info_throws() {
+
+    auto const &instrument =
+        ComponentCreationHelper::createInstrumentWithOptionalComponents(
+            true, true, false);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*instr.first);
+
+    ScopedFileHandle fileResource(
+        "check_no_detector_info_throws_test_file.hdf5");
+    auto destinationFile = fileResource.fullPath();
+
+    TS_ASSERT(compInfo.hasSource()); // rule out throw by no source
+    TS_ASSERT(compInfo.hasSample()); // rule out throw by no sample.
+    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+                     std::invalid_argument &);
   }
 };
 
