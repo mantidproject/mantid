@@ -18,7 +18,6 @@
 # PYQT${major_version}_SIP_FLAGS - The SIP flags used to build PyQt.
 #
 function (find_pyqt major_version)
-  message(STATUS "looking in ${CMAKE_MODULE_PATH}")
   if (EXISTS "${CMAKE_MODULE_PATH}/FindPyQt.py")
     set (_find_pyqt_py "${CMAKE_MODULE_PATH}/FindPyQt.py")
   else()
