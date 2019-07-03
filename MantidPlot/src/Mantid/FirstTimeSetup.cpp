@@ -17,7 +17,6 @@
 #include <QPainter>
 #include <QSettings>
 #include <QUrl>
-#include <iostream>
 
 using MantidQt::API::MantidDesktopServices;
 
