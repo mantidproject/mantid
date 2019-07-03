@@ -327,7 +327,7 @@ class FittingTabPresenter(object):
             return
 
         self._fit_function = [self.view.fit_object.clone() for _ in self.selected_data] \
-            if self.selected_data and self.view.fit_object else [None]
+            if self.selected_data and self.view.fit_object else [self.view.fit_object.clone()] if self.view.fit_object else [None]
         self.clear_fit_information()
         if self.automatically_update_fit_name:
             self.view.function_name = self.model.get_function_name(
@@ -535,6 +535,8 @@ class FittingTabPresenter(object):
                 'Mode': mode}
 
     def create_multi_domain_function(self, function_list):
+        if not any(function_list):
+            return None
         multi_domain_function = MultiDomainFunction()
         for index, func in enumerate(function_list):
             multi_domain_function.add(func)
