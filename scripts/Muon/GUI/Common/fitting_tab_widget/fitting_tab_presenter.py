@@ -10,6 +10,7 @@ from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import Workspace
 from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
+from mantid.api import CompositeFunction, MultiDomainFunction
 import functools
 import re
 
@@ -116,7 +117,9 @@ class FittingTabPresenter(object):
         if self.view.fit_type == self.view.simultaneous_fit:
             multi_domain_function = self.create_multi_domain_function(self._fit_function)
             if multi_domain_function:
-                self.view.function_browser_multi.setFunction(multi_domain_function)
+                self.view.function_browser_multi.blockSignals(True)
+                self.view.function_browser_multi.setFunction(str(multi_domain_function))
+                self.view.function_browser_multi.blockSignals(False)
                 self._fit_function = [self.view.fit_object] * len(self.selected_data) if self.selected_data else [self.view.fit_object]
             else:
                 self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
@@ -126,6 +129,9 @@ class FittingTabPresenter(object):
             if self.view.fit_object:
                 function_list = self.view.function_browser_multi.getGlobalFunction().createEquivalentFunctions()
                 self._fit_function = function_list
+                self.view.function_browser.blockSignals(True)
+                self.view.function_browser.setFunction(str(self._fit_function[0]))
+                self.view.function_browser.blockSignals(False)
             else:
                 self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
             self.view.switch_to_single()
@@ -320,8 +326,8 @@ class FittingTabPresenter(object):
             self.view.function_browser.blockSignals(False)
             return
 
-        self._fit_function = [self.view.fit_object.clone()] * len(self.selected_data) \
-            if self.selected_data and self.view.fit_object else [self.view.fit_object.clone()]
+        self._fit_function = [self.view.fit_object.clone() for _ in self.selected_data] \
+            if self.selected_data and self.view.fit_object else [None]
         self.clear_fit_information()
         if self.automatically_update_fit_name:
             self.view.function_name = self.model.get_function_name(
@@ -356,9 +362,15 @@ class FittingTabPresenter(object):
         if self._tf_asymmetry_mode:
             self.view.select_workspaces_to_fit_button.setEnabled(False)
             new_global_parameters = [str('f0.f1.f1.' + item) for item in global_parameters]
+            if self.automatically_update_fit_name:
+                self.view.function_name += ',TFAsymmetry'
+                self.model.function_name = self.view.function_name
         else:
             self.view.select_workspaces_to_fit_button.setEnabled(True)
             new_global_parameters = [item[9:] for item in global_parameters]
+            if self.automatically_update_fit_name:
+                self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
+                self.model.function_name = self.view.function_name
 
         if self.view.fit_type != self.view.simultaneous_fit:
             for index, fit_function in enumerate(self._fit_function):
@@ -382,9 +394,6 @@ class FittingTabPresenter(object):
 
         self.update_fit_status_information_in_view()
         self.handle_display_workspace_changed()
-        if self.automatically_update_fit_name:
-            self.view.function_name += ',TFAsymmetry'
-            self.model.function_name = self.view.function_name
 
     def handle_function_parameter_changed(self):
         if self.view.fit_type != self.view.simultaneous_fit:
@@ -526,8 +535,9 @@ class FittingTabPresenter(object):
                 'Mode': mode}
 
     def create_multi_domain_function(self, function_list):
-        modified_function_list = [';' + str(item) + ',$domains=i' for item in function_list if item]
-        if not modified_function_list:
-            return None
-        modified_function_as_string = ''.join(modified_function_list)
-        return 'composite=MultiDomainFunction,NumDeriv=1' + modified_function_as_string + ";"
+        multi_domain_function = MultiDomainFunction()
+        for index, func in enumerate(function_list):
+            multi_domain_function.add(func)
+            multi_domain_function.setDomainIndex(index, index)
+
+        return multi_domain_function

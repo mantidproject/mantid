@@ -39,8 +39,15 @@ class HomePlotWidgetModel(object):
             return
 
         if self.plot_figure:
+            axis = self.plot_figure.gca()
+            xlim = axis.get_xlim()
+            ylim = axis.get_ylim()
+            self._remove_all_data_workspaces_from_plot()
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
+            axis = self.plot_figure.gca()
+            axis.set_xlim(xlim)
+            axis.set_ylim(ylim)
         else:
             self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title, plot_kwargs={'distribution': True,
                                                                                                     'autoscale_on_update': False},
@@ -117,3 +124,8 @@ class HomePlotWidgetModel(object):
         new_top = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
 
         axis.set_ylim(bottom=new_bottom, top=new_top)
+
+    def _remove_all_data_workspaces_from_plot(self):
+        workspaces_to_remove = self.plotted_workspaces
+        for workspace in workspaces_to_remove:
+            self.remove_workpace_from_plot(workspace)
