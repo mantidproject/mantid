@@ -446,6 +446,9 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
  * 1 for the model
  */
 size_t Convolution::addFunction(IFunction_sptr f) {
+  if (!boost::dynamic_pointer_cast<IFunction1D>(f)) {
+    throw std::runtime_error("Convolution can work only with IFunction1D");
+  }
   if (nFunctions() == 0 && getAttribute("FixResolution").asBool()) {
     for (size_t i = 0; i < f->nParams(); i++) {
       f->fix(i);
