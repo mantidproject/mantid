@@ -801,7 +801,9 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
   for (auto const &p : parameters) {
     auto key = p.first;
     auto value = p.second;
-    if (value == "QDimension0") {
+    // value starts with QDimension0, then other stuff
+    // do not use ==
+    if (value.find("QDimension0") != std::string::npos) {
       dimensionIndex[0] = parametersIndex;
       const std::string dimXName =
           tempDataWS->getDimension(parametersIndex)->getName();
@@ -830,7 +832,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
           throw(std::invalid_argument(errorMessage.str()));
         }
       }
-    } else if (value == "QDimension1") {
+    } else if (value.find("QDimension1") != std::string::npos) {
       dimensionIndex[1] = parametersIndex;
       const std::string dimYName =
           tempDataWS->getDimension(parametersIndex)->getName();
@@ -859,7 +861,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
           throw(std::invalid_argument(errorMessage.str()));
         }
       }
-    } else if (value == "QDimension2") {
+    } else if (value.find("QDimension2") != std::string::npos) {
       dimensionIndex[2] = parametersIndex;
       const std::string dimZName =
           tempDataWS->getDimension(parametersIndex)->getName();
@@ -906,6 +908,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
       const std::string nameInput = m_inputWS->getDimension(indexID)->getName();
       const std::string nameData = tempDataWS->getDimension(indexID)->getName();
       if (nameInput != nameData) {
+        g_log.warning()<<"Input: "<<nameInput<<" Temporary: "<<nameData<<std::endl;
         throw(std::invalid_argument("TemporaryDataWorkspace does not have the "
                                     "same dimension names as InputWorkspace."));
       }
