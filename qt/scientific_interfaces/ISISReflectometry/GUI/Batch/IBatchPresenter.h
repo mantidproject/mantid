@@ -9,8 +9,6 @@
 
 #include "GUI/Batch/RowProcessingAlgorithm.h"
 #include "MantidGeometry/Instrument_fwd.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <string>
 
@@ -43,11 +41,6 @@ public:
   virtual void anyBatchAutoreductionResumed() = 0;
   virtual void anyBatchAutoreductionPaused() = 0;
 
-  /// Transmission runs for a specific run angle
-  virtual MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(const double angle) const = 0;
-  /// Whether there are per-angle transmission runs specified
-  virtual bool hasPerAngleOptions() const = 0;
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;

@@ -18,19 +18,11 @@
 
 namespace MantidQt {
 
-namespace MantidWidgets {
-namespace DataProcessor {
-class Command;
-}
-} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
 
 namespace CustomInterfaces {
-
-namespace DataProcessor = MantidWidgets::DataProcessor;
-class ISearchModel;
 
 /**
 IRunsView is the base view class for the Reflectometry "Runs"

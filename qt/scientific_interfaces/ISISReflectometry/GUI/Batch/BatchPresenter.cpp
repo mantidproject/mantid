@@ -19,8 +19,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
-using namespace MantidQt::MantidWidgets::DataProcessor;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -292,23 +290,6 @@ Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {
 }
 
 void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }
-
-/** Returns default values specified for 'Transmission run(s)' for the
- * given angle
- *
- * @param angle :: the run angle to look up transmission runs for
- * @return :: Values passed for 'Transmission run(s)'
- */
-OptionsQMap BatchPresenter::getOptionsForAngle(const double /*angle*/) const {
-  return OptionsQMap(); // TODO m_settingsPresenter->getOptionsForAngle(angle);
-}
-
-/** Returns whether there are per-angle transmission runs specified
- * @return :: true if there are per-angle transmission runs
- * */
-bool BatchPresenter::hasPerAngleOptions() const {
-  return false; // TODO m_settingsPresenter->hasPerAngleOptions();
-}
 
 /**
    Checks whether or not data is currently being processed in this batch

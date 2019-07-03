@@ -11,7 +11,6 @@
 #include "Common/GetInstrumentParameter.h"
 #include "Common/InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/Hint.h"
 #include <map>
 #include <vector>

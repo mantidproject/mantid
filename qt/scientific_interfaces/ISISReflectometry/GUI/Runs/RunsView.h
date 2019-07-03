@@ -20,10 +20,6 @@
 namespace MantidQt {
 
 namespace MantidWidgets {
-namespace DataProcessor {
-// Forward decs
-class Command;
-} // namespace DataProcessor
 class SlitCalculator;
 } // namespace MantidWidgets
 namespace API {
@@ -33,7 +29,6 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 using MantidWidgets::SlitCalculator;
-namespace DataProcessor = MantidWidgets::DataProcessor;
 
 /** RunsView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
