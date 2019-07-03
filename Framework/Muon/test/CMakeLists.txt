@@ -7,10 +7,6 @@ if(CXXTEST_FOUND)
   if(stdint)
     add_definitions(-DHAVE_STDINT_H)
   endif()
-  check_include_files(cstdint.hpp boost_stdint)
-  if(boost_stdint)
-    add_definitions(-DBOOST_CSTDINT_HPP)
-  endif()
 
   # Make the tests
   include_directories(../../Algorithms/inc
