@@ -76,7 +76,7 @@ bool CatalogSearcher::startSearchAsync(const std::string &text,
   m_searchType = searchType;
 
   // Already logged in
-  if (hasActiveSession()) {
+  if (hasActiveCatalogSession()) {
     searchAsync();
   } else {
     // Else attempt to login, once login is complete finishHandle will be
@@ -88,8 +88,21 @@ bool CatalogSearcher::startSearchAsync(const std::string &text,
 }
 
 void CatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
-  searchAsync();
   stopObserving(alg);
+  if (!hasActiveCatalogSession()) {
+    m_notifyee->notifySearchFailed();
+  } else {
+    searchAsync();
+  }
+}
+
+void CatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg,
+                                  const std::string &what) {
+  UNUSED_ARG(what)
+  stopObserving(alg);
+  if (!hasActiveCatalogSession()) {
+    m_notifyee->notifySearchFailed();
+  }
 }
 
 void CatalogSearcher::notifySearchComplete() {
@@ -130,21 +143,27 @@ bool CatalogSearcher::searchSettingsChanged(const std::string &text,
          searchType != m_searchType;
 }
 
-bool CatalogSearcher::hasActiveSession() const {
+bool hasActiveCatalogSession() {
   auto sessions = CatalogManager::Instance().getActiveSessions();
   return !sessions.empty();
 }
 
-namespace {
-void execLoginDialog(const IAlgorithm_sptr &alg) {
+void CatalogSearcher::execLoginDialog(const IAlgorithm_sptr &alg) {
   API::InterfaceManager interfaceMgr;
-  auto dlg = interfaceMgr.createDialog(alg);
+  auto dlg = dynamic_cast<MantidQt::API::AlgorithmDialog *>(
+      interfaceMgr.createDialog(alg));
+  QObject::connect(dlg, SIGNAL(closeEventCalled()), this, SLOT(dialogClosed()));
   dlg->setModal(true);
   dlg->show();
   dlg->raise();
   dlg->activateWindow();
 }
-} // namespace
+
+void CatalogSearcher::dialogClosed() {
+  if (!hasActiveCatalogSession()) {
+    m_notifyee->notifySearchFailed();
+  }
+}
 
 /** Log in to the catalog
  * @returns : true if login succeeded
@@ -154,6 +173,7 @@ void CatalogSearcher::logInToCatalog() {
   alg->initialize();
   alg->setProperty("KeepSessionAlive", true);
   this->observeFinish(alg);
+  this->observeError(alg);
   execLoginDialog(alg);
 }
 

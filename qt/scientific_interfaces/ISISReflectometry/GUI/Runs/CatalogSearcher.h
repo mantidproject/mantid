@@ -22,9 +22,11 @@ class IMainWindowView;
 CatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class CatalogSearcher : public ISearcher,
+class CatalogSearcher : public QObject,
+                        public ISearcher,
                         public RunsViewSearchSubscriber,
                         public Mantid::API::AlgorithmObserver {
+  Q_OBJECT
 public:
   explicit CatalogSearcher(IRunsView *m_view);
   ~CatalogSearcher() override{};
@@ -50,6 +52,11 @@ public:
 
 protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg,
+                   const std::string &what) override;
+
+private slots:
+  void dialogClosed();
 
 private:
   IRunsView *m_view;
@@ -61,11 +68,13 @@ private:
 
   bool hasActiveSession() const;
   void logInToCatalog();
+  void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);
   std::string activeSessionId() const;
   Mantid::API::IAlgorithm_sptr createSearchAlgorithm(const std::string &text);
   ISearchModel &results() const;
   void searchAsync();
 };
+bool hasActiveCatalogSession();
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif

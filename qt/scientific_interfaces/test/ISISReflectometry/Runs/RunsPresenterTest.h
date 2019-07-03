@@ -210,6 +210,8 @@ public:
     verifyAndClear();
   }
 
+  const std::string autoReductionSearch = "1120015";
+
   void testResumeAutoreductionWithNewSettings() {
     auto presenter = makePresenter();
     expectAutoreductionSettingsChanged();
@@ -221,6 +223,8 @@ public:
 
   void testResumeAutoreductionWithSameSettings() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsUnchanged();
     expectDoNotClearExistingTable();
     expectCheckForNewRuns();
@@ -231,6 +235,8 @@ public:
   void testResumeAutoreductionWarnsUserIfTableChanged() {
     auto presenter = makePresenter();
     auto runsTable = makeRunsTableWithContent();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsChanged();
     expectRunsTableWithContent(runsTable);
     expectUserRespondsYes();
@@ -241,6 +247,8 @@ public:
 
   void testResumeAutoreductionDoesNotWarnUserIfTableEmpty() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsChanged();
     EXPECT_CALL(m_messageHandler, askUserYesNo(_, _)).Times(0);
     expectCheckForNewRuns();
@@ -250,10 +258,21 @@ public:
 
   void testResumeAutoreductionCancelledByUserIfTableChanged() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     auto runsTable = makeRunsTableWithContent();
     expectAutoreductionSettingsChanged();
     expectRunsTableWithContent(runsTable);
     expectUserRespondsNo();
+    expectDoNotStartAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testResumeAutoreductionCancelledIfSearchStringIsEmpty() {
+    auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString()).WillByDefault(Return(""));
+    auto runsTable = makeRunsTableWithContent();
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
     verifyAndClear();
