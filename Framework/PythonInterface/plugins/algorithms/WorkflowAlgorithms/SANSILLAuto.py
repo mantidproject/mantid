@@ -77,6 +77,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
     output = None
     output_sens = None
     dimensionality = None
+    references = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -102,7 +103,8 @@ class SANSILLAuto(DataProcessorAlgorithm):
         ctr_dim = self.getPropertyValue('ContainerTransmissionRuns').count(',')
         btr_dim = self.getPropertyValue('TransmissionBeamRuns').count(',')
         atr_dim = self.getPropertyValue('TransmissionAbsorberRuns').count(',')
-        mask_dim = self.getPropertyValue('MaskFile').count(',')
+        mask_dim = self.getPropertyValue('MaskFiles').count(',')
+        ref_dim = self.getPropertyValue('ReferenceFiles').count(',')
         if abs_dim != sample_dim and abs_dim != 0:
             result['AbsorberRuns'] = message.format('Absorber')
         if beam_dim != sample_dim and beam_dim != 0:
@@ -118,7 +120,9 @@ class SANSILLAuto(DataProcessorAlgorithm):
         if atr_dim != 0:
             issues['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber')
         if mask_dim != sample_dim and mask_dim != 0:
-            result['MaskFile'] = message.format('Mask')
+            result['MaskFiles'] = message.format('Mask')
+        if ref_dim != sample_dim and ref_dim != 0:
+            result['ReferenceFiles'] = message.format('Reference')
         return result
 
     def setUp(self):
@@ -131,7 +135,8 @@ class SANSILLAuto(DataProcessorAlgorithm):
         self.btransmission = self.getPropertyValue('TransmissionBeamRuns')
         self.atransmission = self.getPropertyValue('TransmissionAbsorberRuns')
         self.sensitivity = self.getPropertyValue('SensitivityMap')
-        self.mask = self.getPropertyValue('MaskFile').split(',')
+        self.mask = self.getPropertyValue('MaskFiles').split(',')
+        self.reference = self.getPropertyValue('ReferenceFiles').split(',')
         self.output = self.getPropertyValue('OutputWorkspace')
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.reduction_type = self.getPropertyValue('ReductionType')
@@ -167,8 +172,11 @@ class SANSILLAuto(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('SensitivityMap', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the map of relative detector efficiencies.')
 
-        self.declareProperty(MultipleFileProperty('MaskFile', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('MaskFiles', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Files containing the beam stop and other detector mask.')
+
+        self.declareProperty(MultipleFileProperty('ReferenceFiles', action=FileAction.OptionalLoad, extensions=['nxs']),
+                             doc='Files containing the corrected water data for absolute normalisation.')
 
         self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
                                                      direction=Direction.Output,
@@ -247,25 +255,35 @@ class SANSILLAuto(DataProcessorAlgorithm):
             SANSILLReduction(Run=container, ProcessAs='Container', OutputWorkspace=container_name, AbsorberInputWorkspace=absorber_name,
                              BeamInputWorkspace=beam_name, TransmissionInputWorkspace=container_transmission_name)
 
-        [load_sensitivity, sensitivity_name] = needs_loading(self.sensitivity, 'Sensitivity')
-        self.progress.report('Loading sensitivity')
-        if load_sensitivity:
-            LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sensitivity_name)
-
         mask = self.mask[i] if len(self.mask) == self.dimensionality else self.mask[0]
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
         self.progress.report('Loading mask')
         if load_mask:
             LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
 
+        if self.sensitivity:
+            [load_sensitivity, sensitivity_name] = needs_loading(self.sensitivity, 'Sensitivity')
+            self.progress.report('Loading sensitivity')
+            if load_sensitivity:
+                LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sensitivity_name)
+        else:
+            reference = self.reference[i] if len(self.reference) == self.dimensionality else self.reference[0]
+            [load_reference, reference_name] = needs_loading(reference, 'Reference')
+            self.progress.report('Loading reference')
+            if load_reference:
+                LoadNexusProcessed(Filename=reference, OutputWorkspace=reference_name)
+
         output = self.output + '_' + str(i + 1)
         [_, sample_name] = needs_processing(self.sample[i], 'Sample')
         self.progress.report('Processing sample at detector configuration '+str(i+1))
         if self.reduction_type == 'ReduceSample':
-            SANSILLReduction(Run=self.sample[i], ProcessAs='Sample', OutputWorkspace=sample_name,
+            sens_input = sensitivity_name if self.sensitivity else ''
+            ref_input = reference_name if not self.sensitivity else ''
+            flux_input = flux_name if self.sensitivity else ''
+            SANSILLReduction(Run=self.sample[i], ProcessAs='Sample', OutputWorkspace=sample_name, ReferenceInputWorkspace=ref_input,
                              AbsorberInputWorkspace=absorber_name, BeamInputWorkspace=beam_name, CacheSolidAngle=True,
                              ContainerInputWorkspace=container_name, TransmissionInputWorkspace=sample_transmission_name,
-                             MaskedInputWorkspace=mask_name, SensitivityInputWorkspace=sensitivity_name, FluxInputWorkspace=flux_name)
+                             MaskedInputWorkspace=mask_name, SensitivityInputWorkspace=sens_input, FluxInputWorkspace=flux_input)
             SANSILLIntegration(InputWorkspace=sample_name, OutputWorkspace=output)
         elif self.reduction_type == 'ReduceWater':
             SANSILLReduction(Run=self.sample[i], ProcessAs='Reference', OutputWorkspace=output, AbsorberInputWorkspace=absorber_name,
