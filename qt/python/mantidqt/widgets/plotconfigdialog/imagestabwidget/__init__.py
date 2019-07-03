@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.collections import QuadMesh
+from matplotlib.colors import LogNorm
 
 
 class ImageProperties(dict):
@@ -30,7 +31,10 @@ class ImageProperties(dict):
             props['interpolation'] = None
         else:
             props['interpolation'] = image.get_interpolation()
-        props['scale'] = 'Linear'
+        if type(image.norm) is LogNorm:
+            props['scale'] = 'Logarithmic'
+        else:
+            props['scale'] = 'Linear'
         return cls(props)
 
     @classmethod

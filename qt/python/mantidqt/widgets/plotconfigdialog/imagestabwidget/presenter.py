@@ -31,7 +31,7 @@ class ImagesTabWidgetPresenter:
             self.update_view)
 
     def apply_properties(self):
-        props = ImageProperties.from_view(self.view)
+        props = self.view.get_properties()
         image = self.get_selected_image()
         self.set_selected_image_label(props.label)
         image.set_cmap(props.colormap)

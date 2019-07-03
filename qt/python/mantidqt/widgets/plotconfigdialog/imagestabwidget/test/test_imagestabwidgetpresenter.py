@@ -17,6 +17,7 @@ from numpy import linspace, random
 from mantid.plots import MantidAxes  # register mantid projection  # noqa
 from mantid.py3compat.mock import Mock
 from mantid.simpleapi import CreateWorkspace
+from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
 
 
@@ -106,13 +107,15 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        props = {'title': '(0, 0) - img label',
+                 'label': 'New Label',
+                 'colormap': 'jet',
+                 'vmin': 0,
+                 'vmax': 2,
+                 'scale': 'Linear',
+                 'interpolation': 'None'}
         mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - img label',
-                         get_label=lambda: 'New Label',
-                         get_colormap=lambda: 'jet',
-                         get_min_value=lambda: 0,
-                         get_max_value=lambda: 2,
-                         get_scale=lambda: 'Linear',
-                         get_interpolation=lambda: 'None')
+                         get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
         self.assertEqual("New Label", img.get_label())
@@ -125,13 +128,15 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         img = ax.imshow([[0, 2], [2, 0]], label='img label')
+        props = {'title': '(0, 0) - img label',
+                 'label': 'New Label',
+                 'colormap': 'jet',
+                 'vmin': 0,
+                 'vmax': 4,
+                 'scale': 'Logarithmic',
+                 'interpolation': 'Hanning'}
         mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - img label',
-                         get_label=lambda: 'New Label',
-                         get_colormap=lambda: 'jet',
-                         get_min_value=lambda: 0,
-                         get_max_value=lambda: 4,
-                         get_scale=lambda: 'Logarithmic',
-                         get_interpolation=lambda: 'Hanning')
+                         get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
         self.assertEqual("New Label", img.get_label())

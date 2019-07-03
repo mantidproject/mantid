@@ -10,25 +10,28 @@ import unittest
 
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
+from matplotlib.colors import LogNorm
 from matplotlib.pyplot import figure
 
 from mantid.py3compat.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
+from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 
 AX_VIEW = 'mantidqt.widgets.plotconfigdialog.axestabwidget.presenter.AxesTabWidgetView'
 CURVE_VIEW = 'mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter.CurvesTabWidgetView'
+IMAGE_VIEW = 'mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter.ImagesTabWidgetView'
 
 new_ax_view_props = {
     'title': 'New Title',
-    'xlim': [-10, 10],
+    'xlim': [0.1, 10],
     'xlabel': 'New X Label',
     'xscale': 'log',
-    'ylim': [0, 3],
+    'ylim': [0.2, 3],
     'ylabel': 'New Y Label',
-    'yscale': 'symlog'}
+    'yscale': 'log'}
 
 new_curve_view_props = {
     'label': 'New label',
@@ -47,6 +50,14 @@ new_curve_view_props = {
     'ecolor': '#ff6550',
     'elinewidth': 5}
 
+new_image_props = {
+    'label': 'new label',
+    'colormap': 'jet',
+    'vmin': 1,
+    'vmax': 5,
+    'interpolation': 'hanning',
+    'scale': 'Logarithmic'}
+
 
 def _run_apply_properties_on_figure_with_curve():
     fig = figure()
@@ -58,8 +69,18 @@ def _run_apply_properties_on_figure_with_curve():
     return ax
 
 
+def _run_apply_properties_on_figure_with_image():
+    img_fig = figure()
+    img_ax = img_fig.add_subplot(111)
+    img_ax.imshow([[0, 1], [0, 1]], label='old label')
+    mock_dialog_view = Mock()
+    presenter = PlotConfigDialogPresenter(img_fig, view=mock_dialog_view)
+    presenter.apply_properties()
+    return img_ax
+
+
 class ApplyAllPropertiesTest(unittest.TestCase):
-    
+
     @classmethod
     def setUpClass(cls):
         # Mock axes tab view
@@ -68,24 +89,52 @@ class ApplyAllPropertiesTest(unittest.TestCase):
             get_properties=lambda: AxProperties(new_ax_view_props))
         cls.ax_view_patch = patch(AX_VIEW, lambda x: mock_axes_view)
         cls.ax_view_mock = cls.ax_view_patch.start()
-        
+
         # Mock curves tab view
-        mock_curves_view = Mock(
+        cls.curve_view_mock = Mock(
             get_selected_curve_name=lambda: 'old label',
             get_selected_ax_name=lambda: '(0, 0)',
             get_properties=lambda: CurveProperties(new_curve_view_props))
-        cls.curve_view_patch = patch(CURVE_VIEW, lambda x: mock_curves_view)
-        cls.curve_view_mock = cls.curve_view_patch.start()
+        cls.curve_view_patch = patch(CURVE_VIEW, lambda x: cls.curve_view_mock)
+        cls.curve_view_patch.start()
 
         cls.ax = _run_apply_properties_on_figure_with_curve()
         cls.new_curve = cls.ax.containers[0]
 
-        # Add images tab tests
-    
+        # Mock images tab view
+        cls.img_view_mock = Mock(
+            get_selected_image_name=lambda: '(0, 0) - old label',
+            get_properties=lambda: ImageProperties(new_image_props))
+        cls.img_view_patch = patch(IMAGE_VIEW, lambda x: cls.img_view_mock)
+        cls.img_view_patch.start()
+
+        cls.img_ax = _run_apply_properties_on_figure_with_image()
+        cls.new_img = cls.img_ax.images[0]
+
     @classmethod
     def tearDownClass(cls):
         cls.ax_view_patch.stop()
         cls.curve_view_patch.stop()
+        cls.img_view_patch.stop()
+
+    def test_apply_properties_on_figure_with_image_sets_label(self):
+        self.assertEqual(new_image_props['label'], self.new_img.get_label())
+
+    def test_apply_properties_on_figure_with_image_sets_colormap(self):
+        self.assertEqual(new_image_props['colormap'], self.new_img.cmap.name)
+
+    def test_apply_properties_on_figure_with_image_sets_vmin(self):
+        self.assertEqual(new_image_props['vmin'], self.new_img.norm.vmin)
+
+    def test_apply_properties_on_figure_with_image_sets_vmax(self):
+        self.assertEqual(new_image_props['vmax'], self.new_img.norm.vmax)
+
+    def test_apply_properties_on_figure_with_image_sets_interpolation(self):
+        self.assertEqual(new_image_props['interpolation'].lower(),
+                         self.new_img.get_interpolation())
+
+    def test_apply_properties_on_figure_with_image_sets_scale(self):
+        self.assertTrue(isinstance(self.new_img.norm, LogNorm))
 
     def test_apply_properties_on_figure_with_curve_sets_title(self):
         self.assertEqual(new_ax_view_props['title'], self.ax.get_title())

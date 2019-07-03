@@ -13,6 +13,7 @@ from matplotlib.colors import LogNorm, Normalize
 from qtpy.QtWidgets import QWidget
 
 from mantidqt.utils.qt import load_ui
+from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 
 CMAPS = ['viridis', 'viridis_r', 'plasma', 'plasma_r', 'inferno', 'inferno_r',
          'magma', 'magma_r', 'cividis', 'cividis_r', 'Greys', 'Greys_r',
@@ -102,6 +103,9 @@ class ImagesTabWidgetView(QWidget):
 
     def populate_select_image_combo_box(self, image_names):
         self.select_image_combo_box.addItems(image_names)
+
+    def get_properties(self):
+        return ImageProperties.from_view(self)
 
     def get_selected_image_name(self):
         return self.select_image_combo_box.currentText()
