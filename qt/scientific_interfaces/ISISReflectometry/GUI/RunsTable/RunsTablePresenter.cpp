@@ -119,7 +119,8 @@ RunsTablePresenter::RunsTablePresenter(
 
 void RunsTablePresenter::appendRowAndGroup() {
   // Calculate
-  std::vector<int> localGroupIndices(
+  std::vector<int> localGroupIndices;
+  localGroupIndices.emplace_back(
       static_cast<int>(m_model.reductionJobs().groups().size()));
   appendEmptyGroupInModel();
   appendEmptyGroupInView();
