@@ -3,20 +3,16 @@
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
+# SPDX - License - Identifier: GPL - 3.0 +
 #
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# system imports
-from functools import partial
-
-# third-party library imports
 import matplotlib.pyplot
+from functools import partial
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
-# local package imports
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
@@ -186,7 +182,7 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _action_double_click_workspace(self, name):
-        self._do_show_data([name])
+        plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()

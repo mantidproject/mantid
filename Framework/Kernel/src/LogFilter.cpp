@@ -51,65 +51,65 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   if (!m_filter || m_filter->size() == 0)
     m_filter.reset(filter.clone());
   else {
-    TimeSeriesProperty<bool> *f = new TimeSeriesProperty<bool>("tmp");
+    auto filterProperty = std::make_unique<TimeSeriesProperty<bool>>("tmp");
 
-    TimeSeriesProperty<bool> *f1 = m_filter.get();
-    TimeSeriesProperty<bool> *f2 = filter.clone();
+    TimeSeriesProperty<bool> *filter1 = m_filter.get();
+    auto filter2 = std::unique_ptr<TimeSeriesProperty<bool>>(filter.clone());
 
-    TimeInterval t1 = f1->nthInterval(f1->size() - 1);
-    TimeInterval t2 = f2->nthInterval(f2->size() - 1);
+    TimeInterval time1 = filter1->nthInterval(filter1->size() - 1);
+    TimeInterval time2 = filter2->nthInterval(filter2->size() - 1);
 
-    if (t1.begin() < t2.begin()) {
-      f1->addValue(t2.begin(), true); // should be f1->lastValue, but it doesnt
-                                      // matter for boolean AND
-    } else if (t2.begin() < t1.begin()) {
-      f2->addValue(t1.begin(), true);
+    if (time1.begin() < time2.begin()) {
+      filter1->addValue(time2.begin(),
+                        true); // should be f1->lastValue, but it doesnt
+                               // matter for boolean AND
+    } else if (time2.begin() < time1.begin()) {
+      filter2->addValue(time1.begin(), true);
     }
 
     int i = 0;
     int j = 0;
 
-    t1 = f1->nthInterval(i);
-    t2 = f2->nthInterval(j);
+    time1 = filter1->nthInterval(i);
+    time2 = filter2->nthInterval(j);
 
     // Make the two filters start at the same time. An entry is added at the
     // beginning
     // of the filter that starts later to equalise their staring times. The new
     // interval will have
     // value opposite to the one it started with originally.
-    if (t1.begin() > t2.begin()) {
-      f1->addValue(t2.begin(), !f1->nthValue(i));
-      t1 = f1->nthInterval(i);
-    } else if (t2.begin() > t1.begin()) {
-      f2->addValue(t1.begin(), !f2->nthValue(j));
-      t2 = f2->nthInterval(j);
+    if (time1.begin() > time2.begin()) {
+      filter1->addValue(time2.begin(), !filter1->nthValue(i));
+      time1 = filter1->nthInterval(i);
+    } else if (time2.begin() > time1.begin()) {
+      filter2->addValue(time1.begin(), !filter2->nthValue(j));
+      time2 = filter2->nthInterval(j);
     }
 
     for (;;) {
-      TimeInterval t;
-      t = t1.intersection(t2);
-      if (t.isValid()) {
-        f->addValue(t.begin(), (f1->nthValue(i) && f2->nthValue(j)));
+      TimeInterval time3;
+      time3 = time1.intersection(time2);
+      if (time3.isValid()) {
+        filterProperty->addValue(
+            time3.begin(), (filter1->nthValue(i) && filter2->nthValue(j)));
       }
 
-      if (t1.end() < t2.end()) {
+      if (time1.end() < time2.end()) {
         i++;
-      } else if (t2.end() < t1.end()) {
+      } else if (time2.end() < time1.end()) {
         j++;
       } else {
         i++;
         j++;
       }
 
-      if (i == f1->size() || j == f2->size())
+      if (i == filter1->size() || j == filter2->size())
         break;
-      t1 = f1->nthInterval(i);
-      t2 = f2->nthInterval(j);
+      time1 = filter1->nthInterval(i);
+      time2 = filter2->nthInterval(j);
     }
-
-    delete f2;
-    f->clearFilter();
-    m_filter.reset(f);
+    filterProperty->clearFilter();
+    m_filter = std::move(filterProperty);
   }
   if (m_prop) {
     m_prop->clearFilter();

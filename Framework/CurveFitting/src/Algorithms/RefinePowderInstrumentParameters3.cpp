@@ -1100,14 +1100,14 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
 
   outws->getAxis(0)->setUnit("dSpacing");
 
-  auto taxis = new TextAxis(outws->getNumberHistograms());
-  taxis->setLabel(0, "Data");
-  taxis->setLabel(1, "Model");
-  taxis->setLabel(2, "DiffDM");
-  taxis->setLabel(3, "Start");
-  taxis->setLabel(4, "DiffDS");
-  taxis->setLabel(5, "Zdiff");
-  outws->replaceAxis(1, taxis);
+  auto tAxis = std::make_unique<TextAxis>(outws->getNumberHistograms());
+  tAxis->setLabel(0, "Data");
+  tAxis->setLabel(1, "Model");
+  tAxis->setLabel(2, "DiffDM");
+  tAxis->setLabel(3, "Start");
+  tAxis->setLabel(4, "DiffDS");
+  tAxis->setLabel(5, "Zdiff");
+  outws->replaceAxis(1, std::move(tAxis));
 
   // 3. Re-calculate values
   FunctionValues funcvalues(domain);

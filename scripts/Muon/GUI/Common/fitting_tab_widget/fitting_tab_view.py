@@ -78,7 +78,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
             return
 
+        self.function_browser.blockSignals(True)
         self.function_browser.updateMultiDatasetParameters(fit_function)
+        self.function_browser.blockSignals(False)
 
         if output_status == 'success':
             self.fit_status_success_failure.setText('Success')
@@ -194,6 +196,15 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_to_raw_data_checkbox.setCheckState(state)
 
     @property
+    def tf_asymmetry_mode(self):
+        return self.tf_asymmetry_mode_checkbox.isChecked()
+
+    @tf_asymmetry_mode.setter
+    def tf_asymmetry_mode(self, value):
+        state = QtCore.Qt.Checked if value else QtCore.Qt.Unchecked
+        self.tf_asymmetry_mode_checkbox.setCheckState(state)
+
+    @property
     def group_name(self):
         return str(self.ads_group_name_textbox.text())
 
@@ -218,16 +229,11 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         current_index = self.parameter_display_combo.currentIndex()
         return current_index if current_index != -1 else 0
 
-    def get_index_for_fit_specification(self):
-        if self.fit_type == self.sequential_fit:
-            current_index = self.parameter_display_combo.currentIndex()
-        else:
-            current_index = 0
-
-        return current_index if current_index != -1 else 0
+    def get_global_parameters(self):
+        return self.function_browser.getGlobalParameters()
 
     def setup_fit_options_table(self):
-        self.fit_options_table.setRowCount(5)
+        self.fit_options_table.setRowCount(6)
         self.fit_options_table.setColumnCount(2)
         self.fit_options_table.setColumnWidth(0, 300)
         self.fit_options_table.setColumnWidth(1, 300)
@@ -251,5 +257,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, True, 3)
 
-        table_utils.setRowName(self.fit_options_table, 4, "Evaluate Function As")
-        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 4, ['CentrePoint', 'Histogram'])
+        table_utils.setRowName(self.fit_options_table, 4, "TF Asymmetry Mode")
+        self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
+            self.fit_options_table, False, 4)
+
+        table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
+        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 5, ['CentrePoint', 'Histogram'])

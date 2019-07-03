@@ -118,17 +118,17 @@ public:
   static MatrixWorkspace_sptr create_2d_workspace() {
     MatrixWorkspace_sptr goodWS =
         WorkspaceCreationHelper::create2DWorkspaceBinned(5, 5, -0.3, 0.12);
-    NumericAxis *yAxis = new NumericAxis(5);
+    auto yAxis = std::make_unique<NumericAxis>(5);
 
     for (int i = 0; i < 5; ++i) {
       yAxis->setValue(i, -0.24 + 0.12 * i);
     }
-    goodWS->replaceAxis(1, yAxis);
+    goodWS->replaceAxis(1, std::move(yAxis));
 
-    NumericAxis *xAxis = new NumericAxis(6);
+    auto xAxis = std::make_unique<NumericAxis>(6);
     for (int i = 0; i < 6; i++)
       xAxis->setValue(i, -0.3 + i * 0.12);
-    goodWS->replaceAxis(0, xAxis);
+    goodWS->replaceAxis(0, std::move(xAxis));
 
     // 0 values
     goodWS->dataY(0)[0] = goodWS->dataY(0)[2] = goodWS->dataY(0)[4] = 0;

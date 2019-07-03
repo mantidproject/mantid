@@ -69,7 +69,11 @@ This is the last release of Mantid which will include the old reflectometry inte
 New
 ###
 
-- Flood correction options have been added to the interface.
+- The tabs have been restructured so that sets of related tabs now reside inside a ``Batch``. This replaces the old structuring where there were two ``Groups`` inside every tab and the user had to toggle to the correct group separately on each tab. You can create and delete Batches using the menu and the tabs on the left.
+- The Settings tab has been split into two separate tabs, ``Experiment Settings`` and ``Instrument Settings``.
+- The main table on the Runs tab now supports many additional keyboard shortcuts for entering text and navigation (see the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` documentation for details).
+- Better validation has been added to input components to highlight invalid values or disallow entering them where possible.
+- Flood correction options have been added to the ``Experiment Settings`` tab.
 
 Improvements
 ############

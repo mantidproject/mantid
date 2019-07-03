@@ -34,6 +34,7 @@ Algorithms
 Improvements
 ############
 
+- :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` is extended to support reduction for the new inverted TOF option (BATS) of IN16B.
 - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` permits now passing parameter values as input properties.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` resolves between run with old and new DAS.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` permits now flux normalization by proton charge and run duration.
@@ -61,6 +62,13 @@ Bug Fixes
 - Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
 - Fixed a bug where the loaded workspace in Data Analysis doesn't update after being changed on a different
   interface.
+- Fixed a bug causing the errors calculated on Iqt to be too small towards the end of the spectra.
+
+.. figure:: ../../images/Iqt_Errors_Bug.PNG
+  :class: screenshot
+  :align: center
+  :figwidth: 90%
+  :alt: The bug causing small Iqt errors.
 
 
 Data Corrections Interface
@@ -90,6 +98,14 @@ Bug Fixes
 #########
 - Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm causing the Moments tab to crash.
 - Fixed an unexpected error when opening the Data Reduction interface with an unrelated facility selected.
+
+
+Diffraction Interface
+----------------------
+
+Bug Fixes
+#########
+- Fixed a bug which allowed an out-of-range Spectra Min and Spectra Max.
 
 
 Indirect Settings Interface

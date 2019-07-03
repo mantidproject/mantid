@@ -114,13 +114,13 @@ void SumOverlappingTubes::exec() {
   outputWS->setDistribution(false);
   outputWS->setSharedRun(m_workspaceList.front()->sharedRun());
 
-  const auto newAxis = new NumericAxis(m_heightAxis);
+  auto newAxis = std::make_unique<NumericAxis>(m_heightAxis);
   newAxis->setUnit("Label");
   auto yLabelUnit =
       boost::dynamic_pointer_cast<Kernel::Units::Label>(newAxis->unit());
   yLabelUnit->setLabel("Height", "m");
   newAxis->unit() = yLabelUnit;
-  outputWS->replaceAxis(1, newAxis);
+  outputWS->replaceAxis(1, std::move(newAxis));
 
   outputWS->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("Label");
@@ -297,7 +297,9 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
     m_progress->report("Processing workspace " + std::string(ws->getName()));
     // loop over spectra
     const auto &specInfo = ws->spectrumInfo();
-    for (size_t i = 0; i < specInfo.size(); ++i) {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outputWS))
+    for (int i = 0; i < static_cast<int>(specInfo.size()); ++i) {
+      PARALLEL_START_INTERUPT_REGION
       if (specInfo.isMonitor(i) || specInfo.isMasked(i))
         continue;
 
@@ -333,11 +335,12 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         continue;
 
       const double deltaAngle = distanceFromAngle(angleIndex, angle);
-      auto counts = ws->histogram(i).y()[0];
-      auto error = ws->histogram(i).e()[0];
+      const auto counts = ws->histogram(i).y()[0];
+      const auto error = ws->histogram(i).e()[0];
       auto &yData = outputWS->mutableY(heightIndex);
       auto &eData = outputWS->mutableE(heightIndex);
 
+      PARALLEL_CRITICAL(Histogramming2ThetaVsHeight)
       // counts are split between bins if outside this tolerance
       if (splitCounts &&
           deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
@@ -376,7 +379,9 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
             sqrt(eData[angleIndex] * eData[angleIndex] + error * error);
         normalisation[heightIndex][angleIndex]++;
       }
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 
   return normalisation;

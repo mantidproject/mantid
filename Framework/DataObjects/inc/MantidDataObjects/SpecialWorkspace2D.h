@@ -42,7 +42,9 @@ public:
   }
   /// Returns a default-initialized clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> cloneEmpty() const {
-    return std::unique_ptr<SpecialWorkspace2D>(doCloneEmpty());
+    auto workspace = std::unique_ptr<SpecialWorkspace2D>(doCloneEmpty());
+    workspace->detID_to_WI = this->detID_to_WI;
+    return workspace;
   }
   SpecialWorkspace2D &operator=(const SpecialWorkspace2D &) = delete;
   /** Gets the name of the workspace type

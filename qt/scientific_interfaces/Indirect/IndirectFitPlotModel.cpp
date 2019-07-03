@@ -272,8 +272,9 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
     MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr guessWorkspace,
     int spectrum, double startX, double endX) const {
   guessWorkspace->setInstrument(inputWS->getInstrument());
-  guessWorkspace->replaceAxis(0,
-                              inputWS->getAxis(0)->clone(guessWorkspace.get()));
+  guessWorkspace->replaceAxis(
+      0,
+      std::unique_ptr<Axis>(inputWS->getAxis(0)->clone(guessWorkspace.get())));
   guessWorkspace->setDistribution(inputWS->isDistribution());
 
   auto extracted = extractSpectra(inputWS, spectrum, spectrum, startX, endX);
@@ -284,7 +285,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
   auto axis = std::make_unique<TextAxis>(2);
   axis->setLabel(0, "Sample");
   axis->setLabel(1, "Guess");
-  inputAndGuess->replaceAxis(1, axis.release());
+  inputAndGuess->replaceAxis(1, std::move(axis));
   return inputAndGuess;
 }
 

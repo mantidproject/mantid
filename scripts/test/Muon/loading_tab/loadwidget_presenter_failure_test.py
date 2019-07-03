@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 from qtpy.QtWidgets import QApplication, QWidget
@@ -77,10 +76,11 @@ class LoadRunWidgetPresenterLoadFailTest(GuiTest):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
             return_value=["C:\\dir1\\EMU0001234.nxs"])
         self.workspace_mock = self.create_fake_workspace(1)
-        self.load_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs")
-        self.load_run_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs")
+        self.load_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs", False)
+        self.load_run_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs", False)
 
         self.presenter.load_file_widget.on_browse_button_clicked()
+        self.context.update_current_data = mock.MagicMock(return_value=([], []))
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
 
         file_utils.get_current_run_filename = mock.Mock(return_value="EMU0001234.nxs")

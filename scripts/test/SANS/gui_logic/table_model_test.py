@@ -315,12 +315,12 @@ class TableModelTest(unittest.TestCase):
             
     def test_that_to_batch_list_is_correct_format(self):
         test_row = ['SANS2D00022024  ', '', 'SANS2D00022025 ', '', '   SANS2D00022026 ', '', '', '', '', '', '', '',
-                    '    out_file', 'a_user_file ', 1.0, '', '', 'Disc', 'WavelengthMax=5.0']
+                    '    out_file', 'a_user_file ', 1.0, 5.0, 5.4, 'Disc', 'WavelengthMax=5.0']
         table_index_model = TableIndexModel(*test_row)
 
         actual_list = table_index_model.to_batch_list()
         expected_list = ["SANS2D00022024", "SANS2D00022025", "SANS2D00022026",
-                         "", "", "",  "out_file", "a_user_file"]
+                         "", "", "",  "out_file", "a_user_file", "1.0", "5.0", "5.4"]
 
         self.assertEqual(actual_list, expected_list)
 
@@ -367,6 +367,7 @@ class TableModelTest(unittest.TestCase):
     def _user_file_wrapper(value):
         table_model = TableModel()
         table_model.user_file = value
+
 
 class TableModelThreadingTest(unittest.TestCase):
     @classmethod

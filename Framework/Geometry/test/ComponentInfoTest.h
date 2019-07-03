@@ -704,6 +704,26 @@ public:
     TS_ASSERT_EQUALS(panel.topLeft, 3);
     TS_ASSERT_EQUALS(panel.topRight, 15);
   }
+
+  void test_new_demo_instrument() {
+    using namespace Mantid::Kernel;
+
+    // 45 degree rotation around z.
+    const Quat bankRotation(45, V3D(0, 0, 1));
+    const Quat detRotation(45, V3D(0, 0, 1));
+
+    auto instrument =
+        ComponentCreationHelper::createSimpleInstrumentWithRotation(
+            V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 1), bankRotation,
+            detRotation);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = *std::get<0>(wrappers);
+    const auto actBankRotation =
+        componentInfo.rotation(componentInfo.indexOfAny("detector-stage"));
+    TS_ASSERT_EQUALS(actBankRotation, bankRotation);
+    const auto actDetRotation = componentInfo.rotation(0);
+    TS_ASSERT_EQUALS(actDetRotation, bankRotation * detRotation);
+  }
 };
 
 #endif /* MANTID_GEOMETRY_COMPONENTINFOTEST_H_ */

@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/MersenneTwister.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -58,7 +59,7 @@ private:
   API::MatrixWorkspace_sptr doSimulation(API::MatrixWorkspace_sptr sample,
                                          API::MatrixWorkspace_sptr resolution,
                                          const std::string &rebinParams,
-                                         const int seed);
+                                         Kernel::MersenneTwister &mTwister);
   API::MatrixWorkspace_sptr setErrorsToStandardDeviation(
       const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
   API::MatrixWorkspace_sptr setErrorsToZero(

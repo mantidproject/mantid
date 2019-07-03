@@ -86,6 +86,14 @@ void PreviewPlot::watchADS(bool on) {
 }
 
 /**
+ * Gets the canvas used by the preview plot
+ * @return The canvas
+ */
+Widgets::MplCpp::FigureCanvasQt *PreviewPlot::canvas() const {
+  return m_canvas;
+}
+
+/**
  * Add a line for a given spectrum to the plot
  * @param lineName A string label for the line
  * @param ws A MatrixWorkspace that contains the data
@@ -94,7 +102,8 @@ void PreviewPlot::watchADS(bool on) {
  */
 void PreviewPlot::addSpectrum(const QString &lineName,
                               const Mantid::API::MatrixWorkspace_sptr &ws,
-                              const size_t wsIndex, const QColor &lineColour) {
+                              const size_t wsIndex, const QColor &lineColour,
+                              const QHash<QString, QVariant> &plotKwargs) {
   if (lineName.isEmpty()) {
     g_log.warning("Cannot plot with empty line name");
     return;
@@ -104,8 +113,16 @@ void PreviewPlot::addSpectrum(const QString &lineName,
     return;
   }
   removeSpectrum(lineName);
+
   auto axes = m_canvas->gca<MantidAxes>();
-  axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName);
+  if (linesWithErrors().contains(lineName)) {
+    axes.errorbar(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
+                  plotKwargs);
+  } else {
+    axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
+              plotKwargs);
+  }
+
   regenerateLegend();
   axes.relim();
   m_canvas->draw();
@@ -119,11 +136,12 @@ void PreviewPlot::addSpectrum(const QString &lineName,
  * @param lineColour Defines the color of the line
  */
 void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
-                              const size_t wsIndex, const QColor &lineColour) {
+                              const size_t wsIndex, const QColor &lineColour,
+                              const QHash<QString, QVariant> &plotKwargs) {
   addSpectrum(lineName,
               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
                   wsName.toStdString()),
-              wsIndex, lineColour);
+              wsIndex, lineColour, plotKwargs);
 }
 
 /**
@@ -151,6 +169,27 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
     m_canvas->gca().setYLim(range.first, range.second);
     break;
   }
+}
+
+/**
+ * Gets the range of the specified axis
+ * @param axisID An enumeration defining the axis
+ * @return The axis range
+ */
+std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
+  switch (axisID) {
+  case AxisID::XBottom:
+    return m_canvas->gca().getXLim();
+  case AxisID::YLeft:
+    return m_canvas->gca().getYLim();
+  }
+  throw std::runtime_error(
+      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
+}
+
+void PreviewPlot::replot() {
+  m_canvas->draw();
+  emit redraw();
 }
 
 /**
@@ -190,7 +229,7 @@ void PreviewPlot::setLinesWithErrors(QStringList labels) {
  * Toggle for programatic legend visibility toggle
  * @param visible If True the legend is visible on the canvas
  */
-void PreviewPlot::showLegend(const bool visible) {
+void PreviewPlot::showLegend(bool visible) {
   m_contextLegend->setChecked(visible);
 }
 
@@ -221,6 +260,9 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
   case QEvent::MouseButtonRelease:
     stopEvent = handleMouseReleaseEvent(static_cast<QMouseEvent *>(evt));
     break;
+  case QEvent::MouseMove:
+    stopEvent = handleMouseMoveEvent(static_cast<QMouseEvent *>(evt));
+    break;
   default:
     break;
   }
@@ -238,6 +280,11 @@ bool PreviewPlot::handleMousePressEvent(QMouseEvent *evt) {
   // show when the mouse click is released
   if (evt->buttons() & Qt::RightButton) {
     stopEvent = true;
+  } else if (evt->buttons() & Qt::LeftButton) {
+    stopEvent = true;
+    const auto position = evt->pos();
+    if (!position.isNull())
+      emit mouseDown(position);
   }
   return stopEvent;
 }
@@ -252,6 +299,22 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
   if (evt->button() == Qt::RightButton) {
     stopEvent = true;
     showContextMenu(evt);
+  } else if (evt->button() == Qt::LeftButton) {
+    stopEvent = true;
+    const auto position = evt->pos();
+    if (!position.isNull())
+      emit mouseUp(position);
+  }
+  return stopEvent;
+}
+
+bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
+  bool stopEvent(false);
+  if (evt->buttons() == Qt::LeftButton) {
+    stopEvent = true;
+    const auto position = evt->pos();
+    if (!position.isNull())
+      emit mouseMove(position);
   }
   return stopEvent;
 }

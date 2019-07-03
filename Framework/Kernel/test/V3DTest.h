@@ -418,10 +418,10 @@ public:
     NexusTestHelper th(true);
     th.createFile("V3DTest.nxs");
     V3D a(1, 2, 3);
-    a.saveNexus(th.file, "vector");
+    a.saveNexus(th.file.get(), "vector");
     th.reopenFile();
     V3D b;
-    b.loadNexus(th.file, "vector");
+    b.loadNexus(th.file.get(), "vector");
     TS_ASSERT_EQUALS(a, b);
   }
 

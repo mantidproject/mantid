@@ -19,11 +19,9 @@ class MockInstrument(object):
 
 
 class MockFacility(object):
-    MOCK_NAME = "MockFacility"
-    all_instruments = [MockInstrument(0), MockInstrument(1)]
-
-    def __init__(self):
-        self.name = StrictMock(return_value=self.MOCK_NAME)
+    def __init__(self, name):
+        self.name = StrictMock(return_value=name)
+        self.all_instruments = [MockInstrument(0), MockInstrument(1)]
         self.instruments = StrictMock(return_value=self.all_instruments)
 
 
@@ -31,8 +29,8 @@ class MockConfigService(object):
     all_facilities = ["facility1", "facility2"]
 
     def __init__(self):
-        self.mock_facility = MockFacility()
-        self.mock_instrument = MockFacility()
+        self.mock_facility = MockFacility(self.all_facilities[0])
+        self.mock_instrument = self.mock_facility.all_instruments[0]
         self.getFacilityNames = StrictMock(return_value=self.all_facilities)
         self.getFacility = StrictMock(return_value=self.mock_facility)
         self.getInstrument = StrictMock(return_value=self.mock_instrument)
@@ -49,15 +47,39 @@ class GeneralSettingsTest(GuiTest):
         self.assertEqual(1, owner.receivers(signal))
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_facilities(self, mock_ConfigService):
+    def test_setup_facilities_with_valid_combination(self, mock_ConfigService):
+        self.assertEqual(0, mock_ConfigService.mock_instrument.name.call_count)
         presenter = GeneralSettings(None)
-        mock_ConfigService.setFacility.assert_called_once_with(MockFacility.MOCK_NAME)
+        mock_ConfigService.setFacility.assert_called_once_with(mock_ConfigService.mock_facility.name())
         self.assertEqual(2, mock_ConfigService.getFacility.call_count)
-        mock_ConfigService.mock_facility.name.assert_called_once_with()
+        self.assertEqual(2, mock_ConfigService.mock_facility.name.call_count)
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
 
         mock_ConfigService.getInstrument.assert_called_once_with()
-        mock_ConfigService.mock_instrument.name.assert_called_once_with()
+        self.assertEqual(2, mock_ConfigService.mock_instrument.name.call_count)
+        self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_setup_facilities_with_invalid_default_facility_chooses_first(self, mock_ConfigService):
+        mock_ConfigService.getFacility.side_effect = [RuntimeError("Invalid facility name"), mock_ConfigService.mock_facility]
+        presenter = GeneralSettings(None)
+
+        self.assertEqual(mock_ConfigService.mock_facility.name(),
+                         presenter.view.facility.currentText())
+        self.assertEqual(mock_ConfigService.mock_instrument.name(),
+                         presenter.view.instrument.currentText())
+        self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
+        self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_setup_facilities_with_invalid_default_instrument_chooses_first(self, mock_ConfigService):
+        mock_ConfigService.getInstrument.side_effect = [RuntimeError("Invalid instrument name"),
+                                                        mock_ConfigService.mock_instrument]
+        presenter = GeneralSettings(None)
+
+        self.assertEqual(mock_ConfigService.mock_instrument.name(),
+                         presenter.view.instrument.currentText())
+        self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
         self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
@@ -112,7 +134,8 @@ class GeneralSettingsTest(GuiTest):
         mock_conf.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_ON_CLOSE, False)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_action_prompt_save_editor_modified(self, mock_CONF):
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_prompt_save_editor_modified(self, mock_ConfigService, mock_CONF):
         presenter = GeneralSettings(None)
 
         presenter.action_prompt_save_editor_modified(True)

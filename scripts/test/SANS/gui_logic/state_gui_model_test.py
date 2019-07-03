@@ -32,8 +32,17 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_can_set_compatibility_mode(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.compatibility_mode = True
-        self.assertTrue(state_gui_model.compatibility_mode)
+        state_gui_model.compatibility_mode = False
+        self.assertFalse(state_gui_model.compatibility_mode)
+
+    def test_that_default_event_slice_optimisation_is_false(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertFalse(state_gui_model.event_slice_optimisation)
+
+    def test_that_can_set_event_slice_optimisation(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.event_slice_optimisation = True
+        self.assertTrue(state_gui_model.event_slice_optimisation)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Save options
@@ -447,6 +456,14 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.q_xy_step_type, RangeStepType.Log)
         self.assertEqual(state_gui_model.r_cut, 45.)
         self.assertEqual(state_gui_model.w_cut, 890.)
+
+    def test_that_q_1d_rebin_string_as_bytes_is_converted_to_string(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.q_1d_rebin_string = b"test"
+
+        q_1d_rebin_string = state_gui_model.q_1d_rebin_string
+        self.assertEqual(type(q_1d_rebin_string), str)
+        self.assertEqual(q_1d_rebin_string, "test")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity

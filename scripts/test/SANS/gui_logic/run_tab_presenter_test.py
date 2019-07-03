@@ -35,7 +35,8 @@ BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
                               BatchReductionEntry.SampleDirect: 'SANS2D00022048',
                               BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
+                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.Output: 'test_file2'}]
 
 BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
                               BatchReductionEntry.SampleScatterPeriod: '3',
@@ -45,7 +46,16 @@ BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
                               BatchReductionEntry.SampleDirect: 'SANS2D00022048',
                               BatchReductionEntry.Output: 'test_file'},
-                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
+                             {BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.Output: 'test_file2'}]
+
+BATCH_FILE_TEST_CONTENT_5 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024',
+                              BatchReductionEntry.SampleTransmission: 'SANS2D00022048',
+                              BatchReductionEntry.SampleDirect: 'SANS2D00022048',
+                              BatchReductionEntry.Output: 'test_file',
+                              BatchReductionEntry.SampleThickness: '5',
+                              BatchReductionEntry.SampleHeight: '2',
+                              BatchReductionEntry.SampleWidth: '8'}]
 
 
 def get_non_empty_row_mock(value):
@@ -446,7 +456,7 @@ class RunTabPresenterTest(unittest.TestCase):
         index = 0
         expected_table_index_model = TableIndexModel(*row)
         expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = True
+        expected_table_index_model.file_finding = False
 
         presenter.on_row_inserted(index, row)
 
@@ -483,7 +493,7 @@ class RunTabPresenterTest(unittest.TestCase):
         value = '74040'
         expected_table_index_model = TableIndexModel(*expected_row)
         expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = True
+        expected_table_index_model.file_finding = False
 
         presenter.on_data_changed(row, column, value, '')
 
@@ -509,17 +519,18 @@ class RunTabPresenterTest(unittest.TestCase):
         rows = [0, 2]
         expected_row_0 = TableIndexModel(*row_1)
         expected_row_0.id = 1
-        expected_row_0.file_finding = True
+        expected_row_0.file_finding = False
         expected_row_1 = TableIndexModel(*row_3)
         expected_row_1.id = 3
-        expected_row_1.file_finding = True
-
+        expected_row_1.file_finding = False
 
         presenter.on_rows_removed(rows)
 
         self.assertEqual(presenter._table_model.get_number_of_rows(), 2)
+
         model_row_0 = presenter._table_model.get_table_entry(0)
         self.assertEqual(model_row_0, expected_row_0)
+
         model_row_1 = presenter._table_model.get_table_entry(1)
         self.assertEqual(model_row_1, expected_row_1)
 
@@ -560,6 +571,18 @@ class RunTabPresenterTest(unittest.TestCase):
 
         table_entry_1 = presenter._table_model.get_table_entry(1)
         self.assertEqual(table_entry_1.output_name, 'test_file2')
+
+    def test_add_row_to_table_model_adds_sample_geometries(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(mock.MagicMock())
+        parsed_data = BATCH_FILE_TEST_CONTENT_5
+
+        presenter._add_row_to_table_model(parsed_data[0], 0)
+
+        table_entry_0 = presenter._table_model.get_table_entry(0)
+        self.assertEqual(table_entry_0.sample_thickness, '5')
+        self.assertEqual(table_entry_0.sample_height, '2')
+        self.assertEqual(table_entry_0.sample_width, '8')
 
     def test_update_view_from_table_model_updated_view_based_on_model(self):
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
@@ -739,6 +762,25 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(presenter._table_model.get_table_entry(1).__dict__, empty_row.__dict__)
         empty_row.id = 4
         self.assertEqual(presenter._table_model.get_table_entry(2).__dict__, empty_row.__dict__)
+
+    def test_on_erase_rows_does_not_add_rows_when_table_contains_one_row(self):
+        """
+        A bug caused erase rows to add a row to a table containing only 1 row.
+        Check that this is fixed
+        """
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0])
+        presenter.set_view(view)
+
+        test_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                    'test_file', '', '1.0', '', '', '', '']
+
+        presenter.on_row_inserted(0, test_row)
+        presenter.on_erase_rows()
+
+        self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
+        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), ['']*19)
 
     def test_on_erase_rows_updates_view(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -939,11 +981,12 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.set_view(view)
 
         test_row = ["SANS2D00022025", "SANS2D00022052", "SANS2D00022022",
-                    "", "", "", "another_file", "a_user_file.txt"]
+                    "", "", "", "another_file", "a_user_file.txt", "1.0", "5.0", "5.4"]
 
         expected_list = ["sample_sans", "SANS2D00022025", "sample_trans", "SANS2D00022052",
                          "sample_direct_beam", "SANS2D00022022", "can_sans", "", "can_trans", "", "can_direct_beam", "",
-                         "output_as", "another_file", "user_file", "a_user_file.txt"]
+                         "output_as", "another_file", "user_file", "a_user_file.txt", "sample_thickness", "1.0",
+                         "sample_height", "5.0", "sample_width", "5.4"]
 
         actual_list = presenter._create_batch_entry_from_row(test_row)
 
@@ -1134,13 +1177,43 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
         presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
 
+    def test_that_on_reduction_mode_changed_calls_update_hab_if_selection_is_HAB(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter._beam_centre_presenter = mock.MagicMock()
+
+        presenter.on_reduction_mode_selection_has_changed("Hab")
+        presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("front")
+        presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+
+    def test_that_on_reduction_mode_changed_calls_update_lab_if_selection_is_LAB(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter._beam_centre_presenter = mock.MagicMock()
+
+        presenter.on_reduction_mode_selection_has_changed("rear")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("main-detector")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("DetectorBench")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        presenter._beam_centre_presenter.reset_mock()
+        presenter.on_reduction_mode_selection_has_changed("rear-detector")
+        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():
             if PropertyManagerDataService.doesExist(element):
                 PropertyManagerDataService.remove(element)
 
-    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path = ""):
+    def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path=""):
         if row_user_file_path:
             content[1].update({BatchReductionEntry.UserFile : row_user_file_path})
 

@@ -58,7 +58,7 @@ class WishMasking(systemtesting.MantidSystemTest):
             os.remove(cal_file_full_path)
 
     def requiredMemoryMB(self):
-        return 2000
+        return 16384
 
     def runTest(self):
         Load(Filename='WISH00016748.raw',OutputWorkspace='wish_ws')
