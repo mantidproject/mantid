@@ -409,13 +409,6 @@ public:
 
   void test_detector_position_is_expected_value_after_rotation() {
 
-    auto rotY =  M_PI / 2; 
-    Eigen::Vector3d originVector(0, 0, 0);
-
-    // test rotation
-    Eigen::Matrix3d testRotationAboutXMatrix;
-    testRotationAboutXMatrix << 1,0,0,0,cos(rotY),-sin(rotY),0,sin(rotY),cos(rotY); // rotation matrix
-
     auto instrument =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
 
@@ -423,32 +416,55 @@ public:
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
     auto &compInfo = (*beamline.first);
 
-    auto detPosa1 = compInfo.position(0); 
-    auto detPosb1 = compInfo.position(1);
-   // set position of bank to origin
-    // compInfo.setPosition(compInfo.indexOfAny("bank1"),
-     //                    Mantid::Kernel::toV3D(originVector));
+    // prepare values
+    const auto bankIndex = compInfo.indexOfAny("bank1");
+    const auto ROT = M_PI / 2;
 
-    // get detector position before rotation.
-    auto absDetectorPositionBeforeRotation = compInfo.position(0);
-    auto bankIndex = compInfo.indexOfAny("bank1");
+    // EIGEN initialisations.
+    Eigen::Vector3d originVectorEigen(0, 0, 0);
 
-    // set abosolute bank rotation (rotate about x)
-    Eigen::Quaterniond absoluteBankRotation(
-        Eigen::AngleAxisd(rotY, Eigen::Vector3d(1, 0, 0)));
+    Eigen::Quaterniond initialBankOrientationEigen(Eigen::AngleAxisd(
+        ROT, Eigen::Vector3d(1, 0, 0))); // adding 1 sets initial detector
+                                         // position to y x z respectively
 
-    compInfo.setRotation(bankIndex,
-                         Mantid::Kernel::toQuat(absoluteBankRotation));
+    Eigen::Quaterniond absoluteBankRotationEigen(
+        Eigen::AngleAxisd(ROT, Eigen::Vector3d(1, 0, 0)));
 
-    // absolute position of detector after rotation
-    auto absDetectorPositionAfterRotation = compInfo.position(0);
+    // EIGEN TO V3D/QUAT conversions.
+    Mantid::Kernel::V3D toV3DOriginVector =
+        Mantid::Kernel::toV3D(originVectorEigen);
+    Mantid::Kernel::Quat toQuatInitialBankOrientation =
+        Mantid::Kernel::toQuat(initialBankOrientationEigen);
+    Mantid::Kernel::Quat toQuatAbsoluteBankRotation =
+        Mantid::Kernel::toQuat(absoluteBankRotationEigen);
 
-    Eigen::Vector3d expectedDetectorPositionAfterRotation =
-        testRotationAboutXMatrix * Mantid::Kernel::toVector3d (absDetectorPositionBeforeRotation);
+    // bank centre to position origin.
+    compInfo.setPosition(bankIndex, toV3DOriginVector);
 
-    TS_ASSERT( Mantid::Kernel::toVector3d(absDetectorPositionAfterRotation).isApprox(
-        expectedDetectorPositionAfterRotation) );
+    // get detector position before test rotation.
+    const V3D pos1 = compInfo.position(2);
+
+    // test rotation bank about an axis
+    compInfo.setRotation(bankIndex, toQuatAbsoluteBankRotation);
+
+    // get detector position after test rotation.
+    const V3D pos2 = compInfo.position(2);
+
+    // test of eigen V3D
+    Eigen::Quaterniond testVersor(
+        Eigen::AngleAxisd(ROT, Eigen::Vector3d(0, 0, 1))); // rotate about z
+    Eigen::Vector3d testVector(1, 0, 0);                   // unit vector i.
+
+    Eigen::Vector3d testTransform = testVersor.matrix() * testVector;
+    Mantid::Kernel::V3D toV3DtestTransform =
+        Mantid::Kernel::toV3D(testTransform);
+
+    /*
+TS_ASSERT(Mantid::Kernel::toVector3d(absDetectorPositionAfterRotation)
+              .isApprox(expectedDetectorPositionAfterRotation)); */
   }
+
+  // void test_toEigen_transform_
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

@@ -47,6 +47,12 @@ void writeStrAttributeToDataSet(H5::DataSet &dSet, const std::string &NX_class,
   attribute.write(attrType, attrVal);
 }
 
+/*
+Eigen::Affine3d toEigenTransform(Eigen::Vector3d translation,
+                                 Eigen::Quaterniond rotation){
+  return rotation.matrix * translation.matrix();
+}*/
+
 // saves the instrument to file.
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
@@ -114,7 +120,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writeStrAttributeToDataSet(dataSet, NX_CLASS,
                              NX_CHAR); // add NX_class attribute to dataset
 
-  // TODO: make a source group NX_class NXsource, containing transformations group NX_class NXtransformations
+  // TODO: make a source group NX_class NXsource, containing transformations
+  // group NX_class NXtransformations
 
   file.close();
 
