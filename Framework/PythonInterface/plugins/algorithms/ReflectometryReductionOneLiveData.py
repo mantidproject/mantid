@@ -25,12 +25,14 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         return 'Run the reflectometry reduction algorithm on live data'
 
     def seeAlso(self):
-        return ["ReflectometryReductionOneAuto", "StartLiveData"]
+        return ["ReflectometryISISLoadAndProcess", "StartLiveData"]
 
     def PyInit(self):
         instruments = ['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']
         defaultInstrument = str(config.getInstrument())
         defaultInstrument = defaultInstrument if defaultInstrument in instruments else instruments[0]
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
+                                                     direction=Direction.Input))
         self.declareProperty(name='Instrument', defaultValue=defaultInstrument, direction=Direction.Input,
                              validator=StringListValidator(instruments),
                              doc='Instrument to find live value for.')
@@ -39,19 +41,21 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
                              doc='The algorithm to use to get live values from the instrument')
 
         self._child_properties = [
-            'InputWorkspace', 'SummationType', 'ReductionType', 'IncludePartialBins',
+            'FirstTransmissionRunList','SecondTransmissionRunList',
+            'SliceWorkspace', 'NumberOfSlices',
+            'SummationType', 'ReductionType', 'IncludePartialBins',
             'AnalysisMode', 'ProcessingInstructions', 'CorrectDetectors',
             'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
             'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
-            'NormalizeByIntegratedMonitors', 'FirstTransmissionRun',
-            'SecondTransmissionRun', 'Params', 'StartOverlap', 'EndOverlap',
+            'NormalizeByIntegratedMonitors', 'Params', 'StartOverlap', 'EndOverlap',
             'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
             'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
             'ScaleFactor', 'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha',
-            'FloodCorrection', 'FloodWorkspace', 'Debug', 'OutputWorkspace']
-        self.copyProperties('ReflectometryReductionOneAuto', self._child_properties)
+            'FloodCorrection', 'FloodWorkspace', 'Debug',
+            'OutputWorkspace']
+        self.copyProperties('ReflectometryISISLoadAndProcess', self._child_properties)
 
     def PyExec(self):
         self._setup_workspace_for_reduction()
@@ -60,7 +64,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def _setup_workspace_for_reduction(self):
         """Set up the workspace ready for the reduction"""
-        self._create_workspace_for_reduction()
+        self._in_ws_name = self.getProperty("InputWorkspace").value.name()
+        self._out_ws_name = self.getPropertyValue("OutputWorkspace")
         self._setup_instrument()
         liveValues = self._get_live_values_from_instrument()
         self._setup_sample_logs(liveValues)
@@ -68,13 +73,15 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def _setup_reduction_algorithm(self):
         """Set up the reduction algorithm"""
-        alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+        alg = AlgorithmManager.create("ReflectometryISISLoadAndProcess")
         alg.initialize()
         alg.setChild(True)
         self._copy_property_values_to(alg)
-        alg.setProperty("InputWorkspace", self._ws_name)
+        alg.setProperty("InputRunList", self._in_ws_name)
         alg.setProperty("ThetaLogName", "Theta")
-        alg.setProperty("OutputWorkspaceBinned", self._ws_name)
+        alg.setProperty("GroupTOFWorkspaces", False)
+        alg.setProperty("ReloadInvalidWorkspaces", False)
+        alg.setProperty("OutputWorkspaceBinned", self._out_ws_name)
         return alg
 
     def _run_reduction_algorithm(self, alg):
@@ -83,16 +90,10 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         out_ws = alg.getProperty("OutputWorkspaceBinned").value
         self.setProperty("OutputWorkspace", out_ws)
 
-    def _create_workspace_for_reduction(self):
-        """Create a workspace for the input/output to the reduction algorithm"""
-        in_ws_name = self.getProperty("InputWorkspace").value.name()
-        self._ws_name = self.getPropertyValue("OutputWorkspace")
-        CloneWorkspace(InputWorkspace=in_ws_name, OutputWorkspace=self._ws_name)
-
     def _setup_instrument(self):
         """Sets the instrument name and loads the instrument on the workspace"""
         self._instrument = self.getProperty('Instrument').value
-        LoadInstrument(Workspace=self._ws_name, RewriteSpectraMap=True,
+        LoadInstrument(Workspace=self._in_ws_name, RewriteSpectraMap=True,
                        InstrumentName=self._instrument)
 
     def _setup_sample_logs(self, liveValues):
@@ -100,19 +101,19 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         logNames = [key for key in liveValues]
         logValues = [liveValues[key].value for key in liveValues]
         logUnits = [liveValues[key].unit for key in liveValues]
-        AddSampleLogMultiple(Workspace=self._ws_name, LogNames=logNames,
+        AddSampleLogMultiple(Workspace=self._in_ws_name, LogNames=logNames,
                              LogValues=logValues, LogUnits=logUnits)
 
     def _setup_slits(self, liveValues):
         """Set up instrument parameters for the slits"""
         s1 = liveValues[self._s1vg_name()].value
         s2 = liveValues[self._s2vg_name()].value
-        SetInstrumentParameter(Workspace=self._ws_name,
+        SetInstrumentParameter(Workspace=self._in_ws_name,
                                ParameterName='vertical gap',
                                ParameterType='Number',
                                ComponentName='slit1',
                                Value=str(s1))
-        SetInstrumentParameter(Workspace=self._ws_name,
+        SetInstrumentParameter(Workspace=self._in_ws_name,
                                ParameterName='vertical gap',
                                ParameterType='Number',
                                ComponentName='slit2',
