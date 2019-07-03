@@ -406,7 +406,7 @@ public:
 
     TS_ASSERT(relativeDetectorRotation.isApprox(zeroRotation));
   }
-
+  /*
   void test_detector_position_is_expected_value_after_rotation() {
 
     auto instrument =
@@ -459,12 +459,68 @@ public:
     Mantid::Kernel::V3D toV3DtestTransform =
         Mantid::Kernel::toV3D(testTransform);
 
-    /*
+    
 TS_ASSERT(Mantid::Kernel::toVector3d(absDetectorPositionAfterRotation)
-              .isApprox(expectedDetectorPositionAfterRotation)); */
+              .isApprox(expectedDetectorPositionAfterRotation));
+  } */
+
+  void test_detector_position_is_expected_value_after_rotation() {
+
+    // 45 degree rotation around z.
+    const Quat bankRotation(45, V3D(0, 0, 1));
+    const Quat detRotation(45, V3D(0, 0, 1));
+
+    auto instrument =
+        ComponentCreationHelper::createSimpleInstrumentWithRotation(
+            Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+            Mantid::Kernel::V3D(0, 0, 10), bankRotation, detRotation);
+
+    auto beamline =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    const auto &compInfo = *std::get<0>(beamline);
+
+    const auto actualBankRotation =
+        compInfo.rotation(compInfo.indexOfAny("detector-stage"));
+    const auto actualDetRotation = compInfo.rotation(0);
+
+    TS_ASSERT_EQUALS(actualBankRotation, bankRotation);
+    TS_ASSERT_EQUALS(actualDetRotation, detRotation * bankRotation);
   }
 
-  // void test_toEigen_transform_
+  void test_toEigen_transform_performs_compounded_rotation_and_translation() {
+  
+	  // create a copy instrument and package the rotation and translation into a toEgeinTaransform return value. 
+	  // apply the  transform, then assert that the transform is the same as the manual rotation an translation
+
+
+	const Quat bankRotation(45, V3D(0, 0, 1));
+    const Quat detRotation(45, V3D(0, 0, 1));
+	 // this may be wrong usage; you should want to pass in the desired position. i.e .position(index)
+
+	
+
+    auto instrument =
+        ComponentCreationHelper::createSimpleInstrumentWithRotation(
+            Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+            Mantid::Kernel::V3D(0, 0, 10), bankRotation, detRotation);
+
+    auto beamline =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    const auto &compInfo = *std::get<0>(beamline);
+
+	
+	const auto bankIndex = compInfo.indexOfAny("detector-stage");
+
+	auto detTranslationMatrix = toEigenTransform(compInfo.position(0), detRotation);
+    auto bankTranslationMatrix = toEigenTransform(compInfo.position(bankIndex), bankRotation);
+
+    const auto actualBankRotation =
+        compInfo.rotation(bankIndex);
+    const auto actualDetRotation = compInfo.rotation(0);
+
+	TS_ASSERT_EQUALS(actualBankRotation, bankRotation);
+    TS_ASSERT_EQUALS(actualDetRotation, detRotation);
+  }
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

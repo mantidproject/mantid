@@ -47,11 +47,19 @@ void writeStrAttributeToDataSet(H5::DataSet &dSet, const std::string &NX_class,
   attribute.write(attrType, attrVal);
 }
 
-/*
-Eigen::Affine3d toEigenTransform(Eigen::Vector3d translation,
-                                 Eigen::Quaterniond rotation){
-  return rotation.matrix * translation.matrix();
-}*/
+ // returns coumpound transform of rotation about one axis and translation.
+Eigen::Affine3d toEigenTransform( const V3D translation,
+                                 const Quat rotation) {
+  Eigen::Vector3d eigenTranslation = Mantid::Kernel::toVector3d(translation);
+  Eigen::Quaterniond eigenRotation = Mantid::Kernel::toQuaterniond(rotation);
+
+  Eigen::Affine3d rotationMatrix = Eigen::Affine3d(eigenRotation);
+  Eigen::Affine3d translationMatrix = Eigen::Affine3d(eigenTranslation);
+
+  Eigen::Affine3d compoundMatrix = rotationMatrix * translationMatrix;
+
+  return compoundMatrix;
+}
 
 // saves the instrument to file.
 void saveInstrument(const Geometry::ComponentInfo &compInfo,

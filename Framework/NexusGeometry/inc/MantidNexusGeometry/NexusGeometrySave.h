@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 
 #include "MantidNexusGeometry/DllConfig.h"
 #include <string>
@@ -27,7 +28,7 @@ class ComponentInfo;
 
 namespace NexusGeometry {
 
-Eigen::Affine3d toEigenTransform(Eigen::Vector3d translation, Eigen::Quaterniond rotation); 
+Eigen::Affine3d toEigenTransform(const V3D translation, const Quat rotation); 
 
 MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,
