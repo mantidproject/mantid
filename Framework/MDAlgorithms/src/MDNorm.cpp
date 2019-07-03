@@ -908,7 +908,8 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
       const std::string nameInput = m_inputWS->getDimension(indexID)->getName();
       const std::string nameData = tempDataWS->getDimension(indexID)->getName();
       if (nameInput != nameData) {
-        g_log.warning()<<"Input: "<<nameInput<<" Temporary: "<<nameData<<std::endl;
+        g_log.warning() << "Input: " << nameInput << " Temporary: " << nameData
+                        << std::endl;
         throw(std::invalid_argument("TemporaryDataWorkspace does not have the "
                                     "same dimension names as InputWorkspace."));
       }
