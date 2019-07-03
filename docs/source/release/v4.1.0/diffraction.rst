@@ -94,6 +94,7 @@ Improvements
 Bug Fixes
 #########
 
+- :ref:`MDNorm <algm-MDNorm>` now checks for consistent binning between the given parameters and the input accumulation workspaces if the latter are given.
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now only calculates statistics for integer HKL (not satellite peaks) instead of combining. Statistics for satellite peaks will be added later.
 
 Imaging
