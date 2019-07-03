@@ -7,8 +7,10 @@
 
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
-
 #include <H5Cpp.h>
 #include <boost/filesystem/operations.hpp>
 
@@ -20,14 +22,20 @@ namespace {
 // NEXUS COMPLIANT ATTRIBUTE NAMES
 const std::string SHORT_NAME = "short_name";
 const std::string NX_CLASS = "NX_class";
+const std::string NX_SAMPLE = "NXsample";
+const std::string NX_DETECTOR = "NXdetector";
 const std::string NX_ENTRY = "NXentry";
 const std::string NX_INSTRUMENT = "NXinstrument";
 const std::string NX_SOURCE = "NXsource";
 const std::string SHAPE = "shape";
+const std::string DEPENDS_ON = "depends_on";
 
 // NEXUS COMPLIANT ATTRIBUTE VALUES
 const std::string NX_TRANSFORMATION = "NXtransformation";
 const std::string NX_CHAR = "NX_CHAR";
+
+// COMPONENT TYPES
+auto DETECTOR = Mantid::Beamline::ComponentType(6);
 
 } // namespace
 
@@ -35,7 +43,7 @@ void writeStrAttributeToGroup(H5::Group &grp, const std::string &NX_class,
                               const std::string &attrVal) {
   H5::StrType attrType(0, H5T_VARIABLE);
   H5::DataSpace attrSpace(H5S_SCALAR);
-  auto attribute = grp.createAttribute(NX_class, attrType, attrSpace);
+  H5::Attribute attribute = grp.createAttribute(NX_class, attrType, attrSpace);
   attribute.write(attrType, attrVal);
 }
 
@@ -78,19 +86,57 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     reporter->report();
   }
 
-  H5::H5File file(fullPath, H5F_ACC_TRUNC); // create h5 file
+  if (!compInfo.hasSample()) {
 
-  H5::Group parentGroup =
-      file.createGroup("/raw_data_1"); // create parent group in file.
+    throw std::invalid_argument("the component has no sample.\n");
+  }
 
-  H5::Group instrumentGroup =
-      parentGroup.createGroup("instrument"); // create child group in parent.
+  if (!compInfo.hasSource()) {
+    throw std::invalid_argument("the component has no source.");
+  }
 
-  writeStrAttributeToGroup(parentGroup, NX_CLASS,
-                           NX_ENTRY); // write attributes to parent.
+  { // so i dont forget they exist.
+    // compInfo.samplePosition();
+    // compInfo.sourcePosition();
+    // compinfo.sourcePosition()
+  }
 
-  writeStrAttributeToGroup(instrumentGroup, NX_CLASS,
-                           NX_INSTRUMENT); // write attributes to child.
+  H5::H5File file(fullPath, H5F_ACC_TRUNC);
+
+  H5::Group parentGroup = file.createGroup("/raw_data_1");
+  H5::Group instrumentGroup = parentGroup.createGroup("instrument");
+  H5::Group sourceGroup = instrumentGroup.createGroup("source");
+  H5::Group sampleGroup = parentGroup.createGroup("sample");
+
+  writeStrAttributeToGroup(parentGroup, NX_CLASS, NX_ENTRY);
+  writeStrAttributeToGroup(instrumentGroup, NX_CLASS, NX_INSTRUMENT);
+  writeStrAttributeToGroup(sourceGroup, NX_CLASS, NX_SOURCE);
+  writeStrAttributeToGroup(sampleGroup, NX_CLASS, NX_SAMPLE);
+
+  const size_t ROOT_INDEX = compInfo.root();
+  const size_t SAMPLE_INDEX = compInfo.sample();
+  const int SOURCE_INDEX = compInfo.source();
+
+  for (size_t index = 0; index <= ROOT_INDEX; ++index) {
+
+    if (compInfo.isDetector(index)) {
+      // write to file a group in instrument named detetctor_[index]
+      H5::Group detectorGroup =
+          instrumentGroup.createGroup("detector_" + std::to_string(index));
+      writeStrAttributeToGroup(detectorGroup, NX_CLASS, NX_DETECTOR);
+
+      // write any additional attributes
+
+      // get its location and writed it as a dataset with nxclass
+      // NXtransformation. write its attributes including Nxclass
+      // NXtransformation do the same with orientation
+    }
+  }
+
+  auto n = compInfo.hasSample();
+  auto m = compInfo.hasSource();
+
+  // get all detectors of component
 
   // create DataSet 'data' in instrument.
 
@@ -110,29 +156,14 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
   writeStrAttributeToDataSet(dataSet, SHORT_NAME,
                              compInfo.name(compInfo.root()));
-
   writeStrAttributeToDataSet(dataSet, NX_CLASS,
                              NX_CHAR); // add NX_class attribute to dataset
-
-  // TODO: make a source group NX_class NXsource, containing transformations
-  // group NX_class NXtransformations
 
   file.close();
 
 } // saveInstrument
 
 // returns coumpound transform of rotation about one axis and translation.
-Eigen::Affine3d toEigenTransform(const V3D vector, const Quat quaternion) {
-
-  Eigen::Vector3d eigenVector = Mantid::Kernel::toVector3d(vector);
-  Eigen::Quaterniond eigenVersor = Mantid::Kernel::toQuaterniond(quaternion);
-
-  Eigen::Translation3d translation(eigenVector);
-  Eigen::Affine3d compoundTransform = eigenVersor * translation;
-
-  return compoundTransform;
-
-} // toEigenTransform
 
 } // namespace NexusGeometry
 } // namespace Mantid

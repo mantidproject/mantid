@@ -7,19 +7,18 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-
 #include "MantidNexusGeometry/DllConfig.h"
 #include <string>
+
 
 namespace Mantid {
 
 namespace Kernel {
 
 class ProgressBase;
+class V3D;
+class Quat;
+
 } // namespace Kernel
 
 namespace Geometry {
@@ -28,8 +27,6 @@ class ComponentInfo;
 
 namespace NexusGeometry {
 
-MANTID_NEXUSGEOMETRY_DLL Eigen::Affine3d
-toEigenTransform(const V3D vector, const Quat quaternion);
 
 MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,
