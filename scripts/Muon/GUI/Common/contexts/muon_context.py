@@ -48,6 +48,12 @@ class MuonContext(object):
         self.update_view_from_model_notifier = Observable()
 
     @property
+    def window_title(self):
+        if self._frequency_context:
+           return self._frequency_context.window_title
+        return "Muon Analysis"
+
+    @property
     def data_context(self):
         return self._data_context
 

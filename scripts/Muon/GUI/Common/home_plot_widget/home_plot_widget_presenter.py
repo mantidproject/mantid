@@ -17,9 +17,6 @@ COUNTS_PLOT_TYPE = 'Counts'
 ASYMMETRY_PLOT_TYPE = 'Asymmetry'
 FREQ_PLOT_TYPE = "Frequency "
 
-# to do list:
-# 1. allow user to pick, maxent, mod, Re or Im, all FFT
-# 2. get correct default
 
 class HomePlotWidgetPresenter(HomeTabSubWidget):
 
@@ -134,7 +131,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
 
-        self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw)
+        self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw, self.context.window_title)
         self._force_redraw = False
         workspace_list_inverse_binning = self.get_workspaces_to_plot(self.context.group_pair_context.selected,
                                                                      not self._view.if_raw(),
@@ -236,6 +233,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
     def get_domain(self):
         if FREQ_PLOT_TYPE in self._view.get_selected():
-           return "Frequency"
+            return "Frequency"
         else:
-           return "Time"
+            return "Time"

@@ -22,13 +22,14 @@ class HomePlotWidgetModel(object):
         self.plotted_fit_workspaces = []
         self.plotted_group = ''
 
-    def plot(self, workspace_list, title, domain, force_redraw):
+    def plot(self, workspace_list, title, domain, force_redraw, window_title):
         """
         Plots a list of workspaces in a new plot window, closing any existing plot windows.
         :param workspace_list: A list of workspace name to plot. They must be in the ADS
         :param title: The name to give to the subplot created, currently only one subplot is ever created
         :param domain: if frequency or time domain
         :param force_redraw: if to force a redraw
+        :param window_title: title for the plot window
         :return: A reference to the newly created plot window is passed back
         """
         if not workspace_list:
@@ -45,7 +46,7 @@ class HomePlotWidgetModel(object):
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
-            
+
         elif self.plot_figure:
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
@@ -55,7 +56,7 @@ class HomePlotWidgetModel(object):
                                     errors=True)
             self.set_x_lim(domain)
 
-        self.plot_figure.canvas.set_window_title('Muon Analysis')
+        self.plot_figure.canvas.set_window_title(window_title)
         self.plot_figure.gca().set_title(title)
 
         self.plot_figure.canvas.window().closing.connect(self._close_plot)

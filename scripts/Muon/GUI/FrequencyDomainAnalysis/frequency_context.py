@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 from re import findall
 
+
 class MaxEnt(object):
 
     def __init__(self, run, ws_freq):
@@ -42,6 +43,10 @@ class FrequencyContext(object):
         self._maxEnt_freq = []
         self._FFT_freq = []
         self.plot_type = "None"
+
+    @property
+    def window_title(self): 
+        return "Frequency Domain Analysis"
 
     def add_maxEnt(self, run, ws_freq):
         self._maxEnt_freq.append(MaxEnt(run, ws_freq))
@@ -84,16 +89,16 @@ class FrequencyContext(object):
         if frequency_type == "All":
             return names
         elif frequency_type ==FREQUENCY_EXTENSIONS["FFT"]:
-		    return [name for name in names if FREQUENCY_EXTENSIONS["MAXENT"] not in name]
+            return [name for name in names if FREQUENCY_EXTENSIONS["MAXENT"] not in name]
         else:
             output = []
             count = 1
             """ if Re or Im then the count will be 2
             appears as part of the FFT name"""
             if len(frequency_type) == 2:
-               count = 2
+                count = 2
             for name in names:
                 num = len(findall(frequency_type, name))
                 if frequency_type in name and count == num:
-                   output.append(name)
+                    output.append(name)
             return output

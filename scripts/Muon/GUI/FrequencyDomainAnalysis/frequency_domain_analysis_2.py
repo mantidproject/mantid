@@ -99,7 +99,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
         self.setup_tabs()
-        self.help_widget = HelpWidget("Frequency Domain Analysis")
+        self.help_widget = HelpWidget(self.context.window_title)
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()
@@ -110,7 +110,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         central_widget.setLayout(vertical_layout)
 
         self.setCentralWidget(central_widget)
-        self.setWindowTitle("Frequency Domain Analysis")
+        self.setWindowTitle(self.context.window_title)
 
         self.setup_load_observers()
 
