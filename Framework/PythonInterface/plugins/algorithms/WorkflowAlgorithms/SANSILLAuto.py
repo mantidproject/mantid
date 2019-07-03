@@ -93,7 +93,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
     def validateInputs(self):
         result = dict()
         message = 'Wrong number of {0} runs. Provide one or as many as sample runs.'
-        tr_message = 'Wrong number of {0} runs. Provede one or multiple runs summed with +.'
+        tr_message = 'Wrong number of {0} runs. Provide one or multiple runs summed with +.'
         sample_dim = self.getPropertyValue('SampleRuns').count(',')
         abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
         beam_dim = self.getPropertyValue('BeamRuns').count(',')
@@ -147,28 +147,28 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              doc='Absorber (Cd/B4C) run(s).')
 
         self.declareProperty(MultipleFileProperty('BeamRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='Beam run(s).')
+                             doc='Empty beam run(s).')
 
         self.declareProperty(MultipleFileProperty('ContainerRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='File path of empty container run(s)/numors.')
+                             doc='Empty container run(s).')
 
         self.declareProperty(MultipleFileProperty('SampleTransmissionRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='File path of sample transmission run(s)/numors.')
+                             doc='Sample transmission run(s).')
 
         self.declareProperty(MultipleFileProperty('ContainerTransmissionRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='File path of empty container transmission run(s)/numors.')
+                             doc='Container transmission run(s).')
 
         self.declareProperty(MultipleFileProperty('TransmissionBeamRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='File path of empty beam runs for transmission run(s)/numors.')
+                             doc='Empty beam run(s) for transmission.')
 
         self.declareProperty(MultipleFileProperty('TransmissionAbsorberRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='File path of absorber runs for transmission run(s)/numors.')
+                             doc='Absorber (Cd/B4C) run(s) for transmission.')
 
         self.declareProperty(FileProperty('SensitivityMap', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the map of relative detector efficiencies.')
 
         self.declareProperty(MultipleFileProperty('MaskFile', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='File containing the beam stop and other detector mask.')
+                             doc='Files containing the beam stop and other detector mask.')
 
         self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
                                                      direction=Direction.Output,
@@ -181,7 +181,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
-                             doc='The output workspace group containing reduced data in Q space.')
+                             doc='The output workspace group containing reduced data.')
 
         self.setPropertyGroup('SampleTransmissionRuns', 'Transmissions')
         self.setPropertyGroup('ContainerTransmissionRuns', 'Transmissions')
@@ -204,77 +204,59 @@ class SANSILLAuto(DataProcessorAlgorithm):
     def reduce(self, i):
 
         [process_transmission_absorber, transmission_absorber_name] = needs_processing(self.atransmission, 'Absorber')
+        self.progress.report('Processing transmission absorber')
         if process_transmission_absorber:
-            self.progress.report('Processing transmission absorber')
             SANSILLReduction(Run=self.atransmission, ProcessAs='Absorber', OutputWorkspace=transmission_absorber_name)
-        else:
-            self.progress.report('Using transmission absorber from ADS')
 
         [process_transmission_beam, transmission_beam_name] = needs_processing(self.btransmission, 'Beam')
+        self.progress.report('Processing transmission beam')
         if process_transmission_beam:
-            self.progress.report('Processing transmission beam')
             SANSILLReduction(Run=self.btransmission, ProcessAs='Beam', OutputWorkspace=transmission_beam_name,
                              AbsorberInputWorkspace=transmission_absorber_name)
-        else:
-            self.progress.report('Using transmission beam from ADS')
 
         [process_container_transmission, container_transmission_name] = needs_processing(self.ctransmission, 'Transmission')
+        self.progress.report('Processing container transmission')
         if process_container_transmission:
-            self.progress.report('Processing container transmission')
             SANSILLReduction(Run=self.ctransmission, ProcessAs='Transmission', OutputWorkspace=container_transmission_name,
                              AbsorberInputWorkspace=transmission_absorber_name, BeamInputWorkspace=transmission_beam_name)
-        else:
-            self.progress.report('Using container transmission from ADS')
 
         [process_sample_transmission, sample_transmission_name] = needs_processing(self.stransmission, 'Transmission')
+        self.progress.report('Processing sample transmission')
         if process_sample_transmission:
-            self.progress.report('Processing sample transmission')
             SANSILLReduction(Run=self.stransmission, ProcessAs='Transmission', OutputWorkspace=sample_transmission_name,
                              AbsorberInputWorkspace=transmission_absorber_name, BeamInputWorkspace=transmission_beam_name)
-        else:
-            self.progress.report('Using sample transmission from ADS')
 
         absorber = self.absorber[i] if len(self.absorber) == self.dimensionality else self.absorber[0]
         [process_absorber, absorber_name] = needs_processing(absorber, 'Absorber')
+        self.progress.report('Processing absorber')
         if process_absorber:
-            self.progress.report('Processing absorber')
             SANSILLReduction(Run=absorber, ProcessAs='Absorber', OutputWorkspace=absorber_name)
-        else:
-            self.progress.report('Using absorber from ADS')
 
         beam = self.beam[i] if len(self.beam) == self.dimensionality else self.beam[0]
         [process_beam, beam_name] = needs_processing(beam, 'Beam')
         flux_name = beam_name + '_Flux'
+        self.progress.report('Processing beam')
         if process_beam:
-            self.progress.report('Processing beam')
             SANSILLReduction(Run=beam, ProcessAs='Beam', OutputWorkspace=beam_name,
                              AbsorberInputWorkspace=absorber_name, FluxOutputWorkspace=flux_name)
-        else:
-            self.progress.report('Using beam from ADS')
 
         container = self.container[i] if len(self.container) == self.dimensionality else self.container[0]
         [process_container, container_name] = needs_processing(container, 'Container')
+        self.progress.report('Processing container')
         if process_container:
-            self.progress.report('Processing container')
             SANSILLReduction(Run=container, ProcessAs='Container', OutputWorkspace=container_name, AbsorberInputWorkspace=absorber_name,
                              BeamInputWorkspace=beam_name, TransmissionInputWorkspace=container_transmission_name)
-        else:
-            self.progress.report('Using container from ADS')
 
         [load_sensitivity, sensitivity_name] = needs_loading(self.sensitivity, 'Sensitivity')
+        self.progress.report('Loading sensitivity')
         if load_sensitivity:
-            self.progress.report('Loading sensitivity')
             LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sensitivity_name)
-        else:
-            self.progress.report('Using sensitivity from ADS')
 
         mask = self.mask[i] if len(self.mask) == self.dimensionality else self.mask[0]
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
+        self.progress.report('Loading mask')
         if load_mask:
-            self.progress.report('Loading mask')
             LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
-        else:
-            self.progress.report('Using mask from ADS')
 
         output = self.output + '_' + str(i + 1)
         [_, sample_name] = needs_processing(self.sample[i], 'Sample')
