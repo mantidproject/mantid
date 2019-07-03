@@ -12,6 +12,7 @@
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
@@ -21,9 +22,11 @@ using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
-namespace { // unnamed namespace
-// These functions update properties in an AlgorithmRuntimeProps for specific
-// properties for the row reduction algorithm
+namespace {
+Mantid::Kernel::Logger g_log("RowProcessingAlgorithm");
+
+// These functions update properties in an AlgorithmRuntimeProps for
+// specific properties for the row reduction algorithm
 void updateInputWorkspacesProperties(
     AlgorithmRuntimeProps &properties,
     std::vector<std::string> const &inputRunNumbers) {
@@ -240,7 +243,12 @@ private:
 void updateEventProperties(AlgorithmRuntimeProps &properties,
                            Slicing const &slicing) {
   if (isValid(slicing))
-    boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
+    try {
+      boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
+    } catch (...) {
+      g_log.error(
+          "Error occured when updating EventProperties from Event Handling");
+    }
 }
 
 boost::optional<double> getDouble(IAlgorithm_sptr algorithm,
