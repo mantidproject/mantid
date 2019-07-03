@@ -117,12 +117,10 @@ RunsTablePresenter::RunsTablePresenter(
   ensureAtLeastOneGroupExists();
 }
 
-void RunsTablePresenter::appendRowAndGroup(std::vector<int> localGroupIndices) {
-  if (localGroupIndices.size() == 0) {
-    // Calculate
-    localGroupIndices.emplace_back(
-        static_cast<int>(m_model.reductionJobs().groups().size()));
-  }
+void RunsTablePresenter::appendRowAndGroup() {
+  // Calculate
+  std::vector<int> localGroupIndices(
+      static_cast<int>(m_model.reductionJobs().groups().size()));
   appendEmptyGroupInModel();
   appendEmptyGroupInView();
   appendRowsToGroupsInView(localGroupIndices);
@@ -356,7 +354,7 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
     return;
 
   if (m_model.reductionJobs().groups().size() == 0) {
-    appendRowAndGroup({0});
+    appendRowAndGroup();
     notifyExpandAllRequested();
     return;
   }
