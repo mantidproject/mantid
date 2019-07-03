@@ -47,8 +47,6 @@ void writeStrAttributeToDataSet(H5::DataSet &dSet, const std::string &NX_class,
   attribute.write(attrType, attrVal);
 }
 
-
-
 // saves the instrument to file.
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
@@ -123,22 +121,18 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
 } // saveInstrument
 
-
- // returns coumpound transform of rotation about one axis and translation.
+// returns coumpound transform of rotation about one axis and translation.
 Eigen::Affine3d toEigenTransform(const V3D vector, const Quat quaternion) {
 
   Eigen::Vector3d eigenVector = Mantid::Kernel::toVector3d(vector);
   Eigen::Quaterniond eigenVersor = Mantid::Kernel::toQuaterniond(quaternion);
 
   Eigen::Translation3d translation(eigenVector);
-  Eigen::Affine3d compoundTransform = eigenVersor * translation; 
+  Eigen::Affine3d compoundTransform = eigenVersor * translation;
 
   return compoundTransform;
 
 } // toEigenTransform
-
-
-
 
 } // namespace NexusGeometry
 } // namespace Mantid

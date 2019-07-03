@@ -300,7 +300,6 @@ public:
 
   void test_translation() {
 
-
     auto instrument =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
 
@@ -319,8 +318,6 @@ public:
 
     TS_ASSERT(relativeSourcePosition.isApprox(absoluteBankLocation));
   }
-
-
 
   void test_rotation() {
 
@@ -370,7 +367,6 @@ public:
     TS_ASSERT(relativeDetectorRotation.isApprox(zeroRotation));
   }
 
-
   void test_detector_position_is_expected_value_after_rotation() {
 
     // 45 degree rotation around z.
@@ -393,41 +389,40 @@ public:
     TS_ASSERT_EQUALS(actualBankRotation, bankRotation);
     TS_ASSERT_EQUALS(actualDetRotation, detRotation * bankRotation);
   }
-  
-    void test_toEigen_transform_performs_compounded_rotation_and_translation() {
 
-    // create a copy instrument and package the rotation and translation into a
-    // toEgeinTaransform return value. apply the  transform, then assert that
-    // the transform is the same as the manual rotation an translation
-      
-    Quat quatBankRotation(45, V3D(0, 0, 1));
-    Quat quatDetRotation(45, V3D(0, 0, 1));
+  void test_toEigen_transform_performs_compounded_rotation_and_translation() {
 
-    const Eigen::Quaterniond eigenBankRotation =
-        Mantid::Kernel::toQuaterniond(quatBankRotation);
-    const Eigen::Quaterniond eigenDetRotation =
-        Mantid::Kernel::toQuaterniond(quatDetRotation);
+    const Quat quatBankRotationVersor(45, V3D(0, 0, 1));
+    const Quat quatDetRotationVersor(45, V3D(0, 0, 1));
+    const V3D bankTranslationVector(0, 0, 10);
 
-    const V3D bankTranslation(0, 0, 10);
+    // eigen conversions
+    const Eigen::Quaterniond eigenBankRotationVersor =
+        Mantid::Kernel::toQuaterniond(quatBankRotationVersor);
+    const Eigen::Quaterniond eigenDetRotationVersor =
+        Mantid::Kernel::toQuaterniond(quatDetRotationVersor);
+    const Eigen::Vector3d eigenBankTranslationVector(
+        Mantid::Kernel::toVector3d(bankTranslationVector));
 
-    Eigen::Affine3d detTransfom = toEigenTransform(bankTranslation, quatDetRotation);
-    Eigen::Affine3d bankTransform = toEigenTransform(bankTranslation, quatBankRotation);
+    // eigen affine transforms
+    Eigen::Affine3d detTransfom =
+        toEigenTransform(bankTranslationVector, quatDetRotationVersor);
+    Eigen::Affine3d bankTransform =
+        toEigenTransform(bankTranslationVector, quatBankRotationVersor);
 
-	 // decompose transforms
-    Eigen::Matrix3d decompDetRotation = detTransfom.rotation();
-    Eigen::Matrix3d decompBankRotation = bankTransform.rotation();
+    // decomposed transforms
+    Eigen::Matrix3d decompDetRotationMatrix = detTransfom.rotation();
+    Eigen::Matrix3d decompBankRotationMatrix = bankTransform.rotation();
+    Eigen::Vector3d decompDetTranslationVector = detTransfom.translation();
+    Eigen::Vector3d decompBankTranslationVector = bankTransform.translation();
 
-
-	auto compoundMatrix = eigenDetRotation.matrix();
-
-    // show that the resulting matrices are equivalent to bank and det rotation
-    // quaternions. convert the quats to eigen and use .matrix().
-
-    TS_ASSERT(decompDetRotation.isApprox(eigenDetRotation.matrix())); 
-	TS_ASSERT(decompBankRotation.isApprox(eigenBankRotation.matrix()));
-
+    TS_ASSERT(
+        decompDetRotationMatrix.isApprox(eigenDetRotationVersor.matrix()));
+    TS_ASSERT(
+        decompBankRotationMatrix.isApprox(eigenBankRotationVersor.matrix()));
+    TS_ASSERT(decompBankTranslationVector.isApprox(eigenBankTranslationVector));
+    TS_ASSERT(decompDetTranslationVector.isApprox(eigenBankTranslationVector));
   }
-
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
