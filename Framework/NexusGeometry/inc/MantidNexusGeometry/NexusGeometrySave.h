@@ -28,7 +28,8 @@ class ComponentInfo;
 
 namespace NexusGeometry {
 
-Eigen::Affine3d toEigenTransform(const V3D translation, const Quat rotation); 
+MANTID_NEXUSGEOMETRY_DLL Eigen::Affine3d
+toEigenTransform(const V3D vector, const Quat quaternion);
 
 MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,

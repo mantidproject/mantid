@@ -300,33 +300,6 @@ public:
 
   void test_translation() {
 
-    // local copy of instrument.
-    /*
-
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        Mantid::Kernel::V3D(1, 1, 1));
-    instrument->setName("test_instrument");
-
-    auto instrumentCopy =
-        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // Test setup.
-    auto &compInfo = (*instrumentCopy.first);
-
-    // translate source.
-    Eigen::Vector3d absSourceLocation(5, 0, 0);
-    compInfo.setPosition(compInfo.source(),
-                         Mantid::Kernel::toV3D(absSourceLocation));
-
-    auto relativeSourceTranslation = Mantid::Kernel::toVector3d(
-        compInfo.relativePosition(compInfo.source())); // eigen type.
-
-    TS_ASSERT(relativeSourceTranslation.isApprox(absSourceLocation));
-
-    // TODO. Either reset the test instrument for the next test, or ideally make
-    // a local copy!
-        */
 
     auto instrument =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
@@ -347,17 +320,7 @@ public:
     TS_ASSERT(relativeSourcePosition.isApprox(absoluteBankLocation));
   }
 
-  // local copy of instrument.
 
-  // auto instrument =
-  // ComponentCreationHelper::createTestInstrumentRectangular(
-  //         1 /*banks*/, 10 /*pixels*/);
-  // auto beamline =
-  // Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-  //  auto &compInfo = (*beamline.first);
-
-  // compInfo.setPostion(compInfo.indexOfAny("bank1"), {0,0,0}));
-  // compInfo.setRotation(compInfo.indexOfAny("bank1"), quat);
 
   void test_rotation() {
 
@@ -406,63 +369,7 @@ public:
 
     TS_ASSERT(relativeDetectorRotation.isApprox(zeroRotation));
   }
-  /*
-  void test_detector_position_is_expected_value_after_rotation() {
 
-    auto instrument =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
-
-    auto beamline =
-        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*beamline.first);
-
-    // prepare values
-    const auto bankIndex = compInfo.indexOfAny("bank1");
-    const auto ROT = M_PI / 2;
-
-    // EIGEN initialisations.
-    Eigen::Vector3d originVectorEigen(0, 0, 0);
-
-    Eigen::Quaterniond initialBankOrientationEigen(Eigen::AngleAxisd(
-        ROT, Eigen::Vector3d(1, 0, 0))); // adding 1 sets initial detector
-                                         // position to y x z respectively
-
-    Eigen::Quaterniond absoluteBankRotationEigen(
-        Eigen::AngleAxisd(ROT, Eigen::Vector3d(1, 0, 0)));
-
-    // EIGEN TO V3D/QUAT conversions.
-    Mantid::Kernel::V3D toV3DOriginVector =
-        Mantid::Kernel::toV3D(originVectorEigen);
-    Mantid::Kernel::Quat toQuatInitialBankOrientation =
-        Mantid::Kernel::toQuat(initialBankOrientationEigen);
-    Mantid::Kernel::Quat toQuatAbsoluteBankRotation =
-        Mantid::Kernel::toQuat(absoluteBankRotationEigen);
-
-    // bank centre to position origin.
-    compInfo.setPosition(bankIndex, toV3DOriginVector);
-
-    // get detector position before test rotation.
-    const V3D pos1 = compInfo.position(2);
-
-    // test rotation bank about an axis
-    compInfo.setRotation(bankIndex, toQuatAbsoluteBankRotation);
-
-    // get detector position after test rotation.
-    const V3D pos2 = compInfo.position(2);
-
-    // test of eigen V3D
-    Eigen::Quaterniond testVersor(
-        Eigen::AngleAxisd(ROT, Eigen::Vector3d(0, 0, 1))); // rotate about z
-    Eigen::Vector3d testVector(1, 0, 0);                   // unit vector i.
-
-    Eigen::Vector3d testTransform = testVersor.matrix() * testVector;
-    Mantid::Kernel::V3D toV3DtestTransform =
-        Mantid::Kernel::toV3D(testTransform);
-
-    
-TS_ASSERT(Mantid::Kernel::toVector3d(absDetectorPositionAfterRotation)
-              .isApprox(expectedDetectorPositionAfterRotation));
-  } */
 
   void test_detector_position_is_expected_value_after_rotation() {
 
@@ -486,41 +393,41 @@ TS_ASSERT(Mantid::Kernel::toVector3d(absDetectorPositionAfterRotation)
     TS_ASSERT_EQUALS(actualBankRotation, bankRotation);
     TS_ASSERT_EQUALS(actualDetRotation, detRotation * bankRotation);
   }
-
-  void test_toEigen_transform_performs_compounded_rotation_and_translation() {
   
-	  // create a copy instrument and package the rotation and translation into a toEgeinTaransform return value. 
-	  // apply the  transform, then assert that the transform is the same as the manual rotation an translation
+    void test_toEigen_transform_performs_compounded_rotation_and_translation() {
+
+    // create a copy instrument and package the rotation and translation into a
+    // toEgeinTaransform return value. apply the  transform, then assert that
+    // the transform is the same as the manual rotation an translation
+      
+    Quat quatBankRotation(45, V3D(0, 0, 1));
+    Quat quatDetRotation(45, V3D(0, 0, 1));
+
+    const Eigen::Quaterniond eigenBankRotation =
+        Mantid::Kernel::toQuaterniond(quatBankRotation);
+    const Eigen::Quaterniond eigenDetRotation =
+        Mantid::Kernel::toQuaterniond(quatDetRotation);
+
+    const V3D bankTranslation(0, 0, 10);
+
+    Eigen::Affine3d detTransfom = toEigenTransform(bankTranslation, quatDetRotation);
+    Eigen::Affine3d bankTransform = toEigenTransform(bankTranslation, quatBankRotation);
+
+	 // decompose transforms
+    Eigen::Matrix3d decompDetRotation = detTransfom.rotation();
+    Eigen::Matrix3d decompBankRotation = bankTransform.rotation();
 
 
-	const Quat bankRotation(45, V3D(0, 0, 1));
-    const Quat detRotation(45, V3D(0, 0, 1));
-	 // this may be wrong usage; you should want to pass in the desired position. i.e .position(index)
+	auto compoundMatrix = eigenDetRotation.matrix();
 
-	
+    // show that the resulting matrices are equivalent to bank and det rotation
+    // quaternions. convert the quats to eigen and use .matrix().
 
-    auto instrument =
-        ComponentCreationHelper::createSimpleInstrumentWithRotation(
-            Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-            Mantid::Kernel::V3D(0, 0, 10), bankRotation, detRotation);
+    TS_ASSERT(decompDetRotation.isApprox(eigenDetRotation.matrix())); 
+	TS_ASSERT(decompBankRotation.isApprox(eigenBankRotation.matrix()));
 
-    auto beamline =
-        Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    const auto &compInfo = *std::get<0>(beamline);
-
-	
-	const auto bankIndex = compInfo.indexOfAny("detector-stage");
-
-	auto detTranslationMatrix = toEigenTransform(compInfo.position(0), detRotation);
-    auto bankTranslationMatrix = toEigenTransform(compInfo.position(bankIndex), bankRotation);
-
-    const auto actualBankRotation =
-        compInfo.rotation(bankIndex);
-    const auto actualDetRotation = compInfo.rotation(0);
-
-	TS_ASSERT_EQUALS(actualBankRotation, bankRotation);
-    TS_ASSERT_EQUALS(actualDetRotation, detRotation);
   }
+
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
