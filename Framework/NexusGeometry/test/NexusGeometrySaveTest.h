@@ -49,57 +49,6 @@ public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
 };
 
-// an instrument creation helper allowing you to include/omit
-// source/detector/sample. from createMinimalInstrument.
-class GeometrySaveInstrumentHelper {
-
-public:
-  GeometrySaveInstrumentHelper(bool haveSource, bool haveSample,
-                               const Mantid::Kernel::V3D &sourcePos,
-                               const Mantid::Kernel::V3D &samplePos,
-                               const Mantid::Kernel::V3D &detectorPos, ) {
-
-    enum PointingAlong { X = 0, Y = 1, Z = 2 };
-    enum Handedness { Left, Right };
-
-    m_instrument = boost::make_shared<Mantid::Geometry::Instrument>();
-
-    m_instrument->setReferenceFrame(
-        boost::make_shared<Mantid::Geometry::ReferenceFrame>(
-            Y /*up*/, X /*along*/, Left, "0,0,0"));
-
-    // A source
-    Mantid::Geometry::ObjComponent *source =
-        new Mantid::Geometry::ObjComponent("source");
-    source->setPos(sourcePos);
-    source->setShape(
-        ComponentCreationHelper::createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-    m_instrument->add(source);
-    m_instrument->markAsSource(source);
-
-    // A sample
-    Mantid::Geometry::ObjComponent *sample =
-        new Mantid::Geometry::ObjComponent("some-surface-holder");
-    sample->setPos(samplePos);
-    sample->setShape(
-        ComponentCreationHelper::createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-    m_instrument->add(sample);
-    m_instrument->markAsSamplePos(sample);
-
-    // A detector
-    Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector(
-        "point-detector", 1 /*detector id*/, nullptr);
-    det->setPos(detectorPos);
-    det->setShape(
-        ComponentCreationHelper::createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-    m_instrument->add(det);
-    m_instrument->markAsDetector(det);
-  }
-
-private:
-  Mantid::Geometry::Instrument_sptr m_instrument;
-};
-
 //  local Class used for validation of the structure of a nexus file as needed
 //  for the unit tests.
 class HDF5FileTestUtility {
@@ -363,8 +312,15 @@ public:
   }
 
   void test_instrument_without_sample_throws() {
-  
-  GeometrySaveInstrumentHelper noSample();
+
+    auto instrument =
+        ComponentCreationHelper::createInstrumentWithOptionalComponents(
+            true, false, true);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*instr.first);
+
+    TS_ASSERT(compInfo.hasDetectorInfo());
+    TS_ASSERT(compInfo.hasSource());
   }
 };
 

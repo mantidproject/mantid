@@ -222,6 +222,12 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
                         const Mantid::Kernel::V3D &samplePos,
                         const Mantid::Kernel::V3D &detectorPos);
 
+Mantid::Geometry::Instrument_sptr createInstrumentWithOptionalComponents(
+    bool haveSource, bool haveSample, bool haveDetector,
+    const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0, 0, -10),
+    const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(0, 0, 0),
+    const Mantid::Kernel::V3D &detectorPos = Mantid::Kernel::V3D(0, 0, 10));
+
 Mantid::Geometry::Instrument_sptr createSimpleInstrumentWithRotation(
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
     const Mantid::Kernel::V3D &detectorPos,
