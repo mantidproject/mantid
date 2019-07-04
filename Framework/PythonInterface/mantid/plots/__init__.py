@@ -434,6 +434,24 @@ class MantidAxes(Axes):
                                    **kwargs)
         return new_artist
 
+    def relim(self, visible_only=True):
+        Axes.relim(self, visible_only)  # relim on any non-errorbar objects
+        lower_xlim, lower_ylim = self.dataLim.get_points()[0]
+        upper_xlim, upper_ylim = self.dataLim.get_points()[1]
+        for container in self.containers:
+            if isinstance(container, ErrorbarContainer) and (
+                    (visible_only and not helperfunctions.errorbars_hidden(container)) or
+                    not visible_only):
+                min_x, max_x, min_y, max_y = helperfunctions.get_errorbar_bounds(container)
+                lower_xlim = min(lower_xlim, min_x) if min_x else lower_xlim
+                upper_xlim = max(upper_xlim, max_x) if max_x else upper_xlim
+                lower_ylim = min(lower_ylim, min_y) if min_y else lower_ylim
+                upper_ylim = max(upper_ylim, max_y) if max_y else upper_ylim
+
+        xys = [[lower_xlim, lower_ylim], [upper_xlim, upper_ylim]]
+        # update_datalim will update limits with union of current lims and xys
+        self.update_datalim(xys)
+
     @staticmethod
     def is_empty(axes):
         """

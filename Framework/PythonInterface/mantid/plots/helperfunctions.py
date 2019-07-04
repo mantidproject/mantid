@@ -11,7 +11,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import datetime
 
-import numpy
+import numpy as np
+from matplotlib.container import ErrorbarContainer
 from scipy.interpolate import interp1d
 
 import mantid.api
@@ -79,7 +80,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
             normalize_by_bin_width = current_normalization
         else:
             normalize_by_bin_width = mantid.kernel.config[
-                                        'graph1d.autodistribution'].lower() == 'on'
+                                         'graph1d.autodistribution'].lower() == 'on'
     return normalize_by_bin_width, kwargs
 
 
@@ -108,7 +109,8 @@ def get_indices(md_workspace, **kwargs):
 
     if 'slicepoint' in kwargs:
         slicepoint = kwargs.pop('slicepoint')
-        assert md_workspace.getNumDims() == len(slicepoint), "slicepoint provided do not match the dimensions of the workspace"
+        assert md_workspace.getNumDims() == len(
+            slicepoint), "slicepoint provided do not match the dimensions of the workspace"
         indices = []
         for n, p in enumerate(slicepoint):
             if p is None:
@@ -118,7 +120,8 @@ def get_indices(md_workspace, **kwargs):
         indices = tuple(indices)
     elif 'indices' in kwargs:
         indices = kwargs.pop('indices')
-        assert md_workspace.getNumDims() == len(indices), "indices provided do not match the dimensions of the workspace"
+        assert md_workspace.getNumDims() == len(
+            indices), "indices provided do not match the dimensions of the workspace"
     else:
         indices = None
 
@@ -126,7 +129,7 @@ def get_indices(md_workspace, **kwargs):
         ws_name = md_workspace.name()
         labels = '; '.join('{0}={1:.4}'.format(md_workspace.getDimension(n).name,
                                                (md_workspace.getDimension(n).getX(indices[n]) +
-                                                md_workspace.getDimension(n).getX(indices[n]+1))/2)
+                                                md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
                            for n in range(md_workspace.getNumDims()) if indices[n] != slice(None))
         if ws_name:
             kwargs['label'] = '{0}: {1}'.format(ws_name, labels)
@@ -140,8 +143,8 @@ def pointToIndex(dim, point):
     """
     Finds the bin index of which the point falls into.
     """
-    i = (point-dim.getX(0))/dim.getBinWidth()
-    return int(min(max(i, 0), dim.getNBins()-1))
+    i = (point - dim.getX(0)) / dim.getBinWidth()
+    return int(min(max(i, 0), dim.getNBins() - 1))
 
 
 def points_from_boundaries(input_array):
@@ -150,7 +153,7 @@ def points_from_boundaries(input_array):
 
     :param input_array: a :class:`numpy.ndarray` of bin boundaries
     """
-    assert isinstance(input_array, numpy.ndarray), 'Not a numpy array'
+    assert isinstance(input_array, np.ndarray), 'Not a numpy array'
     if len(input_array) < 2:
         raise ValueError('could not get centers from less than two boundaries')
     return .5 * (input_array[0:-1] + input_array[1:])
@@ -166,7 +169,7 @@ def _dim2array(d):
     """
     dmin = d.getMinimum()
     dmax = d.getMaximum()
-    return numpy.linspace(dmin, dmax, d.getNBins() + 1)
+    return np.linspace(dmin, dmax, d.getNBins() + 1)
 
 
 def get_wksp_index_dist_and_label(workspace, axis=MantidAxType.SPECTRUM, **kwargs):
@@ -263,7 +266,7 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
         dims = workspace.getNonIntegratedDimensions()
         indices = Ellipsis
     else:
-        dims =  [workspace.getDimension(n) for n in range(workspace.getNumDims()) if indices[n] == slice(None)]
+        dims = [workspace.getDimension(n) for n in range(workspace.getNumDims()) if indices[n] == slice(None)]
     dim_arrays = [_dim2array(d) for d in dims]
     # get data
     data = workspace.getSignalArray()[indices].copy()
@@ -275,12 +278,12 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
         err2 = workspace.getErrorSquaredArray()[indices].copy()
         if normalization == mantid.api.MDNormalization.NumEventsNormalization:
             err2 /= (nev * nev)
-        err = numpy.sqrt(err2)
+        err = np.sqrt(err2)
     data = data.squeeze().T
-    data = numpy.ma.masked_invalid(data)
+    data = np.ma.masked_invalid(data)
     if err is not None:
         err = err.squeeze().T
-        err = numpy.ma.masked_invalid(err)
+        err = np.ma.masked_invalid(err)
     return dim_arrays, data, err
 
 
@@ -317,9 +320,9 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
         x = points_from_boundaries(x)
-    y = numpy.ma.masked_invalid(y)
+    y = np.ma.masked_invalid(y)
     if dy is not None:
-        dy = numpy.ma.masked_invalid(dy)
+        dy = np.ma.masked_invalid(dy)
     return x, y, dy, dx
 
 
@@ -382,57 +385,57 @@ def boundaries_from_points(input_array):
 
     :param input_array: a :class:`numpy.ndarray` of bin centers
     """
-    assert isinstance(input_array, numpy.ndarray), 'Not a numpy array'
+    assert isinstance(input_array, np.ndarray), 'Not a numpy array'
     if len(input_array) == 0:
         raise ValueError('could not extend array with no elements')
     if len(input_array) == 1:
-        return numpy.array([input_array[0] - 0.5, input_array[0] + 0.5])
-    return numpy.concatenate(([(3 * input_array[0] - input_array[1]) * 0.5],
-                              (input_array[1:] + input_array[:-1]) * 0.5,
-                              [(3 * input_array[-1] - input_array[-2]) * 0.5]))
+        return np.array([input_array[0] - 0.5, input_array[0] + 0.5])
+    return np.concatenate(([(3 * input_array[0] - input_array[1]) * 0.5],
+                           (input_array[1:] + input_array[:-1]) * 0.5,
+                           [(3 * input_array[-1] - input_array[-2]) * 0.5]))
 
 
 def common_x(arr):
     """
     Helper function to check if all rows in a 2d :class:`numpy.ndarray` are identical
     """
-    return numpy.all(arr == arr[0, :], axis=(1, 0))
+    return np.all(arr == arr[0, :], axis=(1, 0))
 
 
 def get_matrix_2d_ragged(workspace, distribution, histogram2D=False, transpose=False):
     num_hist = workspace.getNumberHistograms()
-    delta = numpy.finfo(numpy.float64).max
-    min_value = numpy.finfo(numpy.float64).max
-    max_value = numpy.finfo(numpy.float64).min
+    delta = np.finfo(np.float64).max
+    min_value = np.finfo(np.float64).max
+    max_value = np.finfo(np.float64).min
     for i in range(num_hist):
         xtmp = workspace.readX(i)
         if workspace.isHistogramData():
-            #input x is edges
+            # input x is edges
             xtmp = mantid.plots.helperfunctions.points_from_boundaries(xtmp)
         else:
-            #input x is centers
+            # input x is centers
             pass
         min_value = min(min_value, xtmp.min())
         max_value = max(max_value, xtmp.max())
         diff = xtmp[1:] - xtmp[:-1]
         delta = min(delta, diff.min())
-    num_edges = int(numpy.ceil((max_value - min_value)/delta)) + 1
-    x_centers = numpy.linspace(min_value, max_value, num=num_edges)
+    num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
+    x_centers = np.linspace(min_value, max_value, num=num_edges)
     y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
-    z = numpy.empty([num_hist, num_edges], dtype=numpy.float64)
+    z = np.empty([num_hist, num_edges], dtype=np.float64)
     for i in range(num_hist):
         centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(
             workspace, i, normalize_by_bin_width=distribution, withDy=False, withDx=False)
-        f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=numpy.nan)
+        f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
         z[i] = f(x_centers)
     if histogram2D:
         x = mantid.plots.helperfunctions.boundaries_from_points(x_centers)
     else:
         x = x_centers
     if transpose:
-        return y.T,x.T,z.T
+        return y.T, x.T, z.T
     else:
-        return x,y,z
+        return x, y, z
 
 
 def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=False):
@@ -464,7 +467,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
         if histogram2D:
             if len(y) == z.shape[0]:
                 y = boundaries_from_points(y)
-            x = numpy.vstack((x, x[-1]))
+            x = np.vstack((x, x[-1]))
         else:
             x = .5 * (x[:, 0:-1] + x[:, 1:])
             if len(y) == z.shape[0] + 1:
@@ -472,21 +475,21 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     else:
         if histogram2D:
             if common_x(x):
-                x = numpy.tile(boundaries_from_points(x[0]), z.shape[0] + 1).reshape(z.shape[0] + 1, -1)
+                x = np.tile(boundaries_from_points(x[0]), z.shape[0] + 1).reshape(z.shape[0] + 1, -1)
             else:
-                x = numpy.vstack((x, x[-1]))
-                x = numpy.array([boundaries_from_points(xi) for xi in x])
+                x = np.vstack((x, x[-1]))
+                x = np.array([boundaries_from_points(xi) for xi in x])
             if len(y) == z.shape[0]:
                 y = boundaries_from_points(y)
         else:
             if len(y) == z.shape[0] + 1:
                 y = points_from_boundaries(y)
-    y = numpy.tile(y, x.shape[1]).reshape(x.shape[1], x.shape[0]).transpose()
-    z = numpy.ma.masked_invalid(z)
+    y = np.tile(y, x.shape[1]).reshape(x.shape[1], x.shape[0]).transpose()
+    z = np.ma.masked_invalid(z)
     if transpose:
-        return y.T,x.T,z.T
+        return y.T, x.T, z.T
     else:
-        return x,y,z
+        return x, y, z
 
 
 def get_uneven_data(workspace, distribution):
@@ -514,10 +517,10 @@ def get_uneven_data(workspace, distribution):
         zvals = workspace.readY(index)
         if workspace.isHistogramData():
             if not distribution:
-                zvals = zvals / (xvals[1:] - xvals[0:-1])
+                zvals = zvals/(xvals[1:] - xvals[0:-1])
         else:
             xvals = boundaries_from_points(xvals)
-        zvals = numpy.ma.masked_invalid(zvals)
+        zvals = np.ma.masked_invalid(zvals)
         z.append(zvals)
         x.append(xvals)
         y.append([yvals[index], yvals[index + 1]])
@@ -549,8 +552,8 @@ def check_resample_to_regular_grid(ws):
         return True
 
     x = ws.dataX(0)
-    difference = numpy.diff(x)
-    if not numpy.all(numpy.isclose(difference[:-1], difference[0])):
+    difference = np.diff(x)
+    if not np.all(np.isclose(difference[:-1], difference[0])):
         return True
 
     return False
@@ -624,7 +627,7 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
                     dims.append(d)
                 else:
                     title += '{0}={1:.4}; '.format(d.name,
-                                                   (d.getX(indices[n])+d.getX(indices[n]+1))/2)
+                                                   (d.getX(indices[n]) + d.getX(indices[n] + 1))/2)
         for d in dims:
             axis_title = d.name.replace('DeltaE', r'$\Delta E$')
             axis_unit = d.getUnits().replace('Angstrom^-1', r'$\AA^{-1}$')
@@ -683,3 +686,41 @@ def _get_y_errorbar_segments(err_cont):
         return err_cont[2][1].get_segments()
     else:
         return None
+
+
+def get_errorbar_bounds(container):
+    min_x, max_x, min_y, max_y = None, None, None, None
+    x_segments = _get_x_errorbar_segments(container)
+    if x_segments:
+        coords = [array[:, 0] for array in x_segments]
+        max_x = np.max(coords)
+        min_x = np.min(coords)
+    y_segments = _get_y_errorbar_segments(container)
+    if y_segments:
+        coords = [array[:, 1] for array in y_segments]
+        max_y = np.max(coords)
+        min_y = np.min(coords)
+    return min_x, max_x, min_y, max_y
+
+
+def errorbars_hidden(err_container, include_connecting_line=False):
+    """
+    Return True if errorbars in ErrorbarContainer are not visible
+    :param err_container: ErrorbarContainer to find visibility of
+    :param include_connecting_line: Include line connecting errorbars
+    """
+    hidden = True
+    if not isinstance(err_container, ErrorbarContainer):
+        return True
+    err_lines = err_container.lines if include_connecting_line else err_container[1:]
+    try:
+        for lines in err_lines:
+            try:
+                for line in lines:
+                    hidden = hidden and (not line.get_visible())
+            except TypeError:
+                if lines:
+                    hidden = hidden and (not lines.get_visible())
+    except AttributeError:
+        pass
+    return hidden

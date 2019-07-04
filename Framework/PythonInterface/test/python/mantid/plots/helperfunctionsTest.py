@@ -12,6 +12,7 @@ import unittest
 
 import matplotlib
 import numpy as np
+from matplotlib.pyplot import figure
 
 import mantid.api
 import mantid.plots.helperfunctions as funcs
@@ -703,6 +704,36 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_equal(indices, (1,slice(None),slice(None)))
         self.assertIn('label', kwargs)
         self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
+
+    def _create_artist(self, errors=False):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        if errors:
+            artist = ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.1])
+        else:
+            artist = ax.plot([0, 1], [0, 1])[0]
+        return artist
+
+    def test_errorbars_hidden_returns_true_for_non_errorbar_container_object(self):
+        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(Mock()))
+
+    def test_errorbars_hidden_returns_correctly_on_errorbar_container(self):
+        container = self._create_artist(errors=True)
+        self.assertFalse(mantid.plots.helperfunctions.errorbars_hidden(container))
+        container[2][0].set_visible(False)
+        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
+
+    def test_errorbars_hidden_returns_false_on_container_with_connecting_line_with_include_true(self):
+        container = self._create_artist(errors=True)
+        # Hide errorbars
+        [bars.set_visible(False) for bars in container[2]]
+        self.assertFalse(mantid.plots.helperfunctions.errorbars_hidden(container, include_connecting_line=True))
+
+    def test_errorbars_hidden_returns_true_on_container_with_connecting_line_with_include_false(self):
+        container = self._create_artist(errors=True)
+        # Hide errorbars but not connecting line
+        [bars.set_visible(False) for bars in container[2]]
+        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
 
 
 if __name__ == '__main__':
