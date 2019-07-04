@@ -89,7 +89,7 @@ files are remembered by the interface so they only have to be set once per cycle
 There is also the option to manually set the dRange used in all of the sample
 runs, note that in this case all sample files must correspond to the same dRange.
 The dRanges are numbered as per the `OSIRIS manual
-<http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf>`_.
+<https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf>`_.
 Otherwise the dRange is determined based on the table provided in the manual.
 
 Note: There must be a corresponding vanadium file with the same dRanges for each

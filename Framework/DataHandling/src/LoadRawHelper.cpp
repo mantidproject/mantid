@@ -735,15 +735,16 @@ void LoadRawHelper::runLoadLog(const std::string &fileName,
       setChildStartProgress(progStart);
       setChildEndProgress(progEnd);
     }
-    // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+    // Now execute the Child Algorithm. Catch any error, but don't stop.
     try {
+      loadLog->setLogging(false);
       loadLog->execute();
-    } catch (std::exception &) {
-      g_log.error("Unable to successfully run LoadLog Child Algorithm");
-    }
+      if (!loadLog->isExecuted())
+        g_log.warning("Unable to successfully run LoadLog Child Algorithm");
 
-    if (!loadLog->isExecuted()) {
-      g_log.error("Unable to successfully run LoadLog Child Algorithm");
+    } catch (std::exception &ex) {
+      g_log.warning("Unable to successfully run LoadLog Child Algorithm: ");
+      g_log.warning(ex.what());
     }
   }
   // Make log creator object and add the run status log if we have the
