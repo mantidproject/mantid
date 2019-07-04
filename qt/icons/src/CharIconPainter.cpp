@@ -28,8 +28,8 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   // down this far. This is because they can be used for defining variable
   // changes based on state of the buttons/QObject that the Icon is present in.
   // Since we currently don't use this feature availible with QIcon they have
-  // not yet been implemented.
-  UNUSED_ARG(mode);
+  // not yet been implemented. Mode has now been implemented however it will
+  // only ever be gray in it's current mode when disabled.
   UNUSED_ARG(state);
 
   painter->save();
@@ -43,7 +43,9 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   // Set some defaults so it doesn't fail later if nothing was set
   QString color("black");
   double scaleFactor(1.0);
-  if (colorVariant.canConvert<QString>()) {
+  if (mode == QIcon::Mode::Disabled) {
+    color = "#c7c7c7"; // gray
+  } else if (colorVariant.canConvert<QString>()) {
     color = colorVariant.toString();
   }
   if (scaleVariant.canConvert<double>()) {
