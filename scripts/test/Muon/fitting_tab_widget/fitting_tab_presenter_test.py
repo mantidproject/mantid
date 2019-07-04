@@ -608,6 +608,15 @@ class FittingTabPresenterTest(GuiTest):
 
         self.assertEqual(str(self.view.fit_object), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 
+    def test_removing_fit_and_then_switching_displayed_workspace_does_not_lead_to_error(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.view.function_browser.clear()
+
+        self.view.parameter_display_combo.setCurrentIndex(1)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

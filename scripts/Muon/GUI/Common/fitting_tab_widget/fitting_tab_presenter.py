@@ -10,7 +10,7 @@ from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import Workspace
 from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
-from mantid.api import CompositeFunction, MultiDomainFunction
+from mantid.api import MultiDomainFunction
 import functools
 import re
 
@@ -326,8 +326,11 @@ class FittingTabPresenter(object):
             self.view.function_browser.blockSignals(False)
             return
 
-        self._fit_function = [self.view.fit_object.clone() for _ in self.selected_data] \
-            if self.selected_data and self.view.fit_object else [self.view.fit_object.clone()] if self.view.fit_object else [None]
+        if not self.view.fit_object:
+            self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
+        else:
+            self._fit_function = [self.view.fit_object.clone() for _ in self.selected_data] \
+                if self.selected_data else [self.view.fit_object.clone()]
         self.clear_fit_information()
         if self.automatically_update_fit_name:
             self.view.function_name = self.model.get_function_name(
