@@ -41,6 +41,8 @@ public slots:
   void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
   void deleteGroupingWorkspace();
+  void validateSpectrumMin(int value);
+  void validateSpectrumMax(int value);
 
 private:
   std::string documentationPage() const override;

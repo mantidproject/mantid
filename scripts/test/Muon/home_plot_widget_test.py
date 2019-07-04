@@ -113,6 +113,7 @@ class HomeTabPlotPresenterTest(GuiTest):
                                          ['MUSR62260; Group; bottom; Asymmetry; MA'],
                                          ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted;'])
         self.context.fitting_context.fit_list.__getitem__.return_value = fit_information
+        self.context.fitting_context.number_of_fits = 1
 
         self.presenter.handle_fit_completed()
 

@@ -188,7 +188,7 @@ void PlotPeakByLogValue::exec() {
   ITableWorkspace_sptr result =
       WorkspaceFactory::Instance().createTable("TableWorkspace");
   if (logName == "SourceName") {
-    result->addColumn("str", "Source name");
+    result->addColumn("str", "SourceName");
     isDataName = true;
   } else if (logName.empty()) {
     auto col = result->addColumn("double", "axis-1");
@@ -261,7 +261,7 @@ void PlotPeakByLogValue::exec() {
       // Find the log value: it is either a log-file value or simply the
       // workspace number
       double logValue = 0;
-      if (logName.empty()) {
+      if (logName.empty() || logName == "axis-1") {
         API::Axis *axis = data.ws->getAxis(1);
         if (dynamic_cast<BinEdgeAxis *>(axis)) {
           double lowerEdge((*axis)(j));

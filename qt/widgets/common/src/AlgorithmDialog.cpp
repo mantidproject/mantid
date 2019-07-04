@@ -725,6 +725,11 @@ void AlgorithmDialog::accept() {
   }
 }
 
+void AlgorithmDialog::reject() {
+  emit closeEventCalled();
+  QDialog::reject();
+}
+
 //-------------------------------------------------------------------------------------------------
 
 /**
@@ -1092,6 +1097,7 @@ void AlgorithmDialog::errorHandle(const IAlgorithm *alg,
  * Only allow close when close is enabled
  */
 void AlgorithmDialog::closeEvent(QCloseEvent *evt) {
+  emit closeEventCalled();
   if (m_exitButton) {
     if (m_exitButton->isEnabled()) {
       evt->accept();

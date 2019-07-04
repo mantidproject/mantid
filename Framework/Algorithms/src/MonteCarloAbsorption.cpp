@@ -166,7 +166,6 @@ void MonteCarloAbsorption::exec() {
   auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
                                seed, interpolateOpt, useSparseInstrument,
                                static_cast<size_t>(maxScatterPtAttempts));
-
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 

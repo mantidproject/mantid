@@ -452,7 +452,7 @@ double InstrumentActor::getIntegratedCounts(size_t index) const {
  * @param x :: (output) Time of flight values (or whatever values the x axis
  * has) to plot against.
  * @param y :: (output) The sums of the counts for each bin.
- * @param size :: (optional input) Size of the output vectors. If not given it
+ * @param size :: Size of the output vectors. If not given it
  * will be determined automatically.
  */
 void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
@@ -478,6 +478,16 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
     // should be faster than ragged
     sumDetectorsUniform(dets, x, y);
   }
+}
+
+/**
+ * @overload InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
+ * std::vector<double> &x, std::vector<double> &y, size_t size = 0)
+ */
+void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
+                                   std::vector<double> &x,
+                                   std::vector<double> &y) const {
+  sumDetectors(dets, x, y, getWorkspace()->blocksize());
 }
 
 /**

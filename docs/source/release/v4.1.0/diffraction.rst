@@ -35,14 +35,17 @@ Improvements
 
 - The Pearl scripts now set now use a spline coefficient of 5 on long-mode due to the increased amount of noise.
 
+- New IDF have been added for VULCAN.
+
 - The Pearl scripts now crop to a dspacing of 8 on long-mode to avoid negative values caused by noise after this point.
 
 Bug Fixes
 #########
 
 - HRPD Absorption corrections now correctly takes into account the thickness of the slab.
-
 - Pearl no longer produces an output of NaN when long-mode is changed after focusing.
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` if fixed to load also single point scans.
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` no longer errors out if the first chunk has no events
 
 Engineering Diffraction
 -----------------------
@@ -91,6 +94,7 @@ Improvements
 Bug Fixes
 #########
 
+- :ref:`MDNorm <algm-MDNorm>` now checks for consistent binning between the given parameters and the input accumulation workspaces if the latter are given.
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now only calculates statistics for integer HKL (not satellite peaks) instead of combining. Statistics for satellite peaks will be added later.
 
 Imaging

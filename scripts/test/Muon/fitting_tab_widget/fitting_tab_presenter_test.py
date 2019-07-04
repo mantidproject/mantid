@@ -113,10 +113,10 @@ class FittingTabPresenterTest(GuiTest):
 
     def test_fit_clicked_with_simultaneous_selected_and_no_globals(self):
         self.presenter.model.get_function_name.return_value = 'GausOsc'
-        self.view.simul_fit_radio.toggle()
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+        self.view.simul_fit_radio.toggle()
+        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser_multi.getGlobalFunction(),
                                                                  'Fit Suceeded', 0.5)
 
         self.view.fit_button.clicked.emit(True)
@@ -135,11 +135,12 @@ class FittingTabPresenterTest(GuiTest):
 
     def test_fit_clicked_with_simultaneous_selected_with_global_parameters(self):
         self.presenter.model.get_function_name.return_value = 'GausOsc'
-        self.view.simul_fit_radio.toggle()
+
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        self.view.function_browser.setGlobalParameters(['A'])
-        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser.getGlobalFunction(),
+        self.view.simul_fit_radio.toggle()
+        self.view.function_browser_multi.setGlobalParameters(['A'])
+        self.presenter.model.do_simultaneous_fit.return_value = (self.view.function_browser_multi.getGlobalFunction(),
                                                                  'Fit Suceeded', 0.5)
 
         self.view.fit_button.clicked.emit(True)
@@ -204,8 +205,8 @@ class FittingTabPresenterTest(GuiTest):
 
         self.presenter.selected_data = new_workspace_list
 
-        self.assertEqual(self.view.function_browser.getDatasetNames(), new_workspace_list)
-        self.assertEqual(self.view.function_browser.getNumberOfDatasets(), 3)
+        self.assertEqual(self.view.function_browser_multi.getDatasetNames(), new_workspace_list)
+        self.assertEqual(self.view.function_browser_multi.getNumberOfDatasets(), 3)
 
     def test_when_switching_to_simultaneous_function_browser_setup_correctly(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
@@ -227,8 +228,8 @@ class FittingTabPresenterTest(GuiTest):
 
         self.view.simul_fit_radio.toggle()
 
-        self.assertEqual(self.view.function_browser.getDatasetNames(), new_workspace_list)
-        self.assertEqual(self.view.function_browser.getNumberOfDatasets(), 3)
+        self.assertEqual(self.view.function_browser_multi.getDatasetNames(), new_workspace_list)
+        self.assertEqual(self.view.function_browser_multi.getNumberOfDatasets(), 3)
 
     def test_when_switching_to_from_simultaneous_with_manual_selection_on_function_browser_setup_correctly(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
@@ -284,8 +285,8 @@ class FittingTabPresenterTest(GuiTest):
 
         self.view.parameter_display_combo.setCurrentIndex(1)
 
-        self.assertEqual(self.view.function_browser.getDatasetNames(), new_workspace_list)
-        self.assertEqual(self.view.function_browser.getNumberOfDatasets(), 3)
+        self.assertEqual(self.view.function_browser_multi.getDatasetNames(), new_workspace_list)
+        self.assertEqual(self.view.function_browser_multi.getNumberOfDatasets(), 3)
         # self.assertEqual(self.view.function_browser.getCurrentDataset(), 1) TODO FunctionBrowser seems to have an issue here
         self.assertEqual(self.view.end_time, 0.78)
         self.assertEqual(self.view.start_time, 0.45)
@@ -446,7 +447,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter.selected_data = new_workspace_list
         fit_function_2 = self.view.fit_object.clone()
         self.presenter.model.calculate_tf_function.return_value = fit_function_2
-        self.view.function_browser.setGlobalParameters(['A'])
+        self.view.function_browser_multi.setGlobalParameters(['A'])
 
         self.view.tf_asymmetry_mode = True
 
@@ -508,6 +509,113 @@ class FittingTabPresenterTest(GuiTest):
                                   'StartX': 0.0,
                                   'UnNormalizedWorkspaceList': '__MUSR22725; Group; top; Asymmetry_unnorm'}
                          )
+
+    def test_on_function_structure_changed_stores_current_fit_state_in_relevant_presenter(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function], ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 3)
+
+    def test_updating_function_parameters_updates_relevant_stored_function(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+        self.view.function_browser.setParameter('A', 1.5)
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function],
+                         ['name=GausOsc,A=1.5,Sigma=0.2,Frequency=0.1,Phi=0'] + ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 2)
+
+    def test_handle_display_workspace_changed_updates_displayed_single_function(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.view.function_browser.setParameter('A', 1.5)
+
+        self.view.parameter_display_combo.setCurrentIndex(1)
+
+        self.assertEqual(str(self.view.fit_object), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+    def test_setting_selected_data_resets_function_browser_datasets(self):
+        self.assertEqual(self.view.function_browser.getDatasetNames(), [])
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        self.assertEqual(self.view.function_browser.getDatasetNames(), ['MUSR22725; Group; top; Asymmetry'])
+        self.assertEqual(self.view.function_browser_multi.getDatasetNames(), ['MUSR22725; Group; top; Asymmetry',
+                                                                              'MUSR22725; Group; bottom; Asymmetry',
+                                                                              'MUSR22725; Group; fwd; Asymmetry'])
+
+    def test_switching_to_simultaneous_keeps_stored_fit_functions_same_length(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+        self.view.simul_fit_radio.toggle()
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function], ['composite=MultiDomainFunction,NumDeriv=true;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0,$domains=i'
+                                                                                ';name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0,$domains=i;'
+                                                                                'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0,$domains=i']*3)
+
+    def test_switching_from_simultaneous_to_single_fit_updates_fit_functions_appropriately(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+        self.view.simul_fit_radio.toggle()
+        self.view.single_fit_radio.toggle()
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function], [
+            'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 3)
+
+    def test_undo_fit_button_disabled_until_a_succesful_fit_is_performed(self):
+        self.assertEqual(self.view.undo_fit_button.isEnabled(), False)
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter.fitting_calculation_model = mock.MagicMock()
+        self.presenter.fitting_calculation_model.result = (fit_function, 'Success', 1.07)
+
+        self.presenter.handle_finished()
+
+        self.assertEqual(self.view.undo_fit_button.isEnabled(), True)
+
+    def test_after_fit_fit_cache_is_populated(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.5,Sigma=0.5,Frequency=1,Phi=0')
+        self.presenter.fitting_calculation_model = mock.MagicMock()
+        self.presenter.model.do_single_fit.return_value = (fit_function,'Fit Suceeded', 0.5)
+
+        self.presenter.handle_fit_clicked()
+        wait_for_thread(self.presenter.calculation_thread)
+
+        self.assertEqual([str(item) for item in self.presenter._fit_function_cache], ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 3)
+
+    def test_undo_fit_resets_fit_in_view(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.5,Sigma=0.5,Frequency=1,Phi=0')
+        self.presenter.fitting_calculation_model = mock.MagicMock()
+        self.presenter.model.do_single_fit.return_value = (fit_function, 'Fit Suceeded', 0.5)
+        self.presenter.handle_fit_clicked()
+        wait_for_thread(self.presenter.calculation_thread)
+
+        self.view.undo_fit_button.clicked.emit(True)
+
+        self.assertEqual(str(self.view.fit_object), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
+    def test_removing_fit_and_then_switching_displayed_workspace_does_not_lead_to_error(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.view.function_browser.clear()
+
+        self.view.parameter_display_combo.setCurrentIndex(1)
 
 
 if __name__ == '__main__':
