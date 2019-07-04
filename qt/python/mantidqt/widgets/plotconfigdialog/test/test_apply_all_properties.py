@@ -63,9 +63,10 @@ def _run_apply_properties_on_figure_with_curve():
     fig = figure()
     ax = fig.add_subplot(111)
     ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.2], label='old label')
-    mock_dialog_view = Mock()
-    presenter = PlotConfigDialogPresenter(fig, view=mock_dialog_view)
-    presenter.apply_properties()
+    presenter = PlotConfigDialogPresenter(fig, view=Mock())
+    with patch.object(presenter.tab_widget_presenters[0], 'update_view',
+                      lambda: None):
+        presenter.apply_properties()
     return ax
 
 
@@ -73,9 +74,10 @@ def _run_apply_properties_on_figure_with_image():
     img_fig = figure()
     img_ax = img_fig.add_subplot(111)
     img_ax.imshow([[0, 1], [0, 1]], label='old label')
-    mock_dialog_view = Mock()
-    presenter = PlotConfigDialogPresenter(img_fig, view=mock_dialog_view)
-    presenter.apply_properties()
+    presenter = PlotConfigDialogPresenter(img_fig, view=Mock())
+    with patch.object(presenter.tab_widget_presenters[0], 'update_view',
+                      lambda: None):
+        presenter.apply_properties()
     return img_ax
 
 
