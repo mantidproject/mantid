@@ -191,7 +191,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   auto instrNameSize = compInfo.name(ROOT_INDEX).size();
   H5::DataType instrName(H5VARIABLE);
   H5::DataSet instrumentName =
-      instrumentGroup.createDataSet("local_name", H5VARIABLE, H5SCALAR, plist);
+      instrumentGroup.createDataSet("name", H5VARIABLE, H5SCALAR, plist);
 
   // add dataset to child group 'instrument'
 
@@ -221,7 +221,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
       detectorGroup.createDataSet("x_pixel_offset", H5VARIABLE, H5SCALAR);
   H5::DataSet yPixelOffset =
       detectorGroup.createDataSet("y_pixel_offset", H5VARIABLE, H5SCALAR);
-  ;
+  H5::DataSet detectorName =
+      detectorGroup.createDataSet("local_name", H5VARIABLE, H5SCALAR);
 
   // attributes
   writeStrAttributeToGroupHelper(pixelGroup, NX_CLASS, NX_OFF_GEOMETRY);
@@ -263,13 +264,10 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     }
   }*/
 
-  // create DataSet 'data' in instrument.
 
   file.close();
 
 } // saveInstrument
-
-// returns coumpound transform of rotation about one axis and translation.
 
 } // namespace NexusGeometry
 } // namespace Mantid

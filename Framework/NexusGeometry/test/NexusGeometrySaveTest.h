@@ -30,6 +30,9 @@ using namespace Mantid::NexusGeometry;
 //---------------------------------------------------------------
 namespace {
 
+const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
+const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
+
 // NEXUS COMPLIANT ATTRIBUTE NAMES
 const H5std_string SHORT_NAME = "short_name";
 const H5std_string NX_CLASS = "NX_class";
@@ -64,101 +67,151 @@ public:
     }
   }
 
-  // if the sample in th file doesnt have coordinates 0,0,0 return false.
-  bool sampleInFileisNexusCompliant() {
-    // open sample group, check it has nxclass nx sample, check it then has nx
-    // transformation
-  }
+  // moves down the index through groups starting at root, and if
+  // child has expected CLASS_TYPE, and is in parent group with expected parent
+  bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
+                                    const std::string &childNX_CLASS_TYPE) {
 
-  // check if group has matching NX_class attribute value, or if dataype has
-  // matching NX_class attribute value if optional dataset name passed.
-  bool hasNxClass(const std::string &attrVal, const std::string &pathToGroup,
-                  std::string *dataSetname = nullptr) const {
+    H5::Group rootGroup =
+        m_file.openGroup("raw_data_1"); // as defined in saveInstrument.
 
-    H5::Attribute attribute;
+    // if specified parent NX class type is NX entry, check the top level of
+    // file structure only. (dont take extra step to look for parent group)
+    if (parentNX_CLASS_TYPE == NX_ENTRY) {
 
-    // group must be opened before accessing dataset
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
-
-    if (dataSetname != nullptr) {
-
-      // treat as dataset
-
-      H5::DataSet dataSet = parentGroup.openDataSet(*dataSetname);
-      attribute = dataSet.openAttribute(NX_CLASS);
-
-    } else {
-
-      // treat as group
-      attribute = parentGroup.openAttribute(NX_CLASS);
+      for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
+        if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
+          std::string childPath = rootGroup.getObjnameByIdx(i);
+          // Open the sub group
+          H5::Group childGroup = rootGroup.openGroup(childPath);
+          // Test attribute at current index for NX_class
+          H5::Attribute attribute = childGroup.openAttribute(i);
+          if (attribute.getName() == NX_CLASS) {
+            // Get attribute data type
+            H5::DataType dataType = attribute.getDataType();
+            // Get the NX_class type
+            std::string classType;
+            attribute.read(dataType, classType);
+            // If group of correct type, append to subGroup vector
+            if (classType == childNX_CLASS_TYPE) {
+              return true;
+            }
+          }
+        }
+      }
     }
 
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
-    return attributeValue == attrVal;
-  }
-
-  // check if dataset exists in group, and (optional) check if the dataset has
-  // the NX_class attribute specified.
-
-  bool hasDataSet(const std::string dataSetValue,
-                  const std::string &pathToGroup) const {
-
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
-
-    try {
-      H5::DataSet dataSet = parentGroup.openDataSet(m_dataSetName);
-      std::string dataSetVal;
-      dataSet.read(dataSetVal, dataSet.getDataType());
-      return dataSetVal == dataSetValue;
-    } catch (H5::DataSetIException) {
-      return false;
+    // Iterate over children of root group, and determine if a group
+    for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
+      if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
+        std::string childPath = rootGroup.getObjnameByIdx(i);
+        // Open the sub group
+        H5::Group childGroup = rootGroup.openGroup(childPath);
+        // check current child group going down from root has the specified
+        // NX_CLASS parent group
+        H5::Attribute parentAttribute = childGroup.openAttribute(NX_CLASS);
+        std::string parentAttrVal;
+        parentAttribute.read(parentAttribute.getDataType(), parentAttrVal);
+        if (parentAttrVal == parentNX_CLASS_TYPE) {
+          for (hsize_t i = 0; i < childGroup.getNumObjs(); ++i) {
+            if (childGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
+              std::string grandchildPath = childGroup.getObjnameByIdx(i);
+              // Open the sub group
+              H5::Group grandchildGroup = childGroup.openGroup(grandchildPath);
+              // check NX class
+              H5::Attribute grandchildAttribute =
+                  grandchildGroup.openAttribute(NX_CLASS);
+              std::string grandchildAttrVal;
+              grandchildAttribute.read(grandchildAttribute.getDataType(),
+                                       grandchildAttrVal);
+              if( childNX_CLASS_TYPE == grandchildAttrVal){
+                return true;
+			  }
+            }
+          }
+        }
+      }
     }
-  }
+  
+  return false;
+} // namespace
 
-  // check if dataset or group has name-specific attribute
-  bool hasAttributeInGroup(const std::string &pathToGroup,
+// check if group has matching NX_class attribute value, or if dataype has
+// matching NX_class attribute value if optional dataset name passed.
+bool dataSetHasNxClass(std::string dataSetname, const std::string &attrVal,
+                       const std::string &pathToGroup) const {
+
+  H5::Attribute attribute;
+  H5::Group parentGroup = m_file.openGroup(pathToGroup);
+  H5::DataSet dataSet = parentGroup.openDataSet(dataSetname);
+  attribute = dataSet.openAttribute(NX_CLASS);
+  std::string attributeValue;
+  attribute.read(attribute.getDataType(), attributeValue);
+
+  return attributeValue == attrVal;
+}
+
+bool groupHasNxClass(const std::string &attrVal, const std::string &pathToGroup,
+                     std::string *dataSetname = nullptr) const {
+
+  H5::Attribute attribute;
+  H5::Group parentGroup = m_file.openGroup(pathToGroup);
+  attribute = parentGroup.openAttribute(NX_CLASS);
+  std::string attributeValue;
+  attribute.read(attribute.getDataType(), attributeValue);
+
+  return attributeValue == attrVal;
+}
+
+bool hasDataSet(const std::string dataSetValue,
+                const std::string &pathToGroup) const {
+
+  H5::Group parentGroup = m_file.openGroup(pathToGroup);
+
+  try {
+    H5::DataSet dataSet = parentGroup.openDataSet(m_dataSetName);
+    std::string dataSetVal;
+    dataSet.read(dataSetVal, dataSet.getDataType());
+    return dataSetVal == dataSetValue;
+  } catch (H5::DataSetIException) {
+    return false;
+  }
+}
+
+// check if dataset or group has name-specific attribute
+bool hasAttributeInGroup(const std::string &pathToGroup,
+                         const std::string attrName,
+                         const std::string attrVal) {
+
+  H5::Attribute attribute;
+  H5::Group parentGroup = m_file.openGroup(pathToGroup);
+  attribute = parentGroup.openAttribute(attrName);
+  std::string attributeValue;
+  attribute.read(attribute.getDataType(), attributeValue);
+
+  return attributeValue == attrVal;
+}
+
+bool hasAttributeInDataSet(const std::string &pathToGroup,
                            const std::string attrName,
                            const std::string attrVal) {
 
-    H5::Attribute attribute;
+  H5::Attribute attribute;
+  H5::Group parentGroup = m_file.openGroup(pathToGroup);
+  H5::DataSet dataSet = parentGroup.openDataSet(m_dataSetName);
+  attribute = dataSet.openAttribute(attrName);
+  std::string attributeValue;
+  attribute.read(attribute.getDataType(), attributeValue);
 
-    // group must be opened before accessing dataset
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
-
-    // treat as group
-    attribute = parentGroup.openAttribute(attrName);
-
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
-    return attributeValue == attrVal;
-  }
-
-  bool hasAttributeInDataSet(const std::string &pathToGroup,
-                             const std::string attrName,
-                             const std::string attrVal) {
-
-    H5::Attribute attribute;
-
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
-
-    H5::DataSet dataSet = parentGroup.openDataSet(m_dataSetName);
-    attribute = dataSet.openAttribute(attrName);
-
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
-    return attributeValue == attrVal;
-  }
+  return attributeValue == attrVal;
+}
 
 private:
-  H5::H5File m_file;
-  const std::string m_dataSetName =
-      "local_name"; // the title for the dataset containing the instrument name
-                    // is 'local_name' in file.
-};                  // HDF5FileTestUtility
+H5::H5File m_file;
+const std::string m_dataSetName =
+    "name"; // the title for the dataset containing the instrument name
+            // is 'local_name' in file.
+};          // namespace
 
 // RAII: Gives a clean file destination and removes the file when
 // handle is out of scope. Must be stack allocated.
@@ -271,23 +324,21 @@ public:
                      std::invalid_argument &);
   }
 
-  void test_nxentry_class_exists_in_root() {
+  void test_root_group_is_nxentry_class() {
 
     ScopedFileHandle fileResource("check_nxentry_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto const &compInfo = (*m_instrument.first);
-    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
-
     saveInstrument(compInfo, destinationFile);
 
     HDF5FileTestUtility tester(destinationFile);
     std::string dataSetName = compInfo.name(compInfo.root());
 
-    TS_ASSERT(tester.hasNxClass(NX_ENTRY, "/raw_data_1"));
+    TS_ASSERT(tester.groupHasNxClass(NX_ENTRY, "/raw_data_1"));
   }
 
-  void test_nxinstrument_class_exists_in_instrument_group() {
+  void test_nxinstrument_class_group_exists_in_root_group() {
 
     ScopedFileHandle fileResource("check_nxinstrument_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -296,11 +347,10 @@ public:
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
     saveInstrument(compInfo, destinationFile);
-
     HDF5FileTestUtility tester(destinationFile);
     std::string dataSetName = compInfo.name(compInfo.root());
 
-    TS_ASSERT(tester.hasNxClass(NX_INSTRUMENT, "/raw_data_1/instrument"));
+    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_INSTRUMENT));
   }
 
   void test_instrument_has_name() {
@@ -314,8 +364,8 @@ public:
     saveInstrument(compInfo, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    TS_ASSERT(
-        testUtility.hasDataSet(expectedInstrumentName, "/raw_data_1/instrument"));
+    TS_ASSERT(testUtility.hasDataSet(expectedInstrumentName,
+                                     "/raw_data_1/instrument"));
     /*
     TS_ASSERT(testUtility.hasAttributeInDataSet(
         "/raw_data_1/instrument", SHORT_NAME, expectedInstrumentName)); */
@@ -357,6 +407,37 @@ public:
 
     TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
                      std::invalid_argument &);
+  }
+
+  // throws if NXinstrument group does not have NXsource group
+  void test_nxsource_class_exists_and_is_in_instrument_group() {
+
+    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto const &compInfo = (*m_instrument.first);
+    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
+
+    saveInstrument(compInfo, destinationFile);
+    HDF5FileTestUtility tester(destinationFile);
+    TS_ASSERT(compInfo.hasSource());
+    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_INSTRUMENT, NX_SOURCE));
+  }
+
+  // throws if NXentry group does not have NXsample group
+  void test_nxsample_class_exists_and_is_in_root_group() {
+
+    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto const &compInfo = (*m_instrument.first);
+    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
+
+    saveInstrument(compInfo, destinationFile);
+    HDF5FileTestUtility tester(destinationFile);
+
+    TS_ASSERT(compInfo.hasSample());
+    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SOURCE));
   }
 };
 
