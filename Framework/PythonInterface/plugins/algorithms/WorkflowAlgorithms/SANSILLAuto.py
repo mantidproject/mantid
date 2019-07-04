@@ -29,6 +29,13 @@ def needs_loading(property_value, loading_reduction_type):
     return [loading, ws_name]
 
 
+def get_run_number(value):
+    """
+        Extracts the run number from the first run out of the string value of a multiple file property of numors
+    """
+    return path.splitext(path.basename(value.split(',')[0].split('+')[0]))[0]
+
+
 def needs_processing(property_value, process_reduction_type):
     """
         Checks whether a given unary reduction needs processing or is already cached in ADS with expected name.
@@ -38,7 +45,7 @@ def needs_processing(property_value, process_reduction_type):
     process = False
     ws_name = ''
     if property_value:
-        run_number = path.splitext(path.basename(property_value.split(',')[0].split('+')[0]))[0]
+        run_number = get_run_number(property_value)
         ws_name = run_number + '_' + process_reduction_type
         if mtd.doesExist(ws_name):
             run = mtd[ws_name].getRun()
@@ -78,6 +85,9 @@ class SANSILLAuto(DataProcessorAlgorithm):
     output_sens = None
     dimensionality = None
     references = None
+    normalise = None
+    radius = None
+    thickness = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -140,10 +150,20 @@ class SANSILLAuto(DataProcessorAlgorithm):
         self.output = self.getPropertyValue('OutputWorkspace')
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.reduction_type = self.getPropertyValue('ReductionType')
+        self.normalise = self.getPropertyValue('NormaliseBy')
+        self.radius = self.getProperty('BeamRadius').value
         self.dimensionality = len(self.sample)
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
 
     def PyInit(self):
+
+        self.declareProperty('ReductionType', defaultValue='ReduceSample',
+                             validator=StringListValidator(['ReduceSample', 'ReduceWater']),
+                             doc='Choose whether to treat a sample or a water run to calculate sensitivity.')
+
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+                                                    direction=Direction.Output),
+                             doc='The output workspace group containing reduced data.')
 
         self.declareProperty(MultipleFileProperty('SampleRuns', extensions=['nxs']),
                              doc='Sample run(s).')
@@ -157,6 +177,11 @@ class SANSILLAuto(DataProcessorAlgorithm):
         self.declareProperty(MultipleFileProperty('ContainerRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Empty container run(s).')
 
+        self.setPropertyGroup('SampleRuns', 'Numors')
+        self.setPropertyGroup('AbsorberRuns', 'Numors')
+        self.setPropertyGroup('BeamRuns', 'Numors')
+        self.setPropertyGroup('ContainerRuns', 'Numors')
+
         self.declareProperty(MultipleFileProperty('SampleTransmissionRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Sample transmission run(s).')
 
@@ -168,6 +193,11 @@ class SANSILLAuto(DataProcessorAlgorithm):
 
         self.declareProperty(MultipleFileProperty('TransmissionAbsorberRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Absorber (Cd/B4C) run(s) for transmission.')
+
+        self.setPropertyGroup('SampleTransmissionRuns', 'Transmissions')
+        self.setPropertyGroup('ContainerTransmissionRuns', 'Transmissions')
+        self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
+        self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
 
         self.declareProperty(FileProperty('SensitivityMap', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the map of relative detector efficiencies.')
@@ -183,18 +213,34 @@ class SANSILLAuto(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The output sensitivity map workspace.')
 
-        self.declareProperty('ReductionType', defaultValue='ReduceSample',
-                             validator=StringListValidator(['ReduceSample', 'ReduceWater']),
-                             doc='Choose whether to treat a sample or a water run to calculate sensitivity.')
+        self.copyProperties('SANSILLReduction',
+                            ['NormaliseBy'])
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output),
-                             doc='The output workspace group containing reduced data.')
+        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
+                             doc='Sample thickness [cm]')
 
-        self.setPropertyGroup('SampleTransmissionRuns', 'Transmissions')
-        self.setPropertyGroup('ContainerTransmissionRuns', 'Transmissions')
-        self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
-        self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
+        self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
+                             doc='Beam raduis [m]; used for beam center finding, transmission and flux calculations.')
+
+        self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
+                                                          'used only if the absolute scale is done by dividing to water.')
+
+        self.setPropertyGroup('SensitivityMap', 'Options')
+        self.setPropertyGroup('MaskFiles', 'Options')
+        self.setPropertyGroup('ReferenceFiles', 'Options')
+        self.setPropertyGroup('SensitivityOutputWorkspace', 'Options')
+        self.setPropertyGroup('NormaliseBy', 'Options')
+        self.setPropertyGroup('SampleThickness', 'Options')
+        self.setPropertyGroup('BeamRadius', 'Options')
+        self.setPropertyGroup('WaterCrossSection', 'Options')
+
+        self.copyProperties('SANSILLIntegration',
+                            ['OutputType', 'CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'OutputBinning',
+                             'NPixelDivision', 'NumberOfWedges', 'WedgeWorkspace', 'WedgeAngle', 'WedgeOffset',
+                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ', 'IQxQyLogBinning'])
+
+        self.setPropertyGroup('OutputType', 'Integration Options')
+        self.setPropertyGroup('CalculateResolution', 'Integration Options')
 
     def PyExec(self):
 
@@ -214,46 +260,76 @@ class SANSILLAuto(DataProcessorAlgorithm):
         [process_transmission_absorber, transmission_absorber_name] = needs_processing(self.atransmission, 'Absorber')
         self.progress.report('Processing transmission absorber')
         if process_transmission_absorber:
-            SANSILLReduction(Run=self.atransmission, ProcessAs='Absorber', OutputWorkspace=transmission_absorber_name)
+            SANSILLReduction(Run=self.atransmission,
+                             ProcessAs='Absorber',
+                             NormaliseBy=self.normalise,
+                             OutputWorkspace=transmission_absorber_name)
 
         [process_transmission_beam, transmission_beam_name] = needs_processing(self.btransmission, 'Beam')
         self.progress.report('Processing transmission beam')
         if process_transmission_beam:
-            SANSILLReduction(Run=self.btransmission, ProcessAs='Beam', OutputWorkspace=transmission_beam_name,
+            SANSILLReduction(Run=self.btransmission,
+                             ProcessAs='Beam',
+                             NormaliseBy=self.normalise,
+                             OutputWorkspace=transmission_beam_name,
+                             BeamRadius=self.radius,
                              AbsorberInputWorkspace=transmission_absorber_name)
 
         [process_container_transmission, container_transmission_name] = needs_processing(self.ctransmission, 'Transmission')
         self.progress.report('Processing container transmission')
         if process_container_transmission:
-            SANSILLReduction(Run=self.ctransmission, ProcessAs='Transmission', OutputWorkspace=container_transmission_name,
-                             AbsorberInputWorkspace=transmission_absorber_name, BeamInputWorkspace=transmission_beam_name)
+            SANSILLReduction(Run=self.ctransmission,
+                             ProcessAs='Transmission',
+                             OutputWorkspace=container_transmission_name,
+                             AbsorberInputWorkspace=transmission_absorber_name,
+                             BeamInputWorkspace=transmission_beam_name,
+                             NormaliseBy=self.normalise,
+                             BeamRadius=self.radius)
 
         [process_sample_transmission, sample_transmission_name] = needs_processing(self.stransmission, 'Transmission')
         self.progress.report('Processing sample transmission')
         if process_sample_transmission:
-            SANSILLReduction(Run=self.stransmission, ProcessAs='Transmission', OutputWorkspace=sample_transmission_name,
-                             AbsorberInputWorkspace=transmission_absorber_name, BeamInputWorkspace=transmission_beam_name)
+            SANSILLReduction(Run=self.stransmission,
+                             ProcessAs='Transmission',
+                             OutputWorkspace=sample_transmission_name,
+                             AbsorberInputWorkspace=transmission_absorber_name,
+                             BeamInputWorkspace=transmission_beam_name,
+                             NormaliseBy=self.normalise,
+                             BeamRadius=self.radius)
 
         absorber = self.absorber[i] if len(self.absorber) == self.dimensionality else self.absorber[0]
         [process_absorber, absorber_name] = needs_processing(absorber, 'Absorber')
         self.progress.report('Processing absorber')
         if process_absorber:
-            SANSILLReduction(Run=absorber, ProcessAs='Absorber', OutputWorkspace=absorber_name)
+            SANSILLReduction(Run=absorber,
+                             ProcessAs='Absorber',
+                             NormaliseBy=self.normalise,
+                             OutputWorkspace=absorber_name)
 
         beam = self.beam[i] if len(self.beam) == self.dimensionality else self.beam[0]
         [process_beam, beam_name] = needs_processing(beam, 'Beam')
         flux_name = beam_name + '_Flux'
         self.progress.report('Processing beam')
         if process_beam:
-            SANSILLReduction(Run=beam, ProcessAs='Beam', OutputWorkspace=beam_name,
-                             AbsorberInputWorkspace=absorber_name, FluxOutputWorkspace=flux_name)
+            SANSILLReduction(Run=beam,
+                             ProcessAs='Beam',
+                             OutputWorkspace=beam_name,
+                             NormaliseBy=self.normalise,
+                             BeamRadius=self.radius,
+                             AbsorberInputWorkspace=absorber_name,
+                             FluxOutputWorkspace=flux_name)
 
         container = self.container[i] if len(self.container) == self.dimensionality else self.container[0]
         [process_container, container_name] = needs_processing(container, 'Container')
         self.progress.report('Processing container')
         if process_container:
-            SANSILLReduction(Run=container, ProcessAs='Container', OutputWorkspace=container_name, AbsorberInputWorkspace=absorber_name,
-                             BeamInputWorkspace=beam_name, TransmissionInputWorkspace=container_transmission_name)
+            SANSILLReduction(Run=container,
+                             ProcessAs='Container',
+                             OutputWorkspace=container_name,
+                             AbsorberInputWorkspace=absorber_name,
+                             BeamInputWorkspace=beam_name,
+                             TransmissionInputWorkspace=container_transmission_name,
+                             NormaliseBy=self.normalise)
 
         mask = self.mask[i] if len(self.mask) == self.dimensionality else self.mask[0]
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
@@ -261,14 +337,20 @@ class SANSILLAuto(DataProcessorAlgorithm):
         if load_mask:
             LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
 
+        sens_input = ''
+        ref_input = ''
+        flux_input = ''
         if self.sensitivity:
             [load_sensitivity, sensitivity_name] = needs_loading(self.sensitivity, 'Sensitivity')
+            sens_input = sensitivity_name
+            flux_input = flux_name
             self.progress.report('Loading sensitivity')
             if load_sensitivity:
                 LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sensitivity_name)
         else:
             reference = self.reference[i] if len(self.reference) == self.dimensionality else self.reference[0]
             [load_reference, reference_name] = needs_loading(reference, 'Reference')
+            ref_input = reference_name
             self.progress.report('Loading reference')
             if load_reference:
                 LoadNexusProcessed(Filename=reference, OutputWorkspace=reference_name)
@@ -277,18 +359,45 @@ class SANSILLAuto(DataProcessorAlgorithm):
         [_, sample_name] = needs_processing(self.sample[i], 'Sample')
         self.progress.report('Processing sample at detector configuration '+str(i+1))
         if self.reduction_type == 'ReduceSample':
-            sens_input = sensitivity_name if self.sensitivity else ''
-            ref_input = reference_name if not self.sensitivity else ''
-            flux_input = flux_name if self.sensitivity else ''
-            SANSILLReduction(Run=self.sample[i], ProcessAs='Sample', OutputWorkspace=sample_name, ReferenceInputWorkspace=ref_input,
-                             AbsorberInputWorkspace=absorber_name, BeamInputWorkspace=beam_name, CacheSolidAngle=True,
-                             ContainerInputWorkspace=container_name, TransmissionInputWorkspace=sample_transmission_name,
-                             MaskedInputWorkspace=mask_name, SensitivityInputWorkspace=sens_input, FluxInputWorkspace=flux_input)
-            SANSILLIntegration(InputWorkspace=sample_name, OutputWorkspace=output, CalculateResolution='None')
+            SANSILLReduction(Run=self.sample[i],
+                             ProcessAs='Sample',
+                             OutputWorkspace=sample_name,
+                             ReferenceInputWorkspace=ref_input,
+                             AbsorberInputWorkspace=absorber_name,
+                             BeamInputWorkspace=beam_name,
+                             CacheSolidAngle=True,
+                             ContainerInputWorkspace=container_name,
+                             TransmissionInputWorkspace=sample_transmission_name,
+                             MaskedInputWorkspace=mask_name,
+                             SensitivityInputWorkspace=sens_input,
+                             FluxInputWorkspace=flux_input,
+                             NormaliseBy=self.normalise,
+                             SampleThickness=self.getProperty('SampleThickness').value,
+                             WaterCrossSection=self.getProperty('WaterCrossSection').value)
+            SANSILLIntegration(InputWorkspace=sample_name,
+                               OutputWorkspace=output,
+                               OutputType=self.getPropertyValue('OutputType'),
+                               CalculateResolution=self.getPropertyValue('CalculateResolution'),
+                               DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
+                               BinningFactor=self.getProperty('BinningFactor').value,
+                               OutputBinning=self.getPropertyValue('OutputBinning'),
+                               NPixelDivision=self.getProperty('NPixelDivision').value,
+                               NumberOfWedges=self.getProperty('NumberOfWedges').value,
+                               WedgeAngle=self.getProperty('WedgeAngle').value,
+                               WedgeOffset=self.getProperty('WedgeOffset').value,
+                               AsymmetricWedges=self.getProperty('AsymmetricWedges').value)
         elif self.reduction_type == 'ReduceWater':
-            SANSILLReduction(Run=self.sample[i], ProcessAs='Reference', OutputWorkspace=output, AbsorberInputWorkspace=absorber_name,
-                             BeamInputWorkspace=beam_name, ContainerInputWorkspace=container_name,
-                             TransmissionInputWorkspace=sample_transmission_name, SensitivityOutputWorkspace=self.output_sens,
-                             MaskedInputWorkspace=mask_name, FluxInputWorkspace=flux_name)
+            SANSILLReduction(Run=self.sample[i],
+                             ProcessAs='Reference',
+                             OutputWorkspace=output,
+                             AbsorberInputWorkspace=absorber_name,
+                             BeamInputWorkspace=beam_name,
+                             ContainerInputWorkspace=container_name,
+                             NormaliseBy=self.normalise,
+                             TransmissionInputWorkspace=sample_transmission_name,
+                             SensitivityOutputWorkspace=self.output_sens,
+                             MaskedInputWorkspace=mask_name,
+                             FluxInputWorkspace=flux_name,
+                             SampleThickness=self.getProperty('SampleThickness').value)
 
 AlgorithmFactory.subscribe(SANSILLAuto)

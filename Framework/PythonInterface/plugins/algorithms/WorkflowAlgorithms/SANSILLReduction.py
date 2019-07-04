@@ -104,7 +104,7 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='Choose the normalisation type.')
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam raduis [m]; used for beam center finding and transmission calculations.')
+                             doc='Beam raduis [m]; used for beam center finding, transmission and flux calculations.')
 
         self.setPropertySettings('BeamRadius',
                                  EnabledWhenProperty(beam, transmission, LogicOperator.Or))
@@ -198,6 +198,9 @@ class SANSILLReduction(PythonAlgorithm):
         self.setPropertySettings('FluxOutputWorkspace', beam)
 
         self.declareProperty('CacheSolidAngle', False, doc='Whether or not to cache the solid angle workspace.')
+
+        self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
+                                                          'used only if the absolute scale is done by dividing to water.')
 
     def _normalise(self, ws):
         """
@@ -319,6 +322,9 @@ class SANSILLReduction(PythonAlgorithm):
             if not self._check_processed_flag(reference_ws, 'Reference'):
                 self.log().warning('Reference input workspace is not processed as reference.')
             Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws)
+            Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
+            # propagate the mask of the reference on top of the existing mask
+            MaskDetectors(Workspace=ws, MaskedWorkspace=reference_ws)
             coll_ws = reference_ws
         else:
             sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
