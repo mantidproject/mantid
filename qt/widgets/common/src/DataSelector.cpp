@@ -132,6 +132,13 @@ void DataSelector::setSelectorIndex(int index) {
 }
 
 /**
+ * Sets whether the file or workspace type selector is visible
+ */
+void DataSelector::setTypeSelectorVisible(bool visible) {
+  m_uiForm.cbInputType->setVisible(visible);
+}
+
+/**
  * Get if the file selector is currently being shown.
  *
  * @return :: true if it is visible, otherwise false
