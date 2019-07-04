@@ -22,6 +22,11 @@ class AxesTabWidgetPresenter:
         else:
             self.view = view
 
+        # Store a copy of the current view props. This allows us to tell if any
+        # properties have been changed by the user; especially solving issues
+        # with x and y axis limits interfering with figure autoscaling
+        self.current_view_props = None
+
         # Dictionary mapping ax name to Axes object
         self.axes_names_dict = get_axes_names_dict(self.fig)
         # Add axes names to "select axes" combo box
@@ -38,12 +43,15 @@ class AxesTabWidgetPresenter:
         ax = self.get_selected_ax()
         new_props = self.view.get_properties()
         self.set_ax_title(ax, new_props.title)
-        ax.set_xlim(new_props.xlim)
+        if new_props.xlim != self.current_view_props.xlim:
+            ax.set_xlim(new_props.xlim)
         ax.set_xlabel(new_props.xlabel)
         ax.set_xscale(new_props.xscale)
-        ax.set_ylim(new_props.ylim)
+        if new_props.ylim != self.current_view_props.ylim:
+            ax.set_ylim(new_props.ylim)
         ax.set_ylabel(new_props.ylabel)
         ax.set_yscale(new_props.yscale)
+        self.update_view()
 
     def get_selected_ax(self):
         """Get Axes object of selected axes"""
@@ -90,3 +98,4 @@ class AxesTabWidgetPresenter:
         self.view.set_yupper_limit(ax_props.ylim[1])
         self.view.set_ylabel(ax_props.ylabel)
         self.view.set_yscale(ax_props.yscale)
+        self.current_view_props = AxProperties.from_view(self.view)

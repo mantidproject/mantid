@@ -14,6 +14,7 @@ from matplotlib.lines import Line2D
 from qtpy.QtCore import Qt
 
 from mantid.plots import MantidAxes
+from mantid.plots.helperfunctions import errorbars_hidden
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 
 LINESTYLE_MAP = {'-': 'solid', '--': 'dashed', '-.': 'dashdot', ':': 'dotted',
@@ -31,25 +32,6 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
               'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
               'caretup': 6, 'caretup (centered at base)': 10,
               'caretdown (centered at base)': 11, 'None': 'None'}
-
-
-def errorbars_hidden(err_container, include_connecting_line=False):
-    """Return True if all lines in ErrorbarContainer are not visible"""
-    hidden = True
-    if not isinstance(err_container, ErrorbarContainer):
-        return True
-    err_lines = err_container.lines if include_connecting_line else err_container[1:]
-    try:
-        for lines in err_lines:
-            try:
-                for line in lines:
-                    hidden = hidden and (not line.get_visible())
-            except TypeError:
-                if lines:
-                    hidden = hidden and (not lines.get_visible())
-    except AttributeError:
-        pass
-    return hidden
 
 
 def get_ax_from_curve(curve):

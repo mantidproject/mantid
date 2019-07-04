@@ -39,10 +39,10 @@ class AxProperties(dict):
     def from_view(cls, view):
         props = dict()
         props['title'] = decode_unicode_escape(view.get_title())
-        props['xlim'] = [view.get_xlower_limit(), view.get_xupper_limit()]
+        props['xlim'] = (view.get_xlower_limit(), view.get_xupper_limit())
         props['xlabel'] = view.get_xlabel()
         props['xscale'] = view.get_xscale()
-        props['ylim'] = [view.get_ylower_limit(), view.get_yupper_limit()]
+        props['ylim'] = (view.get_ylower_limit(), view.get_yupper_limit())
         props['ylabel'] = view.get_ylabel()
         props['yscale'] = view.get_yscale()
         return cls(props)

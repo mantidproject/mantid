@@ -56,7 +56,6 @@ class CurvesTabWidgetPresenter:
         if self.get_selected_ax().legend_:
             self.get_selected_ax().legend().draggable()
         self.get_selected_ax().relim()
-        self.get_selected_ax().autoscale()
 
     def close_tab(self):
         """Close the tab and set the view to None"""

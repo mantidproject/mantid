@@ -15,7 +15,6 @@ mpl_use('Agg')  # noqa
 from matplotlib import rcParams
 from matplotlib.pyplot import figure
 
-from mantid.py3compat.mock import Mock
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog import curvestabwidget as funcs
@@ -106,27 +105,6 @@ class CurvePropertiesTest(unittest.TestCase):
                          'markersize': 10,
                          'visible': False}
         self.assertEqual(expected_dict, self.props.get_plot_kwargs())
-
-    def test_errorbars_hidden_returns_true_for_non_errorbar_container_object(self):
-        self.assertTrue(funcs.errorbars_hidden(Mock()))
-
-    def test_errorbars_hidden_returns_correctly_on_errorbar_container(self):
-        container = self._create_artist(errors=True)
-        self.assertFalse(funcs.errorbars_hidden(container))
-        container[2][0].set_visible(False)
-        self.assertTrue(funcs.errorbars_hidden(container))
-
-    def test_errorbars_hidden_returns_false_on_container_with_connecting_line_with_include_true(self):
-        container = self._create_artist(errors=True)
-        # Hide errorbars
-        [bars.set_visible(False) for bars in container[2]]
-        self.assertFalse(funcs.errorbars_hidden(container, include_connecting_line=True))
-
-    def test_errorbars_hidden_returns_true_on_container_with_connecting_line_with_include_false(self):
-        container = self._create_artist(errors=True)
-        # Hide errorbars but not connecting line
-        [bars.set_visible(False) for bars in container[2]]
-        self.assertTrue(funcs.errorbars_hidden(container))
 
     def test_curve_hidden_on_line2d(self):
         line2d = self._create_artist(errors=False)
