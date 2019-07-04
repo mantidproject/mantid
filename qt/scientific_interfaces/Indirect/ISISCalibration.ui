@@ -37,7 +37,7 @@
            </sizepolicy>
           </property>
           <property name="label" stdset="0">
-           <string>Run No</string>
+           <string>Input Runs</string>
           </property>
           <property name="multipleFiles" stdset="0">
            <bool>true</bool>
