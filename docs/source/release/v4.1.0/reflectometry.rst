@@ -12,6 +12,11 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ----------------------------
 
+Changes
+#######
+
+- Pushed back deprecation of ISIS Reflectometry (Old) GUI to November 2019 from July 2019.
+
 New
 ###
 
