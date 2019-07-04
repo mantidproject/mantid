@@ -477,7 +477,10 @@ class MainWindow(QMainWindow):
                                 [1.0],  # column 1 row heights
                                 [1.0]]  # column 2 row heights
         }
+
+        size = self.size()  # Preserve size on reset
         self.arrange_layout(default_layout)
+        self.resize(size)
 
     def arrange_layout(self, layout):
         """Arrange the layout of the child widgets according to the supplied layout"""
