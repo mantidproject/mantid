@@ -182,7 +182,13 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _action_double_click_workspace(self, name):
-        plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
+        try:
+            # if this is a table workspace (or peaks workspace),
+            # then it can't be plotted automatically, so the data is shown instead
+            TableWorkspaceDisplay.supports(self._ads.retrieve(name))
+            self._do_show_data([name])
+        except ValueError:
+            plot_from_names([name], errors=False, overplot=False, show_colorfill_btn=True)
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()
