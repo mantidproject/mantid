@@ -390,6 +390,18 @@ public:
     removeFromADS("", inputs);
   }
 
+  void test_OutputGroup_cannot_contain_workspaces_from_the_ADS() {
+    std::vector<std::string> inputs{"ws1", "ws2"};
+    addTestMatrixWorkspacesToADS(inputs);
+    Mantid::Algorithms::GroupWorkspaces alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputs));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws1"));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
 private:
   void addTestMatrixWorkspacesToADS(const std::vector<std::string> &inputs) {
     for (const auto &input : inputs) {

@@ -183,19 +183,19 @@ void RingProfile::exec() {
   // configure the axis
 
   // the horizontal axis is configured as degrees and copy the values of X
-  API::Axis *const horizontal = new API::NumericAxis(refX.size());
+  auto horizontal = std::make_unique<API::NumericAxis>(refX.size());
   horizontal->unit() = boost::make_shared<Kernel::Units::Phi>();
   horizontal->title() = "Ring Angle";
   for (size_t j = 0; j < refX.size(); j++)
     horizontal->setValue(j, refX[j]);
-  outputWS->replaceAxis(0, horizontal);
+  outputWS->replaceAxis(0, std::move(horizontal));
 
   // the vertical axis get the same unit and information from the input
   // workspace
-  API::Axis *const verticalAxis = new API::TextAxis(1);
+  auto verticalAxis = std::make_unique<API::TextAxis>(1);
   verticalAxis->unit() = inputWS->getAxis(1)->unit();
   verticalAxis->title() = inputWS->getAxis(1)->title();
-  outputWS->replaceAxis(1, verticalAxis);
+  outputWS->replaceAxis(1, std::move(verticalAxis));
 
   // set up the output
   setProperty("OutputWorkspace", outputWS);

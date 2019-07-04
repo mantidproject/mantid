@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="CorrectDetectors">
+      <value val="1"/>
+  </parameter>
+
+  <parameter name="DetectorCorrectionType" type="string">
+    <value val="badDetectorCorrectionType"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

@@ -127,8 +127,9 @@ private:
   // the DynamicFactory
   friend class InterfaceManager;
 
-  /// Set the interface name
+  /// Set the interface name, made public so possible from Python
   void setInterfaceName(const QString &iface_name);
+
   /// Has this already been initialized
   bool m_bIsInitialized;
   /// Has the python initialization been run

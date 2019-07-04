@@ -77,6 +77,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         alg.setProperty("OutputTOFCorrectionWorkspace", "__mock")
         alg.setProperty("ExcludeSpecifiedLogs", False)
         alg.setProperty("TimeSeriesPropertyLogs", 'proton_charge')
+        alg.setProperty("DescriptiveOutputNames", True)
         alg.execute()
         # Ensure the run number for the child workspaces is stored in the
         # sample logs as a string (FilterEvents converts it to a double).

@@ -7,16 +7,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 
-class DummyLabelView(QtGui.QWidget):
+class DummyLabelView(QtWidgets.QWidget):
 
     def __init__(self, subcontext, parent=None):
         super(DummyLabelView, self).__init__(parent)
-        self.grid = QtGui.QGridLayout(self)
+        self.grid = QtWidgets.QGridLayout(self)
 
-        self.label = QtGui.QLabel("none")
+        self.label = QtWidgets.QLabel("none")
         self.grid.addWidget(self.label)
         self.loadFromContext(subcontext)
 

@@ -28,7 +28,7 @@ public:
         boost::make_shared<WorkspaceTester>();
     // Matrix with 4 spectra, 5 bins each
     ws->initialize(4, 6, 5);
-    NumericAxis *ax1 = new NumericAxis(4);
+    auto ax1 = std::make_unique<NumericAxis>(4);
     for (size_t wi = 0; wi < 4; wi++) {
       ax1->setValue(wi, static_cast<double>(wi) * 2.0);
       for (size_t x = 0; x < 6; x++) {
@@ -51,7 +51,7 @@ public:
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
     }
     ws->setInstrument(inst);
-    ws->replaceAxis(1, ax1);
+    ws->replaceAxis(1, std::move(ax1));
 
     return ws;
   }

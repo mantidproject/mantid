@@ -207,18 +207,19 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
                                                    dSize, dSize - 1);
     for (size_t idx = 0; idx < dPerpSize - 1; idx++)
       outputWS->setBinEdges(idx, binEdges);
-    NumericAxis *const abscissa = new BinEdgeAxis(dBins.mutableRawData());
-    outputWS->replaceAxis(0, abscissa);
+    auto abscissa = std::make_unique<BinEdgeAxis>(dBins.mutableRawData());
+    outputWS->replaceAxis(0, std::move(abscissa));
   }
 
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
-  NumericAxis *const verticalAxis = new BinEdgeAxis(dPerp);
+  auto verticalAxis = std::make_unique<BinEdgeAxis>(dPerp);
+  auto verticalAxisRaw = verticalAxis.get();
   // Meta data
   verticalAxis->unit() =
       UnitFactory::Instance().create("dSpacingPerpendicular");
   verticalAxis->title() = "d_p";
-  outputWS->replaceAxis(1, verticalAxis);
+  outputWS->replaceAxis(1, std::move(verticalAxis));
 
   Progress prog(this, 0.0, 1.0, m_numberOfSpectra);
   int64_t numSpectra = static_cast<int64_t>(m_numberOfSpectra);
@@ -230,7 +231,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   // fill the workspace with data
   g_log.debug() << "newYSize = " << dPerpSize << std::endl;
   g_log.debug() << "newXSize = " << dSize << std::endl;
-  std::vector<double> dp_vec(verticalAxis->getValues());
+  std::vector<double> dp_vec(verticalAxisRaw->getValues());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
   for (int64_t snum = 0; snum < numSpectra; ++snum) {

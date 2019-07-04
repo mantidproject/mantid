@@ -41,7 +41,7 @@ are relative to the :class:`GPS epoch <mantid.kernel.DateAndTime>`.
 
 Both :ref:`TableWorkspace <Table Workspaces>` and
 :class:`SplittersWorkspace <mantid.api.ISplittersWorkspace>` have 3
-colums, ``start``, ``stop``, and ``target`` which should be a float,
+columns, ``start``, ``stop``, and ``target`` which should be a float,
 float, and string. The :ref:`event filtering <EventFiltering>` concept
 page has details on creating the :ref:`TableWorkspace <Table
 Workspaces>` by hand.

@@ -59,10 +59,11 @@ fi
 
 # setup the proxy
 if [ ! -z "${PROXY_HOST}" ]; then
-  PROXY_ARGS="-Dhttp.proxyHost=${PROXY_HOST} -Dhttp.proxyPort=${PROXY_PORT}"
+  PROXY_ARGS="-Dhttps.proxyHost=${PROXY_HOST} -Dhttps.proxyPort=${PROXY_PORT}"
   echo "using proxy ${PROXY_HOST} ${PROXY_PORT}"
   # For curl
   export http_proxy=http://$PROXY_HOST:$PROXY_PORT
+  export https_proxy=https://$PROXY_HOST:$PROXY_PORT
 fi
 
 # find the jar file if it exists

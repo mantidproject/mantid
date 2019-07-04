@@ -23,6 +23,7 @@ set(SRC_FILES
     src/CalculateDIFC.cpp
     src/CalculateDynamicRange.cpp
     src/CalculateEfficiency.cpp
+    src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
     src/CalculatePolynomialBackground.cpp
@@ -109,6 +110,7 @@ set(SRC_FILES
     src/DiffractionFocussing2.cpp
     src/DirectILLTubeBackground.cpp
     src/Divide.cpp
+    src/EQSANSCorrectFrame.cpp
     src/EQSANSResolution.cpp
     src/EQSANSTofStructure.cpp
     src/EditInstrumentGeometry.cpp
@@ -358,12 +360,12 @@ set(INC_FILES
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
     inc/MantidAlgorithms/BinaryOperateMasks.h
     inc/MantidAlgorithms/BinaryOperation.h
-    inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
     inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
     inc/MantidAlgorithms/CalculateCountRate.h
     inc/MantidAlgorithms/CalculateDIFC.h
     inc/MantidAlgorithms/CalculateDynamicRange.h
     inc/MantidAlgorithms/CalculateEfficiency.h
+    inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
@@ -450,6 +452,7 @@ set(INC_FILES
     inc/MantidAlgorithms/DiffractionFocussing2.h
     inc/MantidAlgorithms/DirectILLTubeBackground.h
     inc/MantidAlgorithms/Divide.h
+    inc/MantidAlgorithms/EQSANSCorrectFrame.h
     inc/MantidAlgorithms/EQSANSResolution.h
     inc/MantidAlgorithms/EQSANSTofStructure.h
     inc/MantidAlgorithms/EditInstrumentGeometry.h
@@ -720,6 +723,7 @@ set(TEST_FILES
     CalculateDIFCTest.h
     CalculateDynamicRangeTest.h
     CalculateEfficiencyTest.h
+    CalculateEfficiency2Test.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
     CalculatePolynomialBackgroundTest.h
@@ -806,6 +810,7 @@ set(TEST_FILES
     DiffractionFocussingTest.h
     DirectILLTubeBackgroundTest.h
     DivideTest.h
+    EQSANSCorrectFrameTest.h
     EditInstrumentGeometryTest.h
     ElasticWindowTest.h
     EstimateDivergenceTest.h

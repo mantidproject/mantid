@@ -641,7 +641,7 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
   }
   auto ax0 = std::make_unique<API::NumericAxis>(xx);
   ax0->setUnit(RangeUnits);
-  m_visWs->replaceAxis(0, ax0.release());
+  m_visWs->replaceAxis(0, std::move(ax0));
 
   // define Y axis (in seconds);
   double dt = (static_cast<double>(m_TRangeMax.totalNanoseconds() -
@@ -657,7 +657,7 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
       Kernel::UnitFactory::Instance().create("Label"));
   labelY->setLabel("sec");
   ax1->unit() = labelY;
-  m_visWs->replaceAxis(1, ax1.release());
+  m_visWs->replaceAxis(1, std::move(ax1));
 
   setProperty("VisualizationWs", m_visWs);
 

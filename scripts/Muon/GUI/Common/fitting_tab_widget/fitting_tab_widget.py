@@ -30,3 +30,6 @@ class FittingTabWidget(object):
             self.fitting_tab_presenter.handle_function_structure_changed)
         self.fitting_tab_view.function_name_line_edit.textChanged.connect(
             self.fitting_tab_presenter.handle_fit_name_changed_by_user)
+        context.update_view_from_model_notifier.add_subscriber(self.fitting_tab_presenter.update_view_from_model_observer)
+        self.fitting_tab_view.tf_asymmetry_mode_checkbox.stateChanged.connect(self.fitting_tab_presenter.handle_tf_asymmetry_mode_changed)
+        self.fitting_tab_view.function_browser.parameterChanged.connect(self.fitting_tab_presenter.handle_function_parameter_changed)

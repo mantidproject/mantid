@@ -489,7 +489,7 @@ public:
       verticalBinEdges[i] = static_cast<double>(i);
     }
     auto vertAxis = std::make_unique<BinEdgeAxis>(verticalBinEdges);
-    inputWS->replaceAxis(1, vertAxis.release());
+    inputWS->replaceAxis(1, std::move(vertAxis));
     LineProfile alg;
     // Don't put output in ADS by default
     alg.setChild(true);

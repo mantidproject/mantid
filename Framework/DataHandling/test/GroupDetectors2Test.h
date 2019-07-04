@@ -1043,11 +1043,11 @@ public:
     // Number of events from WorkspaceCreationHelpers::
     // createEventWorkspaceWithStartTime, numEvents = 100, eventPatter = 2.
     const int numEvents{200};
-    auto newAxis = new NumericAxis(ws->getNumberHistograms());
+    auto newAxis = std::make_unique<NumericAxis>(ws->getNumberHistograms());
     for (size_t i = 0; i < newAxis->length(); ++i) {
       newAxis->setValue(i, static_cast<double>(i + 1));
     }
-    ws->replaceAxis(1, newAxis);
+    ws->replaceAxis(1, std::move(newAxis));
     GroupDetectors2 group;
     TS_ASSERT_THROWS_NOTHING(group.initialize())
     TS_ASSERT(group.isInitialized());

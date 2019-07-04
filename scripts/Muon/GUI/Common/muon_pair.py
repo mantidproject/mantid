@@ -115,3 +115,24 @@ class MuonPair(object):
                 return self._workspace[key].workspace_name
 
         return None
+
+    def remove_workspace_by_name(self, workspace_name):
+        """
+                Searches through all of the stored workspaces and remmves any which match the name given. This is used to handle
+                workspaces being removed from the ADS.
+                :param workspace_name:
+                :return:
+
+                """
+
+        def _remove_workspace_from_dict_by_name(workspace_name, dictionary):
+            set_of_keys_to_remove = set()
+            for key, workspace_wrapper in dictionary.items():
+                if workspace_wrapper.workspace_name == workspace_name:
+                    set_of_keys_to_remove.add(key)
+
+            for key in set_of_keys_to_remove:
+                dictionary.pop(key)
+
+        _remove_workspace_from_dict_by_name(workspace_name, self._workspace)
+        _remove_workspace_from_dict_by_name(workspace_name, self.workspace_rebin)

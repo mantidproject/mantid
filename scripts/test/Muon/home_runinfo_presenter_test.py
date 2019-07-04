@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from mantid.api import FileFinder
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
@@ -36,7 +35,7 @@ class HomeTabRunInfoPresenterTest(GuiTest):
 
     def test_runinfo_correct(self):
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
-        ws, run, filename = load_utils.load_workspace_from_filename(file_path)
+        ws, run, filename, _ = load_utils.load_workspace_from_filename(file_path)
         self.data_context._loaded_data.remove_data(run=run)
         self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
         self.data_context.current_runs = [[22725]]
@@ -49,7 +48,7 @@ class HomeTabRunInfoPresenterTest(GuiTest):
         expected_string_list = ['Instrument:MUSR', 'Run:22725', 'Title:FeTeSeT=1F=100', 'Comment:FCfirstsample',
                                 'Start:2009-03-24T04:18:58', 'End:2009-03-24T04:56:26', 'Counts(MEv):20.076704',
                                 'GoodFrames:88540', 'CountsperGoodFrame:226.753',
-                                'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):2.53386',
+                                'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):19.69992',
                                 'SampleTemperature(K):1.0', 'SampleMagneticField(G):100.0']
 
         self.assertEqual(str(self.view.run_info_box.toPlainText()).replace(' ', '').splitlines(), expected_string_list)
