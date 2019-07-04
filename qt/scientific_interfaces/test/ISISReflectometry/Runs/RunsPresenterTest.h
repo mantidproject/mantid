@@ -448,9 +448,10 @@ public:
         .WillOnce(Return(props));
     auto result =
         presenter.liveDataReductionOptions("live_input_workspace", "INTER");
-    auto expected = "InputRunList=live_input_workspace;GetLiveValueAlgorithm="
-                    "GetLiveInstrumentValue;Instrument=INTER;Prop1=val1;Prop2="
-                    "val2";
+    auto expected =
+        "GetLiveValueAlgorithm=GetLiveInstrumentValue;InputWorkspace="
+        "live_input_workspace;Instrument=INTER;Prop1=val1;Prop2="
+        "val2";
     TS_ASSERT_EQUALS(result, expected);
   }
 
