@@ -121,8 +121,7 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(
     try {
       eFixed = getEFixed(ws);
     } catch (std::exception const &) {
-      showMessageBox(
-          "An Efixed value could not be found, please enter an Efixed value.");
+      showMessageBox("Please enter an Efixed value.");
       return boost::none;
     }
   }
