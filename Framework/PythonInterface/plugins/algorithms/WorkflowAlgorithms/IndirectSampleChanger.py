@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm)
 from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty, IntArrayLengthValidator, IntArrayProperty,
-                           IntBoundedValidator, Property, StringListValidator)
+                           IntBoundedValidator, StringListValidator)
 
 
 class IndirectSampleChanger(DataProcessorAlgorithm):
@@ -78,6 +78,8 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
                              doc='True to save the output data.')
 
     def validateInputs(self):
+        from IndirectCommon import getInstrumentParameter
+
         self._setup()
         issues = dict()
 
@@ -89,6 +91,10 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
 
         if self._spectra_range[0] > self._spectra_range[1]:
             issues['SpectraRange'] = 'Range must be in format: lower,upper'
+
+        spectra_min = getInstrumentParameter(workspace, 'spectra-min')
+        spectra_max = getInstrumentParameter(workspace, 'spectra-max')
+
 
         return issues
 
