@@ -297,7 +297,9 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
     m_progress->report("Processing workspace " + std::string(ws->getName()));
     // loop over spectra
     const auto &specInfo = ws->spectrumInfo();
-    for (size_t i = 0; i < specInfo.size(); ++i) {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outputWS))
+    for (int i = 0; i < static_cast<int>(specInfo.size()); ++i) {
+      PARALLEL_START_INTERUPT_REGION
       if (specInfo.isMonitor(i) || specInfo.isMasked(i))
         continue;
 
@@ -333,50 +335,56 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         continue;
 
       const double deltaAngle = distanceFromAngle(angleIndex, angle);
-      auto counts = ws->histogram(i).y()[0];
-      auto error = ws->histogram(i).e()[0];
-      auto &yData = outputWS->mutableY(heightIndex);
-      auto &eData = outputWS->mutableE(heightIndex);
+      const auto counts = ws->histogram(i).y()[0];
+      const auto error = ws->histogram(i).e()[0];
 
-      // counts are split between bins if outside this tolerance
-      if (splitCounts &&
-          deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
-        int angleIndexNeighbor;
-        if (distanceFromAngle(angleIndex - 1, angle) <
-            distanceFromAngle(angleIndex + 1, angle))
-          angleIndexNeighbor = angleIndex - 1;
-        else
-          angleIndexNeighbor = angleIndex + 1;
+      PARALLEL_CRITICAL(Histogramming2ThetaVsHeight) {
+        auto &yData = outputWS->mutableY(heightIndex);
+        auto &eData = outputWS->mutableE(heightIndex);
+        // counts are split between bins if outside this tolerance
+        if (splitCounts &&
+            deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
+          int angleIndexNeighbor;
+          if (distanceFromAngle(angleIndex - 1, angle) <
+              distanceFromAngle(angleIndex + 1, angle))
+            angleIndexNeighbor = angleIndex - 1;
+          else
+            angleIndexNeighbor = angleIndex + 1;
 
-        double deltaAngleNeighbor =
-            distanceFromAngle(angleIndexNeighbor, angle);
+          double deltaAngleNeighbor =
+              distanceFromAngle(angleIndexNeighbor, angle);
 
-        const auto scalingFactor = deltaAngleNeighbor / m_stepScatteringAngle;
-        const auto newError = error * scalingFactor;
-        yData[angleIndex] += counts * scalingFactor;
-        eData[angleIndex] =
-            sqrt(eData[angleIndex] * eData[angleIndex] + newError * newError);
+          const auto scalingFactor = deltaAngleNeighbor / m_stepScatteringAngle;
+          const auto newError = error * scalingFactor;
+          yData[angleIndex] += counts * scalingFactor;
+          eData[angleIndex] =
+              sqrt(eData[angleIndex] * eData[angleIndex] + newError * newError);
 
-        normalisation[heightIndex][angleIndex] +=
-            (deltaAngleNeighbor / m_stepScatteringAngle);
+          normalisation[heightIndex][angleIndex] +=
+              (deltaAngleNeighbor / m_stepScatteringAngle);
 
-        if (angleIndexNeighbor >= 0 && angleIndexNeighbor < int(m_numPoints)) {
-          const auto scalingFactorNeighbor = deltaAngle / m_stepScatteringAngle;
-          const auto newErrorNeighbor = error * scalingFactorNeighbor;
-          yData[angleIndexNeighbor] += counts * scalingFactorNeighbor;
-          eData[angleIndexNeighbor] =
-              sqrt(eData[angleIndexNeighbor] * eData[angleIndexNeighbor] +
-                   newErrorNeighbor * newErrorNeighbor);
-          normalisation[heightIndex][angleIndexNeighbor] +=
-              (deltaAngle / m_stepScatteringAngle);
+          if (angleIndexNeighbor >= 0 &&
+              angleIndexNeighbor < int(m_numPoints)) {
+            const auto scalingFactorNeighbor =
+                deltaAngle / m_stepScatteringAngle;
+            const auto newErrorNeighbor = error * scalingFactorNeighbor;
+            yData[angleIndexNeighbor] += counts * scalingFactorNeighbor;
+            eData[angleIndexNeighbor] =
+                sqrt(eData[angleIndexNeighbor] * eData[angleIndexNeighbor] +
+                     newErrorNeighbor * newErrorNeighbor);
+            normalisation[heightIndex][angleIndexNeighbor] +=
+                (deltaAngle / m_stepScatteringAngle);
+          }
+        } else {
+          yData[angleIndex] += counts;
+          eData[angleIndex] =
+              sqrt(eData[angleIndex] * eData[angleIndex] + error * error);
+          normalisation[heightIndex][angleIndex]++;
         }
-      } else {
-        yData[angleIndex] += counts;
-        eData[angleIndex] =
-            sqrt(eData[angleIndex] * eData[angleIndex] + error * error);
-        normalisation[heightIndex][angleIndex]++;
       }
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 
   return normalisation;

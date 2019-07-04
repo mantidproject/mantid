@@ -128,6 +128,17 @@ class Plots__init__Test(unittest.TestCase):
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
         self.assertEqual(self.ax.tracked_workspaces[self.ws2d_histo.name()][0]._artists, [line_ws2d_histo_spec_3])
 
+    def test_remove_if_removes_untracked_artists(self):
+        line = self.ax.plot([0], [0])[0]
+        err_cont = self.ax.errorbar([0], [0])
+        img = self.ax.imshow([[0, 1], [0, 1]])
+
+        self.ax.remove_artists_if(lambda art: art in [line, err_cont, img])
+        self.assertNotIn(line, self.ax.lines)
+        self.assertNotIn(err_cont[0], self.ax.lines)
+        self.assertNotIn(err_cont, self.ax.containers)
+        self.assertNotIn(img, self.ax.images)
+
     def test_remove_if_correctly_removes_lines_associated_with_multiple_workspaces(self):
         second_ws = CreateSampleWorkspace()
         line_ws2d_histo_spec_2 = self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)[0]

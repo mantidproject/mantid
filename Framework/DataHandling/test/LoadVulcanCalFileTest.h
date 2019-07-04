@@ -26,7 +26,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec() {
+  void no_test_exec() {
     // Name of the output workspace.
     std::string outWSName("LoadVulcanCalFileTest");
     std::string offsetfilename = "pid_offset_vulcan_new.dat";
@@ -101,7 +101,7 @@ public:
     return;
   }
 
-  void test_exec2BanksBadPixel() {
+  void no_test_exec2BanksBadPixel() {
     // Name of the output workspace.
     std::string outWSName("LoadVulcanCalFileTest");
     std::string offsetfilename = "pid_offset_vulcan_new.dat";

@@ -84,6 +84,9 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
 #else
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
 #endif
+
+  // Disables searching for run files in the data archive
+  m_uiForm.dsSampleInput->isForRunFiles(false);
 }
 
 IndirectSqw::~IndirectSqw() {}

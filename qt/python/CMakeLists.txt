@@ -68,6 +68,7 @@ if(ENABLE_WORKBENCH)
     mantidqt/test/test_import.py
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
+    mantidqt/dialogs/test/test_spectraselectorutils.py
     mantidqt/plotting/test/test_figuretype.py
     mantidqt/plotting/test/test_functions.py
     mantidqt/project/test/test_plotssaver.py

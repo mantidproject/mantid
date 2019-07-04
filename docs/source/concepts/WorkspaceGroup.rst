@@ -223,13 +223,13 @@ It is possible to have groups within groups, the inner group can simply be added
     group1 = WorkspaceGroup()
     group2 = WorkspaceGroup()
 
+    mtd.add("group1", group1)
+    mtd.add("group2", group2)
+
     group1.add("ws1")
     group1.add("ws2")
     group2.add("ws3")
     group2.add("ws4")
-
-    mtd.add("group1", group1)
-    mtd.add("group2", group2)
 
     group1.add("group2")
 

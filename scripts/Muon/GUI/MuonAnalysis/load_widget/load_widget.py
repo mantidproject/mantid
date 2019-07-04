@@ -37,3 +37,5 @@ class LoadWidget(object):
         self.load_widget.set_load_run_widget(self.run_widget)
 
         self.load_widget.set_current_instrument(context.data_context.instrument)
+
+        context.update_view_from_model_notifier.add_subscriber(self.load_widget.update_view_from_model_observer)

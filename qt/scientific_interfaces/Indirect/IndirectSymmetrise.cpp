@@ -150,6 +150,9 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   // Disable run until preview is clicked
   m_uiForm.pbRun->setEnabled(false);
   m_uiForm.pbPreview->setEnabled(false);
+
+  // Disables searching for run files in the data archive
+  m_uiForm.dsInput->isForRunFiles(false);
 }
 
 //----------------------------------------------------------------------------------------------

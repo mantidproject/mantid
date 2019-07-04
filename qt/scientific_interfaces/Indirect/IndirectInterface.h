@@ -9,6 +9,7 @@
 
 #include "IndirectSettings.h"
 
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {
@@ -39,6 +40,7 @@ private:
   virtual void applySettings(std::map<std::string, QVariant> const &settings);
 
   std::unique_ptr<IndirectSettings> m_settings;
+  std::unique_ptr<API::ManageUserDirectories> m_manageUserDirectories;
 };
 
 } // namespace CustomInterfaces

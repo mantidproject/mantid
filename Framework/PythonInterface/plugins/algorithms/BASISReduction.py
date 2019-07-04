@@ -513,7 +513,7 @@ the first two hours"""
                            InputWorkspace=self._samSqwWs)
 
             # additional output
-            if self.getProperty('OutputSusceptibility').value:
+            if self.getProperty('OutputSusceptibility').value is True:
                 temperature = mtd[self._samSqwWs].getRun().\
                     getProperty(TEMPERATURE_SENSOR).getStatistics().mean
                 samXqsWs = self._samSqwWs.replace('sqw', 'Xqw')
@@ -522,7 +522,9 @@ the first two hours"""
                                           Temperature=str(temperature))
                 sapi.ConvertUnits(InputWorkspace=samXqsWs,
                                   OutputWorkspace=samXqsWs,
-                                  Target='DeltaE_inFrequency')
+                                  Target='DeltaE_inFrequency',
+                                  Emode='Indirect',
+                                  Efixed=self._reflection['default_energy'])
                 self.serialize_in_log(samXqsWs)
                 susceptibility_filename = processed_filename.replace('sqw', 'Xqw')
                 sapi.SaveNexus(Filename=susceptibility_filename,
@@ -545,10 +547,10 @@ the first two hours"""
         Returns
         -------
         list
-            If _doIndiv is False, return a list of IntArrayProperty
-            objects. Each item is a pseudolist containing a set of runs to
-            be reduced together. if _doIndiv is True, return a list of
-            strings, each string is a run number.
+            Items of this list are lists. If `doIndiv` is True, each item
+            list is made up of a single run number. If `doIndiv` is False,
+            each item list is made up of several run numbers which are to
+            be reduced together.
         """
         run_list = []
         # ';' separates the runs into substrings. Each substring
@@ -557,9 +559,9 @@ the first two hours"""
         for rlval in rlvals:
             iap = IntArrayProperty('_get_runs_iap', rlval)  # substring split
             if doIndiv:
-                run_list.extend([[x] for x in iap.value])
+                run_list.extend([[str(x)] for x in iap.value])
             else:
-                run_list.append(iap.value)
+                run_list.append([str(x) for x in iap.value])
         return run_list
 
     def _make_run_name(self, run, useShort=True):
@@ -833,7 +835,6 @@ the first two hours"""
 
         wsSqwName = prefix if isSample is True else wsName
         wsSqwName += '_divided_sqw' if self._doNorm is True else '_sqw'
-
         sapi.SofQW3(InputWorkspace=wsName,
                     QAxisBinning=self._qBins,
                     EMode='Indirect',

@@ -1,8 +1,14 @@
 # Defines functions to help deal with python packages
 
 # Function to create links to python packages in the source tree
-# If the EXECUTABLE option is provided then it additional build rules are
-# defined to ensure startup scripts are regenerated appropriately
+# Optional keyword arguments:
+#   - EXECUTABLE: If this option provided then it is assumed the package contains a
+#                 startup script and this is installed in the package bin
+#                 directory
+#   - EGGLINKNAME: Pass in a new name for the egg link, e.g. EGGLINKNAME mylink,
+#                  creates a new egg link called mylink
+#   - EXCLUDE_ON_INSTALL: Specifies a regex of files to exclude from the install
+#   -                     command
 function ( add_python_package pkg_name )
   # Create a setup.py file if necessary
   set ( _setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py )
@@ -35,18 +41,21 @@ CustomInstallLib = patch_setuptools_command('install_lib')
 
   set ( _egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
 
-  # Parses ARGN and adds the expected parameter EGGLINKNAME as a new variable
-  cmake_parse_arguments(_additional_args "" "EGGLINKNAME" "" ${ARGN})
+  # Create variables for additional arguments
+  cmake_parse_arguments(_parsed_arg
+                        "EXECUTABLE"
+                        "EGGLINKNAME;EXCLUDE_FROM_INSTALL"
+                        "" ${ARGN})
 
-  # If a custom egg-link name WAs specified use that for the link
-  if (_additional_args_EGGLINKNAME)
-    set ( _egg_link ${_egg_link_dir}/${_egg_link_name}.egg-link )
+  # If a custom egg-link name was specified use that for the link
+  if (_parsed_arg_EGGLINKNAME)
+    set ( _egg_link ${_egg_link_dir}/${_parsed_arg_EGGLINKNAME}.egg-link )
   else()
     # if no egg-link name is specified, then use the target name
     set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
   endif()
 
-  if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
+  if ( _parsed_arg_EXECUTABLE )
     if ( WIN32 )
       # add .exe in the executable name for Windows, otherwise it can't find it during the install step
       set ( _executable_name ${pkg_name}.exe )
@@ -95,9 +104,16 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     endif ()
 
     # Registers the "installed" components with CMake so it will carry them over
-    install(DIRECTORY ${_package_source_directory}
-            DESTINATION ${_package_install_destination}
-            PATTERN "test" EXCLUDE )
+    if ( _parsed_arg_EXCLUDE_FROM_INSTALL )
+      install(DIRECTORY ${_package_source_directory}
+              DESTINATION ${_package_install_destination}
+              PATTERN "test" EXCLUDE
+              REGEX "${_parsed_arg_EXCLUDE_FROM_INSTALL}" EXCLUDE)
+    else ()
+      install(DIRECTORY ${_package_source_directory}
+              DESTINATION ${_package_install_destination}
+              PATTERN "test" EXCLUDE)
+    endif()
 
     if (APPLE AND "${pkg_name}" STREQUAL "mantidqt")
       # Horrible hack to get mantidqt into the MantidPlot.app bundle too.
@@ -110,7 +126,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     endif()
 
     # install the generated executable - only tested with "workbench"
-    if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
+    if ( _parsed_arg_EXECUTABLE )
         # On UNIX systems install the workbench executable directly.
         # The Windows case is handled with a custom startup script installed in WindowsNSIS
         if ( NOT WIN32 )

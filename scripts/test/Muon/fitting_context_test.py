@@ -183,10 +183,10 @@ class FittingContextTest(unittest.TestCase):
             ws_name='fake2', time_series_logs=time_series_logs[2:])
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake1.name(),
-                           mock.MagicMock()))
+                           fake1.name()))
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake2.name(),
-                           mock.MagicMock()))
+                           fake2.name()))
 
         log_names = self.fitting_context.log_names()
         self.assertEqual(len(time_series_logs), len(log_names))
@@ -203,10 +203,10 @@ class FittingContextTest(unittest.TestCase):
             ws_name='fake2', time_series_logs=time_series_logs[2:])
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake1.name(),
-                           mock.MagicMock()))
+                           fake1.name()))
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake2.name(),
-                           mock.MagicMock()))
+                           fake2.name()))
 
         required_logs = ('ts_2', 'ts_4')
         log_names = self.fitting_context.log_names(
