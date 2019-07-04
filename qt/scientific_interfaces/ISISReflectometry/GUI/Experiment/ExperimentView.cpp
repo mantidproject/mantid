@@ -112,7 +112,7 @@ void ExperimentView::initializeTableRow(QTableWidget &table, int row) {
 }
 
 void ExperimentView::initializeTableRow(QTableWidget &table, int row,
-                                        std::array<std::string, 8> rowValues) {
+                                        OptionsTableRow rowValues) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < table.columnCount(); ++column)
     table.setItem(
@@ -126,7 +126,7 @@ void ExperimentView::initOptionsTable() {
 
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
-  table->setColumnCount(8);
+  table->setColumnCount(OPTIONS_TABLE_COLUMN_COUNT);
   table->setRowCount(1);
   initializeTableItems(*table);
 
@@ -643,13 +643,13 @@ ExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem) const {
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
 GNU_DIAG_OFF("missing-braces")
-std::vector<std::array<std::string, 8>>
-ExperimentView::getPerAngleOptions() const {
+auto ExperimentView::getPerAngleOptions() const
+    -> std::vector<OptionsTableRow> {
   auto const &table = *m_ui.optionsTable;
-  auto rows = std::vector<std::array<std::string, 8>>();
+  auto rows = std::vector<OptionsTableRow>();
   rows.reserve(table.rowCount());
   for (auto row = 0; row < table.rowCount(); ++row) {
-    rows.emplace_back(std::array<std::string, 8>{
+    rows.emplace_back(OptionsTableRow{
         textFromCell(table.item(row, 0)), textFromCell(table.item(row, 1)),
         textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
         textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
@@ -659,8 +659,7 @@ ExperimentView::getPerAngleOptions() const {
 }
 GNU_DIAG_ON("missing-braces")
 
-void ExperimentView::setPerAngleOptions(
-    std::vector<std::array<std::string, 8>> rows) {
+void ExperimentView::setPerAngleOptions(std::vector<OptionsTableRow> rows) {
   auto &table = *m_ui.optionsTable;
   table.blockSignals(true);
   auto numberOfRows = static_cast<int>(rows.size());

@@ -25,6 +25,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentView : public QWidget,
                                                       public IExperimentView {
   Q_OBJECT
 public:
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 8;
+  using OptionsTableRow = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
+
   ExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
                  QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
