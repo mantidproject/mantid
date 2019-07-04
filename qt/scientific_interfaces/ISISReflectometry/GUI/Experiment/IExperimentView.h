@@ -12,6 +12,7 @@
 #include "Common/InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include "Reduction/PerThetaDefaults.h"
 #include <map>
 #include <vector>
 
@@ -63,10 +64,10 @@ public:
   virtual bool getDebugOption() const = 0;
   virtual void setDebugOption(bool enable) = 0;
 
-  virtual std::vector<std::array<std::string, 8>>
+  virtual std::vector<PerThetaDefaults::ValueArray>
   getPerAngleOptions() const = 0;
   virtual void
-      setPerAngleOptions(std::vector<std::array<std::string, 8>> rows) = 0;
+  setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) = 0;
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
   virtual void showPerAngleOptionsAsValid(int row) = 0;
   virtual void showAllPerAngleOptionsAsValid() = 0;

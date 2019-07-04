@@ -25,9 +25,6 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentView : public QWidget,
                                                       public IExperimentView {
   Q_OBJECT
 public:
-  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 8;
-  using OptionsTableRow = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
-
   ExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
                  QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
@@ -56,9 +53,9 @@ public:
   bool getDebugOption() const override;
   void setDebugOption(bool enable) override;
 
-  std::vector<std::array<std::string, 8>> getPerAngleOptions() const override;
+  std::vector<PerThetaDefaults::ValueArray> getPerAngleOptions() const override;
   void
-      setPerAngleOptions(std::vector<std::array<std::string, 8>> rows) override;
+  setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) override;
   void showPerAngleOptionsAsInvalid(int row, int column) override;
   void showPerAngleOptionsAsValid(int row) override;
   void showPerAngleThetasNonUnique(double thetaTolerance) override;
@@ -129,7 +126,7 @@ private:
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);
   void initializeTableRow(QTableWidget &table, int row,
-                          std::array<std::string, 8> rowValues);
+                          PerThetaDefaults::ValueArray rowValues);
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;

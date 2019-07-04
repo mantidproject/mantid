@@ -61,8 +61,8 @@ public:
   void testValidPerThetaOptions() {
     auto result = getDefaults("Experiment");
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
-                                     RangeInQ(0.01, 0.03, 0.2), 0.7,
-                                     std::string("390-415"));
+                                     boost::none, RangeInQ(0.01, 0.03, 0.2),
+                                     0.7, std::string("390-415"));
     TS_ASSERT_EQUALS(result.perThetaDefaults().size(), 1);
     TS_ASSERT_EQUALS(result.perThetaDefaults().front(), expected);
   }

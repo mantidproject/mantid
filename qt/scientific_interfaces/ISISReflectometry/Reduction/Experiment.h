@@ -49,7 +49,7 @@ public:
   std::map<std::string, std::string> stitchParameters() const;
   std::string stitchParametersString() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
-  std::vector<std::array<std::string, 8>> perThetaDefaultsArray() const;
+  std::vector<PerThetaDefaults::ValueArray> perThetaDefaultsArray() const;
 
   PerThetaDefaults const *defaultsForTheta(double thetaAngle,
                                            double tolerance) const;

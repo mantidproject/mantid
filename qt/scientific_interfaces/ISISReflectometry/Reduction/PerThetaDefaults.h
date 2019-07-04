@@ -25,8 +25,13 @@ namespace CustomInterfaces {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 9;
+  using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
+
   PerThetaDefaults(
       boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
+      boost::optional<ProcessingInstructions>
+          transmissionProcessingInstructions,
       RangeInQ qRange, boost::optional<double> scaleFactor,
       boost::optional<ProcessingInstructions> processingInstructions);
 
@@ -35,6 +40,8 @@ public:
   boost::optional<double> thetaOrWildcard() const;
   RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
+  boost::optional<ProcessingInstructions>
+  transmissionProcessingInstructions() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
 
 private:
@@ -42,6 +49,7 @@ private:
   TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
+  boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
   boost::optional<ProcessingInstructions> m_processingInstructions;
 };
 
@@ -49,7 +57,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PerThetaDefaults const &lhs,
                                                PerThetaDefaults const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PerThetaDefaults const &lhs,
                                                PerThetaDefaults const &rhs);
-std::array<std::string, 8>
+PerThetaDefaults::ValueArray
 perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
 } // namespace CustomInterfaces
 } // namespace MantidQt

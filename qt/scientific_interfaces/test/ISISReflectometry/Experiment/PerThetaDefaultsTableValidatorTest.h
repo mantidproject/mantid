@@ -28,7 +28,7 @@ public:
     delete suite;
   }
   static auto constexpr TOLERANCE = 0.001;
-  using Cells = std::array<std::string, 8>;
+  using Cells = PerThetaDefaults::ValueArray;
   using Table = std::vector<Cells>;
 
   void testEmptyTable() {

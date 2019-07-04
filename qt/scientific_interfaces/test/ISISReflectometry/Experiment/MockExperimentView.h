@@ -49,9 +49,9 @@ public:
   MOCK_CONST_METHOD0(getDebugOption, bool());
   MOCK_METHOD1(setDebugOption, void(bool));
   MOCK_CONST_METHOD0(getPerAngleOptions,
-                     std::vector<std::array<std::string, 8>>());
+                     std::vector<PerThetaDefaults::ValueArray>());
   MOCK_METHOD1(setPerAngleOptions,
-               void(std::vector<std::array<std::string, 8>>));
+               void(std::vector<PerThetaDefaults::ValueArray>));
   MOCK_METHOD2(showPerAngleOptionsAsInvalid, void(int row, int column));
   MOCK_METHOD1(showPerAngleOptionsAsValid, void(int row));
   MOCK_METHOD0(showAllPerAngleOptionsAsValid, void());

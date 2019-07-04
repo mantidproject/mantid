@@ -20,9 +20,9 @@ Experiment::Experiment()
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)),
       m_transmissionRunRange(boost::none),
       m_stitchParameters(std::map<std::string, std::string>()),
-      m_perThetaDefaults(std::vector<PerThetaDefaults>(
-          {PerThetaDefaults(boost::none, TransmissionRunPair(), RangeInQ(),
-                            boost::none, ProcessingInstructions())})) {}
+      m_perThetaDefaults(std::vector<PerThetaDefaults>({PerThetaDefaults(
+          boost::none, TransmissionRunPair(), boost::none, RangeInQ(),
+          boost::none, ProcessingInstructions())})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        SummationType summationType, bool includePartialBins,
@@ -71,9 +71,9 @@ std::vector<PerThetaDefaults> const &Experiment::perThetaDefaults() const {
   return m_perThetaDefaults;
 }
 
-std::vector<std::array<std::string, 8>>
+std::vector<PerThetaDefaults::ValueArray>
 Experiment::perThetaDefaultsArray() const {
-  auto result = std::vector<std::array<std::string, 8>>();
+  auto result = std::vector<PerThetaDefaults::ValueArray>();
   for (auto const &perThetaDefaults : m_perThetaDefaults)
     result.push_back(perThetaDefaultsToArray(perThetaDefaults));
   return result;

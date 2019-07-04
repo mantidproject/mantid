@@ -34,7 +34,7 @@ using testing::_;
 GNU_DIAG_OFF("missing-braces")
 
 class ExperimentPresenterTest : public CxxTest::TestSuite {
-  using OptionsRow = std::array<std::string, 8>;
+  using OptionsRow = PerThetaDefaults::ValueArray;
   using OptionsTable = std::vector<OptionsRow>;
 
 public:
@@ -497,13 +497,13 @@ public:
   }
 
   void testRestoreDefaultsUpdatesPerThetaInView() {
-    auto perThetaDefaults = PerThetaDefaults(boost::none, TransmissionRunPair(),
-                                             RangeInQ(0.01, 0.03, 0.2), 0.7,
-                                             std::string("390-415"));
+    auto perThetaDefaults = PerThetaDefaults(
+        boost::none, TransmissionRunPair(), boost::none,
+        RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"));
     auto model = makeModelWithPerThetaDefaults(std::move(perThetaDefaults));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    auto const expected = std::vector<std::array<std::string, 8>>{
+    auto const expected = std::vector<PerThetaDefaults::ValueArray>{
         {"", "", "", "0.010000", "0.200000", "0.030000", "0.700000",
          "390-415"}};
     EXPECT_CALL(m_view, setPerAngleOptions(expected)).Times(1);
@@ -513,14 +513,14 @@ public:
 
   void testRestoreDefaultsUpdatesPerThetaInModel() {
     auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(
-        boost::none, TransmissionRunPair(), RangeInQ(0.01, 0.03, 0.2), 0.7,
-        std::string("390-415")));
+        boost::none, TransmissionRunPair(), boost::none,
+        RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
-                                     RangeInQ(0.01, 0.03, 0.2), 0.7,
-                                     std::string("390-415"));
+                                     boost::none, RangeInQ(0.01, 0.03, 0.2),
+                                     0.7, std::string("390-415"));
     TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().size(), 1);
     TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().front(),
                      expected);
@@ -780,14 +780,14 @@ private:
   // either as an input array of strings or an output model
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
   PerThetaDefaults defaultsWithFirstAngle() {
-    return PerThetaDefaults(0.5, TransmissionRunPair("13463", ""), RangeInQ(),
-                            boost::none, boost::none);
+    return PerThetaDefaults(0.5, TransmissionRunPair("13463", ""), boost::none,
+                            RangeInQ(), boost::none, boost::none);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
   PerThetaDefaults defaultsWithSecondAngle() {
     return PerThetaDefaults(2.3, TransmissionRunPair("13463", "13464"),
-                            RangeInQ(), boost::none, boost::none);
+                            boost::none, RangeInQ(), boost::none, boost::none);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }

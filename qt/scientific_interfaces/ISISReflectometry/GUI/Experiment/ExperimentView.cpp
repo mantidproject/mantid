@@ -111,8 +111,8 @@ void ExperimentView::initializeTableRow(QTableWidget &table, int row) {
   m_ui.optionsTable->blockSignals(false);
 }
 
-void ExperimentView::initializeTableRow(QTableWidget &table, int row,
-                                        OptionsTableRow rowValues) {
+void ExperimentView::initializeTableRow(
+    QTableWidget &table, int row, PerThetaDefaults::ValueArray rowValues) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < table.columnCount(); ++column)
     table.setItem(
@@ -126,7 +126,7 @@ void ExperimentView::initOptionsTable() {
 
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
-  table->setColumnCount(OPTIONS_TABLE_COLUMN_COUNT);
+  table->setColumnCount(PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT);
   table->setRowCount(1);
   initializeTableItems(*table);
 
@@ -136,7 +136,7 @@ void ExperimentView::initOptionsTable() {
     totalRowHeight += table->rowHeight(i);
   }
 
-  const int padding = 2;
+  const int padding = 20;
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
 }
 
@@ -643,23 +643,25 @@ ExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem) const {
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
 GNU_DIAG_OFF("missing-braces")
-auto ExperimentView::getPerAngleOptions() const
-    -> std::vector<OptionsTableRow> {
+std::vector<PerThetaDefaults::ValueArray>
+ExperimentView::getPerAngleOptions() const {
   auto const &table = *m_ui.optionsTable;
-  auto rows = std::vector<OptionsTableRow>();
+  auto rows = std::vector<PerThetaDefaults::ValueArray>();
   rows.reserve(table.rowCount());
   for (auto row = 0; row < table.rowCount(); ++row) {
-    rows.emplace_back(OptionsTableRow{
+    rows.emplace_back(PerThetaDefaults::ValueArray{
         textFromCell(table.item(row, 0)), textFromCell(table.item(row, 1)),
         textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
         textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
-        textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7))});
+        textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7)),
+        textFromCell(table.item(row, 8))});
   }
   return rows;
 }
 GNU_DIAG_ON("missing-braces")
 
-void ExperimentView::setPerAngleOptions(std::vector<OptionsTableRow> rows) {
+void ExperimentView::setPerAngleOptions(
+    std::vector<PerThetaDefaults::ValueArray> rows) {
   auto &table = *m_ui.optionsTable;
   table.blockSignals(true);
   auto numberOfRows = static_cast<int>(rows.size());
