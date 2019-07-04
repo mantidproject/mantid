@@ -53,16 +53,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pbPlotRaw">
-          <property name="toolTip">
-           <string>Plot first detector spectra</string>
-          </property>
-          <property name="text">
-           <string>Plot Raw</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QCheckBox" name="ckSumFiles">
           <property name="text">
            <string>Sum Files</string>
