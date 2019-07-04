@@ -206,8 +206,8 @@ involving other parameters from any of the selected functions. The
 expression can be a constant (doesn't involve any parameters), in which
 case we would say the parameter is fixed.
 
-Constraining a parameter is where its value is kept above a lower bound or
-below an upper bound, or both.
+Constraining a parameter is where its value is kept above a lower bound,
+below an upper bound or both.
 
 To set a constraint or a tie right click on a parameter name:
 
