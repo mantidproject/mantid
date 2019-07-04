@@ -711,7 +711,7 @@ def errorbars_hidden(err_container):
     if not isinstance(err_container, ErrorbarContainer):
         return True
     hidden = True
-    for lines in err_container.lines[1:]:
+    for lines in err_container[1:]:
         for line in lines:
             hidden = hidden and (not line.get_visible())
     return hidden

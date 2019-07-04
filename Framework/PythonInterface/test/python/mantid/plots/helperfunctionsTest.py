@@ -11,8 +11,9 @@ import datetime
 import unittest
 
 import matplotlib
-import numpy as np
+matplotlib.use('AGG')  # noqa
 from matplotlib.pyplot import figure
+import numpy as np
 
 import mantid.api
 import mantid.plots.helperfunctions as funcs
@@ -21,8 +22,6 @@ from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import AddTimeSeriesLog, ConjoinWorkspaces, CreateMDHistoWorkspace, CreateSampleWorkspace, \
     CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace
-
-matplotlib.use('AGG')
 
 
 def add_workspace_with_data(func):
@@ -720,12 +719,14 @@ class HelperFunctionsTest(unittest.TestCase):
     def test_errorbars_hidden_returns_correctly_on_errorbar_container(self):
         container = self._create_artist(errors=True)
         self.assertFalse(mantid.plots.helperfunctions.errorbars_hidden(container))
-        container[2][0].set_visible(False)
+        [caps.set_visible(False) for caps in container[1] if container[1]]
+        [bars.set_visible(False) for bars in container[2]]
         self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
 
     def test_errorbars_hidden_returns_true_on_container_with_invisible_connecting_line(self):
         container = self._create_artist(errors=True)
         container[0].set_visible(False)
+        [caps.set_visible(False) for caps in container[1] if container[1]]
         [bars.set_visible(False) for bars in container[2]]
         self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
 

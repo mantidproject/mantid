@@ -116,6 +116,7 @@ class CurvePropertiesTest(unittest.TestCase):
         container = self._create_artist(errors=True)
         self.assertFalse(funcs.curve_hidden(container))
         # Hide errorbars but not connecting line
+        [caps.set_visible(False) for caps in container[1] if container[1]]
         [bars.set_visible(False) for bars in container[2]]
         self.assertFalse(funcs.curve_hidden(container))
         # Now hide connecting line
