@@ -93,7 +93,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         # force the plot to update
         self._force_redraw = True
-        self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
+        if self.context._frequency_context:
+            self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
         self.plot_type_changed_notifier.notify_subscribers()
 
         current_group_pair = self.context.group_pair_context[
@@ -112,6 +113,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the selected group pair being changed on the view
         """
+        self._force_redraw = True
         if self.context.group_pair_context.selected == self._model.plotted_group:
             return
         self._model.plotted_group = self.context.group_pair_context.selected

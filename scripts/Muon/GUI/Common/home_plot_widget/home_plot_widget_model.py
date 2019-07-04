@@ -41,6 +41,8 @@ class HomePlotWidgetModel(object):
         except RuntimeError:
             return
 
+        self._remove_already_plotted(workspace_list)
+
         if force_redraw and self.plot_figure:
             self.plot_figure.clear()
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
@@ -66,6 +68,11 @@ class HomePlotWidgetModel(object):
             self.remove_workpace_from_plot(workspace)
 
         self.plotted_workspaces = workspace_list
+
+    def _remove_already_plotted(self, workspace_list):
+        workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace in workspace_list]
+        for workspace in workspaces_to_remove:
+            self.remove_workpace_from_plot(workspace)
 
     def set_x_lim(self,domain):
         if domain == "Time":
