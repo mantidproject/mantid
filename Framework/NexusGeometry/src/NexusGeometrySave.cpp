@@ -124,7 +124,11 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
       // write to file a group in instrument named detetctor_[index]
       H5::Group detectorGroup =
           instrumentGroup.createGroup("detector_" + std::to_string(index));
+
       writeStrAttributeToGroup(detectorGroup, NX_CLASS, NX_DETECTOR);
+
+      // write location of detector as dataset to detector group
+      H5::DataSet location;
 
       // write any additional attributes
 

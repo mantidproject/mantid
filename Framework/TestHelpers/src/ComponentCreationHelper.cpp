@@ -731,7 +731,7 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
   }
 
   return instrument;
-} 
+}
 
 /**
  * createOneDetectorInstrument, creates the most simple possible definition of
