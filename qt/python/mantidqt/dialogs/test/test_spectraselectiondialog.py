@@ -1,31 +1,22 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-#
-#
-
-# std imports
 import unittest
+from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QDialogButtonBox
 
-
-# 3rdparty imports
 from mantid.api import WorkspaceFactory
 from mantid.py3compat import mock
-from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialog, QDialogButtonBox
-
-# local imports
+from mantidqt.dialogs.spectraselectordialog import parse_selection_str, SpectraSelectionDialog
+from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 from mantidqt.utils.qt.testing import GuiTest
-from mantidqt.dialogs.spectraselectordialog import (get_spectra_selection, parse_selection_str,
-                                                    SpectraSelectionDialog)
 
 
 class SpectraSelectionDialogTest(GuiTest):
-
     _mock_get_icon = None
     _single_spec_ws = None
     _multi_spec_ws = None
@@ -106,27 +97,6 @@ class SpectraSelectionDialogTest(GuiTest):
         self.assertNotEqual(dlg.selection, None)
         self.assertEqual(dlg.selection.spectra, None)
         self.assertEqual(list(range(50, 61)), dlg.selection.wksp_indices)
-
-    @mock.patch('mantidqt.dialogs.spectraselectordialog.SpectraSelectionDialog', autospec=True)
-    def test_get_spectra_selection_cancelled_returns_None(self, dialog_mock):
-        # a new instance of the mock created inside get_spectra_selection will return
-        # dialog_mock
-        dialog_mock.return_value = dialog_mock
-        dialog_mock.Rejected = QDialog.Rejected
-        dialog_mock.exec_.return_value = dialog_mock.Rejected
-
-        selection = get_spectra_selection([self._multi_spec_ws])
-
-        dialog_mock.exec_.assert_called_once_with()
-        self.assertEqual(selection, None)
-
-    @mock.patch('mantidqt.dialogs.spectraselectordialog.SpectraSelectionDialog')
-    def test_get_spectra_selection_does_not_use_dialog_for_single_spectrum(self, dialog_mock):
-        selection = get_spectra_selection([self._single_spec_ws])
-
-        dialog_mock.assert_not_called()
-        self.assertEqual([0], selection.wksp_indices)
-        self.assertEqual([self._single_spec_ws], selection.workspaces)
 
     def test_parse_selection_str_single_number(self):
         s = '1'

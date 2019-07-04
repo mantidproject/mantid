@@ -163,6 +163,7 @@ class MainWindow(QMainWindow):
         self.file_menu_actions = None
         self.view_menu = None
         self.view_menu_actions = None
+        self.view_menu_layouts = None
         self.interfaces_menu = None
         self.help_menu = None
         self.help_menu_actions = None
@@ -235,11 +236,10 @@ class MainWindow(QMainWindow):
         self.interface_manager = InterfaceManager()
 
         # uses default configuration as necessary
+        self.setup_default_layouts()
+        self.create_actions()
         self.readSettings(CONF)
         self.config_updated()
-
-        self.setup_layout()
-        self.create_actions()
 
     def post_mantid_init(self):
         """Run any setup that requires mantid
@@ -297,11 +297,15 @@ class MainWindow(QMainWindow):
                                   action_save_project, action_save_project_as,
                                   None, action_settings, None,
                                   action_manage_directories, None, action_quit]
+
         # view menu
         action_restore_default = create_action(
             self, "Restore Default Layout",
-            on_triggered=self.prep_window_for_reset,
+            on_triggered=self.setup_default_layouts,
             shortcut="Shift+F10", shortcut_context=Qt.ApplicationShortcut)
+
+        self.view_menu_layouts = self.view_menu.addMenu("&User Layouts")
+        self.populate_layout_menu()
 
         self.view_menu_actions = [action_restore_default, None] + self.create_widget_actions()
 
@@ -355,7 +359,7 @@ class MainWindow(QMainWindow):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
         interfaces = self._discover_python_interfaces(interface_dir)
-        interfaces.update(self._discover_cpp_interfaces())
+        self._discover_cpp_interfaces(interfaces)
 
         keys = list(interfaces.keys())
         keys.sort()
@@ -378,8 +382,7 @@ class MainWindow(QMainWindow):
         items = ConfigService['mantidqt.python_interfaces'].split()
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'Frequency_Domain_Analysis_Old.py',
-                         'Elemental_Analysis.py']
+                         'Frequency_Domain_Analysis_Old.py']
 
         # detect the python interfaces
         interfaces = {}
@@ -395,9 +398,8 @@ class MainWindow(QMainWindow):
 
         return interfaces
 
-    def _discover_cpp_interfaces(self):
+    def _discover_cpp_interfaces(self, interfaces):
         """Return a dictionary mapping a category to a set of named C++ interfaces"""
-        interfaces = {}
         cpp_interface_factory = UserSubWindowFactory.Instance()
         interface_names = cpp_interface_factory.keys()
         for name in interface_names:
@@ -405,7 +407,10 @@ class MainWindow(QMainWindow):
             if len(categories) == 0:
                 categories = ["General"]
             for category in categories:
-                interfaces.setdefault(category, []).append(name)
+                if category in interfaces.keys():
+                    interfaces[category].append(name)
+                else:
+                    interfaces[category] = [name]
 
         return interfaces
 
@@ -416,10 +421,28 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Layout ---------------------------------
 
-    def setup_layout(self):
-        """Assume this is a first run of the application and set layouts
-        accordingly"""
-        self.setup_default_layouts()
+    def populate_layout_menu(self):
+        self.view_menu_layouts.clear()
+        try:
+            layout_dict = CONF.get("MainWindow/user_layouts")
+        except KeyError:
+            layout_dict = {}
+        layout_keys = sorted(layout_dict.keys())
+        layout_options = []
+        for item in layout_keys:
+            layout_options.append(self.create_load_layout_action(item, layout_dict[item]))
+        layout_options.append(None)
+        action_settings = create_action(
+            self, "Settings", on_triggered=self.open_settings_layout_window)
+        layout_options.append(action_settings)
+
+        add_actions(self.view_menu_layouts, layout_options)
+
+    def create_load_layout_action(self, layout_name, layout):
+        action_load_layout = create_action(
+            self, layout_name,
+            on_triggered=lambda: self.restoreState(layout))
+        return action_load_layout
 
     def prep_window_for_reset(self):
         """Function to reset all dock widgets to a state where they can be
@@ -427,10 +450,10 @@ class MainWindow(QMainWindow):
         for widget in self.widgets:
             widget.dockwidget.setFloating(False)  # Bring back any floating windows
             self.addDockWidget(Qt.LeftDockWidgetArea, widget.dockwidget)  # Un-tabify all widgets
-        self.setup_default_layouts()
+            widget.toggle_view(False)
 
     def setup_default_layouts(self):
-        """Set or reset the layouts of the child widgets"""
+        """Set the default layouts of the child widgets"""
         # layout definition
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
@@ -446,7 +469,7 @@ class MainWindow(QMainWindow):
                 [[editor, ipython]],
                 # column 2
                 [[logmessages]]
-            ],
+                ],
             'width-fraction': [0.25,  # column 0 width
                                0.50,  # column 1 width
                                0.25],  # column 2 width
@@ -454,9 +477,13 @@ class MainWindow(QMainWindow):
                                 [1.0],  # column 1 row heights
                                 [1.0]]  # column 2 row heights
         }
+        self.arrange_layout(default_layout)
 
+    def arrange_layout(self, layout):
+        """Arrange the layout of the child widgets according to the supplied layout"""
+        self.prep_window_for_reset()
+        widgets_layout = layout['widgets']
         with widget_updates_disabled(self):
-            widgets_layout = default_layout['widgets']
             # flatten list
             widgets = [item for column in widgets_layout for row in column for item in row]
             # show everything
@@ -553,6 +580,11 @@ class MainWindow(QMainWindow):
     def open_settings_window(self):
         settings = SettingsPresenter(self)
         settings.show()
+
+    def open_settings_layout_window(self):
+        settings = SettingsPresenter(self)
+        settings.show()
+        settings.general_settings.focus_layout_box()
 
     def config_updated(self):
         """

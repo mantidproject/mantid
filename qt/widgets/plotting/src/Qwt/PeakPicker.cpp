@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/Qwt/PreviewPlot.h"
 
 #include <qwt_painter.h>
 #include <qwt_plot_canvas.h>
@@ -29,6 +30,14 @@ PeakPicker::PeakPicker(QwtPlot *plot, QColor color)
       m_isMoving(false), m_isResizing(false), m_peak() {
   attach(plot);
   plot->canvas()->setCursor(DEFAULT_CURSOR);
+}
+
+PeakPicker::PeakPicker(PreviewPlot *plot, QColor color)
+    : QwtPlotPicker(plot->canvas()), QwtPlotItem(), m_plot(plot->getPlot()),
+      m_basePen(color, 0, Qt::SolidLine), m_widthPen(color, 0, Qt::DashLine),
+      m_isMoving(false), m_isResizing(false), m_peak() {
+  attach(m_plot);
+  m_plot->canvas()->setCursor(DEFAULT_CURSOR);
 }
 
 bool PeakPicker::eventFilter(QObject *object, QEvent *event) {

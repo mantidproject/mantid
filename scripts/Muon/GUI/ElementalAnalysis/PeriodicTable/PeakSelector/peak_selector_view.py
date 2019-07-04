@@ -13,7 +13,7 @@ from Muon.GUI.Common.checkbox import Checkbox
 
 
 class PeakSelectorView(QtWidgets.QListWidget):
-    sig_finished_selection = QtCore.pyqtSignal(object, object)
+    sig_finished_selection = QtCore.Signal(object, object)
 
     def __init__(self, peak_data, element, parent=None):
         super(PeakSelectorView, self).__init__(parent)

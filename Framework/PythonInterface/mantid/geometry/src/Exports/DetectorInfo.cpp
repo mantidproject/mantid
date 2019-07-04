@@ -77,6 +77,9 @@ void export_DetectorInfo() {
            "Returns the size of the DetectorInfo, i.e., the number of "
            "detectors in the instrument.")
 
+      .def("indexOf", &DetectorInfo::indexOf, (arg("self"), arg("detId")),
+           "Returns the index of the detector with the given id.")
+
       .def("isMonitor", isMonitor, (arg("self"), arg("index")),
            "Returns True if the detector is a monitor.")
 
