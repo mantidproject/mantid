@@ -50,7 +50,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
                 self._view.addItem(FREQ_PLOT_TYPE+FREQUENCY_EXTENSIONS[ext])
             self._view.addItem(FREQ_PLOT_TYPE+"All")
 
-
     def show(self):
         """
         Calls show on the view QtWidget

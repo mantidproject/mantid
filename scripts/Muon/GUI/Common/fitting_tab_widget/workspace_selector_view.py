@@ -17,6 +17,7 @@ ui_workspace_selector, _ = load_ui(__file__, "workspace_selector.ui")
 
 frequency_domain = "Frequency Domain "
 
+
 class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
     def __init__(self, current_runs, instrument, current_workspaces, fit_to_raw, context, parent_widget=None):
         super(QtWidgets.QDialog, self).__init__(parent=parent_widget)

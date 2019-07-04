@@ -50,7 +50,7 @@ class MuonContext(object):
     @property
     def window_title(self):
         if self._frequency_context:
-           return self._frequency_context.window_title
+            return self._frequency_context.window_title
         return "Muon Analysis"
 
     @property
@@ -273,7 +273,8 @@ class MuonContext(object):
             return self.get_names_of_time_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
                                                                    phasequad=phasequad, rebin=rebin)
         else:
-            return self.get_names_of_frequency_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair, phasequad=phasequad, frequency_type=freq)
+            return self.get_names_of_frequency_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
+			                                                            phasequad=phasequad, frequency_type=freq)
 
     def get_group_and_pair(self, group_and_pair):
         group = []

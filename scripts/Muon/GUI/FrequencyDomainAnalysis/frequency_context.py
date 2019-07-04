@@ -45,7 +45,7 @@ class FrequencyContext(object):
         self.plot_type = "None"
 
     @property
-    def window_title(self): 
+    def window_title(self):
         return "Frequency Domain Analysis"
 
     def add_maxEnt(self, run, ws_freq):
