@@ -200,9 +200,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.home_tab.group_widget.selected_group_pair_changed_notifier.add_subscriber(
             self.home_tab.plot_widget.group_pair_observer)
 
-        self.context.gui_context.gui_variables_notifier.add_subscriber(
-            self.home_tab.plot_widget.rebin_options_set_observer)
-
     def setup_alpha_recalculated_observers(self):
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.loadObserver)
