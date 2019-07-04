@@ -93,6 +93,7 @@ Improvements
 ############
 - Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
 - Improved ISISEnergyTransfer by automatically loading the Detailed Balance from the sample logs if available.
+- Removed the obsolete *Plot Raw* button.
 
 Bug Fixes
 #########
@@ -125,3 +126,12 @@ New Features
 
 - The *Settings* GUI allows you to turn off the restriction of input data based on their name.
 - The *Settings* GUI allows you to turn on error bars for the output plots.
+
+
+Simulations Interface
+---------------------
+
+Bug Fixes
+#########
+- Fixed a crash in MolDyn caused by plotting output data.
+
