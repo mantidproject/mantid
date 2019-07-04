@@ -703,24 +703,15 @@ def get_errorbar_bounds(container):
     return min_x, max_x, min_y, max_y
 
 
-def errorbars_hidden(err_container, include_connecting_line=False):
+def errorbars_hidden(err_container):
     """
     Return True if errorbars in ErrorbarContainer are not visible
     :param err_container: ErrorbarContainer to find visibility of
-    :param include_connecting_line: Include line connecting errorbars
     """
-    hidden = True
     if not isinstance(err_container, ErrorbarContainer):
         return True
-    err_lines = err_container.lines if include_connecting_line else err_container[1:]
-    try:
-        for lines in err_lines:
-            try:
-                for line in lines:
-                    hidden = hidden and (not line.get_visible())
-            except TypeError:
-                if lines:
-                    hidden = hidden and (not lines.get_visible())
-    except AttributeError:
-        pass
+    hidden = True
+    for lines in err_container.lines[1:]:
+        for line in lines:
+            hidden = hidden and (not line.get_visible())
     return hidden

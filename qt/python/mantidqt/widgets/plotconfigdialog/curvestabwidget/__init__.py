@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 from matplotlib import rcParams
 from matplotlib.axes import ErrorbarContainer
 from matplotlib.lines import Line2D
+from numpy import isclose
 from qtpy.QtCore import Qt
 
 from mantid.plots import MantidAxes
@@ -52,7 +53,9 @@ def get_marker_name(marker):
 def curve_hidden(curve):
     """Return True if curve is not visible"""
     if isinstance(curve, ErrorbarContainer):
-        return errorbars_hidden(curve, include_connecting_line=True)
+        line_hidden = True if not curve[0] else (not curve[0].get_visible())
+        bars_hidden = errorbars_hidden(curve)
+        return line_hidden and bars_hidden
     else:
         return not curve.get_visible()
 
@@ -106,6 +109,17 @@ class CurveProperties(dict):
 
     def __init__(self, props):
         self.update(props)
+
+    def __eq__(self, other):
+        for prop, value in sorted(self.items()):
+            other_value = other[prop]
+            if type(value) is float:
+                if not isclose(value, other_value, atol=1e-5):
+                    return False
+            else:
+                if value != other_value:
+                    return False
+        return True
 
     def __getattr__(self, item):
         return self[item]
@@ -192,20 +206,21 @@ class CurveProperties(dict):
     @staticmethod
     def _get_errorbars_props_from_curve(curve, props):
         """Get a curve's errorbar properties and add to props dict"""
-        props['hide_errors'] = errorbars_hidden(curve)
+        props['hide_errors'] = getattr(curve, 'hide_errors',
+                                       errorbars_hidden(curve))
         props['errorevery'] = getattr(curve, 'errorevery', 1)
         try:
             caps = curve[1]
-            props['capsize'] = caps[0].get_markersize()/2
-            props['capthick'] = caps[0].get_markeredgewidth()
+            props['capsize'] = float(caps[0].get_markersize()/2)
+            props['capthick'] = float(caps[0].get_markeredgewidth())
         except (IndexError, TypeError):
-            props['capsize'] = 0
-            props['capthick'] = 1
+            props['capsize'] = 0.0
+            props['capthick'] = 1.0
         try:
             bars = curve[2]
-            props['elinewidth'] = bars[0].get_linewidth()[0]
+            props['elinewidth'] = float(bars[0].get_linewidth()[0])
             props['ecolor'] = convert_color_to_hex(bars[0].get_color()[0])
         except (IndexError, TypeError):
-            props['elinewidth'] = 1
+            props['elinewidth'] = 1.0
             props['ecolor'] = convert_color_to_hex(rcParams['lines.color'])
         return props

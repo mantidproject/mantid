@@ -30,6 +30,8 @@ class CurvesTabWidgetPresenter:
         else:
             self.view = view
 
+        self.current_view_properties = None
+
         # Fill the fields in the view
         self.axes_names_dict = get_axes_names_dict(self.fig, curves_only=True)
         self.populate_select_axes_combo_box()
@@ -47,14 +49,18 @@ class CurvesTabWidgetPresenter:
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
         view_props = self.get_view_properties()
+        if view_props == self.current_view_properties:
+            return
         # Re-plot curve
         self.replot_selected_curve(view_props.get_plot_kwargs())
         curve = self.get_selected_curve()
         # Set the curve's new name in the names dict and combo box
         self.set_new_curve_name_in_dict_and_combo_box(curve, view_props.label)
+        setattr(curve, 'hide_errors', view_props.hide_errors)
         set_errorbars_hidden(curve, view_props.hide_errors)
         if self.get_selected_ax().legend_:
             self.get_selected_ax().legend().draggable()
+        self.current_view_properties = view_props
         self.get_selected_ax().relim()
 
     def close_tab(self):
@@ -75,6 +81,10 @@ class CurvesTabWidgetPresenter:
     def get_selected_curve(self):
         """Get selected Line2D or ErrorbarContainer object"""
         return self.curve_names_dict[self.view.get_selected_curve_name()]
+
+    def get_selected_curve_properties(self):
+        """Get a CurveProperties object from the selected curve"""
+        return CurveProperties.from_curve(self.get_selected_curve())
 
     def get_view_properties(self):
         """Get top level properties from view"""
@@ -197,6 +207,7 @@ class CurvesTabWidgetPresenter:
         curve_props = CurveProperties.from_curve(self.get_selected_curve())
         self.view.update_fields(curve_props)
         self.set_errorbars_tab_enabled()
+        self.current_view_properties = curve_props
 
     # Private methods
     def _generate_curve_name(self, curve, label):

@@ -723,15 +723,9 @@ class HelperFunctionsTest(unittest.TestCase):
         container[2][0].set_visible(False)
         self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
 
-    def test_errorbars_hidden_returns_false_on_container_with_connecting_line_with_include_true(self):
+    def test_errorbars_hidden_returns_true_on_container_with_invisible_connecting_line(self):
         container = self._create_artist(errors=True)
-        # Hide errorbars
-        [bars.set_visible(False) for bars in container[2]]
-        self.assertFalse(mantid.plots.helperfunctions.errorbars_hidden(container, include_connecting_line=True))
-
-    def test_errorbars_hidden_returns_true_on_container_with_connecting_line_with_include_false(self):
-        container = self._create_artist(errors=True)
-        # Hide errorbars but not connecting line
+        container[0].set_visible(False)
         [bars.set_visible(False) for bars in container[2]]
         self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
 
