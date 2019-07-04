@@ -264,7 +264,6 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     }
   }*/
 
-
   file.close();
 
 } // saveInstrument
