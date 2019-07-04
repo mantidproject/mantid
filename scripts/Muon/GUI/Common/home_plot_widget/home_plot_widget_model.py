@@ -33,6 +33,7 @@ class HomePlotWidgetModel(object):
         :return: A reference to the newly created plot window is passed back
         """
         if not workspace_list:
+            self.plotted_workspaces = []
             self.plot_figure.clear()
             self.plot_figure.canvas.draw()
             return self.plot_figure
@@ -40,18 +41,14 @@ class HomePlotWidgetModel(object):
             workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
         except RuntimeError:
             return
-
-        self._remove_already_plotted(workspace_list)
-
         if force_redraw and self.plot_figure:
+            self.plotted_workspaces = []
             self.plot_figure.clear()
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
 
         elif self.plot_figure:
-
-        if self.plot_figure:
             axis = self.plot_figure.gca()
             xlim = axis.get_xlim()
             ylim = axis.get_ylim()
@@ -77,11 +74,6 @@ class HomePlotWidgetModel(object):
             self.remove_workpace_from_plot(workspace)
 
         self.plotted_workspaces = workspace_list
-
-    def _remove_already_plotted(self, workspace_list):
-        workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace in workspace_list]
-        for workspace in workspaces_to_remove:
-            self.remove_workpace_from_plot(workspace)
 
     def set_x_lim(self,domain):
         if domain == "Time":
