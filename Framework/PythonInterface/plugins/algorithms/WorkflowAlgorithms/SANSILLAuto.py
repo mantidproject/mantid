@@ -284,7 +284,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              AbsorberInputWorkspace=absorber_name, BeamInputWorkspace=beam_name, CacheSolidAngle=True,
                              ContainerInputWorkspace=container_name, TransmissionInputWorkspace=sample_transmission_name,
                              MaskedInputWorkspace=mask_name, SensitivityInputWorkspace=sens_input, FluxInputWorkspace=flux_input)
-            SANSILLIntegration(InputWorkspace=sample_name, OutputWorkspace=output)
+            SANSILLIntegration(InputWorkspace=sample_name, OutputWorkspace=output, CalculateResolution='None')
         elif self.reduction_type == 'ReduceWater':
             SANSILLReduction(Run=self.sample[i], ProcessAs='Reference', OutputWorkspace=output, AbsorberInputWorkspace=absorber_name,
                              BeamInputWorkspace=beam_name, ContainerInputWorkspace=container_name,
