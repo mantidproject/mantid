@@ -84,6 +84,8 @@ Bug Fixes
 #########
 - Fixed a bug where the output plots on the Calculate Paalman Pings and Calculate Monte Carlo Absorption tabs had
   the wrong axis labels and units.
+- Fixed a bug where Calculate Paalman Pings would crash if an EFixed value had not been provided.
+- Fixed a bug where Apply Aborption Corrections would crash when provided an invalid corrections workspace.
 
 
 Data Reduction Interface
