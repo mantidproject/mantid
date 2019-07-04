@@ -76,23 +76,22 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
                                 ext.generic_string());
   }
 
-  // check if the component has detector info.
-  if (!compInfo.hasDetectorInfo()) {
-    throw std::invalid_argument("The component has no detector info.\n");
-  }
-
   // does reporting if optional reporter exists.
   if (reporter != nullptr) {
     reporter->report();
   }
 
+  if (!compInfo.hasDetectorInfo()) {
+    throw std::invalid_argument("The component has no detector info.\n");
+  }
+
   if (!compInfo.hasSample()) {
 
-    throw std::invalid_argument("the component has no sample.\n");
+    throw std::invalid_argument("The component has no sample.\n");
   }
 
   if (!compInfo.hasSource()) {
-    throw std::invalid_argument("the component has no source.");
+    throw std::invalid_argument("The component has no source.");
   }
 
   { // so i dont forget they exist.
@@ -135,30 +134,26 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     }
   }
 
-  /*
+  // create DataSet 'data' in instrument.
 
-    // create DataSet 'data' in instrument.
+  H5::StrType dataType(0, H5T_VARIABLE);
+  H5::DataSpace dataSpace(H5S_SCALAR);
 
-    H5::StrType dataType(0, H5T_VARIABLE);
-    H5::DataSpace dataSpace(H5S_SCALAR);
+  std::string dataSetData = "test_data_for_instrument";
+  auto dataSetDataAsCStr = dataSetData.c_str();
 
-    std::string dataSetData = "test_data_for_instrument"; // value for dataset.
-    auto dataSetDataAsCStr = dataSetData.c_str();         // for plist..
+  H5::DSetCreatPropList plist;
+  plist.setFillValue(dataType, &dataSetDataAsCStr);
 
-    H5::DSetCreatPropList plist;
-    plist.setFillValue(dataType, &dataSetDataAsCStr); // for dataSet.
+  // add dataset to child group 'instrument'
+  H5::DataSet dataSet = instrumentGroup.createDataSet(
+      compInfo.name(ROOT_INDEX), dataType, dataSpace,
+      plist); // name of dataset initialised with fill value.
 
-    // add dataset to child group 'instrument'
-    H5::DataSet dataSet = instrumentGroup.createDataSet(
-        compInfo.name(compInfo.root()), dataType, dataSpace,
-        plist); // name of dataset initialised with fill value.
-
-    writeStrAttributeToDataSet(dataSet, SHORT_NAME,
-                               compInfo.name(compInfo.root()));
-    writeStrAttributeToDataSet(dataSet, NX_CLASS,
-                               NX_CHAR); // add NX_class attribute to dataset
-
-  */
+  writeStrAttributeToDataSet(dataSet, SHORT_NAME,
+                             compInfo.name(compInfo.root()));
+  writeStrAttributeToDataSet(dataSet, NX_CLASS,
+                             NX_CHAR); // add NX_class attribute to dataset
 
   file.close();
 
