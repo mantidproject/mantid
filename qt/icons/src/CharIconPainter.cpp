@@ -13,8 +13,8 @@ namespace MantidQt {
 namespace Icons {
 
 namespace {
-const QString defaultColor("black");
-const QString defaultDeactivatedColor("#c7c7c7");
+const QString DEFAULT_COLOR("black");
+const QString DEFAULT_DEACTIVATED_COLOR("#c7c7c7");
 } // namespace
 
 void CharIconPainter::paint(IconicFont *iconic, QPainter *painter, QRect rect,
@@ -46,10 +46,10 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
       iconic->findCharacterFromCharMap(prefix, charecterOption);
 
   // Set some defaults so it doesn't fail later if nothing was set
-  QString color(defaultColor);
+  QString color(DEFAULT_COLOR);
   double scaleFactor(1.0);
   if (mode == QIcon::Mode::Disabled) {
-    color = defaultDeactivatedColor; // gray
+    color = DEFAULT_DEACTIVATED_COLOR; // gray
   } else if (colorVariant.canConvert<QString>()) {
     color = colorVariant.toString();
   }
