@@ -66,6 +66,10 @@ public:
   void setTransmissionStartOverlap(double start) override;
   double getTransmissionEndOverlap() const override;
   void setTransmissionEndOverlap(double end) override;
+  std::string getTransmissionStitchParams() const override;
+  void setTransmissionStitchParams(std::string const &params) override;
+  bool getTransmissionScaleRHSWorkspace() const override;
+  void setTransmissionScaleRHSWorkspace(bool enable) override;
   void showTransmissionRangeInvalid() override;
   void showTransmissionRangeValid() override;
 

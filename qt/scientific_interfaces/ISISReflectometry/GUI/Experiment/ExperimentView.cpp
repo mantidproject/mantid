@@ -198,6 +198,8 @@ void ExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.analysisModeComboBox->setEnabled(enabled);
   m_ui.startOverlapEdit->setEnabled(enabled);
   m_ui.endOverlapEdit->setEnabled(enabled);
+  m_ui.transStitchParamsEdit->setEnabled(enabled);
+  m_ui.transScaleRHSCheckBox->setEnabled(enabled);
   m_ui.polCorrComboBox->setEnabled(enabled);
   m_ui.CRhoEdit->setEnabled(enabled);
   m_ui.CAlphaEdit->setEnabled(enabled);
@@ -226,6 +228,8 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
+  registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
+  registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
   registerSettingWidget(*m_ui.CRhoEdit, "cRho", alg);
   registerSettingWidget(*m_ui.CAlphaEdit, "cAlpha", alg);
@@ -248,6 +252,8 @@ void ExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.analysisModeComboBox);
   connectSettingsChange(*m_ui.startOverlapEdit);
   connectSettingsChange(*m_ui.endOverlapEdit);
+  connectSettingsChange(*m_ui.transStitchParamsEdit);
+  connectSettingsChange(*m_ui.transScaleRHSCheckBox);
   connectSettingsChange(*m_ui.polCorrComboBox);
   connectSettingsChange(*m_ui.CRhoEdit);
   connectSettingsChange(*m_ui.CAlphaEdit);
@@ -267,6 +273,8 @@ void ExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.analysisModeComboBox);
   disconnectSettingsChange(*m_ui.startOverlapEdit);
   disconnectSettingsChange(*m_ui.endOverlapEdit);
+  disconnectSettingsChange(*m_ui.transStitchParamsEdit);
+  disconnectSettingsChange(*m_ui.transScaleRHSCheckBox);
   disconnectSettingsChange(*m_ui.polCorrComboBox);
   disconnectSettingsChange(*m_ui.CRhoEdit);
   disconnectSettingsChange(*m_ui.CAlphaEdit);
@@ -689,6 +697,26 @@ double ExperimentView::getTransmissionEndOverlap() const {
   return m_ui.endOverlapEdit->value();
 }
 
+void ExperimentView::setTransmissionEndOverlap(double end) {
+  m_ui.endOverlapEdit->setValue(end);
+}
+
+std::string ExperimentView::getTransmissionStitchParams() const {
+  return getText(*m_ui.transStitchParamsEdit);
+}
+
+void ExperimentView::setTransmissionStitchParams(std::string const &params) {
+  setText(*m_ui.transStitchParamsEdit, params);
+}
+
+bool ExperimentView::getTransmissionScaleRHSWorkspace() const {
+  return m_ui.transScaleRHSCheckBox->isChecked();
+}
+
+void ExperimentView::setTransmissionScaleRHSWorkspace(bool enable) {
+  setChecked(*m_ui.transScaleRHSCheckBox, enable);
+}
+
 void ExperimentView::showTransmissionRangeInvalid() {
   showAsInvalid(*m_ui.startOverlapEdit);
   showAsInvalid(*m_ui.endOverlapEdit);
@@ -697,10 +725,6 @@ void ExperimentView::showTransmissionRangeInvalid() {
 void ExperimentView::showTransmissionRangeValid() {
   showAsValid(*m_ui.startOverlapEdit);
   showAsValid(*m_ui.endOverlapEdit);
-}
-
-void ExperimentView::setTransmissionEndOverlap(double end) {
-  m_ui.endOverlapEdit->setValue(end);
 }
 
 void ExperimentView::setPolarizationCorrectionType(std::string const &type) {

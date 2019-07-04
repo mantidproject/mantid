@@ -85,6 +85,10 @@ public:
   virtual void setTransmissionStartOverlap(double start) = 0;
   virtual double getTransmissionEndOverlap() const = 0;
   virtual void setTransmissionEndOverlap(double end) = 0;
+  virtual std::string getTransmissionStitchParams() const = 0;
+  virtual void setTransmissionStitchParams(std::string const &params) = 0;
+  virtual bool getTransmissionScaleRHSWorkspace() const = 0;
+  virtual void setTransmissionScaleRHSWorkspace(bool enable) = 0;
   virtual void showTransmissionRangeInvalid() = 0;
   virtual void showTransmissionRangeValid() = 0;
 
