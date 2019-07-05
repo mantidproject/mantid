@@ -9,6 +9,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
 namespace {
@@ -113,8 +114,8 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(replotNewSpectrum(QtProperty *, double)));
   // Plot miniplot when file has finished loading
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(plotRawInput(const QString &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(QString const &)));
   // Preview symmetrise
   connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SLOT(preview()));
   // X range selectors
@@ -163,17 +164,27 @@ IndirectSymmetrise::~IndirectSymmetrise() {}
 void IndirectSymmetrise::setup() {}
 
 bool IndirectSymmetrise::validate() {
-  // Check for a valid input file
-  if (!m_uiForm.dsInput->isValid())
-    return false;
+  auto const sampleName = m_uiForm.dsInput->getCurrentDataName();
+
+  UserInputValidator uiv;
+  // Validate the sample workspace
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
+  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
+      sampleName, "MatrixWorkspace");
 
   // EMin and EMax must be positive
   if (m_dblManager->value(m_properties["EMin"]) <= 0.0)
-    return false;
+    uiv.addErrorMessage("EMin must be positive.");
   if (m_dblManager->value(m_properties["EMax"]) <= 0.0)
-    return false;
+    uiv.addErrorMessage("EMax must be positive.");
 
-  return true;
+  auto const errorMessage = uiv.generateErrorMessage();
+
+  // Show an error message if needed
+  if (!errorMessage.isEmpty())
+    emit showMessageBox(errorMessage);
+
+  return errorMessage.isEmpty();
 }
 
 void IndirectSymmetrise::run() {
@@ -228,16 +239,34 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
 }
 
 /**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ * @param dataName The name of the data that has been loaded
+ */
+void IndirectSymmetrise::handleDataReady(QString const &dataName) {
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
+  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
+      dataName, "MatrixWorkspace");
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (errorMessage.isEmpty()) {
+    plotNewData(dataName);
+  } else {
+    emit showMessageBox(errorMessage);
+  }
+}
+
+/**
  * Plots a new workspace in the mini plot when it is loaded form the data
  *selector.
  *
- * @param workspaceName Name of the workspace that has been laoded
+ * @param workspaceName Name of the workspace that has been loaded
  */
-void IndirectSymmetrise::plotRawInput(const QString &workspaceName) {
+void IndirectSymmetrise::plotNewData(QString const &workspaceName) {
   // Set the preview spectrum number to the first spectrum in the workspace
-  MatrixWorkspace_sptr sampleWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          workspaceName.toStdString());
+  auto sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName.toStdString());
   int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
   m_dblManager->setValue(m_properties["PreviewSpec"],
                          static_cast<double>(minSpectrumRange));
