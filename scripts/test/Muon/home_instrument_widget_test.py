@@ -5,23 +5,23 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
+
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
 from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class HomeTabInstrumentPresenterTest(unittest.TestCase):
+class HomeTabInstrumentPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
         setup_context_for_tests(self)
         self.gui_variable_observer = Observer()
 

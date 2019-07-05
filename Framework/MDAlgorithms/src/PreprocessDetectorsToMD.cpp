@@ -35,17 +35,17 @@ void PreprocessDetectorsToMD::init() {
   // the validator which checks if the workspace has axis and any units
   // ws_valid->add<API::WorkspaceUnitValidator>("");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input, ws_valid),
                   "Name of an input Matrix Workspace with instrument.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Name of the output Table workspace with pre-processed "
                   "detectors data. If the workspace exists, it will be "
                   "replaced.");
 
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "GetMaskState", true, Kernel::Direction::Input),
                   "Returns masked state of the detectors. If this option is "
                   "false, the masked detectors are just dropped from the "
@@ -54,7 +54,7 @@ void PreprocessDetectorsToMD::init() {
                   "and logic necessary until Mantid masks signal by 0 rather "
                   "then NaN.");
 
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "UpdateMasksInfo", false, Kernel::Direction::Input),
                   "If target workspace already exists as the result of "
                   "previous deployment of this algorithm, the algorithm just "
@@ -64,7 +64,7 @@ void PreprocessDetectorsToMD::init() {
                   "parameter and logic necessary until Mantid masks signal by "
                   "0 rather then NaN.");
 
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "GetEFixed", false, Kernel::Direction::Input),
                   "This option makes sense for Indirect instrument, where each "
                   "detector can have its own energy, defined by correspondent "

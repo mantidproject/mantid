@@ -37,8 +37,8 @@ class SofQWMomentsTest(unittest.TestCase):
         workspace = SofQW(workspace, '0.4, 0.1, 1.8', EMode='Indirect', EFixed='1.845')
         workspace = SofQWMoments(workspace)
 
-        self.assertEquals(workspace.getNumberHistograms(), 5)
-        self.assertEquals(workspace.blocksize(), 14)
+        self.assertEqual(workspace.getNumberHistograms(), 5)
+        self.assertEqual(workspace.blocksize(), 14)
 
     def test_that_SOfQWMoments_produces_the_workspace_expected(self):
         input_workspace = Load('iris26176_graphite002_sqw')

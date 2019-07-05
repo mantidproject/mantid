@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
@@ -35,3 +37,5 @@ class LoadWidget(object):
         self.load_widget.set_load_run_widget(self.run_widget)
 
         self.load_widget.set_current_instrument(context.data_context.instrument)
+
+        context.update_view_from_model_notifier.add_subscriber(self.load_widget.update_view_from_model_observer)

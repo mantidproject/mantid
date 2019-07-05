@@ -95,7 +95,7 @@ const std::string MDNorm::summary() const {
 /** Initialize the algorithm's properties.
  */
 void MDNorm::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "An input MDEventWorkspace. Must be in Q_sample frame.");
 
@@ -111,24 +111,27 @@ void MDNorm::init() {
   Q2[2] = 1.;
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("QDimension0", Q0, mustBe3D),
+      std::make_unique<ArrayProperty<double>>("QDimension0", Q0, mustBe3D),
       "The first Q projection axis - Default is (1,0,0)");
-  setPropertySettings("QDimension0", make_unique<Kernel::VisibleWhenProperty>(
-                                         "RLU", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "QDimension0",
+      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension0", "Q projections RLU");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("QDimension1", Q1, mustBe3D),
+      std::make_unique<ArrayProperty<double>>("QDimension1", Q1, mustBe3D),
       "The second Q projection axis - Default is (0,1,0)");
-  setPropertySettings("QDimension1", make_unique<Kernel::VisibleWhenProperty>(
-                                         "RLU", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "QDimension1",
+      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension1", "Q projections RLU");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("QDimension2", Q2, mustBe3D),
+      std::make_unique<ArrayProperty<double>>("QDimension2", Q2, mustBe3D),
       "The thirdtCalculateCover Q projection axis - Default is (0,0,1)");
-  setPropertySettings("QDimension2", make_unique<Kernel::VisibleWhenProperty>(
-                                         "RLU", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "QDimension2",
+      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension2", "Q projections RLU");
 
   // vanadium
@@ -137,16 +140,16 @@ void MDNorm::init() {
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "SolidAngleWorkspace", "", Direction::Input,
           API::PropertyMode::Optional, solidAngleValidator),
       "An input workspace containing integrated vanadium "
       "(a measure of the solid angle).\n"
       "Mandatory for diffraction, optional for direct geometry inelastic");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
-                                       API::PropertyMode::Optional,
-                                       fluxValidator),
+      std::make_unique<WorkspaceProperty<>>(
+          "FluxWorkspace", "", Direction::Input, API::PropertyMode::Optional,
+          fluxValidator),
       "An input workspace containing momentum dependent flux.\n"
       "Mandatory for diffraction. No effect on direct geometry inelastic");
   setPropertyGroup("SolidAngleWorkspace", "Vanadium normalization");
@@ -160,14 +163,14 @@ void MDNorm::init() {
     if (i < 3) {
       defaultName = "QDimension" + Strings::toString(i);
     }
-    declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+    declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                         propName, defaultName, Direction::Input),
                     "Name for the " + Strings::toString(i) +
                         "th dimension. Leave blank for NONE.");
     auto atMost3 = boost::make_shared<ArrayLengthValidator<double>>(0, 3);
     std::vector<double> temp;
     declareProperty(
-        Kernel::make_unique<ArrayProperty<double>>(propBinning, temp, atMost3),
+        std::make_unique<ArrayProperty<double>>(propBinning, temp, atMost3),
         "Binning for the " + Strings::toString(i) + "th dimension.\n" +
             "- Leave blank for complete integration\n" +
             "- One value is interpreted as step\n"
@@ -178,20 +181,20 @@ void MDNorm::init() {
   }
 
   // symmetry operations
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "SymmetryOperations", "", Direction::Input),
                   "If specified the symmetry will be applied, "
                   "can be space group name, point group name, or list "
                   "individual symmetries.");
 
   // temporary workspaces
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryDataWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate data from "
                   "multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate normalization "
@@ -200,13 +203,13 @@ void MDNorm::init() {
   setPropertyGroup("TemporaryDataWorkspace", "Temporary workspaces");
   setPropertyGroup("TemporaryNormalizationWorkspace", "Temporary workspaces");
 
-  declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "A name for the normalized output MDHistoWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputDataWorkspace", "", Kernel::Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
@@ -313,10 +316,11 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       auto it = std::find(originalDimensionNames.begin(),
                           originalDimensionNames.end(), dimName);
       if (it == originalDimensionNames.end()) {
-        errorMessage.emplace(propName,
-                             "Name '" + dimName +
-                                 "' is not one of the "
-                                 "original workspace names or a Q dimension");
+        errorMessage.emplace(
+            propName,
+            "Name '" + dimName +
+                "' is not one of the "
+                "original workspace names or a directional dimension");
       } else {
         // make sure dimension is unique
         auto itSel = std::find(selectedDimensions.begin(),
@@ -367,6 +371,45 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       }
     }
   }
+  // validate accumulation workspaces, if provided
+  boost::shared_ptr<IMDHistoWorkspace> tempNormWS =
+      this->getProperty("TemporaryNormalizationWorkspace");
+  Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
+      this->getProperty("TemporaryDataWorkspace");
+
+  // check that either both or neuther accumulation workspaces are provied
+  if ((tempNormWS && !tempDataWS) || (!tempNormWS && tempDataWS)) {
+    errorMessage.emplace(
+        "TemporaryDataWorkspace",
+        "Must provide either no accumulation workspaces or,"
+        "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
+  }
+  // check that both accumulation workspaces are on the same grid
+  if (tempNormWS && tempDataWS) {
+    size_t numNormDims = tempNormWS->getNumDims();
+    size_t numDataDims = tempDataWS->getNumDims();
+    if (numNormDims == numDataDims) {
+      for (size_t i = 0; i < numNormDims; i++) {
+        const auto dim1 = tempNormWS->getDimension(i);
+        const auto dim2 = tempDataWS->getDimension(i);
+        if ((dim1->getMinimum() != dim2->getMinimum()) ||
+            (dim1->getMaximum() != dim2->getMaximum()) ||
+            (dim1->getNBins() != dim2->getNBins()) ||
+            (dim1->getName() != dim2->getName())) {
+          errorMessage.emplace("TemporaryDataWorkspace",
+                               "Binning for TemporaryNormalizationWorkspaces "
+                               "and TemporaryDataWorkspace must be the same.");
+          break;
+        }
+      }
+    } else { // accumulation workspaces have different number of dimensions
+      errorMessage.emplace(
+          "TemporaryDataWorkspace",
+          "TemporaryNormalizationWorkspace and TemporaryDataWorkspace "
+          "do not have the same number of dimensions");
+    }
+  }
+
   return errorMessage;
 }
 
@@ -471,7 +514,23 @@ void MDNorm::exec() {
 }
 
 /**
- *
+ * Get the dimension name when not using reciprocal lattice units.
+ * @param i - axis number to return axis name for.  Can be 0, 1, or 2.
+ * @return string containing the name
+ */
+std::string MDNorm::QDimensionNameQSample(int i) {
+  if (i == 0)
+    return std::string("Q_sample_x");
+  else if (i == 1)
+    return std::string("Q_sample_y");
+  else if (i == 2)
+    return std::string("Q_sample_z");
+  else
+    throw std::invalid_argument(
+        "Index must be 0, 1, or 2 for QDimensionNameQSample");
+}
+/**
+ * Get the dimension name when using reciprocal lattice units.
  * @param projection - a vector with 3 elements, containing a
  *   description of the projection ("1,-1,0" for "[H,-H,0]")
  * @return string containing the name
@@ -679,6 +738,186 @@ void MDNorm::createNormalizationWS(
 }
 
 /**
+ * Validates the TemporaryDataWorkspace has the same binning
+ * as the input binning parameters
+ * @param parameters :: map of binning parameters
+ * @param tempDataWS :: the workspace weare using to aggregate from
+ * @return :: bool - true means the binning is correct to aggreagete using
+ * tempDataWS
+ */
+void MDNorm::validateBinningForTemporaryDataWorkspace(
+    const std::map<std::string, std::string> &parameters,
+    const Mantid::API::IMDHistoWorkspace_sptr tempDataWS) {
+
+  // parse the paramters map and get extents from tempDataWS
+  const std::string numBinsStr = parameters.at("OutputBins");
+  const std::string extentsStr = parameters.at("OutputExtents");
+  const std::vector<size_t> numBins =
+      VectorHelper::splitStringIntoVector<size_t>(numBinsStr);
+  const std::vector<double> extents =
+      VectorHelper::splitStringIntoVector<double>(extentsStr);
+
+  // make sure the number of dimensions is the same for both workspaces
+  size_t numDimsTemp = tempDataWS->getNumDims();
+  if ((numBins.size() != numDimsTemp) || (extents.size() != numDimsTemp * 2)) {
+    std::stringstream errorMessage;
+    errorMessage << "The number of dimensions in the output and ";
+    errorMessage << "TemporaryDataWorkspace are not the same.";
+    throw(std::invalid_argument(errorMessage.str()));
+  }
+
+  // compare the extents and number of bins
+  for (size_t i = 0; i < numDimsTemp; i++) {
+    auto ax = tempDataWS->getDimension(i);
+    if (numBins[i] != ax->getNBins()) {
+      std::stringstream errorMessage;
+      errorMessage << "The number of bins output and number of bins in ";
+      errorMessage << "TemporaryDataWorkspace are not the same along ";
+      errorMessage << "dimension " << i;
+      throw(std::invalid_argument(errorMessage.str()));
+    }
+    if (std::abs(extents[2 * i] - ax->getMinimum()) > 1.e-5) {
+      std::stringstream errorMessage;
+      errorMessage << "The minimum binning value for the output and ";
+      errorMessage << "TemporaryDataWorkspace are not the same along ";
+      errorMessage << "dimension " << i;
+      throw(std::invalid_argument(errorMessage.str()));
+    }
+    if (std::abs(extents[2 * i + 1] - ax->getMaximum()) > 1.e-5) {
+      std::stringstream errorMessage;
+      errorMessage << "The maximum binning value for the output and ";
+      errorMessage << "TemporaryDataWorkspace are not the same along ";
+      errorMessage << "dimension " << i;
+      throw(std::invalid_argument(errorMessage.str()));
+    }
+  }
+
+  // sort out which axes are dimensional and check names
+  size_t parametersIndex = 0;
+  std::vector<size_t> dimensionIndex(
+      numDimsTemp + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
+  std::vector<size_t>
+      nonDimensionIndex; // stores non-h,k,l or non-Qx,Qy,Qz dimensions
+  for (auto const &p : parameters) {
+    auto key = p.first;
+    auto value = p.second;
+    // value starts with QDimension0, then other stuff
+    // do not use ==
+    if (value.find("QDimension0") != std::string::npos) {
+      dimensionIndex[0] = parametersIndex;
+      const std::string dimXName =
+          tempDataWS->getDimension(parametersIndex)->getName();
+      if (m_isRLU) { // hkl
+        if (dimXName != QDimensionName(m_Q0Basis)) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension0 Names: Output will be: "
+                       << QDimensionName(m_Q0Basis);
+          debugMessage << " TemporaryDataWorkspace: " << dimXName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      } else {
+        if (dimXName != QDimensionNameQSample(0)) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension0 Names: Output will be: "
+                       << QDimensionNameQSample(0);
+          debugMessage << " TemporaryDataWorkspace: " << dimXName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      }
+    } else if (value.find("QDimension1") != std::string::npos) {
+      dimensionIndex[1] = parametersIndex;
+      const std::string dimYName =
+          tempDataWS->getDimension(parametersIndex)->getName();
+      if (m_isRLU) { // hkl
+        if (dimYName != QDimensionName(m_Q1Basis)) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension1 Names: Output will be: "
+                       << QDimensionName(m_Q1Basis);
+          debugMessage << " TemporaryDataWorkspace: " << dimYName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      } else {
+        if (dimYName != QDimensionNameQSample(1)) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension1 Names: Output will be: "
+                       << QDimensionNameQSample(1);
+          debugMessage << " TemporaryDataWorkspace: " << dimYName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      }
+    } else if (value.find("QDimension2") != std::string::npos) {
+      dimensionIndex[2] = parametersIndex;
+      const std::string dimZName =
+          tempDataWS->getDimension(parametersIndex)->getName();
+      if (m_isRLU) { // hkl
+        if (dimZName != QDimensionName(m_Q2Basis)) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension2 Names: Output will be: "
+                       << QDimensionName(m_Q2Basis);
+          debugMessage << " TemporaryDataWorkspace: " << dimZName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      } else {
+        if (dimZName != QDimensionNameQSample(2)) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension2 Names: Output will be: "
+                       << QDimensionNameQSample(2);
+          debugMessage << " TemporaryDataWorkspace: " << dimZName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      }
+
+    } else if ((key != "OutputBins") && (key != "OutputExtents")) {
+      nonDimensionIndex.push_back(parametersIndex);
+    }
+    parametersIndex++;
+  }
+  for (auto &idx : dimensionIndex) {
+    if (idx > numDimsTemp)
+      throw(std::invalid_argument("Cannot find at least one of QDimension0, "
+                                  "QDimension1, or QDimension2"));
+  }
+
+  // make sure the names of non-directional dimensions are the same
+  if (!(nonDimensionIndex.empty())) {
+    for (auto &indexID : nonDimensionIndex) {
+      const std::string nameInput = m_inputWS->getDimension(indexID)->getName();
+      const std::string nameData = tempDataWS->getDimension(indexID)->getName();
+      if (nameInput != nameData) {
+        g_log.warning() << "Input: " << nameInput << " Temporary: " << nameData
+                        << std::endl;
+        throw(std::invalid_argument("TemporaryDataWorkspace does not have the "
+                                    "same dimension names as InputWorkspace."));
+      }
+    }
+  }
+}
+
+/**
  * Runs the BinMD algorithm on the input to provide the output workspace
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
@@ -689,6 +928,11 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
       this->getProperty("TemporaryDataWorkspace");
   Mantid::API::Workspace_sptr outputWS;
   std::map<std::string, std::string> parameters = getBinParameters();
+
+  // check that our input matches the temporary workspaces
+  if (tempDataWS)
+    validateBinningForTemporaryDataWorkspace(parameters, tempDataWS);
+
   double soIndex = 0;
   std::vector<size_t> qDimensionIndices;
   for (auto so : symmetryOps) {
@@ -723,14 +967,15 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
     for (auto const &p : parameters) {
       auto key = p.first;
       auto value = p.second;
-
       std::stringstream basisVector;
       std::vector<double> projection(m_inputWS->getNumDims(), 0.);
+      // value is a string that can start with QDimension0, etc, but contain
+      // other stuff. Do not use ==
       if (value.find("QDimension0") != std::string::npos) {
         m_hIdx = qindex;
         if (!m_isRLU) {
           projection[0] = 1.;
-          basisVector << "Q_sample_x,A^{-1}";
+          basisVector << QDimensionNameQSample(0) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][0];
@@ -742,7 +987,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_kIdx = qindex;
         if (!m_isRLU) {
           projection[1] = 1.;
-          basisVector << "Q_sample_y,A^{-1}";
+          basisVector << QDimensionNameQSample(1) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][1];
@@ -754,7 +999,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_lIdx = qindex;
         if (!m_isRLU) {
           projection[2] = 1.;
-          basisVector << "Q_sample_z,A^{-1}";
+          basisVector << QDimensionNameQSample(2) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][2];
@@ -772,9 +1017,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         }
         value = basisVector.str();
       }
-      if (value.find("DeltaE") != std::string::npos) {
-        m_eIdx = qindex;
-      }
+
       g_log.debug() << "Binning parameter " << key << " value: " << value
                     << "\n";
       binMD->setPropertyValue(key, value);
@@ -950,8 +1193,8 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
   double progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
-      make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
-                                 0.3 + progStep * (1. + progIndex), ndets);
+      std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
+                                      0.3 + progStep * (1. + progIndex), ndets);
   bool safe = true;
   if (m_diffraction) {
     safe = Kernel::threadSafe(*integrFlux);

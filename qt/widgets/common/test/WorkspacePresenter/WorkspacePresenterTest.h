@@ -11,11 +11,11 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceDockMockObjects.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 
-#include <MantidAPI/AlgorithmManager.h>
-#include <MantidAPI/AnalysisDataService.h>
-#include <MantidAPI/FrameworkManager.h>
-#include <MantidAPI/WorkspaceGroup.h>
-#include <MantidTestHelpers/WorkspaceCreationHelper.h>
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <algorithm>
 #include <boost/make_shared.hpp>

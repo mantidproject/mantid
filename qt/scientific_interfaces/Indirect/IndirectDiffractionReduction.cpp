@@ -12,6 +12,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/MplCpp/Plot.h"
+#endif
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -26,6 +31,16 @@ Mantid::Kernel::Logger g_log("IndirectDiffractionReduction");
 std::string toStdString(const QString &qString) {
   return qString.toStdString();
 }
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+QStringList toQStringList(std::vector<std::string> const &input) {
+  QStringList output;
+  for (auto const &element : input)
+    output << QString::fromStdString(element);
+  return output;
+}
+#endif
+
 } // namespace
 
 DECLARE_SUBWINDOW(IndirectDiffractionReduction)
@@ -47,6 +62,7 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction() {
 void IndirectDiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
 
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
@@ -59,6 +75,11 @@ void IndirectDiffractionReduction::initLayout() {
           this,
           SLOT(instrumentSelected(const QString &, const QString &,
                                   const QString &)));
+
+  connect(m_uiForm.spSpecMin, SIGNAL(valueChanged(int)), this,
+          SLOT(validateSpectrumMin(int)));
+  connect(m_uiForm.spSpecMax, SIGNAL(valueChanged(int)), this,
+          SLOT(validateSpectrumMax(int)));
 
   // Update run button based on state of raw files field
   connectRunButtonValidation(m_uiForm.rfSampleFiles);
@@ -199,8 +220,8 @@ void IndirectDiffractionReduction::plotResults() {
   setPlotIsPlotting(true);
   const QString plotType = m_uiForm.cbPlotType->currentText();
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
-
   if (plotType == "Spectra" || plotType == "Both") {
     for (const auto &it : m_plotWorkspaces) {
       const auto workspaceExists =
@@ -224,8 +245,17 @@ void IndirectDiffractionReduction::plotResults() {
             "Workspace '" + it + "' not found\nUnable to plot workspace"));
     }
   }
-
   runPythonCode(pyInput);
+#else
+  if (plotType == "Spectra" || plotType == "Both") {
+    using MantidQt::Widgets::MplCpp::plot;
+    plot(m_plotWorkspaces, boost::none, std::vector<int>{0});
+  }
+  if (plotType == "Contour" || plotType == "Both") {
+    using MantidQt::Widgets::MplCpp::pcolormesh;
+    pcolormesh(toQStringList(m_plotWorkspaces));
+  }
+#endif
 
   setPlotIsPlotting(false);
 }
@@ -642,6 +672,11 @@ void IndirectDiffractionReduction::instrumentSelected(
   double specMin = instrument->getNumberParameter("spectra-min")[0];
   double specMax = instrument->getNumberParameter("spectra-max")[0];
 
+  m_uiForm.spSpecMin->setMinimum(static_cast<int>(specMin));
+  m_uiForm.spSpecMin->setMaximum(static_cast<int>(specMax));
+  m_uiForm.spSpecMax->setMinimum(static_cast<int>(specMin));
+  m_uiForm.spSpecMax->setMaximum(static_cast<int>(specMax));
+
   m_uiForm.spSpecMin->setValue(static_cast<int>(specMin));
   m_uiForm.spSpecMax->setValue(static_cast<int>(specMax));
 
@@ -703,6 +738,22 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.spSpecMin->setEnabled(true);
     m_uiForm.spSpecMax->setEnabled(true);
   }
+}
+
+void IndirectDiffractionReduction::validateSpectrumMin(int value) {
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpecMin);
+
+  auto const spectraMax = m_uiForm.spSpecMax->value();
+  if (value > spectraMax)
+    m_uiForm.spSpecMin->setValue(spectraMax);
+}
+
+void IndirectDiffractionReduction::validateSpectrumMax(int value) {
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpecMax);
+
+  auto const spectraMin = m_uiForm.spSpecMin->value();
+  if (value < spectraMin)
+    m_uiForm.spSpecMax->setValue(spectraMin);
 }
 
 std::string IndirectDiffractionReduction::documentationPage() const {

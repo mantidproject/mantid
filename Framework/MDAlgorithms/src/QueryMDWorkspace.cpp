@@ -66,26 +66,26 @@ whichNormalisation(const std::string &strNormalisation) {
 
 /// Initialise the properties
 void QueryMDWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The output Tableworkspace "
       "with columns containing key summary information about the MDWorkspace.");
 
   declareProperty("LimitRows", true,
                   "Limit the report output to a maximum number of rows");
 
-  declareProperty(make_unique<PropertyWithValue<int>>(
+  declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "MaximumRows", 100000,
                       boost::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings(
-      "MaximumRows", make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
+  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
+                                         "LimitRows", IS_DEFAULT));
 
   std::vector<std::string> propOptions;
   propOptions.push_back(noNormalisationOption());
@@ -104,7 +104,7 @@ void QueryMDWorkspace::init() {
       "Output box coordinates in terms of original workspace coordinates");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "BoxDataTable", "", Direction::Output,
           Mantid::API::PropertyMode::Optional),
       "Optional output data table with MDEventWorkspace-specific box data.");

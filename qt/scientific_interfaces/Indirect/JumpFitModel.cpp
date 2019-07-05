@@ -189,8 +189,9 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
 
   const auto subworkspaces = subdivideWidthWorkspace(workspace, widthSpectra);
   const auto hwhmWorkspace = appendAll(subworkspaces, hwhmName);
-  const auto axis = workspace->getAxis(1)->clone(hwhmWorkspace.get());
-  hwhmWorkspace->replaceAxis(1, dynamic_cast<TextAxis *>(axis));
+  auto axis = dynamic_cast<TextAxis *>(
+      workspace->getAxis(1)->clone(hwhmWorkspace.get()));
+  hwhmWorkspace->replaceAxis(1, std::unique_ptr<TextAxis>(axis));
 
   deleteTemporaryWorkspaces(subworkspaces);
 
@@ -362,6 +363,8 @@ std::string JumpFitModel::singleFitOutputName(std::size_t index,
 }
 
 std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
+
+std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
 
 std::string JumpFitModel::constructOutputName() const {
   auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);

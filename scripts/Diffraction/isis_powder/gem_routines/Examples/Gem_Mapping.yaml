@@ -1,0 +1,137 @@
+56207-57783:
+  label: "cycle_11_4"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+    vanadium_run_numbers: "56224" #V
+    empty_run_numbers: "56225"
+
+64300-66000:
+  label: "cycle_13_3"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+    vanadium_run_numbers: "64399" #VNb
+    empty_run_numbers: "64398"
+
+84213-84272:
+  label: "cycle_17_2_700MeV"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+#    vanadium_run_numbers: "84258" #V
+    vanadium_run_numbers: "84246" #VNb
+    empty_run_numbers: "84247"
+
+  PDF:  # none collected for 700MeV proton beam energy
+    vanadium_run_numbers: "83883" #VNb
+    empty_run_numbers: "83884"
+
+
+
+83881-84212:
+  label: "cycle_17_3"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+#    vanadium_run_numbers: "83882" #V
+    vanadium_run_numbers: "83883" #VNb
+    empty_run_numbers: "83884"
+
+  PDF:    
+    vanadium_run_numbers: "83883" #VNb
+    empty_run_numbers: "83884"
+
+84275-84312:
+  label: "cycle_17_4"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+#    vanadium_run_numbers: "83882" #V
+    vanadium_run_numbers: "84288" #VNb
+    empty_run_numbers: "84278"
+
+  PDF:    
+    vanadium_run_numbers: "83883" #VNb
+    empty_run_numbers: "83884"
+
+84313-85335:
+  label: "cycle_18_1"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+#    vanadium_run_numbers: "83882" #V
+#    vanadium_run_numbers: "84732" #VNb
+#wk     vanadium_run_numbers: "84697-84702" #VNb Methane tests, 110K
+#wk     empty_run_numbers: "84731"
+     vanadium_run_numbers: "85105"
+     empty_run_numbers: "85107"
+
+85336-86000:
+  label: "cycle_18_2"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+#wk    vanadium_run_numbers: "84732" #VNb
+#wk    empty_run_numbers: "85107"
+    vanadium_run_numbers: "85590" #VNb
+    empty_run_numbers: "85591"
+
+#86001-86093:
+  label: "cycle_18_2"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+##wk    vanadium_run_numbers: "84732" #VNb
+##wk    empty_run_numbers: "85107"
+    vanadium_run_numbers: "86017" #VNb
+    empty_run_numbers: "86018"
+
+
+  PDF:    
+#    vanadium_run_numbers: "83883" #VNb
+#    empty_run_numbers: "83884"
+#    vanadium_run_numbers: "84856-84858" #VNb
+#    empty_run_numbers: "84859"
+#    vanadium_run_numbers: "85374" #VNb
+#    empty_run_numbers: "85359,85375"
+#    vanadium_run_numbers: "85710,85731,85734,85787,85822,85823,85828,85829,85910,85911" #VNb
+#    empty_run_numbers: "85711,85732,85824,85825,85832,85833,85912,85913"
+    vanadium_run_numbers: "85952" #VNb
+    empty_run_numbers: "85951"
+
+86095-86575:
+  label: "cycle_18_3"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+##wk    vanadium_run_numbers: "84732" #VNb
+##wk    empty_run_numbers: "85107"
+    vanadium_run_numbers: "86100" #VNb
+    empty_run_numbers: "86101"
+
+  PDF:   
+    vanadium_run_numbers: "86333,86344,86355" #VNb
+    empty_run_numbers: "86343,86354"
+
+86576-88000:
+  label: "cycle_18_4"
+  offset_file_name: "offsets_2011_cycle111b.cal"
+  Rietveld:
+    vanadium_run_numbers: "86576,86580" #VNb
+    empty_run_numbers: "86577"
+
+  PDF:   
+#    vanadium_run_numbers: "86581,86583,86584" #VNb
+#    empty_run_numbers: "86582,86585,86586"
+#    vanadium_run_numbers: "87154" #VNb
+#    empty_run_numbers: "87155"
+    vanadium_run_numbers: "87411" #VNb
+    empty_run_numbers: "87412"
+
+87567-90000:
+  label: "cycle_19_1"
+#  offset_file_name: "offsets_2011_cycle111b.cal"
+  offset_file_name: "offsets_2019_cycle191.cal"
+  Rietveld:
+    vanadium_run_numbers: "87568" #VNb
+    empty_run_numbers: "87569"
+
+  PDF:   
+#    vanadium_run_numbers: "86581,86583,86584" #VNb
+#    empty_run_numbers: "86582,86585,86586"
+#    vanadium_run_numbers: "87154" #VNb
+#    empty_run_numbers: "87155"
+    vanadium_run_numbers: "87573" #VNb
+    empty_run_numbers: "87574"

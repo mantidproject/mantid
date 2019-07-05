@@ -48,7 +48,7 @@ class SANSFileCheckingTest(unittest.TestCase):
             self.assertEqual(measurement_time, expected_time)
         else:
             print("Missing data files. Path to system test data needs to be set.")
-            self.assertTrue(False)
+            self.fail()
 
     def test_that_sans2D_nexus_file_with_date_is_evaluated_correctly(self):
         file_name = 'SANS2D00022048.nxs'
@@ -96,7 +96,7 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
             idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
         else:
             print("Missing data files. Path to system test data needs to be set.")
-            self.assertTrue(False)
+            self.fail()
         return idf_path_workspace
 
     def test_that_reducer_for_SANS2D_switches_to_correct_IDF_when_outdated(self):

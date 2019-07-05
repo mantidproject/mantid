@@ -14,6 +14,7 @@ from unittest import TestCase, main
 
 # third party imports
 import matplotlib
+
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
@@ -51,7 +52,8 @@ class FunctionsTest(TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            self.__class__._test_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
+            self.__class__._test_ws = WorkspaceFactory.Instance().create(
+                "Workspace2D", NVectors=2, YLength=5, XLength=5)
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
@@ -65,13 +67,13 @@ class FunctionsTest(TestCase):
         self.assertTrue(can_overplot()[0])
 
     def test_can_overplot_returns_false_for_active_patch_plot(self):
-        plt.pcolormesh(np.arange(9.).reshape(3,3))
+        plt.pcolormesh(np.arange(9.).reshape(3, 3))
         allowed, msg = can_overplot()
         self.assertFalse(allowed)
-        self.assertTrue(len(msg) > 0)
+        self.assertGreater(len(msg), 0)
 
     def test_current_figure_or_none_returns_none_if_no_figures_exist(self):
-        self.assertTrue(current_figure_or_none() is None)
+        self.assertEqual(current_figure_or_none(), None)
 
     def test_figure_title_with_single_string(self):
         self.assertEqual("test-1", figure_title("test", 1))
@@ -97,7 +99,7 @@ class FunctionsTest(TestCase):
         try:
             result_workspaces = workspace_names_dummy_func([ws_name1])
         except ValueError:
-            self.assertFalse(True, "Passing workspace names should not raise a value error.")
+            self.fail("Passing workspace names should not raise a value error.")
         else:
             # The list of workspace names we pass in should have been converted
             # to a list of workspaces
@@ -112,7 +114,6 @@ class FunctionsTest(TestCase):
         selection.wksp_indices = [0]
         get_spectra_selection_mock.return_value = selection
         plot_from_names([ws_name], errors=False, overplot=False)
-
         self.assertEqual(1, plot_mock.call_count)
 
     @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
@@ -148,14 +149,12 @@ class FunctionsTest(TestCase):
         ws_name = 'test_pcolormesh_from_names_calls_pcolormesh-1'
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         pcolormesh_from_names([ws_name])
-
         self.assertEqual(1, pcolormesh_mock.call_count)
 
     def test_pcolormesh_from_names(self):
         ws_name = 'test_pcolormesh_from_names-1'
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         fig = pcolormesh_from_names([ws_name])
-
         self.assertEqual(1, len(fig.gca().images))
 
     def test_pcolormesh_from_names_using_existing_figure(self):
@@ -163,7 +162,6 @@ class FunctionsTest(TestCase):
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         target_fig = plt.figure()
         fig = pcolormesh_from_names([ws_name], fig=target_fig)
-
         self.assertEqual(fig, target_fig)
         self.assertEqual(1, len(fig.gca().images))
 
@@ -211,12 +209,20 @@ class FunctionsTest(TestCase):
         self.assertIsInstance(mantid_ax, MantidAxes)
 
     def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars(self):
-        config['graph1d.autodistribution'] = 'Off'
-        self._compare_errorbar_labels_and_title()
+        auto_dist = config['graph1d.autodistribution']
+        try:
+            config['graph1d.autodistribution'] = 'Off'
+            self._compare_errorbar_labels_and_title()
+        finally:
+            config['graph1d.autodistribution'] = auto_dist
 
-    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_plot_as_dist(self):
-        config['graph1d.autodistribution'] = 'On'
-        self._compare_errorbar_labels_and_title()
+    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_normalize_by_bin_width(self):
+        auto_dist = config['graph1d.autodistribution']
+        try:
+            config['graph1d.autodistribution'] = 'On'
+            self._compare_errorbar_labels_and_title()
+        finally:
+            config['graph1d.autodistribution'] = auto_dist
 
     # ------------- Failure tests -------------
 
@@ -225,14 +231,14 @@ class FunctionsTest(TestCase):
         table_name = 'test_plot_from_names_with_non_plottable_workspaces_returns_None'
         AnalysisDataService.Instance().addOrReplace(table_name, table)
         result = plot_from_names([table_name], errors=False, overplot=False)
-        self.assertTrue(result is None)
+        self.assertEqual(result, None)
 
     def test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None(self):
         table = WorkspaceFactory.Instance().createTable()
         table_name = 'test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None'
         AnalysisDataService.Instance().addOrReplace(table_name, table)
         result = pcolormesh_from_names([table_name])
-        self.assertTrue(result is None)
+        self.assertEqual(result, None)
 
     def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
         ws = ["some_workspace", self._test_ws]

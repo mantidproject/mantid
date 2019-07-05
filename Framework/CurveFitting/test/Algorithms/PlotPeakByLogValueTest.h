@@ -247,7 +247,7 @@ public:
 
     std::vector<std::string> tnames = result->getColumnNames();
     TS_ASSERT_EQUALS(tnames.size(), 12);
-    TS_ASSERT_EQUALS(tnames[0], "Source name");
+    TS_ASSERT_EQUALS(tnames[0], "SourceName");
 
     TS_ASSERT_EQUALS(result->String(0, 0), "PlotPeakGroup_0");
     TS_ASSERT_EQUALS(result->String(1, 0), "PlotPeakGroup_1");
@@ -675,8 +675,8 @@ private:
     edges.push_back(0.0);
     edges.push_back(1.0);
     edges.push_back(5.0);
-    BinEdgeAxis *axis = new BinEdgeAxis(edges);
-    testWS->replaceAxis(1, axis);
+    auto axis = std::make_unique<BinEdgeAxis>(edges);
+    testWS->replaceAxis(1, std::move(axis));
 
     return testWS;
   }

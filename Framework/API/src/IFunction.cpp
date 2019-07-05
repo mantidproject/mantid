@@ -30,11 +30,10 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <algorithm>
 #include <limits>
@@ -72,7 +71,13 @@ IFunction::~IFunction() { m_attrs.clear(); }
  * Virtual copy constructor
  */
 boost::shared_ptr<IFunction> IFunction::clone() const {
-  return FunctionFactory::Instance().createInitialized(this->asString());
+  auto clonedFunction =
+      FunctionFactory::Instance().createInitialized(this->asString());
+  for (size_t i = 0; i < this->nParams(); i++) {
+    double error = this->getError(i);
+    clonedFunction->setError(i, error);
+  }
+  return clonedFunction;
 }
 
 /**
@@ -181,7 +186,7 @@ void IFunction::unfix(size_t i) {
  */
 void IFunction::tie(const std::string &parName, const std::string &expr,
                     bool isDefault) {
-  auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
+  auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());
     fix(getParameterIndex(*ti));

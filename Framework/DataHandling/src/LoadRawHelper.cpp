@@ -58,12 +58,12 @@ LoadRawHelper::~LoadRawHelper() {}
 /// Initialisation method.
 void LoadRawHelper::init() {
   const std::vector<std::string> exts{".raw", ".s*", ".add"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the RAW file to read, including its full or "
-                  "relative path. The file extension must be .raw or .RAW "
-                  "(N.B. case sensitive if running on Linux).");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the RAW file to read, including its full or "
+      "relative path. The file extension must be .raw or .RAW "
+      "(N.B. case sensitive if running on Linux).");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "
                   "the read-in data and stored in the Analysis Data Service. "
@@ -148,7 +148,7 @@ int LoadRawHelper::getNumberofTimeRegimes() {
  */
 ISISRAW2 &LoadRawHelper::isisRaw() const {
   if (!m_isis_raw) {
-    m_isis_raw = Kernel::make_unique<ISISRAW2>();
+    m_isis_raw = std::make_unique<ISISRAW2>();
   }
 
   return *m_isis_raw;
@@ -294,7 +294,7 @@ void LoadRawHelper::createMonitorWorkspace(
     // otherwise  set the workspace as "OutputWorkspace"
     if (nwsSpecs > 0) {
       std::string monitorwsName = wsName + "_monitors";
-      pAlg->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      pAlg->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
           "MonitorWorkspace", monitorwsName, Direction::Output));
       setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,
                            numberOfPeriods, true, pAlg);
@@ -350,7 +350,7 @@ void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,
     outputWorkspace = "OutputWorkspace";
   }
   outws = outputWorkspace + "_" + suffix.str();
-  pAlg->declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  pAlg->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       outws, wsName, Direction::Output));
   pAlg->setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
   grpws_sptr->addWorkspace(ws_sptr);
@@ -735,15 +735,16 @@ void LoadRawHelper::runLoadLog(const std::string &fileName,
       setChildStartProgress(progStart);
       setChildEndProgress(progEnd);
     }
-    // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+    // Now execute the Child Algorithm. Catch any error, but don't stop.
     try {
+      loadLog->setLogging(false);
       loadLog->execute();
-    } catch (std::exception &) {
-      g_log.error("Unable to successfully run LoadLog Child Algorithm");
-    }
+      if (!loadLog->isExecuted())
+        g_log.warning("Unable to successfully run LoadLog Child Algorithm");
 
-    if (!loadLog->isExecuted()) {
-      g_log.error("Unable to successfully run LoadLog Child Algorithm");
+    } catch (std::exception &ex) {
+      g_log.warning("Unable to successfully run LoadLog Child Algorithm: ");
+      g_log.warning(ex.what());
     }
   }
   // Make log creator object and add the run status log if we have the

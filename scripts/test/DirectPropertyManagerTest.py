@@ -87,11 +87,11 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(propman.van_rmm,50.9415,9)
         self.assertRaises(AttributeError,setattr,propman,'van_rmm',100)
 
-        self.assertTrue(propman.det_cal_file is None)
+        self.assertEqual(propman.det_cal_file, None)
         propman.det_cal_file = 'a_data_file.dat'
         self.assertEqual(propman.det_cal_file,'a_data_file.dat')
 
-        self.assertTrue(propman.map_file is not None, 'it is defined in IDF')
+        self.assertNotEqual(propman.map_file, None, 'it is defined in IDF')
         propman.map_file = 'a_map_file'
         self.assertEqual(propman.map_file,'a_map_file.map')
 
@@ -111,7 +111,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_hartmask_plus_or_only(self):
         propman = self.prop_man
 
-        self.assertTrue(propman.hard_mask_file is None)
+        self.assertEqual(propman.hard_mask_file, None)
         propman.hard_mask_file = 'a_mask_file'
         self.assertEqual(propman.hard_mask_file,'a_mask_file.msk')
 
@@ -122,18 +122,18 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_spectra_to_mon(self):
         propman = self.prop_man
 
-        self.assertTrue(propman.spectra_to_monitors_list is None)
+        self.assertEqual(propman.spectra_to_monitors_list, None)
 
         propman.spectra_to_monitors_list = 35
         self.assertTrue(isinstance(propman.spectra_to_monitors_list,list))
         self.assertEqual(35,propman.spectra_to_monitors_list[0])
 
         propman.spectra_to_monitors_list = None
-        self.assertTrue(propman.spectra_to_monitors_list is None)
+        self.assertEqual(propman.spectra_to_monitors_list, None)
         propman.spectra_to_monitors_list = 'None'
-        self.assertTrue(propman.spectra_to_monitors_list is None)
+        self.assertEqual(propman.spectra_to_monitors_list, None)
         propman.spectra_to_monitors_list = []
-        self.assertTrue(propman.spectra_to_monitors_list is None)
+        self.assertEqual(propman.spectra_to_monitors_list, None)
 
         propman.spectra_to_monitors_list = '467'
         self.assertEqual(467,propman.spectra_to_monitors_list[0])
@@ -256,10 +256,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = self.prop_man
 
         formats = propman.save_format
-        self.assertTrue(len(formats) == 0)
+        self.assertEqual(len(formats),  0)
 
         propman.save_format = 'unknown'
-        self.assertTrue(len(propman.save_format) == 0)
+        self.assertEqual(len(propman.save_format),  0)
 
         propman.save_format = '.spe'
         formats = propman.save_format
@@ -273,7 +273,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
         propman.save_format = ''
-        self.assertTrue(len(propman.save_format) == 0)
+        self.assertEqual(len(propman.save_format),  0)
 
         propman.save_format = ['nxspe','.nxs']
         formats = propman.save_format
@@ -281,7 +281,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('nxspe' in formats)
 
         propman.save_format = None
-        self.assertTrue(len(propman.save_format) == 0)
+        self.assertEqual(len(propman.save_format),  0)
         propman.save_format = 'spe,.nxs'
         formats = propman.save_format
         self.assertEqual(len(propman.save_format),2)
@@ -293,7 +293,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(propman.save_format),3)
 
         propman.save_format = 'None'
-        self.assertTrue(len(propman.save_format) == 0)
+        self.assertEqual(len(propman.save_format),  0)
 
         propman.save_format = ('spe','nxspe')
         self.assertEqual(len(propman.save_format),2)
@@ -347,7 +347,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(logs[0],'wccr')
         self.assertEqual(logs[1],'Rot')
 
-        self.assertTrue(propman.motor_offset is None)
+        self.assertEqual(propman.motor_offset, None)
 
         sample_ws = CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
                                            NumEvents=10,XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
@@ -391,7 +391,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_diag_spectra(self):
         propman = self.prop_man
 
-        self.assertTrue(propman.diag_spectra is None)
+        self.assertEqual(propman.diag_spectra, None)
 
         propman.diag_spectra = '(19,299);(399,500)'
         spectra = propman.diag_spectra
@@ -916,7 +916,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.hardmaskOnly = 'None'
         self.assertFalse(propman.use_hard_mask_only)
         self.assertTrue(propman.run_diagnostics)
-        self.assertTrue(propman.hard_mask_file is None)
+        self.assertEqual(propman.hard_mask_file, None)
 
     def test_hadmask_options_locked(self):
         #
@@ -1043,17 +1043,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_multirep_tof_specta_list(self):
         propman = self.prop_man
         sp = propman.multirep_tof_specta_list
-        self.assertTrue(len(sp) == 2)
+        self.assertEqual(len(sp),  2)
         self.assertEqual(sp[0],5)
 
         propman.multirep_tof_specta_list = '10'
         sp = propman.multirep_tof_specta_list
-        self.assertTrue(len(sp) == 1)
+        self.assertEqual(len(sp),  1)
         self.assertEqual(sp[0],10)
 
         propman.multirep_tof_specta_list = '10,11,13,15'
         sp = propman.multirep_tof_specta_list
-        self.assertTrue(len(sp) == 4)
+        self.assertEqual(len(sp),  4)
         self.assertEqual(sp[3],15)
 
     def test_mono_correction_factor(self):
@@ -1064,21 +1064,21 @@ class DirectPropertyManagerTest(unittest.TestCase):
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(11015)
 
 
-        self.assertTrue(propman.mono_correction_factor is None)
+        self.assertEqual(propman.mono_correction_factor, None)
         propman.mono_correction_factor = 66.
         self.assertAlmostEqual(propman.mono_correction_factor,66)
 
-        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+        self.assertEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman), None)
         PropertyManager.mono_correction_factor.set_val_to_cash(propman,100)
         self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman),100)
 
         PropertyManager.incident_energy.next()
-        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+        self.assertEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman), None)
         PropertyManager.mono_correction_factor.set_val_to_cash(propman,50)
         self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman),50)
 
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(11060)
-        self.assertTrue(PropertyManager.mono_correction_factor.get_val_from_cash(propman) is None)
+        self.assertEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman), None)
 
     def test_mono_file_properties(self):
         propman = self.prop_man

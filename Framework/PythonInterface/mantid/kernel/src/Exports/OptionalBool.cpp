@@ -80,11 +80,11 @@ public:
 
     auto optBool = fromPyObj(value);
     if (isNone(validator)) {
-      return Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
-          name, optBool, direction);
+      return std::make_unique<PropertyWithValue<OptionalBool>>(name, optBool,
+                                                               direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      return Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
+      return std::make_unique<PropertyWithValue<OptionalBool>>(
           name, optBool, propValidator->clone(), direction);
     }
   }

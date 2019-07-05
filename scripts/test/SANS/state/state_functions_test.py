@@ -64,8 +64,8 @@ class StateFunctionsTest(unittest.TestCase):
         expected_text = "var1: 12\n" \
                         "var2: test\n" \
                         "" + instruction
-        self.assertTrue(list(val_message.keys())[0] == error_message)
-        self.assertTrue(val_message[error_message] == expected_text)
+        self.assertEqual(list(val_message.keys())[0],  error_message)
+        self.assertEqual(val_message[error_message],  expected_text)
 
 
 if __name__ == '__main__':

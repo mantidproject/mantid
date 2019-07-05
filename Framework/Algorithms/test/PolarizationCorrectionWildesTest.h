@@ -614,12 +614,12 @@ public:
     AnalysisDataService::Instance().addOrReplace(wsName, ws00);
     auto effWS = idealEfficiencies(edges);
     // Rename F1 to something else.
-    auto axis = make_unique<TextAxis>(4);
+    auto axis = std::make_unique<TextAxis>(4);
     axis->setLabel(0, "__wrong_histogram_label");
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
-    effWS->replaceAxis(1, axis.release());
+    effWS->replaceAxis(1, std::move(axis));
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -743,12 +743,12 @@ private:
     ws->mutableE(2) = 0.015;
     ws->mutableY(3) = 0.04;
     ws->mutableE(3) = 0.03;
-    auto axis = make_unique<TextAxis>(4);
+    auto axis = std::make_unique<TextAxis>(4);
     axis->setLabel(0, "F1");
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
-    ws->replaceAxis(1, axis.release());
+    ws->replaceAxis(1, std::move(axis));
     return ws;
   }
 
@@ -765,12 +765,12 @@ private:
         create<Workspace2D>(nHist, Histogram(edges, counts));
     ws->mutableY(0) = 1.;
     ws->mutableY(1) = 1.;
-    auto axis = make_unique<TextAxis>(4);
+    auto axis = std::make_unique<TextAxis>(4);
     axis->setLabel(0, "F1");
     axis->setLabel(1, "F2");
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
-    ws->replaceAxis(1, axis.release());
+    ws->replaceAxis(1, std::move(axis));
     return ws;
   }
 

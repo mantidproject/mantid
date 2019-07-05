@@ -19,11 +19,11 @@ class MuonDataContextTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
-        cls.load_result, cls.run_number, cls.filename = load_workspace_from_filename(cls.filepath)
+        cls.load_result, cls.run_number, cls.filename, _ = load_workspace_from_filename(cls.filepath)
 
     def setUp(self):
         self.loaded_data = MuonLoadData()
-        self.context = MuonDataContext(self.loaded_data)
+        self.context = MuonDataContext(load_data=self.loaded_data)
         self.context.instrument = 'EMU'
 
         self.loaded_data.add_data(workspace=self.load_result, run=[self.run_number], filename=self.filename, instrument='EMU')

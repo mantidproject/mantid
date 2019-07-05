@@ -7,6 +7,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGPRESENTER_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
 #include "DllConfig.h"
@@ -31,15 +32,13 @@ public:
   void initialize();
 
   /// @return Last loaded data workspace
-  Mantid::API::MatrixWorkspace_const_sptr loadedData() const {
-    return m_loadedData;
-  }
+  Mantid::API::MatrixWorkspace_sptr loadedData() const { return m_loadedData; }
 
   /// @return Loaded data as MatrixWorkspace_sptr
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
 
   /// Sets some data
-  void setData(Mantid::API::MatrixWorkspace_const_sptr data);
+  void setData(Mantid::API::MatrixWorkspace_sptr data);
 
 private slots:
   /// Check file range and call method to load new data
@@ -79,7 +78,7 @@ private:
   IALCDataLoadingView *const m_view;
 
   /// Last loaded data workspace
-  Mantid::API::MatrixWorkspace_const_sptr m_loadedData;
+  Mantid::API::MatrixWorkspace_sptr m_loadedData;
 
   /// Watch a directory for changes
   QFileSystemWatcher m_watcher;

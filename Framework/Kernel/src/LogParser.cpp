@@ -16,8 +16,8 @@
 #include <fstream>
 
 // constants for the new style icp event commands
-const char *START_COLLECTION = "START_COLLECTION";
-const char *STOP_COLLECTION = "STOP_COLLECTION";
+constexpr const char *START_COLLECTION = "START_COLLECTION";
+constexpr const char *STOP_COLLECTION = "STOP_COLLECTION";
 
 using std::size_t;
 
@@ -29,12 +29,6 @@ namespace {
 /// static logger
 Logger g_log("LogParser");
 } // namespace
-
-/// @returns the name of the log created that defines the status during a run
-const std::string LogParser::statusLogName() { return std::string("running"); }
-
-/// @returns the name of the log that contains all of the periods
-const std::string LogParser::periodsLogName() { return std::string("periods"); }
 
 /**  Reads in log data from a log file and stores them in a TimeSeriesProperty.
 @param logFName :: The name of the log file
@@ -282,7 +276,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
  */
 Kernel::Property *LogParser::createCurrentPeriodLog(const int &period) const {
   Kernel::PropertyWithValue<int> *currentPeriodProperty =
-      new Kernel::PropertyWithValue<int>("current_period", period);
+      new Kernel::PropertyWithValue<int>(currentPeriodLogName(), period);
   return currentPeriodProperty;
 }
 

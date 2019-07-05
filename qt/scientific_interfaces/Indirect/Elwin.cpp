@@ -373,7 +373,7 @@ void Elwin::updatePlotSpectrumOptions() {
 }
 
 void Elwin::updateAvailablePlotWorkspaces() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.cbPlotWorkspace);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.cbPlotWorkspace);
   m_uiForm.cbPlotWorkspace->clear();
   for (auto const &suffix : getOutputWorkspaceSuffices()) {
     auto const workspaceName = getOutputBasename().toStdString() + suffix;
@@ -387,7 +387,7 @@ QString Elwin::getPlotWorkspaceName() const {
 }
 
 void Elwin::setPlotSpectrumValue(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spPlotSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spPlotSpectrum);
   m_uiForm.spPlotSpectrum->setValue(value);
 }
 
@@ -572,8 +572,11 @@ void Elwin::updateIntegrationRange() {
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
-  if (prop == m_properties["BackgroundSubtraction"])
+  if (prop == m_properties["BackgroundSubtraction"]) {
     m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange")->setVisible(val);
+    m_properties["BackgroundStart"]->setEnabled(val);
+    m_properties["BackgroundEnd"]->setEnabled(val);
+  }
 }
 
 void Elwin::minChanged(double val) {

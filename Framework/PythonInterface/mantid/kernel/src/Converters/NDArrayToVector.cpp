@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
-#include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
+#include "MantidPythonInterface/core/Converters/NumpyFunctions.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/stl_iterator.hpp>
@@ -184,6 +184,7 @@ INSTANTIATE_TOVECTOR(long long)
 INSTANTIATE_TOVECTOR(unsigned int)
 INSTANTIATE_TOVECTOR(unsigned long)
 INSTANTIATE_TOVECTOR(unsigned long long)
+INSTANTIATE_TOVECTOR(float)
 INSTANTIATE_TOVECTOR(double)
 INSTANTIATE_TOVECTOR(bool)
 INSTANTIATE_TOVECTOR(std::string)

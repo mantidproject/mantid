@@ -73,7 +73,7 @@ units of :math:`\Delta E`. See the algorithm :ref:`ISISIndirectEnergyTransfer <a
 ISIS Energy Transfer Options
 ############################
 
-Run Files
+Input Runs
   Allows you to select the raw data files for an experiment. You can enter these
   either by clicking on the Browse button and selecting them, or entering the run
   numbers. Multiple files can be selected, multiple run numbers can be separated
@@ -107,7 +107,8 @@ Background Removal
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
-  been converted to Energy based on the temperature.
+  been converted to Energy based on the temperature. This is automatically loaded 
+  from the sample logs of the input file if available.
 
 Scale by Factor
   Gives the option to scale the output by a given factor.
@@ -161,7 +162,7 @@ The ISIS Energy Transfer tab operates on raw TOF data files. Before starting thi
 1. Set the **Instrument** to be OSIRIS, the **Analyser** to be graphite and the **Reflection** to
    be 002.
 
-2. In **Run Files**, enter the run numbers 104371-104375 and press enter.
+2. In **Input Runs**, enter the run numbers 104371-104375 and press enter.
 
 3. Change the **Spectra Min** and **Spectra Max** if you want to avoid some of the detectors. For
    the purposes of this demonstration, keep them at their default values.
@@ -361,7 +362,7 @@ The calibration file is normalised to an average of 1.
 ISIS Calibration Options
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Run No
+Input Runs
   This allows you to select a run for the function to use, either by selecting the
   *.raw* file with the Browse button or through entering the number in the box.
 
@@ -443,7 +444,7 @@ The ISIS Calibration tab operates on raw TOF data files. Before starting this wo
 1. Set the **Instrument** to be IRIS, the **Analyser** to be graphite and the **Reflection** to
    be 002.
 
-2. In **Run Files**, enter the run number 26176 and press enter.
+2. In **Input Runs**, enter the run number 26176 and press enter.
 
 3. Tick **Create RES File**. This will create a workspace ending in _res.
 
@@ -471,7 +472,7 @@ MODES. It is only available when the default facility is set to ISIS.
 ISIS Diagnostics Options
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Input Files
+Input Runs
   This allows you to select a run for the function to use, either by selecting the
   *.raw* file with the Browse button or through entering the number in the box.
   Multiple files can be selected, in the same manner as described for the Energy
@@ -523,7 +524,7 @@ The ISIS Diagnostics tab operates on raw TOF data files. Before starting this wo
 1. Set the **Instrument** to be IRIS, the **Analyser** to be graphite and the **Reflection** to
    be 002.
 
-2. In **Run Files**, enter the run number 26176 and press enter.
+2. In **Input Runs**, enter the run number 26176 and press enter.
 
 3. Tick **Use Calibration** and load the file named ``irs26173_graphite002_calib``.
 
@@ -558,10 +559,10 @@ Transmission Options
 ~~~~~~~~~~~~~~~~~~~~
 
 Sample
-  Allows the selection of a raw file or workspace to be used as the sample.
+  Allows the selection of a raw file to be used as the sample.
 
 Background
-  Allows the selection of a raw file or workspace to be used as the background.
+  Allows the selection of a raw file to be used as the background.
 
 Run
   Runs the processing configured on the current tab.

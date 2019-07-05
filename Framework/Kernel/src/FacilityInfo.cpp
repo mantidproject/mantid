@@ -18,7 +18,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>

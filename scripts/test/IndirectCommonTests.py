@@ -80,7 +80,7 @@ class IndirectCommonTests(unittest.TestCase):
     def test_getDefaultWorkingDirectory(self):
         config['defaultsave.directory'] = os.path.expanduser('~')
         workdir = indirect_common.getDefaultWorkingDirectory()
-        self.assertEquals(os.path.expanduser('~'), workdir,
+        self.assertEqual(os.path.expanduser('~'), workdir,
                           "The working directory does not match the expected one")
 
     def test_getDefaultWorkingDirectory_failure(self):
@@ -290,7 +290,7 @@ class IndirectCommonTests(unittest.TestCase):
     def assert_workspace_units_match_expected(self, expected_unit_ID, ws, axis_number=1):
         axis = mtd[ws].getAxis(axis_number)
         actual_unit_ID = axis.getUnit().unitID()
-        self.assertEquals(expected_unit_ID, actual_unit_ID)
+        self.assertEqual(expected_unit_ID, actual_unit_ID)
 
     def assert_has_spectrum_axis(self, ws, axis_number=1):
         axis = mtd[ws].getAxis(axis_number)
@@ -303,10 +303,10 @@ class IndirectCommonTests(unittest.TestCase):
     def assert_table_workspace_dimensions(self, workspace, expected_column_count, expected_row_count):
         actual_row_count = mtd[workspace].rowCount()
         actual_column_count = mtd[workspace].columnCount()
-        self.assertEquals(expected_row_count, actual_row_count,
+        self.assertEqual(expected_row_count, actual_row_count,
                           "Number of rows does not match expected (%d != %d)"
                           % (expected_row_count, actual_row_count))
-        self.assertEquals(expected_column_count, actual_column_count,
+        self.assertEqual(expected_column_count, actual_column_count,
                           "Number of columns does not match expected (%d != %d)"
                           % (expected_column_count, actual_column_count))
 

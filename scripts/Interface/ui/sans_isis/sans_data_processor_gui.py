@@ -20,6 +20,7 @@ from six import with_metaclass
 from reduction_gui.reduction.scripter import execute_script
 from mantid.kernel import (Logger)
 from mantidqt import icons
+from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
@@ -109,6 +110,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_reduction_mode_selection_has_changed(self, selection):
+            pass
+
+        @abstractmethod
         def on_mask_file_add(self):
             pass
 
@@ -184,10 +189,6 @@ class SANSDataProcessorGui(QMainWindow,
         def on_save_other(self):
             pass
 
-        @abstractmethod
-        def on_compatibility_unchecked(self):
-            pass
-
     def __init__(self):
         """
         Initialise the interface
@@ -223,8 +224,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.copy_button.setIcon(icons.get_icon("mdi.content-copy"))
         self.cut_button.setIcon(icons.get_icon("mdi.content-cut"))
         self.erase_button.setIcon(icons.get_icon("mdi.eraser"))
-        self.delete_row_button.setIcon(icons.get_icon("mdi.trash-can"))
-        self.insert_row_button.setIcon(icons.get_icon("mdi.table"))
+        self.delete_row_button.setIcon(icons.get_icon("mdi.table-row-remove"))
+        self.insert_row_button.setIcon(icons.get_icon("mdi.table-row-plus-after"))
         self.export_table_button.setIcon(icons.get_icon("mdi.file-export"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
@@ -286,7 +287,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
 
-        runs_icon = icons.get_icon("mdi.play-circle-outline")
+        runs_icon = icons.get_icon("mdi.play")
         _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
         settings_icon = icons.get_icon("mdi.settings")
@@ -295,10 +296,10 @@ class SANSDataProcessorGui(QMainWindow,
         centre_icon = icons.get_icon("mdi.adjust")
         _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon = icons.get_icon("mdi.plus-circle-outline")
+        add_runs_page_icon = icons.get_icon("mdi.plus")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon = icons.get_icon("mdi.help-circle-outline")
+        diagnostic_icon = icons.get_icon("mdi.stethoscope")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
@@ -449,6 +450,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
         self.table_signals.cellTextChanged.connect(self._data_changed)
         self.table_signals.rowInserted.connect(self._row_inserted)
+        self.table_signals.appendAndEditAtChildRowRequested.connect(self._append_and_edit_at_child_row_requested)
+        self.table_signals.appendAndEditAtRowBelowRequested.connect(self._append_and_edit_at_row_below_requested)
+        self.table_signals.editAtRowAboveRequested.connect(self._edit_at_row_above_requested)
         self.table_signals.removeRowsRequested.connect(self._remove_rows_requested)
         self.table_signals.copyRowsRequested.connect(self._copy_rows_requested)
         self.table_signals.pasteRowsRequested.connect(self._paste_rows_requested)
@@ -511,6 +515,15 @@ class SANSDataProcessorGui(QMainWindow,
             row = self.get_row(row_location)
             self._call_settings_listeners(lambda listener: listener.on_row_inserted(index, row))
 
+    def _append_and_edit_at_child_row_requested(self):
+        self.data_processor_table.appendAndEditAtChildRow()
+
+    def _append_and_edit_at_row_below_requested(self):
+        self.data_processor_table.appendAndEditAtRowBelow()
+
+    def _edit_at_row_above_requested(self):
+        self.data_processor_table.editAtRowAbove()
+
     def _remove_rows_requested(self, rows):
         rows = [item.rowRelativeToParent() for item in rows]
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
@@ -540,12 +553,12 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_save_other_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_save_other())
 
-    def _on_compatibility_unchecked(self):
-        self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
-
     def _on_help_button_clicked(self):
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
+        else:
+            InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
+                                            'interfaces/ISIS%20SANS%20v2.html')
 
     def _on_output_mode_clicked(self):
         """This method is called when an output mode is clicked on the gui"""
@@ -734,6 +747,7 @@ class SANSDataProcessorGui(QMainWindow,
         selection = self.reduction_mode_combo_box.currentText()
         is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
         self.merged_settings.setEnabled(is_merged)
+        self._call_settings_listeners(lambda listener: listener.on_reduction_mode_selection_has_changed(selection))
 
     def _on_q_resolution_shape_has_changed(self):
         shape_selection = self.q_resolution_shape_combo_box.currentIndex()
@@ -1091,8 +1105,14 @@ class SANSDataProcessorGui(QMainWindow,
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
-        if not value:
-            self._on_compatibility_unchecked()
+
+    @property
+    def event_slice_optimisation(self):
+        return self.event_slice_optimisation_checkbox.isChecked()
+
+    @event_slice_optimisation.setter
+    def event_slice_optimisation(self, value):
+        self.event_slice_optimisation_checkbox.setChecked(value)
 
     @property
     def instrument(self):

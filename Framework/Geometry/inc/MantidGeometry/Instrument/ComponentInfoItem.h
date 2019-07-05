@@ -7,8 +7,8 @@
 #ifndef MANTID_GEOMETRY_COMPONENTINFOITEM_H_
 #define MANTID_GEOMETRY_COMPONENTINFOITEM_H_
 
-#include <MantidKernel/Quat.h>
-#include <MantidKernel/V3D.h>
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include <vector>
 
 namespace Mantid {

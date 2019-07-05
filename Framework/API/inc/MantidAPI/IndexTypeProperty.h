@@ -8,7 +8,7 @@
 #define MANTID_API_INDEXTYPEPROPERTY_H_
 
 #include "MantidAPI/DllConfig.h"
-#include <MantidKernel/PropertyWithValue.h>
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace API {

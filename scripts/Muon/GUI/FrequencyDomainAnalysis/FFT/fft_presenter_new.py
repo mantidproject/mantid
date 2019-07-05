@@ -184,8 +184,11 @@ class FFTPresenter(object):
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
         run = re.search('[0-9]+', input_workspace).group()
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
-        group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument)
+        group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument, self.load.workspace_suffix)
         directory = get_base_data_directory(self.load, run) + group
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(fft_workspace, directory + fft_workspace_name)
         muon_workspace_wrapper.show()
+
+    def update_view_from_model(self):
+        self.getWorkspaceNames()

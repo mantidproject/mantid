@@ -46,12 +46,12 @@ const std::string PeakIntensityVsRadius::category() const {
 /** Initialize the algorithm's properties.
  */
 void PeakIntensityVsRadius::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace containing the SCD data.");
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "",
-                                                     Direction::Input),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "",
+                                                          Direction::Input),
       "The list of peaks to integrate, matching the InputWorkspace.");
 
   declareProperty("RadiusStart", 0.0, "Radius at which to start integrating.");
@@ -91,12 +91,12 @@ void PeakIntensityVsRadius::init() {
   setPropertyGroup("BackgroundInnerRadius", "Fixed Background Shell");
   setPropertyGroup("BackgroundOuterRadius", "Fixed Background Shell");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace2D containing intensity vs radius.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace2",
-                                                   "NumberPeaksIntegrated",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace2",
+                                                        "NumberPeaksIntegrated",
+                                                        Direction::Output),
                   "An output workspace2D containing number of peaks at levels "
                   "of I/sigI vs radius.");
 }
@@ -143,23 +143,23 @@ void PeakIntensityVsRadius::exec() {
       "Workspace2D", peaksWS->getNumberPeaks(), NumSteps, NumSteps);
 
   // Create a text axis for axis(1), with H K L of each peak
-  auto ax = new TextAxis(outWS->getNumberHistograms());
+  auto ax = std::make_unique<TextAxis>(outWS->getNumberHistograms());
   for (int i = 0; i < peaksWS->getNumberPeaks(); i++) {
     V3D hkl = peaksWS->getPeak(i).getHKL();
     hkl.round(); // Round HKL to make the string prettier
     ax->setLabel(size_t(i), hkl.toString());
   }
-  outWS->replaceAxis(1, ax);
+  outWS->replaceAxis(1, std::move(ax));
 
   MatrixWorkspace_sptr outWS2 =
       WorkspaceFactory::Instance().create("Workspace2D", 4, NumSteps, NumSteps);
   // Create a text axis for axis(1), with H K L of each peak
-  auto ax2 = new TextAxis(outWS2->getNumberHistograms());
+  auto ax2 = std::make_unique<TextAxis>(outWS2->getNumberHistograms());
   ax2->setLabel(0, "I/SigI=2");
   ax2->setLabel(1, "I/SigI=3");
   ax2->setLabel(2, "I/SigI=5");
   ax2->setLabel(3, "I/SigI=10");
-  outWS2->replaceAxis(1, ax2);
+  outWS2->replaceAxis(1, std::move(ax2));
 
   Progress prog(this, 0.0, 1.0, NumSteps);
   double progStep = 1.0 / double(NumSteps);

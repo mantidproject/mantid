@@ -33,7 +33,7 @@ DECLARE_ALGORITHM(FindPeakBackground)
 /** Define properties
  */
 void FindPeakBackground::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "Anonymous", Direction::Input),
                   "Name of input MatrixWorkspace that contains peaks.");
 
@@ -46,7 +46,7 @@ void FindPeakBackground::init() {
       "Multiplier of standard deviations of the variance for convergence of "
       "peak elimination.  Default is 1.0. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("FitWindow"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("FitWindow"),
                   "Optional: enter a comma-separated list of the minimum and "
                   "maximum X-positions of window to fit.  "
                   "The window is the same for all indices in workspace. The "
@@ -59,7 +59,7 @@ void FindPeakBackground::init() {
 
   // The found peak in a table
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "The name of the TableWorkspace in which to store the background found "
       "for each index.  "

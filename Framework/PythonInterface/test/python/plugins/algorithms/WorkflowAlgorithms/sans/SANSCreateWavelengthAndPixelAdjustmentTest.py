@@ -129,12 +129,12 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         wavelength_adjustment, pixel_adjustment = SANSCalculateTransmissionTest._run_test(transmission_workspace,
                                                                                           norm_workspace, state, True)
         # Assert
-        self.assertTrue(pixel_adjustment is None)
-        self.assertTrue(wavelength_adjustment.getNumberHistograms() == 1)
+        self.assertEqual(pixel_adjustment, None)
+        self.assertEqual(wavelength_adjustment.getNumberHistograms(),  1)
         expected = np.array(data_trans)*np.array(data_norm)
         data_y = wavelength_adjustment.dataY(0)
         for e1, e2, in zip(expected, data_y):
-            self.assertTrue(e1 == e2)
+            self.assertEqual(e1,  e2)
 
     def test_that_gets_adjustment_workspace_if_files_are_specified(self):
         # Arrange
@@ -155,12 +155,12 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         wavelength_adjustment, pixel_adjustment = SANSCalculateTransmissionTest._run_test(transmission_workspace,
                                                                                           norm_workspace, state, False)
         # Assert
-        self.assertTrue(pixel_adjustment is None)
-        self.assertTrue(wavelength_adjustment.getNumberHistograms() == 1)
+        self.assertEqual(pixel_adjustment, None)
+        self.assertEqual(wavelength_adjustment.getNumberHistograms(),  1)
         expected = np.array(data_trans)*np.array(data_norm)*np.array(expected_direct_file_workspace)
         data_y = wavelength_adjustment.dataY(0)
         for e1, e2, in zip(expected, data_y):
-            self.assertTrue(e1 == e2)
+            self.assertEqual(e1,  e2)
 
         # Clean up
         SANSCalculateTransmissionTest._remove_test_file(direct_file_name)

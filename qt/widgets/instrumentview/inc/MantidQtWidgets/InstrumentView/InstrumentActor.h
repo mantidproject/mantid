@@ -163,7 +163,10 @@ public:
   double getIntegratedCounts(size_t index) const;
   /// Sum the counts in detectors
   void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x,
-                    std::vector<double> &y, size_t size = 0) const;
+                    std::vector<double> &y, size_t size) const;
+  /// Sum the counts in detectors.
+  void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x,
+                    std::vector<double> &y) const;
   /// Calc indexes for min and max bin values
   void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const;
 

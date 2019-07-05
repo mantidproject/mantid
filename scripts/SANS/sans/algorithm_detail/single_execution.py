@@ -5,16 +5,120 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import (create_child_algorithm,
-                                           write_hash_into_reduced_can_workspace,
-                                           get_reduced_can_workspace_from_ads, get_transmission_workspaces_from_ads)
-from sans.common.enums import (ISISReductionMode, DetectorType, DataType, OutputParts, TransmissionType)
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
-from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle, OutputTransmissionBundle)
-from mantid.kernel import mpisetup
+
 import sys
+
+from mantid.kernel import mpisetup
+from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle,
+                                           OutputPartsBundle, OutputTransmissionBundle)
+from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
+from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DataType, DetectorType, ISISReductionMode, OutputParts, TransmissionType)
+from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
+                                           get_transmission_workspaces_from_ads,
+                                           write_hash_into_reduced_can_workspace)
+
+
+def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
+    """
+    This function runs the initial core reduction for event slice data. This is essentially half
+    a reduction (either sample or can), and is run before event slicing has been performed.
+
+    :param reduction_alg: a handle to the initial event slice reduction algorithm.
+    :param reduction_setting_bundle: a ReductionSettingBundle tuple
+    :return: a EventSliceReductionSettingBundle tuple
+    """
+    # Get component to reduce
+    component = get_component_to_reduce(reduction_setting_bundle)
+    # Set the properties on the reduction algorithms
+    serialized_state = reduction_setting_bundle.state.property_manager
+    reduction_alg.setProperty("SANSState", serialized_state)
+    reduction_alg.setProperty("Component", component)
+    reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
+    reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
+    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+
+    reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+    reduction_alg.setProperty("OutputMonitorWorkspace", EMPTY_NAME)
+
+    # Run the reduction core
+    reduction_alg.execute()
+
+    # Get the results
+    output_workspace = reduction_alg.getProperty("OutputWorkspace").value
+    mask_workspace = reduction_alg.getProperty("DummyMaskWorkspace").value
+    output_monitor_workspace = reduction_alg.getProperty("OutputMonitorWorkspace").value
+
+    return EventSliceSettingBundle(state=reduction_setting_bundle.state,
+                                   data_type=reduction_setting_bundle.data_type,
+                                   reduction_mode=reduction_setting_bundle.reduction_mode,
+                                   output_parts=reduction_setting_bundle.output_parts,
+                                   scatter_workspace=output_workspace,
+                                   dummy_mask_workspace=mask_workspace,
+                                   scatter_monitor_workspace=output_monitor_workspace,
+                                   direct_workspace=reduction_setting_bundle.direct_workspace,
+                                   transmission_workspace=reduction_setting_bundle.transmission_workspace)
+
+
+def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
+    """
+    This function runs a core reduction for event slice data. This reduction slices by event time and converts to q.
+    All other operations, such as moving and converting to histogram, have been performed before the event slicing.
+
+    :param reduction_alg: a handle to the reduction algorithm.
+    :param reduction_setting_bundle: a ReductionSettingBundle tuple
+    :return: an OutputBundle and an OutputPartsBundle
+    """
+
+    # Get component to reduce
+    component = get_component_to_reduce(reduction_setting_bundle)
+    # Set the properties on the reduction algorithms
+    serialized_state = reduction_setting_bundle.state.property_manager
+    reduction_alg.setProperty("SANSState", serialized_state)
+    reduction_alg.setProperty("Component", component)
+    reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
+    reduction_alg.setProperty("DirectWorkspace", reduction_setting_bundle.direct_workspace)
+    reduction_alg.setProperty("TransmissionWorkspace", reduction_setting_bundle.transmission_workspace)
+    reduction_alg.setProperty("DummyMaskWorkspace", reduction_setting_bundle.dummy_mask_workspace)
+    reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
+
+    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+
+    reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+    reduction_alg.setProperty("SumOfCounts", EMPTY_NAME)
+    reduction_alg.setProperty("SumOfNormFactors", EMPTY_NAME)
+
+    # Run the reduction core
+    reduction_alg.execute()
+
+    # Get the results
+    output_workspace = reduction_alg.getProperty("OutputWorkspace").value
+    output_workspace_count = reduction_alg.getProperty("SumOfCounts").value
+    output_workspace_norm = reduction_alg.getProperty("SumOfNormFactors").value
+    output_calculated_transmission_workspace = reduction_alg.getProperty("CalculatedTransmissionWorkspace").value
+    output_unfitted_transmission_workspace = reduction_alg.getProperty("UnfittedTransmissionWorkspace").value
+
+    # Pull the result out of the workspace
+    output_bundle = OutputBundle(state=reduction_setting_bundle.state,
+                                 data_type=reduction_setting_bundle.data_type,
+                                 reduction_mode=reduction_setting_bundle.reduction_mode,
+                                 output_workspace=output_workspace)
+
+    output_parts_bundle = OutputPartsBundle(state=reduction_setting_bundle.state,
+                                            data_type=reduction_setting_bundle.data_type,
+                                            reduction_mode=reduction_setting_bundle.reduction_mode,
+                                            output_workspace_count=output_workspace_count,
+                                            output_workspace_norm=output_workspace_norm)
+
+    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state,
+                                                          data_type=reduction_setting_bundle.data_type,
+                                                          calculated_transmission_workspace=
+                                                          output_calculated_transmission_workspace,
+                                                          unfitted_transmission_workspace=
+                                                          output_unfitted_transmission_workspace,
+                                                          )
+    return output_bundle, output_parts_bundle, output_transmission_bundle
 
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
@@ -208,13 +312,14 @@ def get_component_to_reduce(reduction_setting_bundle):
     return reduction_mode_setting
 
 
-def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
+def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_optimisation=False):
     """
     Check if the state can reduction already exists, and if so, use it else reduce it and add it to the ADS.
 
-    @param reduction_alg: a handle to the SANSReductionCore algorithm
-    @param reduction_setting_bundle: a ReductionSettingBundle tuple.
-    @return: a reduced workspace, a partial output workspace for the counts, a partial workspace for the normalization.
+    :param reduction_alg: a handle to the SANSReductionCore algorithm
+    :param reduction_setting_bundle: a ReductionSettingBundle tuple.
+    :param event_slice_optimisation: An optional bool. If true then run run_core_event_slice_reduction, else run_core_reduction.
+    :return: a reduced workspace, a partial output workspace for the counts, a partial workspace for the normalization.
     """
     state = reduction_setting_bundle.state
     output_parts = reduction_setting_bundle.output_parts
@@ -262,8 +367,12 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
 
     if must_reload:
         # if output_bundle.output_workspace is None or partial_output_require_reload:
-        output_bundle, output_parts_bundle, output_transmission_bundle = run_core_reduction(reduction_alg,
-                                                                                            reduction_setting_bundle)
+        if not event_slice_optimisation:
+            output_bundle, output_parts_bundle, \
+                output_transmission_bundle = run_core_reduction(reduction_alg, reduction_setting_bundle)
+        else:
+            output_bundle, output_parts_bundle, \
+                output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle)
 
         # Now we need to tag the workspaces and add it to the ADS
         if output_bundle.output_workspace is not None:

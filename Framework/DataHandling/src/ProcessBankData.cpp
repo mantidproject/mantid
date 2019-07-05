@@ -82,7 +82,6 @@ void ProcessBankData::run() { // override {
 
   // Default pulse time (if none are found)
   Mantid::Types::Core::DateAndTime pulsetime;
-  int periodNumber = 1;
   int periodIndex = 0;
   Mantid::Types::Core::DateAndTime lastpulsetime(0);
 
@@ -134,11 +133,7 @@ void ProcessBankData::run() { // override {
       // Save the pulse time at this index for creating those events
       pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
       int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
-      periodNumber = logPeriodNumber > 0
-                         ? logPeriodNumber
-                         : periodNumber; // Some historic files have recorded
-                                         // their logperiod numbers as zeros!
-      periodIndex = periodNumber - 1;
+      periodIndex = logPeriodNumber - 1;
 
       // Determine if pulse times continue to increase
       if (pulsetime < lastpulsetime)

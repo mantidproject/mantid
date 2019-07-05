@@ -276,10 +276,14 @@ def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, 
         # Crop to the detectors required
         workspace = mtd[workspace_name]
 
-        CropWorkspace(InputWorkspace=workspace_name,
-                      OutputWorkspace=workspace_name,
-                      StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
-                      EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
+        try:
+            CropWorkspace(InputWorkspace=workspace_name,
+                          OutputWorkspace=workspace_name,
+                          StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
+                          EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
+        except RuntimeError:
+            raise RuntimeError('The spectra min {0} or spectra max {1} could not be found in workspace {2}.'
+                               .format(str(spec_min), str(spec_max), workspace_name))
 
 
 # -------------------------------------------------------------------------------
@@ -484,7 +488,6 @@ def unwrap_monitor(workspace_name):
         elif unwrap == 'BaseOnTimeRegime':
             mon_time = mtd[monitor_workspace_name].readX(0)[0]
             det_time = mtd[workspace_name].readX(0)[0]
-            logger.notice(str(mon_time) + " " + str(det_time))
             should_unwrap = mon_time == det_time
         else:
             should_unwrap = False
@@ -1003,7 +1006,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     @param multi_frame_rebin_string Rebin string for multiple frame rebinning
     @param num_bins Max number of bins in input frames
     """
-    from mantid.simpleapi import (Rebin, SortXAxis)
+    from mantid.simpleapi import (Rebin, SortXAxis, RemoveSpectra)
 
     if rebin_string is not None:
         if multi_frame_rebin_string is not None and num_bins is not None:
@@ -1018,9 +1021,11 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
                       Params=multi_frame_rebin_string)
         else:
             # Regular data
+            RemoveSpectra(InputWorkspace=workspace_name,
+                          OutputWorkspace=workspace_name,
+                          RemoveSpectraWithNoDetector=True)
             SortXAxis(InputWorkspace=workspace_name,
-                      OutputWorkspace=workspace_name,
-                      IgnoreHistogramValidation=True)
+                      OutputWorkspace=workspace_name)
             Rebin(InputWorkspace=workspace_name,
                   OutputWorkspace=workspace_name,
                   Params=rebin_string)

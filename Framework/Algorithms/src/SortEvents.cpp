@@ -28,7 +28,7 @@ using DataObjects::EventWorkspace_sptr;
  *
  */
 void SortEvents::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::InOut),
                   "EventWorkspace to be sorted.");
 

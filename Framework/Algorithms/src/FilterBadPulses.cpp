@@ -46,10 +46,10 @@ const std::string FilterBadPulses::category() const {
 
 /// Initialise the properties
 void FilterBadPulses::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An event workspace");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
   auto range = boost::make_shared<BoundedValidator<double>>();

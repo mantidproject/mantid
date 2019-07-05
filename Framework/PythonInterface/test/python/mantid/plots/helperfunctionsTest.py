@@ -11,6 +11,8 @@ import datetime
 import unittest
 
 import matplotlib
+matplotlib.use('AGG')  # noqa
+from matplotlib.pyplot import figure
 import numpy as np
 
 import mantid.api
@@ -20,8 +22,6 @@ from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import AddTimeSeriesLog, ConjoinWorkspaces, CreateMDHistoWorkspace, CreateSampleWorkspace, \
     CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace
-
-matplotlib.use('AGG')
 
 
 def add_workspace_with_data(func):
@@ -195,28 +195,28 @@ class HelperFunctionsTest(unittest.TestCase):
 
     def test_y_units_for_distribution_and_autodist_off_with_latex(self):
         ws = self.ws2d_distribution
-        labels = funcs.get_axes_labels(ws, plot_as_dist=False, use_latex=True)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=False, use_latex=True)
         self.assertEqual(labels[0], 'Counts (microAmp.hour)$^{-1}$')
 
     def test_y_units_for_non_distribution_and_autodist_on_with_ascii(self):
         ws = self.ws2d_non_distribution
-        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=False)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=False)
         self.assertEqual(labels[0], 'Counts per microAmp.hour per Angstrom')
 
     def test_y_units_for_non_distribution_and_autodist_on_with_latex(self):
         ws = self.ws2d_non_distribution
-        labels = funcs.get_axes_labels(ws, plot_as_dist=True)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True)
         self.assertEqual(labels[0], 'Counts (microAmp.hour $\\AA$)$^{-1}$')
 
     def test_y_units_for_non_distribution_with_no_x_or_y_unit_and_autodist_on(self):
         ws = self.ws1d_point
-        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=True)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=True)
         self.assertEqual(labels[0], '')
 
     def test_y_units_for_non_distribution_with_no_x_unit_and_autodist_on(self):
         ws = self.ws2d_point
         ws.setYUnit("Counts")
-        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=True)
+        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=True)
         self.assertEqual(labels[0], 'Counts')
         ws.setYUnit('')
 
@@ -233,13 +233,13 @@ class HelperFunctionsTest(unittest.TestCase):
     def test_get_data_uneven_flag(self):
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, axisaligned=True, other_kwarg=1)
         self.assertTrue(flag)
-        self.assertEquals(kwargs, {'other_kwarg': 1})
+        self.assertEqual(kwargs, {'other_kwarg': 1})
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, other_kwarg=2)
         self.assertFalse(flag)
-        self.assertEquals(kwargs, {'other_kwarg': 2})
+        self.assertEqual(kwargs, {'other_kwarg': 2})
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_uneven, axisaligned=False, other_kwarg=3)
         self.assertTrue(flag)
-        self.assertEquals(kwargs, {'other_kwarg': 3})
+        self.assertEqual(kwargs, {'other_kwarg': 3})
 
     def test_boundaries_from_points(self):
         centers = np.array([1., 2., 4., 8.])
@@ -251,21 +251,44 @@ class HelperFunctionsTest(unittest.TestCase):
         centers = funcs.points_from_boundaries(bounds)
         self.assertTrue(np.array_equal(centers, np.array([2., 3.5, 7])))
 
-    def test_get_spectrum(self):
-        # get data divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 1, False, withDy=True, withDx=True)
+    def test_get_spectrum_distribution_workspace(self):
+        # Since the workspace being plotted is a distribution, we should not
+        # divide by bin width whether or not normalize_by_bin_width is True
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 1, True, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15., 25.])))
-        self.assertTrue(np.array_equal(y, np.array([.4, .5])))
-        self.assertTrue(np.array_equal(dy, np.array([.3, .4])))
+        self.assertTrue(np.array_equal(y, np.array([4, 5])))
+        self.assertTrue(np.array_equal(dy, np.array([3, 4])))
         self.assertEqual(dx, None)
-        # get data not divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 0, True, withDy=True, withDx=True)
+
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 0, False, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15., 25.])))
         self.assertTrue(np.array_equal(y, np.array([2, 3])))
         self.assertTrue(np.array_equal(dy, np.array([1, 2])))
         self.assertEqual(dx, None)
         # fail case - try to find spectrum out of range
-        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_histo, 10, True)
+        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_histo,
+                          10, True)
+
+    def test_get_spectrum_non_distribution_workspace(self):
+        # get data divided by bin width
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1,
+                                          normalize_by_bin_width=True,
+                                          withDy=True, withDx=True)
+        self.assertTrue(np.array_equal(x, np.array([15., 25.])))
+        self.assertTrue(np.array_equal(y, np.array([0.4, 0.5])))
+        self.assertTrue(np.array_equal(dy, np.array([0.3, 0.4])))
+        self.assertEqual(dx, None)
+        # get data not divided by bin width
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1,
+                                          normalize_by_bin_width=False,
+                                          withDy=True, withDx=True)
+        self.assertTrue(np.array_equal(x, np.array([15., 25.])))
+        self.assertTrue(np.array_equal(y, np.array([4, 5])))
+        self.assertTrue(np.array_equal(dy, np.array([3, 4])))
+        self.assertEqual(dx, None)
+        # fail case - try to find spectrum out of range
+        self.assertRaises(RuntimeError, funcs.get_spectrum,
+                          self.ws2d_non_distribution, 10, True)
 
     def test_get_md_data2d_bin_bounds(self):
         x, y, data = funcs.get_md_data2d_bin_bounds(self.ws_MD_2d, mantid.api.MDNormalization.NoNormalization)
@@ -416,14 +439,14 @@ class HelperFunctionsTest(unittest.TestCase):
 
     def test_get_sample_logs(self):
         x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log', FullTime=True)
-        self.assertEquals(x[0], datetime.datetime(2010, 1, 1, 0, 0, 0))
-        self.assertEquals(x[1], datetime.datetime(2010, 1, 1, 0, 30, 0))
-        self.assertEquals(x[2], datetime.datetime(2010, 1, 1, 0, 50, 0))
+        self.assertEqual(x[0], datetime.datetime(2010, 1, 1, 0, 0, 0))
+        self.assertEqual(x[1], datetime.datetime(2010, 1, 1, 0, 30, 0))
+        self.assertEqual(x[2], datetime.datetime(2010, 1, 1, 0, 50, 0))
         np.testing.assert_allclose(y, np.array([100, 15, 100.2]))
         self.assertTrue(FullTime)
-        self.assertEquals(LogName, 'my_log')
-        self.assertEquals(units, '')
-        self.assertEquals(kwargs, {})
+        self.assertEqual(LogName, 'my_log')
+        self.assertEqual(units, '')
+        self.assertEqual(kwargs, {})
 
     def test_validate_args_success(self):
         ws = CreateSampleWorkspace()
@@ -609,7 +632,7 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_no_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, distribution=False, withDy=False, withDx=False)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalize_by_bin_width=False, withDy=False, withDx=False)
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
         self.assertIsNone(dy)
@@ -617,7 +640,7 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_with_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, distribution=False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalize_by_bin_width=False, withDy=True, withDx=True)
 
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
@@ -680,6 +703,32 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_equal(indices, (1,slice(None),slice(None)))
         self.assertIn('label', kwargs)
         self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
+
+    def _create_artist(self, errors=False):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        if errors:
+            artist = ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.1])
+        else:
+            artist = ax.plot([0, 1], [0, 1])[0]
+        return artist
+
+    def test_errorbars_hidden_returns_true_for_non_errorbar_container_object(self):
+        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(Mock()))
+
+    def test_errorbars_hidden_returns_correctly_on_errorbar_container(self):
+        container = self._create_artist(errors=True)
+        self.assertFalse(mantid.plots.helperfunctions.errorbars_hidden(container))
+        [caps.set_visible(False) for caps in container[1] if container[1]]
+        [bars.set_visible(False) for bars in container[2]]
+        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
+
+    def test_errorbars_hidden_returns_true_on_container_with_invisible_connecting_line(self):
+        container = self._create_artist(errors=True)
+        container[0].set_visible(False)
+        [caps.set_visible(False) for caps in container[1] if container[1]]
+        [bars.set_visible(False) for bars in container[2]]
+        self.assertTrue(mantid.plots.helperfunctions.errorbars_hidden(container))
 
 
 if __name__ == '__main__':

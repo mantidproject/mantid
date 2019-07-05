@@ -61,19 +61,29 @@ void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           "Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace. Optional. If given, will be saved at "
       "TransmissionSpectrum");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           "TransmissionCan", "", Kernel::Direction::Input,
           PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace of the Can. Optional. If given, will be "
       "saved at TransmissionSpectrum");
+
+  declareProperty(
+      "SampleTransmissionRunNumber", "",
+      "The run number for the sample transmission workspace. Optional.");
+  declareProperty("SampleDirectRunNumber", "",
+                  "The run number for the sample direct workspace. Optional.");
+  declareProperty("CanScatterRunNumber", "",
+                  "The run number for the can scatter workspace. Optional.");
+  declareProperty("CanDirectRunNumber", "",
+                  "The run number for the can direct workspace. Optional.");
 }
 
 /// Overwrites Algorithm method
@@ -212,19 +222,44 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   // outFile<<sasProcuserfile;
   sasProcess += sasProcuserfile;
 
+  if (m_trans_ws) {
+    // Add other run numbers
+    // SampleTransmission
+    const auto sample_trans_run =
+        getPropertyValue("SampleTransmissionRunNumber");
+    sasProcess += "\n\t\t\t<term name=\"sample_trans_run\">";
+    sasProcess += sample_trans_run + "</term>";
+
+    // SampleDirect
+    const auto sample_direct_run = getPropertyValue("SampleDirectRunNumber");
+    sasProcess += "\n\t\t\t<term name=\"sample_direct_run\">";
+    sasProcess += sample_direct_run + "</term>";
+  }
+
   // can run number if available
   if (m_transcan_ws) {
+    std::string can_run;
     if (m_transcan_ws->run().hasProperty("run_number")) {
       Kernel::Property *logP = m_transcan_ws->run().getLogData("run_number");
-      auto can_run = logP->value();
-      std::string sasProcCanRun = "\n\t\t\t<term name=\"can_trans_run\">";
-      sasProcCanRun += can_run;
-      sasProcCanRun += "</term>";
-      sasProcess += sasProcCanRun;
+      can_run = logP->value();
     } else {
       g_log.debug() << "Didn't find RunNumber log in workspace. Writing "
                        "<Run></Run> to the CANSAS file\n";
     }
+    std::string sasProcCanRun = "\n\t\t\t<term name=\"can_trans_run\">";
+    sasProcCanRun += can_run;
+    sasProcCanRun += "</term>";
+    sasProcess += sasProcCanRun;
+
+    // CanScatter
+    const auto can_scatter_run = getPropertyValue("CanScatterRunNumber");
+    sasProcess += "\n\t\t\t<term name=\"can_scatter_run\">";
+    sasProcess += can_scatter_run + "</term>";
+
+    // CanDirect
+    const auto can_direct_run = getPropertyValue("CanDirectRunNumber");
+    sasProcess += "\n\t\t\t<term name=\"can_direct_run\">";
+    sasProcess += can_direct_run + "</term>";
   }
 
   // Reduction process note, if available

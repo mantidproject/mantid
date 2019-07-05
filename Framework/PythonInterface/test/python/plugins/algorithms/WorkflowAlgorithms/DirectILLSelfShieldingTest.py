@@ -55,7 +55,7 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         inWS = mtd[self._TEST_WS_NAME]
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms())
+        self.assertEqual(outWS.getNumberHistograms(), inWS.getNumberHistograms())
         xs = outWS.extractX()
         originalXs = inWS.extractX()
         numpy.testing.assert_almost_equal(xs, originalXs[:, :])
@@ -72,7 +72,7 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         inWS = mtd[self._TEST_WS_NAME]
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms())
+        self.assertEqual(outWS.getNumberHistograms(), inWS.getNumberHistograms())
         xs = outWS.extractX()
         originalXs = inWS.extractX()
         numpy.testing.assert_almost_equal(xs, originalXs[:, :])

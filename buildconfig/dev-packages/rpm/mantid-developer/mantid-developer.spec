@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.31
+Version:        1.32
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -110,6 +110,10 @@ Requires: python3-mock
 Requires: boost-python3-devel
 %endif
 
+%{?el7:Requires: boost-python36-devel}
+%{?el7:Requires: python36-devel}
+%{?el7:Requires: python36-numpy}
+
 BuildArch: noarch
 
 %description
@@ -131,6 +135,9 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Thu Jun 27 2019 Peter Peterson <petersonpf@ornl.gov>
+- Added python3 dependencies for framework on rhel7
 
 * Thu Apr 25 2019 Samuel Jones <samuel.jones@stfc.ac.uk>
 - Removed qtawesome

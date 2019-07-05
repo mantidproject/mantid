@@ -11,7 +11,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/MersenneTwister.h"
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <cmath>
@@ -41,8 +40,8 @@ void randomizeHistogramWithinError(HistogramY &row, const HistogramE &errors,
 }
 
 MatrixWorkspace_sptr
-randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace, const int seed) {
-  MersenneTwister mTwister(seed);
+randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace,
+                              MersenneTwister &mTwister) {
   auto randomNumberGenerator = [&mTwister](const double error) {
     return mTwister.nextValue(-error, error);
   };
@@ -121,11 +120,11 @@ const std::string CalculateIqt::summary() const {
 
 void CalculateIqt::init() {
 
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The name of the sample workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("ResolutionWorkspace", "",
-                                                   Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The name of the sample workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ResolutionWorkspace",
+                                                        "", Direction::Input),
                   "The name of the resolution workspace.");
 
   declareProperty("EnergyMin", -0.5, "Minimum energy for fit. Default = -0.5.");
@@ -141,8 +140,8 @@ void CalculateIqt::init() {
       "SeedValue", DEFAULT_SEED, positiveInt,
       "Seed the random number generator for monte-carlo error calculation.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace.");
 
   declareProperty("CalculateErrors", true, "Calculate monte-carlo errors.");
@@ -181,6 +180,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
   simulatedWorkspaces.reserve(nIterations);
   simulatedWorkspaces.emplace_back(outputWorkspace);
 
+  MersenneTwister mTwister(seed);
   if (calculateErrors) {
     Progress errorCalculationProg(this, 0.0, 1.0, nIterations);
     PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
@@ -188,7 +188,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
       errorCalculationProg.report("Calculating Monte Carlo errors...");
       PARALLEL_START_INTERUPT_REGION
       auto simulated =
-          doSimulation(sample->clone(), resolution, rebinParams, seed);
+          doSimulation(sample->clone(), resolution, rebinParams, mTwister);
       PARALLEL_CRITICAL(emplace_back)
       simulatedWorkspaces.emplace_back(simulated);
       PARALLEL_END_INTERUPT_REGION
@@ -320,8 +320,8 @@ CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
 MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample,
                                                 MatrixWorkspace_sptr resolution,
                                                 const std::string &rebinParams,
-                                                const int seed) {
-  auto simulatedWorkspace = randomizeWorkspaceWithinError(sample, seed);
+                                                MersenneTwister &mTwister) {
+  auto simulatedWorkspace = randomizeWorkspaceWithinError(sample, mTwister);
   return calculateIqt(simulatedWorkspace, resolution, rebinParams);
 }
 

@@ -65,11 +65,11 @@ void IQTransform::init() {
   // Require X data to be increasing from left to right
   wsValidator->add<IncreasingAxisValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace must be a distribution with units of Q");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the output workspace");
 
   // Extract the keys from the transformations map to pass to the property
@@ -90,14 +90,14 @@ void IQTransform::init() {
       "BackgroundValue", 0.0, mustBePositive,
       "A constant value to subtract from the data prior to its transformation");
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace to subtract from the input workspace prior to its "
       "transformation."
       "Must be compatible with the input (as for the Minus algorithm).");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("GeneralFunctionConstants"),
+      std::make_unique<ArrayProperty<double>>("GeneralFunctionConstants"),
       "A set of 10 constants to be used (only) with the 'General' "
       "transformation");
 }

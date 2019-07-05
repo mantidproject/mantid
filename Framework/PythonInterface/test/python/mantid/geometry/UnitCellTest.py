@@ -19,8 +19,8 @@ class UnitCellTest(unittest.TestCase):
 
     def test_simple_constructor(self):
         u1 = UnitCell()
-        self.assertEquals(u1.a1(), 1)
-        self.assertEquals(u1.alpha(), 90)
+        self.assertEqual(u1.a1(), 1)
+        self.assertEqual(u1.alpha(), 90)
 
         u2 = UnitCell(3,4,5)
         self.assertAlmostEquals(u2.b1(),1./3., 10)
@@ -68,7 +68,7 @@ class UnitCellTest(unittest.TestCase):
         self.assertAlmostEqual(cell.gamma(),97,10)
 
         # get the some elements of the B matrix
-        self.assertEquals(type(cell.getB()), np.ndarray)
+        self.assertEqual(type(cell.getB()), np.ndarray)
         self.assertAlmostEqual(cell.getB()[0][0],0.403170877311,10)
         self.assertAlmostEqual(cell.getB()[2][0],0.0,10)
         self.assertAlmostEqual(cell.getB()[0][2],-0.00360329991666,10)
@@ -80,8 +80,8 @@ class UnitCellTest(unittest.TestCase):
         # angle
         self.assertAlmostEqual(cell.recAngle(1,1,1,1,0,0,AngleUnits.Radians),0.471054990614,10)
 
-        self.assertEquals(type(cell.getG()), np.ndarray)
-        self.assertEquals(type(cell.getGstar()), np.ndarray)
+        self.assertEqual(type(cell.getG()), np.ndarray)
+        self.assertEqual(type(cell.getGstar()), np.ndarray)
 
 
 if __name__ == '__main__':

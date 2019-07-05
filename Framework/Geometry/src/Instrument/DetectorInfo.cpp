@@ -13,7 +13,6 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -51,7 +50,7 @@ DetectorInfo::DetectorInfo(
  * ComponentInfo must be set up. */
 DetectorInfo::DetectorInfo(const DetectorInfo &other)
     : m_detectorInfo(
-          Kernel::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
+          std::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
       m_instrument(other.m_instrument), m_detectorIDs(other.m_detectorIDs),
       m_detIDToIndex(other.m_detIDToIndex),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
@@ -316,6 +315,17 @@ double DetectorInfo::l1() const { return m_detectorInfo->l1(); }
 /// Returns a sorted vector of all detector IDs.
 const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
   return *m_detectorIDs;
+}
+
+std::size_t DetectorInfo::indexOf(const detid_t id) const {
+  try {
+    return m_detIDToIndex->at(id);
+  } catch (const std::out_of_range &) {
+    // customize the error message
+    std::stringstream msg;
+    msg << "Failed to find detector with id=" << id;
+    throw std::out_of_range(msg.str());
+  }
 }
 
 /// Returns the scan count of the detector with given detector index.

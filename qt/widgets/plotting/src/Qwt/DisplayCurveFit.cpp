@@ -64,7 +64,7 @@ DisplayCurveFit::~DisplayCurveFit() {}
  * @param axisID ID of axis
  * @exception std::runtime_error if supplied range is nonsense
  */
-void DisplayCurveFit::setAxisRange(QPair<double, double> range, int axisID) {
+void DisplayCurveFit::setAxisRange(QPair<double, double> range, AxisID axisID) {
   m_uiForm.fitPlot->setAxisRange(range, axisID);
   m_uiForm.residualsPlot->setAxisRange(range, axisID);
 }

@@ -17,6 +17,11 @@ Improvements
   script window, then drag and drop a workspace on top of it.
 - Mantid's offline help is now available in Workbench.
 - A colorfill plot of a workspace with logarithmic bins is plotted on a log scale.
+- You can now toggle the normalization of plots in Workbench from the plot's context menu
+- Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data
+- You can now save, load and delete custom layouts from the settings menu with quick access to user layout in the view
+  menu.
+- The plot options dialog has been improved to offer you more control over your figures
 
 Bugfixes
 ########
@@ -25,5 +30,7 @@ Bugfixes
 - Help documentation for the manage user directories interface now correctly displays when launched from the interface.
 - A Colorfill plot of a workspace with one spectrum plots correctly and no longer raises an error.
 - The units on the y-axis of distribution workspace plots have been corrected
+- Restore Default Layout no longer resizes the main window.
+- Entering an invalid number into a plot's axis editor no longer causes an uncaught error
 
 :ref:`Release 4.1.0 <v4.1.0>`

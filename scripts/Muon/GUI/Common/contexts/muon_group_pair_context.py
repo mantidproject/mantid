@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -15,21 +17,38 @@ from mantid.kernel import ConfigServiceImpl
 from Muon.GUI.Common.observer_pattern import Observable
 
 
+def get_grouping_psi(workspace):
+    grouping_list = []
+
+    for ii in range(0, workspace.getNumberHistograms()):
+        sample_log_label_name = "Label Spectra " + str(ii)
+        workspace_run = workspace.getRun()
+        if workspace_run.hasProperty(sample_log_label_name):
+            sample_log_value = workspace_run.getProperty(sample_log_label_name).value
+            grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+
+    return grouping_list, [], ''
+
+
 def get_default_grouping(workspace, instrument, main_field_direction):
     parameter_name = "Default grouping file"
     if instrument == "MUSR" or instrument == 'CHRONUS':
         parameter_name += " - " + main_field_direction
-    try:
-        if isinstance(workspace, WorkspaceGroup):
-            grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
-        else:
-            grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
-    except IndexError:
-        return [], []
+
+    if instrument != "PSI":
+        try:
+            if isinstance(workspace, WorkspaceGroup):
+                grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
+            else:
+                grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+        except IndexError:
+            return [], [], ''
+    else:
+        return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
-    filename = instrument_directory + grouping_file
-    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
-    return new_groups, new_pairs
+    filename = os.path.join(instrument_directory, grouping_file)
+    new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
+    return new_groups, new_pairs, default
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -79,6 +98,7 @@ class MuonGroupPairContext(object):
     def __init__(self, check_group_contains_valid_detectors=lambda x : True):
         self._groups = []
         self._pairs = []
+        self._selected = ''
 
         self.message_notifier = MessageNotifier(self)
 
@@ -98,11 +118,24 @@ class MuonGroupPairContext(object):
     def pairs(self):
         return self._pairs
 
+    def clear(self):
+        self.clear_groups()
+        self.clear_pairs()
+
     def clear_groups(self):
         self._groups = []
 
     def clear_pairs(self):
         self._pairs = []
+
+    @property
+    def selected(self):
+        return self._selected
+
+    @selected.setter
+    def selected(self, value):
+        if value in self.group_names + self.pair_names and self._selected != value:
+            self._selected = value
 
     @property
     def group_names(self):
@@ -145,7 +178,7 @@ class MuonGroupPairContext(object):
         self[name].show(str(run))
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
-        self._groups, self._pairs = get_default_grouping(workspace, instrument, main_field_direction)
+        self._groups, self._pairs, self._selected = get_default_grouping(workspace, instrument, main_field_direction)
 
     def _check_name_unique(self, name):
         for item in self._groups + self.pairs:
@@ -188,3 +221,16 @@ class MuonGroupPairContext(object):
                 return equivalent_name
 
         return None
+
+    def remove_workspace_by_name(self, workspace_name):
+        for item in self.groups + self.pairs:
+            item.remove_workspace_by_name(workspace_name)
+
+    def get_unormalisised_workspace_list(self, workspace_list):
+        return [self.find_unormalised_workspace(workspace) for workspace in workspace_list]
+
+    def find_unormalised_workspace(self, workspace):
+        for group in self.groups:
+            unnormalised_workspace = group.find_unormalised(workspace)
+            if unnormalised_workspace:
+                return unnormalised_workspace

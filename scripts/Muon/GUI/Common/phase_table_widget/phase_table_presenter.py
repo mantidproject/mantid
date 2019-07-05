@@ -1,3 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad
@@ -32,9 +40,14 @@ class PhaseTablePresenter(object):
         self.phase_table_calculation_complete_notifier = Observable()
         self.phase_quad_calculation_complete_nofifier = Observable()
 
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+
         self.update_current_phase_tables()
 
     def update_view_from_model(self):
+        self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
+        self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
+        self.update_current_phase_tables()
         for key, item in self.context.phase_context.options_dict.items():
             setattr(self.view, key, item)
 
@@ -100,7 +113,7 @@ class PhaseTablePresenter(object):
         run = re.search('[0-9]+', input_workspace).group()
         phasequad_workspace_name = get_phase_quad_workspace_name(input_workspace, input_phase_table)
         phase_table_group = get_phase_table_workspace_group_name(phasequad_workspace_name,
-                                                                 self.context.data_context.instrument)
+                                                                 self.context.data_context.instrument, self.context.workspace_suffix)
         directory = get_base_data_directory(self.context, run) + phase_table_group
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(phase_quad, directory + phasequad_workspace_name)
@@ -146,7 +159,8 @@ class PhaseTablePresenter(object):
         run = re.search('[0-9]+', base_name).group()
 
         phase_table_group = get_phase_table_workspace_group_name(base_name,
-                                                                 self.context.data_context.instrument)
+                                                                 self.context.data_context.instrument,
+                                                                 self.context.workspace_suffix)
         directory = get_base_data_directory(self.context, run) + phase_table_group
         muon_workspace_wrapper = MuonWorkspaceWrapper(detector_table, directory + base_name)
         muon_workspace_wrapper.show()
@@ -159,7 +173,8 @@ class PhaseTablePresenter(object):
 
         run = re.search('[0-9]+', base_name).group()
         phase_table_group = get_phase_table_workspace_group_name(base_name,
-                                                                 self.context.data_context.instrument)
+                                                                 self.context.data_context.instrument,
+                                                                 self.context.workspace_suffix)
         fitting_workspace_name = get_fitting_workspace_name(base_name)
         directory = get_base_data_directory(self.context, run) + phase_table_group
 
@@ -179,8 +194,6 @@ class PhaseTablePresenter(object):
 
         backward_group = self.context.phase_context.options_dict['backward_group']
         parameters['BackwardSpectra'] = self.context.group_pair_context[backward_group].detectors
-
-        parameters['DetectorTable'] = parameters['InputWorkspace'].replace('_raw_data', '') + "; PhaseTable"
 
         parameters['DetectorTable'] = get_phase_table_workspace_name(parameters['InputWorkspace'], forward_group,
                                                                      backward_group)

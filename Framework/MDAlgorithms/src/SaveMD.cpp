@@ -53,17 +53,17 @@ DECLARE_ALGORITHM(SaveMD)
 /** Initialize the algorithm's properties.
  */
 void SaveMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                     ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
-  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
                                       "UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 
   declareProperty(
@@ -71,17 +71,17 @@ void SaveMD::init() {
       "Only for MDEventWorkspaces with a file back end: check this to update "
       "the NXS file on disk\n"
       "to reflect the current data structure. Filename parameter is ignored.");
-  setPropertySettings(
-      "UpdateFileBackEnd",
-      make_unique<EnabledWhenProperty>("MakeFileBacked", IS_EQUAL_TO, "0"));
+  setPropertySettings("UpdateFileBackEnd",
+                      std::make_unique<EnabledWhenProperty>("MakeFileBacked",
+                                                            IS_EQUAL_TO, "0"));
 
   declareProperty("MakeFileBacked", false,
                   "For an MDEventWorkspace that was created in memory:\n"
                   "This saves it to a file AND makes the workspace into a "
                   "file-backed one.");
-  setPropertySettings(
-      "MakeFileBacked",
-      make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
+  setPropertySettings("MakeFileBacked",
+                      std::make_unique<EnabledWhenProperty>("UpdateFileBackEnd",
+                                                            IS_EQUAL_TO, "0"));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       oldFile.remove();
   }
 
-  auto prog = make_unique<Progress>(this, 0.0, 0.05, 1);
+  auto prog = std::make_unique<Progress>(this, 0.0, 0.05, 1);
   if (updateFileBackend) // workspace has its own file and ignores any changes
                          // to the
                          // algorithm parameters

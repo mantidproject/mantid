@@ -104,6 +104,17 @@ void cloneWorkspace(std::string const &workspaceName,
   cloner->execute();
 }
 
+bool isTechniqueDirect(MatrixWorkspace_const_sptr sampleWorkspace,
+                       MatrixWorkspace_const_sptr resWorkspace) {
+  try {
+    auto const logValue1 = sampleWorkspace->getLog("deltaE-mode")->value();
+    auto const logValue2 = resWorkspace->getLog("deltaE-mode")->value();
+    return (logValue1 == "Direct") && (logValue2 == "Direct");
+  } catch (std::exception const &) {
+    return false;
+  }
+}
+
 void cropWorkspace(std::string const &name, std::string const &newName,
                    double const &cropValue) {
   auto croper = AlgorithmManager::Instance().create("CropWorkspace");
@@ -428,12 +439,15 @@ bool Iqt::validate() {
     auto const resWorkspace = getADSMatrixWorkspace(resolutionName);
 
     addErrorMessage(uiv, checkInstrumentsMatch(sampleWorkspace, resWorkspace));
-    addErrorMessage(
-        uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "analyser"));
-    addErrorMessage(
-        uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "reflection"));
     addErrorMessage(uiv,
                     validateNumberOfHistograms(sampleWorkspace, resWorkspace));
+
+    if (!isTechniqueDirect(sampleWorkspace, resWorkspace)) {
+      addErrorMessage(
+          uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "analyser"));
+      addErrorMessage(uiv, checkParametersMatch(sampleWorkspace, resWorkspace,
+                                                "reflection"));
+    }
   }
 
   auto const message = uiv.generateErrorMessage();
@@ -650,7 +664,7 @@ void Iqt::updateEnergyRange(int state) {
 }
 
 void Iqt::setTiledPlotFirstPlot(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotFirst);
   auto const lastPlotIndex = m_uiForm.spTiledPlotLast->text().toInt();
   auto const rangeSize = lastPlotIndex - value;
   if (value > lastPlotIndex)
@@ -666,7 +680,7 @@ void Iqt::setTiledPlotFirstPlot(int value) {
 }
 
 void Iqt::setTiledPlotLastPlot(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotLast);
   auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const rangeSize = value - firstPlotIndex;
   if (value < firstPlotIndex)
@@ -689,12 +703,12 @@ void Iqt::setMinMaxOfTiledPlotLastIndex(int minimum, int maximum) {
 }
 
 void Iqt::setTiledPlotFirstIndex(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotFirst);
   m_uiForm.spTiledPlotFirst->setValue(value);
 }
 
 void Iqt::setTiledPlotLastIndex(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotLast);
   auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const lastPlotIndex = value - m_maxTiledPlots > firstPlotIndex
                                  ? firstPlotIndex + m_maxTiledPlots
@@ -703,12 +717,12 @@ void Iqt::setTiledPlotLastIndex(int value) {
 }
 
 void Iqt::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 
 void Iqt::setPlotSpectrumIndex(int spectrum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setValue(spectrum);
 }
 

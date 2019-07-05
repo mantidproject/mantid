@@ -61,9 +61,9 @@ private:
       // Mask part of the workspace
       std::vector<coord_t> min_mask{0, 0};
       std::vector<coord_t> max_mask{5, 5};
-      MDImplicitFunction *function =
-          new MDBoxImplicitFunction(min_mask, max_mask);
-      ws->setMDMasking(function);
+      auto function =
+          std::make_unique<MDBoxImplicitFunction>(min_mask, max_mask);
+      ws->setMDMasking(std::move(function));
     }
 
     auto first_dim = ws->getDimension(0);
@@ -567,8 +567,8 @@ public:
     max.push_back(5);
 
     // Mask part of the workspace
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    ws->setMDMasking(function);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
+    ws->setMDMasking(std::move(function));
 
     IMDWorkspace_sptr iws(ws);
 
@@ -627,9 +627,8 @@ public:
     // Mask the entire workspace
     std::vector<coord_t> min_mask{0, 0};
     std::vector<coord_t> max_mask{10, 10};
-    MDImplicitFunction *function =
-        new MDBoxImplicitFunction(min_mask, max_mask);
-    ws->setMDMasking(function);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min_mask, max_mask);
+    ws->setMDMasking(std::move(function));
 
     auto first_dim = ws->getDimension(0);
     VMD start(first_dim->getMinimum(), 0.0);
@@ -683,8 +682,8 @@ public:
     std::vector<coord_t> max{5, 5};
 
     // Mask part of the workspace
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    ws->setMDMasking(function);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
+    ws->setMDMasking(std::move(function));
 
     VMD start(0.5, 0.5);
     VMD end(9.5, 0.5);
@@ -991,9 +990,9 @@ public:
     max.push_back(10);
 
     // Create an function that encompases ALL of the total bins.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
-    ws->setMDMasking(function);
+    ws->setMDMasking(std::move(function));
     ws->operatorNot();
     checkWorkspace(ws, 1.0, 0.0);
   }
@@ -1093,13 +1092,13 @@ public:
     TS_ASSERT_DELTA(a->getSignalAt(2), 6.78, 1e-5);
   }
 
-  void doTestMasking(MDImplicitFunction *function,
+  void doTestMasking(std::unique_ptr<MDImplicitFunction> function,
                      size_t expectedNumberMasked) {
     // 10x10x10 histoWorkspace
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 10, 10.0);
 
-    ws->setMDMasking(function);
+    ws->setMDMasking(std::move(function));
 
     size_t numberMasked = getNumberMasked(ws);
     TSM_ASSERT_EQUALS("Didn't perform the masking as expected",
@@ -1123,8 +1122,8 @@ public:
     max.push_back(10);
 
     // Create an function that encompases ALL of the total bins.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    doTestMasking(function, 1000); // 1000 out of 1000 bins masked
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
+    doTestMasking(std::move(function), 1000); // 1000 out of 1000 bins masked
   }
 
   void test_maskHalf() {
@@ -1140,8 +1139,8 @@ public:
     max.push_back(4.99f);
 
     // Create an function that encompases 1/2 of the total bins.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    doTestMasking(function, 500); // 500 out of 1000 bins masked
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
+    doTestMasking(std::move(function), 500); // 500 out of 1000 bins masked
   }
 
   void test_clearMasking() {
@@ -1154,11 +1153,11 @@ public:
     max.push_back(10);
     max.push_back(10);
     max.push_back(10);
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
-    ws->setMDMasking(function);
+    ws->setMDMasking(std::move(function));
 
     TSM_ASSERT_EQUALS("Everything should be masked.", 1000,
                       getNumberMasked(ws));

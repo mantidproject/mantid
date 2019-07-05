@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
 from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 
@@ -19,3 +21,5 @@ class PhaseTabWidget(object):
         self.phase_table_view.set_calculate_phase_quad_action(self.phase_table_presenter.handle_calculate_phase_quad_button_clicked)
 
         self.phase_table_view.set_cancel_action(self.phase_table_presenter.cancel)
+
+        context.update_view_from_model_notifier.add_subscriber(self.phase_table_presenter.update_view_from_model_observer)

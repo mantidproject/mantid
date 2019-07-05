@@ -5,9 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -15,7 +15,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -248,7 +247,7 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Input ws
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input run in TOF or wavelength");
 
@@ -266,7 +265,7 @@ void ReflectometryReductionOneAuto2::init() {
                   Direction::Input);
 
   // Processing instructions
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern of spectrum numbers to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
@@ -281,8 +280,8 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Whether to correct detectors
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
+                                                Direction::Input),
       "Moves detectors to twoTheta if ThetaIn or ThetaLogName is given");
 
   // Detector position correction type
@@ -299,7 +298,7 @@ void ReflectometryReductionOneAuto2::init() {
       "should be shifted vertically or rotated around the sample position.",
       Direction::Input);
   setPropertySettings("DetectorCorrectionType",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "CorrectDetectors", IS_EQUAL_TO, "1"));
 
   // Wavelength limits
@@ -326,21 +325,21 @@ void ReflectometryReductionOneAuto2::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "Polarization analysis mode.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
       "Effective polarizing power of the polarizing system. "
       "Expressed as a ratio 0 &lt; Pp &lt; 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CAp", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("CAp", Direction::Input),
       "Effective polarizing power of the analyzing system. "
       "Expressed as a ratio 0 &lt; Ap &lt; 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CRho", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("CRho", Direction::Input),
       "Ratio of efficiencies of polarizer spin-down to polarizer "
       "spin-up. This is characteristic of the polarizer flipper. "
       "Values are constants for each term in a polynomial "
       "expression.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CAlpha", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("CAlpha", Direction::Input),
       "Ratio of efficiencies of analyzer spin-down to analyzer "
       "spin-up. This is characteristic of the analyzer flipper. "
       "Values are factors for each term in a polynomial "
@@ -360,7 +359,7 @@ void ReflectometryReductionOneAuto2::init() {
                   "workspace, ParameterFile - use parameters in the parameter "
                   "file to construct and apply flood correction workspace.");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FloodWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A flood workspace to apply; if empty and FloodCorrection is "
       "'Workspace' then no correction is applied.");
@@ -369,19 +368,19 @@ void ReflectometryReductionOneAuto2::init() {
   initDebugProperties();
 
   // Output workspace in Q
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceBinned", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in Q (rebinned workspace)");
 
   // Output workspace in Q (unbinned)
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Output workspace in Q (native binning)");
 
   // Output workspace in wavelength
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in wavelength");
@@ -898,16 +897,18 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   }
 
   std::vector<std::string> IvsQBinnedGroup, IvsQGroup, IvsLamGroup;
+  std::string runNumber = getRunNumberForWorkspaceGroup(group);
 
   // Execute algorithm over each group member
   for (size_t i = 0; i < group->size(); ++i) {
+    auto inputName = group->getItem(i)->getName();
+    auto outputNames = getOutputNamesForGroups(inputName, runNumber, i);
 
-    const std::string IvsQName = output.iVsQ + "_" + std::to_string(i + 1);
-    const std::string IvsQBinnedName =
-        output.iVsQBinned + "_" + std::to_string(i + 1);
-    const std::string IvsLamName = output.iVsLam + "_" + std::to_string(i + 1);
+    const std::string IvsQName = outputNames.iVsQ;
+    const std::string IvsQBinnedName = outputNames.iVsQBinned;
+    const std::string IvsLamName = outputNames.iVsLam;
 
-    alg->setProperty("InputWorkspace", group->getItem(i)->getName());
+    alg->setProperty("InputWorkspace", inputName);
     alg->setProperty("Debug", true);
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
@@ -974,9 +975,11 @@ bool ReflectometryReductionOneAuto2::processGroups() {
 
   auto outputIvsLamNames = workspaceNamesInGroup(output.iVsLam);
   for (size_t i = 0; i < outputIvsLamNames.size(); ++i) {
-    const std::string IvsQName = output.iVsQ + "_" + std::to_string(i + 1);
-    const std::string IvsQBinnedName =
-        output.iVsQBinned + "_" + std::to_string(i + 1);
+    auto inputName = group->getItem(i)->getName();
+    auto outputNames = getOutputNamesForGroups(inputName, runNumber, i);
+
+    const std::string IvsQName = outputNames.iVsQ;
+    const std::string IvsQBinnedName = outputNames.iVsQBinned;
     const std::string IvsLamName = outputIvsLamNames[i];
 
     // Find the spectrum processing instructions for ws index 0
@@ -999,6 +1002,36 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   setOutputWorkspaces(output, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
 
   return true;
+}
+
+/** Get the output workspace names for a workspace in a group.
+ * If an input workspace has been passed with the format
+ * TOF_<runNumber>_<otherInfo> then the output workspaces will be of the same
+ * format otherwise they are numbered according to the wsGroupNumber
+ */
+ReflectometryReductionOneAuto2::WorkspaceNames
+ReflectometryReductionOneAuto2::getOutputNamesForGroups(
+    const std::string &inputName, const std::string &runNumber,
+    const size_t wsGroupNumber) {
+  auto const output = getOutputWorkspaceNames();
+  std::string informativeName = "TOF" + runNumber + "_";
+
+  WorkspaceNames outputNames;
+  if (equal(informativeName.begin(), informativeName.end(),
+            inputName.begin())) {
+    auto informativeTest = inputName.substr(informativeName.length());
+    outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
+    outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;
+    outputNames.iVsLam = output.iVsLam + "_" + informativeTest;
+  } else {
+    outputNames.iVsQ = output.iVsQ + "_" + std::to_string(wsGroupNumber + 1);
+    outputNames.iVsQBinned =
+        output.iVsQBinned + "_" + std::to_string(wsGroupNumber + 1);
+    outputNames.iVsLam =
+        output.iVsLam + "_" + std::to_string(wsGroupNumber + 1);
+  }
+
+  return outputNames;
 }
 
 /** Construct a polarization efficiencies workspace based on values of input

@@ -11,6 +11,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
+#include "MantidQtWidgets/Common/Python/Sip.h"
 
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
@@ -20,12 +21,40 @@ namespace Widgets {
 namespace MplCpp {
 
 namespace {
-Python::Object constructArgs(const std::vector<std::string> &workspaces) {
-  Python::Object workspaceList =
-      Converters::ToPyList<std::string>()(workspaces);
-  return Python::NewRef(Py_BuildValue("(O)", workspaceList.ptr()));
+
+/**
+ * @returns The mantidqt.plotting.functions module
+ */
+Python::Object functionsModule() {
+  return Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions"));
 }
 
+/**
+ * Construct a Python list from a vector of strings
+ * @param workspaces A strings
+ * @return A new Python list object
+ */
+Python::Object constructArgs(const std::vector<std::string> &workspaces) {
+  return Python::NewRef(Py_BuildValue(
+      "(O)", Converters::ToPyList<std::string>()(workspaces).ptr()));
+}
+
+/**
+ * Construct a Python list from a QStringList
+ * @param workspaces A list of strings
+ * @return A new Python list object
+ */
+Python::Object constructArgs(const QStringList &workspaces) {
+  const auto sipAPI = Python::Detail::sipAPI();
+  const auto copy = new QStringList(workspaces);
+  const auto *sobj = sipAPI->api_convert_from_new_type(
+      copy, sipAPI->api_find_type("QStringList"), Py_None);
+  return Python::NewRef(Py_BuildValue("(O)", sobj));
+}
+
+/**
+ * Construct kwargs list for the plot function
+ */
 Python::Object
 constructKwargs(boost::optional<std::vector<int>> spectrumNums,
                 boost::optional<std::vector<int>> wkspIndices,
@@ -60,6 +89,25 @@ constructKwargs(boost::optional<std::vector<int>> spectrumNums,
 
   return kwargs;
 }
+
+Python::Object plot(const Python::Object &args,
+                    boost::optional<std::vector<int>> spectrumNums,
+                    boost::optional<std::vector<int>> wkspIndices,
+                    boost::optional<Python::Object> fig,
+                    boost::optional<QHash<QString, QVariant>> plotKwargs,
+                    boost::optional<QHash<QString, QVariant>> axProperties,
+                    boost::optional<std::string> windowTitle, bool errors,
+                    bool overplot) {
+  const auto kwargs =
+      constructKwargs(spectrumNums, wkspIndices, fig, plotKwargs, axProperties,
+                      windowTitle, errors, overplot);
+  try {
+    return functionsModule().attr("plot")(*args, **kwargs);
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
+}
+
 } // namespace
 
 Python::Object plot(const std::vector<std::string> &workspaces,
@@ -71,17 +119,41 @@ Python::Object plot(const std::vector<std::string> &workspaces,
                     boost::optional<std::string> windowTitle, bool errors,
                     bool overplot) {
   GlobalInterpreterLock lock;
-  auto funcsModule =
-      Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions"));
-  auto args = constructArgs(workspaces);
-  auto kwargs = constructKwargs(spectrumNums, wkspIndices, fig, plotKwargs,
-                                axProperties, windowTitle, errors, overplot);
+  return plot(constructArgs(workspaces), std::move(spectrumNums),
+              std::move(wkspIndices), std::move(fig), std::move(plotKwargs),
+              std::move(axProperties), std::move(windowTitle), errors,
+              overplot);
+}
+
+Python::Object plot(const QStringList &workspaces,
+                    boost::optional<std::vector<int>> spectrumNums,
+                    boost::optional<std::vector<int>> wkspIndices,
+                    boost::optional<Python::Object> fig,
+                    boost::optional<QHash<QString, QVariant>> plotKwargs,
+                    boost::optional<QHash<QString, QVariant>> axProperties,
+                    boost::optional<std::string> windowTitle, bool errors,
+                    bool overplot) {
+  GlobalInterpreterLock lock;
+  return plot(constructArgs(workspaces), std::move(spectrumNums),
+              std::move(wkspIndices), std::move(fig), std::move(plotKwargs),
+              std::move(axProperties), std::move(windowTitle), errors,
+              overplot);
+}
+
+Python::Object pcolormesh(const QStringList &workspaces,
+                          boost::optional<Python::Object> fig) {
+  GlobalInterpreterLock lock;
   try {
-    return funcsModule.attr("plot")(*args, **kwargs);
+    const auto args = constructArgs(workspaces);
+    Python::Dict kwargs;
+    if (fig)
+      kwargs["fig"] = fig.get();
+    return functionsModule().attr("pcolormesh")(*args, **kwargs);
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();
   }
 }
+
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt

@@ -20,7 +20,8 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
                   ('one_wing_IFWS', '083073'),
                   ('two_wing_QENS', '136558-136559'),
                   ('two_wing_EFWS', '143720'),
-                  ('two_wing_IFWS', '170300')])
+                  ('two_wing_IFWS', '170300'),
+                  ('bats', '215962')])
 
     # cache the def instrument and data search dirs
     _def_fac = config['default.facility']
@@ -92,35 +93,30 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         res = IndirectILLEnergyTransfer(**args)
         self.assertTrue(res.getItem(0).getAxis(1).getUnit().unitID(), "Theta")
 
+    def test_bats(self):
+        args = {'Run': self._runs['bats'], 'PulseChopper': '34'}
+        res = IndirectILLEnergyTransfer(**args)
+        self._check_workspace_group(res, 1, 2050, 1121)
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
-        self.assertTrue(isinstance(wsgroup, WorkspaceGroup),
-                        "{0} should be a group workspace".format(wsgroup.name()))
+        self.assertTrue(isinstance(wsgroup, WorkspaceGroup))
 
-        self.assertEquals(wsgroup.getNumberOfEntries(),nentries,
-                          "{0} should contain {1} workspaces".format(wsgroup.name(),nentries))
+        self.assertEquals(wsgroup.getNumberOfEntries(),nentries)
 
         item = wsgroup.getItem(0)
 
-        name = item.name()
+        self.assertTrue(isinstance(item, MatrixWorkspace))
 
-        self.assertTrue(isinstance(item, MatrixWorkspace),
-                        "{0} should be a matrix workspace".format(name))
+        self.assertEqual(item.getAxis(0).getUnit().unitID(), "DeltaE")
 
-        self.assertEqual(item.getAxis(0).getUnit().unitID(), "DeltaE",
-                         "{0} should have DeltaE units in X-axis".format(name))
+        self.assertEquals(item.getNumberHistograms(),nspectra)
 
-        self.assertEquals(item.getNumberHistograms(),nspectra,
-                          "{0} should contain {1} spectra".format(name,nspectra))
+        self.assertEquals(item.blocksize(), nbins)
 
-        self.assertEquals(item.blocksize(), nbins,
-                          "{0} should contain {1} bins".format(name, nbins))
+        self.assertTrue(item.getSampleDetails())
 
-        self.assertTrue(item.getSampleDetails(),
-                        "{0} should have sample logs".format(name))
-
-        self.assertTrue(item.getHistory().lastAlgorithm(),
-                        "{0} should have history".format(name))
+        self.assertTrue(item.getHistory().lastAlgorithm())
 
 if __name__ == '__main__':
     unittest.main()

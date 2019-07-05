@@ -113,13 +113,13 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
  *
  */
 void SumSpectra::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<CommonBinsValidator>()),
                   "The workspace containing the spectra to be summed.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm. "
       " A workspace of this name will be created and stored in the Analysis "
       "Data Service.");
@@ -132,7 +132,7 @@ void SumSpectra::init() {
                   "The last Workspace index to be included in the summing");
 
   declareProperty(
-      make_unique<Kernel::ArrayProperty<int>>("ListOfWorkspaceIndices"),
+      std::make_unique<Kernel::ArrayProperty<int>>("ListOfWorkspaceIndices"),
       "A list of workspace indices as a string with ranges, for "
       "example: 5-10,15,20-23. \n"
       "Optional: if not specified, then the "
@@ -164,7 +164,7 @@ void SumSpectra::init() {
                   "by the number of spectra contributing to the bin.");
   setPropertySettings(
       "MultiplyBySpectra",
-      make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "1"));
+      std::make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "1"));
 }
 
 /*

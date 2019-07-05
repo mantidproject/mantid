@@ -332,7 +332,7 @@ void EstimateFitParameters::initConcrete() {
                   "Number of parameter sets to output to "
                   "OutputWorkspace. Unused if OutputWorkspace "
                   "isn't set. (Monte Carlo only)");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output,
                       Mantid::API::PropertyMode::Optional),
                   "Optional: A table workspace with parameter sets producing "

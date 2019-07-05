@@ -33,10 +33,10 @@
 #include "FunctionCurve.h"
 #include "Graph.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "Matrix.h"
 #include "PlotCurve.h"
 #include "Table.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QCheckBox>
 #include <QCloseEvent>

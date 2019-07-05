@@ -5,18 +5,18 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from qtpy.QtWidgets import QApplication, QWidget
 
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class LoadRunWidgetPresenterTest(unittest.TestCase):
+class LoadRunWidgetPresenterTest(GuiTest):
     def run_test_with_and_without_threading(test_function):
         def run_twice(self):
             test_function(self)
@@ -29,12 +29,11 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            self._qapp.processEvents()
+            QApplication.instance().processEvents()
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QWidget()
 
         setup_context_for_tests(self)
         self.data_context.instrument = 'EMU'
@@ -54,7 +53,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def mock_loading_via_user_input_run(self, workspace, filename, run):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            return_value=(workspace, run, filename))
+            return_value=(workspace, run, filename, False))
         self.view.set_run_edit_text("1234")
 
     # ------------------------------------------------------------------------------------------------------------------

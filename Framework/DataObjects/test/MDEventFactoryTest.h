@@ -7,11 +7,11 @@
 #ifndef MANTID_DATAOBJECTS_MDEVENTFACTORYTEST_H_
 #define MANTID_DATAOBJECTS_MDEVENTFACTORYTEST_H_
 
-#include <MantidKernel/System.h>
-#include <MantidKernel/Timer.h>
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
-#include <MantidDataObjects/MDEventFactory.h>
+#include "MantidDataObjects/MDEventFactory.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;

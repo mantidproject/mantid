@@ -81,10 +81,10 @@ void PoldiAnalyseResiduals::addValue(
 
 /// Initialize algorithm
 void PoldiAnalyseResiduals::init() {
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "MeasuredCountData", "", Direction::Input),
                   "Input workspace containing the measured data.");
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "FittedCountData", "", Direction::Input),
                   "Input workspace containing the fitted data.");
   declareProperty("LambdaMin", 1.1, "Minimum wavelength to be considered.");
@@ -96,7 +96,7 @@ void PoldiAnalyseResiduals::init() {
       "MaxRelativeChange", 1.0,
       "Relative change in counts (in percent) that should be reached.");
 
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Workspace containing the residual correlation spectrum.");
 }
