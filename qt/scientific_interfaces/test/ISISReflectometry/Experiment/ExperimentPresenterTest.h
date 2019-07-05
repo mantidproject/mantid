@@ -245,6 +245,20 @@ public:
     runTestForValidTransmissionRunRange(range, boost::none);
   }
 
+  void testSetValidTransmissionParams() {
+    auto presenter = makePresenter();
+    auto const params = "-0.02";
+
+    EXPECT_CALL(m_view, getTransmissionStitchParams()).WillOnce(Return(params));
+    EXPECT_CALL(m_view, showTransmissionStitchParamsValid());
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(
+        presenter.experiment().transmissionStitchOptions().rebinParameters(),
+        params);
+    verifyAndClear();
+  }
+
   void testSetStitchOptions() {
     auto presenter = makePresenter();
     auto const optionsString = "Params=0.02";
