@@ -149,8 +149,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writeStrAttributeToGroupHelper(rootGroup, NX_CLASS, NX_ENTRY);
 
   const size_t ROOT_INDEX = compInfo.root();
-  const size_t SAMPLE_INDEX = compInfo.sample();
-  const int SOURCE_INDEX = compInfo.source();
+  // const size_t SAMPLE_INDEX = compInfo.sample();
+  // const int SOURCE_INDEX = compInfo.source();
 
   /*
   ==============================================================================================================
