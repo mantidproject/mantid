@@ -78,7 +78,7 @@
          <item>
           <widget class="QCheckBox" name="ckRestrictInputDataNames">
            <property name="text">
-            <string>Restrict allowed input files by name</string>
+            <string>Restrict allowed input files by name (recommended)</string>
            </property>
            <property name="checked">
             <bool>true</bool>
