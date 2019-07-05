@@ -25,7 +25,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._view = view
         self._model = model
         self.context = context
-        self._plot_window = None
         self._view.on_plot_button_clicked(self.handle_data_updated)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self._view.on_plot_type_changed(self.handle_plot_type_changed)
@@ -33,6 +32,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.fit_observer = GenericObserver(self.handle_fit_completed)
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
+        self.instrument_observer = GenericObserver(self.handle_instrument_changed)
         self.keep = False
 
     def show(self):
@@ -182,3 +182,9 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             self._view.set_raw_checkbox_state(False)
         else:
             self._view.set_raw_checkbox_state(True)
+
+    def handle_instrument_changed(self):
+        if self._model.plot_figure is not None:
+            from matplotlib import pyplot as plt
+            plt.close(self._model.plot_figure)
+        self._model.close_plot()
