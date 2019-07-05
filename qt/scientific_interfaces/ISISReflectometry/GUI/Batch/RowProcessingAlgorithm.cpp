@@ -140,6 +140,9 @@ void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
 
   updateTransmissionWorkspaceProperties(
       properties, perThetaDefaults->transmissionWorkspaceNames());
+  AlgorithmProperties::update(
+      "TransmissionProcessingInstructions",
+      perThetaDefaults->transmissionProcessingInstructions(), properties);
   updateMomentumTransferProperties(properties, perThetaDefaults->qRange());
   AlgorithmProperties::update("ScaleFactor", perThetaDefaults->scaleFactor(),
                               properties);

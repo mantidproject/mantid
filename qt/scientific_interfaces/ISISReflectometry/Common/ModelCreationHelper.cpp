@@ -287,7 +287,8 @@ std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard() {
   return std::vector<PerThetaDefaults>{
       // wildcard row with no angle
       PerThetaDefaults(boost::none, TransmissionRunPair("22345", "22346"),
-                       boost::none, RangeInQ(0.007, 0.01, 1.1), 0.7,
+                       ProcessingInstructions("5-6"),
+                       RangeInQ(0.007, 0.01, 1.1), 0.7,
                        ProcessingInstructions("1")),
       // two angle rows
       PerThetaDefaults(0.5, TransmissionRunPair("22347", ""), boost::none,
@@ -296,7 +297,7 @@ std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard() {
       PerThetaDefaults(
           2.3, TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
                                    std::vector<std::string>{"22358", "22359"}),
-          boost::none, RangeInQ(0.009, 0.03, 1.3), 0.9,
+          ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9,
           ProcessingInstructions("4-6"))};
 }
 
@@ -323,8 +324,8 @@ FloodCorrections makeFloodCorrections() {
 }
 
 TransmissionStitchOptions makeTransmissionStitchOptions() {
-  return TransmissionStitchOptions(RangeInLambda{7.5, 9.2}, RebinParameters(),
-                                   true);
+  return TransmissionStitchOptions(RangeInLambda{7.5, 9.2},
+                                   RebinParameters("-0.02"), true);
 }
 
 TransmissionStitchOptions makeEmptyTransmissionStitchOptions() {
