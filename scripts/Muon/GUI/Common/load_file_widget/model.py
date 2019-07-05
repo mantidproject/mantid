@@ -113,3 +113,7 @@ class BrowseFileWidgetModel(object):
     @current_runs.setter
     def current_runs(self, value):
         self._data_context.current_runs = value
+
+    @property
+    def current_filenames(self):
+        return self._data_context.current_filenames

@@ -112,13 +112,20 @@ class BrowseFileWidgetPresenter(object):
         self._load_thread = self.create_load_thread()
         self._load_thread.threadWrapperSetUp(self.disable_loading,
                                              self.handle_load_thread_finished,
-                                             self._view.warning_popup)
+                                             self.handle_load_error)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
+
+    def handle_load_error(self, message):
+        self.thread_success = False
+        self._view.warning_popup(message)
 
     def handle_load_thread_finished(self):
         self._load_thread.deleteLater()
         self._load_thread = None
+
+        if not self.thread_success:
+            self.filenames = self._model.current_filenames
 
         self.on_loading_finished()
 
@@ -152,6 +159,7 @@ class BrowseFileWidgetPresenter(object):
         self._model.clear()
 
     def disable_loading(self):
+        self.thread_success = True
         self._view.disable_load_buttons()
 
     def enable_loading(self):

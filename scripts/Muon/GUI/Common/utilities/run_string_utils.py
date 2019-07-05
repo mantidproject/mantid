@@ -179,3 +179,7 @@ def decrement_run_string(run_string, decrement_by=1):
     run_list = run_string_to_list(run_string)
     run_list = decrement_run_list(run_list, decrement_by)
     return run_list_to_string(run_list)
+
+
+def flatten_run_list(run_list):
+    return [item for sublist in run_list for item in sublist]
