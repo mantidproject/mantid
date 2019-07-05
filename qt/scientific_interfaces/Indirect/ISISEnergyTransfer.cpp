@@ -1025,9 +1025,14 @@ void ISISEnergyTransfer::setPlotTimeEnabled(bool enable) {
 }
 
 void ISISEnergyTransfer::setSaveEnabled(bool enable) {
-  m_uiForm.pbSave->setEnabled(!m_outputWorkspaces.empty() ? enable : false);
-  m_uiForm.loSaveFormats->setEnabled(!m_outputWorkspaces.empty() ? enable
-                                                                 : false);
+  enable = !m_outputWorkspaces.empty() ? enable : false;
+  m_uiForm.pbSave->setEnabled(enable);
+  m_uiForm.ckSaveAclimax->setEnabled(enable);
+  m_uiForm.ckSaveASCII->setEnabled(enable);
+  m_uiForm.ckSaveDaveGrp->setEnabled(enable);
+  m_uiForm.ckSaveNexus->setEnabled(enable);
+  m_uiForm.ckSaveNXSPE->setEnabled(enable);
+  m_uiForm.ckSaveSPE->setEnabled(enable);
 }
 
 void ISISEnergyTransfer::updateRunButton(bool enabled,
@@ -1038,10 +1043,11 @@ void ISISEnergyTransfer::updateRunButton(bool enabled,
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged") {
-    setPlotSpectrumEnabled(enableOutputButtons == "enable");
-    setPlotContourEnabled(enableOutputButtons == "enable");
-    setPlotTimeEnabled(enableOutputButtons == "enable");
-    setSaveEnabled(enableOutputButtons == "enable");
+    auto const enableButtons = enableOutputButtons == "enable";
+    setPlotSpectrumEnabled(enableButtons);
+    setPlotContourEnabled(enableButtons);
+    setPlotTimeEnabled(enableButtons);
+    setSaveEnabled(enableButtons);
   }
 }
 
