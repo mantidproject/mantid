@@ -9,6 +9,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+TransmissionStitchOptions::TransmissionStitchOptions()
+    : m_overlapRange(boost::none), m_rebinParameters(), m_scaleRHS(false) {}
+
 TransmissionStitchOptions::TransmissionStitchOptions(
     boost::optional<RangeInLambda> overlapRange,
     RebinParameters rebinParameters, bool scaleRHS)
@@ -27,9 +30,9 @@ bool TransmissionStitchOptions::scaleRHS() const { return m_scaleRHS; }
 
 bool operator==(TransmissionStitchOptions const &lhs,
                 TransmissionStitchOptions const &rhs) {
-  lhs.overlapRange() == rhs.overlapRange() &&
-      lhs.rebinParameters() == rhs.rebinParameters() &&
-      lhs.scaleRHS() == rhs.scaleRHS();
+  return lhs.overlapRange() == rhs.overlapRange() &&
+         lhs.rebinParameters() == rhs.rebinParameters() &&
+         lhs.scaleRHS() == rhs.scaleRHS();
 }
 
 bool operator!=(TransmissionStitchOptions const &lhs,

@@ -322,15 +322,20 @@ FloodCorrections makeFloodCorrections() {
                           boost::optional<std::string>("test_workspace"));
 }
 
-RangeInLambda makeTransmissionRunRange() { return RangeInLambda(7.5, 9.2); }
+TransmissionStitchOptions makeTransmissionStitchOptions() {
+  return TransmissionStitchOptions(RangeInLambda{7.5, 9.2}, RebinParameters(),
+                                   true);
+}
 
-RangeInLambda makeEmptyTransmissionRunRange() { return RangeInLambda{0, 0}; }
+TransmissionStitchOptions makeEmptyTransmissionStitchOptions() {
+  return TransmissionStitchOptions(RangeInLambda{0, 0}, std::string(), false);
+}
 
 Experiment makeExperiment() {
   return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample,
                     SummationType::SumInQ, true, true,
                     makePolarizationCorrections(), makeFloodCorrections(),
-                    makeTransmissionRunRange(), makeStitchOptions(),
+                    makeTransmissionStitchOptions(), makeStitchOptions(),
                     makePerThetaDefaultsWithTwoAnglesAndWildcard());
 }
 
@@ -339,7 +344,8 @@ Experiment makeEmptyExperiment() {
                     SummationType::SumInLambda, false, false,
                     PolarizationCorrections(PolarizationCorrectionType::None),
                     FloodCorrections(FloodCorrectionType::Workspace),
-                    boost::none, std::map<std::string, std::string>(),
+                    TransmissionStitchOptions(),
+                    std::map<std::string, std::string>(),
                     std::vector<PerThetaDefaults>());
 }
 

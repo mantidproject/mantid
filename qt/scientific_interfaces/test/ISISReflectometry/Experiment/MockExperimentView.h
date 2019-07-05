@@ -73,6 +73,8 @@ public:
   MOCK_METHOD1(setTransmissionScaleRHSWorkspace, void(bool));
   MOCK_METHOD0(showTransmissionRangeValid, void(void));
   MOCK_METHOD0(showTransmissionRangeInvalid, void(void));
+  MOCK_METHOD0(showTransmissionStitchParamsValid, void(void));
+  MOCK_METHOD0(showTransmissionStitchParamsInvalid, void(void));
   MOCK_CONST_METHOD0(getPolarizationCorrectionType, std::string());
   MOCK_METHOD1(setPolarizationCorrectionType, void(std::string const &));
   MOCK_CONST_METHOD0(getCRho, double());

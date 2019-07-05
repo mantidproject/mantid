@@ -51,9 +51,16 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto transmissionRunRange = RangeInLambda(
       defaults.getDoubleOrZero("StartOverlap", "TransRunStartOverlap"),
       defaults.getDoubleOrZero("EndOverlap", "TransRunEndOverlap"));
-
   if (!transmissionRunRange.isValid(false))
     throw std::invalid_argument("Transmission run overlap range is invalid");
+
+  auto transmissionStitchParams = defaults.getStringOrEmpty(
+      "TransmissionStitchParams", "TransmissionStitchParams");
+  auto transmissionScaleRHS =
+      defaults.getBoolOrTrue("TransmissionScaleRHS", "TransmissionScaleRHS");
+
+  auto transmissionStitchOptions = TransmissionStitchOptions(
+      transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
 
   // We currently don't specify stitch parameters in the parameters file
   auto stitchParameters = std::map<std::string, std::string>();
@@ -94,7 +101,7 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   return Experiment(
       analysisMode, reductionType, summationType, includePartialBins, debug,
       std::move(polarizationCorrections), std::move(floodCorrections),
-      std::move(transmissionRunRange), std::move(stitchParameters),
+      std::move(transmissionStitchOptions), std::move(stitchParameters),
       std::move(perThetaValidationResult.assertValid()));
 }
 } // unnamed namespace

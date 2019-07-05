@@ -24,6 +24,18 @@ void showAsInvalid(QDoubleSpinBox &spinBox) {
 }
 
 void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
+
+void showAsInvalid(QLineEdit &lineEdit) {
+  auto palette = lineEdit.palette();
+  palette.setColor(QPalette::Base, QColor("#ffb8ad"));
+  lineEdit.setPalette(palette);
+}
+
+void showAsValid(QLineEdit &lineEdit) {
+  auto palette = lineEdit.palette();
+  palette.setColor(QPalette::Base, Qt::transparent);
+  lineEdit.setPalette(palette);
+}
 } // namespace
 
 /** Constructor
@@ -58,15 +70,11 @@ void ExperimentView::showPerAngleThetasNonUnique(double tolerance) {
 }
 
 void ExperimentView::showStitchParametersValid() {
-  auto palette = stitchOptionsLineEdit().palette();
-  palette.setColor(QPalette::Base, Qt::transparent);
-  stitchOptionsLineEdit().setPalette(palette);
+  showAsValid(stitchOptionsLineEdit());
 }
 
 void ExperimentView::showStitchParametersInvalid() {
-  auto palette = stitchOptionsLineEdit().palette();
-  palette.setColor(QPalette::Base, QColor("#ffb8ad"));
-  stitchOptionsLineEdit().setPalette(palette);
+  showAsInvalid(stitchOptionsLineEdit());
 }
 
 void ExperimentView::subscribe(ExperimentViewSubscriber *notifyee) {
@@ -726,6 +734,14 @@ void ExperimentView::showTransmissionRangeInvalid() {
 void ExperimentView::showTransmissionRangeValid() {
   showAsValid(*m_ui.startOverlapEdit);
   showAsValid(*m_ui.endOverlapEdit);
+}
+
+void ExperimentView::showTransmissionStitchParamsValid() {
+  showAsValid(*m_ui.transStitchParamsEdit);
+}
+
+void ExperimentView::showTransmissionStitchParamsInvalid() {
+  showAsInvalid(*m_ui.transStitchParamsEdit);
 }
 
 void ExperimentView::setPolarizationCorrectionType(std::string const &type) {

@@ -72,7 +72,8 @@ public:
   void testValidTransmissionRunRange() {
     auto result = getDefaults("Experiment");
     auto const expected = RangeInLambda{10.0, 12.0};
-    TS_ASSERT_EQUALS(result.transmissionRunRange(), expected);
+    TS_ASSERT_EQUALS(result.transmissionStitchOptions().overlapRange(),
+                     expected);
   }
 
   void testInvalidTransmissionRunRange() {

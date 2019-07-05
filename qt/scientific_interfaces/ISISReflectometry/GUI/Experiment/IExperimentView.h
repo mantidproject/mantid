@@ -92,6 +92,8 @@ public:
   virtual void setTransmissionScaleRHSWorkspace(bool enable) = 0;
   virtual void showTransmissionRangeInvalid() = 0;
   virtual void showTransmissionRangeValid() = 0;
+  virtual void showTransmissionStitchParamsInvalid() = 0;
+  virtual void showTransmissionStitchParamsValid() = 0;
 
   virtual std::string getPolarizationCorrectionType() const = 0;
   virtual void setPolarizationCorrectionType(std::string const &type) = 0;

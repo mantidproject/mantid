@@ -544,7 +544,9 @@ public:
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     auto const expected = RangeInLambda{10.0, 12.0};
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), expected);
+    TS_ASSERT_EQUALS(
+        presenter.experiment().transmissionStitchOptions().overlapRange(),
+        expected);
     verifyAndClear();
   }
 
@@ -591,28 +593,29 @@ private:
   double m_thetaTolerance{0.01};
 
   Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
-    return Experiment(analysisMode, ReductionType::Normal,
-                      SummationType::SumInLambda, false, false,
-                      makeEmptyPolarizationCorrections(),
-                      makeFloodCorrections(), makeEmptyTransmissionRunRange(),
-                      makeEmptyStitchOptions(), makePerThetaDefaults());
+    return Experiment(
+        analysisMode, ReductionType::Normal, SummationType::SumInLambda, false,
+        false, makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+        makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(),
+        makePerThetaDefaults());
   }
 
   Experiment makeModelWithReduction(SummationType summationType,
                                     ReductionType reductionType,
                                     bool includePartialBins) {
-    return Experiment(AnalysisMode::PointDetector, reductionType, summationType,
-                      includePartialBins, false,
-                      makeEmptyPolarizationCorrections(),
-                      makeFloodCorrections(), makeEmptyTransmissionRunRange(),
-                      makeEmptyStitchOptions(), makePerThetaDefaults());
+    return Experiment(
+        AnalysisMode::PointDetector, reductionType, summationType,
+        includePartialBins, false, makeEmptyPolarizationCorrections(),
+        makeFloodCorrections(), makeEmptyTransmissionStitchOptions(),
+        makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
   Experiment makeModelWithDebug(bool debug) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, debug,
                       makeEmptyPolarizationCorrections(),
-                      makeFloodCorrections(), makeEmptyTransmissionRunRange(),
+                      makeFloodCorrections(),
+                      makeEmptyTransmissionStitchOptions(),
                       makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
@@ -622,16 +625,18 @@ private:
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
                       makeEmptyPolarizationCorrections(),
-                      makeFloodCorrections(), makeEmptyTransmissionRunRange(),
+                      makeFloodCorrections(),
+                      makeEmptyTransmissionStitchOptions(),
                       makeEmptyStitchOptions(), std::move(perThetaList));
   }
 
   Experiment makeModelWithTransmissionRunRange(RangeInLambda range) {
-    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                      SummationType::SumInLambda, false, false,
-                      makeEmptyPolarizationCorrections(),
-                      makeFloodCorrections(), std::move(range),
-                      makeEmptyStitchOptions(), makePerThetaDefaults());
+    return Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, false,
+        makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+        TransmissionStitchOptions(std::move(range), std::string(), false),
+        makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
   Experiment
@@ -641,8 +646,8 @@ private:
                       SummationType::SumInLambda, false, false,
                       std::move(polarizationCorrections),
                       std::move(floodCorrections),
-                      makeEmptyTransmissionRunRange(), makeEmptyStitchOptions(),
-                      makePerThetaDefaults());
+                      makeEmptyTransmissionStitchOptions(),
+                      makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
   ExperimentPresenter
@@ -759,7 +764,9 @@ private:
         .WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), result);
+    TS_ASSERT_EQUALS(
+        presenter.experiment().transmissionStitchOptions().overlapRange(),
+        result);
     verifyAndClear();
   }
 
@@ -771,8 +778,9 @@ private:
         .WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(),
-                     boost::none);
+    TS_ASSERT_EQUALS(
+        presenter.experiment().transmissionStitchOptions().overlapRange(),
+        boost::none);
     verifyAndClear();
   }
 

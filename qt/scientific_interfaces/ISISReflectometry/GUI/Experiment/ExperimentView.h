@@ -72,6 +72,8 @@ public:
   void setTransmissionScaleRHSWorkspace(bool enable) override;
   void showTransmissionRangeInvalid() override;
   void showTransmissionRangeValid() override;
+  void showTransmissionStitchParamsInvalid() override;
+  void showTransmissionStitchParamsValid() override;
 
   std::string getPolarizationCorrectionType() const override;
   void setPolarizationCorrectionType(std::string const &type) override;

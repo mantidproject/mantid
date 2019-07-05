@@ -26,6 +26,7 @@ using RebinParameters = std::string;
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions {
 public:
+  TransmissionStitchOptions();
   TransmissionStitchOptions(boost::optional<RangeInLambda> overlapRange,
                             RebinParameters rebinParameters, bool scaleRHS);
 

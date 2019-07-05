@@ -60,17 +60,25 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   AlgorithmProperties::updateFromMap(properties, row.reductionOptions());
 }
 
-void updateTransmissionRangeProperties(
+void updateTransmissionStitchProperties(
     AlgorithmRuntimeProps &properties,
-    boost::optional<RangeInLambda> const &range) {
-  if (!range)
-    return;
+    TransmissionStitchOptions const &options) {
+  auto range = options.overlapRange();
+  if (range) {
+    if (range->minSet())
+      AlgorithmProperties::update("StartOverlap", range->min(), properties);
 
-  if (range->minSet())
-    AlgorithmProperties::update("StartOverlap", range->min(), properties);
+    if (range->maxSet())
+      AlgorithmProperties::update("EndOverlap", range->max(), properties);
+  }
 
-  if (range->maxSet())
-    AlgorithmProperties::update("EndOverlap", range->max(), properties);
+  if (!options.rebinParameters().empty()) {
+    AlgorithmProperties::update("Params", options.rebinParameters(),
+                                properties);
+  }
+
+  AlgorithmProperties::update("ScaleRHSWorkspace", options.scaleRHS(),
+                              properties);
 }
 
 void updatePolarizationCorrectionProperties(
@@ -118,8 +126,8 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
                               properties);
   AlgorithmProperties::update("IncludePartialBins",
                               experiment.includePartialBins(), properties);
-  updateTransmissionRangeProperties(properties,
-                                    experiment.transmissionRunRange());
+  updateTransmissionStitchProperties(properties,
+                                     experiment.transmissionStitchOptions());
   updatePolarizationCorrectionProperties(properties,
                                          experiment.polarizationCorrections());
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
