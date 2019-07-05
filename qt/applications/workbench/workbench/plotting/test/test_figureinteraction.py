@@ -138,10 +138,10 @@ class FigureInteractionTest(unittest.TestCase):
                 self.assertEqual(2, qmenu_call3.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
-        self._test_toggle_normalization(errobars_on=False)
+        self._test_toggle_normalization(errorbars_on=False)
 
     def test_toggle_normalization_with_errorbars(self):
-        self._test_toggle_normalization(errobars_on=True)
+        self._test_toggle_normalization(errorbars_on=True)
 
     def test_correct_yunit_label_when_overplotting_after_normaliztion_toggle(self):
         fig = plot([self.ws], spectrum_nums=[1], errors=True,
@@ -180,8 +180,8 @@ class FigureInteractionTest(unittest.TestCase):
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 
-    def _test_toggle_normalization(self, errobars_on):
-        fig = plot([self.ws], spectrum_nums=[1], errors=errobars_on,
+    def _test_toggle_normalization(self, errorbars_on):
+        fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,
                    plot_kwargs={'distribution': True})
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)

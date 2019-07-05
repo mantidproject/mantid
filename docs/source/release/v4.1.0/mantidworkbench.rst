@@ -21,6 +21,7 @@ Improvements
 - Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data
 - You can now save, load and delete custom layouts from the settings menu with quick access to user layout in the view
   menu.
+- The plot options dialog has been improved to offer you more control over your figures
 
 Bugfixes
 ########
