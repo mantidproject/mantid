@@ -5,12 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
+
 #include <QLabel>
 #include <QLineEdit>
 #include <QString>
 #include <QValidator>
 #include <cmath>
 
+using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace // anonymous
@@ -22,6 +25,11 @@ template <typename T> void sortPair(std::pair<T, T> &pair) {
     pair.second = temp;
   }
 }
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 } // anonymous namespace
 
 namespace MantidQt {
@@ -272,6 +280,20 @@ bool UserInputValidator::checkNotEqual(const QString &name, double x, double y,
     return false;
   }
 
+  return true;
+}
+
+/**
+ * Checks that a workspace exists within the ADS.
+ *
+ * @param workspaceName Name of the workspace
+ * @return True if the workspace is in the ADS
+ */
+bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName) {
+  if (!doesExistInADS(workspaceName.toStdString())) {
+    m_errorMessages.append(workspaceName + " could not be found.");
+    return false;
+  }
   return true;
 }
 

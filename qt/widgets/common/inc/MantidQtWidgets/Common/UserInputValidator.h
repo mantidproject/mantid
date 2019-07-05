@@ -7,6 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
 #define MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
@@ -19,6 +20,15 @@ class QLineEdit;
 class QLabel;
 class QString;
 class QStringList;
+
+namespace {
+
+template <typename T = MatrixWorkspace, typename R = MatrixWorkspace_sptr>
+R getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -68,6 +78,15 @@ public:
   /// Checks two values are not equal
   bool checkNotEqual(const QString &name, double x, double y = 0.0,
                      double tolerance = 0.00000001);
+
+  /// Checks that a workspace has the correct workspace type
+  template <typename T = Mantid::API::MatrixWorkspace,
+            typename R = Mantid::API::MatrixWorkspace_sptr>
+  bool checkWorkspaceType(QString const &workspaceName,
+                          QString const &validType);
+  /// Checks that a workspace exists in the ADS
+  bool checkWorkspaceExists(QString const &workspaceName);
+
   /// Add a custom error message to the list.
   void addErrorMessage(const QString &message);
 
@@ -84,6 +103,27 @@ private:
   /// Any raised error messages.
   QStringList m_errorMessages;
 };
+
+/**
+ * Checks if the workspace has the correct type.
+ *
+ * @param workspaceName The name of the workspace
+ * @param validType The type which is valid
+ * @return True if the workspace has the correct type
+ */
+template <typename T, typename R>
+bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
+                                            QString const &validType) {
+  if (this->checkWorkspaceExists(workspaceName)) {
+    if (!getADSWorkspace<T, R>(workspaceName.toStdString())) {
+      m_errorMessages.append(workspaceName + " is not a " + validType + ".");
+      return false;
+    } else
+      return true;
+  }
+  return false;
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -31,8 +31,7 @@ public:
   bool validate() override;
 
 private slots:
-  void plotRqwContour();
-  void setDefaultQAndEnergy();
+  void handleDataReady();
   void sqwAlgDone(bool error);
 
   void runClicked();
@@ -46,6 +45,8 @@ private slots:
                        QString const tooltip = "");
 
 private:
+  void plotRqwContour(std::string const &sampleName);
+  void setDefaultQAndEnergy();
   void setQRange(std::tuple<double, double> const &axisRange);
   void setEnergyRange(std::tuple<double, double> const &axisRange);
   void setFileExtensionsByName(bool filter) override;
