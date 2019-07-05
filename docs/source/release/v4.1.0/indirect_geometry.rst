@@ -42,6 +42,7 @@ Improvements
 - :ref:`BASISReduction <algm-BASISReduction>` permits now retaining events only within a time window.
 - :ref:`BASISReduction <algm-BASISReduction>` can output now the powder diffraction spectra.
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between run with old and new DAS.
+- :ref:`Abins <algm-Abins>` permits individual numbered atom contributions to simulated INS spectrum to be specified, alongside the existing option to select by element.
 
 
 Data Analysis Interface
