@@ -33,6 +33,7 @@ public slots:
   bool validate() override;
 
 private slots:
+  void handleDataReady(QString const &dataName) override;
   void algorithmComplete(bool error);
 
   void setCurrentGroupingOption(QString const &option);

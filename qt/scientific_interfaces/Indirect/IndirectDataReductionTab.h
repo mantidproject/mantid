@@ -89,7 +89,9 @@ protected:
                           QString reflection = "");
 
 private slots:
-  virtual void handleDataReady(QString const &dataName) = 0;
+  virtual void handleDataReady(QString const &dataName) {
+    UNUSED_ARG(dataName);
+  };
   void tabExecutionComplete(bool error);
 
 private:

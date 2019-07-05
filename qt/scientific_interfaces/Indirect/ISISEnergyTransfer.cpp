@@ -237,6 +237,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
+  connect(m_uiForm.dsCalibrationFile, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(QString const &)));
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
@@ -279,9 +281,12 @@ bool ISISEnergyTransfer::validate() {
   }
 
   // Calibration file input
-  if (m_uiForm.ckUseCalib->isChecked() &&
-      !m_uiForm.dsCalibrationFile->isValid()) {
-    uiv.addErrorMessage("Calibration file/workspace is invalid.");
+  if (m_uiForm.ckUseCalib->isChecked()) {
+    auto const calibName = m_uiForm.dsCalibrationFile->getCurrentDataName();
+    uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibrationFile);
+    uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
+        calibName, "MatrixWorkspace");
+    uiv.checkWorkspaceNumberOfHistograms(calibName, 1);
   }
 
   QString groupingError = validateDetectorGrouping();
@@ -387,6 +392,21 @@ bool ISISEnergyTransfer::validate() {
   showMessageBox(error);
 
   return uiv.isAllInputValid();
+}
+
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void ISISEnergyTransfer::handleDataReady(QString const &dataName) {
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibrationFile);
+  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
+      dataName, "MatrixWorkspace");
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
 }
 
 bool ISISEnergyTransfer::numberInCorrectRange(

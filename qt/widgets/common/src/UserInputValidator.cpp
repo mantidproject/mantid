@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QLabel>
 #include <QLineEdit>
@@ -52,7 +53,7 @@ bool UserInputValidator::checkFieldIsNotEmpty(const QString &name,
                                               QLabel *errorLabel) {
   if (field->text().trimmed().isEmpty()) {
     setErrorLabel(errorLabel, false);
-    m_errorMessages.append(name + " has been left blank.");
+    addErrorMessage(name + " has been left blank.");
     return false;
   } else {
     setErrorLabel(errorLabel, true);
@@ -81,7 +82,7 @@ bool UserInputValidator::checkFieldIsValid(const QString &errorMessage,
     return true;
   } else {
     setErrorLabel(errorLabel, false);
-    m_errorMessages.append(errorMessage);
+    addErrorMessage(errorMessage);
     return false;
   }
 }
@@ -98,7 +99,7 @@ bool UserInputValidator::checkFieldIsValid(const QString &errorMessage,
 bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(
     const QString &name, WorkspaceSelector *workspaceSelector) {
   if (workspaceSelector->currentText() == "") {
-    m_errorMessages.append("No " + name + " workspace has been selected.");
+    addErrorMessage("No " + name + " workspace has been selected.");
     return false;
   }
 
@@ -115,7 +116,7 @@ bool UserInputValidator::checkWorkspaceSelectorIsNotEmpty(
 bool UserInputValidator::checkMWRunFilesIsValid(const QString &name,
                                                 MWRunFiles *widget) {
   if (!widget->isValid()) {
-    m_errorMessages.append(name + " file error: " + widget->getFileProblem());
+    addErrorMessage(name + " file error: " + widget->getFileProblem());
     return false;
   }
 
@@ -132,7 +133,7 @@ bool UserInputValidator::checkMWRunFilesIsValid(const QString &name,
 bool UserInputValidator::checkDataSelectorIsValid(const QString &name,
                                                   DataSelector *widget) {
   if (!widget->isValid()) {
-    m_errorMessages.append(name + " error: " + widget->getProblem());
+    addErrorMessage(name + " error: " + widget->getProblem());
     return false;
   }
 
@@ -149,13 +150,12 @@ bool UserInputValidator::checkDataSelectorIsValid(const QString &name,
 bool UserInputValidator::checkValidRange(const QString &name,
                                          std::pair<double, double> range) {
   if (range.second == range.first) {
-    m_errorMessages.append(name + " must have a non-zero width.");
+    addErrorMessage(name + " must have a non-zero width.");
     return false;
   }
 
   if (range.second < range.first) {
-    m_errorMessages.append("The start of " + name +
-                           " must be less than the end.");
+    addErrorMessage("The start of " + name + " must be less than the end.");
     return false;
   }
 
@@ -180,7 +180,7 @@ bool UserInputValidator::checkRangesDontOverlap(
                           .arg(rangeA.second)
                           .arg(rangeB.first)
                           .arg(rangeB.second);
-    m_errorMessages.append(message);
+    addErrorMessage(message);
     return false;
   }
 
@@ -205,8 +205,7 @@ bool UserInputValidator::checkRangeIsEnclosed(const QString &outerName,
   sortPair(outer);
 
   if (inner.first < outer.first || inner.second > outer.second) {
-    m_errorMessages.append(outerName + " must completely enclose " + innerName +
-                           ".");
+    addErrorMessage(outerName + " must completely enclose " + innerName + ".");
     return false;
   }
 
@@ -229,20 +228,19 @@ bool UserInputValidator::checkBins(double lower, double binWidth, double upper,
                                    double tolerance) {
   double range = upper - lower;
   if (range < 0) {
-    m_errorMessages.append(
-        "The start of a binning range must be less than the end.");
+    addErrorMessage("The start of a binning range must be less than the end.");
     return false;
   }
   if (range == 0) {
-    m_errorMessages.append("Binning ranges must be non-zero.");
+    addErrorMessage("Binning ranges must be non-zero.");
     return false;
   }
   if (binWidth == 0) {
-    m_errorMessages.append("Bin width must be non-zero.");
+    addErrorMessage("Bin width must be non-zero.");
     return false;
   }
   if (binWidth < 0) {
-    m_errorMessages.append("Bin width must be a positive value.");
+    addErrorMessage("Bin width must be a positive value.");
     return false;
   }
 
@@ -250,8 +248,7 @@ bool UserInputValidator::checkBins(double lower, double binWidth, double upper,
     range -= binWidth;
 
   if (std::abs(range) > tolerance) {
-    m_errorMessages.append(
-        "Bin width must allow for even splitting of the range.");
+    addErrorMessage("Bin width must allow for even splitting of the range.");
     return false;
   }
 
@@ -276,7 +273,7 @@ bool UserInputValidator::checkNotEqual(const QString &name, double x, double y,
     msg << name.toStdString() << " (" << x << ")"
         << " should not be equal to " << y << ".";
     QString msgStr = QString::fromStdString(msg.str());
-    m_errorMessages.append(msgStr);
+    addErrorMessage(msgStr);
     return false;
   }
 
@@ -291,7 +288,73 @@ bool UserInputValidator::checkNotEqual(const QString &name, double x, double y,
  */
 bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName) {
   if (!doesExistInADS(workspaceName.toStdString())) {
-    m_errorMessages.append(workspaceName + " could not be found.");
+    addErrorMessage(workspaceName + " could not be found.");
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Checks that a workspaces has a valid number of histograms.
+ *
+ * @param workspaceName Name of the workspace
+ * @param validSize The valid number of histograms
+ * @return True if the workspace has the correct size
+ */
+bool UserInputValidator::checkWorkspaceNumberOfHistograms(
+    QString const &workspaceName, std::size_t const &validSize) {
+  if (checkWorkspaceExists(workspaceName))
+    return checkWorkspaceNumberOfHistograms(
+        getADSWorkspace(workspaceName.toStdString()), validSize);
+  return false;
+}
+
+/**
+ * Checks that a workspaces has a valid number of histograms.
+ *
+ * @param workspace The workspace
+ * @param validSize The valid number of histograms
+ * @return True if the workspace has the correct size
+ */
+bool UserInputValidator::checkWorkspaceNumberOfHistograms(
+    MatrixWorkspace_sptr workspace, std::size_t const &validSize) {
+  if (workspace->getNumberHistograms() != validSize) {
+    addErrorMessage(
+        QString::fromStdString(workspace->getName()) + " should contain " +
+        QString::fromStdString(std::to_string(validSize)) + " spectra.");
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Checks that a workspaces has a valid number of bins.
+ *
+ * @param workspaceName Name of the workspace
+ * @param validSize The valid number of bins
+ * @return True if the workspace has the correct size
+ */
+bool UserInputValidator::checkWorkspaceNumberOfBins(
+    QString const &workspaceName, std::size_t const &validSize) {
+  if (checkWorkspaceExists(workspaceName))
+    return checkWorkspaceNumberOfBins(
+        getADSWorkspace(workspaceName.toStdString()), validSize);
+  return false;
+}
+
+/**
+ * Checks that a workspaces has a valid number of bins.
+ *
+ * @param workspace The workspace
+ * @param validSize The valid number of bins
+ * @return True if the workspace has the correct size
+ */
+bool UserInputValidator::checkWorkspaceNumberOfBins(
+    MatrixWorkspace_sptr workspace, std::size_t const &validSize) {
+  if (workspace->x(0).size() != validSize) {
+    addErrorMessage(
+        QString::fromStdString(workspace->getName()) + " should contain " +
+        QString::fromStdString(std::to_string(validSize)) + " bins.");
     return false;
   }
   return true;
@@ -303,7 +366,8 @@ bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName) {
  * @param message :: the message to add to the list
  */
 void UserInputValidator::addErrorMessage(const QString &message) {
-  m_errorMessages.append(message);
+  if (!m_errorMessages.contains(message))
+    m_errorMessages.append(message);
 }
 
 /**

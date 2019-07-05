@@ -21,15 +21,6 @@ class QLabel;
 class QString;
 class QStringList;
 
-namespace {
-
-template <typename T = MatrixWorkspace, typename R = MatrixWorkspace_sptr>
-R getADSWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /**
@@ -86,6 +77,16 @@ public:
                           QString const &validType);
   /// Checks that a workspace exists in the ADS
   bool checkWorkspaceExists(QString const &workspaceName);
+  /// Checks the number of histograms in a workspace
+  bool checkWorkspaceNumberOfHistograms(QString const &workspaceName,
+                                        std::size_t const &validSize);
+  bool checkWorkspaceNumberOfHistograms(Mantid::API::MatrixWorkspace_sptr,
+                                        std::size_t const &validSize);
+  /// Checks the number of bins in a workspace
+  bool checkWorkspaceNumberOfBins(QString const &workspaceName,
+                                  std::size_t const &validSize);
+  bool checkWorkspaceNumberOfBins(Mantid::API::MatrixWorkspace_sptr,
+                                  std::size_t const &validSize);
 
   /// Add a custom error message to the list.
   void addErrorMessage(const QString &message);
@@ -100,6 +101,10 @@ public:
   bool isAllInputValid();
 
 private:
+  template <typename T = Mantid::API::MatrixWorkspace,
+            typename R = Mantid::API::MatrixWorkspace_sptr>
+  R getADSWorkspace(std::string const &workspaceName);
+
   /// Any raised error messages.
   QStringList m_errorMessages;
 };
@@ -114,14 +119,25 @@ private:
 template <typename T, typename R>
 bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
                                             QString const &validType) {
-  if (this->checkWorkspaceExists(workspaceName)) {
+  if (checkWorkspaceExists(workspaceName)) {
     if (!getADSWorkspace<T, R>(workspaceName.toStdString())) {
-      m_errorMessages.append(workspaceName + " is not a " + validType + ".");
+      addErrorMessage(workspaceName + " is not a " + validType + ".");
       return false;
     } else
       return true;
   }
   return false;
+}
+
+/**
+ * Gets a workspace from the ADS.
+ *
+ * @param workspaceName The name of the workspace
+ * @return The workspace
+ */
+template <typename T, typename R>
+R UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
 } // namespace CustomInterfaces
