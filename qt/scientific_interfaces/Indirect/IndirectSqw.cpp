@@ -62,8 +62,8 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleDataReady()));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(QString const &)));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(sqwAlgDone(bool)));
 
@@ -231,17 +231,15 @@ void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
  * Handles the event of data being loaded. Validates the loaded data.
  *
  */
-void IndirectSqw::handleDataReady() {
-  auto const sampleName = m_uiForm.dsSampleInput->getCurrentDataName();
-
+void IndirectSqw::handleDataReady(QString const &dataName) {
   UserInputValidator uiv;
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
   uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
-      sampleName, "MatrixWorkspace");
+      dataName, "MatrixWorkspace");
 
   auto const errorMessage = uiv.generateErrorMessage();
   if (errorMessage.isEmpty()) {
-    plotRqwContour(sampleName.toStdString());
+    plotRqwContour(dataName.toStdString());
     setDefaultQAndEnergy();
   } else {
     emit showMessageBox(errorMessage);

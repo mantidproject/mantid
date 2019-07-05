@@ -31,7 +31,7 @@ public:
   bool validate() override;
 
 private slots:
-  void handleDataReady();
+  void handleDataReady(QString const &dataName) override;
   void sqwAlgDone(bool error);
 
   void runClicked();
@@ -51,8 +51,6 @@ private:
   void setEnergyRange(std::tuple<double, double> const &axisRange);
   void setFileExtensionsByName(bool filter) override;
 
-  Mantid::API::MatrixWorkspace_const_sptr
-  getADSWorkspace(std::string const &name) const;
   std::size_t getOutWsNumberOfSpectra() const;
 
   void setPlotSpectrumIndexMax(int maximum);

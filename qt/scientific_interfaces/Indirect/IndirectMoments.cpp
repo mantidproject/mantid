@@ -47,8 +47,8 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
   m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
   m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleSampleInputReady(const QString &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(const QString &)));
 
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rangeChanged(double, double)));
@@ -124,10 +124,28 @@ bool IndirectMoments::validate() {
 }
 
 /**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void IndirectMoments::handleDataReady(QString const &dataName) {
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
+  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
+      dataName, "MatrixWorkspace");
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (errorMessage.isEmpty()) {
+    plotNewData(dataName);
+  } else {
+    emit showMessageBox(errorMessage);
+  }
+}
+
+/**
  * Clears previous plot data (in both preview and raw plot) and sets the new
  * range bars
  */
-void IndirectMoments::handleSampleInputReady(const QString &filename) {
+void IndirectMoments::plotNewData(QString const &filename) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
 
