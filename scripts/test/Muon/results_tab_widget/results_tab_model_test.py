@@ -15,6 +15,7 @@ import unittest
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import iteritems, mock, string_types
+from mantidqt.utils.qt.testing import GuiTest
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
@@ -114,7 +115,7 @@ def add_logs(workspace_name, logs):
     return workspace
 
 
-class ResultsTabModelTest(unittest.TestCase):
+class ResultsTabModelTest(GuiTest):
     def setUp(self):
         self.f0_height = (2309.2, 16)
         self.f0_centre = (2.1, 0.002)

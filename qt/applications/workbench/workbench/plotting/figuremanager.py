@@ -10,15 +10,8 @@
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 from __future__ import (absolute_import, unicode_literals)
 
-import matplotlib
 import sys
 from functools import wraps
-from matplotlib._pylab_helpers import Gcf
-from matplotlib.axes import Axes
-from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
-from qtpy.QtCore import QObject, Qt
-from qtpy.QtWidgets import QApplication, QLabel
 
 # 3rdparty imports
 import matplotlib
