@@ -245,17 +245,63 @@ public:
     runTestForValidTransmissionRunRange(range, boost::none);
   }
 
-  void testSetValidTransmissionParams() {
+  void testTransmissionParamsAreValidWithPositiveValue() {
+    runTestForValidTransmissionParams("0.02");
+  }
+
+  void testTransmissionParamsAreValidWithNoValues() {
+    runTestForValidTransmissionParams("");
+  }
+
+  void testTransmissionParamsAreValidWithNegativeValue() {
+    runTestForValidTransmissionParams("-0.02");
+  }
+
+  void testTransmissionParamsAreValidWithThreeValues() {
+    runTestForValidTransmissionParams("0.1, -0.02, 5");
+  }
+
+  void testTransmissionParamsAreValidWithFiveValues() {
+    runTestForValidTransmissionParams("0.1, -0.02, 5, 6, 7.9");
+  }
+
+  void testTransmissionParamsIgnoresWhitespace() {
+    runTestForValidTransmissionParams("    0.1  , -0.02 , 5   ");
+  }
+
+  void testTransmissionParamsAreInvalidWithTwoValues() {
+    runTestForInvalidTransmissionParams("1, 2");
+  }
+
+  void testTransmissionParamsAreInvalidWithFourValues() {
+    runTestForInvalidTransmissionParams("1, 2, 3, 4");
+  }
+
+  void testSetTransmissionScaleRHSProperty() {
     auto presenter = makePresenter();
-    auto const params = "-0.02";
+    auto const scaleRHS = false;
+
+    EXPECT_CALL(m_view, getTransmissionScaleRHSWorkspace())
+        .WillOnce(Return(scaleRHS));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(
+        presenter.experiment().transmissionStitchOptions().scaleRHS(),
+        scaleRHS);
+    verifyAndClear();
+  }
+
+  void testSetTransmissionParamsAreInvalidIfContainNonNumericValue() {
+    auto presenter = makePresenter();
+    auto const params = "1,bad";
 
     EXPECT_CALL(m_view, getTransmissionStitchParams()).WillOnce(Return(params));
-    EXPECT_CALL(m_view, showTransmissionStitchParamsValid());
+    EXPECT_CALL(m_view, showTransmissionStitchParamsInvalid());
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(
         presenter.experiment().transmissionStitchOptions().rebinParameters(),
-        params);
+        "");
     verifyAndClear();
   }
 
@@ -897,6 +943,28 @@ private:
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     EXPECT_CALL(m_view, showPerAngleThetasNonUnique(m_thetaTolerance)).Times(1);
     presenter.notifyPerAngleDefaultsChanged(0, 0);
+    verifyAndClear();
+  }
+
+  void runTestForValidTransmissionParams(std::string const &params) {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getTransmissionStitchParams()).WillOnce(Return(params));
+    EXPECT_CALL(m_view, showTransmissionStitchParamsValid());
+    presenter.notifySettingsChanged();
+    TS_ASSERT_EQUALS(
+        presenter.experiment().transmissionStitchOptions().rebinParameters(),
+        params);
+    verifyAndClear();
+  }
+
+  void runTestForInvalidTransmissionParams(std::string const &params) {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getTransmissionStitchParams()).WillOnce(Return(params));
+    EXPECT_CALL(m_view, showTransmissionStitchParamsInvalid());
+    presenter.notifySettingsChanged();
+    TS_ASSERT_EQUALS(
+        presenter.experiment().transmissionStitchOptions().rebinParameters(),
+        "");
     verifyAndClear();
   }
 };
