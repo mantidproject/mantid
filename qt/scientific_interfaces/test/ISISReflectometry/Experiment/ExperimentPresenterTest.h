@@ -435,6 +435,19 @@ public:
     runTestForValidPerAngleOptions(optionsTable);
   }
 
+  void testSetTransmissionProcessingInstructionsValid() {
+    OptionsTable const optionsTable = {
+        optionsRowWithTransProcessingInstructions()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
+
+  void testSetTransmissionProcessingInstructionsInvalid() {
+    OptionsTable const optionsTable = {
+        optionsRowWithTransProcessingInstructionsInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::TRANS_SPECTRA);
+  }
+
   void testSetQMin() {
     OptionsTable const optionsTable = {optionsRowWithQMin()};
     runTestForValidPerAngleOptions(optionsTable);
@@ -884,6 +897,12 @@ private:
   OptionsRow optionsRowWithBothTransmissionRuns() {
     return {"", "13463", "13464"};
   }
+  OptionsRow optionsRowWithTransProcessingInstructions() {
+    return {"", "", "", "1-4"};
+  }
+  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() {
+    return {"", "", "", "bad"};
+  }
   OptionsRow optionsRowWithQMin() { return {"", "", "", "", "0.008"}; }
   OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "", "bad"}; }
   OptionsRow optionsRowWithQMax() { return {"", "", "", "", "", "0.1"}; }
@@ -897,12 +916,6 @@ private:
   }
   OptionsRow optionsRowWithScaleInvalid() {
     return {"", "", "", "", "", "", "", "bad"};
-  }
-  OptionsRow optionsRowWithTransProcessingInstructions() {
-    return {"", "", "", "1-4"};
-  }
-  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() {
-    return {"", "", "", "bad"};
   }
   OptionsRow optionsRowWithProcessingInstructions() {
     return {"", "", "", "", "", "", "", "", "1-4"};
