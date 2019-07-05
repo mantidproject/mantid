@@ -52,7 +52,7 @@ def needs_processing(property_value, process_reduction_type):
             if run.hasProperty('ProcessedAs'):
                 process = run.getLogData('ProcessedAs').value
                 if process == process_reduction_type:
-                    logger.information('Reusing {0} workspace: {1}'.format(process_reduction_type, ws_name))
+                    logger.notice('Reusing {0} workspace: {1}'.format(process_reduction_type, ws_name))
                 else:
                     logger.warning(
                         '{0} workspace found, but processed differently: {1}'.format(process_reduction_type, ws_name))
@@ -330,6 +330,8 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              BeamInputWorkspace=beam_name,
                              TransmissionInputWorkspace=container_transmission_name,
                              NormaliseBy=self.normalise)
+        else:
+            self.log().warning('Using existing container: '+container_name)
 
         mask = self.mask[i] if len(self.mask) == self.dimensionality else self.mask[0]
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
