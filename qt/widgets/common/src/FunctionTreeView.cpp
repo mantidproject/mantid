@@ -414,10 +414,12 @@ void FunctionTreeView::setFunction(QtProperty *prop,
 /**
  * Add a function.
  * @param prop :: Property of the parent composite function or NULL
- * @param fun :: FunctionFactory function creation string
+ * @param fun :: A function to add
  */
 bool FunctionTreeView::addFunction(QtProperty *prop,
                                    Mantid::API::IFunction_sptr fun) {
+  if (!fun)
+    return false;
   if (!prop) {
     AProperty ap =
         addFunctionProperty(nullptr, QString::fromStdString(fun->name()));
