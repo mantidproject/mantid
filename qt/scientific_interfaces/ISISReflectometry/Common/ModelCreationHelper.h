@@ -59,6 +59,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs anotherGroupWithARowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithARowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithTwoRowsModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithMixedRowsModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs emptyReductionJobs();
 
 /* Experiment */
 MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<PerThetaDefaults>

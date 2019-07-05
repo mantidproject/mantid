@@ -36,23 +36,22 @@ public:
     auto reductionJobs = twoEmptyGroupsModel();
     selectedRowLocationsAre(m_jobs, {location(0)});
 
-    EXPECT_CALL(m_jobs, removeRowAt(location(0)));
-
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
+    EXPECT_CALL(m_jobs, removeRowAt(location(0))).Times(2);
     presenter.notifyDeleteGroupRequested();
 
     verifyAndClearExpectations();
   }
 
   void testUpdatesModelWhenGroupDeletedFromDirectSelection() {
-    selectedRowLocationsAre(m_jobs, {location(0)});
+    selectedRowLocationsAre(m_jobs, {location(1)});
 
-    auto presenter = makePresenter(m_view, twoEmptyGroupsModel());
+    auto presenter = makePresenter(m_view, twoGroupsWithARowModel());
     presenter.notifyDeleteGroupRequested();
 
     auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(1, groups.size());
-    TS_ASSERT_EQUALS("Test group 2", groups[0].name());
+    TS_ASSERT_EQUALS("Test group 1", groups[0].name());
 
     verifyAndClearExpectations();
   }
@@ -76,7 +75,7 @@ public:
     {
       testing::InSequence s;
       EXPECT_CALL(m_jobs, removeRowAt(location(1)));
-      EXPECT_CALL(m_jobs, removeRowAt(location(0)));
+      EXPECT_CALL(m_jobs, removeRowAt(location(0))).Times(2);
     }
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
@@ -104,7 +103,7 @@ public:
     {
       testing::InSequence s;
       EXPECT_CALL(m_jobs, removeRowAt(location(1)));
-      EXPECT_CALL(m_jobs, removeRowAt(location(0)));
+      EXPECT_CALL(m_jobs, removeRowAt(location(0))).Times(2);
     }
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
@@ -136,22 +135,20 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testRemoveAllRowsAndGroupsUpdatesModel() {
-    auto presenter = makePresenter(m_view, ReductionJobs());
-    presenter.notifyRemoveAllRowsAndGroupsRequested();
-    auto &groups = jobsFromPresenter(presenter).groups();
-    // Should be left with a single empty group
-    TS_ASSERT_EQUALS(1, groups.size());
-    TS_ASSERT_EQUALS(0, groups[0].rows().size());
-    verifyAndClearExpectations();
-  }
-
   void testRemoveAllRowsAndGroupsPerformedIfProcessingOrAutoreducing() {
     auto presenter = makePresenter(m_view, ReductionJobs());
     EXPECT_CALL(m_mainPresenter, isProcessing()).Times(0);
     EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(0);
     presenter.notifyRemoveAllRowsAndGroupsRequested();
     verifyAndClearExpectations();
+  }
+
+  void testRemoveAllRowsAndGroupsLeavesAGroupAndRow() {
+    auto presenter = makePresenter(m_view);
+    presenter.notifyRemoveAllRowsAndGroupsRequested();
+    auto &groups = jobsFromPresenter(presenter).groups();
+    TS_ASSERT_EQUALS(1, groups.size());
+    TS_ASSERT_EQUALS(1, groups[0].rows().size());
   }
 };
 
