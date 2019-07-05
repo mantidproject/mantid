@@ -286,7 +286,6 @@ bool ISISEnergyTransfer::validate() {
     uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibrationFile);
     uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
         calibName, "MatrixWorkspace");
-    uiv.checkWorkspaceNumberOfHistograms(calibName, 1);
   }
 
   QString groupingError = validateDetectorGrouping();
