@@ -26,7 +26,7 @@ Test 1: individual fit
 - "Label" box and "Co-add/Simultaneous" radio buttons should be disabled
 - Click and drag blue lines on graph, check start/end times are updated.
 - Check the reverse - change start/end times and blue lines should be updated on graph.
-- Set up the interface to look like this. Note the non-default values for ``f1.Omega`` and ``f1.Sigma``:
+- Set up the interface to look like this. Note the non-default values for ``f0.Omega`` and ``f0.Tou``:
 
 .. image:: ../../images/MuonAnalysisTests/fitting_test1.png
   :align: center
@@ -44,9 +44,8 @@ Test 2: sequential fit
 
 Test 3: co-added fit
 --------------------
-- Stale errors should be cleared from the function browser.
-- Click the "Co-add" button.
-- The "Label" box will now be disabled
+- On the *Home* tab, load EMU 20918-20
+- Go to *Data Analysis* tab. Stale errors should be cleared from the function browser.
 - In the drop-down, there should only be one workspace (``EMU00020918-20; Pair; long; Asym; #1``)
 - Fit as before. Graph should be updated.
 
@@ -63,8 +62,8 @@ Test 4: simultaneous fit across runs
 Test 5: simultaneous fit across groups
 --------------------------------------
 - Type "20918" only in the "Runs" box
-- The "Label" box should now read "20918"
-- Select both "fwd" and "bwd" as groups, deselect "long"
+- The "Label" box should still read "20918-20SimFit", change it to "20918"
+- Under ``property`` for ``Groups/Pairs to fit`` change from All Pairs to All Groups
 - Keep fit function and global parameters as before
 - Fit data 
 - Now try to fit again, without changing anything. It should warn you that the label "20918" has already been used - say no to overwriting and it should automatically increment the label to "20918#2"
