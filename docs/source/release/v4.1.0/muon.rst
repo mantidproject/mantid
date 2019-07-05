@@ -18,6 +18,7 @@ New
 * Frequency Domain Analysis GUI added to workbench.
 * Muon ALC GUI added to workbench.
 * Added phase tab for calculating :ref:`phase tables <algm-CalMuonDetectorPhases>` and :ref:`PhaseQuad <algm-PhaseQuad>` workspaces to Frequency Domain Analysis GUI.
+* Frequency Domain Analysis GUI added to workbench.
 
 Improvements
 ############
@@ -28,4 +29,4 @@ Bug Fixes
 #########
 
 * Muon Analysis (original) no longer crashes when `TF Asymmetry` mode is activated.
-* Frequency Domain Analysis GUI added to workbench.
+* Issue where imaginary box was reappearing for FFT transforms after being unselected fixed.
