@@ -26,7 +26,7 @@ Test 1: individual fit
 - "Label" box and "Co-add/Simultaneous" radio buttons should be disabled
 - Click and drag blue lines on graph, check start/end times are updated.
 - Check the reverse - change start/end times and blue lines should be updated on graph.
-- Set up the interface to look like this. Note the non-default values for ``f0.Omega`` and ``f0.Tou``:
+- Set up the interface to look like this. Note the non-default values for ``f0.Omega`` and ``f0.Tau``:
 
 .. image:: ../../images/MuonAnalysisTests/fitting_test1.png
   :align: center
