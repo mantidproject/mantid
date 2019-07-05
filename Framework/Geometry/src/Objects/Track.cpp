@@ -34,6 +34,8 @@ Track::Track(const V3D &startPt, const V3D &unitVector)
     throw std::invalid_argument(
         "Failed to construct track: direction is not a unit vector.");
   }
+  m_links.reserve(2);
+  m_surfPoints.reserve(4);
 }
 
 /**

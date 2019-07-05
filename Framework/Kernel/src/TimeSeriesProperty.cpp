@@ -2339,13 +2339,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
   // 6. Re-count size
   countSize();
-
-  if (name() == "proton_charge") {
-    for (const auto &item : m_filterQuickRef) {
-      std::cerr << "first=" << item.first << ",  second=" << item.second
-                << "\n";
-    }
-  }
 }
 
 /*

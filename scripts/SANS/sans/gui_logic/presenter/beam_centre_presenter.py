@@ -142,6 +142,31 @@ class BeamCentrePresenter(object):
         self._view.hab_pos_1 = hab_pos_1
         self._view.hab_pos_2 = hab_pos_2
 
+    def update_hab_selected(self):
+        self._beam_centre_model.update_hab = True
+        self._beam_centre_model.update_lab = False
+
+        # HAB is selected, so ensure update HAB is enabled and checked
+        self._view.enable_update_hab(True)
+        # Disable and deselect update LAB
+        self._view.enable_update_lab(False)
+
+    def update_lab_selected(self):
+        self._beam_centre_model.update_hab = False
+        self._beam_centre_model.update_lab = True
+
+        # LAB is selected, so ensure update LAB is enabled and checked
+        self._view.enable_update_lab(True)
+        # Disable and deselect update HAB
+        self._view.enable_update_hab(False)
+
+    def update_all_selected(self):
+        self._beam_centre_model.update_hab = True
+        self._beam_centre_model.update_lab = True
+
+        self._view.enable_update_hab(True)
+        self._view.enable_update_lab(True)
+
     def set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
         if attribute or isinstance(attribute, bool):

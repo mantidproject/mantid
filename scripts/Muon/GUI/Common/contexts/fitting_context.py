@@ -291,6 +291,8 @@ class FittingContext(object):
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
+        self._number_of_fits = 0
+        self._number_of_fits_cache = 0
 
     def __len__(self):
         """
@@ -319,8 +321,9 @@ class FittingContext(object):
         :param fit: A new FitInformation object
         """
         if fit in self.fit_list:
-            return
+            self.fit_list.pop(self.fit_list.index(fit))
         self.fit_list.append(fit)
+        self._number_of_fits += 1
         self.new_fit_notifier.notify_subscribers()
 
     def fit_function_names(self):
@@ -367,6 +370,20 @@ class FittingContext(object):
 
     def clear(self):
         self.fit_list = []
+
+    def remove_latest_fit(self, number_of_fits_to_remove):
+        self.fit_list = self.fit_list[:-number_of_fits_to_remove]
+        self._number_of_fits = self._number_of_fits_cache
+        self.new_fit_notifier.notify_subscribers()
+
+    @property
+    def number_of_fits(self):
+        return self._number_of_fits
+
+    @number_of_fits.setter
+    def number_of_fits(self, value):
+        self._number_of_fits_cache = self._number_of_fits
+        self._number_of_fits = value
 
 
 # Private functions

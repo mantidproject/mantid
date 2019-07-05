@@ -67,6 +67,9 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
           this,
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
+
+  // Disables searching for run files in the data archive
+  m_uiForm.dsInput->isForRunFiles(false);
 }
 
 //----------------------------------------------------------------------------------------------

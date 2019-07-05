@@ -93,7 +93,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         # force the plot to update
         self._force_redraw = True
-        self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
+        if self.context._frequency_context:
+            self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
         self.plot_type_changed_notifier.notify_subscribers()
 
         current_group_pair = self.context.group_pair_context[
@@ -112,6 +113,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the selected group pair being changed on the view
         """
+        self._force_redraw = True
         if self.context.group_pair_context.selected == self._model.plotted_group:
             return
         self._model.plotted_group = self.context.group_pair_context.selected
@@ -129,7 +131,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.get_workspaces_to_plot(
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
-
         self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw, self.context.window_title)
         self._force_redraw = False
         workspace_list_inverse_binning = self.get_workspaces_to_plot(self.context.group_pair_context.selected,
@@ -149,18 +150,26 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         :return:
         """
-        current_fit = self.context.fitting_context.fit_list[-1]
-        combined_ws_list = self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning
-        list_of_output_workspaces_to_plot = [output for output, input in
-                                             zip(current_fit.output_workspace_names, current_fit.input_workspaces)
-                                             if input in combined_ws_list]
-
         for workspace_name in self._model.plotted_fit_workspaces:
             self._model.remove_workpace_from_plot(workspace_name)
 
-        for workspace_name in list_of_output_workspaces_to_plot:
-            self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Fit')
-            self._model.add_workspace_to_plot(workspace_name, 3, workspace_name + ': Diff')
+        for index in range(1, self.context.fitting_context.number_of_fits + 1, 1):
+            if self.context.fitting_context.fit_list:
+                current_fit = self.context.fitting_context.fit_list[-index]
+                combined_ws_list = self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning
+                list_of_output_workspaces_to_plot = [output for output, input in
+                                                     zip(current_fit.output_workspace_names, current_fit.input_workspaces)
+                                                     if input in combined_ws_list]
+                list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot\
+                    else [current_fit.output_workspace_names[-1]]
+            else:
+                list_of_output_workspaces_to_plot = []
+
+            for workspace_name in list_of_output_workspaces_to_plot:
+                self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Fit')
+                self._model.add_workspace_to_plot(workspace_name, 3, workspace_name + ': Diff')
+
+        self._model.force_redraw()
 
     def get_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """

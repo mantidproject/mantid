@@ -33,8 +33,12 @@ public:
 private:
   void init() override;
   void exec() override;
+  void validateBinningForTemporaryDataWorkspace(
+      const std::map<std::string, std::string> &,
+      const Mantid::API::IMDHistoWorkspace_sptr);
   std::map<std::string, std::string> validateInputs() override final;
   std::string QDimensionName(std::vector<double> projection);
+  std::string QDimensionNameQSample(int i);
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   DataObjects::MDHistoWorkspace_sptr

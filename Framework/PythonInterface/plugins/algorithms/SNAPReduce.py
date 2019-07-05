@@ -414,7 +414,8 @@ class SNAPReduce(DataProcessorAlgorithm):
         finalUnits = self.getPropertyValue("FinalUnits")
 
         # default arguments for AlignAndFocusPowder
-        self.alignAndFocusArgs = {'TMax': 50000,
+        self.alignAndFocusArgs = {'Tmin': 0,
+                                  'TMax': 50000,
                                   'RemovePromptPulseWidth': 1600,
                                   'PreserveEvents': False,
                                   'Dspacing': True,  # binning parameters in d-space

@@ -79,20 +79,7 @@ Usage
 
 .. testcode:: LoadVulcanCalFile
 
-  # Load Vulcan calibration files
-  LoadVulcanCalFile(OffsetFilename='pid_offset_vulcan_new.dat',
-    BadPixelFilename='bad_pids_vulcan_new_6867_7323.dat',
-    WorkspaceName='Vulcan_idl', BankIDs='21,22,23,26,27,28',
-    EffectiveDIFCs='16372.6,16377,16372.1,16336.6,16340.8,16338.8',
-    Effective2Thetas='90.091,90.122,90.089,89.837,89.867,89.852')
-
-  # Print
-  offsetws = mtd["Vulcan_idl_offsets"]
-  groupws = mtd["Vulcan_idl_group"]
-  for iws in [0, 100, 1000, 3500, 7000]:
-    print("Spectrum {:<5} Offset = {:.5f} of Group {:.0f}".format(iws, offsetws.readY(iws)[0], groupws.readY(iws)[0]))
-  maskws = mtd["Vulcan_idl_mask"]
-  print("Size of mask workspace = {}".format(maskws.getNumberHistograms()))
+  print ("LoadVulcanCalFile is obsolete and will be deprecated soon")
 
 .. testcleanup::
 
@@ -100,12 +87,7 @@ Output:
 
 .. testoutput:: LoadVulcanCalFile
 
-  Spectrum 0     Offset = -0.00047 of Group 1
-  Spectrum 100   Offset = -0.00096 of Group 1
-  Spectrum 1000  Offset = -0.00060 of Group 1
-  Spectrum 3500  Offset = -0.00036 of Group 3
-  Spectrum 7000  Offset = 0.00058 of Group 6
-  Size of mask workspace = 7392
+  LoadVulcanCalFile is obsolete and will be deprecated soon
 
 .. categories::
 

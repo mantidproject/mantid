@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench
 from __future__ import absolute_import, unicode_literals
 
-from mantid.py3compat.mock import call, patch
+from mantid.py3compat.mock import call, patch, Mock
 from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.general.presenter import GeneralSettings
@@ -220,3 +220,95 @@ class GeneralSettingsTest(GuiTest):
 
         presenter.action_show_invisible_workspaces(False)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.SHOW_INVISIBLE_WORKSPACES, "False")
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_fill_layout_display(self, mock_CONF):
+        presenter = GeneralSettings(None, view=Mock())
+        # setup CONF.get returns dictionary
+        test_dict = {'a': 1, 'b': 2, 'c': 3}
+        mock_CONF.get.return_value = test_dict
+        # setup mock commands
+        presenter.view.layout_display.addItem = Mock()
+
+        presenter.fill_layout_display()
+
+        calls = [call('a'), call('b'),  call('c')]
+        presenter.view.layout_display.addItem.assert_has_calls(calls)
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_get_layout_dict(self, mock_CONF):
+        presenter = GeneralSettings(None, view=Mock())
+        # setup CONF.get returns dictionary
+        test_dict = {'a': 1}
+        mock_CONF.get.return_value = test_dict
+
+        self.assertEquals(test_dict, presenter.get_layout_dict())
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_get_layout_dict_key_error(self, mock_CONF):
+        presenter = GeneralSettings(None, view=Mock())
+        # setup CONF.get to return KeyError
+        mock_CONF.get.side_effect = KeyError()
+
+        self.assertEquals({}, presenter.get_layout_dict())
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_save_layout(self, mock_CONF):
+        presenter = GeneralSettings(None, view=Mock())
+        # setup parent
+        mock_parent = Mock()
+        mock_parent.saveState.return_value = "value"
+        presenter.parent = mock_parent
+        # setup CONF.get returns dictionary
+        test_dict = {'a': 1}
+        mock_CONF.get = Mock(return_value=test_dict)
+        # setup mock commands
+        presenter.view.new_layout_name.text = Mock(return_value='key')
+        presenter.view.new_layout_name.clear = Mock()
+
+        presenter.save_layout()
+
+        calls = [call(presenter.USER_LAYOUT), call(presenter.USER_LAYOUT)]
+        mock_CONF.get.assert_has_calls(calls)
+        mock_parent.saveState.assert_called_once_with()
+        mock_parent.populate_layout_menu.assert_called_once_with()
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_load_layout(self, mock_CONF):
+        presenter = GeneralSettings(None, view=Mock())
+        # setup parent
+        mock_parent = Mock()
+        presenter.parent = mock_parent
+        # setup item selection
+        list_item = Mock()
+        list_item.text.return_value = 'a'
+        presenter.view.layout_display.currentItem = Mock(return_value=list_item)
+        # setup CONF.get returns dictionary
+        test_dict = {'a': 1}
+        mock_CONF.get = Mock(return_value=test_dict)
+
+        presenter.load_layout()
+
+        mock_CONF.get.assert_called_once_with(presenter.USER_LAYOUT)
+        mock_parent.restoreState.assert_called_once_with(test_dict['a'])
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_delete_layout(self, mock_CONF):
+        presenter = GeneralSettings(None, view=Mock())
+        # setup parent
+        mock_parent = Mock()
+        presenter.parent = mock_parent
+        # setup item selection
+        list_item = Mock()
+        list_item.text.return_value = 'a'
+        presenter.view.layout_display.currentItem = Mock(return_value=list_item)
+        # setup CONF.get returns dictionary
+        test_dict = {'a': 1}
+        mock_CONF.get = Mock(return_value=test_dict)
+
+        presenter.delete_layout()
+
+        calls = [call(presenter.USER_LAYOUT), call(presenter.USER_LAYOUT)]
+        mock_CONF.get.assert_has_calls(calls)
+        mock_CONF.set.assert_called_once_with(presenter.USER_LAYOUT, {})
+        mock_parent.populate_layout_menu.assert_called_once_with()

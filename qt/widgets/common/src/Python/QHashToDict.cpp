@@ -13,6 +13,9 @@ namespace Common {
 namespace Python {
 
 Python::Dict qHashToDict(const KwArgs &hash) {
+  auto mod = PyImport_ImportModule("qtpy.QtCore");
+  Py_DECREF(mod);
+
   auto d = Python::Dict();
 
   auto it = hash.constBegin();
