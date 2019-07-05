@@ -14,7 +14,7 @@ import re
 delimiter = ","
 range_separator = "-"
 run_string_regex = "^[0-9]*([0-9]+\s*[,-]{0,1}\s*)*[0-9]*$"
-max_run_list_size = 100
+max_run_list_size = 1000
 valid_float_regex = "^[0-9]+([.][0-9]*)?$"
 valid_name_regex = "^\w+$"
 valid_alpha_regex = "^[0-9]*[.]?[0-9]+$"
@@ -107,7 +107,7 @@ def run_string_to_list(run_string, max_value = True):
 
             range_max = int(range_max)
             range_min = int(range_min)
-            if max_value and (range_max - range_min) > max_run_list_size:
+            if max_value and (range_max - range_min + 1) > max_run_list_size:
                 raise IndexError(
                     "Too many runs ({}) must be <{}".format(range_max - range_min, max_run_list_size))
             else:

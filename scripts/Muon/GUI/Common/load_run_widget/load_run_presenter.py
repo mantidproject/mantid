@@ -113,7 +113,11 @@ class LoadRunWidgetPresenter(object):
         if not run_string:
             return
 
-        self.run_list = run_utils.run_string_to_list(run_string)
+        try:
+            self.run_list = run_utils.run_string_to_list(run_string)
+        except IndexError as err:
+            self._view.warning_popup(err.args[0])
+            return
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
                       for new_run in self.run_list if not self._model.get_data(run=[new_run])]
         if file_names:
