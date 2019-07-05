@@ -572,8 +572,11 @@ void Elwin::updateIntegrationRange() {
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
-  if (prop == m_properties["BackgroundSubtraction"])
+  if (prop == m_properties["BackgroundSubtraction"]) {
     m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange")->setVisible(val);
+    m_properties["BackgroundStart"]->setEnabled(val);
+    m_properties["BackgroundEnd"]->setEnabled(val);
+  }
 }
 
 void Elwin::minChanged(double val) {
