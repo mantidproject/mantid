@@ -25,6 +25,20 @@ namespace CustomInterfaces {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
+  enum Column {
+    // 0-based column indices for cells in a row. The Actual values are
+    // important here so set them explicitly
+    THETA = 0,
+    FIRST_TRANS = 1,
+    SECOND_TRANS = 2,
+    TRANS_SPECTRA = 3,
+    QMIN = 4,
+    QMAX = 5,
+    QSTEP = 6,
+    SCALE = 7,
+    RUN_SPECTRA = 8
+  };
+
   static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 9;
   using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
 

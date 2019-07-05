@@ -341,7 +341,8 @@ public:
   void testMultipleWildcardRowsAreInvalid() {
     OptionsTable const optionsTable = {optionsRowWithWildcard(),
                                        optionsRowWithWildcard()};
-    runTestForInvalidPerAngleOptions(optionsTable, {0, 1}, 0);
+    runTestForInvalidPerAngleOptions(optionsTable, {0, 1},
+                                     PerThetaDefaults::Column::THETA);
   }
 
   void testSetFirstTransmissionRun() {
@@ -349,9 +350,24 @@ public:
     runTestForValidPerAngleOptions(optionsTable);
   }
 
+  void testFirstTransmissionRunInvalid() {
+    OptionsTable const optionsTable = {
+        optionsRowWithFirstTransmissionRunInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::FIRST_TRANS);
+  }
+
   void testSetSecondTransmissionRun() {
     OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRun()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 1);
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::FIRST_TRANS);
+  }
+
+  void testSecondTransmissionRunInvalid() {
+    OptionsTable const optionsTable = {
+        optionsRowWithSecondTransmissionRunInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::SECOND_TRANS);
   }
 
   void testSetBothTransmissionRuns() {
@@ -366,7 +382,8 @@ public:
 
   void testSetQMinInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMinInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 3);
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::QMIN);
   }
 
   void testSetQMax() {
@@ -376,7 +393,8 @@ public:
 
   void testSetQMaxInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMaxInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 4);
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::QMAX);
   }
 
   void testSetQStep() {
@@ -386,7 +404,8 @@ public:
 
   void testSetQStepInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQStepInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 5);
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::QSTEP);
   }
 
   void testSetScale() {
@@ -396,7 +415,8 @@ public:
 
   void testSetScaleInvalid() {
     OptionsTable const optionsTable = {optionsRowWithScaleInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 6);
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::SCALE);
   }
 
   void testSetProcessingInstructions() {
@@ -407,7 +427,8 @@ public:
   void testSetProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {
         optionsRowWithProcessingInstructionsInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 7);
+    runTestForInvalidPerAngleOptions(optionsTable, 0,
+                                     PerThetaDefaults::Column::RUN_SPECTRA);
   }
 
   void testChangingSettingsNotifiesMainPresenter() {
@@ -504,7 +525,7 @@ public:
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     auto const expected = std::vector<PerThetaDefaults::ValueArray>{
-        {"", "", "", "0.010000", "0.200000", "0.030000", "0.700000",
+        {"", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000",
          "390-415"}};
     EXPECT_CALL(m_view, setPerAngleOptions(expected)).Times(1);
     presenter.notifyRestoreDefaultsRequested();
@@ -803,23 +824,31 @@ private:
   OptionsRow optionsRowWithBothTransmissionRuns() {
     return {"", "13463", "13464"};
   }
-  OptionsRow optionsRowWithQMin() { return {"", "", "", "0.008"}; }
-  OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "bad"}; }
-  OptionsRow optionsRowWithQMax() { return {"", "", "", "", "0.1"}; }
-  OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "0.02"}; }
+  OptionsRow optionsRowWithQMin() { return {"", "", "", "", "0.008"}; }
+  OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQMax() { return {"", "", "", "", "", "0.1"}; }
+  OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "", "0.02"}; }
   OptionsRow optionsRowWithQStepInvalid() {
-    return {"", "", "", "", "", "bad"};
-  }
-  OptionsRow optionsRowWithScale() { return {"", "", "", "", "", "", "1.4"}; }
-  OptionsRow optionsRowWithScaleInvalid() {
     return {"", "", "", "", "", "", "bad"};
   }
+  OptionsRow optionsRowWithScale() {
+    return {"", "", "", "", "", "", "", "1.4"};
+  }
+  OptionsRow optionsRowWithScaleInvalid() {
+    return {"", "", "", "", "", "", "", "bad"};
+  }
+  OptionsRow optionsRowWithTransProcessingInstructions() {
+    return {"", "", "", "1-4"};
+  }
+  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() {
+    return {"", "", "", "bad"};
+  }
   OptionsRow optionsRowWithProcessingInstructions() {
-    return {"", "", "", "", "", "", "", "1-4"};
+    return {"", "", "", "", "", "", "", "", "1-4"};
   }
   OptionsRow optionsRowWithProcessingInstructionsInvalid() {
-    return {"", "", "", "", "", "", "", "bad"};
+    return {"", "", "", "", "", "", "", "", "bad"};
   }
 
   void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {

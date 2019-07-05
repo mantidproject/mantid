@@ -54,10 +54,10 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   if (!transmissionRunRange.isValid(false))
     throw std::invalid_argument("Transmission run overlap range is invalid");
 
-  auto transmissionStitchParams = defaults.getStringOrEmpty(
-      "TransmissionStitchParams", "TransmissionStitchParams");
+  auto transmissionStitchParams =
+      defaults.getStringOrEmpty("Params", "TransmissionStitchParams");
   auto transmissionScaleRHS =
-      defaults.getBoolOrTrue("TransmissionScaleRHS", "TransmissionScaleRHS");
+      defaults.getBoolOrTrue("ScaleRHSWorkspace", "TransmissionScaleRHS");
 
   auto transmissionStitchOptions = TransmissionStitchOptions(
       transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
