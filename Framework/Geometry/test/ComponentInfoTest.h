@@ -704,7 +704,6 @@ public:
     TS_ASSERT_EQUALS(panel.topLeft, 3);
     TS_ASSERT_EQUALS(panel.topRight, 15);
   }
-
 };
 
 #endif /* MANTID_GEOMETRY_COMPONENTINFOTEST_H_ */
