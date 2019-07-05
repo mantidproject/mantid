@@ -21,30 +21,39 @@ namespace NexusGeometry {
 
 namespace {
 
-// NEXUS COMPLIANT ATTRIBUTE NAMES
-const std::string SHORT_NAME = "short_name";
+// NEXUS NAMES
 const std::string NX_CLASS = "NX_class";
 const std::string NX_SAMPLE = "NXsample";
 const std::string NX_DETECTOR = "NXdetector";
 const std::string NX_OFF_GEOMETRY = "NXoff_geometry";
 const std::string NX_ENTRY = "NXentry";
 const std::string NX_INSTRUMENT = "NXinstrument";
+const std::string NX_CHAR = "NX_CHAR";
 const std::string NX_SOURCE = "NXsource";
-const std::string SHAPE = "shape";
+const std::string NX_TRANSFORMATIONS = "NXtransformations";
+
+// group/attribute/dataset names
+const std::string SHORT_NAME = "short_name";
+const std::string TRANSFORMATIONS = "transformations";
+const std::string LOCAL_NAME = "local_name";
+const std::string LOCATION = "location";
+const std::string ORIENTATION = "orientation";
 const std::string DEPENDS_ON = "depends_on";
-const std::string UNITS = "UNITS";
+const std::string X_PIXEL_OFFSET = "x_pixel_offset";
+const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
+const std::string SOURCE = "source";
+
+// metadata
 const std::string METRES = "m";
+const std::string NAME = "name";
+const std::string UNITS = "UNITS";
+const std::string SHAPE = "shape";
 
 // NEXUS COMPLIANT ATTRIBUTE VALUES
-const std::string NX_TRANSFORMATION = "NXtransformation";
-const std::string NX_CHAR = "NX_CHAR";
 
-// COMPONENT TYPES
-auto DETECTOR = Mantid::Beamline::ComponentType(6);
-
+//
 const H5::StrType H5VARIABLE(0, H5T_VARIABLE);
-// const H5::StrType H5ASCII(0, H5T_CSET_ASCII);
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
 } // namespace
@@ -57,24 +66,36 @@ const H5::DataSpace H5SCALAR(H5S_SCALAR);
 ==============================================================================================================
 */
 
-void writeStrAttributeToGroupHelper(H5::Group &grp, const std::string &attrName,
-                                    const std::string &attrVal,
-                                    H5::StrType dataType = H5VARIABLE,
-                                    H5::DataSpace dataSpace = H5SCALAR) {
+inline void writeStrAttributeToGroupHelper(H5::Group &grp,
+                                           const std::string &attrName,
+                                           const std::string &attrVal,
+                                           H5::StrType dataType = H5VARIABLE,
+                                           H5::DataSpace dataSpace = H5SCALAR) {
   H5::Attribute attribute = grp.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
 }
 
-void writeStrAttributeToDataSetHelper(H5::DataSet &dSet,
-                                      const std::string &attrName,
-                                      const std::string &attrVal,
-                                      H5::StrType dataType = H5VARIABLE,
-                                      H5::DataSpace dataSpace = H5SCALAR) {
+inline void writeStrAttributeToDataSetHelper(
+    H5::DataSet &dSet, const std::string &attrName, const std::string &attrVal,
+    H5::StrType dataType = H5VARIABLE, H5::DataSpace dataSpace = H5SCALAR) {
   auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
 }
 
-// saves the instrument to file.
+inline void writeStrValueToDataSetHelper(H5::DataSet &dSet,
+                                         std::string dSetValue) {
+
+  dSet.write(dSetValue, dSet.getDataType(), H5SCALAR);
+}
+
+/*
+==============================================================================================================
+
+    saves the instrument to file.
+
+==============================================================================================================
+*/
+
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
                     Kernel::ProgressBase *reporter) {
@@ -117,7 +138,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     throw std::invalid_argument("The component has no sample.\n");
   }
 
-  if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.position(compInfo.sample())) {
+  if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
     throw std::invalid_argument("The sample is not at the origin.\n");
   }
 
@@ -131,6 +152,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     // compinfo.sourcePosition();
     // compInfo.hasSample();
     // compInfo.hasSource();
+    // auto DETECTOR = Mantid::Beamline::ComponentType(6);
   }
 
   /*
@@ -149,8 +171,6 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writeStrAttributeToGroupHelper(rootGroup, NX_CLASS, NX_ENTRY);
 
   const size_t ROOT_INDEX = compInfo.root();
-  // const size_t SAMPLE_INDEX = compInfo.sample();
-  // const int SOURCE_INDEX = compInfo.source();
 
   /*
   ==============================================================================================================
@@ -174,9 +194,11 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   /*
  ==============================================================================================================
         Instrument group in tree: @NXinstrument
+                Parent: NXentry
 
-        => detector bank(s)
-                => source
+        Children:
+        => detector arrays
+        => source
  ==============================================================================================================
  */
   // subgroups
@@ -184,27 +206,24 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::Group detectorGroup = instrumentGroup.createGroup("detector_1");
 
   // datasets
-
-  auto valueInDataset = (compInfo.name(ROOT_INDEX)).c_str();
-  H5::DSetCreatPropList plist;
-  plist.setFillValue(H5VARIABLE, &valueInDataset);
-  auto instrNameSize = compInfo.name(ROOT_INDEX).size();
-  H5::DataType instrName(H5VARIABLE);
   H5::DataSet instrumentName =
-      instrumentGroup.createDataSet("name", H5VARIABLE, H5SCALAR, plist);
-
-  // add dataset to child group 'instrument'
+      instrumentGroup.createDataSet("name", H5VARIABLE, H5SCALAR);
 
   // attributes
   writeStrAttributeToGroupHelper(sourceGroup, NX_CLASS, NX_SOURCE);
   writeStrAttributeToGroupHelper(detectorGroup, NX_CLASS, NX_DETECTOR);
   writeStrAttributeToDataSetHelper(instrumentName, SHORT_NAME,
                                    compInfo.name(ROOT_INDEX));
+  // dataset values
+  writeStrValueToDataSetHelper(instrumentName,
+                               compInfo.name(ROOT_INDEX).c_str());
 
   /*
 ==============================================================================================================
-    Detector group in tree : @NXinstrument
+                Detector group in tree : @NXinstrument
+        Parent: NXinstrument
 
+        Children:
         => pixel geometry
 ==============================================================================================================
 */
@@ -214,45 +233,92 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
   // datasets
   H5::DataSet bankLocationInNXformat =
-      detectorGroup.createDataSet("location", H5VARIABLE, H5SCALAR);
+      detectorGroup.createDataSet(LOCATION, H5VARIABLE, H5SCALAR);
   H5::DataSet bankOrientationInNXformat =
-      detectorGroup.createDataSet("orientation", H5VARIABLE, H5SCALAR);
+      detectorGroup.createDataSet(ORIENTATION, H5VARIABLE, H5SCALAR);
   H5::DataSet xPixelOffset =
-      detectorGroup.createDataSet("x_pixel_offset", H5VARIABLE, H5SCALAR);
+      detectorGroup.createDataSet(X_PIXEL_OFFSET, H5VARIABLE, H5SCALAR);
   H5::DataSet yPixelOffset =
-      detectorGroup.createDataSet("y_pixel_offset", H5VARIABLE, H5SCALAR);
+      detectorGroup.createDataSet(Y_PIXEL_OFFSET, H5VARIABLE, H5SCALAR);
   H5::DataSet detectorName =
-      detectorGroup.createDataSet("local_name", H5VARIABLE, H5SCALAR);
+      detectorGroup.createDataSet(LOCAL_NAME, H5VARIABLE, H5SCALAR);
+  H5::DataSet detectorDependency =
+      detectorGroup.createDataSet(DEPENDS_ON, H5VARIABLE, H5SCALAR);
 
   // attributes
   writeStrAttributeToGroupHelper(pixelGroup, NX_CLASS, NX_OFF_GEOMETRY);
   writeStrAttributeToDataSetHelper(bankLocationInNXformat, NX_CLASS,
-                                   NX_TRANSFORMATION);
+                                   NX_TRANSFORMATIONS);
   writeStrAttributeToDataSetHelper(bankOrientationInNXformat, NX_CLASS,
-                                   NX_TRANSFORMATION);
+                                   NX_TRANSFORMATIONS);
   writeStrAttributeToDataSetHelper(xPixelOffset, UNITS, METRES);
   writeStrAttributeToDataSetHelper(yPixelOffset, UNITS, METRES);
+
+  // dataset values
+  writeStrValueToDataSetHelper(detectorDependency,
+                               detectorGroup.getObjName() + "/" + LOCATION);
+
+  /*
+ =============================================================================================================
+
+         Source group in tree : @NXsource
+                 Parent: NXentry
+
+                 children:
+         => transformations
+ =============================================================================================================
+ */
+
+  // subgroups
+  H5::Group transformationsGroup = sourceGroup.createGroup(TRANSFORMATIONS);
+
+  // datatsets
+  H5::DataSet sourceName =
+      sourceGroup.createDataSet(NAME, H5VARIABLE, H5SCALAR);
+  H5::DataSet sourceDependency =
+      sourceGroup.createDataSet(DEPENDS_ON, H5VARIABLE, H5SCALAR);
+
+  // atributes
+  writeStrAttributeToGroupHelper(transformationsGroup, NX_CLASS,
+                                 NX_TRANSFORMATIONS);
+
+  // dataset Values
+  writeStrValueToDataSetHelper(sourceName, SOURCE);
+  writeStrValueToDataSetHelper(sourceDependency,
+                               sourceGroup.getObjName() + "/" + LOCATION);
 
   /*
   =============================================================================================================
 
-  parse components in tree structure
+         Transformations group in tree: @NXtransformations
+             Parent: NXsource
+
+             Children:
+                  => location
+  =============================================================================================================
+  */
+
+  // datasets
+  H5::DataSet sourceLocation =
+      transformationsGroup.createDataSet(LOCATION, H5VARIABLE, H5SCALAR);
+
+  // attributes
+  writeStrAttributeToDataSetHelper(sourceLocation, NX_CLASS, LOCATION);
+
+  /*
+  =============================================================================================================
+
+         parse components in tree structure
 
   =============================================================================================================
   */
 
-  // detector array and pixel datasets
+  //  pixel datasets to detector group
 
-  /*for (size_t index = ROOT_INDEX; index >= 0; --index) {
+  for (int index = ROOT_INDEX; index >= 0; index--) {
 
-    std::vector<std::pair<size_t, size_t>> xyOffsets;
     if (compInfo.isDetector(index)) {
       Mantid::Kernel::V3D offset = compInfo.position(index);
-      xyOffsets.push_back(std::make_pair(offset[0], offset[1]));
-
-      // write offset to x and y dataset.
-      //
-      // xPixelOffset.write(offset)
 
       // write  of detector as dataset to NXdetector group
 
@@ -262,7 +328,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
       // NXtransformation. write its attributes including Nxclass
       // NXtransformation do the same with orientation
     }
-  }*/
+  }
 
   file.close();
 

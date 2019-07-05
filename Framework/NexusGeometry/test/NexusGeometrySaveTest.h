@@ -435,6 +435,22 @@ public:
     TS_ASSERT(compInfo.hasSample());
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
   }
+
+  void test_sample_not_at_origin_throws() {
+
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        V3D(0, 0, -10), V3D(0, 0, 2), V3D(0, 0, 10));
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*instr.first);
+
+    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+                     std::invalid_argument &);
+  }
+
+
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
