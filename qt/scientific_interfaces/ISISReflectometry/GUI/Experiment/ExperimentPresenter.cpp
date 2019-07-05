@@ -192,8 +192,10 @@ ExperimentPresenter::transmissionRunRangeFromView() {
 std::string ExperimentPresenter::transmissionStitchParamsFromView() {
   auto stitchParams = m_view->getTransmissionStitchParams();
   // It's valid if empty
-  if (stitchParams.empty())
+  if (stitchParams.empty()) {
+    m_view->showTransmissionStitchParamsValid();
     return stitchParams;
+  }
 
   // If set, the params should be a list containing an odd number of double
   // values (as per the Params property of Rebin)
