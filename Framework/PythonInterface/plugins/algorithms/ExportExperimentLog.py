@@ -132,19 +132,16 @@ class ExportExperimentLog(PythonAlgorithm):
     def _process_inputs(self):
         """ Process input properties
         """
-
         self._wksp = self.getProperty("InputWorkspace").value
 
         self._logfilename = self.getProperty("OutputFilename").value
 
         # Field and keys
         self._headerTitles = self.getProperty("SampleLogTitles").value
-        if len(self._headerTitles) == 0:
-            raise RuntimeError('Header titles must be given!')
-
         self._sampleLogNames = self.getProperty("SampleLogNames").value
-        ops = self.getProperty("SampleLogOperation").value
 
+        # operations
+        ops = self.getProperty("SampleLogOperation").value
         if len(self._sampleLogNames) != len(ops):
             raise RuntimeError("Size of sample log names and sample operations are unequal!")
         self._sampleLogOperations = []
@@ -181,11 +178,18 @@ class ExportExperimentLog(PythonAlgorithm):
             self.log().debug("FileMode is from user specified value.")
 
         # Examine the file mode
-        if self._filemode == "new" or self._filemode == "append":
+        if self._filemode in ["new", "append"]:
+            # For new and append mode, header title must be given and correspond to log names
             if len(self._headerTitles) != len(self._sampleLogNames):
-                raise RuntimeError("In mode new or append, there must be same number of sample titles and names")
+                raise RuntimeError("In mode new or append, Header titles (now {}) must be given and"
+                                   " must be same number of sample titles and names".format(self._headerTitles))
+        else:
+            # Fast append mode: header title might be overridden by sample log locations
+            if len(self._headerTitles) != len(self._sampleLogNames):
+                self._headerTitles = self._sampleLogNames[:]
+        # END-IF-ELSE
 
-        self.log().information("File mode is %s. " % (self._filemode))
+        self.log().information("File mode: {}".format(self._filemode))
 
         # This is left for a feature that might be needed in future.
         self._reorderOld = False
@@ -299,41 +303,33 @@ class ExportExperimentLog(PythonAlgorithm):
         self.log().information("Appending is called once.")
 
         # Write to a buffer
-        wbuf = ""
+        wbuf = ''
 
-        self.log().debug("Samlpe Log Names: %s" % (self._sampleLogNames))
-        self.log().debug("Title      Names: %s" % (self._headerTitles))
+        self.log().debug("Samlpe Log Names: {}".format(self._sampleLogNames))
+        self.log().debug("Title      Names: {}".format(self._headerTitles))
 
-        # if len(self._headerTitles) == 0:
-        #     skip = True
-        # else:
-        #     skip = False
-
-        # headertitle = None
-        for il in range(len(self._sampleLogNames)):
-            # if skip is False:
-            #     headertitle = self._headerTitles[il]
-
-            # if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
-            #     # overriden
-            #     # TODO / FIXME - override shall be executed before and result in log value dict already!
-            #     value = self._ovrdTitleValueDict[headertitle]
-
+        for il in range(len(self._headerTitles)):
             # from log value dictionary (including from overridden and workspace)
-            log_name_i = self._sampleLogNames[il]
+            log_title_i = self._headerTitles[il]
             operation_type = self._sampleLogOperations[il]
-            key = log_name_i + "-" + operation_type
-            if key in log_value_dict.keys():
-                value = log_value_dict[key]
-            elif log_name_i in log_value_dict.keys():
-                value = log_value_dict[log_name_i]
+
+            # form key
+            log_key = '{}'.format(log_title_i)
+            if operation_type is not None:
+                log_key = '{}-{}'.format(log_key, operation_type)
+
+            # locate value
+            if log_key in log_value_dict:
+                value = log_value_dict[log_key]
+            elif log_title_i in log_value_dict:
+                value = log_value_dict[log_title_i]
             else:
-                raise RuntimeError('Log {} with operation {} cannot be found in log value dict'
-                                   ''.format(log_name_i, operation_type))
+                raise RuntimeError('Log {} with operation {} cannot be found in log value dict.  Available keys are {}'
+                                   ''.format(log_title_i, operation_type, log_value_dict.keys()))
             # END-IF-ELSE
 
             # append line
-            wbuf += "%s%s" % (str(value), self._csv_separator)
+            wbuf += "{}{}".format(value, self._csv_separator)
         # END-FOR
 
         # remove last separator
@@ -492,13 +488,14 @@ class ExportExperimentLog(PythonAlgorithm):
 
         for il in range(len(self._sampleLogNames)):
             # get log name, check and operation type
+            log_title = self._headerTitles[il]
             log_name = self._sampleLogNames[il]
 
             # check log name
             if log_name is None or log_name.lower() == 'none':
                 # real log name is None or 'None' means overriding works
                 continue
-            elif  log_name in value_dict:
+            elif log_title in value_dict:
                 # overridden already: no need to read
                 continue
 
@@ -508,7 +505,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 # If not exist and not overridden: use 0.00 as default
                 self.log().warning("Sample log %s does not exist in given workspace %s."
                                    "" % (log_name, str(self._wksp)))
-                value_dict[log_name] = 0.0
+                value_dict[log_title] = 0.0
                 continue
             else:
                 log_property = run.getProperty(log_name)
@@ -519,8 +516,10 @@ class ExportExperimentLog(PythonAlgorithm):
             # Get log value according to type
             property_value = self._retrieve_log_value(log_property, operation_type)
 
-            key = log_name + "-" + operation_type
-            value_dict[key] = property_value
+            log_key = log_title
+            if operation_type is not None:
+                log_key = '{}-{}'.format(log_key, operation_type)
+            value_dict[log_key] = property_value
         # END-FOR
 
         return value_dict
