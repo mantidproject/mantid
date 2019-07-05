@@ -42,11 +42,9 @@ class RunStringUtilsListToStringTest(unittest.TestCase):
         run_string = utils.run_list_to_string(run_list)
         self.assertEqual(run_string, "1-3,48-50")
 
-    def test_run_list_to_string_throws_if_more_than_100_runs(self):
+    def test_run_list_to_string_doesnt_throw_if_more_than_100_runs(self):
         run_list = [i for i in range(150)]
-        with self.assertRaises(IndexError) as context:
-            utils.run_list_to_string(run_list)
-        self.assertTrue("Too many runs (150) must be <100" in str(context.exception))
+        utils.run_list_to_string(run_list)
 
 
 class RunStringUtilsStringToListTest(unittest.TestCase):
