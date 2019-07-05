@@ -498,9 +498,9 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
     for (int i = 0; i < m_logs.size(); ++i) {
       // need to add one to the column number
       // as the first (0th) one is done elsewhere
-      Mantid::API::Column_sptr col = table->getColumn(i+1);
+      Mantid::API::Column_sptr col = table->getColumn(i + 1);
       auto col_type = col->type();
-  
+
       const auto &log = m_logs[i];
       const QVariant &val = logValues[log];
 
@@ -510,7 +510,7 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
-      } else if (col_type =="double") {
+      } else if (col_type == "double") {
         valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
