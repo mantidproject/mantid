@@ -295,8 +295,9 @@ std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard() {
                        RangeInQ(0.008, 0.02, 1.2), 0.8,
                        ProcessingInstructions("2-3")),
       PerThetaDefaults(
-          2.3, TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
-                                   std::vector<std::string>{"22358", "22359"}),
+          2.3,
+          TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
+                              std::vector<std::string>{"22358", "22359"}),
           ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9,
           ProcessingInstructions("4-6"))};
 }
