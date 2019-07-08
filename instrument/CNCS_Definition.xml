@@ -29,6 +29,7 @@
       <location name="monitor1" z="-29.949"/>
       <location name="monitor2" z="-28.706"/>
       <location name="monitor3" z="-1.416"/>
+      <location name="monitor4" z="3.7338"/>
     </component>
   </type>
   <component idlist="detectors" type="detectors">
@@ -714,6 +715,7 @@
     <id val="-1"/>
     <id val="-2"/>
     <id val="-3"/>
+    <id val="-4"/>
   </idlist>
   <!--DETECTOR PARAMETERS-->
   <component-link name="detectors">
