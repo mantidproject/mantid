@@ -4,9 +4,9 @@
 Mantid 4.1.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/wb_sliceviewer.png
    :class: screenshot
-   :width: 385px
+   :width: 500px
    :align: right
 
 .. contents:: Table of Contents
@@ -14,13 +14,16 @@ Mantid 4.1.0 Release Notes
 
 .. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
+**Due to support ending for windows 7 and 8. This is the last release to support Windows 7 or 8.  Releases following this may continue to work for these releases, but will not have been verified or tested by the development team on anythin earlier than Windows 10.
+This is also the final release that will support Ubuntu 16.04.**
+
+
 We are proud to announce version 4.1.0 of Mantid.
 
-**This is the last release to support Windows 7**
 
-**TODO: Add paragraph summarizing big changes**
+We have made significant improvements to support within the Mantid workbench for a number of techniques, adding serval technique specific user interfaces ported ver from Mantidplot.  It also includes a fresh new implmentation of the sliceviewer that merges in a lot of the popular functionality of the spectrum viewer into one capable tool.  This version also introduces the new muon interface that is the result of a long effort to rebuild the interface using modern design and engineering standards, resulting in a much more stable, extensible interface, but also just so much better to use.
 
-This is just one of many improvements in this release, so please take a
+This is just a few of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
