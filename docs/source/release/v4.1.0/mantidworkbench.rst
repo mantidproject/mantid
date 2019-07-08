@@ -29,6 +29,7 @@ SliceViewer
 - We have merged much of the functionality of the Spectrum Viewer and Slice Viewer from Mantidplot into a single useful tool.
 - It works much like the previous SliceViewer tool, plotting any MatrixWorkspace or MDWorkspaces, and  allowing the 2 axes for plotting to be selected, while presenting a slider for additional dimensions.
 - The side plot toolbar button (that looks like a curve plot) adds line plot vertically and horizontally that will dynamically update as you move your mouse cursor across the plot.
+- Support for some of the more advanced features of the old sliceViewer such as non-orthogonal axes, extracting slices to other workspaces and displying peaks will be included in future releases.
 
 Scientific Interfaces
 ---------------------
