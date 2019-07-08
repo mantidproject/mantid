@@ -34,7 +34,7 @@ Similarly, to remove one plot press *Remove plot*, select the plot you wish to r
 Displaying peaks
 ----------------
 Elements whose name appears in grey lack any peak data and thus cannot be plotted.
-To observe the peaks of any other, click on its label which should turn yellow.
+To observe the peaks of any other, click on its label which will turn yellow.
 Now plot data from one of the detectors and select all the peaks you would like to examine: main, secondary,
 gamma and electronic. Lines will appear for each of the peaks.
 Lines corresponding to different elements will appear in different colours.
