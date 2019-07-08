@@ -157,8 +157,7 @@ class ResultsTabModel(object):
             results_table.addRow(
                 self._add_parameters_to_table(row_dict, fit_parameters))
 
-        ads.Instance().addOrReplace(self.results_table_name(),
-                                                    results_table)
+        ads.Instance().addOrReplace(self.results_table_name(), results_table)
         return results_table
 
     def _add_logs_to_table(self, row_dict, fit, log_selection):
