@@ -132,8 +132,10 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   connect(this, SIGNAL(newInstrumentConfiguration()), this,
           SLOT(setDefaultInstDetails()));
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   connect(resPeak, SIGNAL(rangeChanged(double, double)), resBackground,
           SLOT(setRange(double, double)));
+#endif
 
   // Update property map when a range selector is moved
   connect(calPeak, SIGNAL(minValueChanged(double)), this,

@@ -576,7 +576,7 @@ void PreviewPlot::switchPlotTool(QAction *selected) {
     m_panZoomTool.enableZoom(false);
     m_panZoomTool.enablePan(false);
   } else if (toolName == PLOT_TOOL_PAN) {
-    m_panZoomTool.enablePan(false);
+    m_panZoomTool.enablePan(true);
   } else if (toolName == PLOT_TOOL_ZOOM) {
     m_panZoomTool.enableZoom(true);
   } else {
