@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
-using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::callMethodNoCheck;
 
 namespace MantidQt {
 namespace Widgets {
