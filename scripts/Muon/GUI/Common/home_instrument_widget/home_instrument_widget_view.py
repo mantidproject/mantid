@@ -383,10 +383,10 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
         self.dead_time_selector = QtWidgets.QComboBox(self)
         self.dead_time_selector.addItems(
-            ["None",
-             "From data file",
+            ["From data file",
              "From table workspace",
-             "From other file"])
+             "From other file",
+             "None"])
 
         self.dead_time_label_2 = QtWidgets.QLabel(self)
         self.dead_time_label_2.setText("Dead Time Workspace : ")
@@ -442,9 +442,9 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     def populate_dead_time_combo(self, names):
         self.dead_time_file_selector.blockSignals(True)
         self.dead_time_file_selector.clear()
-        self.dead_time_file_selector.addItem("None")
         for name in names:
             self.dead_time_file_selector.addItem(name)
+        self.dead_time_file_selector.addItem("None")
         self.dead_time_file_selector.blockSignals(False)
 
     def get_dead_time_file_selection(self):
@@ -494,25 +494,25 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
     def on_dead_time_combo_changed(self, index):
         if index == 0:
-            self._on_dead_time_unselected()
-            self.dead_time_file_loader_hidden(True)
-            self.dead_time_data_info_hidden(True)
-            self.dead_time_other_file_hidden(True)
-        if index == 1:
             self._on_dead_time_from_data_selected()
             self.dead_time_file_loader_hidden(True)
             self.dead_time_data_info_hidden(False)
             self.dead_time_other_file_hidden(True)
-        if index == 2:
+        if index == 1:
             self._on_dead_time_from_file_selected()
             self.dead_time_file_loader_hidden(False)
             self.dead_time_data_info_hidden(False)
             self.dead_time_other_file_hidden(True)
-        if index == 3:
+        if index == 2:
             self._on_dead_time_from_other_file_selected()
             self.dead_time_file_loader_hidden(True)
             self.dead_time_data_info_hidden(True)
             self.dead_time_other_file_hidden(False)
+        if index == 3:
+            self._on_dead_time_unselected()
+            self.dead_time_file_loader_hidden(True)
+            self.dead_time_data_info_hidden(True)
+            self.dead_time_other_file_hidden(True)
 
     def on_dead_time_from_other_file_selected(self, slot):
         self._on_dead_time_from_other_file_selected = slot

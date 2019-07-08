@@ -179,7 +179,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             return
 
         # switch the view to the "from table workspace" option
-        self._view.set_dead_time_selection(2)
+        self._view.set_dead_time_selection(1)
         is_set = self._view.set_dead_time_file_selection_text(name)
         if not is_set:
             self._view.warning_popup("Dead time table cannot be loaded")
