@@ -36,6 +36,7 @@ def open_urls(list_of_urls, delay=1):
     :param delay: in seconds
     :return:
     """
+    print("I'm about to open %d urls..." % len(list_of_urls))
     for url in list_of_urls:
         time.sleep(delay)
         webbrowser.open(url)
