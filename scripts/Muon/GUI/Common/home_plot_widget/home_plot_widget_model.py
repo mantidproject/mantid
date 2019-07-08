@@ -103,6 +103,8 @@ class HomePlotWidgetModel(object):
         """
         self.plot_figure = None
         self.plotted_workspaces = []
+        self.plotted_workspaces_inverse_binning = []
+        self.plotted_fit_workspaces = []
 
     def force_redraw(self):
         if not self.plot_figure:

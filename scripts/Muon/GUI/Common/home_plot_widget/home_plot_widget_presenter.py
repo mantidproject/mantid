@@ -187,4 +187,3 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         if self._model.plot_figure is not None:
             from matplotlib import pyplot as plt
             plt.close(self._model.plot_figure)
-        self._model.close_plot()
