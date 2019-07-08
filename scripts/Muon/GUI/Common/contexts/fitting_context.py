@@ -268,13 +268,23 @@ class FitInformation(object):
             if hasattr(prop, 'timeAverageValue'):
                 return prop.timeAverageValue()
             else:
-                return float(prop.value)
+                try:
+                    return float(prop.value)
+                except ValueError:
+                    return prop.valueAsStr
 
         values = [
             value_from_workspace(wksp_name)
             for wksp_name in self.output_workspace_names
         ]
-        return np.mean(values)
+        try:
+            return np.mean(values)
+        except TypeError:
+            # This will be a string
+            if len(values) == 1:
+                return values[0]
+            elif len(values) > 1:
+                return str(values[0]) + " to " + str(values[len(values) - 1])
 
 
 class FittingContext(object):
