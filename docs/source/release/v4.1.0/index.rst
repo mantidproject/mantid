@@ -12,8 +12,6 @@ Mantid 4.1.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 **Due to support ending for windows 7 and 8. This is the last release to support Windows 7 or 8.  Releases following this may continue to work for these releases, but will not have been verified or tested by the development team on anythin earlier than Windows 10.
 This is also the final release that will support Ubuntu 16.04.**
 
