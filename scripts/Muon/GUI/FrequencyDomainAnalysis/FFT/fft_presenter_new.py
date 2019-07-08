@@ -172,6 +172,7 @@ class FFTPresenter(object):
                 imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
         else:
             imaginary_workspace_input = None
+            imaginary_workspace_padding_parameters['InputWorkspace'] = ""
 
         fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input, imaginary_workspace_index)
 
