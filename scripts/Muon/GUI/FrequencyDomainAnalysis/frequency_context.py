@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 from re import findall
 from six import iteritems
 
+
 class MaxEnt(object):
 
     def __init__(self, run, ws_freq):
@@ -53,14 +54,14 @@ class FrequencyContext(object):
 
     @property
     def maxEnt_freq(self):
-        return [maxEnt for maxEnt in list(self._maxEnt_freq.keys())]
+        return list(self._maxEnt_freq.keys())
 
     def add_FFT(self, ws_freq_name, Re_run, Re, Im_run, Im, phasequad=False):
         self._FFT_freq[ws_freq_name] = FFT(ws_freq_name, Re_run, Re, Im_run, Im, phasequad=phasequad)
 
     @property
     def FFT_freq(self):
-        return [FFT for FFT in list(self._FFT_freq.keys())]
+        return list(self._FFT_freq.keys())
 
     def get_frequency_workspace_names(self, run_list, group, pair, phasequad, frequency_type):
         # do MaxEnt first as it only has run number
