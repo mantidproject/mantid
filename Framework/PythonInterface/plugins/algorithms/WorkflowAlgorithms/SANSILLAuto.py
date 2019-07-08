@@ -270,6 +270,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
 
         [process_transmission_beam, transmission_beam_name] = needs_processing(self.btransmission, 'Beam')
         self.progress.report('Processing transmission beam')
+        flux_name = transmission_beam_name + '_Flux'
         if process_transmission_beam:
             SANSILLReduction(Run=self.btransmission,
                              ProcessAs='Beam',
@@ -277,6 +278,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              MergingOption=self.merging_option,
                              OutputWorkspace=transmission_beam_name,
                              BeamRadius=self.radius,
+                             FluxOutputWorkspace=flux_name,
                              AbsorberInputWorkspace=transmission_absorber_name)
 
         [process_container_transmission, container_transmission_name] = needs_processing(self.ctransmission, 'Transmission')
