@@ -43,8 +43,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
         self.plot_type_changed_notifier = GenericObservable()
 
-        self.keep = False
-        self._force_redraw = True
+        self._force_redraw = False
         if self.context._frequency_context:
             for ext in FREQUENCY_EXTENSIONS.keys():
                 self._view.addItem(FREQ_PLOT_TYPE+FREQUENCY_EXTENSIONS[ext])
@@ -91,21 +90,23 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the plot type being changed on the view
         """
-        # force the plot to update
-        self._force_redraw = True
-        if self.context._frequency_context:
-            self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
-        self.plot_type_changed_notifier.notify_subscribers()
-
         current_group_pair = self.context.group_pair_context[
             self.context.group_pair_context.selected]
         current_plot_type = self._view.get_selected()
 
         if isinstance(current_group_pair, MuonPair) and current_plot_type == COUNTS_PLOT_TYPE:
+            self._view.plot_selector.blockSignals(True)
             self._view.plot_selector.setCurrentText(ASYMMETRY_PLOT_TYPE)
+            self._view.plot_selector.blockSignals(False)
             self._view.warning_popup(
                 'Pair workspaces have no counts workspace')
             return
+
+        # force the plot to update
+        self._force_redraw = True
+        if self.context._frequency_context:
+            self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
+        self.plot_type_changed_notifier.notify_subscribers()
 
         self.plot_standard_workspaces()
 
@@ -113,7 +114,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the selected group pair being changed on the view
         """
-        self._force_redraw = True
         if self.context.group_pair_context.selected == self._model.plotted_group:
             return
         self._model.plotted_group = self.context.group_pair_context.selected
@@ -133,11 +133,11 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             self._view.get_selected())
         self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw, self.context.window_title)
         self._force_redraw = False
-        workspace_list_inverse_binning = self.get_workspaces_to_plot(self.context.group_pair_context.selected,
-                                                                     not self._view.if_raw(),
-                                                                     self._view.get_selected())
-        self._model.plotted_workspaces_inverse_binning = workspace_list_inverse_binning
-        combined_ws_list = workspace_list + workspace_list_inverse_binning
+
+        self._model.plotted_workspaces_inverse_binning = {workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
+                                                          for workspace in workspace_list
+                                                          if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
+        combined_ws_list = workspace_list + list(self._model.plotted_workspaces_inverse_binning.values())
         # This is checking whether the latest fit performed contains a fit which matches any of the workspaces just plotted
         # if it does then handle fit complete is also called to update the fit on the plot.
         if self.context.fitting_context.fit_list and \
@@ -150,13 +150,16 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         :return:
         """
+        if self._model.plot_figure is None:
+            return
+
         for workspace_name in self._model.plotted_fit_workspaces:
             self._model.remove_workpace_from_plot(workspace_name)
 
         for index in range(1, self.context.fitting_context.number_of_fits + 1, 1):
             if self.context.fitting_context.fit_list:
                 current_fit = self.context.fitting_context.fit_list[-index]
-                combined_ws_list = self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning
+                combined_ws_list = self._model.plotted_workspaces + list(self._model.plotted_workspaces_inverse_binning.values())
                 list_of_output_workspaces_to_plot = [output for output, input in
                                                      zip(current_fit.output_workspace_names, current_fit.input_workspaces)
                                                      if input in combined_ws_list]
@@ -200,7 +203,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         except AttributeError:
             return []
 
-    def get_time_workspaces_to_plot(self,current_group_pair,is_raw, plot_type):
+    def get_time_workspaces_to_plot(self,current_group_pair, is_raw, plot_type):
         """
         :param current_group_pair: The group/pair currently selected
         :param is_raw: Whether to use raw or rebinned data
@@ -217,7 +220,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
             if plot_type == COUNTS_PLOT_TYPE:
                 workspace_list = [item.replace(ASYMMETRY_PLOT_TYPE, COUNTS_PLOT_TYPE)
-                                  for item in workspace_list]
+                                  for item in workspace_list if ASYMMETRY_PLOT_TYPE in item]
 
             return workspace_list
         except AttributeError:

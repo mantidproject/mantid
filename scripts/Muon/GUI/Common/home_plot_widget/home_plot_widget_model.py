@@ -18,7 +18,7 @@ class HomePlotWidgetModel(object):
         """
         self.plot_figure = None
         self.plotted_workspaces = []
-        self.plotted_workspaces_inverse_binning = []
+        self.plotted_workspaces_inverse_binning = {}
         self.plotted_fit_workspaces = []
         self.plotted_group = ''
 
@@ -34,6 +34,8 @@ class HomePlotWidgetModel(object):
         """
         if not workspace_list:
             self.plotted_workspaces = []
+            self.plotted_workspaces_inverse_binning = {}
+            self.plotted_fit_workspaces = []
             self.plot_figure.clear()
             self.plot_figure.canvas.draw()
             return self.plot_figure
@@ -41,9 +43,11 @@ class HomePlotWidgetModel(object):
             workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
         except RuntimeError:
             return
-        if force_redraw and self.plot_figure:
-            self.plotted_workspaces = []
+        if (force_redraw or self.plotted_workspaces == []) and self.plot_figure:
             self.plot_figure.clear()
+            self.plotted_workspaces = []
+            self.plotted_workspaces_inverse_binning = {}
+            self.plotted_fit_workspaces = []
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
@@ -67,7 +71,7 @@ class HomePlotWidgetModel(object):
         self.plot_figure.canvas.set_window_title(window_title)
         self.plot_figure.gca().set_title(title)
 
-        self.plot_figure.canvas.window().closing.connect(self._close_plot)
+        self.plot_figure.canvas.window().closing.connect(self._clear_plot_references)
 
         workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace not in workspace_list]
         for workspace in workspaces_to_remove:
@@ -110,14 +114,18 @@ class HomePlotWidgetModel(object):
         self.plot_figure.gca().remove_workspace_artists(workspace)
         self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
         self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
+        if workspace_name in self.plotted_fit_workspaces:
+            self.plotted_workspaces_inverse_binning.pop(workspace_name)
 
-    def _close_plot(self):
+    def _clear_plot_references(self):
         """
         callback to call when the plot window is closed. Removes the reference and resets plotted workspaces
         :return:
         """
         self.plot_figure = None
         self.plotted_workspaces = []
+        self.plotted_workspaces_inverse_binning = {}
+        self.plotted_fit_workspaces = []
 
     def force_redraw(self):
         if not self.plot_figure:
