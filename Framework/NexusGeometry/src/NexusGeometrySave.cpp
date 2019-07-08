@@ -5,7 +5,13 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-// test your new groups and data sets have their NXclasses.
+/*
+==============================================================================================================
+
+    saves the instrument to file.
+
+==============================================================================================================
+*/
 
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -43,6 +49,7 @@ const std::string X_PIXEL_OFFSET = "x_pixel_offset";
 const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
 const std::string SOURCE = "source";
+const std::string DETECTOR_NUMBER = "depends_on";
 
 // metadata
 const std::string METRES = "m";
@@ -53,7 +60,7 @@ const std::string SHAPE = "shape";
 // NEXUS COMPLIANT ATTRIBUTE VALUES
 
 //
-const H5::StrType H5VARIABLE(0, H5T_VARIABLE);
+const H5::StrType H5VARIABLE(0, H5T_VARIABLE); // this may be inefficient
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
 } // namespace
@@ -87,14 +94,6 @@ inline void writeStrValueToDataSetHelper(H5::DataSet &dSet,
 
   dSet.write(dSetValue, dSet.getDataType(), H5SCALAR);
 }
-
-/*
-==============================================================================================================
-
-    saves the instrument to file.
-
-==============================================================================================================
-*/
 
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
@@ -158,10 +157,9 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   /*
 ==============================================================================================================
 
-     Begin writing NX format tree structure to file
+ Parse tree structure in component
 
 ==============================================================================================================
-
 */
 
   H5::H5File file(fullPath, H5F_ACC_TRUNC);
@@ -171,6 +169,28 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writeStrAttributeToGroupHelper(rootGroup, NX_CLASS, NX_ENTRY);
 
   const size_t ROOT_INDEX = compInfo.root();
+
+  std::vector<int> detectorBanks;
+  for (int i = ROOT_INDEX; i > 0; --i) {
+    if (compInfo.isDetector(i)) {
+      detectorBanks.push_back(i);
+    }
+  }
+
+  // get number of detector banks/arrays
+
+  // get pixels for each detector
+
+  //
+
+  /*
+==============================================================================================================
+
+     Begin writing NX format tree structure to file
+
+==============================================================================================================
+
+*/
 
   /*
   ==============================================================================================================
@@ -228,6 +248,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 ==============================================================================================================
 */
 
+  // get num of detector banks and do for each:
+
   // subgroups
   H5::Group pixelGroup = detectorGroup.createGroup(PIXEL_SHAPE);
 
@@ -261,10 +283,10 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   /*
  =============================================================================================================
 
-         Source group in tree : @NXsource
-                 Parent: NXentry
+                Source group in tree : @NXsource
+                Parent: NXentry
 
-                 children:
+                children:
          => transformations
  =============================================================================================================
  */
@@ -290,11 +312,11 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   /*
   =============================================================================================================
 
-         Transformations group in tree: @NXtransformations
-             Parent: NXsource
+                Transformations group in tree: @NXtransformations
+                Parent: NXsource
 
-             Children:
-                  => location
+                Children:
+                => location
   =============================================================================================================
   */
 
@@ -331,6 +353,21 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   }
 
   file.close();
+
+  // detector number
+  hsize_t dims[1] = {13};
+  H5::DataSpace space = H5Screate_simple(1, dims, NULL);
+  H5::DataSet dset = sampleGroup.createDataSet("test", H5T_NATIVE_INT, space);
+
+  int wdata[13];
+
+  for (int i = 0; i < 13; i++) {
+    wdata[i] = i + 1;
+  }
+
+ 
+  dset.write(wdata, H5T_NATIVE_INT, space);
+
 
 } // saveInstrument
 
