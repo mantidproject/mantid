@@ -99,14 +99,14 @@ later date.
     class MasterPresenter(object):
 
         def __init__(self, view, data_model, colour_list):
-        self.view = view
+            self.view = view
 
-        self.data_model = data_model
+            self.data_model = data_model
 
-        self.presenter = presenter.Presenter(self.view.getOptionView(), colour_list)
-        self.plot_presenter = plot_presenter.PlotPresenter(self.view.getPlotView())
-        # connect statements
-        self.view.getOptionView().plotSignal.connect(self.updatePlot)             
+            self.presenter = presenter.Presenter(self.view.getOptionView(), colour_list)
+            self.plot_presenter = plot_presenter.PlotPresenter(self.view.getPlotView())
+            # connect statements
+            self.view.getOptionView().plotSignal.connect(self.updatePlot)
        
         # handle signals 
         def updatePlot(self):

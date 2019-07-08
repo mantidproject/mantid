@@ -31,12 +31,12 @@ main.py
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-        def get_qapplication_instance():
-            if QtWidgets.QApplication.instance():
-                app = QtWidgets.QApplication.instance()
-            else:
-                app = QtWidgets.QApplication(sys.argv)
-            return app
+    def get_qapplication_instance():
+        if QtWidgets.QApplication.instance():
+            app = QtWidgets.QApplication.instance()
+        else:
+            app = QtWidgets.QApplication(sys.argv)
+        return app
 
     app = get_qapplication_instance()
     window = Demo()
