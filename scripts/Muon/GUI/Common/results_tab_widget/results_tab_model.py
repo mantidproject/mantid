@@ -260,6 +260,8 @@ class ResultsTabModel(object):
             try:
                 run = ads.Instance().retrieve(wksp_name).run()
                 prop = run.getProperty(log_name)
+                if isinstance(prop, FloatTimeSeriesProperty):
+                    return True
                 try:
                     float(prop.value)
                     return True
