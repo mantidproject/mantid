@@ -13,7 +13,7 @@ MantidPlot Changes
 Improvements
 ############
 
-The vast mojority of development effort for user interfaces is now directed towards the Mantid workbench, for now only significant bugs will be fixed within Mantidplot.
+The vast mojority of development effort for user interfaces is now directed towards the :doc:`Mantid workbench <mantidworkbench>`, for now only significant bugs will be fixed within MantidPlot.
 
 Bugfixes
 ########
