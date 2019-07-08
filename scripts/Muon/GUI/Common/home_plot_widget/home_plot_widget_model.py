@@ -58,7 +58,7 @@ class HomePlotWidgetModel(object):
         self.plot_figure.canvas.set_window_title('Muon Analysis')
         self.plot_figure.gca().set_title(title)
 
-        self.plot_figure.canvas.window().closing.connect(self._close_plot)
+        self.plot_figure.canvas.window().closing.connect(self.close_plot)
 
         workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace not in workspace_list]
         for workspace in workspaces_to_remove:
@@ -96,13 +96,15 @@ class HomePlotWidgetModel(object):
         self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
         self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
 
-    def _close_plot(self):
+    def close_plot(self):
         """
         callback to call when the plot window is closed. Removes the reference and resets plotted workspaces
         :return:
         """
         self.plot_figure = None
         self.plotted_workspaces = []
+        self.plotted_workspaces_inverse_binning = []
+        self.plotted_fit_workspaces = []
 
     def force_redraw(self):
         if not self.plot_figure:
