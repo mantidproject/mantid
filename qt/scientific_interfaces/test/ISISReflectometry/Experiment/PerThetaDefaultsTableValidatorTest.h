@@ -86,9 +86,13 @@ public:
                      TransmissionRunPair("13463", "13464"));
   }
 
-  void testInvalidTransmissionRuns() {
-    auto table = Table({Cells({"", "bad", "bad"})});
-    runTestInvalidCells(table, expectedErrors({0}, {1, 2}));
+  void testTransmissionRunsAreWorkspaceNames() {
+    auto table = Table({Cells({"", "some workspace", "another_workspace"})});
+    auto results = runTestValid(table);
+    TS_ASSERT_EQUALS(results.size(), 1);
+    TS_ASSERT_EQUALS(
+        results[0].transmissionWorkspaceNames(),
+        TransmissionRunPair("some workspace", "another_workspace"));
   }
 
   void testValidQRange() {
@@ -146,10 +150,10 @@ public:
 
   void testCorrectRowMarkedAsInvalidInMultiRowTable() {
     auto row1 = Cells({"0.5"});
-    auto row2 = Cells({"1.2", "bad"});
+    auto row2 = Cells({"1.2", "", "", "bad"});
     auto row3 = Cells({"2.3"});
     auto table = Table({row1, row2, row3});
-    runTestInvalidCells(table, expectedErrors({1}, {1}));
+    runTestInvalidCells(table, expectedErrors({1}, {3}));
   }
 
 private:
