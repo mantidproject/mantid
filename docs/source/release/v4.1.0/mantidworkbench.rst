@@ -25,6 +25,11 @@ User interface
 - You can now save, load and delete custom layouts from the settings menu with quick access to user layout in the view
   menu.
 
+.. figure:: ../../images/workbench_plotoptions.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+   
 Plotting
 --------
 
