@@ -49,7 +49,7 @@ Scientific Interfaces
     - Data Reduction
     - Diffraction
     - Settings
-    - Simmulations
+    - Simulations
     - Tools
 
 
