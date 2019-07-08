@@ -132,6 +132,8 @@ private:
   void setScaleType(AxisID id, QString actionName);
   void toggleLegend(const bool checked);
 
+  void setSelectorsVisible(bool visible);
+
   // Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   // Map a line label to the boolean indicating whether error bars are shown

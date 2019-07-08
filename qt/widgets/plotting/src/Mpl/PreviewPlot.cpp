@@ -234,6 +234,17 @@ void PreviewPlot::setSelectorActive(bool active) { m_selectorActive = active; }
 bool PreviewPlot::selectorActive() const { return m_selectorActive; }
 
 /**
+ * Sets whether or not the selectors are visible on the preview plot.
+ * @param visible True if the selectors should be visible.
+ */
+void PreviewPlot::setSelectorsVisible(bool visible) {
+  for (auto singleSelector : m_singleSelectors)
+    singleSelector->setVisible(visible);
+  for (auto rangeSelector : m_rangeSelectors)
+    rangeSelector->setVisible(visible);
+}
+
+/**
  * Set the range of the specified axis
  * @param range The new range
  * @param axisID An enumeration defining the axis
@@ -284,7 +295,11 @@ void PreviewPlot::resizeX() { m_canvas->gca().autoscaleView(true, false); }
 /**
  * Reset the whole view to show all of the data
  */
-void PreviewPlot::resetView() { m_panZoomTool.zoomOut(); }
+void PreviewPlot::resetView() {
+  m_panZoomTool.zoomOut();
+  // Redraw the selectors if they are visible
+  QTimer::singleShot(0, this, SLOT(replot()));
+}
 
 /**
  * Set the face colour for the canvas
@@ -363,7 +378,6 @@ bool PreviewPlot::handleMousePressEvent(QMouseEvent *evt) {
   if (evt->buttons() & Qt::RightButton) {
     stopEvent = true;
   } else if (evt->buttons() & Qt::LeftButton) {
-    stopEvent = true;
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseDown(position);
@@ -382,7 +396,6 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
     stopEvent = true;
     showContextMenu(evt);
   } else if (evt->button() == Qt::LeftButton) {
-    stopEvent = true;
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseUp(position);
@@ -398,7 +411,6 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
 bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
   bool stopEvent(false);
   if (evt->buttons() == Qt::LeftButton) {
-    stopEvent = true;
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseMove(position);
@@ -575,14 +587,19 @@ void PreviewPlot::switchPlotTool(QAction *selected) {
   if (toolName == PLOT_TOOL_NONE) {
     m_panZoomTool.enableZoom(false);
     m_panZoomTool.enablePan(false);
+    setSelectorsVisible(true);
   } else if (toolName == PLOT_TOOL_PAN) {
     m_panZoomTool.enablePan(true);
+    setSelectorsVisible(false);
   } else if (toolName == PLOT_TOOL_ZOOM) {
     m_panZoomTool.enableZoom(true);
+    setSelectorsVisible(false);
   } else {
     // if a tool is added to the menu but no handler is added
     g_log.warning("Unknown plot tool selected.");
   }
+  // Redraw the selectors if they are visible
+  replot();
 }
 
 /**
