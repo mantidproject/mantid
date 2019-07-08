@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
+#include "IndirectDataValidationHelper.h"
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -18,10 +20,6 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
 
 template <typename T = MatrixWorkspace, typename R = MatrixWorkspace_sptr>
 R getADSWorkspace(std::string const &workspaceName) {
@@ -472,64 +470,24 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
 bool ApplyAbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  // Validate the sample workspace
+  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red,
+                      {DataType::Sqw});
 
-  const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
-  const auto sampleWsName = sampleName.toStdString();
-  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
+  // Validate the container workspace
+  if (m_uiForm.ckUseCan->isChecked())
+    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red,
+                        {DataType::Sqw});
 
-  if (sampleExists && !getADSWorkspace(sampleWsName)) {
-    uiv.addErrorMessage(
-        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
-  }
-
-  bool useCan = m_uiForm.ckUseCan->isChecked();
-
-  if (useCan)
-    uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
-
-  validateCorrections(uiv);
+  // Validate the corrections workspace
+  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections",
+                       DataType::Corrections);
 
   // Show errors if there are any
   if (!uiv.isAllInputValid())
     emit showMessageBox(uiv.generateErrorMessage());
 
   return uiv.isAllInputValid();
-}
-
-void ApplyAbsorptionCorrections::validateCorrections(
-    UserInputValidator &uiv) const {
-  auto const correctionsName =
-      m_uiForm.dsCorrections->getCurrentDataName().toStdString();
-
-  if (correctionsName.empty())
-    uiv.addErrorMessage("Please load a corrections workspace.");
-  else
-    validateCorrections(uiv, correctionsName);
-}
-
-void ApplyAbsorptionCorrections::validateCorrections(
-    UserInputValidator &uiv, std::string const &name) const {
-  if (doesExistInADS(name)) {
-    if (auto const corrections =
-            getADSWorkspace<WorkspaceGroup, WorkspaceGroup_sptr>(name))
-      validateCorrections(uiv, corrections);
-    else
-      uiv.addErrorMessage(
-          "The corrections workspace should be a WorkspaceGroup.");
-
-  } else {
-    uiv.addErrorMessage("The corrections workspace could not be found. Please "
-                        "re-load the corrections workspace.");
-  }
-}
-
-void ApplyAbsorptionCorrections::validateCorrections(
-    UserInputValidator &uiv, WorkspaceGroup_sptr correctionsWorkspace) const {
-  for (auto const workspace : *correctionsWorkspace)
-    if (!workspace)
-      uiv.addErrorMessage(
-          "The corrections WorkspaceGroup contains an invalid workspace.");
 }
 
 void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {

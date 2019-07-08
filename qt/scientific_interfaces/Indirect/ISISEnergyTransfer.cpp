@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -272,6 +273,20 @@ ISISEnergyTransfer::~ISISEnergyTransfer() {}
 
 void ISISEnergyTransfer::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void ISISEnergyTransfer::handleDataReady(QString const &dataName) {
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration",
+                       DataType::Calib);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
+}
+
 bool ISISEnergyTransfer::validate() {
   UserInputValidator uiv;
 
@@ -281,12 +296,9 @@ bool ISISEnergyTransfer::validate() {
   }
 
   // Calibration file input
-  if (m_uiForm.ckUseCalib->isChecked()) {
-    auto const calibName = m_uiForm.dsCalibrationFile->getCurrentDataName();
-    uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibrationFile);
-    uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
-        calibName, "MatrixWorkspace");
-  }
+  if (m_uiForm.ckUseCalib->isChecked())
+    validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration",
+                         DataType::Calib);
 
   QString groupingError = validateDetectorGrouping();
   if (!groupingError.isEmpty())
@@ -391,21 +403,6 @@ bool ISISEnergyTransfer::validate() {
   showMessageBox(error);
 
   return uiv.isAllInputValid();
-}
-
-/**
- * Handles the event of data being loaded. Validates the loaded data.
- *
- */
-void ISISEnergyTransfer::handleDataReady(QString const &dataName) {
-  UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibrationFile);
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
-      dataName, "MatrixWorkspace");
-
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage);
 }
 
 bool ISISEnergyTransfer::numberInCorrectRange(

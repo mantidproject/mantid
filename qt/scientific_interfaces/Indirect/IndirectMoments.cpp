@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMoments.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -82,6 +83,25 @@ IndirectMoments::~IndirectMoments() {}
 
 void IndirectMoments::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void IndirectMoments::handleDataReady(QString const &dataName) {
+  if (validate())
+    plotNewData(dataName);
+}
+
+bool IndirectMoments::validate() {
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Sqw);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
+  return errorMessage.isEmpty();
+}
+
 void IndirectMoments::run() {
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
   QString outputName = workspaceName.left(workspaceName.length() - 4);
@@ -107,38 +127,6 @@ void IndirectMoments::run() {
 
   // Execute algorithm on separate thread
   runAlgorithm(momentsAlg);
-}
-
-bool IndirectMoments::validate() {
-  UserInputValidator uiv;
-
-  uiv.checkDataSelectorIsValid("Sample input", m_uiForm.dsInput);
-
-  QString msg = uiv.generateErrorMessage();
-  if (!msg.isEmpty()) {
-    emit showMessageBox(msg);
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Handles the event of data being loaded. Validates the loaded data.
- *
- */
-void IndirectMoments::handleDataReady(QString const &dataName) {
-  UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
-      dataName, "MatrixWorkspace");
-
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (errorMessage.isEmpty()) {
-    plotNewData(dataName);
-  } else {
-    emit showMessageBox(errorMessage);
-  }
 }
 
 /**

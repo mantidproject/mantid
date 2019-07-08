@@ -50,7 +50,8 @@ public:
   /// Check that the given MWRunFiles widget has valid files.
   bool checkMWRunFilesIsValid(const QString &name, MWRunFiles *widget);
   /// Check that the given DataSelector widget has valid input.
-  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget);
+  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget,
+                                bool silent = false);
   /// Check that the given start and end range is valid.
   bool checkValidRange(const QString &name, std::pair<double, double> range);
   /// Check that the given ranges dont overlap.
@@ -74,9 +75,10 @@ public:
   template <typename T = Mantid::API::MatrixWorkspace,
             typename R = Mantid::API::MatrixWorkspace_sptr>
   bool checkWorkspaceType(QString const &workspaceName,
-                          QString const &validType);
+                          QString const &inputType, QString const &validType,
+                          bool silent = false);
   /// Checks that a workspace exists in the ADS
-  bool checkWorkspaceExists(QString const &workspaceName);
+  bool checkWorkspaceExists(QString const &workspaceName, bool silent = false);
   /// Checks the number of histograms in a workspace
   bool checkWorkspaceNumberOfHistograms(QString const &workspaceName,
                                         std::size_t const &validSize);
@@ -87,9 +89,13 @@ public:
                                   std::size_t const &validSize);
   bool checkWorkspaceNumberOfBins(Mantid::API::MatrixWorkspace_sptr,
                                   std::size_t const &validSize);
+  /// Checks that a workspace group contains valid matrix workspace's
+  bool checkWorkspaceGroupIsValid(QString const &groupName,
+                                  QString const &inputType,
+                                  bool silent = false);
 
   /// Add a custom error message to the list.
-  void addErrorMessage(const QString &message);
+  void addErrorMessage(const QString &message, bool silent = false);
 
   /// Sets a validation label
   void setErrorLabel(QLabel *errorLabel, bool valid);
@@ -118,10 +124,14 @@ private:
  */
 template <typename T, typename R>
 bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
-                                            QString const &validType) {
-  if (checkWorkspaceExists(workspaceName)) {
+                                            QString const &inputType,
+                                            QString const &validType,
+                                            bool silent) {
+  if (checkWorkspaceExists(workspaceName, silent)) {
     if (!getADSWorkspace<T, R>(workspaceName.toStdString())) {
-      addErrorMessage(workspaceName + " is not a " + validType + ".");
+      addErrorMessage("The " + inputType + " workspace is not a " + validType +
+                          ".",
+                      silent);
       return false;
     } else
       return true;
@@ -137,7 +147,8 @@ bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
  */
 template <typename T, typename R>
 R UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
+  return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(
+      workspaceName);
 }
 
 } // namespace CustomInterfaces

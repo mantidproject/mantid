@@ -5,10 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSqw.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 
 #include <QFileInfo>
@@ -96,6 +97,23 @@ IndirectSqw::~IndirectSqw() {}
 
 void IndirectSqw::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void IndirectSqw::handleDataReady(QString const &dataName) {
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsSampleInput, "Sample", DataType::Red);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty()) {
+    showMessageBox(errorMessage);
+  } else {
+    plotRqwContour(dataName.toStdString());
+    setDefaultQAndEnergy();
+  }
+}
+
 bool IndirectSqw::validate() {
   double const tolerance = 1e-10;
   double const qLow = m_uiForm.spQLow->value();
@@ -106,13 +124,8 @@ bool IndirectSqw::validate() {
 
   UserInputValidator uiv;
 
-  // Validate the data selector
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
-
-  // Validate sample workspace
-  auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
-      sampleWsName, "MatrixWorkspace");
+  // Validate the sample
+  validateDataIsOfType(uiv, m_uiForm.dsSampleInput, "Sample", DataType::Red);
 
   // Validate Q binning
   uiv.checkBins(qLow, qWidth, qHigh, tolerance);
@@ -225,25 +238,6 @@ void IndirectSqw::sqwAlgDone(bool error) {
 void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
   MantidQt::API::SignalBlocker blocker(m_uiForm.spWorkspaceIndex);
   m_uiForm.spWorkspaceIndex->setMaximum(maximum);
-}
-
-/**
- * Handles the event of data being loaded. Validates the loaded data.
- *
- */
-void IndirectSqw::handleDataReady(QString const &dataName) {
-  UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
-      dataName, "MatrixWorkspace");
-
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (errorMessage.isEmpty()) {
-    plotRqwContour(dataName.toStdString());
-    setDefaultQAndEnergy();
-  } else {
-    emit showMessageBox(errorMessage);
-  }
 }
 
 /**

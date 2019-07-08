@@ -251,6 +251,11 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
 
+private slots:
+  virtual void handleDataReady(QString const &dataName) {
+    UNUSED_ARG(dataName);
+  };
+
 private:
   std::string getInterfaceProperty(std::string const &interfaceName,
                                    std::string const &propertyName,

@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSymmetrise.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -163,14 +164,28 @@ IndirectSymmetrise::~IndirectSymmetrise() {}
 
 void IndirectSymmetrise::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ * @param dataName The name of the data that has been loaded
+ */
+void IndirectSymmetrise::handleDataReady(QString const &dataName) {
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
+  else
+    plotNewData(dataName);
+}
+
 bool IndirectSymmetrise::validate() {
   auto const sampleName = m_uiForm.dsInput->getCurrentDataName();
 
   UserInputValidator uiv;
   // Validate the sample workspace
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
-      sampleName, "MatrixWorkspace");
+  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
 
   // EMin and EMax must be positive
   if (m_dblManager->value(m_properties["EMin"]) <= 0.0)
@@ -236,25 +251,6 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
   // Enable save and plot
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
-}
-
-/**
- * Handles the event of data being loaded. Validates the loaded data.
- *
- * @param dataName The name of the data that has been loaded
- */
-void IndirectSymmetrise::handleDataReady(QString const &dataName) {
-  UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
-      dataName, "MatrixWorkspace");
-
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (errorMessage.isEmpty()) {
-    plotNewData(dataName);
-  } else {
-    emit showMessageBox(errorMessage);
-  }
 }
 
 /**

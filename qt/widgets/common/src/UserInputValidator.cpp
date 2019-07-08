@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QLabel>
 #include <QLineEdit>
@@ -29,6 +30,15 @@ template <typename T> void sortPair(std::pair<T, T> &pair) {
 
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+boost::optional<std::string>
+containsInvalidWorkspace(WorkspaceGroup_const_sptr group) {
+  for (auto workspace : *group)
+    if (!workspace)
+      return "The group workspace called " + group->getName() +
+             " contains an invalid workspace.";
+  return boost::none;
 }
 
 } // anonymous namespace
@@ -131,9 +141,10 @@ bool UserInputValidator::checkMWRunFilesIsValid(const QString &name,
  * @returns True if the input was valid
  */
 bool UserInputValidator::checkDataSelectorIsValid(const QString &name,
-                                                  DataSelector *widget) {
+                                                  DataSelector *widget,
+                                                  bool silent) {
   if (!widget->isValid()) {
-    addErrorMessage(name + " error: " + widget->getProblem());
+    addErrorMessage(name + " error: " + widget->getProblem(), silent);
     return false;
   }
 
@@ -286,9 +297,13 @@ bool UserInputValidator::checkNotEqual(const QString &name, double x, double y,
  * @param workspaceName Name of the workspace
  * @return True if the workspace is in the ADS
  */
-bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName) {
+bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName,
+                                              bool silent) {
+  if (workspaceName.isEmpty())
+    return false;
+
   if (!doesExistInADS(workspaceName.toStdString())) {
-    addErrorMessage(workspaceName + " could not be found.");
+    addErrorMessage(workspaceName + " could not be found.", silent);
     return false;
   }
   return true;
@@ -361,12 +376,36 @@ bool UserInputValidator::checkWorkspaceNumberOfBins(
 }
 
 /**
+ * Checks that a workspaces group is not empty and doesn't contain null
+ * workspaces.
+ *
+ * @param groupName The name of the workspace group
+ * @return True if the workspace group is valid
+ */
+bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName,
+                                                    QString const &inputType,
+                                                    bool silent) {
+  if (checkWorkspaceType<WorkspaceGroup, WorkspaceGroup_sptr>(
+          groupName, inputType, "WorkspaceGroup", silent)) {
+    if (auto const group = getADSWorkspace<WorkspaceGroup, WorkspaceGroup_sptr>(
+            groupName.toStdString())) {
+      if (auto const error = containsInvalidWorkspace(group)) {
+        addErrorMessage(QString::fromStdString(error.get()), silent);
+        return false;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Add a custom error message to the list.
  *
  * @param message :: the message to add to the list
  */
-void UserInputValidator::addErrorMessage(const QString &message) {
-  if (!m_errorMessages.contains(message))
+void UserInputValidator::addErrorMessage(const QString &message, bool silent) {
+  if (!silent && !m_errorMessages.contains(message))
     m_errorMessages.append(message);
 }
 
