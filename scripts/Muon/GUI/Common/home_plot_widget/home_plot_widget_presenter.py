@@ -29,7 +29,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._view = view
         self._model = model
         self.context = context
-        self._plot_window = None
         self._view.on_plot_button_clicked(self.handle_data_updated)
         self._view.on_rebin_options_changed(
             self.handle_use_raw_workspaces_changed)
@@ -40,7 +39,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.plot_type_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
-
         self.plot_type_changed_notifier = GenericObservable()
 
         self._force_redraw = False
@@ -48,6 +46,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             for ext in FREQUENCY_EXTENSIONS.keys():
                 self._view.addItem(FREQ_PLOT_TYPE+FREQUENCY_EXTENSIONS[ext])
             self._view.addItem(FREQ_PLOT_TYPE+"All")
+        self.instrument_observer = GenericObserver(self.handle_instrument_changed)
+        self.keep = False
 
     def show(self):
         """
@@ -247,3 +247,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             return "Frequency"
         else:
             return "Time"
+
+    def handle_instrument_changed(self):
+        if self._model.plot_figure is not None:
+            from matplotlib import pyplot as plt
+            plt.close(self._model.plot_figure)

@@ -11,7 +11,6 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>
 
@@ -19,7 +18,17 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
 }
+
+template <typename T = MatrixWorkspace, typename R = MatrixWorkspace_sptr>
+R getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -77,8 +86,7 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // Get workspace
-  m_ppSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      dataName.toStdString());
+  m_ppSampleWS = getADSWorkspace(dataName.toStdString());
 
   // Check if supplied workspace is a MatrixWorkspace
   if (!m_ppSampleWS) {
@@ -104,8 +112,7 @@ void ApplyAbsorptionCorrections::newContainer(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // get Workspace
-  m_ppContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      dataName.toStdString());
+  m_ppContainerWS = getADSWorkspace(dataName.toStdString());
 
   // Check if supplied workspace is a MatrixWorkspace
   if (!m_ppContainerWS) {
@@ -189,9 +196,7 @@ void ApplyAbsorptionCorrections::run() {
   applyCorrAlg->initialize();
 
   // get Sample Workspace
-  MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_sampleWorkspaceName);
+  auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
   absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
@@ -208,8 +213,7 @@ void ApplyAbsorptionCorrections::run() {
     clone->setProperty("Outputworkspace", cloneName);
     clone->execute();
 
-    canClone =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
+    canClone = getADSWorkspace(cloneName);
     // Check for same binning across sample and container
     if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
       const char *text = "Binning on sample and container does not match."
@@ -251,11 +255,10 @@ void ApplyAbsorptionCorrections::run() {
 
   QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-  WorkspaceGroup_sptr corrections =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          correctionsWsName.toStdString());
+  auto const corrections = getADSWorkspace<WorkspaceGroup, WorkspaceGroup_sptr>(
+      correctionsWsName.toStdString());
   bool interpolateAll = false;
-  for (size_t i = 0; i < corrections->size(); i++) {
+  for (std::size_t i = 0; i < corrections->size(); i++) {
     MatrixWorkspace_sptr factorWs =
         boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
@@ -329,10 +332,9 @@ void ApplyAbsorptionCorrections::run() {
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
-    const auto canName =
+    auto const canName =
         m_uiForm.dsContainer->getCurrentDataName().toStdString();
-    MatrixWorkspace_sptr containerWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canName);
+    auto const containerWs = getADSWorkspace(canName);
     auto logs = containerWs->run();
     if (logs.hasProperty("run_number")) {
       outputWsName +=
@@ -363,11 +365,6 @@ void ApplyAbsorptionCorrections::run() {
 
 std::size_t ApplyAbsorptionCorrections::getOutWsNumberOfSpectra() const {
   return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
-}
-
-MatrixWorkspace_const_sptr
-ApplyAbsorptionCorrections::getADSWorkspace(std::string const &name) const {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
 }
 
 /**
@@ -481,9 +478,7 @@ bool ApplyAbsorptionCorrections::validate() {
   const auto sampleWsName = sampleName.toStdString();
   bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
 
-  if (sampleExists &&
-      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          sampleWsName)) {
+  if (sampleExists && !getADSWorkspace(sampleWsName)) {
     uiv.addErrorMessage(
         "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
   }
@@ -493,32 +488,48 @@ bool ApplyAbsorptionCorrections::validate() {
   if (useCan)
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
-  if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
-    uiv.addErrorMessage(
-        "Correction selector must contain a corrections file or workspace.");
-  } else {
-    QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
-    WorkspaceGroup_sptr corrections =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            correctionsWsName.toStdString());
-    for (size_t i = 0; i < corrections->size(); i++) {
-      // Check it is a MatrixWorkspace
-      MatrixWorkspace_sptr factorWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
-      if (!factorWs) {
-        QString msg = "Correction factor workspace " + QString::number(i) +
-                      " is not a MatrixWorkspace";
-        uiv.addErrorMessage(msg);
-        continue;
-      }
-    }
-  }
+  validateCorrections(uiv);
 
   // Show errors if there are any
   if (!uiv.isAllInputValid())
     emit showMessageBox(uiv.generateErrorMessage());
 
   return uiv.isAllInputValid();
+}
+
+void ApplyAbsorptionCorrections::validateCorrections(
+    UserInputValidator &uiv) const {
+  auto const correctionsName =
+      m_uiForm.dsCorrections->getCurrentDataName().toStdString();
+
+  if (correctionsName.empty())
+    uiv.addErrorMessage("Please load a corrections workspace.");
+  else
+    validateCorrections(uiv, correctionsName);
+}
+
+void ApplyAbsorptionCorrections::validateCorrections(
+    UserInputValidator &uiv, std::string const &name) const {
+  if (doesExistInADS(name)) {
+    if (auto const corrections =
+            getADSWorkspace<WorkspaceGroup, WorkspaceGroup_sptr>(name))
+      validateCorrections(uiv, corrections);
+    else
+      uiv.addErrorMessage(
+          "The corrections workspace should be a WorkspaceGroup.");
+
+  } else {
+    uiv.addErrorMessage("The corrections workspace could not be found. Please "
+                        "re-load the corrections workspace.");
+  }
+}
+
+void ApplyAbsorptionCorrections::validateCorrections(
+    UserInputValidator &uiv, WorkspaceGroup_sptr correctionsWorkspace) const {
+  for (auto const workspace : *correctionsWorkspace)
+    if (!workspace)
+      uiv.addErrorMessage(
+          "The corrections WorkspaceGroup contains an invalid workspace.");
 }
 
 void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {

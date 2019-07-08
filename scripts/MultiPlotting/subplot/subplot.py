@@ -68,10 +68,11 @@ class subplot(QtWidgets.QWidget):
         self._context.add_annotate(subplotName, label)
         self.canvas.draw()
 
-    def add_vline(self, subplotName, xvalue, name):
+    # todo: add color suppport
+    def add_vline(self, subplotName, xvalue, name, color):
         if subplotName not in self._context.subplots.keys():
             return
-        self._context.add_vline(subplotName, xvalue, name)
+        self._context.add_vline(subplotName, xvalue, name, color)
         self.canvas.draw()
 
     def rm_annotate(self, subplotName, name):

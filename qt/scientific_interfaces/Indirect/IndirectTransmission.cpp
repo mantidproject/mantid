@@ -39,6 +39,9 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
           this,
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
+
+  m_uiForm.dsSampleInput->setTypeSelectorVisible(false);
+  m_uiForm.dsCanInput->setTypeSelectorVisible(false);
 }
 
 //----------------------------------------------------------------------------------------------

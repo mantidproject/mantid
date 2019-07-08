@@ -349,21 +349,9 @@ public:
     runTestForValidPerAngleOptions(optionsTable);
   }
 
-  void testFirstTransmissionRunInvalid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithFirstTransmissionRunInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 1);
-  }
-
   void testSetSecondTransmissionRun() {
     OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRun()};
     runTestForInvalidPerAngleOptions(optionsTable, 0, 1);
-  }
-
-  void testSecondTransmissionRunInvalid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithSecondTransmissionRunInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 2);
   }
 
   void testSetBothTransmissionRuns() {
@@ -803,11 +791,7 @@ private:
   }
   OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
-  OptionsRow optionsRowWithFirstTransmissionRunInvalid() { return {"", "bad"}; }
   OptionsRow optionsRowWithSecondTransmissionRun() { return {"", "", "13464"}; }
-  OptionsRow optionsRowWithSecondTransmissionRunInvalid() {
-    return {"", "", "bad"};
-  }
   OptionsRow optionsRowWithBothTransmissionRuns() {
     return {"", "13463", "13464"};
   }

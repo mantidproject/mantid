@@ -234,6 +234,7 @@ std::string optionsToString(std::map<std::string, std::string> const &options) {
 
     auto const &firstKvp = (*optionsKvpIt);
     resultStream << firstKvp.first << "='" << firstKvp.second << '\'';
+    ++optionsKvpIt;
 
     for (; optionsKvpIt != options.cend(); ++optionsKvpIt) {
       auto kvp = (*optionsKvpIt);

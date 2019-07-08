@@ -444,10 +444,12 @@ std::string RunsPresenter::liveDataReductionAlgorithm() {
 }
 
 std::string
-RunsPresenter::liveDataReductionOptions(const std::string &instrument) {
+RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace,
+                                        const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
   AlgorithmRuntimeProps options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
+  options["InputWorkspace"] = inputWorkspace;
   options["Instrument"] = instrument;
   options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";
   // Convert the properties to a string to pass to the algorithm
@@ -460,15 +462,16 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->initialize();
   alg->setChild(true);
   alg->setLogging(false);
-  auto instrument = m_view->getSearchInstrument();
+  auto const instrument = m_view->getSearchInstrument();
+  auto const inputWorkspace = "TOF_live";
   alg->setProperty("Instrument", instrument);
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
-  alg->setProperty("AccumulationWorkspace", "TOF_live");
+  alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", "20");
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
-                   liveDataReductionOptions(instrument));
+                   liveDataReductionOptions(inputWorkspace, instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {

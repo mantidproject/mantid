@@ -61,6 +61,7 @@ Bug fixes
 
 - Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
 - Fixed a problem where auto-saving would fail if the output for a row is a group workspace.
+- Fixed a problem where the live data monitor would not start. Also fixed an issue where the output workspace is created prematurely as a clone of the TOF workspace.
 	
 Removed
 #######

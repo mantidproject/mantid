@@ -127,7 +127,7 @@ class AxisEditor(PropertiesEditorBase):
         axis = axes.xaxis if axis_id == 'x' else axes.yaxis
 
         memento = AxisEditorModel()
-        self._momento = memento
+        self._memento = memento
         memento.min, memento.max = getattr(axes, 'get_{}lim'.format(axis_id))()
         memento.log = getattr(axes, 'get_{}scale'.format(axis_id))() != 'linear'
         memento.grid = axis.majorTicks[0].gridOn
