@@ -546,9 +546,6 @@ public:
 
   void invalidateCachedSpectrumNumbers();
 
-  void cacheDetectorGroupings(const det2group_map &mapping) override;
-  size_t groupOfDetectorID(const detid_t detID) const override;
-
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
