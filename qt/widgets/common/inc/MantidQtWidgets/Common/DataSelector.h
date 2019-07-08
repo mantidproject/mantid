@@ -86,6 +86,8 @@ public:
   QString getCurrentDataName() const;
   /// Sets which selector (file or workspace) is visible
   void setSelectorIndex(int index);
+  /// Sets if the option to choose selector is visible
+  void setTypeSelectorVisible(bool visible);
   /// Set the index of the combobox containing the loaded workspace
   void setWorkspaceSelectorIndex(QString const &workspaceName);
   /// Get whether the file selector is currently being shown

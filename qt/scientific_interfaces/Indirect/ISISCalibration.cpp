@@ -158,8 +158,6 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(calUpdateRS(QtProperty *, double)));
   // Plot miniplots after a file has loaded
   connect(m_uiForm.leRunNo, SIGNAL(filesFound()), this, SLOT(calPlotRaw()));
-  // Plot miniplots when the user clicks Plot Raw
-  connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
   // Toggle RES file options when user toggles Create RES File checkbox
   connect(m_uiForm.ckCreateResolution, SIGNAL(toggled(bool)), this,
           SLOT(resCheck(bool)));
@@ -418,7 +416,7 @@ void ISISCalibration::calPlotRaw() {
   QString filename = m_uiForm.leRunNo->getFirstFilename();
 
   // Don't do anything if the file we would plot has not changed
-  if (filename == m_lastCalPlotFilename)
+  if (filename.isEmpty() || filename == m_lastCalPlotFilename)
     return;
 
   m_lastCalPlotFilename = filename;

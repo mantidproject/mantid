@@ -39,6 +39,8 @@ Improvements
 
 - The Pearl scripts now crop to a dspacing of 8 on long-mode to avoid negative values caused by noise after this point.
 
+- New example mapping files for GEM and POLARIS have been added to the ISIS powder scripts.
+
 Bug Fixes
 #########
 

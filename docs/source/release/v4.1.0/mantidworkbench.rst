@@ -21,6 +21,7 @@ Improvements
 - Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data
 - You can now save, load and delete custom layouts from the settings menu with quick access to user layout in the view
   menu.
+- The plot options dialog has been improved to offer you more control over your figures
 
 Bugfixes
 ########
@@ -30,5 +31,6 @@ Bugfixes
 - A Colorfill plot of a workspace with one spectrum plots correctly and no longer raises an error.
 - The units on the y-axis of distribution workspace plots have been corrected
 - Restore Default Layout no longer resizes the main window.
+- Entering an invalid number into a plot's axis editor no longer causes an uncaught error
 
 :ref:`Release 4.1.0 <v4.1.0>`

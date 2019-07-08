@@ -37,7 +37,7 @@
            </sizepolicy>
           </property>
           <property name="label" stdset="0">
-           <string>Run No</string>
+           <string>Input Runs</string>
           </property>
           <property name="multipleFiles" stdset="0">
            <bool>true</bool>
@@ -49,16 +49,6 @@
            <stringlist>
             <string>.raw</string>
            </stringlist>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pbPlotRaw">
-          <property name="toolTip">
-           <string>Plot first detector spectra</string>
-          </property>
-          <property name="text">
-           <string>Plot Raw</string>
           </property>
          </widget>
         </item>

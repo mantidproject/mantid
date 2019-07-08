@@ -264,6 +264,15 @@ ReductionJobs twoGroupsWithMixedRowsModel() {
   return reductionJobs;
 }
 
+ReductionJobs emptyReductionJobs() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Group1");
+  group1.appendRow(makeRow());
+  reductionJobs.appendGroup(std::move(group1));
+
+  return reductionJobs;
+}
+
 /* Experiment */
 
 std::vector<PerThetaDefaults> makePerThetaDefaults() {

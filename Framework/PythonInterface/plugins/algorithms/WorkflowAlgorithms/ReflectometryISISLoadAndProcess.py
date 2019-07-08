@@ -303,7 +303,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # which by default is just the first run. Set it to the concatenated name,
         # e.g. 13461+13462
         ws = AnalysisDataService.retrieve(summed)
-        ws.run().addProperty('run_number', concatenated_names, True)
+        if isinstance(ws, WorkspaceGroup):
+            for workspaceName in ws.getNames():
+                grouped_ws = AnalysisDataService.retrieve(workspaceName)
+                grouped_ws.run().addProperty('run_number', concatenated_names, True)
+        else:
+            ws.run().addProperty('run_number', concatenated_names, True)
         return summed
 
     def _slicingEnabled(self):

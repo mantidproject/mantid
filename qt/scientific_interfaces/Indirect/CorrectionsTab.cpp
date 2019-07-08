@@ -94,10 +94,9 @@ bool CorrectionsTab::checkWorkspaceBinningMatches(
  * @param eMode Emode to use (if not set will determine based on current X unit)
  * @return Name of output workspace
  */
-std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
-                                                const std::string &unitID,
-                                                const std::string &suffix,
-                                                std::string eMode) {
+boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(
+    MatrixWorkspace_sptr ws, std::string const &unitID,
+    std::string const &suffix, std::string eMode, double eFixed) {
   std::string outputName = ws->getName();
 
   if (suffix != "UNIT")
@@ -118,8 +117,17 @@ std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
 
   convertAlg->setProperty("EMode", eMode);
 
+  if (eMode == "Indirect" && eFixed == 0.0) {
+    try {
+      eFixed = getEFixed(ws);
+    } catch (std::exception const &) {
+      showMessageBox("Please enter an Efixed value.");
+      return boost::none;
+    }
+  }
+
   if (eMode == "Indirect")
-    convertAlg->setProperty("EFixed", getEFixed(ws));
+    convertAlg->setProperty("EFixed", eFixed);
 
   m_batchAlgoRunner->addAlgorithm(convertAlg);
 
