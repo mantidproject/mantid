@@ -72,7 +72,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def get_subplots(self):
         return list(self._context.subplots.keys())
 
-    # todo: add color suppport
     def add_vline_and_annotate(self, subplotName, xvalue, label, color):
         self.add_annotate(subplotName, label)
         self.add_vline(subplotName, xvalue, label.text, color)
@@ -84,7 +83,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def add_annotate(self, subplotName, label):
         self.plots.add_annotate(subplotName, label)
 
-    # todo: add color suppport
     def add_vline(self, subplotName, xvalue, name, color):
         self.plots.add_vline(subplotName, xvalue, name, color)
 

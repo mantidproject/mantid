@@ -47,7 +47,6 @@ class PlottingContext(object):
     def add_annotate(self, subplotName, label):
         self.subplots[subplotName].add_annotate(label)
 
-    # todo: add color suppport
     def add_vline(self, subplotName, xvalue, name, color):
         self.subplots[subplotName].add_vline(xvalue, name, color=color)
 
