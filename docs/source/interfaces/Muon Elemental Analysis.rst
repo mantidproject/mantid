@@ -21,13 +21,13 @@ the program will not load any file, nor return an error.
 
 Plotting
 --------
-Tick the boxes corresponding to the detector you want to display. For each detector, a separate plot should appear in
+Tick the boxes corresponding to the detector you want to display. For each detector, a separate plot will appear in
 the same window. Each plot contains 3 lines: *Prompt*, *Delayed* and *Total*.
 
 .. image:: ../images/MuonElementalAnalysisPlot.png
   :align: center
 
-To remove one or more lines on the top right corner of the plot press *Remove line*, a table should appear. Select the
+To remove one or more lines on the top right corner of the plot press *Remove line*, a table will appear. Select the
 lines you want to remove and press *OK*.
 Similarly, to remove one plot press *Remove plot*, select the plot you wish to remove and press *OK*.
 
@@ -36,8 +36,8 @@ Displaying peaks
 Elements whose name appears in grey lack any peak data and thus cannot be plotted.
 To observe the peaks of any other, click on its label which should turn yellow.
 Now plot data from one of the detectors and select all the peaks you would like to examine: main, secondary,
-gamma and electronic. Lines should appear for each of the peaks.
-Lines corresponding to different elements should appear in different colours.
+gamma and electronic. Lines will appear for each of the peaks.
+Lines corresponding to different elements will appear in different colours.
 
 To remove lines from a specific element, click on its label on the periodic table which will return to the original
 colour.
