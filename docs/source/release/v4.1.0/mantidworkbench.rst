@@ -10,12 +10,6 @@ Installation
 
 - Linux desktops now have an icon to launch the workbench without using the terminal.
 
-Scripting
-#########
-- Single line commenting in the script editor is now enabled without needing to highlight any text.
-- You can now import from local python files that are in the same directory as the script you're executing.
-
-
 User interface
 ##############
 
@@ -24,6 +18,33 @@ User interface
 - Mantid's offline help is now available in Workbench.
 - You can now save, load and delete custom layouts from the settings menu with quick access to user layout in the view
   menu.
+  
+.. figure:: ../../images/wb_sliceviewer.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+   
+SliceViewer
+-----------
+- We have merged much of the functionality of the Spectrum Viewer and Slice Viewer from Mantidplot into a single useful tool.
+
+Scientific Interfaces
+---------------------
+- Many of the interfaces that were missing from Workbench v4.0 have now been integrated into this release, including:
+  - ISIS Reflectometry
+  - Muon:
+    - ALC
+    - Elemental Analysis
+    - Frequency Domain Analysis
+    - Muon Analysis 2
+  - Indirect: 
+    - Corrections
+    - Data Reduction
+    - Diffraction
+    - Settings
+    - Simmulations
+    - Tools
+
 
 .. figure:: ../../images/workbench_plotoptions.png
    :class: screenshot
@@ -40,6 +61,10 @@ Plotting
 - You can now toggle the normalization of plots in Workbench from the plot's context menu
 - Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data
 
+Scripting
+#########
+- Single line commenting in the script editor is now enabled without needing to highlight any text.
+- You can now import from local python files that are in the same directory as the script you're executing.
 
 Bugfixes
 ########
