@@ -47,6 +47,7 @@ Improvements
 - All the ILL nexus file loaders were speeded up due to parallelization of the loading.
 - :ref:`algm-SumOverlappingTubes` was speeded up due to parallelization of the actual histogramming step.
 - Updated the clone method of IFunction to copy parameter errors across as well as parameter values.
+- :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now has a `CylinderAxis` property to set the direction of the cylinder axis.
 
 Instrument Definition Files
 ###########################

@@ -23,6 +23,11 @@ New Algorithms
 
 - :ref:`algm-FlippingRatioCorrectionMD` algorithm was introduced to account for polarization effects on HYSPEC, but it's not instrument specific.
 
+Improvements
+############
+
+- :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now has a `CylinderAxis` property to set the direction of the cylinder axis.
+
 Removed
 #######
 
