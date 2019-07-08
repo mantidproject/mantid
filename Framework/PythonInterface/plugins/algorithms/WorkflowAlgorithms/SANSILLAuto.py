@@ -42,7 +42,7 @@ def needs_processing(property_value, process_reduction_type):
         @param property_value : the string value of the corresponding MultipleFile input property
         @param process_reduction_type : the reduction_type of process
     """
-    process = False
+    do_process = False
     ws_name = ''
     if property_value:
         run_number = get_run_number(property_value)
@@ -56,14 +56,14 @@ def needs_processing(property_value, process_reduction_type):
                 else:
                     logger.warning(
                         '{0} workspace found, but processed differently: {1}'.format(process_reduction_type, ws_name))
-                    process = True
+                    do_process = True
             else:
                 logger.warning(
                     '{0} workspace found, but missing the ProcessedAs flag: {1}'.format(process_reduction_type, ws_name))
-                process = True
+                do_process = True
         else:
-            process = True
-    return [process, ws_name]
+            do_process = True
+    return [do_process, ws_name]
 
 
 class SANSILLAuto(DataProcessorAlgorithm):
