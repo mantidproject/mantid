@@ -5,8 +5,15 @@ MantidPlot Changes
 .. contents:: Table of Contents
    :local:
 
+.. figure:: ../../images/mantid_amber.jpeg
+   :class: screenshot
+   :width: 500px
+   :align: right
+   
 Improvements
 ############
+
+The vast mojority of development effort for user interfaces is now directed towards the :doc:`Mantid workbench <mantidworkbench>`, for now only significant bugs will be fixed within MantidPlot.
 
 Bugfixes
 ########
