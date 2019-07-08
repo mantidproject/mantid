@@ -211,6 +211,7 @@ class LoadRunWidgetPresenter(object):
             self._model.execute()
         except ValueError as error:
             self._view.warning_popup(error.args[0])
+            self.run_list = flatten_run_list(self._model.current_runs)
         finished_callback()
 
     def on_loading_start(self):

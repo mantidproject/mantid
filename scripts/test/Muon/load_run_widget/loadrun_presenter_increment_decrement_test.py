@@ -146,7 +146,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(GuiTest):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assert_model_has_not_changed()
-        self.assertEqual(self.view.get_run_edit_text(), '')
+        self.assertEqual(self.view.get_run_edit_text(), '1234')
 
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
@@ -156,7 +156,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(GuiTest):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assert_model_has_not_changed()
-        self.assertEqual(self.view.get_run_edit_text(), '')
+        self.assertEqual(self.view.get_run_edit_text(), '1234')
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_warning_message_is_displayed(self):
