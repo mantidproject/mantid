@@ -23,7 +23,7 @@ def needs_loading(property_value, loading_reduction_type):
     if property_value:
         ws_name = path.splitext(path.basename(property_value))[0]
         if mtd.doesExist(ws_name):
-            logger.information('Reusing {0} workspace: {1}'.format(loading_reduction_type, ws_name))
+            logger.notice('Reusing {0} workspace: {1}'.format(loading_reduction_type, ws_name))
         else:
             loading = True
     return [loading, ws_name]

@@ -47,12 +47,14 @@ class SANSILLReduction(PythonAlgorithm):
             Checks if the detector distance between two workspaces are close enough
             @param ws1 : workspace 1
             @param ws2 : workspace 2
-            @return true if the detector distance difference is less than 1 cm
         """
         tolerance = 0.01 #m
         l2_1 = ws1.getRun().getLogData('L2').value
         l2_2 = ws2.getRun().getLogData('L2').value
-        return fabs(l2_1 - l2_2) < tolerance
+        r1 = ws1.getRunNumber()
+        r2 = ws2.getRunNumber()
+        if fabs(l2_1 - l2_2) > tolerance:
+            logger.warning('Different distances detected! {0}: {1}, {2}: {3}'.format(r1, l2_1, r2, l2_2))
 
     @staticmethod
     def _check_processed_flag(ws, value):
@@ -284,8 +286,7 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace name
             @param beam_ws: empty beam workspace
         """
-        if not self._check_distances_match(mtd[ws], beam_ws):
-            self.log().warning('Different detector distances found for empty beam and transmission runs!')
+        self._check_distances_match(mtd[ws], beam_ws)
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam_ws, OutputWorkspace=ws)
         radius = self.getProperty('BeamRadius').value
         shapeXML = self._cylinder(radius)
@@ -332,6 +333,8 @@ class SANSILLReduction(PythonAlgorithm):
                 if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
                     self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
                 Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
+                # propagate the mask of the sensitivity also to the sample
+                MaskDetectors(Workspace=ws, MaskedWorkspace=sensitivity_in)
             flux_in = self.getProperty('FluxInputWorkspace').value
             if flux_in:
                 coll_ws = flux_in
@@ -343,9 +346,7 @@ class SANSILLReduction(PythonAlgorithm):
                 else:
                     Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws)
         if coll_ws:
-            if not self._check_distances_match(mtd[ws], coll_ws):
-                self.log().warning(
-                    'Different detector distances found for the reference/flux and sample runs!')
+            self._check_distances_match(mtd[ws], coll_ws)
             sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
             ref_coll = coll_ws.getRun().getLogData('collimation.actual_position').value
             flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
@@ -378,8 +379,7 @@ class SANSILLReduction(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
             AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
-        if not self._check_distances_match(mtd[ws], beam_ws):
-            self.log().warning('Different detector distances found for empty beam and sample runs!')
+        self._check_distances_match(mtd[ws], beam_ws)
 
     def _apply_transmission(self, ws, transmission_ws):
         """
@@ -412,9 +412,7 @@ class SANSILLReduction(PythonAlgorithm):
         """
         if not self._check_processed_flag(container_ws, 'Container'):
             self.log().warning('Container input workspace is not processed as container.')
-        if not self._check_distances_match(mtd[ws], container_ws):
-            self.log().warning(
-                'Different detector distances found for container and sample runs!')
+        self._check_distances_match(mtd[ws], container_ws)
         Minus(LHSWorkspace=ws, RHSWorkspace=container_ws, OutputWorkspace=ws)
 
     def _apply_mask(self, ws, mask_ws):
@@ -461,8 +459,7 @@ class SANSILLReduction(PythonAlgorithm):
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
-        #LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
-        Load(Filename=self.getPropertyValue('Run').replace(',', '+'), OutputWorkspace=ws)
+        LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         self._normalise(ws)
         ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
         self._instrument = mtd[ws].getInstrument().getName()
