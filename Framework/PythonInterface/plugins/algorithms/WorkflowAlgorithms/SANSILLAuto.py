@@ -330,8 +330,6 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              BeamInputWorkspace=beam_name,
                              TransmissionInputWorkspace=container_transmission_name,
                              NormaliseBy=self.normalise)
-        else:
-            self.log().warning('Using existing container: '+container_name)
 
         mask = self.mask[i] if len(self.mask) == self.dimensionality else self.mask[0]
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
