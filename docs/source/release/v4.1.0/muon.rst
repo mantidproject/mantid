@@ -29,4 +29,4 @@ Bug Fixes
 
 * Muon Analysis (original) no longer crashes when `TF Asymmetry` mode is activated.
 * Muon Analysis (original) can now produce results tables when columns contain both ranges and single values.
-* Frequency Domain Analysis GUI added to workbench.
+* Issue where imaginary box was reappearing for FFT transforms after being unselected fixed.
