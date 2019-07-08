@@ -160,7 +160,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     IFunction1D_sptr fun =
         boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
     if (!fun) {
-      throw std::runtime_error("Convolution can work only with IFunction1D");
+      throw std::runtime_error("Convolution can work only with 1D functions");
     }
     fun->function1D(m_resolution.data(), xr.data(), nData);
 
@@ -345,7 +345,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
   IFunction1D_sptr resolution =
       boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
   if (!resolution) {
-    throw std::runtime_error("Convolution can work only with IFunction1D");
+    throw std::runtime_error("Convolution can work only with 1D functions");
   }
   if (m_resolution.empty()) {
     m_resolution.resize(nData);

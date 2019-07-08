@@ -1483,7 +1483,7 @@ void FunctionTreeView::removeFunction() {
       // which means more than two subproperties
       size_t nFunctions = props[0]->subProperties().size() - 1;
 
-      if (nFunctions == 1) {
+      if (nFunctions == 1 && cf->name() == "CompositeFunction") {
         // If only one function remains, remove the composite function:
         // Temporary copy the remaining function
         auto func = getFunction(m_browser->properties()[0]->subProperties()[1]);
