@@ -32,6 +32,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.fit_observer = GenericObserver(self.handle_fit_completed)
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
+        self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
         self.keep = False
 
     def show(self):
@@ -107,20 +108,43 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
         self._model.plot(workspace_list, self.get_plot_title())
 
+        workspace_list_inverse_binning = self.get_workspaces_to_plot(self.context.group_pair_context.selected,
+                                                                     not self._view.if_raw(),
+                                                                     self._view.get_selected())
+        self._model.plotted_workspaces_inverse_binning = workspace_list_inverse_binning
+        combined_ws_list = workspace_list + workspace_list_inverse_binning
+        # This is checking whether the latest fit performed contains a fit which matches any of the workspaces just plotted
+        # if it does then handle fit complete is also called to update the fit on the plot.
+        if self.context.fitting_context.fit_list and \
+                any([workspace in combined_ws_list
+                     for workspace in self.context.fitting_context.fit_list[-1].input_workspaces]):
+            self.handle_fit_completed()
+
     def handle_fit_completed(self):
         """
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         :return:
         """
-        for plotted_workspace in self._model.plotted_workspaces:
-            list_of_workspaces_to_plot = self.context.fitting_context.find_output_workspaces_for_input_workspace_name(plotted_workspace)
+        for workspace_name in self._model.plotted_fit_workspaces:
+            self._model.remove_workpace_from_plot(workspace_name)
 
-            for workspace_name in list_of_workspaces_to_plot:
-                self._model.remove_workpace_from_plot(workspace_name)
+        for index in range(1, self.context.fitting_context.number_of_fits + 1, 1):
+            if self.context.fitting_context.fit_list:
+                current_fit = self.context.fitting_context.fit_list[-index]
+                combined_ws_list = self._model.plotted_workspaces + self._model.plotted_workspaces_inverse_binning
+                list_of_output_workspaces_to_plot = [output for output, input in
+                                                     zip(current_fit.output_workspace_names, current_fit.input_workspaces)
+                                                     if input in combined_ws_list]
+                list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot\
+                    else [current_fit.output_workspace_names[-1]]
+            else:
+                list_of_output_workspaces_to_plot = []
 
-            for workspace_name in list_of_workspaces_to_plot:
-                self._model.add_workspace_to_plot(workspace_name, 2)
-                self._model.add_workspace_to_plot(workspace_name, 3)
+            for workspace_name in list_of_output_workspaces_to_plot:
+                self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Fit')
+                self._model.add_workspace_to_plot(workspace_name, 3, workspace_name + ': Diff')
+
+        self._model.force_redraw()
 
     def get_workspaces_to_plot(self, current_group_pair, is_raw, plot_type):
         """
@@ -152,3 +176,9 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         flattened_run_list = [item for sublist in self.context.data_context.current_runs for item in sublist]
         return self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + ' ' + \
             self.context.group_pair_context.selected
+
+    def handle_rebin_options_set(self):
+        if self.context._do_rebin():
+            self._view.set_raw_checkbox_state(False)
+        else:
+            self._view.set_raw_checkbox_state(True)

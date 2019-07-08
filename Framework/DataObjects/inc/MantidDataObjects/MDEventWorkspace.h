@@ -174,27 +174,26 @@ public:
 
   /// Return true if the underlying box is a MDGridBox.
   bool isGridBox() {
-    return dynamic_cast<MDGridBox<MDE, nd> *>(data) != nullptr;
+    return dynamic_cast<MDGridBox<MDE, nd> *>(data.get()) != nullptr;
   }
 
   /** @returns a pointer to the box (MDBox or MDGridBox) contained within, */
-  MDBoxBase<MDE, nd> *getBox() { return data; }
+  MDBoxBase<MDE, nd> *getBox() { return data.get(); }
 
   /** @returns a pointer to the box (MDBox or MDGridBox) contained within, const
    * version.  */
-  const MDBoxBase<MDE, nd> *getBox() const { return data; }
+  const MDBoxBase<MDE, nd> *getBox() const { return data.get(); }
 
   /** Set the base-level box contained within.
    * Used in file loading */
   void setBox(API::IMDNode *box) override {
-    if (data)
-      delete data;
-    data = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
+    data = std::unique_ptr<MDBoxBase<MDE, nd>>(
+        dynamic_cast<MDBoxBase<MDE, nd> *>(box));
   }
 
   /// Apply masking
-  void
-  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override;
+  void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
+                        maskingRegion) override;
 
   /// Clear masking
   void clearMDMasking() override;
@@ -236,7 +235,7 @@ protected:
                                 std::set<coord_t> &mid_points) const;
 
   /** MDBox containing all of the events in the workspace. */
-  MDBoxBase<MDE, nd> *data;
+  std::unique_ptr<MDBoxBase<MDE, nd>> data;
 
   /// Box controller in use
   API::BoxController_sptr m_BoxController;

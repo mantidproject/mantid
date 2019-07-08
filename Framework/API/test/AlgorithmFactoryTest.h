@@ -26,8 +26,9 @@ public:
   ~AlgorithmFactoryTest() override {}
 
   void testSubscribe() {
-    Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
-        new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
+    std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newTwo =
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>>();
 
     auto &algFactory = AlgorithmFactory::Instance();
 
@@ -40,7 +41,7 @@ public:
     size_t noOfAlgs = keys.size();
 
     TS_ASSERT_THROWS_NOTHING(algFactory.subscribe<ToyAlgorithm>());
-    TS_ASSERT_THROWS_NOTHING(algFactory.subscribe(newTwo));
+    TS_ASSERT_THROWS_NOTHING(algFactory.subscribe(std::move(newTwo)));
 
     TS_ASSERT_THROWS_ANYTHING(algFactory.subscribe<ToyAlgorithm>());
 
@@ -54,8 +55,9 @@ public:
   }
 
   void testUnsubscribe() {
-    Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
-        new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
+    std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newTwo =
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>>();
 
     auto &algFactory = AlgorithmFactory::Instance();
 
@@ -64,7 +66,7 @@ public:
     size_t noOfAlgs = keys.size();
 
     algFactory.subscribe<ToyAlgorithm>();
-    algFactory.subscribe(newTwo);
+    algFactory.subscribe(std::move(newTwo));
 
     TS_ASSERT_THROWS_NOTHING(algFactory.unsubscribe("ToyAlgorithm", 1));
     TS_ASSERT_THROWS_NOTHING(algFactory.unsubscribe("ToyAlgorithm", 2));
@@ -87,13 +89,14 @@ public:
   }
 
   void testExists() {
-    Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
-        new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
+    std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newTwo =
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>>();
 
     auto &algFactory = AlgorithmFactory::Instance();
 
     algFactory.subscribe<ToyAlgorithm>();
-    algFactory.subscribe(newTwo);
+    algFactory.subscribe(std::move(newTwo));
 
     TS_ASSERT(algFactory.exists("ToyAlgorithm", 1));
     TS_ASSERT(algFactory.exists("ToyAlgorithm", 2));
@@ -131,9 +134,10 @@ public:
     algFactory.subscribe<ToyAlgorithm>();
     TS_ASSERT_EQUALS(1, algFactory.highestVersion("ToyAlgorithm"));
 
-    Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
-        new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
-    algFactory.subscribe(newTwo);
+    std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newTwo =
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>>();
+    algFactory.subscribe(std::move(newTwo));
     TS_ASSERT_EQUALS(2, algFactory.highestVersion("ToyAlgorithm"));
 
     algFactory.unsubscribe("ToyAlgorithm", 1);
@@ -141,13 +145,14 @@ public:
   }
 
   void testCreate() {
-    Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm> *newTwo =
-        new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
+    std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newTwo =
+        std::make_unique<
+            Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>>();
 
     auto &algFactory = AlgorithmFactory::Instance();
 
     algFactory.subscribe<ToyAlgorithm>();
-    algFactory.subscribe(newTwo);
+    algFactory.subscribe(std::move(newTwo));
 
     TS_ASSERT_THROWS_NOTHING(algFactory.create("ToyAlgorithm", -1));
     TS_ASSERT_THROWS_ANYTHING(algFactory.create("AlgorithmDoesntExist", -1));

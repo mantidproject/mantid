@@ -9,7 +9,9 @@ from __future__ import (absolute_import, division)
 from collections import OrderedDict
 import re
 
-from mantid.py3compat import iteritems, iterkeys
+from mantid.api import AnalysisDataService
+from mantid.py3compat import iteritems, iterkeys, string_types
+import numpy as np
 
 from Muon.GUI.Common.observer_pattern import Observable
 
@@ -188,8 +190,8 @@ class FitInformation(object):
         :param parameter_workspace: The workspace wrapper
         that contains all of the parameters from the fit
         :param fit_function_name: The name of the function used
-        :param input_workspace: The name of the workspace containing
-        the original data
+        :param input_workspace: The name or list of names
+        of the workspace(s) containing the original data
         :param output_workspace_names: A list containing the names of the output workspaces containing the fits
         :param global_parameters: An optional list of parameters
         that were tied together during the fit
@@ -197,19 +199,82 @@ class FitInformation(object):
         self._fit_parameters = FitParameters(parameter_workspace,
                                              global_parameters)
         self.fit_function_name = fit_function_name
-        self.input_workspace = input_workspace
-        self.output_workspace_names = output_workspace_names
+        self.input_workspaces = [input_workspace] if isinstance(
+            input_workspace, string_types) else input_workspace
+        self.output_workspace_names = [output_workspace_names] if isinstance(
+            output_workspace_names, string_types) else output_workspace_names
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self._fit_parameters.parameter_workspace_name == other._fit_parameters.parameter_workspace_name and \
+        return self.parameter_workspace_name == other.parameter_workspace_name and \
             self.fit_function_name == other.fit_function_name and \
-            self.input_workspace == other.input_workspace and \
+            self.input_workspaces == other.input_workspaces and \
             self.output_workspace_names == other.output_workspace_names
 
     @property
     def parameters(self):
         return self._fit_parameters
+
+    @property
+    def parameter_workspace_name(self):
+        return self._fit_parameters.parameter_workspace_name
+
+    def log_names(self, filter_fn=None):
+        """
+        The names of the logs on the workspaces
+        associated with this fit.
+
+        :filter_fn: An optional unary function to filter the names out. It should accept a log
+        and return True if the log should be accepted
+        :return: A list of names
+        """
+        filter_fn = filter_fn if filter_fn is not None else lambda x: True
+
+        all_names = []
+        for ws_name in self.output_workspace_names:
+            logs = _run(ws_name).getLogData()
+            all_names.extend([log.name for log in logs if filter_fn(log)])
+
+        return all_names
+
+    def has_log(self, log_name):
+        """
+        :param log_name: A string name
+        :return: True if the log exists on all of the input workspaces False, otherwise
+        """
+        for ws_name in self.output_workspace_names:
+            run = _run(ws_name)
+            if not run.hasProperty(log_name):
+                return False
+
+        return True
+
+    def log_value(self, log_name):
+        """
+        Compute and return the log value for the named log.
+        If the log is a string then the value is converted to a float
+        if possible. If the log is a time series then the time-average
+        value is computed. If multiple workspaces are part of the fit
+        then the values computed above are averaged over each workspace.
+        It is assumed that all logs have been checked for existence.
+        :param log_name: The name of an existing log
+        :return: A single double value
+        """
+        ads = AnalysisDataService.Instance()
+
+        def value_from_workspace(wksp_name):
+            run = ads.retrieve(wksp_name).run()
+            prop = run.getProperty(log_name)
+            if hasattr(prop, 'timeAverageValue'):
+                return prop.timeAverageValue()
+            else:
+                return float(prop.value)
+
+        values = [
+            value_from_workspace(wksp_name)
+            for wksp_name in self.output_workspace_names
+        ]
+        return np.mean(values)
 
 
 class FittingContext(object):
@@ -226,6 +291,8 @@ class FittingContext(object):
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
+        self._number_of_fits = 0
+        self._number_of_fits_cache = 0
 
     def __len__(self):
         """
@@ -245,7 +312,8 @@ class FittingContext(object):
         """
         self.add_fit(
             FitInformation(parameter_workspace, fit_function_name,
-                           input_workspace, output_workspace_names, global_parameters))
+                           input_workspace, output_workspace_names,
+                           global_parameters))
 
     def add_fit(self, fit):
         """
@@ -253,8 +321,9 @@ class FittingContext(object):
         :param fit: A new FitInformation object
         """
         if fit in self.fit_list:
-            return
+            self.fit_list.pop(self.fit_list.index(fit))
         self.fit_list.append(fit)
+        self._number_of_fits += 1
         self.new_fit_notifier.notify_subscribers()
 
     def fit_function_names(self):
@@ -263,18 +332,8 @@ class FittingContext(object):
         """
         return list(set([fit.fit_function_name for fit in self.fit_list]))
 
-    def find_fits_for_function(self, fit_function_name):
-        """
-        Find the fits in the list whose function name matches
-        :param fit_function_name: The name of the function
-        :return: A list of any matching fits
-        """
-        return [
-            fit for fit in self.fit_list
-            if fit.fit_function_name == fit_function_name
-        ]
-
-    def find_output_workspaces_for_input_workspace_name(self, input_workspace_name):
+    def find_output_workspaces_for_input_workspace_name(
+            self, input_workspace_name):
         """
         Find the fits in the list whose input workspace matches
         :param input_workspace_name: The name of the input_workspace
@@ -282,11 +341,55 @@ class FittingContext(object):
         """
         workspace_list = []
         for fit in self.fit_list:
-            if type(fit.input_workspace) == list:
-                for index, workspace in enumerate(fit.input_workspace):
-                    if workspace == input_workspace_name:
-                        workspace_list.append(fit.output_workspace_names[index])
-            else:
-                if input_workspace_name == fit.input_workspace:
-                    workspace_list.append(fit.output_workspace_names[0])
+            for index, workspace in enumerate(fit.input_workspaces):
+                if workspace == input_workspace_name:
+                    workspace_list.append(fit.output_workspace_names[index])
+
         return workspace_list
+
+    def remove_workspace_by_name(self, workspace_name):
+        list_of_fits_to_remove = []
+        for fit in self.fit_list:
+            if workspace_name in fit.output_workspace_names or workspace_name==fit.parameter_workspace_name:
+                list_of_fits_to_remove.append(fit)
+
+        for fit in list_of_fits_to_remove:
+            self.fit_list.remove(fit)
+
+    def log_names(self, filter_fn=None):
+        """
+        The names of the logs on the workspaces associated with all of the workspaces.
+
+        :filter_fn: An optional unary function to filter the names out. For more information see
+        FitInformation.log_names
+        :return: A list of names of logs
+        """
+        return [
+            name for fit in self.fit_list for name in fit.log_names(filter_fn)
+        ]
+
+    def clear(self):
+        self.fit_list = []
+
+    def remove_latest_fit(self, number_of_fits_to_remove):
+        self.fit_list = self.fit_list[:-number_of_fits_to_remove]
+        self._number_of_fits = self._number_of_fits_cache
+        self.new_fit_notifier.notify_subscribers()
+
+    @property
+    def number_of_fits(self):
+        return self._number_of_fits
+
+    @number_of_fits.setter
+    def number_of_fits(self, value):
+        self._number_of_fits_cache = self._number_of_fits
+        self._number_of_fits = value
+
+
+# Private functions
+def _run(ws_name):
+    """
+    :param ws_name: A workspace name in the ADS
+    :return: A list of the log data for a workspace
+    """
+    return AnalysisDataService.Instance().retrieve(ws_name).run()

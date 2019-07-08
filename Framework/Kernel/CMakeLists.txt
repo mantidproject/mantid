@@ -98,6 +98,7 @@ set(SRC_FILES
     src/RebinParamsValidator.cpp
     src/RegexStrings.cpp
     src/RemoteJobManager.cpp
+    src/SimpleJSON.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
     src/StartsWithValidator.cpp
@@ -270,6 +271,7 @@ set(INC_FILES
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
     inc/MantidKernel/RemoteJobManager.h
+    inc/MantidKernel/SimpleJSON.h 
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
@@ -417,6 +419,7 @@ set(TEST_FILES
     RegexStringsTest.h
     SLSQPMinimizerTest.h
     ShrinkToFitTest.h
+    SimpleJSONTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
     StartsWithValidatorTest.h

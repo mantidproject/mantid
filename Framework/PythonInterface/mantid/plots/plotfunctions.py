@@ -48,7 +48,7 @@ def _setLabels1D(axes, workspace, indices=None, normalize_by_bin_width=True,
     axes.set_ylabel(labels[0])
 
 
-def _setLabels2D(axes, workspace, indices=None, transpose=False):
+def _setLabels2D(axes, workspace, indices=None, transpose=False, xscale=None):
     '''
     helper function to automatically set axes labels for 2D plots
     '''
@@ -60,8 +60,10 @@ def _setLabels2D(axes, workspace, indices=None, transpose=False):
         axes.set_xlabel(labels[1])
         axes.set_ylabel(labels[2])
     axes.set_title(labels[-1])
-    if hasattr(workspace, 'isCommonLogBins') and workspace.isCommonLogBins():
+    if xscale is None and hasattr(workspace, 'isCommonLogBins') and workspace.isCommonLogBins():
         axes.set_xscale('log')
+    elif xscale is not None:
+        axes.set_xscale(xscale)
 
 
 def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
@@ -209,7 +211,8 @@ def errorbar(axes, workspace, *args, **kwargs):
         workspace, axes, **kwargs)
     x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(
         axes, workspace, kwargs, with_dy=True, with_dx=False)
-    _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
+    _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width,
+                 axis=axis)
 
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 

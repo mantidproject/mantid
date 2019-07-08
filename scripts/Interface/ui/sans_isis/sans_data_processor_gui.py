@@ -20,6 +20,7 @@ from six import with_metaclass
 from reduction_gui.reduction.scripter import execute_script
 from mantid.kernel import (Logger)
 from mantidqt import icons
+from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
@@ -106,6 +107,10 @@ class SANSDataProcessorGui(QMainWindow,
 
         @abstractmethod
         def on_batch_file_load(self):
+            pass
+
+        @abstractmethod
+        def on_reduction_mode_selection_has_changed(self, selection):
             pass
 
         @abstractmethod
@@ -445,6 +450,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
         self.table_signals.cellTextChanged.connect(self._data_changed)
         self.table_signals.rowInserted.connect(self._row_inserted)
+        self.table_signals.appendAndEditAtChildRowRequested.connect(self._append_and_edit_at_child_row_requested)
+        self.table_signals.appendAndEditAtRowBelowRequested.connect(self._append_and_edit_at_row_below_requested)
+        self.table_signals.editAtRowAboveRequested.connect(self._edit_at_row_above_requested)
         self.table_signals.removeRowsRequested.connect(self._remove_rows_requested)
         self.table_signals.copyRowsRequested.connect(self._copy_rows_requested)
         self.table_signals.pasteRowsRequested.connect(self._paste_rows_requested)
@@ -507,6 +515,15 @@ class SANSDataProcessorGui(QMainWindow,
             row = self.get_row(row_location)
             self._call_settings_listeners(lambda listener: listener.on_row_inserted(index, row))
 
+    def _append_and_edit_at_child_row_requested(self):
+        self.data_processor_table.appendAndEditAtChildRow()
+
+    def _append_and_edit_at_row_below_requested(self):
+        self.data_processor_table.appendAndEditAtRowBelow()
+
+    def _edit_at_row_above_requested(self):
+        self.data_processor_table.editAtRowAbove()
+
     def _remove_rows_requested(self, rows):
         rows = [item.rowRelativeToParent() for item in rows]
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
@@ -539,6 +556,9 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_help_button_clicked(self):
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
+        else:
+            InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
+                                            'interfaces/ISIS%20SANS%20v2.html')
 
     def _on_output_mode_clicked(self):
         """This method is called when an output mode is clicked on the gui"""
@@ -727,6 +747,7 @@ class SANSDataProcessorGui(QMainWindow,
         selection = self.reduction_mode_combo_box.currentText()
         is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
         self.merged_settings.setEnabled(is_merged)
+        self._call_settings_listeners(lambda listener: listener.on_reduction_mode_selection_has_changed(selection))
 
     def _on_q_resolution_shape_has_changed(self):
         shape_selection = self.q_resolution_shape_combo_box.currentIndex()
@@ -1084,11 +1105,14 @@ class SANSDataProcessorGui(QMainWindow,
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
-        if not value:
-            # If you uncheck it, post to logger, in
-            # case user didn't realise user file had
-            # turned it off
-            self.gui_logger.notice("Compatibility mode has been turned off.")
+
+    @property
+    def event_slice_optimisation(self):
+        return self.event_slice_optimisation_checkbox.isChecked()
+
+    @event_slice_optimisation.setter
+    def event_slice_optimisation(self, value):
+        self.event_slice_optimisation_checkbox.setChecked(value)
 
     @property
     def instrument(self):

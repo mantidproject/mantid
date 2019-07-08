@@ -69,9 +69,26 @@ std::map<std::string, QVariant> IndirectSettings::getSettings() const {
 void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }
 
 void IndirectSettings::closeSettings() {
-  if (window())
-    window()->close();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  getDockedOrFloatingWindow()->close();
+#else
+  if (auto settingsWindow = window())
+    settingsWindow->close();
+#endif
 }
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+QWidget *IndirectSettings::getDockedOrFloatingWindow() const {
+  auto widget = parentWidget();
+  while (widget) {
+    auto const className = std::string(widget->metaObject()->className());
+    if (className == "DockedWindow" || className == "FloatingWindow")
+      return widget;
+    widget = widget->parentWidget();
+  }
+  return window();
+}
+#endif
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

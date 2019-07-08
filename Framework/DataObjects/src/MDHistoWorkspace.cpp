@@ -1292,7 +1292,7 @@ Does not perform any clearing. Multiple calls are compounded.
 @param maskingRegion : Implicit function defining mask region.
 */
 void MDHistoWorkspace::setMDMasking(
-    Mantid::Geometry::MDImplicitFunction *maskingRegion) {
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) {
   if (maskingRegion != nullptr) {
     for (size_t i = 0; i < this->getNPoints(); ++i) {
       // If the function masks the point, then mask it, otherwise leave it as it
@@ -1301,7 +1301,6 @@ void MDHistoWorkspace::setMDMasking(
         this->setMDMaskAt(i, true);
       }
     }
-    delete maskingRegion;
   }
 }
 

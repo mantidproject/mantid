@@ -224,9 +224,7 @@ FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() {
-  delete this->m_eventFile;
-}
+FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() {}
 
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file
@@ -2304,7 +2302,7 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
 void FilterEventsByLogValuePreNexus::openEventFile(
     const std::string &filename) {
   // Open the file
-  m_eventFile = new BinaryFile<DasEvent>(filename);
+  m_eventFile = std::make_unique<BinaryFile<DasEvent>>(filename);
   m_numEvents = m_eventFile->getNumElements();
   g_log.debug() << "File contains " << m_numEvents << " event records.\n";
 

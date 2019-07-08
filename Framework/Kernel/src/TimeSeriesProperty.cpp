@@ -1982,6 +1982,14 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
     }
     size_t nvalues = m_filterQuickRef.empty() ? m_values.size()
                                               : m_filterQuickRef.back().second;
+    // The filter logic can end up with the quick ref having a duplicate of the
+    // last time and value at the end if the last filter time is past the log
+    // time See "If it is out of upper boundary, still record it.  but make the
+    // log entry to mP.size()+1" in applyFilter
+    // Make the log seem the full size
+    if (nvalues == m_values.size() + 1) {
+      --nvalues;
+    }
     m_size = static_cast<int>(nvalues);
   }
 }

@@ -53,7 +53,9 @@ class ThreadModelWorker(QtCore.QObject):
                 self.signals.error.emit("")
         finally:
             self.signals.finished.emit()
-            QtCore.QThread.currentThread().quit()
+            current_thread = QtCore.QThread.currentThread()
+            if current_thread is not None:
+                current_thread.quit()
 
 
 class ThreadModel(QtWidgets.QWidget):

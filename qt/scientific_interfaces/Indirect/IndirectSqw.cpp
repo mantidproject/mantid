@@ -67,6 +67,9 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
   m_uiForm.rqwPlot2D->setColourBarVisible(false);
   m_uiForm.rqwPlot2D->setXAxisLabel("Energy (meV)");
   m_uiForm.rqwPlot2D->setYAxisLabel("Q (A-1)");
+
+  // Disables searching for run files in the data archive
+  m_uiForm.dsSampleInput->isForRunFiles(false);
 }
 
 IndirectSqw::~IndirectSqw() {}

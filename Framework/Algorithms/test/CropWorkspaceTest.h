@@ -399,11 +399,11 @@ public:
       inputWS->dataY(croppedIndex)[i] = flagged;
     }
     const char *labels[3] = {"Entry1", "Entry2", "Entry3"};
-    TextAxis *inputTextAxis = new TextAxis(3);
+    auto inputTextAxis = std::make_unique<TextAxis>(3);
     for (int i = 0; i < 3; ++i) {
       inputTextAxis->setLabel(i, labels[i]);
     }
-    inputWS->replaceAxis(1, inputTextAxis);
+    inputWS->replaceAxis(1, std::move(inputTextAxis));
 
     // Run and test
     alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);

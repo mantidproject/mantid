@@ -148,7 +148,7 @@ public:
     NexusTestHelper nexusHelper(true);
     nexusHelper.createFile("testSavePeaksWorkspace.nxs");
 
-    testPWS->saveNexus(nexusHelper.file);
+    testPWS->saveNexus(nexusHelper.file.get());
     nexusHelper.reopenFile();
 
     // Verify that this test_entry has a peaks_workspace entry

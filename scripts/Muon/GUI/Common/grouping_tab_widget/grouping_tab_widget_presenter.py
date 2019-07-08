@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.observer_pattern import Observer, Observable, GenericObservable
+from Muon.GUI.Common.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -59,6 +59,12 @@ class GroupingTabPresenter(object):
         self.gui_variables_observer = GroupingTabPresenter.GuiVariablesChangedObserver(self)
         self.enable_observer = GroupingTabPresenter.EnableObserver(self)
         self.disable_observer = GroupingTabPresenter.DisableObserver(self)
+
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+
+    def update_view_from_model(self):
+        self.grouping_table_widget.update_view_from_model()
+        self.pairing_table_widget.update_view_from_model()
 
     def show(self):
         self._view.show()

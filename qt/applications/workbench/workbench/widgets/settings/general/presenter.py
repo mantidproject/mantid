@@ -30,27 +30,39 @@ class GeneralSettings(object):
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
     PROMPT_SAVE_EDITOR_MODIFIED = 'project/prompt_save_editor_modified'
     PROMPT_SAVE_ON_CLOSE = 'project/prompt_save_on_close'
+    USER_LAYOUT = "MainWindow/user_layouts"
 
     def __init__(self, parent, view=None):
         self.view = view if view else GeneralSettingsView(parent, self)
+        self.parent = parent
         self.load_current_setting_values()
 
         self.setup_facilities_group()
         self.setup_checkbox_signals()
 
+        self.setup_layout_options()
+
         self.setup_confirmations()
 
     def setup_facilities_group(self):
         facilities = ConfigService.getFacilityNames()
+        if not facilities:
+            return
         self.view.facility.addItems(facilities)
 
-        default_facility = ConfigService.getFacility().name()
+        try:
+            default_facility = ConfigService.getFacility().name()
+        except RuntimeError:
+            default_facility = facilities[0]
         self.view.facility.setCurrentIndex(self.view.facility.findText(default_facility))
         self.action_facility_changed(default_facility)
         self.view.facility.currentTextChanged.connect(self.action_facility_changed)
 
-        default_instrument = ConfigService.getInstrument().name()
-        self.view.instrument.setCurrentIndex(self.view.instrument.findText(default_instrument))
+        try:
+            default_instrument = ConfigService.getInstrument().name()
+            self.view.instrument.setCurrentIndex(self.view.instrument.findText(default_instrument))
+        except RuntimeError:
+            default_instrument = self.view.instrument.itemText(0)
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
 
@@ -112,3 +124,55 @@ class GeneralSettings(object):
 
     def action_show_invisible_workspaces(self, state):
         ConfigService.setString(self.SHOW_INVISIBLE_WORKSPACES, str(bool(state)))
+
+    def setup_layout_options(self):
+        self.fill_layout_display()
+        self.view.save_layout.clicked.connect(self.save_layout)
+        self.view.load_layout.clicked.connect(self.load_layout)
+        self.view.delete_layout.clicked.connect(self.delete_layout)
+
+    def fill_layout_display(self):
+        self.view.layout_display.clear()
+        layout_dict = self.get_layout_dict()
+        layout_list = sorted(layout_dict.keys())
+        for item in layout_list:
+            self.view.layout_display.addItem(item)
+
+    def get_layout_dict(self):
+        try:
+            layout_list = CONF.get(self.USER_LAYOUT)
+        except KeyError:
+            layout_list = {}
+        return layout_list
+
+    def save_layout(self):
+        filename = self.view.new_layout_name.text()
+        if filename != "":
+            layout_dict = self.get_layout_dict()
+            layout_dict[filename] = self.parent.saveState()
+            CONF.set(self.USER_LAYOUT, layout_dict)
+            self.view.new_layout_name.clear()
+            self.fill_layout_display()
+            self.parent.populate_layout_menu()
+
+    def load_layout(self):
+        item = self.view.layout_display.currentItem()
+        if hasattr(item, "text"):
+            layout = item.text()
+            layout_dict = self.get_layout_dict()
+            self.parent.restoreState(layout_dict[layout])
+
+    def delete_layout(self):
+        item = self.view.layout_display.currentItem()
+        if hasattr(item, "text"):
+            layout = item.text()
+            layout_dict = self.get_layout_dict()
+            layout_dict.pop(layout, None)
+            CONF.set(self.USER_LAYOUT, layout_dict)
+            self.fill_layout_display()
+            self.parent.populate_layout_menu()
+
+    def focus_layout_box(self):
+        # scroll the settings to the layout box. High yMargin ensures the box is always at the top of the window.
+        self.view.scrollArea.ensureWidgetVisible(self.view.new_layout_name, yMargin=1000)
+        self.view.new_layout_name.setFocus()

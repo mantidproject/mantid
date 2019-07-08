@@ -771,12 +771,12 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
   size_t height = fileInfo.axisPixelLengths[1] / binSize;
   if (loadAsRectImg) {
     // width/X axis
-    auto axw = new Mantid::API::NumericAxis(width + 1);
+    auto axw = std::make_unique<Mantid::API::NumericAxis>(width + 1);
     axw->title() = "width";
     for (size_t i = 0; i < width + 1; i++) {
       axw->setValue(i, static_cast<double>(i) * cmpp);
     }
-    ws->replaceAxis(0, axw);
+    ws->replaceAxis(0, std::move(axw));
     // "cm" width label unit
     boost::shared_ptr<Kernel::Units::Label> unitLbl =
         boost::dynamic_pointer_cast<Kernel::Units::Label>(
@@ -785,12 +785,12 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
     ws->getAxis(0)->unit() = unitLbl;
 
     // height/Y axis
-    auto axh = new Mantid::API::NumericAxis(height);
+    auto axh = std::make_unique<Mantid::API::NumericAxis>(height);
     axh->title() = "height";
     for (size_t i = 0; i < height; i++) {
       axh->setValue(i, static_cast<double>(i) * cmpp);
     }
-    ws->replaceAxis(1, axh);
+    ws->replaceAxis(1, std::move(axh));
     // "cm" height label unit
     unitLbl = boost::dynamic_pointer_cast<Kernel::Units::Label>(
         UnitFactory::Instance().create("Label"));

@@ -23,10 +23,15 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
         self.setup_fit_options_table()
+        self.undo_fit_button.setEnabled(False)
 
-        self.function_browser = FunctionBrowser(self, True)
+        self.function_browser = FunctionBrowser(self, False)
+        self.function_browser_multi = FunctionBrowser(self, True)
+        self.function_browser_multi.hide()
         self.function_browser_layout.addWidget(self.function_browser)
+        self.function_browser_layout.addWidget(self.function_browser_multi)
         self.function_browser.setErrorsEnabled(True)
+        self.function_browser_multi.setErrorsEnabled(True)
 
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
@@ -68,8 +73,13 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         number_of_data_sets = self.function_browser.getNumberOfDatasets()
         index_list = range(number_of_data_sets)
         self.function_browser.removeDatasets(index_list)
-
         self.function_browser.addDatasets(data_set_name_list)
+
+    def set_datasets_in_function_browser_multi(self, data_set_name_list):
+        number_of_data_sets = self.function_browser_multi.getNumberOfDatasets()
+        index_list = range(number_of_data_sets)
+        self.function_browser_multi.removeDatasets(index_list)
+        self.function_browser_multi.addDatasets(data_set_name_list)
 
     def update_with_fit_outputs(self, fit_function, output_status, output_chi_squared):
         if not fit_function:
@@ -78,11 +88,21 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
             return
 
-        self.function_browser.updateMultiDatasetParameters(fit_function)
+        if self.fit_type != self.simultaneous_fit:
+            self.function_browser.blockSignals(True)
+            self.function_browser.updateMultiDatasetParameters(fit_function)
+            self.function_browser.blockSignals(False)
+        else:
+            self.function_browser_multi.blockSignals(True)
+            self.function_browser_multi.updateMultiDatasetParameters(fit_function)
+            self.function_browser_multi.blockSignals(False)
 
         if output_status == 'success':
             self.fit_status_success_failure.setText('Success')
             self.fit_status_success_failure.setStyleSheet('color: green')
+        elif output_status is None:
+            self.fit_status_success_failure.setText('No Fit')
+            self.fit_status_success_failure.setStyleSheet('color: black')
         else:
             self.fit_status_success_failure.setText('Failure: {}'.format(output_status))
             self.fit_status_success_failure.setStyleSheet('color: red')
@@ -137,7 +157,10 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     @property
     def fit_object(self):
-        return self.function_browser.getGlobalFunction()
+        if self.fit_type != self.simultaneous_fit:
+            return self.function_browser.getGlobalFunction()
+        else:
+            return self.function_browser_multi.getGlobalFunction()
 
     @property
     def minimizer(self):
@@ -194,6 +217,15 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_to_raw_data_checkbox.setCheckState(state)
 
     @property
+    def tf_asymmetry_mode(self):
+        return self.tf_asymmetry_mode_checkbox.isChecked()
+
+    @tf_asymmetry_mode.setter
+    def tf_asymmetry_mode(self, value):
+        state = QtCore.Qt.Checked if value else QtCore.Qt.Unchecked
+        self.tf_asymmetry_mode_checkbox.setCheckState(state)
+
+    @property
     def group_name(self):
         return str(self.ads_group_name_textbox.text())
 
@@ -218,19 +250,19 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         current_index = self.parameter_display_combo.currentIndex()
         return current_index if current_index != -1 else 0
 
-    def get_index_for_fit_specification(self):
-        if self.fit_type == self.sequential_fit:
-            current_index = self.parameter_display_combo.currentIndex()
-        else:
-            current_index = 0
-
-        return current_index if current_index != -1 else 0
-
     def get_global_parameters(self):
-        return self.function_browser.getGlobalParameters()
+        return self.function_browser_multi.getGlobalParameters()
+
+    def switch_to_simultaneous(self):
+        self.function_browser_multi.show()
+        self.function_browser.hide()
+
+    def switch_to_single(self):
+        self.function_browser_multi.hide()
+        self.function_browser.show()
 
     def setup_fit_options_table(self):
-        self.fit_options_table.setRowCount(5)
+        self.fit_options_table.setRowCount(6)
         self.fit_options_table.setColumnCount(2)
         self.fit_options_table.setColumnWidth(0, 300)
         self.fit_options_table.setColumnWidth(1, 300)
@@ -254,5 +286,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, True, 3)
 
-        table_utils.setRowName(self.fit_options_table, 4, "Evaluate Function As")
-        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 4, ['CentrePoint', 'Histogram'])
+        table_utils.setRowName(self.fit_options_table, 4, "TF Asymmetry Mode")
+        self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
+            self.fit_options_table, False, 4)
+
+        table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
+        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 5, ['CentrePoint', 'Histogram'])

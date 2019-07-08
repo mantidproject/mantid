@@ -188,6 +188,5 @@ class FittingTabModelTest(unittest.TestCase):
 
         self.assertEqual(name_as_string, 'ExpDecayOsc,GausDecay,ExpDecayOsc,...')
 
-
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

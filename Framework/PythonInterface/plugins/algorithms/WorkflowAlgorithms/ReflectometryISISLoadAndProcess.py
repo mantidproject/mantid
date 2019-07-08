@@ -25,6 +25,11 @@ class Prop:
     SECOND_TRANS_RUNS = 'SecondTransmissionRunList'
     SLICE = 'SliceWorkspace'
     NUMBER_OF_SLICES = 'NumberOfSlices'
+    QMIN='MomentumTransferMin'
+    QSTEP='MomentumTransferStep'
+    QMAX='MomentumTransferMax'
+    GROUP_TOF='GroupTOFWorkspaces'
+    RELOAD='ReloadInvalidWorkspaces'
     OUTPUT_WS='OutputWorkspace'
     OUTPUT_WS_BINNED='OutputWorkspaceBinned'
     OUTPUT_WS_LAM='OutputWorkspaceWavelength'
@@ -80,6 +85,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                              'Multiple runs will be summed before reduction.')
         self._declareSliceAlgorithmProperties()
         self._declareReductionAlgorithmProperties()
+        self.declareProperty(Prop.GROUP_TOF, True, doc = 'If true, group the input TOF workspace')
+        self.declareProperty(Prop.RELOAD, True, doc = 'If true, reload input workspaces if they are of the incorrect type')
         self.declareProperty(WorkspaceProperty(Prop.OUTPUT_WS, '',
                                                optional=PropertyMode.Optional,
                                                direction=Direction.Output),
@@ -95,6 +102,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
+        self._reload = self.getProperty(Prop.RELOAD).value
         # Convert run numbers to real workspaces
         inputRuns = self.getProperty(Prop.RUNS).value
         inputWorkspaces = self._getInputWorkspaces(inputRuns, False)
@@ -142,16 +150,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _declareReductionAlgorithmProperties(self):
         """Copy properties from the child reduction algorithm"""
         self._reduction_properties = [
+            'ThetaIn', 'ThetaLogName',
             'SummationType', 'ReductionType', 'IncludePartialBins',
-            'AnalysisMode', 'ProcessingInstructions', 'ThetaIn', 'ThetaLogName', 'CorrectDetectors',
+            'AnalysisMode', 'ProcessingInstructions', 'CorrectDetectors',
             'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
             'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
             'NormalizeByIntegratedMonitors', 'Params', 'StartOverlap', 'EndOverlap',
-            'TransmissionProcessingInstructions', 'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
-            'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax', 'ScaleFactor',
-            'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha', 'FloodCorrection',
-            'FloodWorkspace', 'Debug']
+            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
+            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
+            'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
+            'ScaleFactor', 'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha',
+            'FloodCorrection', 'FloodWorkspace', 'Debug']
         self.copyProperties('ReflectometryReductionOneAuto', self._reduction_properties)
 
     def _getInputWorkspaces(self, runs, isTrans):
@@ -176,19 +186,29 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _isValidWorkspace(self, workspace_name, workspace_id):
         """Returns true, if the workspace of name workspace_name is a valid
-        reflectometry workspace of type workspace_id and deletes the workspace
-        otherwise"""
+        reflectometry workspace of type workspace_id. Otherwise, deletes the
+        workspace if the user requested to reload invalid workspaces, or raises
+        an error otherwise
+        """
         if not _hasWorkspaceID(workspace_name, workspace_id):
-            self.log().information('Workspace ' + workspace_name + ' exists but is not a ' + workspace_id)
-            _removeWorkspace(workspace_name)
-            return False
+            message = 'Workspace ' + workspace_name + ' exists but is not a ' + workspace_id
+            if self._reload:
+                self.log().information(message)
+                _removeWorkspace(workspace_name)
+                return False
+            else:
+                raise RuntimeError(message)
 
         # For event workspaces, the monitors workspace must also exist, otherwise it's not valid
         if workspace_id == "EventWorkspace":
             if not AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
-                self.log().information('Monitors workspace ' + workspace_name + '_monitors does not exist')
-                _removeWorkspace(workspace_name)
-                return False
+                if self._reload:
+                    message = 'Monitors workspace ' + workspace_name + '_monitors does not exist'
+                    self.log().information(message)
+                    _removeWorkspace(workspace_name)
+                    return False
+                else:
+                    raise RuntimeError(message)
         return True
 
     def _workspaceExistsAndIsValid(self, workspace_name, isTrans):
@@ -222,6 +242,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         Groups all the given workspaces into a group with the given name. If the group
         already exists it will add them to that group.
         """
+        if not self.getProperty(Prop.GROUP_TOF).value:
+            return
+
         if AnalysisDataService.doesExist(output_ws_name):
             ws_group = AnalysisDataService.retrieve(output_ws_name)
             if not isinstance(ws_group, WorkspaceGroup):
@@ -280,7 +303,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # which by default is just the first run. Set it to the concatenated name,
         # e.g. 13461+13462
         ws = AnalysisDataService.retrieve(summed)
-        ws.run().addProperty('run_number', concatenated_names, True)
+        if isinstance(ws, WorkspaceGroup):
+            for workspaceName in ws.getNames():
+                grouped_ws = AnalysisDataService.retrieve(workspaceName)
+                grouped_ws.run().addProperty('run_number', concatenated_names, True)
+        else:
+            ws.run().addProperty('run_number', concatenated_names, True)
         return summed
 
     def _slicingEnabled(self):
@@ -369,17 +397,30 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _finalize(self, child_alg):
         """Set our output properties from the results in the given child algorithm"""
-        self._setOutputWorkspace(Prop.OUTPUT_WS, child_alg)
-        self._setOutputWorkspace(Prop.OUTPUT_WS_BINNED, child_alg)
-        self._setOutputWorkspace(Prop.OUTPUT_WS_LAM, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
+        self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QMIN, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QSTEP, child_alg)
+        self._setOutputPropertyIfInputNotSet(Prop.QMAX, child_alg)
 
-    def _setOutputWorkspace(self, property_name, child_alg):
+    def _setOutputProperty(self, property_name, child_alg):
         """Set the given output property from the result in the given child algorithm,
-        if it exists"""
+        if it exists in the child algorithm's outputs"""
         value = child_alg.getPropertyValue(property_name)
         if value:
             self.setPropertyValue(property_name, value)
             self.setProperty(property_name, child_alg.getProperty(property_name).value)
+
+    def _setOutputPropertyIfInputNotSet(self, property_name, child_alg):
+        """Set the given output property from the result in the given child algorithm,
+        if it was not set as an input to this algorithm and if it exists in the
+        child algorithm's outputs"""
+        if self.getProperty(property_name).isDefault:
+            value = child_alg.getPropertyValue(property_name)
+            if value:
+                self.setPropertyValue(property_name, value)
+                self.setProperty(property_name, child_alg.getProperty(property_name).value)
 
 
 def _throwIfNotValidReflectometryEventWorkspace(workspace_name):
