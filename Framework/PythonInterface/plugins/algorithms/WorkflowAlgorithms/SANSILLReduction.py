@@ -496,8 +496,9 @@ class SANSILLReduction(PythonAlgorithm):
                         self._apply_transmission(ws, transmission_ws)
                     solid_angle = self._make_solid_angle_name(ws)
                     cache = self.getProperty('CacheSolidAngle').value
-                    if cache and not mtd.doesExist(solid_angle):
-                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                    if cache:
+                        if not mtd.doesExist(solid_angle):
+                            SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
                     else:
                         SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws)

@@ -337,6 +337,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              AbsorberInputWorkspace=absorber_name,
                              BeamInputWorkspace=beam_name,
                              MergingOption=self.merging_option,
+                             CacheSolidAngle=True,
                              TransmissionInputWorkspace=container_transmission_name,
                              NormaliseBy=self.normalise)
 
@@ -402,6 +403,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              OutputWorkspace=output,
                              AbsorberInputWorkspace=absorber_name,
                              BeamInputWorkspace=beam_name,
+                             CacheSolidAngle=True,
                              ContainerInputWorkspace=container_name,
                              NormaliseBy=self.normalise,
                              MergingOption=self.merging_option,
