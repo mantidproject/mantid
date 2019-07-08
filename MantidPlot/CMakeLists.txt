@@ -176,6 +176,7 @@ set(MANTID_SRCS
     src/Mantid/AlgorithmMonitor.cpp
     src/Mantid/ErrorBarSettings.cpp
     src/Mantid/FirstTimeSetup.cpp
+    src/Mantid/ReportUsageDisableDialog.cpp
     src/Mantid/FitParameterTie.cpp
     src/Mantid/IFunctionWrapper.cpp
     src/Mantid/ImportWorkspaceDlg.cpp
@@ -373,6 +374,7 @@ set(MANTID_HDRS
     src/Mantid/AlgorithmMonitor.h
     src/Mantid/ErrorBarSettings.h
     src/Mantid/FirstTimeSetup.h
+    src/Mantid/ReportUsageDisableDialog.h
     src/Mantid/FitParameterTie.h
     src/Mantid/IFunctionWrapper.h
     src/Mantid/ImportWorkspaceDlg.h
@@ -602,6 +604,7 @@ set(MANTID_MOC_FILES
     src/Mantid/AlgorithmMonitor.h
     src/Mantid/ErrorBarSettings.h
     src/Mantid/FirstTimeSetup.h
+    src/Mantid/ReportUsageDisableDialog.h
     src/Mantid/IFunctionWrapper.h
     src/Mantid/ImportWorkspaceDlg.h
     src/Mantid/LabelToolLogValuesDialog.h

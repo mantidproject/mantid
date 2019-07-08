@@ -1,5 +1,14 @@
 # Create egg link to binary output directory
-add_python_package(workbench EXECUTABLE "EXCLUDE_RESOURCES")
+if(WIN32)
+  # handled separately below
+  set(_exclude_on_install "resources\.pyc?")
+else()
+  set(_exclude_on_install "")
+endif()
+add_python_package(workbench
+  EXECUTABLE
+  EXCLUDE_FROM_INSTALL ${_exclude_on_install}
+)
 
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
@@ -13,10 +22,11 @@ if (WIN32)
 
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if (${BUILD_TYPE} STREQUAL "build")
-      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n") 
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5/\n") 
       set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
     elseif(${BUILD_TYPE} STREQUAL "install")
-      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5/\n")
+      file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.webengine "[Paths]\nPrefix = ../\n")
       set(_output_res_py ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install)
     endif()
 
@@ -46,7 +56,7 @@ else()
                      COMMENT "Generating workbench resources module"
                      DEPENDS ${_images_qrc_file})
   add_custom_target(workbench_resources ALL DEPENDS ${_output_res_py})
-endif()     
+endif()
 
 # Dependency chain
 add_dependencies(workbench workbench_resources mantidqt)

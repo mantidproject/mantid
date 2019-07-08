@@ -33,7 +33,6 @@ namespace CustomInterfaces {
 // Forward decs
 class IMessageHandler;
 class IPythonRunner;
-class ISearchModel;
 
 using MantidWidgets::ProgressableView;
 
@@ -88,6 +87,8 @@ public:
   void autoreductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionCompleted() override;
+  void anyBatchAutoreductionResumed() override;
+  void anyBatchAutoreductionPaused() override;
   void instrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
@@ -106,6 +107,7 @@ public:
 
   // SearcherSubscriber overrides
   void notifySearchComplete() override;
+  void notifySearchFailed() override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;
@@ -118,7 +120,8 @@ protected:
   /// The search implementation
   std::unique_ptr<ISearcher> m_searcher;
 
-  std::string liveDataReductionOptions(const std::string &instrument);
+  std::string liveDataReductionOptions(const std::string &inputWorkspace,
+                                       const std::string &instrument);
 
 private:
   /// The main view we're managing
@@ -136,6 +139,8 @@ private:
   /// The name to use for the live data workspace
   Mantid::API::IAlgorithm_sptr m_monitorAlg;
   double m_thetaTolerance;
+
+  bool isAnyBatchAutoreducing() const;
 
   /// searching
   bool search(ISearcher::SearchType searchType);

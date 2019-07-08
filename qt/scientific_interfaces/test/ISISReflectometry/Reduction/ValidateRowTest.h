@@ -127,21 +127,21 @@ public:
   void testParsesSingleRunNumber() {
     TS_ASSERT_EQUALS(std::vector<std::string>({"100"}),
                      parseRunNumbers("100").get());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"102"}),
+    TS_ASSERT_EQUALS(std::vector<std::string>({"000102"}),
                      parseRunNumbers("000102").get());
   }
 
   void testParsesMultipleRunNumbersSeparatedByPlus() {
     TS_ASSERT_EQUALS(std::vector<std::string>({"100", "1002"}),
                      parseRunNumbers("100+1002").get());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"102", "111102", "10"}),
+    TS_ASSERT_EQUALS(std::vector<std::string>({"000102", "111102", "010"}),
                      parseRunNumbers("000102+111102+010").get());
   }
 
   void testParsesMultipleRunNumbersSeparatedByComma() {
     TS_ASSERT_EQUALS(std::vector<std::string>({"100", "1002"}),
                      parseRunNumbers("100,1002").get());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"102", "111102", "10"}),
+    TS_ASSERT_EQUALS(std::vector<std::string>({"000102", "111102", "010"}),
                      parseRunNumbers("000102+111102+010").get());
   }
 
@@ -152,10 +152,13 @@ public:
     TS_ASSERT_EQUALS(boost::none, parseRunNumbers("+"));
   }
 
-  void testFailsForBadRunNumbersMixedWithGood() {
-    TS_ASSERT_EQUALS(boost::none, parseRunNumbers("00001+00012A+111249"));
-    TS_ASSERT_EQUALS(boost::none, parseRunNumbers("000A01+00012+111249"));
-    TS_ASSERT_EQUALS(boost::none, parseRunNumbers("00001+00012+11124D9"));
+  void testParsesRunNumbersMixedWithWorkspaceNames() {
+    TS_ASSERT_EQUALS(std::vector<std::string>({"00001", "00012A", "111249"}),
+                     parseRunNumbers("00001+00012A+111249"));
+    TS_ASSERT_EQUALS(std::vector<std::string>({"000A01", "00012", "111249"}),
+                     parseRunNumbers("000A01+00012+111249"));
+    TS_ASSERT_EQUALS(std::vector<std::string>({"00001", "00012", "11124D9"}),
+                     parseRunNumbers("00001+00012+11124D9"));
   }
 
   void testParseThetaParsesValidThetaValues() {
@@ -224,22 +227,13 @@ public:
         boost::get<std::vector<int>>(parseTransmissionRuns("", "1000")));
   }
 
-  void testFailsForInvalidFirstTransmissionRun() {
-    TS_ASSERT_EQUALS(
-        std::vector<int>({0}),
-        boost::get<std::vector<int>>(parseTransmissionRuns("HDSK~", "1000")));
-  }
-
-  void testFailsForInvalidSecondTransmissionRun() {
-    TS_ASSERT_EQUALS(
-        std::vector<int>({1}),
-        boost::get<std::vector<int>>(parseTransmissionRuns("1000", "10ABSC")));
-  }
-
-  void testFailsForInvalidFirstAndSecondTransmissionRun() {
-    TS_ASSERT_EQUALS(std::vector<int>({0, 1}),
-                     boost::get<std::vector<int>>(
-                         parseTransmissionRuns("1bad000", "10ABSC")));
+  void testParsesWorkspaceNamesForTransmissionRuns() {
+    auto const expected =
+        TransmissionRunPair(std::vector<std::string>{"trans1a", "trans1b"},
+                            std::vector<std::string>{"trans2 a", "trans2 b"});
+    auto const result = boost::get<TransmissionRunPair>(
+        parseTransmissionRuns("trans1a,trans1b", "trans2 a, trans2 b"));
+    TS_ASSERT_EQUALS(expected, result);
   }
 };
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_

@@ -81,10 +81,11 @@ protected:
   checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
                                Mantid::API::MatrixWorkspace_const_sptr right);
   /// Adds a unit conversion step to the algorithm queue
-  std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws,
-                                  const std::string &unitID,
-                                  const std::string &suffix = "UNIT",
-                                  std::string eMode = "");
+  boost::optional<std::string>
+  addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws,
+                      const std::string &unitID,
+                      const std::string &suffix = "UNIT",
+                      std::string eMode = "", double eFixed = 0.0);
   /// Displays and logs the error for a workspace with an invalid type
   void displayInvalidWorkspaceTypeError(const std::string &workspaceName,
                                         Mantid::Kernel::Logger &log);

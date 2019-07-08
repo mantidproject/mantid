@@ -28,6 +28,7 @@ public:
   virtual void notifyCollapseAllRequested() = 0;
   virtual void notifyPlotSelectedPressed() = 0;
   virtual void notifyPlotSelectedStitchedOutputPressed() = 0;
+  virtual void notifyFillDown() = 0;
 
   virtual ~RunsTableViewSubscriber() = default;
 };
@@ -54,7 +55,8 @@ public:
     Expand,
     Collapse,
     PlotSelected,
-    PlotSelectedStitchedOutput
+    PlotSelectedStitchedOutput,
+    FillDown
   };
 
   virtual void subscribe(RunsTableViewSubscriber *notifyee) = 0;

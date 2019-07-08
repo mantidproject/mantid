@@ -54,6 +54,7 @@ public:
                             std::string const &message) override;
 
   // IBatchPresenter overrides
+  void acceptMainPresenter(IMainWindowPresenter *mainPresenter) override;
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
   void notifyAutoreductionResumed() override;
@@ -62,12 +63,12 @@ public:
   void notifyInstrumentChanged(const std::string &instName) override;
   void notifyRestoreDefaultsRequested() override;
   void notifySettingsChanged() override;
-  bool hasPerAngleOptions() const override;
-  MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(const double angle) const override;
+  void anyBatchAutoreductionResumed() override;
+  void anyBatchAutoreductionPaused() override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
+  bool isAnyBatchAutoreducing() const override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   int percentComplete() const override;
   AlgorithmRuntimeProps rowProcessingProperties() const override;
@@ -95,6 +96,7 @@ private:
   void settingsChanged();
 
   IBatchView *m_view;
+  IMainWindowPresenter *m_mainPresenter;
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;

@@ -21,7 +21,10 @@ request information from other tabs.
 */
 class IMainWindowPresenter {
 public:
-  virtual bool isProcessing() const = 0;
+  virtual bool isAnyBatchProcessing() const = 0;
+  virtual bool isAnyBatchAutoreducing() const = 0;
+  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
   virtual ~IMainWindowPresenter() = default;
 };
 } // namespace CustomInterfaces

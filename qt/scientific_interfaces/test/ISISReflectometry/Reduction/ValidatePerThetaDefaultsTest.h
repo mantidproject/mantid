@@ -59,12 +59,13 @@ public:
                      expected);
   }
 
-  void testParseTransmissionRunsError() {
+  void testParseTransmissionRunsWithWorkspaceNames() {
     PerThetaDefaultsValidator validator;
-    auto result = validator({"", "bad", "bad"});
-    std::vector<int> errorCells = {1, 2};
-    TS_ASSERT(result.isError());
-    TS_ASSERT_EQUALS(result.assertError(), errorCells);
+    auto result = validator({"", "some workspace", "another_workspace"});
+    auto expected = TransmissionRunPair("some workspace", "another_workspace");
+    TS_ASSERT(result.isValid());
+    TS_ASSERT_EQUALS(result.assertValid().transmissionWorkspaceNames(),
+                     expected);
   }
 
   void testParseQRange() {

@@ -80,7 +80,7 @@
          </sizepolicy>
         </property>
         <property name="label" stdset="0">
-         <string>Run Files</string>
+         <string>Input Runs</string>
         </property>
         <property name="multipleFiles" stdset="0">
          <bool>true</bool>
@@ -246,7 +246,7 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="pgMapFile">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -1124,6 +1124,7 @@
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

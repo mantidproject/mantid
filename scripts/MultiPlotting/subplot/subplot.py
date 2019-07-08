@@ -12,7 +12,7 @@ from qtpy import QtWidgets, QtCore
 from copy import deepcopy
 
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
@@ -68,10 +68,11 @@ class subplot(QtWidgets.QWidget):
         self._context.add_annotate(subplotName, label)
         self.canvas.draw()
 
-    def add_vline(self, subplotName, xvalue, name):
+    # todo: add color suppport
+    def add_vline(self, subplotName, xvalue, name, color):
         if subplotName not in self._context.subplots.keys():
             return
-        self._context.add_vline(subplotName, xvalue, name)
+        self._context.add_vline(subplotName, xvalue, name, color)
         self.canvas.draw()
 
     def rm_annotate(self, subplotName, name):
@@ -111,7 +112,7 @@ class subplot(QtWidgets.QWidget):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
         self.plotObjects[subplotName] = self.figure.add_subplot(
-            gridspec[number], label=subplotName)
+            gridspec[number], label=subplotName, projection ='mantid')
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         self._update()
@@ -235,8 +236,8 @@ class subplot(QtWidgets.QWidget):
         # if all of the lines have been removed -> delete subplot
         if remove_subplot:
             self._remove_subplot(self._rm_window.subplot)
-
-        self.canvas.draw()
+        else:
+            self.canvas.draw()
         # if no subplots then close plotting window
         if len(self._context.subplots.keys()) == 0:
             self._close_rm_window()

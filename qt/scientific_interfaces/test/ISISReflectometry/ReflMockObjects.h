@@ -31,16 +31,12 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/Hint.h"
 #include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets::DataProcessor;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -63,7 +59,10 @@ public:
 class MockMainWindowPresenter : public IMainWindowPresenter {
 public:
   MOCK_METHOD1(settingsChanged, void(int));
-  bool isProcessing() const override { return false; }
+  MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
+  MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
 
   ~MockMainWindowPresenter() override{};
 };
@@ -75,18 +74,22 @@ public:
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionCompleted, void());
+  MOCK_METHOD0(anyBatchAutoreductionResumed, void());
+  MOCK_METHOD0(anyBatchAutoreductionPaused, void());
 
-  MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
-  MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
   MOCK_METHOD0(notifySettingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
+
+  // Calls we don't care about
+  void acceptMainPresenter(IMainWindowPresenter *) override{};
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -107,6 +110,8 @@ public:
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
   MOCK_METHOD0(autoreductionCompleted, void());
+  MOCK_METHOD0(anyBatchAutoreductionPaused, void());
+  MOCK_METHOD0(anyBatchAutoreductionResumed, void());
   MOCK_METHOD1(instrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());

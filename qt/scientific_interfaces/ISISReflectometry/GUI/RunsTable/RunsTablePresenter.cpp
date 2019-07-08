@@ -112,6 +112,20 @@ RunsTablePresenter::RunsTablePresenter(
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
       m_clipboard(), m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
+
+  // Add Group to view and model, add row to this group in view and model.
+  ensureAtLeastOneGroupExists();
+}
+
+void RunsTablePresenter::appendRowAndGroup() {
+  // Calculate
+  std::vector<int> localGroupIndices;
+  localGroupIndices.emplace_back(
+      static_cast<int>(m_model.reductionJobs().groups().size()));
+  appendEmptyGroupInModel();
+  appendEmptyGroupInView();
+  appendRowsToGroupsInView(localGroupIndices);
+  appendRowsToGroupsInModel(localGroupIndices);
 }
 
 void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
@@ -339,6 +353,13 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   // If we have more than one group/row then it's ok
   if (m_model.reductionJobs().groups().size() > 1)
     return;
+
+  if (m_model.reductionJobs().groups().size() == 0) {
+    appendRowAndGroup();
+    notifyExpandAllRequested();
+    return;
+  }
+
   auto const &group = m_model.reductionJobs().groups()[0];
   if (group.rows().size() > 0)
     return;
@@ -355,6 +376,15 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   // group first, then delete the original one
   appendEmptyGroupInView();
   removeRowsAndGroupsFromView({location});
+
+  // Insert a new group (and include an expanded row, for usability) and then
+  // delete the original "bad" group
+  appendRowAndGroup();
+  notifyExpandAllRequested();
+
+  // After repairing the view and adding the Row and Group
+  removeGroupsFromModel({0});
+  removeGroupsFromView({0});
 }
 
 void RunsTablePresenter::notifyExpandAllRequested() {
@@ -363,6 +393,34 @@ void RunsTablePresenter::notifyExpandAllRequested() {
 
 void RunsTablePresenter::notifyCollapseAllRequested() {
   m_view->jobs().collapseAll();
+}
+
+namespace {
+bool isGroup(MantidWidgets::Batch::RowLocation const &location) {
+  return isGroupLocation(location);
+}
+} // namespace
+
+void RunsTablePresenter::notifyFillDown() {
+  auto selected = m_view->jobs().selectedRowLocations();
+  selected.erase(std::remove_if(selected.begin(), selected.end(), isGroup),
+                 selected.end());
+  std::sort(selected.begin(), selected.end());
+
+  if (selected.size() < 1)
+    return;
+
+  auto const topRow = selected[0];
+  auto const column = m_view->jobs().currentColumn();
+  auto const cellContent = m_view->jobs().cellAt(topRow, column).contentText();
+
+  for (auto const &rowLocation : selected) {
+    auto cell = m_view->jobs().cellAt(rowLocation, column);
+    auto const oldCellContent = cell.contentText();
+    cell.setContentText(cellContent);
+    m_view->jobs().setCellAt(rowLocation, column, cell);
+    notifyCellTextChanged(rowLocation, column, oldCellContent, cellContent);
+  }
 }
 
 std::vector<std::string> RunsTablePresenter::cellTextFromViewAt(
@@ -462,9 +520,11 @@ void RunsTablePresenter::notifySelectionChanged() {
 void RunsTablePresenter::applyGroupStylingToRow(
     MantidWidgets::Batch::RowLocation const &location) {
   auto cells = m_view->jobs().cellsAt(location);
-  boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()),
-              m_view->jobs().deadCell());
-  m_view->jobs().setCellsAt(location, cells);
+  if (cells.size() > 0) {
+    boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()),
+                m_view->jobs().deadCell());
+    m_view->jobs().setCellsAt(location, cells);
+  }
 }
 
 void RunsTablePresenter::notifyRowInserted(
@@ -562,12 +622,15 @@ void RunsTablePresenter::notifyCutRowsRequested() {
   if (isProcessing() || isAutoreducing())
     return;
 
+  auto selected = m_view->jobs().selectedRowLocations();
+  if (selected.size() < 1)
+    return;
+
   m_clipboard = Clipboard(m_view->jobs().selectedSubtrees(),
                           m_view->jobs().selectedSubtreeRoots());
-  auto selected = m_view->jobs().selectedRowLocations();
   if (m_clipboard.isInitialized()) {
     removeRowsAndGroupsFromView(selected);
-    removeRowsFromModel(selected);
+    removeRowsAndGroupsFromModel(selected);
     m_view->jobs().clearSelection();
     ensureAtLeastOneGroupExists();
     notifySelectionChanged();
@@ -613,7 +676,7 @@ void RunsTablePresenter::pasteRowsOntoRows(
     auto replacementRows = m_clipboard.createRowsForAllRoots();
     auto replacementRow = replacementRows.begin();
     auto replacementPoint = replacementRoots.cbegin();
-    for (; replacementRow < replacementRows.end(),
+    for (; replacementRow < replacementRows.end() &&
            replacementPoint < replacementRoots.cend();
          ++replacementRow, ++replacementPoint) {
       auto &group = groups[groupOf(*replacementPoint)];
@@ -690,7 +753,6 @@ void RunsTablePresenter::forAllCellsAt(
 
 void RunsTablePresenter::setRowStylingForItem(
     MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
-
   switch (item.state()) {
   case State::ITEM_NOT_STARTED: // fall through
   case State::ITEM_STARTING:

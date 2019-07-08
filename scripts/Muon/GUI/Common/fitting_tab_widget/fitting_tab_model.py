@@ -199,19 +199,25 @@ class FittingTabModel(object):
 
     def _handle_simultaneous_fit_results(self, input_workspace_list, fit_function, fitting_parameters_table,
                                          output_workspace, fit_group_name, global_parameters):
-        workspace_name, workspace_directory = self.create_multi_domain_fitted_workspace_name(
-            input_workspace_list[0],
-            fit_function, fit_group_name)
-        table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0] + '+ ...',
-                                                                       fit_function, fit_group_name)
-
-        self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
         if len(input_workspace_list) > 1:
+            table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0] + '+ ...',
+                                                                           fit_function, fit_group_name)
+            workspace_name, workspace_directory = self.create_multi_domain_fitted_workspace_name(
+                input_workspace_list[0],
+                fit_function, fit_group_name)
+            self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
             workspace_name = self.rename_members_of_fitted_workspace_group(output_workspace,
                                                                            input_workspace_list,
                                                                            fit_function,
                                                                            fit_group_name)
         else:
+            table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0],
+                                                                           fit_function,
+                                                                           fit_group_name)
+            workspace_name, workspace_directory = self.create_fitted_workspace_name(
+                input_workspace_list[0],
+                fit_function, fit_group_name)
+            self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
             workspace_name = [workspace_name]
 
         wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,

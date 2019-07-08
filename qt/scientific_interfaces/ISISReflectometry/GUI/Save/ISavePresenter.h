@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_ISAVEPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_ISAVEPRESENTER_H
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

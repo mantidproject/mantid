@@ -12,6 +12,11 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ----------------------------
 
+Changes
+#######
+
+- Pushed back deprecation of ISIS Reflectometry (Old) GUI to November 2019 from July 2019.
+
 New
 ###
 
@@ -25,7 +30,9 @@ New
 
 The Runs Table
 ^^^^^^^^^^^^^^
+.. |filldown| image:: ../../images/arrow-expand-down.png
 
+- Added a "Fill Down" (|filldown|) functionality which allows filling all selected cells below the highest selected cell, in the column that is selected.
 - Filtering by run or group name is now possible using the search bar above the table. This accepts regular expressions.
 
 - Navigation by keyboard shortcuts has been added:
@@ -54,6 +61,7 @@ Bug fixes
 
 - Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
 - Fixed a problem where auto-saving would fail if the output for a row is a group workspace.
+- Fixed a problem where the live data monitor would not start. Also fixed an issue where the output workspace is created prematurely as a clone of the TOF workspace.
 	
 Removed
 #######

@@ -9,13 +9,13 @@
 
 #include "GUI/Batch/RowProcessingAlgorithm.h"
 #include "MantidGeometry/Instrument_fwd.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class IMainWindowPresenter;
 
 /** @class IBatchPresenter
 
@@ -28,6 +28,8 @@ public:
   /// Destructor
   virtual ~IBatchPresenter() = default;
 
+  virtual void acceptMainPresenter(IMainWindowPresenter *mainPresenter) = 0;
+
   virtual void notifyReductionPaused() = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyAutoreductionResumed() = 0;
@@ -36,15 +38,13 @@ public:
   virtual void notifyInstrumentChanged(const std::string &instName) = 0;
   virtual void notifyRestoreDefaultsRequested() = 0;
   virtual void notifySettingsChanged() = 0;
+  virtual void anyBatchAutoreductionResumed() = 0;
+  virtual void anyBatchAutoreductionPaused() = 0;
 
-  /// Transmission runs for a specific run angle
-  virtual MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(const double angle) const = 0;
-  /// Whether there are per-angle transmission runs specified
-  virtual bool hasPerAngleOptions() const = 0;
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
+  virtual bool isAnyBatchAutoreducing() const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;

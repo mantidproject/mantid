@@ -20,9 +20,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "SearchModel.h"
 
-#include <QStringList>
 #include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -119,6 +117,12 @@ void RunsPresenter::notifySearchComplete() {
     autoreduceNewRuns();
 }
 
+void RunsPresenter::notifySearchFailed() {
+  if (isAutoreducing()) {
+    notifyAutoreductionPaused();
+  }
+}
+
 void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
 }
@@ -190,6 +194,11 @@ bool RunsPresenter::resumeAutoreduction() {
   auto const searchString = m_view->getSearchString();
   auto const instrument = m_view->getSearchInstrument();
 
+  if (searchString == "") {
+    m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
+    return false;
+  }
+
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
   if (m_searcher->searchSettingsChanged(searchString, instrument,
@@ -221,6 +230,14 @@ void RunsPresenter::autoreductionPaused() {
   m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
   tablePresenter()->autoreductionPaused();
+}
+
+void RunsPresenter::anyBatchAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsPresenter::anyBatchAutoreductionPaused() {
+  updateWidgetEnabledState();
 }
 
 void RunsPresenter::autoreductionCompleted() {
@@ -284,6 +301,10 @@ bool RunsPresenter::isProcessing() const {
 
 bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+bool RunsPresenter::isAnyBatchAutoreducing() const {
+  return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
 bool RunsPresenter::searchInProgress() const {
@@ -402,8 +423,8 @@ void RunsPresenter::updateWidgetEnabledState() const {
   m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
-  m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing() &&
-                                     !searchInProgress());
+  m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&
+                                     !isProcessing() && !searchInProgress());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
   m_view->setTransferButtonEnabled(!isProcessing() && !isAutoreducing());
 }
@@ -423,10 +444,12 @@ std::string RunsPresenter::liveDataReductionAlgorithm() {
 }
 
 std::string
-RunsPresenter::liveDataReductionOptions(const std::string &instrument) {
+RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace,
+                                        const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
   AlgorithmRuntimeProps options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
+  options["InputWorkspace"] = inputWorkspace;
   options["Instrument"] = instrument;
   options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";
   // Convert the properties to a string to pass to the algorithm
@@ -439,15 +462,16 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->initialize();
   alg->setChild(true);
   alg->setLogging(false);
-  auto instrument = m_view->getSearchInstrument();
+  auto const instrument = m_view->getSearchInstrument();
+  auto const inputWorkspace = "TOF_live";
   alg->setProperty("Instrument", instrument);
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
-  alg->setProperty("AccumulationWorkspace", "TOF_live");
+  alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", "20");
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
-                   liveDataReductionOptions(instrument));
+                   liveDataReductionOptions(inputWorkspace, instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {

@@ -62,6 +62,13 @@ Bug Fixes
 - Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
 - Fixed a bug where the loaded workspace in Data Analysis doesn't update after being changed on a different
   interface.
+- Fixed a bug causing the errors calculated on Iqt to be too small towards the end of the spectra.
+
+.. figure:: ../../images/Iqt_Errors_Bug.PNG
+  :class: screenshot
+  :align: center
+  :figwidth: 90%
+  :alt: The bug causing small Iqt errors.
 
 
 Data Corrections Interface
@@ -77,6 +84,8 @@ Bug Fixes
 #########
 - Fixed a bug where the output plots on the Calculate Paalman Pings and Calculate Monte Carlo Absorption tabs had
   the wrong axis labels and units.
+- Fixed a bug where Calculate Paalman Pings would crash if an EFixed value had not been provided.
+- Fixed a bug where Apply Aborption Corrections would crash when provided an invalid corrections workspace.
 
 
 Data Reduction Interface
@@ -86,11 +95,13 @@ Improvements
 ############
 - Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
 - Improved ISISEnergyTransfer by automatically loading the Detailed Balance from the sample logs if available.
+- Removed the obsolete *Plot Raw* button.
 
 Bug Fixes
 #########
 - Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm causing the Moments tab to crash.
 - Fixed an unexpected error when opening the Data Reduction interface with an unrelated facility selected.
+- Fixed a crash on the Symmetrise, Sqw and Moments tab caused by attempting to load raw data.
 
 
 Diffraction Interface
@@ -118,3 +129,12 @@ New Features
 
 - The *Settings* GUI allows you to turn off the restriction of input data based on their name.
 - The *Settings* GUI allows you to turn on error bars for the output plots.
+
+
+Simulations Interface
+---------------------
+
+Bug Fixes
+#########
+- Fixed a crash in MolDyn caused by plotting output data.
+

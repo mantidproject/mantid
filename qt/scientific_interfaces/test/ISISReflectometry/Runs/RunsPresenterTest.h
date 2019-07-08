@@ -210,6 +210,8 @@ public:
     verifyAndClear();
   }
 
+  const std::string autoReductionSearch = "1120015";
+
   void testResumeAutoreductionWithNewSettings() {
     auto presenter = makePresenter();
     expectAutoreductionSettingsChanged();
@@ -221,6 +223,8 @@ public:
 
   void testResumeAutoreductionWithSameSettings() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsUnchanged();
     expectDoNotClearExistingTable();
     expectCheckForNewRuns();
@@ -231,6 +235,8 @@ public:
   void testResumeAutoreductionWarnsUserIfTableChanged() {
     auto presenter = makePresenter();
     auto runsTable = makeRunsTableWithContent();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsChanged();
     expectRunsTableWithContent(runsTable);
     expectUserRespondsYes();
@@ -241,6 +247,8 @@ public:
 
   void testResumeAutoreductionDoesNotWarnUserIfTableEmpty() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     expectAutoreductionSettingsChanged();
     EXPECT_CALL(m_messageHandler, askUserYesNo(_, _)).Times(0);
     expectCheckForNewRuns();
@@ -250,10 +258,21 @@ public:
 
   void testResumeAutoreductionCancelledByUserIfTableChanged() {
     auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString())
+        .WillByDefault(Return(autoReductionSearch));
     auto runsTable = makeRunsTableWithContent();
     expectAutoreductionSettingsChanged();
     expectRunsTableWithContent(runsTable);
     expectUserRespondsNo();
+    expectDoNotStartAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testResumeAutoreductionCancelledIfSearchStringIsEmpty() {
+    auto presenter = makePresenter();
+    ON_CALL(m_view, getSearchString()).WillByDefault(Return(""));
+    auto runsTable = makeRunsTableWithContent();
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
     verifyAndClear();
@@ -281,6 +300,20 @@ public:
     EXPECT_CALL(*m_runNotifier, startPolling()).Times(1);
     expectWidgetsEnabledForAutoreducing();
     presenter.autoreductionCompleted();
+    verifyAndClear();
+  }
+
+  void testAutoreductionDisabledWhenAnotherBatchAutoreducing() {
+    auto presenter = makePresenter();
+    expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing();
+    presenter.anyBatchAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionDisabledWhenAnotherBatchNotAutoreducing() {
+    auto presenter = makePresenter();
+    expectAutoreduceButtonEnabledWhenAnotherBatchNotAutoreducing();
+    presenter.anyBatchAutoreductionPaused();
     verifyAndClear();
   }
 
@@ -432,9 +465,12 @@ public:
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
         .Times(1)
         .WillOnce(Return(props));
-    auto result = presenter.liveDataReductionOptions("INTER");
-    auto expected = "GetLiveValueAlgorithm=GetLiveInstrumentValue;Instrument="
-                    "INTER;Prop1=val1;Prop2=val2";
+    auto result =
+        presenter.liveDataReductionOptions("live_input_workspace", "INTER");
+    auto expected =
+        "GetLiveValueAlgorithm=GetLiveInstrumentValue;InputWorkspace="
+        "live_input_workspace;Instrument=INTER;Prop1=val1;Prop2="
+        "val2";
     TS_ASSERT_EQUALS(result, expected);
   }
 
@@ -674,16 +710,40 @@ private:
     EXPECT_CALL(m_view, setTransferButtonEnabled(true));
   }
 
+  void expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing() {
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+  }
+
+  void expectAutoreduceButtonEnabledWhenAnotherBatchNotAutoreducing() {
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+  }
+
   void expectIsAutoreducing() {
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(true));
+    ON_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .WillByDefault(Return(true));
   }
 
   void expectIsNotAutoreducing() {
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
+    ON_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .WillByDefault(Return(false));
   }
 
   void expectIsProcessing() {

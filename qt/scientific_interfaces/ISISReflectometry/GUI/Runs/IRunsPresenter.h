@@ -41,6 +41,8 @@ public:
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionCompleted() = 0;
   virtual void autoreductionResumed() = 0;
+  virtual void anyBatchAutoreductionResumed() = 0;
+  virtual void anyBatchAutoreductionPaused() = 0;
   virtual void instrumentChanged(std::string const &instrumentName) = 0;
   virtual void settingsChanged() = 0;
 

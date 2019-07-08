@@ -43,6 +43,9 @@ IBatchView *MainWindowView::newBatch() {
 void MainWindowView::removeBatch(int batchIndex) {
   m_batchViews.erase(m_batchViews.begin() + batchIndex);
   m_ui.mainTabs->removeTab(batchIndex);
+  if (m_ui.mainTabs->count() == 0) {
+    m_notifyee->notifyNewBatchRequested();
+  }
 }
 
 std::vector<IBatchView *> MainWindowView::batches() const {
@@ -54,6 +57,10 @@ Initialise the Interface
 */
 void MainWindowView::initLayout() {
   m_ui.setupUi(this);
+  // Until this is implemented we should hide this action
+  m_ui.loadBatch->setEnabled(false);
+  m_ui.loadBatch->setVisible(false);
+
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
           SLOT(onTabCloseRequested(int)));
@@ -91,14 +98,14 @@ void MainWindowView::initLayout() {
 
   // Create the presenter
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, std::move(makeBatchPresenter));
+      this, messageHandler, std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
   m_notifyee->notifyNewBatchRequested();
 }
 
 void MainWindowView::onTabCloseRequested(int tabIndex) {
-  m_ui.mainTabs->removeTab(tabIndex);
+  m_notifyee->notifyCloseBatchRequested(tabIndex);
 }
 
 void MainWindowView::onNewBatchRequested(bool) {
@@ -128,7 +135,8 @@ Handles attempt to close main window
 */
 void MainWindowView::closeEvent(QCloseEvent *event) {
   // Close only if reduction has been paused
-  if (!m_presenter->isProcessing()) {
+  if (!m_presenter->isAnyBatchProcessing() ||
+      m_presenter->isAnyBatchAutoreducing()) {
     event->accept();
   } else {
     event->ignore();
