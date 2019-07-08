@@ -153,6 +153,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
         self.normalise = self.getPropertyValue('NormaliseBy')
         self.radius = self.getProperty('BeamRadius').value
         self.dimensionality = len(self.sample)
+        self.merging_option = self.getPropertyValue('MergingOption')
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
 
     def PyInit(self):
@@ -214,7 +215,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              doc='The output sensitivity map workspace.')
 
         self.copyProperties('SANSILLReduction',
-                            ['NormaliseBy'])
+                            ['NormaliseBy', 'MergingOption'])
 
         self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
                              doc='Sample thickness [cm]')
@@ -233,6 +234,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleThickness', 'Options')
         self.setPropertyGroup('BeamRadius', 'Options')
         self.setPropertyGroup('WaterCrossSection', 'Options')
+        self.setPropertyGroup('MergingOption', 'Options')
 
         self.copyProperties('SANSILLIntegration',
                             ['OutputType', 'CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'OutputBinning',
@@ -263,6 +265,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
             SANSILLReduction(Run=self.atransmission,
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
+                             MergingOption=self.merging_option,
                              OutputWorkspace=transmission_absorber_name)
 
         [process_transmission_beam, transmission_beam_name] = needs_processing(self.btransmission, 'Beam')
@@ -271,6 +274,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
             SANSILLReduction(Run=self.btransmission,
                              ProcessAs='Beam',
                              NormaliseBy=self.normalise,
+                             MergingOption=self.merging_option,
                              OutputWorkspace=transmission_beam_name,
                              BeamRadius=self.radius,
                              AbsorberInputWorkspace=transmission_absorber_name)
@@ -284,6 +288,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              AbsorberInputWorkspace=transmission_absorber_name,
                              BeamInputWorkspace=transmission_beam_name,
                              NormaliseBy=self.normalise,
+                             MergingOption=self.merging_option,
                              BeamRadius=self.radius)
 
         [process_sample_transmission, sample_transmission_name] = needs_processing(self.stransmission, 'Transmission')
@@ -295,6 +300,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              AbsorberInputWorkspace=transmission_absorber_name,
                              BeamInputWorkspace=transmission_beam_name,
                              NormaliseBy=self.normalise,
+                             MergingOption=self.merging_option,
                              BeamRadius=self.radius)
 
         absorber = self.absorber[i] if len(self.absorber) == self.dimensionality else self.absorber[0]
@@ -304,6 +310,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
             SANSILLReduction(Run=absorber,
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
+                             MergingOption=self.merging_option,
                              OutputWorkspace=absorber_name)
 
         beam = self.beam[i] if len(self.beam) == self.dimensionality else self.beam[0]
@@ -315,6 +322,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              ProcessAs='Beam',
                              OutputWorkspace=beam_name,
                              NormaliseBy=self.normalise,
+                             MergingOption=self.merging_option,
                              BeamRadius=self.radius,
                              AbsorberInputWorkspace=absorber_name,
                              FluxOutputWorkspace=flux_name)
@@ -328,6 +336,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              OutputWorkspace=container_name,
                              AbsorberInputWorkspace=absorber_name,
                              BeamInputWorkspace=beam_name,
+                             MergingOption=self.merging_option,
                              TransmissionInputWorkspace=container_transmission_name,
                              NormaliseBy=self.normalise)
 
@@ -372,6 +381,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              SensitivityInputWorkspace=sens_input,
                              FluxInputWorkspace=flux_input,
                              NormaliseBy=self.normalise,
+                             MergingOption=self.merging_option,
                              SampleThickness=self.getProperty('SampleThickness').value,
                              WaterCrossSection=self.getProperty('WaterCrossSection').value)
             SANSILLIntegration(InputWorkspace=sample_name,
@@ -394,6 +404,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              BeamInputWorkspace=beam_name,
                              ContainerInputWorkspace=container_name,
                              NormaliseBy=self.normalise,
+                             MergingOption=self.merging_option,
                              TransmissionInputWorkspace=sample_transmission_name,
                              SensitivityOutputWorkspace=self.output_sens,
                              MaskedInputWorkspace=mask_name,

@@ -204,6 +204,10 @@ class SANSILLReduction(PythonAlgorithm):
         self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
                                                           'used only if the absolute scale is done by dividing to water.')
 
+        self.declareProperty('MergingOption', 'IgnoreMetadata', StringListValidator(['IgnoreMetadata', 'RespectMetadata']),
+                             doc='Choose to respect or ignore the metadata when merging numors with +;'
+                                 'LoadAndMerge and Load algorithms will be invoked respectively.')
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
@@ -459,7 +463,11 @@ class SANSILLReduction(PythonAlgorithm):
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
-        LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
+        merging_option = self.getPropertyValue('MergingOption')
+        if merging_option == 'IgnoreMetadata':
+            Load(Filename=self.getPropertyValue('Run').replace(',','+'), OutputWorkspace=ws)
+        elif merging_option == 'RespectMetadata':
+            LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         self._normalise(ws)
         ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
         self._instrument = mtd[ws].getInstrument().getName()
