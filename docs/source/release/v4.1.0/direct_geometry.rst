@@ -43,8 +43,8 @@ New features
 Improvements
 ############
 
+- New instrument geometry for CNCS.
 - The :ref:`GetEiT0atSNS <algm-GetEiT0atSNS>` algorithm was improved to handle monitors where TOF is not wrapped to the first frame.
-
 
 Bugfixes
 ########
