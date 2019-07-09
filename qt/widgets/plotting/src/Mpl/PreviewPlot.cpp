@@ -234,17 +234,6 @@ void PreviewPlot::setSelectorActive(bool active) { m_selectorActive = active; }
 bool PreviewPlot::selectorActive() const { return m_selectorActive; }
 
 /**
- * Sets whether or not the selectors are visible on the preview plot.
- * @param visible True if the selectors should be visible.
- */
-void PreviewPlot::setSelectorsVisible(bool visible) {
-  for (auto singleSelector : m_singleSelectors)
-    singleSelector->setVisible(visible);
-  for (auto rangeSelector : m_rangeSelectors)
-    rangeSelector->setVisible(visible);
-}
-
-/**
  * Set the range of the specified axis
  * @param range The new range
  * @param axisID An enumeration defining the axis
@@ -297,8 +286,8 @@ void PreviewPlot::resizeX() { m_canvas->gca().autoscaleView(true, false); }
  */
 void PreviewPlot::resetView() {
   m_panZoomTool.zoomOut();
-  // Redraw the selectors if they are visible
-  QTimer::singleShot(0, this, SLOT(replot()));
+  if (!m_panZoomTool.isPanEnabled() && !m_panZoomTool.isZoomEnabled())
+    QTimer::singleShot(0, this, SLOT(replot()));
 }
 
 /**
@@ -587,19 +576,17 @@ void PreviewPlot::switchPlotTool(QAction *selected) {
   if (toolName == PLOT_TOOL_NONE) {
     m_panZoomTool.enableZoom(false);
     m_panZoomTool.enablePan(false);
-    setSelectorsVisible(true);
+    replot();
   } else if (toolName == PLOT_TOOL_PAN) {
     m_panZoomTool.enablePan(true);
-    setSelectorsVisible(false);
+    m_canvas->draw();
   } else if (toolName == PLOT_TOOL_ZOOM) {
     m_panZoomTool.enableZoom(true);
-    setSelectorsVisible(false);
+    m_canvas->draw();
   } else {
     // if a tool is added to the menu but no handler is added
     g_log.warning("Unknown plot tool selected.");
   }
-  // Redraw the selectors if they are visible
-  replot();
 }
 
 /**
