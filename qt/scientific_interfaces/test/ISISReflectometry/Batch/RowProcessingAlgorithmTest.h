@@ -44,6 +44,8 @@ public:
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
     TS_ASSERT_EQUALS(result["StartOverlap"], "7.500000");
     TS_ASSERT_EQUALS(result["EndOverlap"], "9.200000");
+    TS_ASSERT_EQUALS(result["Params"], "-0.02");
+    TS_ASSERT_EQUALS(result["ScaleRHSWorkspace"], "1");
   }
 
   void testExperimentSettingsWithEmptyRow() {
@@ -69,6 +71,7 @@ public:
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["FirstTransmissionRunList"], "22348, 22349");
     TS_ASSERT_EQUALS(result["SecondTransmissionRunList"], "22358, 22359");
+    TS_ASSERT_EQUALS(result["TransmissionProcessingInstructions"], "4");
     TS_ASSERT_EQUALS(result["MomentumTransferMin"], "0.009000");
     TS_ASSERT_EQUALS(result["MomentumTransferStep"], "0.030000");
     TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.300000");
@@ -83,6 +86,7 @@ public:
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["FirstTransmissionRunList"], "22345");
     TS_ASSERT_EQUALS(result["SecondTransmissionRunList"], "22346");
+    TS_ASSERT_EQUALS(result["TransmissionProcessingInstructions"], "5-6");
     TS_ASSERT_EQUALS(result["MomentumTransferMin"], "0.007000");
     TS_ASSERT_EQUALS(result["MomentumTransferStep"], "0.010000");
     TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.100000");
