@@ -1828,9 +1828,6 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     if (category == "SamplePos" || category == "samplePos") {
       m_instrument->markAsSamplePos(comp);
     }
-    if (category == "ChopperPos" || category == "chopperPos") {
-      m_instrument->markAsChopperPoint(comp);
-    }
 
     // set location for this newly added comp and set facing if specified in
     // instrument def. file. Also

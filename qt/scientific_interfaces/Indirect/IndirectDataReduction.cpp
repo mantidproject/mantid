@@ -79,6 +79,7 @@ void IndirectDataReduction::exportTabPython() {
  */
 void IndirectDataReduction::initLayout() {
   m_uiForm.setupUi(this);
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   // Create the tabs
   addTab<ISISEnergyTransfer>("ISIS Energy Transfer");

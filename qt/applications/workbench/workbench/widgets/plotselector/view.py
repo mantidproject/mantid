@@ -10,15 +10,15 @@
 from __future__ import absolute_import, print_function
 
 import re
-
 from qtpy.QtCore import Qt, Signal, QMutex, QMutexLocker
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QHeaderView, QLineEdit,
                             QMenu, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
+from mantid.py3compat.enum import IntEnum
+
 from mantidqt.icons import get_icon
 from mantidqt.utils.flowlayout import FlowLayout
-from mantid.py3compat.enum import IntEnum
-from workbench.plotting.qappthreadcall import QAppThreadCall
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 DEBUG_MODE = False
 

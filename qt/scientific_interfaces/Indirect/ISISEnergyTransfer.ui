@@ -80,7 +80,7 @@
          </sizepolicy>
         </property>
         <property name="label" stdset="0">
-         <string>Run Files</string>
+         <string>Input Runs</string>
         </property>
         <property name="multipleFiles" stdset="0">
          <bool>true</bool>
@@ -246,7 +246,7 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="pgMapFile">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -1019,9 +1019,9 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="loOutputOptions">
         <item>
-         <widget class="QLabel" name="lbPlotOutput">
+         <widget class="QLabel" name="lbWorkspaceIndex">
           <property name="text">
-           <string>Plot Output:</string>
+           <string>Workspace Index:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1029,27 +1029,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cbPlotType">
+         <widget class="QSpinBox" name="spWorkspaceIndex">
           <property name="enabled">
            <bool>false</bool>
           </property>
-          <property name="toolTip">
-           <string>Select the type of plot</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>Spectra</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Contour</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pbPlot">
+         <widget class="QPushButton" name="pbPlotSpectrum">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -1057,7 +1044,17 @@
            <string>Produce a plot of the result</string>
           </property>
           <property name="text">
-           <string>Plot</string>
+           <string>Plot Spectrum</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbPlotContour">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Plot Contour</string>
           </property>
          </widget>
         </item>
@@ -1124,6 +1121,7 @@
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1151,7 +1149,6 @@
   <tabstop>spPlotTimeSpecMin</tabstop>
   <tabstop>spPlotTimeSpecMax</tabstop>
   <tabstop>pbPlotTime</tabstop>
-  <tabstop>cbPlotType</tabstop>
   <tabstop>ckFold</tabstop>
   <tabstop>ckCm1Units</tabstop>
   <tabstop>ckSaveSPE</tabstop>

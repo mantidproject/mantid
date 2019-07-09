@@ -25,8 +25,27 @@ namespace CustomInterfaces {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
+  enum Column {
+    // 0-based column indices for cells in a row. The Actual values are
+    // important here so set them explicitly
+    THETA = 0,
+    FIRST_TRANS = 1,
+    SECOND_TRANS = 2,
+    TRANS_SPECTRA = 3,
+    QMIN = 4,
+    QMAX = 5,
+    QSTEP = 6,
+    SCALE = 7,
+    RUN_SPECTRA = 8
+  };
+
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 9;
+  using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
+
   PerThetaDefaults(
       boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
+      boost::optional<ProcessingInstructions>
+          transmissionProcessingInstructions,
       RangeInQ qRange, boost::optional<double> scaleFactor,
       boost::optional<ProcessingInstructions> processingInstructions);
 
@@ -35,6 +54,8 @@ public:
   boost::optional<double> thetaOrWildcard() const;
   RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
+  boost::optional<ProcessingInstructions>
+  transmissionProcessingInstructions() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
 
 private:
@@ -42,6 +63,7 @@ private:
   TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
+  boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
   boost::optional<ProcessingInstructions> m_processingInstructions;
 };
 
@@ -49,7 +71,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PerThetaDefaults const &lhs,
                                                PerThetaDefaults const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PerThetaDefaults const &lhs,
                                                PerThetaDefaults const &rhs);
-std::array<std::string, 8>
+PerThetaDefaults::ValueArray
 perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
 } // namespace CustomInterfaces
 } // namespace MantidQt

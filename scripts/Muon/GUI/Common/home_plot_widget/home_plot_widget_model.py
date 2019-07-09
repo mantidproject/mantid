@@ -18,18 +18,24 @@ class HomePlotWidgetModel(object):
         """
         self.plot_figure = None
         self.plotted_workspaces = []
-        self.plotted_workspaces_inverse_binning = []
+        self.plotted_workspaces_inverse_binning = {}
         self.plotted_fit_workspaces = []
         self.plotted_group = ''
 
-    def plot(self, workspace_list, title):
+    def plot(self, workspace_list, title, domain, force_redraw, window_title):
         """
         Plots a list of workspaces in a new plot window, closing any existing plot windows.
         :param workspace_list: A list of workspace name to plot. They must be in the ADS
         :param title: The name to give to the subplot created, currently only one subplot is ever created
+        :param domain: if frequency or time domain
+        :param force_redraw: if to force a redraw
+        :param window_title: title for the plot window
         :return: A reference to the newly created plot window is passed back
         """
         if not workspace_list:
+            self.plotted_workspaces = []
+            self.plotted_workspaces_inverse_binning = {}
+            self.plotted_fit_workspaces = []
             self.plot_figure.clear()
             self.plot_figure.canvas.draw()
             return self.plot_figure
@@ -37,27 +43,47 @@ class HomePlotWidgetModel(object):
             workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspace_list, unrollGroups=True)
         except RuntimeError:
             return
-
-        if self.plot_figure:
+        if (force_redraw or self.plotted_workspaces == []) and self.plot_figure:
+            self.plot_figure.clear()
+            self.plotted_workspaces = []
+            self.plotted_workspaces_inverse_binning = {}
+            self.plotted_fit_workspaces = []
             self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
+            self.set_x_lim(domain)
+
+        elif self.plot_figure:
+            axis = self.plot_figure.gca()
+            xlim = axis.get_xlim()
+            ylim = axis.get_ylim()
+            self._remove_all_data_workspaces_from_plot()
+            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
+                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
+            axis = self.plot_figure.gca()
+            axis.set_xlim(xlim)
+            axis.set_ylim(ylim)
         else:
             self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title, plot_kwargs={'distribution': True,
                                                                                                     'autoscale_on_update': False},
                                     errors=True)
-            self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
-            self.autoscale_y_to_data_in_view()
+            self.set_x_lim(domain)
 
-        self.plot_figure.canvas.set_window_title('Muon Analysis')
+        self.plot_figure.canvas.set_window_title(window_title)
         self.plot_figure.gca().set_title(title)
 
-        self.plot_figure.canvas.window().closing.connect(self._close_plot)
+        self.plot_figure.canvas.window().closing.connect(self._clear_plot_references)
 
         workspaces_to_remove = [workspace for workspace in self.plotted_workspaces if workspace not in workspace_list]
         for workspace in workspaces_to_remove:
             self.remove_workpace_from_plot(workspace)
 
         self.plotted_workspaces = workspace_list
+
+    def set_x_lim(self,domain):
+        if domain == "Time":
+            self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
+            self.autoscale_y_to_data_in_view()
+            self.plot_figure.canvas.draw()
 
     def add_workspace_to_plot(self, workspace, specNum, label):
         """
@@ -88,14 +114,24 @@ class HomePlotWidgetModel(object):
         self.plot_figure.gca().remove_workspace_artists(workspace)
         self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
         self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
+        if workspace_name in self.plotted_fit_workspaces:
+            self.plotted_workspaces_inverse_binning.pop(workspace_name)
 
-    def _close_plot(self):
+    def _clear_plot_references(self):
         """
         callback to call when the plot window is closed. Removes the reference and resets plotted workspaces
         :return:
         """
         self.plot_figure = None
         self.plotted_workspaces = []
+        self.plotted_workspaces_inverse_binning = {}
+        self.plotted_fit_workspaces = []
+
+    def force_redraw(self):
+        if not self.plot_figure:
+            return
+
+        self.plot_figure.canvas.draw()
 
     def autoscale_y_to_data_in_view(self):
         axis = self.plot_figure.gca()
@@ -111,3 +147,8 @@ class HomePlotWidgetModel(object):
         new_top = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
 
         axis.set_ylim(bottom=new_bottom, top=new_top)
+
+    def _remove_all_data_workspaces_from_plot(self):
+        workspaces_to_remove = self.plotted_workspaces
+        for workspace in workspaces_to_remove:
+            self.remove_workpace_from_plot(workspace)

@@ -55,7 +55,8 @@ private slots:
       bool error); //< Called when the Plot Raw algorithmm chain completes
   /// Handles running, plotting and saving
   void runClicked();
-  void plotClicked();
+  void plotSpectrumClicked();
+  void plotContourClicked();
   void saveClicked();
 
   void updateRunButton(bool enabled = true,
@@ -74,7 +75,10 @@ private:
   std::pair<std::string, std::string> createMapFile(
       const std::string
           &groupType); ///< create the mapping file with which to group results
-  std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
+
+  void plotWorkspace(std::string const &workspaceName,
+                     std::string const &plotType);
+  void saveWorkspace(std::string const &workspaceName);
 
   bool numberInCorrectRange(std::size_t const &spectraNumber) const;
   QString checkCustomGroupingNumbersInRange(
@@ -85,10 +89,13 @@ private:
   void loadDetailedBalance(std::string const &filename);
 
   void setRunEnabled(bool enable);
-  void setPlotEnabled(bool enable);
+  void setPlotSpectrumEnabled(bool enable);
+  void setPlotContourEnabled(bool enable);
   void setPlotTimeEnabled(bool enable);
   void setSaveEnabled(bool enable);
-  void setPlotIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enable);
+  void setPlotSpectrumIsPlotting(bool plotting);
+  void setPlotContourIsPlotting(bool plotting);
   void setPlotTimeIsPlotting(bool plotting);
 
   std::string m_outputGroupName;

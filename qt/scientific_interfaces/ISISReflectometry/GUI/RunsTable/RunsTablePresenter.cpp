@@ -112,6 +112,20 @@ RunsTablePresenter::RunsTablePresenter(
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
       m_clipboard(), m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
+
+  // Add Group to view and model, add row to this group in view and model.
+  ensureAtLeastOneGroupExists();
+}
+
+void RunsTablePresenter::appendRowAndGroup() {
+  // Calculate
+  std::vector<int> localGroupIndices;
+  localGroupIndices.emplace_back(
+      static_cast<int>(m_model.reductionJobs().groups().size()));
+  appendEmptyGroupInModel();
+  appendEmptyGroupInView();
+  appendRowsToGroupsInView(localGroupIndices);
+  appendRowsToGroupsInModel(localGroupIndices);
 }
 
 void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
@@ -339,6 +353,13 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   // If we have more than one group/row then it's ok
   if (m_model.reductionJobs().groups().size() > 1)
     return;
+
+  if (m_model.reductionJobs().groups().size() == 0) {
+    appendRowAndGroup();
+    notifyExpandAllRequested();
+    return;
+  }
+
   auto const &group = m_model.reductionJobs().groups()[0];
   if (group.rows().size() > 0)
     return;
@@ -355,6 +376,15 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   // group first, then delete the original one
   appendEmptyGroupInView();
   removeRowsAndGroupsFromView({location});
+
+  // Insert a new group (and include an expanded row, for usability) and then
+  // delete the original "bad" group
+  appendRowAndGroup();
+  notifyExpandAllRequested();
+
+  // After repairing the view and adding the Row and Group
+  removeGroupsFromModel({0});
+  removeGroupsFromView({0});
 }
 
 void RunsTablePresenter::notifyExpandAllRequested() {
@@ -490,9 +520,11 @@ void RunsTablePresenter::notifySelectionChanged() {
 void RunsTablePresenter::applyGroupStylingToRow(
     MantidWidgets::Batch::RowLocation const &location) {
   auto cells = m_view->jobs().cellsAt(location);
-  boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()),
-              m_view->jobs().deadCell());
-  m_view->jobs().setCellsAt(location, cells);
+  if (cells.size() > 0) {
+    boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()),
+                m_view->jobs().deadCell());
+    m_view->jobs().setCellsAt(location, cells);
+  }
 }
 
 void RunsTablePresenter::notifyRowInserted(
@@ -721,7 +753,6 @@ void RunsTablePresenter::forAllCellsAt(
 
 void RunsTablePresenter::setRowStylingForItem(
     MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
-
   switch (item.state()) {
   case State::ITEM_NOT_STARTED: // fall through
   case State::ITEM_STARTING:

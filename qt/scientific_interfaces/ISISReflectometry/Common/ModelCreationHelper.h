@@ -59,6 +59,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs anotherGroupWithARowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithARowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithTwoRowsModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs twoGroupsWithMixedRowsModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs emptyReductionJobs();
 
 /* Experiment */
 MANTIDQT_ISISREFLECTOMETRY_DLL std::vector<PerThetaDefaults>
@@ -75,7 +76,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections
 makeEmptyPolarizationCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL FloodCorrections makeFloodCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeTransmissionRunRange();
-MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeEmptyTransmissionRunRange();
+MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions
+makeEmptyTransmissionStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperiment();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeEmptyExperiment();
 

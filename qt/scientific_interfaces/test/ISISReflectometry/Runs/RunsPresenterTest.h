@@ -465,9 +465,12 @@ public:
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
         .Times(1)
         .WillOnce(Return(props));
-    auto result = presenter.liveDataReductionOptions("INTER");
-    auto expected = "GetLiveValueAlgorithm=GetLiveInstrumentValue;Instrument="
-                    "INTER;Prop1=val1;Prop2=val2";
+    auto result =
+        presenter.liveDataReductionOptions("live_input_workspace", "INTER");
+    auto expected =
+        "GetLiveValueAlgorithm=GetLiveInstrumentValue;InputWorkspace="
+        "live_input_workspace;Instrument=INTER;Prop1=val1;Prop2="
+        "val2";
     TS_ASSERT_EQUALS(result, expected);
   }
 

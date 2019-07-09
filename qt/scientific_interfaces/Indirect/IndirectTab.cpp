@@ -733,13 +733,22 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min,
  * @param lower :: The lower bound property in the property browser
  * @param upper :: The upper bound property in the property browser
  * @param bounds :: The upper and lower bounds to be set
+ * @param range :: The range to set the range selector to.
  */
-void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower,
-                                   QtProperty *upper,
-                                   const QPair<double, double> &bounds) {
+void IndirectTab::setRangeSelector(
+    RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+    const QPair<double, double> &bounds,
+    const boost::optional<QPair<double, double>> &range) {
   m_dblManager->setValue(lower, bounds.first);
   m_dblManager->setValue(upper, bounds.second);
   rs->setRange(bounds.first, bounds.second);
+  if (range) {
+    rs->setMinimum(range.get().first);
+    rs->setMaximum(range.get().second);
+  } else {
+    rs->setMinimum(bounds.first);
+    rs->setMaximum(bounds.second);
+  }
 }
 
 /**
@@ -836,6 +845,21 @@ bool IndirectTab::getResolutionRangeFromWs(
     }
   }
   return false;
+}
+
+QPair<double, double>
+IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName) const {
+  auto const &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName))
+    return getXRangeFromWorkspace(
+        ads.retrieveWS<MatrixWorkspace>(workspaceName));
+  return QPair<double, double>(0.0, 0.0);
+}
+
+QPair<double, double> IndirectTab::getXRangeFromWorkspace(
+    Mantid::API::MatrixWorkspace_const_sptr workspace) const {
+  const auto xValues = workspace->x(0);
+  return QPair<double, double>(xValues[0], xValues[xValues.size() - 1]);
 }
 
 /**

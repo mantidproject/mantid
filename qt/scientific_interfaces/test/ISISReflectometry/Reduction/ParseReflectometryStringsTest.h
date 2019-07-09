@@ -39,14 +39,9 @@ public:
     TS_ASSERT(!result.is_initialized());
   }
 
-  void testRunNumberHandlesInvalidCharacters() {
-    auto result = parseRunNumber("bad");
-    TS_ASSERT(!result.is_initialized());
-  }
-
-  void testParseRunNumberConsidersFloatingPointInvalid() {
-    auto result = parseRunNumber("13.460");
-    TS_ASSERT(!result.is_initialized());
+  void testRunNumberHandlesFreeTextInput() {
+    auto result = parseRunNumber("some workspace name");
+    TS_ASSERT(result.is_initialized());
   }
 
   void testParseRunNumberOrWhitespaceExtractsRun() {
@@ -212,9 +207,9 @@ public:
     TS_ASSERT(!result.is_initialized());
   }
 
-  void testParseRunNumbersInvalid() {
-    auto result = parseRunNumbers("13460, bad");
-    TS_ASSERT(!result.is_initialized());
+  void testParseRunNumbersHandlesFreeTextInput() {
+    auto result = parseRunNumbers("13460, some workspace");
+    TS_ASSERT(result.is_initialized());
   }
 
   void testParseTransmissionRuns() {
@@ -245,18 +240,18 @@ public:
     TS_ASSERT_EQUALS(boost::get<std::vector<int>>(result), expected);
   }
 
-  void testParseTransmissionRunsFirstInvalid() {
-    auto result = parseTransmissionRuns("bad", "13464");
-    std::vector<int> expected = {0};
-    TS_ASSERT_EQUALS(result.which(), ERROR);
-    TS_ASSERT_EQUALS(boost::get<std::vector<int>>(result), expected);
+  void testParseTransmissionRunsHandlesFreeTextInputForFirst() {
+    auto result = parseTransmissionRuns("some workspace", "13464");
+    TransmissionRunPair expected = {"some workspace", "13464"};
+    TS_ASSERT_EQUALS(result.which(), VALUE);
+    TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
   }
 
-  void testParseTransmissionRunsSecondInvalid() {
-    auto result = parseTransmissionRuns("13463", "bad");
-    std::vector<int> expected = {1};
-    TS_ASSERT_EQUALS(result.which(), ERROR);
-    TS_ASSERT_EQUALS(boost::get<std::vector<int>>(result), expected);
+  void testParseTransmissionRunsHandlesFreeTextInputForSecond() {
+    auto result = parseTransmissionRuns("13463", "some workspace");
+    TransmissionRunPair expected = {"13463", "some workspace"};
+    TS_ASSERT_EQUALS(result.which(), VALUE);
+    TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
   }
 
 private:

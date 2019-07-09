@@ -40,8 +40,7 @@ private:
   int m_baseColumn;
 };
 
-using CellText =
-    std::array<std::string, PerThetaDefaultsValidator::INPUT_FIELD_COUNT>;
+using CellText = PerThetaDefaults::ValueArray;
 
 boost::optional<boost::optional<double>>
 PerThetaDefaultsValidator::parseThetaOrWhitespace(CellText const &cellText) {
@@ -67,20 +66,30 @@ PerThetaDefaultsValidator::parseTransmissionRuns(CellText const &cellText) {
       transmissionRunsOrError);
 }
 
+boost::optional<boost::optional<std::string>>
+PerThetaDefaultsValidator::parseTransmissionProcessingInstructions(
+    CellText const &cellText) {
+  auto optionalInstructionsOrNoneIfError =
+      ::MantidQt::CustomInterfaces::parseProcessingInstructions(cellText[3]);
+  if (!optionalInstructionsOrNoneIfError.is_initialized())
+    m_invalidColumns.emplace_back(3);
+  return optionalInstructionsOrNoneIfError;
+}
+
 boost::optional<RangeInQ>
 PerThetaDefaultsValidator::parseQRange(CellText const &cellText) {
   auto qRangeOrError = ::MantidQt::CustomInterfaces::parseQRange(
-      cellText[3], cellText[4], cellText[5]);
+      cellText[4], cellText[5], cellText[6]);
   return boost::apply_visitor(
-      AppendErrorIfNotType<RangeInQ>(m_invalidColumns, 3), qRangeOrError);
+      AppendErrorIfNotType<RangeInQ>(m_invalidColumns, 4), qRangeOrError);
 }
 
 boost::optional<boost::optional<double>>
 PerThetaDefaultsValidator::parseScaleFactor(CellText const &cellText) {
   auto optionalScaleFactorOrNoneIfError =
-      ::MantidQt::CustomInterfaces::parseScaleFactor(cellText[6]);
+      ::MantidQt::CustomInterfaces::parseScaleFactor(cellText[7]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(6);
+    m_invalidColumns.emplace_back(7);
   return optionalScaleFactorOrNoneIfError;
 }
 
@@ -88,9 +97,9 @@ boost::optional<boost::optional<std::string>>
 PerThetaDefaultsValidator::parseProcessingInstructions(
     CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
-      ::MantidQt::CustomInterfaces::parseProcessingInstructions(cellText[7]);
+      ::MantidQt::CustomInterfaces::parseProcessingInstructions(cellText[8]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(7);
+    m_invalidColumns.emplace_back(8);
   return optionalInstructionsOrNoneIfError;
 }
 
@@ -98,11 +107,14 @@ ValidationResult<PerThetaDefaults, std::vector<int>> PerThetaDefaultsValidator::
 operator()(CellText const &cellText) {
   auto maybeTheta = parseThetaOrWhitespace(cellText);
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
+  auto maybeTransmissionProcessingInstructions =
+      parseTransmissionProcessingInstructions(cellText);
   auto maybeQRange = parseQRange(cellText);
   auto maybeScaleFactor = parseScaleFactor(cellText);
   auto maybeProcessingInstructions = parseProcessingInstructions(cellText);
   auto maybeDefaults = makeIfAllInitialized<PerThetaDefaults>(
-      maybeTheta, maybeTransmissionRuns, maybeQRange, maybeScaleFactor,
+      maybeTheta, maybeTransmissionRuns,
+      maybeTransmissionProcessingInstructions, maybeQRange, maybeScaleFactor,
       maybeProcessingInstructions);
 
   if (maybeDefaults.is_initialized())

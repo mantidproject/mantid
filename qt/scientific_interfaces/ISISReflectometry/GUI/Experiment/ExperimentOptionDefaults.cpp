@@ -51,9 +51,16 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto transmissionRunRange = RangeInLambda(
       defaults.getDoubleOrZero("StartOverlap", "TransRunStartOverlap"),
       defaults.getDoubleOrZero("EndOverlap", "TransRunEndOverlap"));
-
   if (!transmissionRunRange.isValid(false))
     throw std::invalid_argument("Transmission run overlap range is invalid");
+
+  auto transmissionStitchParams =
+      defaults.getStringOrEmpty("Params", "TransmissionStitchParams");
+  auto transmissionScaleRHS =
+      defaults.getBoolOrTrue("ScaleRHSWorkspace", "TransmissionScaleRHS");
+
+  auto transmissionStitchOptions = TransmissionStitchOptions(
+      transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
 
   // We currently don't specify stitch parameters in the parameters file
   auto stitchParameters = std::map<std::string, std::string>();
@@ -64,6 +71,9 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto const theta = std::string("");
   auto const firstTransmissionRun = std::string("");
   auto const secondTransmissionRun = std::string("");
+  auto const transmissionProcessingInstructions =
+      defaults.getStringOrEmpty("TransmissionProcessingInstructions",
+                                "TransmissionProcessingInstructions");
   auto const qMin = stringValueOrEmpty(
       defaults.getOptionalValue<double>("MomentumTransferMin", "QMin"));
   auto const qMax = stringValueOrEmpty(
@@ -75,11 +85,12 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto const scaleFactor = stringValueOrEmpty(maybeScaleFactor);
   auto const processingInstructions = defaults.getStringOrEmpty(
       "ProcessingInstructions", "ProcessingInstructions");
-  auto perThetaDefaultsRow = std::array<std::string, 8>{
-      {theta, firstTransmissionRun, secondTransmissionRun, qMin, qMax, qStep,
-       scaleFactor, processingInstructions}};
+  auto perThetaDefaultsRow = PerThetaDefaults::ValueArray{
+      {theta, firstTransmissionRun, secondTransmissionRun,
+       transmissionProcessingInstructions, qMin, qMax, qStep, scaleFactor,
+       processingInstructions}};
   auto perThetaDefaults =
-      std::vector<std::array<std::string, 8>>{perThetaDefaultsRow};
+      std::vector<PerThetaDefaults::ValueArray>{perThetaDefaultsRow};
   auto validate = PerThetaDefaultsTableValidator();
   auto const tolerance = 0.0; // irrelevant because theta is empty
   auto perThetaValidationResult = validate(perThetaDefaults, tolerance);
@@ -90,7 +101,7 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   return Experiment(
       analysisMode, reductionType, summationType, includePartialBins, debug,
       std::move(polarizationCorrections), std::move(floodCorrections),
-      std::move(transmissionRunRange), std::move(stitchParameters),
+      std::move(transmissionStitchOptions), std::move(stitchParameters),
       std::move(perThetaValidationResult.assertValid()));
 }
 } // unnamed namespace

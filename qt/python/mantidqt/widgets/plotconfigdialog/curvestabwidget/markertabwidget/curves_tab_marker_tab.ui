@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>359</width>
+    <height>201</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="grid_layout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetFixedSize</enum>
+     </property>
+     <property name="topMargin">
+      <number>5</number>
+     </property>
+     <item row="1" column="2">
+      <widget class="QComboBox" name="marker_style_combo_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>190</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>190</width>
+         <height>22</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>point</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>pixel</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>circle</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>triangle_down</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>triangle_up</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>triangle_left</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>triangle_right</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tri_down</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tri_up</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tri_left</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tri_right</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>octagon</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>square</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>pentagon</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>plus (filled)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>star</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>hexagon1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>hexagon2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>plus</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>x</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>x (filled)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>diamond</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>thin_diamond</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>vline</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>hline</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tickleft</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tickright</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tickup</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tickdown</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>caretleft</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>caretright</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>caretup</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>caretdown</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>caretleft (centered at base)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>caretright (centered at base)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>caretup (centered at base)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>caretdown (centered at base)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="marker_style_label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Marker Style</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="color_label_2">
+       <property name="text">
+        <string>Edge Color</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <spacer name="horizontalSpacer_17">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="2" column="1">
+      <spacer name="horizontalSpacer_15">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="width_label_2">
+       <property name="text">
+        <string>Face Color</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="marker_size_label">
+       <property name="text">
+        <string>Marker Size</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <spacer name="horizontalSpacer_14">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="3" column="1">
+      <spacer name="horizontalSpacer_16">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="marker_options_label">
+       <property name="minimumSize">
+        <size>
+         <width>79</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Marker Options</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QDoubleSpinBox" name="marker_size_spin_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>190</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>190</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="decimals">
+        <number>2</number>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QWidget" name="face_color_dummy_widget" native="true"/>
+     </item>
+     <item row="4" column="2">
+      <widget class="QWidget" name="edge_color_dummy_widget" native="true"/>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>marker_style_combo_box</tabstop>
+  <tabstop>marker_size_spin_box</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

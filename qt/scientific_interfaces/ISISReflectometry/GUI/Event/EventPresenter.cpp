@@ -106,7 +106,11 @@ void EventPresenter::setLogValueSlicingFromView() {
   auto maybeBreakpoints =
       parseList(m_view->logBreakpoints(), parseNonNegativeDouble);
   auto blockName = m_view->logBlockName();
-  if (maybeBreakpoints.is_initialized()) {
+  // Currently we don't support multiple log intervals, so for now if we have
+  // more than one item in the list then show that as invalid. We intend to add
+  // this though which is why this is still a free text field rather than a
+  // spin box
+  if (maybeBreakpoints.is_initialized() && maybeBreakpoints.get().size() <= 1) {
     m_view->showLogBreakpointsValid();
     m_slicing = SlicingByEventLog(maybeBreakpoints.get(), blockName);
   } else {

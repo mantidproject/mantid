@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMolDyn.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -16,9 +17,21 @@ using namespace Mantid::API;
 
 namespace {
 
-WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      workspaceName);
+template <typename T = MatrixWorkspace, typename R = MatrixWorkspace_sptr>
+R getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
+}
+
+std::vector<std::string>
+getAllWorkspaceNames(std::string const &workspaceName) {
+  std::vector<std::string> allNames;
+  if (auto const group =
+          getADSWorkspace<WorkspaceGroup, WorkspaceGroup_sptr>(workspaceName)) {
+    allNames = group->getNames();
+  } else if (auto const workspace = getADSWorkspace(workspaceName)) {
+    allNames.emplace_back(workspace->getName());
+  }
+  return allNames;
 }
 
 } // namespace
@@ -153,15 +166,13 @@ void IndirectMolDyn::plotClicked() {
   setPlotIsPlotting(true);
 
   QString const filename = m_uiForm.mwRun->getFirstFilename();
-  QString const baseName = QFileInfo(filename).baseName();
+  auto const baseName = QFileInfo(filename).baseName().toStdString();
 
-  if (checkADSForPlotSaveWorkspace(baseName.toStdString(), true)) {
+  if (checkADSForPlotSaveWorkspace(baseName, true)) {
+    auto const workspaceNames = getAllWorkspaceNames(baseName);
 
-    auto const diffResultsGroup = getADSWorkspaceGroup(baseName.toStdString());
-    auto const names = diffResultsGroup->getNames();
     auto const plotType = m_uiForm.cbPlot->currentText();
-
-    for (auto const &name : names) {
+    for (auto const &name : workspaceNames) {
       if (plotType == "Spectra" || plotType == "Both")
         plotSpectrum(QString::fromStdString(name));
 

@@ -12,12 +12,19 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ----------------------------
 
+Changes
+#######
+
+- Pushed back deprecation of ISIS Reflectometry (Old) GUI to November 2019 from July 2019.
+
 New
 ###
 
 - Tabs are now grouped inside "Batches" rather than having two separate "Groups" within each tab. This makes it easier to see which set of settings will be used together. Batches can be added/removed using the menu and the Batch tabs on the left.
 - The Settings tab has been split into two separate tabs, Experiment Settings and Instrument Settings.
 - The first and second transmission runs are now entered via two separate boxes. Multiple runs can be summed for either of these inputs by entering the run numbers as a comma-separated list.
+- New inputs have been added to control stitching of transmission runs: you can select whether to scale the left or right workspace; you can enter rebin parameters specifically for transmission run stitching (previously the same parameters as stitching of the output workspaces were used).
+- Spectra of interest can be specified for the transmission runs via a new column on the Experiment Settings tab (previously the same spectra as the run workspaces was used).
 - Default values for the current instrument are automatically set in the Experiment and Instrument Settings tabs when the interface is opened or the instrument is changed.
 - Processing in event mode is now done asynchronously. Previously this used to lock up MantidPlot.
 - Error handling has been improved to catch invalid inputs earlier. Errors are highlighted in red or (for the table) with a red star.
@@ -56,6 +63,7 @@ Bug fixes
 
 - Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
 - Fixed a problem where auto-saving would fail if the output for a row is a group workspace.
+- Fixed a problem where the live data monitor would not start. Also fixed an issue where the output workspace is created prematurely as a clone of the TOF workspace.
 	
 Removed
 #######

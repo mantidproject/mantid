@@ -27,7 +27,7 @@ class MockLine2d(object):
 
 class FigureManagerWorkbenchTest(GuiTest):
 
-    @patch("workbench.plotting.qappthreadcall.QAppThreadCall")
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_construction(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
         fig = MagicMock()
