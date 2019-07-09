@@ -12,6 +12,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/core/Converters/NumpyFunctions.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
@@ -238,18 +240,37 @@ void pythonReplaceAxis(MatrixWorkspace &self, const std::size_t &axisIndex,
   self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
 }
 
-std::vector<Mantid::signal_t>
-getSignalAtCoord(MatrixWorkspace &self, const NDArray &values,
-                 const Mantid::API::MDNormalization &normalization) {
-  std::vector<Mantid::coord_t> coords =
-      NDArrayToVector<Mantid::coord_t>(values)();
-  auto length = len(values) * 2;
-  std::vector<Mantid::signal_t> signals;
-  for (auto i = 0; i < length; i = i + 2) {
-    std::vector<Mantid::coord_t> coord = {coords[i], coords[i + 1]};
-    signals.push_back(self.getSignalAtCoord(coord.data(), normalization));
+/**
+ * Wrapper around MatrixWorkspace::getSignalAtCoord API to allow us to pass in a
+ * numpy array of coordinates and get a numpy array of signals out.
+ * @param self :: A Matrix Workspace
+ * @param npCoords :: An NDArray of coordinates with shape (n, 2)
+ * @param normalization :: MDNormalization object specifying normalization type
+ */
+object getSignalAtCoord(MatrixWorkspace &self, const NDArray &npCoords,
+                        const Mantid::API::MDNormalization &normalization) {
+  if (npCoords.get_shape()[1] != 2) {
+    throw std::invalid_argument("MatrixWorkspace::getSignalAtCoord - Input "
+                                "array must have shape (n, 2)");
   }
-  return signals;
+  Py_intptr_t length = len(npCoords);
+  int datatype = NDArrayTypeIndex<Mantid::coord_t>::typenum;
+  PyArrayObject *signalArray =
+      Impl::func_PyArray_NewFromDescr(datatype, 1, &length);
+
+  for (Py_intptr_t i = 0; i < length; ++i) {
+    // Extract coords, pipe them into getSignalArray and place into our return
+    // array
+    auto row = NDArray(npCoords[i]);
+    std::vector<float> coords = {
+        static_cast<float>(PyFloat_AsDouble(object(row[0]).ptr())),
+        static_cast<float>(PyFloat_AsDouble(object(row[1]).ptr()))};
+    auto signalValue =
+        reinterpret_cast<Mantid::coord_t *>(PyArray_GETPTR1(signalArray, i));
+    *signalValue = self.getSignalAtCoord(
+        static_cast<Mantid::coord_t *>(coords.data()), normalization);
+  }
+  return object(handle<>((PyObject *)(signalArray)));
 }
 
 } // namespace
@@ -442,7 +463,7 @@ void export_MatrixWorkspace() {
            "block "
            "of memory free that will fit all of the data.")
       .def("getSignalAtCoord", &getSignalAtCoord,
-           args("self", "coords", "normalization"), return_readonly_numpy(),
+           args("self", "coords", "normalization"),
            "Return signal for array of coordinates")
       //-------------------------------------- Operators
       //-----------------------------------
