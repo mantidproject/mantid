@@ -459,8 +459,9 @@ class SANSILLReduction(PythonAlgorithm):
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
-        # we do not want the summing done by Load, since it's pair-wise and slow
-        Load(Filename=self.getPropertyValue('Run').replace('+',','), OutputWorkspace=ws)
+        # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
+        # instead we load and list, and merge once with merge runs
+        LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         if isinstance(mtd[ws], WorkspaceGroup):
             MergeRuns(InputWorkspaces=ws, OutputWorkspace=ws)
         self._normalise(ws)
