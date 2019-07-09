@@ -60,8 +60,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         presenter.on_function_selection_changed()
 
         self.mock_view.selected_fit_function.assert_called_once_with()
-        self.mock_model.set_selected_fit_function.assert_called_with(new_name)
-        self.assertEqual(2, self.mock_model.set_selected_fit_function.call_count)
+        self.mock_model.set_selected_fit_function.assert_called_once_with(new_name)
 
     def test_adding_new_fit_to_existing_fits_preserves_current_selections(
             self):
