@@ -629,7 +629,7 @@
         </size>
        </property>
        <property name="text">
-        <string>CheckBox</string>
+        <string/>
        </property>
       </widget>
      </item>
