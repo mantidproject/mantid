@@ -604,6 +604,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   double wavelength =
       entry.getFloat(instrumentNamePath + "/selector/wavelength");
   g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
+  // round the wavelength to avoid unnecessary rebinning during merge runs
+  wavelength = std::round(wavelength * 100) / 100.;
 
   if (wavelength <= 0) {
     g_log.debug() << "Mode = " << entry.getFloat("mode") << '\n';
