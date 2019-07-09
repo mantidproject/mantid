@@ -120,7 +120,9 @@ private:
  * Checks if the workspace has the correct type.
  *
  * @param workspaceName The name of the workspace
+ * @param inputType What the workspace is used for (e.g. Sample)
  * @param validType The type which is valid
+ * @param silent True if an error should not be added to the validator.
  * @return True if the workspace has the correct type
  */
 template <typename T, typename R>

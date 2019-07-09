@@ -278,6 +278,7 @@ void ISISEnergyTransfer::setup() {}
  *
  */
 void ISISEnergyTransfer::handleDataReady(QString const &dataName) {
+  UNUSED_ARG(dataName);
   UserInputValidator uiv;
   validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration",
                        DataType::Calib);

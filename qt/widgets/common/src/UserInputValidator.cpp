@@ -138,6 +138,7 @@ bool UserInputValidator::checkMWRunFilesIsValid(const QString &name,
  *
  * @param name   :: the "name" of the widget so as to be recognised by the user.
  * @param widget :: the widget to check
+ * @param silent True if an error should not be added to the validator.
  * @returns True if the input was valid
  */
 bool UserInputValidator::checkDataSelectorIsValid(const QString &name,
