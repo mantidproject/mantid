@@ -38,9 +38,9 @@ public:
   }
 
   void testInit() {
-    using Mantid::Algorithms::GroupWorkspaces;
     using Mantid::API::WorkspaceGroup;
     using Mantid::API::WorkspaceProperty;
+    using Mantid::Algorithms::GroupWorkspaces;
 
     GroupWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
