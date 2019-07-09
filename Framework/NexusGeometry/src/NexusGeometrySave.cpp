@@ -111,18 +111,40 @@ inline void writeDetectorNumberDataSetToGroupHelper(
 
   const hsize_t dsz = detectorIndices.size();
 
+  int rank = 1;
   hsize_t dims[1];
   dims[0] = dsz;
 
   int *data = (int *)malloc(dsz * sizeof(int));
-  H5::DataSpace space = H5Screate_simple(1, dims, NULL);
+  H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
   for (int i = 0; i < dsz; i++) {
-    data[i] = i + 1;
+    data[i] = i + 1; // placeholder
   }
   H5::DataSet dset =
       grp.createDataSet("detector_number", H5::PredType::NATIVE_INT, space);
   dset.write(data, H5::PredType::NATIVE_INT, space);
   free(data);
+}
+
+inline void
+writeLocationToDataSetHelper(H5::Group &grp,
+                             const Geometry::ComponentInfo &compInfo) {
+  /*
+  int rank = 1;
+  hsize_t dims[1];
+  dims[0] = 1;
+
+  int *data = (int *)malloc(rank * sizeof(int));
+  H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+
+  hsize_t val = 13;
+  data[0] = val;
+
+  H5::DataSet dset =
+      grp.createDataSet("detector_number", H5::PredType::NATIVE_INT, space);
+  dset.write(data, H5::PredType::NATIVE_INT, space);
+  free(data);
+  */
 }
 
 /*
@@ -186,11 +208,10 @@ public:
     writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_DETECTOR);
 
     writeDetectorNumberDataSetToGroupHelper(m_group, compInfo);
+    // writeLocationToDataSetHelper(m_group, compInfo);
 
     H5::DataSet localName =
         m_group.createDataSet(LOCAL_NAME, H5VARIABLE, H5SCALAR);
-    H5::DataSet location =
-        m_group.createDataSet(LOCATION, H5VARIABLE, H5SCALAR);
     H5::DataSet orientation =
         m_group.createDataSet(ORIENTATION, H5VARIABLE, H5SCALAR);
     H5::DataSet xPixelOffset =
@@ -285,15 +306,6 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     throw std::invalid_argument("The component has no source.");
   }
 
-  { // so i dont forget they exist.
-    // compInfo.samplePosition();
-    // compInfo.sourcePosition();
-    // compinfo.sourcePosition();
-    // compInfo.hasSample();
-    // compInfo.hasSource();
-    // auto DETECTOR = Mantid::Beamline::ComponentType(6);
-  }
-
   /*
 ==============================================================================================================
 
@@ -314,8 +326,6 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   NGSSample sample(rootGroup, compInfo);
 
   file.close();
-
-  // detector number
 
 } // saveInstrument
 
