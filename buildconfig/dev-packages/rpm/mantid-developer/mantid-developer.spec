@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.32
+Version:        1.33
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -110,9 +110,13 @@ Requires: python3-mock
 Requires: boost-python3-devel
 %endif
 
-%{?el7:Requires: boost-python36-devel}
-%{?el7:Requires: python36-devel}
-%{?el7:Requires: python36-numpy}
+%if 0%{el7}
+Requires: boost-python36-devel
+Requires: python36-devel
+Requires: python36-h5py
+Requires: python36-numpy
+Requires: python36-PyYAML
+%endif
 
 BuildArch: noarch
 
