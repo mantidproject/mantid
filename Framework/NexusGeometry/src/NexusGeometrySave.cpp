@@ -21,6 +21,9 @@
 #include "MantidKernel/ProgressBase.h"
 #include <H5Cpp.h>
 #include <boost/filesystem/operations.hpp>
+#include <stdlib.h>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -49,6 +52,7 @@ const std::string X_PIXEL_OFFSET = "x_pixel_offset";
 const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
 const std::string SOURCE = "source";
+const std::string SAMPLE = "sample";
 const std::string DETECTOR_NUMBER = "depends_on";
 
 // metadata
@@ -95,19 +99,155 @@ inline void writeStrValueToDataSetHelper(H5::DataSet &dSet,
   dSet.write(dSetValue, dSet.getDataType(), H5SCALAR);
 }
 
+inline void writeDetectorNumberDataSetToGroupHelper(
+    H5::Group &grp, const Geometry::ComponentInfo &compInfo) {
+
+  std::vector<int> detectorIndices;
+  for (int i = compInfo.root(); i >= 0; --i) {
+    if (compInfo.isDetector(i)) {
+      detectorIndices.push_back(i);
+    }
+  }
+
+  const hsize_t dsz = detectorIndices.size();
+
+  hsize_t dims[1];
+  dims[0] = dsz;
+
+  int *data = (int *)malloc(dsz * sizeof(int));
+  H5::DataSpace space = H5Screate_simple(1, dims, NULL);
+  for (int i = 0; i < dsz; i++) {
+    data[i] = i + 1;
+  }
+  H5::DataSet dset =
+      grp.createDataSet("detector_number", H5::PredType::NATIVE_INT, space);
+  dset.write(data, H5::PredType::NATIVE_INT, space);
+  free(data);
+}
+
+/*
+==============================================================================================================
+
+    classes for NGS
+
+==============================================================================================================
+*/
+
+class NGSInstrument {
+
+public:
+  NGSInstrument(const H5::Group &parent,
+                const Geometry::ComponentInfo &compInfo) {
+
+    m_group = parent.createGroup(compInfo.name(compInfo.root()));
+    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_INSTRUMENT);
+
+    H5::DataSet name = m_group.createDataSet("name", H5VARIABLE, H5SCALAR);
+    writeStrAttributeToDataSetHelper(name, SHORT_NAME,
+                                     compInfo.name(compInfo.root()));
+
+    writeStrValueToDataSetHelper(name, compInfo.name(compInfo.root()).c_str());
+  }
+
+  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
+  H5::Group group() const { return m_group; }
+
+private:
+  const std::string m_name;
+  const std::string m_dependency;
+  H5::Group m_group;
+  std::vector<H5::Group> m_childrenGroups;
+};
+
+class NGSSample {
+
+public:
+  NGSSample(const H5::Group &parent, const Geometry::ComponentInfo &compInfo) {
+
+    m_group = parent.createGroup(compInfo.name(compInfo.sample()));
+    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SAMPLE);
+  }
+
+  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
+  H5::Group group() const { return m_group; }
+
+private:
+  H5::Group m_group;
+  std::vector<H5::Group> m_childrenGroups;
+};
+
+class NGSDetector {
+
+public:
+  NGSDetector(const std::string &name, const H5::Group &parent,
+              const Geometry::ComponentInfo &compInfo) {
+
+    m_group = parent.createGroup("detector_0");
+    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_DETECTOR);
+
+    writeDetectorNumberDataSetToGroupHelper(m_group, compInfo);
+
+    H5::DataSet localName =
+        m_group.createDataSet(LOCAL_NAME, H5VARIABLE, H5SCALAR);
+    H5::DataSet location =
+        m_group.createDataSet(LOCATION, H5VARIABLE, H5SCALAR);
+    H5::DataSet orientation =
+        m_group.createDataSet(ORIENTATION, H5VARIABLE, H5SCALAR);
+    H5::DataSet xPixelOffset =
+        m_group.createDataSet(X_PIXEL_OFFSET, H5VARIABLE, H5SCALAR);
+    H5::DataSet yPixelOffset =
+        m_group.createDataSet(Y_PIXEL_OFFSET, H5VARIABLE, H5SCALAR);
+    H5::DataSet dependency =
+        m_group.createDataSet(DEPENDS_ON, H5VARIABLE, H5SCALAR);
+
+    // dataset values
+    writeStrValueToDataSetHelper(localName, "INST");
+    writeStrValueToDataSetHelper(dependency,
+                                 m_group.getObjName() + "/" + LOCATION);
+
+    // dataset attributes
+  }
+
+  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
+  H5::Group group() const { return m_group; }
+
+private:
+  const std::string m_name;
+  const std::string m_dependency;
+  H5::Group m_group;
+  std::vector<H5::Group> m_childrenGroups;
+};
+
+class NGSSource {
+
+public:
+  NGSSource(const H5::Group &parent, const Geometry::ComponentInfo &compInfo) {
+
+    m_group = parent.createGroup(compInfo.name(compInfo.source()));
+    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SOURCE);
+  }
+
+  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
+  H5::Group group() const { return m_group; }
+
+private:
+  H5::Group m_group;
+  std::vector<H5::Group> m_childrenGroups;
+};
+
+/*
+==============================================================================================================
+
+      Beginning of saveInstrument
+
+==============================================================================================================
+*/
+
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
                     Kernel::ProgressBase *reporter) {
 
   boost::filesystem::path tmp(fullPath);
-
-  /*
-==============================================================================================================
-
-   Exception handling
-
-==============================================================================================================
-*/
 
   // check the directory for the file is valid.
   if (!boost::filesystem::is_directory(tmp.root_directory())) {
@@ -168,206 +308,14 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::Group rootGroup = file.createGroup("/raw_data_1");
   writeStrAttributeToGroupHelper(rootGroup, NX_CLASS, NX_ENTRY);
 
-  const size_t ROOT_INDEX = compInfo.root();
-
-  std::vector<int> detectorBanks;
-  for (int i = ROOT_INDEX; i > 0; --i) {
-    if (compInfo.isDetector(i)) {
-      detectorBanks.push_back(i);
-    }
-  }
-
-  // get number of detector banks/arrays
-
-  // get pixels for each detector
-
-  //
-
-  /*
-==============================================================================================================
-
-     Begin writing NX format tree structure to file
-
-==============================================================================================================
-
-*/
-
-  /*
-  ==============================================================================================================
-         Root group in tree: @NXentry
-
-         => Instrument
-         => sample
-  ==============================================================================================================
-  */
-
-  // subgroups
-  H5::Group instrumentGroup = rootGroup.createGroup("instrument");
-  H5::Group sampleGroup = rootGroup.createGroup("sample");
-
-  // datasets
-
-  // attributes
-  writeStrAttributeToGroupHelper(instrumentGroup, NX_CLASS, NX_INSTRUMENT);
-  writeStrAttributeToGroupHelper(sampleGroup, NX_CLASS, NX_SAMPLE);
-
-  /*
- ==============================================================================================================
-        Instrument group in tree: @NXinstrument
-                Parent: NXentry
-
-        Children:
-        => detector arrays
-        => source
- ==============================================================================================================
- */
-  // subgroups
-  H5::Group sourceGroup = instrumentGroup.createGroup("source");
-  H5::Group detectorGroup = instrumentGroup.createGroup("detector_1");
-
-  // datasets
-  H5::DataSet instrumentName =
-      instrumentGroup.createDataSet("name", H5VARIABLE, H5SCALAR);
-
-  // attributes
-  writeStrAttributeToGroupHelper(sourceGroup, NX_CLASS, NX_SOURCE);
-  writeStrAttributeToGroupHelper(detectorGroup, NX_CLASS, NX_DETECTOR);
-  writeStrAttributeToDataSetHelper(instrumentName, SHORT_NAME,
-                                   compInfo.name(ROOT_INDEX));
-  // dataset values
-  writeStrValueToDataSetHelper(instrumentName,
-                               compInfo.name(ROOT_INDEX).c_str());
-
-  /*
-==============================================================================================================
-                Detector group in tree : @NXinstrument
-        Parent: NXinstrument
-
-        Children:
-        => pixel geometry
-==============================================================================================================
-*/
-
-  // get num of detector banks and do for each:
-
-  // subgroups
-  H5::Group pixelGroup = detectorGroup.createGroup(PIXEL_SHAPE);
-
-  // datasets
-  H5::DataSet bankLocationInNXformat =
-      detectorGroup.createDataSet(LOCATION, H5VARIABLE, H5SCALAR);
-  H5::DataSet bankOrientationInNXformat =
-      detectorGroup.createDataSet(ORIENTATION, H5VARIABLE, H5SCALAR);
-  H5::DataSet xPixelOffset =
-      detectorGroup.createDataSet(X_PIXEL_OFFSET, H5VARIABLE, H5SCALAR);
-  H5::DataSet yPixelOffset =
-      detectorGroup.createDataSet(Y_PIXEL_OFFSET, H5VARIABLE, H5SCALAR);
-  H5::DataSet detectorName =
-      detectorGroup.createDataSet(LOCAL_NAME, H5VARIABLE, H5SCALAR);
-  H5::DataSet detectorDependency =
-      detectorGroup.createDataSet(DEPENDS_ON, H5VARIABLE, H5SCALAR);
-
-  // attributes
-  writeStrAttributeToGroupHelper(pixelGroup, NX_CLASS, NX_OFF_GEOMETRY);
-  writeStrAttributeToDataSetHelper(bankLocationInNXformat, NX_CLASS,
-                                   NX_TRANSFORMATIONS);
-  writeStrAttributeToDataSetHelper(bankOrientationInNXformat, NX_CLASS,
-                                   NX_TRANSFORMATIONS);
-  writeStrAttributeToDataSetHelper(xPixelOffset, UNITS, METRES);
-  writeStrAttributeToDataSetHelper(yPixelOffset, UNITS, METRES);
-
-  // dataset values
-  writeStrValueToDataSetHelper(detectorDependency,
-                               detectorGroup.getObjName() + "/" + LOCATION);
-
-  /*
- =============================================================================================================
-
-                Source group in tree : @NXsource
-                Parent: NXentry
-
-                children:
-         => transformations
- =============================================================================================================
- */
-
-  // subgroups
-  H5::Group transformationsGroup = sourceGroup.createGroup(TRANSFORMATIONS);
-
-  // datatsets
-  H5::DataSet sourceName =
-      sourceGroup.createDataSet(NAME, H5VARIABLE, H5SCALAR);
-  H5::DataSet sourceDependency =
-      sourceGroup.createDataSet(DEPENDS_ON, H5VARIABLE, H5SCALAR);
-
-  // atributes
-  writeStrAttributeToGroupHelper(transformationsGroup, NX_CLASS,
-                                 NX_TRANSFORMATIONS);
-
-  // dataset Values
-  writeStrValueToDataSetHelper(sourceName, SOURCE);
-  writeStrValueToDataSetHelper(sourceDependency,
-                               sourceGroup.getObjName() + "/" + LOCATION);
-
-  /*
-  =============================================================================================================
-
-                Transformations group in tree: @NXtransformations
-                Parent: NXsource
-
-                Children:
-                => location
-  =============================================================================================================
-  */
-
-  // datasets
-  H5::DataSet sourceLocation =
-      transformationsGroup.createDataSet(LOCATION, H5VARIABLE, H5SCALAR);
-
-  // attributes
-  writeStrAttributeToDataSetHelper(sourceLocation, NX_CLASS, LOCATION);
-
-  /*
-  =============================================================================================================
-
-         parse components in tree structure
-
-  =============================================================================================================
-  */
-
-  //  pixel datasets to detector group
-
-  for (int index = ROOT_INDEX; index >= 0; index--) {
-
-    if (compInfo.isDetector(index)) {
-      Mantid::Kernel::V3D offset = compInfo.position(index);
-
-      // write  of detector as dataset to NXdetector group
-
-      // write any additional attributes
-
-      // get its location and writed it as a dataset with nxclass
-      // NXtransformation. write its attributes including Nxclass
-      // NXtransformation do the same with orientation
-    }
-  }
+  NGSInstrument instr(rootGroup, compInfo);
+  NGSDetector detector1("detector_1", instr.group(), compInfo);
+  NGSSource source(instr.group(), compInfo);
+  NGSSample sample(rootGroup, compInfo);
 
   file.close();
 
   // detector number
-  hsize_t dims[1] = {13};
-  H5::DataSpace space = H5Screate_simple(1, dims, NULL);
-  H5::DataSet dset = sampleGroup.createDataSet("test", H5T_NATIVE_INT, space);
-
-  int wdata[13];
-
-  for (int i = 0; i < 13; i++) {
-    wdata[i] = i + 1;
-  }
-
- 
-  dset.write(wdata, H5T_NATIVE_INT, space);
-
 
 } // saveInstrument
 

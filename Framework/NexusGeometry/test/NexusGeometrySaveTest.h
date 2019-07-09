@@ -159,7 +159,7 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool hasDataSet(const std::string dataSetValue,
+  bool hasDataSetValue(const std::string dataSetValue,
                   const std::string &pathToGroup) const {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -350,7 +350,7 @@ public:
   }
 
   void test_instrument_has_name() {
-
+    
     ScopedFileHandle fileResource("check_instrument_name_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
 
@@ -360,15 +360,15 @@ public:
     saveInstrument(compInfo, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    TS_ASSERT(testUtility.hasDataSet(expectedInstrumentName,
-                                     "/raw_data_1/instrument"));
-    /*
+    TS_ASSERT(testUtility.hasDataSetValue(expectedInstrumentName,
+                                     "/raw_data_1/" + expectedInstrumentName));
+    
     TS_ASSERT(testUtility.hasAttributeInDataSet(
-        "/raw_data_1/instrument", SHORT_NAME, expectedInstrumentName)); */
+        "/raw_data_1/" + expectedInstrumentName, SHORT_NAME, expectedInstrumentName)); 
   }
 
   void test_instrument_without_sample_throws() {
-
+    
     auto const &instrument =
         ComponentCreationHelper::createInstrumentWithOptionalComponents(
             true, false, true);
@@ -387,7 +387,7 @@ public:
   }
 
   void test_instrument_without_source_throws() {
-
+    
     auto const &instrument =
         ComponentCreationHelper::createInstrumentWithOptionalComponents(
             false, true, true);
@@ -407,50 +407,54 @@ public:
 
   // throws if NXinstrument group does not have NXsource group
   void test_nxsource_class_exists_and_is_in_instrument_group() {
+    
+        ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+        std::string destinationFile = fileResource.fullPath();
 
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
+        auto const &compInfo = (*m_instrument.first);
+        const std::string expectedInstrumentName =
+    compInfo.name(compInfo.root());
 
-    auto const &compInfo = (*m_instrument.first);
-    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
+        saveInstrument(compInfo, destinationFile);
+        HDF5FileTestUtility tester(destinationFile);
+        TS_ASSERT(compInfo.hasSource());
+        TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_INSTRUMENT,
+    NX_SOURCE));
+      }
 
-    saveInstrument(compInfo, destinationFile);
-    HDF5FileTestUtility tester(destinationFile);
-    TS_ASSERT(compInfo.hasSource());
-    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_INSTRUMENT, NX_SOURCE));
-  }
+      // throws if NXentry group does not have NXsample group
+      void test_nxsample_class_exists_and_is_in_root_group() {
 
-  // throws if NXentry group does not have NXsample group
-  void test_nxsample_class_exists_and_is_in_root_group() {
+        ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+        std::string destinationFile = fileResource.fullPath();
 
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
+        auto const &compInfo = (*m_instrument.first);
+        const std::string expectedInstrumentName =
+    compInfo.name(compInfo.root());
 
-    auto const &compInfo = (*m_instrument.first);
-    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
+        saveInstrument(compInfo, destinationFile);
+        HDF5FileTestUtility tester(destinationFile);
 
-    saveInstrument(compInfo, destinationFile);
-    HDF5FileTestUtility tester(destinationFile);
+        TS_ASSERT(compInfo.hasSample());
+        TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
+      }
 
-    TS_ASSERT(compInfo.hasSample());
-    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
-  }
+      void test_sample_not_at_origin_throws() {
 
-  void test_sample_not_at_origin_throws() {
+        auto instrument = ComponentCreationHelper::createMinimalInstrument(
+            V3D(0, 0, -10), V3D(0, 0, 2), V3D(0, 0, 10));
+        auto instr =
+    Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument); auto
+    &compInfo = (*instr.first);
 
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        V3D(0, 0, -10), V3D(0, 0, 2), V3D(0, 0, 10));
-    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
+        ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+        std::string destinationFile = fileResource.fullPath();
 
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
-                     std::invalid_argument &);
-  }
+        TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+                         std::invalid_argument &);
+      }
 
 
-};
+    };
 
-#endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
+    #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
