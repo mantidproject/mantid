@@ -13,7 +13,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
-from mantid.kernel import DateAndTime
+from mantid.kernel import DateAndTime, FloatTimeSeriesProperty
 import inspect
 import math
 import os
@@ -1033,22 +1033,23 @@ def _clean_logs(ws, estimate_logs):
     """
     run = ws.getRun()
     if run.hasProperty("proton_charge"):
+        epoch_start_time = DateAndTime(0, 0)
         pc = run.getProperty("proton_charge")
-        first_log_time = pc.firstTime().toISO8601String()
-        if int(first_log_time.split("-")[0]) < 1990:
+        np_epoch_datetime = np.datetime64(str(epoch_start_time))
+        first_valid_index = next((index for index, time in enumerate(pc.times) if time > np_epoch_datetime), None)
+
+        if first_valid_index != 0:
             # Bug caused bad proton charges in 1700s. 1990 is start of epoch.
-            start = pc.nthTime(1)
+            start = pc.nthTime(first_valid_index)
             end = pc.lastTime()
-            # Remove the 0th element in the proton charge logs
-            # we have assumed here that a run can have 1 bad proton charge at a maximum
             pc.filterByTime(start, end)
-            sanslog.notice("An invalid pulsetime of {} has been detected and removed.".format(first_log_time))
+            sanslog.notice("{} Invalid pulsetimes from before {} removed.".format(first_valid_index, epoch_start_time))
             if estimate_logs:
                 # Estimate what the data should have been
-                _estimate_good_log(pc)
+                _estimate_good_log(pc, first_valid_index)
 
 
-def _estimate_good_log(pc):
+def _estimate_good_log(pc, num):
     """
     The bad proton charge is corrupted data from the end of a run,
     rather than additional data. Therefore, we can estimate what
@@ -1056,15 +1057,17 @@ def _estimate_good_log(pc):
     Naively, we add a log with a time = last time + average time diff
     and a value equal to the average of the values
     :param pc: FloatTimeSeriesProperty. The proton charge logs.
+    :param num: Number of logs to append
     """
     average_time_diff = _get_average_time_difference(pc)
-    estimated_time = pc.lastTime().totalNanoseconds() + average_time_diff
     estimated_charge = pc.lastValue()
-    pc.addValue(estimated_time, estimated_charge)
-    sanslog.notice("A corrected pulsetime of {} has been estimated.".format(estimated_time))
+    for _ in range(num):
+        estimated_time = pc.lastTime().totalNanoseconds() + average_time_diff
+        pc.addValue(estimated_time, estimated_charge)
+        sanslog.notice("A corrected pulsetime of {} has been estimated.".format(estimated_time))
 
 
-def _get_average_time_difference(pc):
+def _get_average_time_difference(pc, ):
     """
     Get the average difference between consecutive values,
     in nanoseconds

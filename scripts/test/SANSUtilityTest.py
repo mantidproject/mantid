@@ -519,8 +519,7 @@ class AddOperationTest(unittest.TestCase):
         ws = self._create_workspace_with_bad_logs()
 
         # Clean the logs and estimate values
-        adder = su.OverlayWorkspaces()
-        adder._clean_logs(ws, True)
+        su._clean_logs(ws, True)
 
         # Get proton charge logs after operation
         new_pc = ws.getRun().getProperty("proton_charge")
@@ -529,7 +528,7 @@ class AddOperationTest(unittest.TestCase):
         self.assertEqual(new_pc.firstTime().toISO8601String(), "2019-01-01T00:00:00")
         #  Estimated time is last time + av difference
         self.assertEqual(new_pc.lastTime().toISO8601String(), "2019-01-01T02:00:00")
-        self.assertEqual(new_pc.value[-1], 11.)
+        self.assertEqual(new_pc.value[-1], 12.)
 
     def test_that_bad_proton_charges_can_be_removed_without_estimating_good_values(self):
         # If we pass a False boolean to _clean_logs, we should remove the bad proton charges
@@ -537,8 +536,7 @@ class AddOperationTest(unittest.TestCase):
         ws = self._create_workspace_with_bad_logs()
 
         # Clean the logs, but do not estimate new values
-        adder = su.OverlayWorkspaces()
-        adder._clean_logs(ws, False)
+        su._clean_logs(ws, False)
 
         # Get proton charge logs after operation
         new_pc = ws.getRun().getProperty("proton_charge")
