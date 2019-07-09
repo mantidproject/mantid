@@ -12,46 +12,69 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ----------------------------
 
-New
-###
+Usability improvements
+######################
 
-- Tabs are now grouped inside "Batches" rather than having two separate "Groups" within each tab. This makes it easier to see which set of settings will be used together. Batches can be added/removed using the menu and the Batch tabs on the left.
-- The Settings tab has been split into two separate tabs, Experiment Settings and Instrument Settings.
-- The first and second transmission runs are now entered via two separate boxes. Multiple runs can be summed for either of these inputs by entering the run numbers as a comma-separated list.
-- New inputs have been added to control stitching of transmission runs: you can select whether to scale the left or right workspace; you can enter rebin parameters specifically for transmission run stitching (previously the same parameters as stitching of the output workspaces were used).
-- Spectra of interest can be specified for the transmission runs via a new column on the Experiment Settings tab (previously the same spectra as the run workspaces was used).
-- Default values for the current instrument are automatically set in the Experiment and Instrument Settings tabs when the interface is opened or the instrument is changed.
-- Processing in event mode is now done asynchronously. Previously this used to lock up MantidPlot.
-- Error handling has been improved to catch invalid inputs earlier. Errors are highlighted in red or (for the table) with a red star.
-- The progress bar now remembers previous progress when you pause and restart processing.
+This release contains major usability improvements to the interface. The functionality is largely the same and the changes should be intuitive, but a few things have been moved around slightly, and there is new functionality for:
 
-The Runs Table
-^^^^^^^^^^^^^^
+- keyboard navigation
+- input validation
+- processing and stitching transmission runs
+
+See below for more details.
+  
+Batches and Settings
+^^^^^^^^^^^^^^^^^^^^
+- Tabs are now grouped inside "Batches" rather than having two separate "Groups" within each tab to make it easier to see which settings will be used together.
+- Any number of Batches is now supported - batches can be added/removed using the menu and the Batch tabs on the left.
+- The Settings tab has been split into two separate tabs or Experiment and Instrument Settings.
+- Default values for the Experiment and Instrument Settings tabs are automatically populated for the selected instrument.
+
+Transmission Runs
+^^^^^^^^^^^^^^^^^
+- There are now separate input boxes for the first and second transmission runs.
+- Multiple runs can be specified for each transmission input - these will be summed prior to reduction. Multiple values are entered as a comma-separated list, similarly to the Run(s) column.
+- Specific spectra (i.e. ``processing instructions``) can be specified for the transmission runs on the Experiment Settings tab. If none are specified then the same spectra will be used as for the input runs.
+- A new ``Transmission stitch params`` input allows you to stitch parameters specifically for the transmission runs rather than using the same parameters as for the output IvsQ workspaces.
+- A new ``Scale RHS transmission workspace`` check box allows you to control which workspace is scaled when stitching transmission runs.
+
+The Toobar
+^^^^^^^^^^
 .. |filldown| image:: ../../images/arrow-expand-down.png
 
-- Added a "Fill Down" (|filldown|) functionality which allows filling all selected cells below the highest selected cell, in the column that is selected.
+- A "Fill Down" (|filldown|) button has been added, which allows filling all selected cells below the highest selected cell, in the column that is selected.
 - Filtering by run or group name is now possible using the search bar above the table. This accepts regular expressions.
 
-- Navigation by keyboard shortcuts has been added:
-  - F2 edits a cell
-  - Tab/Shift-Tab moves to the next/previous cell
-  - Pressing Tab when in the last cell of a row adds a new row and moves to the first cell in it
-  - Enter adds a new row/group at the same level
-  - Ctrl-I inserts a new child row to a group
-  - Ctrl-X/Ctrl-C/Ctrl-V perform cut/copy/paste
-  - The Delete key removes the selected rows/groups
-  - Copy/paste functionality is more intuitive - you can select the destination rows/groups to paste over or paste into the "root" of the table to create a new group
+Keyboard shortcuts
+^^^^^^^^^^^^^^^^^^
+Navigation by keyboard shortcuts has been added to the Runs table:
 
-- Additional highlighting has been added for rows in the table:
+- ``F2`` edits a cell
+- ``Esc`` cancels the current edit operation
+- ``Tab``/``Shift-Tab`` moves to the next/previous cell
+- Pressing ``Tab`` when in the last cell of a row adds a new row and moves to the first cell in it
+- ``Enter`` adds a new row/group at the same level
+- ``Ctrl-I`` inserts a new child row to a group
+- ``Ctrl-X``/``Ctrl-C``/``Ctrl-V`` perform cut/copy/paste. Note that 
+- The ``Delete`` key removes the selected rows/groups
+- Copy/paste functionality is more intuitive - you can select the destination rows/groups to paste over or paste into the "root" of the table to create a new group
+
+Processing and highlighting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- Input validation is more intuitive - invalid values are highlighted with a red background, or, in the table, cells with an invalid value are marked with a red star
+- Additional highlighting has been added for rows and groups in the table:
 
   - Grey rows are invalid and will not be processed
   - Yellow rows are currently processing
   - Green rows have completed successfully
-  - Blue rows completed with an error - a tooltip will display the error message
-  - Rows are also highlighted in blue if their mandatory output workspaces have been deleted - again, a tooltip will explain the issue
-  - Renamed workspaces are now tracked, so that the row state is no longer reset if a mandatory output workspace is renamed
-  - Cells are greyed out when they have been populated from the algorithm outputs so that you can easily distinguish between inputs and outputs
+  - Blue rows have completed with an error - a tooltip will display the error message
+  - Rows highlighting is cleared if its mandatory output workspaces have been deleted
+  - Renamed workspaces now remain associated with the correct row/group in the table, so they can still be plotted
+  - Q min, Q max and dQ/Q are greyed out when they have been populated from the algorithm outputs so that you can easily distinguish between inputs and outputs
 
+- The progress bar is more accurate, and remembers previous progress when you pause and restart processing.
+- Processing in event mode is now done asynchronously, so it no longer locks up MantidPlot.
+    
 Bug fixes
 #########
 
