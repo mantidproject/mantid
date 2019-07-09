@@ -13,7 +13,6 @@ from mantid.api import FileFinder
 from Muon.GUI.Common.observer_pattern import Observer
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
-from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 
 if sys.version_info.major < 2:
     from unittest import mock
@@ -24,7 +23,6 @@ else:
 class MuonDataContextTest(unittest.TestCase):
     def setUp(self):
         setup_context_for_tests(self)
-        self.frequency_context = FrequencyContext(self.context)
         self.gui_variable_observer = Observer()
         self.gui_variable_observer.update = mock.MagicMock()
         self.gui_context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
@@ -45,9 +43,7 @@ class MuonDataContextTest(unittest.TestCase):
         AnalysisDataService.clear()
 
     def test_get_detectors_excluded_from_default_grouping_tables_gets_correct_groups_for_CHRONUS(self):
-        result = self.frequency_context.get_detectors_excluded_from_default_grouping_tables()
-
-        self.assertEqual(result, [256, 425])
+        pass
 
 
 if __name__ == '__main__':
