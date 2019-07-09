@@ -138,3 +138,10 @@ Bug Fixes
 #########
 - Fixed a crash in MolDyn caused by plotting output data.
 
+
+Tools Interface
+---------------
+
+Improvements
+############
+- Added a verification for the chemical formula input on the Transmission tab.
