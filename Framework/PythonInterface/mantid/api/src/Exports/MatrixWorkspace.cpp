@@ -45,6 +45,9 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(MatrixWorkspace)
 
+extern template int Mantid::PythonInterface::Converters::NDArrayTypeIndex<
+    Mantid::signal_t>::typenum;
+
 namespace {
 /// Typedef for data access, i.e. dataX,Y,E members
 using data_modifier =
