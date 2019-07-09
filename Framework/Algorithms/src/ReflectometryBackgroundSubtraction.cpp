@@ -302,9 +302,9 @@ void ReflectometryBackgroundSubtraction::exec() {
     int degree = getProperty("degreeOfPolynomial");
     if (range < degree) {
       throw std::invalid_argument(
-          "Cannot fit polynomial: number of data points in region less than "
+          "Cannot fit polynomial, number of data points in region < "
           "the number of fitting parameters: " +
-          std::to_string(range) + " < " + std::to_string(degree));
+          std::to_string(range + 1) + " < " + std::to_string(degree + 1));
     }
     auto spectrumRanges = findSpectrumRanges(spectraList);
     calculatePolynomialBackground(inputWS, spectrumRanges);

@@ -175,6 +175,8 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
  *  @param ws a workspace to fit to
  *  @param wsIndex a workspace index identifying the histogram to fit to
  *  @param ranges a vector defining the fitting intervals
+ *  @param costFunction a string representing the cost function used for the fit
+ *  @param minimizer a string representing the minimizer used for the fitting
  *  @return a vector of final fitted parameters
  */
 std::vector<double>
@@ -204,6 +206,7 @@ executeFit(Mantid::API::Algorithm &fit, const std::string &function,
 }
 
 /** Return a Fit algorithm compatible string representing a polynomial.
+ *  @param name a string respresenting the name of the polynomial 
  *  @param parameters a vector containing the polynomial coefficients
  *  @return a function string
  */
@@ -221,7 +224,7 @@ std::string makeFunctionString(const std::string &name,
 }
 
 /** Return a name of the function used in the fit.
- *  @param parameters a vector containing the polynomial coefficients
+ *  @param degree an integer representing the degree of the polynomial
  *  @return a string containing the name of the polynomial
  */
 std::string makeNameString(const size_t degree) {
@@ -243,7 +246,8 @@ std::string makeNameString(const size_t degree) {
 }
 
 /** Evaluates the given function directly on a histogram
- *  @param function a string representing function to evaluate
+ *  @param name a string representing the name of the polynomial to evaluate
+ *  @param parameters a vector containing the coefficients of the polynomial
  *  @param ws an output workspace
  *  @param wsIndex a workspace index identifying a histogram
  */
@@ -318,13 +322,13 @@ void CalculatePolynomialBackground::init() {
   std::array<std::string, 2> costFuncOpts{
       {CostFunc::WEIGHTED_LEAST_SQUARES, CostFunc::UNWEIGHTED_LEAST_SQUARES}};
   declareProperty(
-      Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES.c_str(),
+      Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES,
       boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
       "The cost function to be passed to the Fit algorithm.");
   std::array<std::string, 2> minimizerOpts{
       {Minimizer::LEVENBERG_MARQUARDT_MD, Minimizer::LEVENBERG_MARQUARDT}};
   declareProperty(
-      Prop::MINIMIZER, Minimizer::LEVENBERG_MARQUARDT_MD.c_str(),
+      Prop::MINIMIZER, Minimizer::LEVENBERG_MARQUARDT_MD,
       boost::make_shared<Kernel::ListValidator<std::string>>(minimizerOpts),
       "The minimizer to be passed to the Fit algorithm.");
 }
