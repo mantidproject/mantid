@@ -107,6 +107,7 @@ public:
   bool isAllInputValid();
 
 private:
+  /// Gets a workspace from the ADS
   template <typename T = Mantid::API::MatrixWorkspace,
             typename R = Mantid::API::MatrixWorkspace_sptr>
   R getADSWorkspace(std::string const &workspaceName);

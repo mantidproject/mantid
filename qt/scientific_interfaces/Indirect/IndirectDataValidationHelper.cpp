@@ -83,7 +83,7 @@ bool validateDataIsAReducedFile(UserInputValidator &uiv,
                                silent);
   uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
       dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
-
+  // TODO :: check the axis labels for the data units
   return uiv.isAllInputValid();
 };
 
@@ -102,7 +102,7 @@ bool validateDataIsASqwFile(UserInputValidator &uiv, DataSelector *dataSelector,
                                silent);
   uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
       dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
-
+  // TODO :: check the axis labels for the data units
   return uiv.isAllInputValid();
 };
 
@@ -122,7 +122,7 @@ bool validateDataIsACalibrationFile(UserInputValidator &uiv,
                                silent);
   uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
       dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
-
+  // TODO :: check the axis labels for the data units
   return uiv.isAllInputValid();
 };
 
@@ -144,39 +144,9 @@ bool validateDataIsACorrectionsFile(UserInputValidator &uiv,
       dataName, QString::fromStdString(inputType), "WorkspaceGroup", silent);
   uiv.checkWorkspaceGroupIsValid(dataName, QString::fromStdString(inputType),
                                  silent);
-
+  // TODO :: check the axis labels for the data units
   return uiv.isAllInputValid();
 };
-
-// bool validateDataHasIdenticalDimensions(
-//    UserInputValidator &uiv, DataAxis const &dataAxis,
-//    std::map<std::string, DataSelector *> const &data) {
-//  switch (dataAxis) {
-//  case DataAxis::Histograms:
-//    return validateDataHasSameNumberOfHistograms(uiv, data);
-//  case DataAxis::Bins:
-//    return validateDataHasSameNumberOfBins(uiv, data);
-//  default:
-//    return false;
-//  }
-//}
-//
-// bool validateDataHasSameNumberOfHistograms(
-//    UserInputValidator &uiv,
-//    std::map<std::string, DataSelector *> const &data) {
-//
-//  auto &ads = AnalysisDataService::Instance();
-//  auto workspaceName =
-//  data.begin()->second->getCurrentDataName().toStdString(); if
-//  (ads.doesExist(workspaceName))
-//    if (auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName))
-//      auto numberOfHistograms = workspace->getNumberHistograms();
-//
-//  for (auto iter = data.begin(); iter != data.end(); ++iter) {
-//
-//    uiv.checkWorkspaceNumberOfHistograms();
-//  }
-//}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

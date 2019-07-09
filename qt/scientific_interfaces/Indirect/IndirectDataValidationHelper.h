@@ -13,7 +13,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 enum DataType { Red, Sqw, Calib, Corrections } const;
-enum DataAxis { Histograms, Bins } const;
 
 bool validateDataIsOneOf(UserInputValidator &uiv,
                          MantidWidgets::DataSelector *dataSelector,

@@ -295,6 +295,7 @@ bool UserInputValidator::checkNotEqual(const QString &name, double x, double y,
  * Checks that a workspace exists within the ADS.
  *
  * @param workspaceName Name of the workspace
+ * @param silent True if an error should not be added to the validator.
  * @return True if the workspace is in the ADS
  */
 bool UserInputValidator::checkWorkspaceExists(QString const &workspaceName,
@@ -380,6 +381,8 @@ bool UserInputValidator::checkWorkspaceNumberOfBins(
  * workspaces.
  *
  * @param groupName The name of the workspace group
+ * @param inputType The name to put in the error message (e.g. "Sample")
+ * @param silent True if an error should not be added to the validator.
  * @return True if the workspace group is valid
  */
 bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName,
@@ -403,6 +406,7 @@ bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName,
  * Add a custom error message to the list.
  *
  * @param message :: the message to add to the list
+ * @param silent True if an error should not be added to the validator.
  */
 void UserInputValidator::addErrorMessage(const QString &message, bool silent) {
   if (!silent && !m_errorMessages.contains(message))
