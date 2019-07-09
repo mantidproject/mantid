@@ -71,6 +71,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.set_time_zero(time_zero)
 
         self._view.set_instrument(self._model._data.instrument)
+        self.handle_user_selects_dead_time_from_data()
 
     def clear_view(self):
         self._view.set_time_zero(0.0)
@@ -192,6 +193,10 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             dead_times = dtc.toDict()['dead-time']
             dead_time_text = self.dead_time_from_data_text(dead_times)
             self._view.set_dead_time_label(dead_time_text)
+            if self._view.dead_time_selector.currentIndex() == 0:
+                self._view.dead_time_label_3.setVisible(True)
+            else:
+                self._view.dead_time_label_3.hide()
         else:
             self._view.set_dead_time_label("No loaded dead time")
 

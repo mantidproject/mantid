@@ -491,6 +491,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
     def set_dead_time_label(self, text):
         self.dead_time_label_3.setText(text)
+        #self.dead_time_label_3.setVisible(True)
 
     def on_dead_time_combo_changed(self, index):
         if index == 0:

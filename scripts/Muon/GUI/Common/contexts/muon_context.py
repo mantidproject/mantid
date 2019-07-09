@@ -34,7 +34,7 @@ class MuonContext(object):
         self.workspace_suffix = workspace_suffix
         self.ads_observer = MuonContextADSObserver(self.remove_workspace_by_name, self.clear_context)
 
-        self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
+        self.gui_context.update({'DeadTimeSource': 'FromFile', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
 
         self.update_view_from_model_notifier = Observable()
 
