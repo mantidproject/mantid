@@ -64,11 +64,7 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         function_selector.clear()
         function_selector.addItems(names)
         if original_selection in names:
-            if PYQT4:
-                function_selector.setCurrentIndex(
-                    function_selector.findText(original_selection))
-            else:
-                function_selector.setCurrentText(original_selection)
+            self.set_selected_fit_function(original_selection)
         function_selector.blockSignals(False)
 
     def selected_result_workspaces(self):
@@ -90,6 +86,16 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         state for the workspace list selector
         """
         self.fit_selector_presenter.update_model(workspace_list_state)
+
+    def set_selected_fit_function(self, function):
+        """
+        Set the fit function in the QComboBox
+        """
+        if PYQT4:
+            self.fit_function_selector.setCurrentIndex(
+                self.fit_function_selector.findText(function))
+        else:
+            self.fit_function_selector.setCurrentText(function)
 
     def selected_fit_function(self):
         """Return the text of the selected item in the function
