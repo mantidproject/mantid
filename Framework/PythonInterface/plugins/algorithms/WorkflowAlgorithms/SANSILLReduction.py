@@ -470,7 +470,6 @@ class SANSILLReduction(PythonAlgorithm):
             DeleteWorkspaces(ws)
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
         self._normalise(ws)
-        #ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
         self._instrument = mtd[ws].getInstrument().getName()
         run = mtd[ws].getRun()
         if run.hasProperty('tof_mode'):
@@ -512,10 +511,6 @@ class SANSILLReduction(PythonAlgorithm):
                             self._apply_container(ws, container_ws)
                         mask_ws = self.getProperty('MaskedInputWorkspace').value
                         if mask_ws:
-                            # for the first time, check if the workspace has the monitors, if so remove them
-                            if mask_ws.detectorInfo().isMonitor(mask_ws.getNumberHistograms()-1):
-                                #ExtractMonitors(InputWorkspace=mask_ws, DetectorWorkspace=mask_ws)
-                                pass
                             MaskDetectors(Workspace=ws, MaskedWorkspace=mask_ws)
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
