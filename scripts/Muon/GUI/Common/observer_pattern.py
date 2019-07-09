@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtCore import QMetaObject, QObject, Slot
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 class Observer(object):
@@ -25,7 +25,7 @@ class Observer(object):
         pass
 
 
-class Observable(QObject):
+class Observable(object):
     """
     The Observable is an object which may be subscribed to by Observers. It maintains a list of subscribers to it,
     and when needed, it will notify those subscribers.
@@ -33,6 +33,7 @@ class Observable(QObject):
     def __init__(self):
         super(Observable, self).__init__()
         self._subscribers = []
+        self.thread_safe_update_call = QAppThreadCall(self._notify_subscribers_impl)
         self.arg = None
         self.kwargs = {}
 
@@ -52,18 +53,11 @@ class Observable(QObject):
         return len(self._subscribers)
 
     def notify_subscribers(self, arg=None, **kwargs):
-        self.arg = arg
-        self.kwargs = kwargs
-        QMetaObject.invokeMethod(self, '_notify_subscribers_impl')
+        self.thread_safe_update_call(arg, **kwargs)
 
-    @Slot()
-    def _notify_subscribers_impl(self):
-        try:
-            for observer in self._subscribers:
-                observer.update(self, self.arg, **self.kwargs)
-        finally:
-            self.arg = None
-            self.kwargs = {}
+    def _notify_subscribers_impl(self, arg, **kwargs):
+        for observer in self._subscribers:
+            observer.update(self, arg, **kwargs)
 
 
 class GenericObserver(Observer):

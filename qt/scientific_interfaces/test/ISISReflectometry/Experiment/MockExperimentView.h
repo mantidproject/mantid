@@ -49,9 +49,9 @@ public:
   MOCK_CONST_METHOD0(getDebugOption, bool());
   MOCK_METHOD1(setDebugOption, void(bool));
   MOCK_CONST_METHOD0(getPerAngleOptions,
-                     std::vector<std::array<std::string, 8>>());
+                     std::vector<PerThetaDefaults::ValueArray>());
   MOCK_METHOD1(setPerAngleOptions,
-               void(std::vector<std::array<std::string, 8>>));
+               void(std::vector<PerThetaDefaults::ValueArray>));
   MOCK_METHOD2(showPerAngleOptionsAsInvalid, void(int row, int column));
   MOCK_METHOD1(showPerAngleOptionsAsValid, void(int row));
   MOCK_METHOD0(showAllPerAngleOptionsAsValid, void());
@@ -67,8 +67,14 @@ public:
   MOCK_METHOD1(setTransmissionStartOverlap, void(double));
   MOCK_CONST_METHOD0(getTransmissionEndOverlap, double());
   MOCK_METHOD1(setTransmissionEndOverlap, void(double));
+  MOCK_CONST_METHOD0(getTransmissionStitchParams, std::string());
+  MOCK_METHOD1(setTransmissionStitchParams, void(std::string const &));
+  MOCK_CONST_METHOD0(getTransmissionScaleRHSWorkspace, bool());
+  MOCK_METHOD1(setTransmissionScaleRHSWorkspace, void(bool));
   MOCK_METHOD0(showTransmissionRangeValid, void(void));
   MOCK_METHOD0(showTransmissionRangeInvalid, void(void));
+  MOCK_METHOD0(showTransmissionStitchParamsValid, void(void));
+  MOCK_METHOD0(showTransmissionStitchParamsInvalid, void(void));
   MOCK_CONST_METHOD0(getPolarizationCorrectionType, std::string());
   MOCK_METHOD1(setPolarizationCorrectionType, void(std::string const &));
   MOCK_CONST_METHOD0(getCRho, double());

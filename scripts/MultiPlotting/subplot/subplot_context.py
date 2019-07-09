@@ -26,8 +26,9 @@ class subplotContext(object):
         self._subplot.set_position(tmp)
         self._subplot.set_subplotspec(gridspec[j])
 
-    def add_vline(self, xvalue, name):
-        self._vLines[name] = self._subplot.axvline(xvalue, 0, 1)
+    # todo: add color suppport
+    def add_vline(self, xvalue, name, color):
+        self._vLines[name] = self._subplot.axvline(xvalue, 0, 1, color=color)
 
     def add_annotate(self, label):
         self._labelObjects[label.text] = label

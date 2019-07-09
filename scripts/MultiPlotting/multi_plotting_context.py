@@ -47,8 +47,8 @@ class PlottingContext(object):
     def add_annotate(self, subplotName, label):
         self.subplots[subplotName].add_annotate(label)
 
-    def add_vline(self, subplotName, xvalue, name):
-        self.subplots[subplotName].add_vline(xvalue, name)
+    def add_vline(self, subplotName, xvalue, name, color):
+        self.subplots[subplotName].add_vline(xvalue, name, color=color)
 
     def removePlotLine(self, subplotName, name):
         try:

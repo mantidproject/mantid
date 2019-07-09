@@ -23,10 +23,16 @@ New Algorithms
 
 - :ref:`algm-FlippingRatioCorrectionMD` algorithm was introduced to account for polarization effects on HYSPEC, but it's not instrument specific.
 
+Improvements
+############
+
+- :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now has a `CylinderAxis` property to set the direction of the cylinder axis.
+
 Removed
 #######
 
 - The deprecated versions 1 and 2 of :ref:`algm-GetEiMonDet` have been removed. Use version 3 instead.
+- All algorithms and code related to VATES Quantification have been removed.
 
 Interfaces
 ----------
@@ -38,8 +44,8 @@ New features
 Improvements
 ############
 
+- New instrument geometry for CNCS.
 - The :ref:`GetEiT0atSNS <algm-GetEiT0atSNS>` algorithm was improved to handle monitors where TOF is not wrapped to the first frame.
-
 
 Bugfixes
 ########

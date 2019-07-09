@@ -18,18 +18,18 @@ Experiment::Experiment()
       m_debug(false), m_polarizationCorrections(PolarizationCorrections(
                           PolarizationCorrectionType::None)),
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)),
-      m_transmissionRunRange(boost::none),
+      m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
-      m_perThetaDefaults(std::vector<PerThetaDefaults>(
-          {PerThetaDefaults(boost::none, TransmissionRunPair(), RangeInQ(),
-                            boost::none, ProcessingInstructions())})) {}
+      m_perThetaDefaults(std::vector<PerThetaDefaults>({PerThetaDefaults(
+          boost::none, TransmissionRunPair(), boost::none, RangeInQ(),
+          boost::none, ProcessingInstructions())})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        SummationType summationType, bool includePartialBins,
                        bool debug,
                        PolarizationCorrections polarizationCorrections,
                        FloodCorrections floodCorrections,
-                       boost::optional<RangeInLambda> transmissionRunRange,
+                       TransmissionStitchOptions transmissionStitchOptions,
                        // cppcheck-suppress passedByValue
                        std::map<std::string, std::string> stitchParameters,
                        // cppcheck-suppress passedByValue
@@ -39,7 +39,7 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
       m_debug(debug),
       m_polarizationCorrections(std::move(polarizationCorrections)),
       m_floodCorrections(std::move(floodCorrections)),
-      m_transmissionRunRange(std::move(transmissionRunRange)),
+      m_transmissionStitchOptions(std::move(transmissionStitchOptions)),
       m_stitchParameters(std::move(stitchParameters)),
       m_perThetaDefaults(std::move(perThetaDefaults)) {}
 
@@ -55,8 +55,8 @@ FloodCorrections const &Experiment::floodCorrections() const {
   return m_floodCorrections;
 }
 
-boost::optional<RangeInLambda> Experiment::transmissionRunRange() const {
-  return m_transmissionRunRange;
+TransmissionStitchOptions Experiment::transmissionStitchOptions() const {
+  return m_transmissionStitchOptions;
 }
 
 std::map<std::string, std::string> Experiment::stitchParameters() const {
@@ -71,9 +71,9 @@ std::vector<PerThetaDefaults> const &Experiment::perThetaDefaults() const {
   return m_perThetaDefaults;
 }
 
-std::vector<std::array<std::string, 8>>
+std::vector<PerThetaDefaults::ValueArray>
 Experiment::perThetaDefaultsArray() const {
-  auto result = std::vector<std::array<std::string, 8>>();
+  auto result = std::vector<PerThetaDefaults::ValueArray>();
   for (auto const &perThetaDefaults : m_perThetaDefaults)
     result.push_back(perThetaDefaultsToArray(perThetaDefaults));
   return result;
@@ -120,7 +120,7 @@ bool operator==(Experiment const &lhs, Experiment const &rhs) {
          lhs.debug() == rhs.debug() &&
          lhs.polarizationCorrections() == rhs.polarizationCorrections() &&
          lhs.floodCorrections() == rhs.floodCorrections() &&
-         lhs.transmissionRunRange() == rhs.transmissionRunRange() &&
+         lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&
          lhs.stitchParameters() == rhs.stitchParameters() &&
          lhs.perThetaDefaults() == rhs.perThetaDefaults();
 }

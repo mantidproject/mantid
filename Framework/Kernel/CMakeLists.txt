@@ -56,7 +56,6 @@ set(SRC_FILES
     src/MDAxisValidator.cpp
     src/MDUnit.cpp
     src/MDUnitFactory.cpp
-    src/MagneticFormFactorTable.cpp
     src/MagneticIon.cpp
     src/MandatoryValidator.cpp
     src/MantidVersion.cpp
@@ -65,7 +64,6 @@ set(SRC_FILES
     src/MaterialBuilder.cpp
     src/MaterialXMLParser.cpp
     src/Math/ChebyshevPolyFit.cpp
-    src/Math/Distributions/BoseEinsteinDistribution.cpp
     src/Math/Distributions/ChebyshevPolynomial.cpp
     src/Math/Distributions/ChebyshevSeries.cpp
     src/Math/Optimization/SLSQPMinimizer.cpp
@@ -218,7 +216,6 @@ set(INC_FILES
     inc/MantidKernel/MDAxisValidator.h
     inc/MantidKernel/MDUnit.h
     inc/MantidKernel/MRUList.h
-    inc/MantidKernel/MagneticFormFactorTable.h
     inc/MantidKernel/MagneticIon.h
     inc/MantidKernel/MandatoryValidator.h
     inc/MantidKernel/MantidVersion.h
@@ -227,7 +224,6 @@ set(INC_FILES
     inc/MantidKernel/MaterialBuilder.h
     inc/MantidKernel/MaterialXMLParser.h
     inc/MantidKernel/Math/ChebyshevPolyFit.h
-    inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
     inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
     inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
     inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
@@ -324,7 +320,6 @@ set(TEST_FILES
     BinaryFileTest.h
     BinaryStreamReaderTest.h
     BinaryStreamWriterTest.h
-    BoseEinsteinDistributionTest.h
     BoundedValidatorTest.h
     CPUTimerTest.h
     CacheTest.h
@@ -380,7 +375,6 @@ set(TEST_FILES
     MDUnitFactoryTest.h
     MDUnitTest.h
     MRUListTest.h
-    MagneticFormFactorTableTest.h
     MagneticIonTest.h
     MakeCowTest.h
     MandatoryValidatorTest.h

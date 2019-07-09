@@ -153,3 +153,11 @@ The Workbench
   :align: center
   :figwidth: 90%
   :alt: The Indirect Data Reduction GUI in the Workbench.
+
+Tools Interface
+---------------
+
+Improvements
+############
+- Added a verification for the chemical formula input on the Transmission tab.
+
