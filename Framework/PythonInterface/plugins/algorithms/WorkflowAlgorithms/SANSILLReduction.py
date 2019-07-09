@@ -513,7 +513,7 @@ class SANSILLReduction(PythonAlgorithm):
                         mask_ws = self.getProperty('MaskedInputWorkspace').value
                         if mask_ws:
                             # for the first time, check if the workspace has the monitors, if so remove them
-                            if mtd[mask_ws].detectorInfo().isMonitor(mtd[mask_ws].getNumberHistograms()-1):
+                            if mask_ws.detectorInfo().isMonitor(mask_ws.getNumberHistograms()-1):
                                 ExtractMonitors(InputWorkspace=mask_ws, DetectorWorkspace=mask_ws)
                             MaskDetectors(Workspace=ws, MaskedWorkspace=mask_ws)
                         thickness = self.getProperty('SampleThickness').value
