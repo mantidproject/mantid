@@ -627,6 +627,9 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
         g_log.warning("Could not find wavelength resolution, assuming 10%");
       }
     }
+    // round also the wavelength res to avoid unnecessary rebinning during merge
+    // runs
+    wavelengthRes = std::round(wavelengthRes * 100) / 100.;
     runDetails.addProperty<double>("wavelength", wavelength);
     double ei = m_loader.calculateEnergy(wavelength);
     runDetails.addProperty<double>("Ei", ei, true);

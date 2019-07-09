@@ -415,19 +415,11 @@ class SANSILLReduction(PythonAlgorithm):
         self._check_distances_match(mtd[ws], container_ws)
         Minus(LHSWorkspace=ws, RHSWorkspace=container_ws, OutputWorkspace=ws)
 
-    def _apply_mask(self, ws, mask_ws):
-        """
-            Applies the mask
-            @param ws: input workspace
-            @param mask_ws: input masked workspace
-        """
-        masked_ws = ws + '_mask'
-        CloneWorkspace(InputWorkspace=mask_ws, OutputWorkspace=masked_ws)
-        ExtractMonitors(InputWorkspace=masked_ws, DetectorWorkspace=masked_ws)
-        MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
-        DeleteWorkspace(masked_ws)
-
     def _apply_parallax(self, ws):
+        """
+            Applies the parallax correction
+            @param ws : the input workspace
+        """
         self.log().information('Performing parallax correction')
         if self._instrument == 'D33':
             components = ['back_detector', 'front_detector_top', 'front_detector_bottom',
@@ -520,7 +512,10 @@ class SANSILLReduction(PythonAlgorithm):
                             self._apply_container(ws, container_ws)
                         mask_ws = self.getProperty('MaskedInputWorkspace').value
                         if mask_ws:
-                            self._apply_mask(ws, mask_ws)
+                            # for the first time, check if the workspace has the monitors, if so remove them
+                            if mtd[mask_ws].detectorInfo().isMonitor(mtd[mask_ws].getNumberHistograms()-1):
+                                ExtractMonitors(InputWorkspace=mask_ws, DetectorWorkspace=mask_ws)
+                            MaskDetectors(Workspace=ws, MaskedWorkspace=mask_ws)
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         # parallax (gondola) effect
