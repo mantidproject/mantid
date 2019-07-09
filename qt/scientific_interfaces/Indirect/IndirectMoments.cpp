@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMoments.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -26,9 +27,11 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
 
   const unsigned int NUM_DECIMALS = 6;
 
-  // RAW PLOT
-  auto xRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("XRange");
-  xRangeSelector->setInfoOnly(false);
+  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppMomentsPreview->setCanvasColour(QColor(240, 240, 240));
+
+  MantidWidgets::RangeSelector *xRangeSelector =
+      m_uiForm.ppRawPlot->addRangeSelector("XRange");
 
   // PROPERTY TREE
   m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
@@ -47,7 +50,7 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
   connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(handleSampleInputReady(const QString &)));
 
-  connect(xRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this,
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
@@ -134,13 +137,15 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
 
   // Update plot and change data in interface
   m_uiForm.ppRawPlot->addSpectrum("Raw", filename, 0);
-  QPair<double, double> range = m_uiForm.ppRawPlot->getCurveRange("Raw");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
 
   auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
   setPlotPropertyRange(xRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
   setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);
+  m_uiForm.ppRawPlot->replot();
+
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 }
@@ -152,8 +157,12 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
  * @param max :: The new value of the upper guide
  */
 void IndirectMoments::rangeChanged(double min, double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -171,6 +180,7 @@ void IndirectMoments::updateProperties(QtProperty *prop, double val) {
       m_dblManager->setValue(prop, emax);
     } else {
       m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMinimum(val);
+      m_uiForm.ppRawPlot->replot();
     }
   } else if (prop == m_properties["EMax"]) {
     double emin = m_dblManager->value(m_properties["EMin"]);
@@ -178,6 +188,7 @@ void IndirectMoments::updateProperties(QtProperty *prop, double val) {
       m_dblManager->setValue(prop, emin);
     } else {
       m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMaximum(val);
+      m_uiForm.ppRawPlot->replot();
     }
   }
 }

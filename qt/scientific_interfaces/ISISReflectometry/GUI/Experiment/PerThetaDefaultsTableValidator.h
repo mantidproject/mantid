@@ -16,7 +16,7 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsTableValidator {
 public:
-  using ContentType = std::vector<std::array<std::string, 8>>;
+  using ContentType = std::vector<PerThetaDefaults::ValueArray>;
   using ResultType = ValidationResult<std::vector<PerThetaDefaults>,
                                       PerThetaDefaultsTableValidationError>;
 

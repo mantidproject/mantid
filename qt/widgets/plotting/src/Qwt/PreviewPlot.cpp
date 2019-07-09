@@ -222,6 +222,18 @@ void PreviewPlot::setAxisRange(QPair<double, double> range, AxisID axisID) {
 }
 
 /**
+ * Gets the range along the specified axis
+ *
+ * @param axisID The axis you want the range of
+ * @return The limits of the axis.
+ */
+std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) const {
+  const auto scaleDiv = m_uiForm.plot->axisScaleDiv(toQwtAxis(axisID));
+  return std::make_tuple<double, double>(scaleDiv->lowerBound(),
+                                         scaleDiv->upperBound());
+}
+
+/**
  * Gets the X range of a curve given a pointer to the workspace.
  *
  * @param ws Pointer to workspace
@@ -463,6 +475,39 @@ void PreviewPlot::removeRangeSelector(const QString &rsName, bool del = true) {
  */
 bool PreviewPlot::hasRangeSelector(const QString &rsName) {
   return m_rangeSelectors.contains(rsName);
+}
+
+/**
+ * Creates a SingleSelector, adds it to the plot and stores it.
+ *
+ * @param name Name of single selector
+ * @param type Type of single selector to add
+ * @return SingleSelector object
+ */
+SingleSelector *PreviewPlot::addSingleSelector(const QString &name,
+                                               SingleSelector::SelectType type,
+                                               double position) {
+  if (m_singleSelectors.contains(name))
+    throw std::runtime_error("SingleSelector already exists on PreviewPlot");
+
+  m_singleSelectors[name] =
+      new MantidWidgets::SingleSelector(m_uiForm.plot, type, position);
+  m_ssVisibility[name] = m_singleSelectors[name]->isVisible();
+
+  return m_singleSelectors[name];
+}
+
+/**
+ * Gets a SingleSelector.
+ *
+ * @param name Name of single selector
+ * @return SingleSelector object
+ */
+SingleSelector *PreviewPlot::getSingleSelector(const QString &name) {
+  if (!m_singleSelectors.contains(name))
+    throw std::runtime_error("SingleSelector not found on PreviewPlot");
+
+  return m_singleSelectors[name];
 }
 
 /**
@@ -911,13 +956,30 @@ void PreviewPlot::handleAxisTypeSelect() {
     RangeSelector *rs = it.value();
     RangeSelector::SelectType type = rs->getType();
 
-    if (type == RangeSelector::XMINMAX || type == RangeSelector::XSINGLE) {
+    if (type == RangeSelector::XMINMAX) {
       // When setting to invisible save the last visibility setting
       if (xIsSquared) {
         m_rsVisibility[rsName] = rs->isVisible();
         rs->setVisible(false);
       } else {
         rs->setVisible(m_rsVisibility[rsName]);
+      }
+    }
+  }
+
+  for (auto it = m_singleSelectors.begin(); it != m_singleSelectors.end();
+       ++it) {
+    const QString &ssName = it.key();
+    SingleSelector *ss = it.value();
+    SingleSelector::SelectType type = ss->getType();
+
+    if (type == SingleSelector::XSINGLE) {
+      // When setting to invisible save the last visibility setting
+      if (xIsSquared) {
+        m_ssVisibility[ssName] = ss->isVisible();
+        ss->setVisible(false);
+      } else {
+        ss->setVisible(m_ssVisibility[ssName]);
       }
     }
   }

@@ -9,6 +9,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 
 #include <QFileInfo>
 
@@ -21,6 +22,17 @@ Mantid::Kernel::Logger g_log("S(Q,w)");
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
+}
+
+double roundToPrecision(double value, double precision) {
+  return value - std::remainder(value, precision);
+}
+
+std::pair<double, double>
+roundToWidth(std::tuple<double, double> const &axisRange, double width) {
+  return std::make_pair(roundToPrecision(std::get<0>(axisRange), width) + width,
+                        roundToPrecision(std::get<1>(axisRange), width) -
+                            width);
 }
 
 void convertToSpectrumAxis(std::string const &inputName,
@@ -47,6 +59,8 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(plotRqwContour()));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
+          SLOT(setDefaultQAndEnergy()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(sqwAlgDone(bool)));
 
@@ -64,9 +78,12 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
-  m_uiForm.rqwPlot2D->setColourBarVisible(false);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_uiForm.rqwPlot2D->setXAxisLabel("Energy (meV)");
   m_uiForm.rqwPlot2D->setYAxisLabel("Q (A-1)");
+#else
+  m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
+#endif
 
   // Disables searching for run files in the data archive
   m_uiForm.dsSampleInput->isForRunFiles(false);
@@ -181,8 +198,8 @@ void IndirectSqw::sqwAlgDone(bool error) {
 }
 
 void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
-  m_uiForm.spSpectrum->setMaximum(maximum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spWorkspaceIndex);
+  m_uiForm.spWorkspaceIndex->setMaximum(maximum);
 }
 
 /**
@@ -218,6 +235,26 @@ void IndirectSqw::plotRqwContour() {
   }
 }
 
+void IndirectSqw::setDefaultQAndEnergy() {
+  if (m_uiForm.dsSampleInput->isValid()) {
+    setQRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft));
+    setEnergyRange(
+        m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom));
+  }
+}
+
+void IndirectSqw::setQRange(std::tuple<double, double> const &axisRange) {
+  auto const qRange = roundToWidth(axisRange, m_uiForm.spQWidth->value());
+  m_uiForm.spQLow->setValue(qRange.first);
+  m_uiForm.spQHigh->setValue(qRange.second);
+}
+
+void IndirectSqw::setEnergyRange(std::tuple<double, double> const &axisRange) {
+  auto const energyRange = roundToWidth(axisRange, m_uiForm.spEWidth->value());
+  m_uiForm.spELow->setValue(energyRange.first);
+  m_uiForm.spEHigh->setValue(energyRange.second);
+}
+
 void IndirectSqw::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Sqw");
@@ -232,7 +269,7 @@ void IndirectSqw::runClicked() { runTab(); }
 void IndirectSqw::plotSpectrumClicked() {
   setPlotSpectrumIsPlotting(true);
 
-  auto const spectrumNumber = m_uiForm.spSpectrum->text().toInt();
+  auto const spectrumNumber = m_uiForm.spWorkspaceIndex->text().toInt();
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
     plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumNumber);
 
@@ -242,12 +279,8 @@ void IndirectSqw::plotSpectrumClicked() {
 void IndirectSqw::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
-    QString pyInput = "from mantidplot import plot2D\nimportMatrixWorkspace('" +
-                      QString::fromStdString(m_pythonExportWsName) +
-                      "').plotGraph2D()\n";
-    m_pythonRunner.runPythonCode(pyInput);
-  }
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    IndirectTab::plot2D(QString::fromStdString(m_pythonExportWsName));
 
   setPlotContourIsPlotting(false);
 }
@@ -264,7 +297,7 @@ void IndirectSqw::setRunEnabled(bool enabled) {
 
 void IndirectSqw::setPlotSpectrumEnabled(bool enabled) {
   m_uiForm.pbPlotSpectrum->setEnabled(enabled);
-  m_uiForm.spSpectrum->setEnabled(enabled);
+  m_uiForm.spWorkspaceIndex->setEnabled(enabled);
 }
 
 void IndirectSqw::setPlotContourEnabled(bool enabled) {

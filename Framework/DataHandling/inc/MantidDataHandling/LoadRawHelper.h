@@ -13,6 +13,7 @@
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <climits>
+#include <list>
 #include <memory>
 
 class ISISRAW;

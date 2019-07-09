@@ -85,12 +85,11 @@ class ResultsTabModel(object):
         """
         return self._fit_context.fit_function_names()
 
-    def fit_selection(self, existing_selection):
+    def fit_selection(self, to_select):
         """
         Combine the existing selection state of workspaces with the workspace names
         of fits stored here. New workspaces are always checked for inclusion.
-        :param existing_selection: A dict defining any current selection model. The
-        format matches that of the ListSelectorPresenter class' model.
+        :param to_select A list of workspace names to select
         :return: The workspaces that have had fits performed on them along with their selection status. The
         format matches that of the ListSelectorPresenter class' model.
         """
@@ -99,11 +98,7 @@ class ResultsTabModel(object):
             if fit.fit_function_name != self.selected_fit_function():
                 continue
             name = fit.parameters.parameter_workspace_name
-            if name in existing_selection:
-                checked = existing_selection[name][1]
-            else:
-                checked = True
-            selection[name] = [index, checked, True]
+            selection[name] = [index, name in to_select, True]
 
         return selection
 

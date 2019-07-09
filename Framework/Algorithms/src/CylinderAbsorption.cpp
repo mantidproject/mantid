@@ -11,6 +11,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rasterize.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -27,6 +28,15 @@ CylinderAbsorption::CylinderAbsorption()
     : AbsorptionCorrection(), m_cylHeight(0.0), m_cylRadius(0.0),
       m_numSlices(0), m_numAnnuli(0), m_useSampleShape(false) {}
 
+std::map<std::string, std::string> CylinderAbsorption::validateInputs() {
+  std::map<std::string, std::string> issues;
+  std::vector<double> prop = getProperty("CylinderAxis");
+  if (prop.size() != 3) {
+    issues["CylinderAxis"] = "CylinderAxis must be a list with 3 elements.";
+  }
+  return issues;
+}
+
 void CylinderAbsorption::defineProperties() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -34,6 +44,9 @@ void CylinderAbsorption::defineProperties() {
                   "The height of the cylindrical sample in centimetres");
   declareProperty("CylinderSampleRadius", EMPTY_DBL(), mustBePositive,
                   "The radius of the cylindrical sample in centimetres");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("CylinderAxis", "0.0, 1.0, 0.0"),
+      "A 3D vector specifying the cylindrical sample's orientation");
 
   auto positiveInt = boost::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(1);
@@ -75,6 +88,8 @@ void CylinderAbsorption::getShapeFromSample(
 void CylinderAbsorption::retrieveProperties() {
   m_numSlices = getProperty("NumberOfSlices");
   m_numAnnuli = getProperty("NumberOfAnnuli");
+  std::vector<double> axisXYZ = getProperty("CylinderAxis");
+  m_cylAxis = V3D(axisXYZ[0], axisXYZ[1], axisXYZ[2]);
 
   bool userSuppliedHeight = false;
   bool userSuppliedRadius = false;
@@ -130,15 +145,16 @@ std::string CylinderAbsorption::sampleXML() {
   // generic
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   // Shift so that cylinder is centered at sample position
-  const double cylinderBase = (-0.5 * m_cylHeight) + samplePos.Y();
+  const V3D cylBase = m_cylAxis * (-0.5 * m_cylHeight) + samplePos;
 
   // The default behavior is to have the sample along the y-axis. If something
   // else is desired, it will have to be done through SetSample.
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<cylinder id=\"detector-shape\"> "
-                 << "<centre-of-bottom-base x=\"" << samplePos.X() << "\" y=\""
-                 << cylinderBase << "\" z=\"" << samplePos.Z() << "\" /> "
-                 << "<axis x=\"0\" y=\"1\" z=\"0\" /> "
+                 << "<centre-of-bottom-base x=\"" << cylBase.X() << "\" y=\""
+                 << cylBase.Y() << "\" z=\"" << cylBase.Z() << "\" /> "
+                 << "<axis x=\"" << m_cylAxis.X() << "\" y=\"" << m_cylAxis.Y()
+                 << "\" z=\"" << m_cylAxis.Z() << "\" /> "
                  << "<radius val=\"" << m_cylRadius << "\" /> "
                  << "<height val=\"" << m_cylHeight << "\" /> "
                  << "</cylinder>";

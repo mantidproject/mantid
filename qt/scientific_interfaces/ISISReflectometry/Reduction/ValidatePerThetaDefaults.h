@@ -24,31 +24,31 @@ namespace CustomInterfaces {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsValidator {
 public:
-  static auto constexpr INPUT_FIELD_COUNT = 8;
-
   ValidationResult<PerThetaDefaults, std::vector<int>>
-  operator()(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
+  operator()(PerThetaDefaults::ValueArray const &cellText);
 
 private:
-  boost::optional<boost::optional<double>> parseThetaOrWhitespace(
-      std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
-  boost::optional<TransmissionRunPair> parseTransmissionRuns(
-      std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
-  boost::optional<RangeInQ>
-  parseQRange(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<boost::optional<double>>
-  parseScaleFactor(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
+  parseThetaOrWhitespace(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<TransmissionRunPair>
+  parseTransmissionRuns(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<boost::optional<std::string>>
+  parseTransmissionProcessingInstructions(
+      PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<RangeInQ>
+  parseQRange(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<boost::optional<double>>
+  parseScaleFactor(PerThetaDefaults::ValueArray const &cellText);
   boost::optional<std::map<std::string, std::string>>
-  parseOptions(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
-  boost::optional<boost::optional<std::string>> parseProcessingInstructions(
-      std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
+  parseOptions(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<boost::optional<std::string>>
+  parseProcessingInstructions(PerThetaDefaults::ValueArray const &cellText);
 
   std::vector<int> m_invalidColumns;
 };
 
-ValidationResult<PerThetaDefaults, std::vector<int>> validatePerThetaDefaults(
-    std::array<std::string, PerThetaDefaultsValidator::INPUT_FIELD_COUNT> const
-        &cellText);
+ValidationResult<PerThetaDefaults, std::vector<int>>
+validatePerThetaDefaults(PerThetaDefaults::ValueArray const &cellText);
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

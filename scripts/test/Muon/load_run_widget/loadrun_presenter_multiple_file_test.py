@@ -145,7 +145,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(GuiTest):
         six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4]])
         six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4]])
 
-        self.assertEqual(self.view.get_run_edit_text(), "")
+        self.assertEqual(self.view.get_run_edit_text(), '2-4')
 
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
@@ -160,7 +160,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(GuiTest):
         six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4]])
         six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4]])
 
-        self.assertEqual(self.view.get_run_edit_text(), "")
+        self.assertEqual(self.view.get_run_edit_text(), '2-4')
 
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_warning_message_is_displayed(self):

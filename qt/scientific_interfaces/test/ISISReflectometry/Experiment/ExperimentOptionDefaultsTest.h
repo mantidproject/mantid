@@ -61,8 +61,8 @@ public:
   void testValidPerThetaOptions() {
     auto result = getDefaults("Experiment");
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
-                                     RangeInQ(0.01, 0.03, 0.2), 0.7,
-                                     std::string("390-415"));
+                                     boost::none, RangeInQ(0.01, 0.03, 0.2),
+                                     0.7, std::string("390-415"));
     TS_ASSERT_EQUALS(result.perThetaDefaults().size(), 1);
     TS_ASSERT_EQUALS(result.perThetaDefaults().front(), expected);
   }
@@ -72,7 +72,8 @@ public:
   void testValidTransmissionRunRange() {
     auto result = getDefaults("Experiment");
     auto const expected = RangeInLambda{10.0, 12.0};
-    TS_ASSERT_EQUALS(result.transmissionRunRange(), expected);
+    TS_ASSERT_EQUALS(result.transmissionStitchOptions().overlapRange(),
+                     expected);
   }
 
   void testInvalidTransmissionRunRange() {

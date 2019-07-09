@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 #include "MantidQtWidgets/Plotting/Qwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/Qwt/SingleSelector.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -69,6 +70,8 @@ public:
 
   void setAxisRange(QPair<double, double> range,
                     AxisID axisID = AxisID::XBottom);
+  std::tuple<double, double>
+  getAxisRange(AxisID axisID = AxisID::XBottom) const;
 
   QPair<double, double>
   getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws);
@@ -98,6 +101,12 @@ public:
   void removeRangeSelector(const QString &rsName, bool del);
 
   bool hasRangeSelector(const QString &rsName);
+
+  SingleSelector *
+  addSingleSelector(const QString &rsName,
+                    SingleSelector::SelectType type = SingleSelector::XSINGLE,
+                    double position = 0.0);
+  SingleSelector *getSingleSelector(const QString &rsName);
 
   QString getAxisType(int axisID);
 
@@ -162,8 +171,12 @@ private:
 
   /// Range selector widget for mini plot
   QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
+  /// Single selector widget for mini plot
+  QMap<QString, MantidQt::MantidWidgets::SingleSelector *> m_singleSelectors;
   /// Cache of range selector visibility
   QMap<QString, bool> m_rsVisibility;
+  /// Cache of single selector visibility
+  QMap<QString, bool> m_ssVisibility;
 
   /// Poco Observers for ADS Notifications
   Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>

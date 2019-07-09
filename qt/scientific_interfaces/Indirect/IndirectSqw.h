@@ -32,6 +32,7 @@ public:
 
 private slots:
   void plotRqwContour();
+  void setDefaultQAndEnergy();
   void sqwAlgDone(bool error);
 
   void runClicked();
@@ -45,6 +46,8 @@ private slots:
                        QString const tooltip = "");
 
 private:
+  void setQRange(std::tuple<double, double> const &axisRange);
+  void setEnergyRange(std::tuple<double, double> const &axisRange);
   void setFileExtensionsByName(bool filter) override;
 
   Mantid::API::MatrixWorkspace_const_sptr

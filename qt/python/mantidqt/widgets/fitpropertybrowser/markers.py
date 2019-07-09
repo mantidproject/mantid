@@ -12,6 +12,163 @@ from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
 
+class HorizontalMarker(QObject):
+    """
+    An interactive marker displayed as a horizontal line.
+    """
+
+    y_moved = Signal(float)
+
+    def __init__(self, canvas, color, y, x0=None, x1=None, line_width=1.0, picker_width=5, line_style='-'):
+        """
+        Init the marker.
+        :param canvas: A MPL canvas.
+        :param color: An MPL colour value
+        :param y: The y coordinate (data) of the marker.
+        :param x0: The x coordinate (data) of the left end of the marker. Default is None which means dynamically
+            set it to the current maximum x value displayed.
+        :param x1: The x coordinate (data) of the right end of the marker. Default is None which means dynamically
+            set it to the current minimum x value displayed.
+        :param line_width: The line width (pixels).
+        :param picker_width: The picker sensitivity (pixels).
+        :param line_style: An MPL line style value.
+        """
+        super(HorizontalMarker, self).__init__()
+        self.axis = canvas.figure.get_axes()[0]
+        self.y = y
+        self.x0 = x0
+        self.x1 = x1
+        x0, x1 = self._get_x0_x1()
+        path = Path([(x0, y), (x1, y)], [Path.MOVETO, Path.LINETO])
+        self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
+                               linewidth=line_width, linestyle=line_style, animated=True)
+        self.axis.add_patch(self.patch)
+        self.is_moving = False
+
+    def _get_x0_x1(self):
+        """
+        Calculate the current x coordinates of the line ends.
+        :return: Tuple x0, x1.
+        """
+        if self.x0 is None or self.x1 is None:
+            x0, x1 = self.axis.get_xlim()
+        if self.x0 is not None:
+            x0 = self.x0
+        if self.x1 is not None:
+            x1 = self.x1
+        return x0, x1
+
+    def remove(self):
+        """
+        Remove this marker from the canvas.
+        """
+        self.patch.remove()
+
+    def redraw(self):
+        """
+        Redraw this marker.
+        """
+        x0, x1 = self._get_x0_x1()
+        vertices = self.patch.get_path().vertices
+        vertices[0] = x0, self.y
+        vertices[1] = x1, self.y
+        self.axis.draw_artist(self.patch)
+
+    def set_color(self, color):
+        """
+        Set the colour of the marker
+        :param color: The color to set the marker to.
+        """
+        self.patch.set_edgecolor(color)
+
+    def get_position(self):
+        """
+        Get the y coordinate in axes coords.
+        :return: y in axes coords
+        """
+        return self.y
+
+    def set_position(self, y):
+        """
+        Set the y position of the marker.
+        :param y: An y axis coordinate.
+        """
+        self.y = y
+        self.y_moved.emit(y)
+
+    def get_y_in_pixels(self):
+        """
+        Returns the y coordinate in screen pixels.
+        :return: y in pixels
+        """
+        _, y_pixels = self.patch.get_transform().transform((0, self.y))
+        return y_pixels
+
+    def is_above(self, x, y):
+        """
+        Check if a mouse positioned at (x, y) is over this marker.
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :return: True or False.
+        """
+        _, y_pixels = self.patch.get_transform().transform((x, y))
+
+        if self.x0 is not None and x < self.x0:
+            return False
+        if self.x1 is not None and x > self.x1:
+            return False
+        return abs(self.get_y_in_pixels() - y_pixels) < 3
+
+    def mouse_move_start(self, x, y):
+        """
+        Start moving this marker if (x, y) is above it. Ignore otherwise.
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :param pixels: True if the coordinates are already in pixels.
+        """
+        self.is_moving = self.is_above(x, y)
+
+    def mouse_move_stop(self):
+        """
+        Stop moving.
+        """
+        self.is_moving = False
+
+    def mouse_move(self, x, y):
+        """
+        Move this marker to a new position if movement had been started earlier by a call to mouse_move_start(x, y)
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :return: True if moved or False if stayed at the old position.
+        """
+        if self.is_moving and y is not None and x is not None:
+            self.set_position(y)
+            return True
+        return False
+
+    def is_marker_moving(self):
+        """
+        Returns true if the marker is being moved
+        :return: True if the marker is being moved.
+        """
+        return self.is_moving
+
+    def override_cursor(self, x, y):
+        """
+        Get the override cursor for mouse position (x, y)
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :return: QCursor or None.
+        """
+        if self.x0 is not None and x < self.x0:
+            return None
+        if self.x1 is not None and x > self.x1:
+            return None
+        if self.is_moving or self.is_above(x, y):
+            return QCursor(Qt.SizeVerCursor)
+        return None
+
+
 class VerticalMarker(QObject):
     """
     An interactive marker displayed as a vertical line.
@@ -44,7 +201,6 @@ class VerticalMarker(QObject):
                                linewidth=line_width, linestyle=line_style, animated=True)
         self.ax.add_patch(self.patch)
         self.is_moving = False
-        self.y_dependent = True
 
     def _get_y0_y1(self):
         """
@@ -82,14 +238,14 @@ class VerticalMarker(QObject):
         """
         self.patch.set_edgecolor(color)
 
-    def get_x_position(self):
+    def get_position(self):
         """
         Get the x coordinate in axes coords.
         :return: x in axes coords
         """
         return self.x
 
-    def set_x_position(self, x):
+    def set_position(self, x):
         """
         Set the x position of the marker.
         :param x: An x axis coordinate.
@@ -112,22 +268,13 @@ class VerticalMarker(QObject):
         :param y: An y mouse coordinate.
         :return: True or False.
         """
-        x_pixels, y_pixels = self.patch.get_transform().transform((x, y))
-        if self.y_dependent and self.y0 is not None and y < self.y0:
+        x_pixels, _ = self.patch.get_transform().transform((x, y))
+
+        if self.y0 is not None and y < self.y0:
             return False
-        if self.y_dependent and self.y1 is not None and y > self.y1:
+        if self.y1 is not None and y > self.y1:
             return False
         return abs(self.get_x_in_pixels() - x_pixels) < 3
-
-    def transform_pixels_to_coords(self, x_pixels, y_pixels):
-        """
-        Transforms pixel coords to axis coords
-        :param x_pixels: An x mouse pixel coordinate.
-        :param y_pixels: An y mouse pixel coordinate.
-        :return: The x and y position along the axis.
-        """
-        x_value, y_value = self.patch.get_transform().inverted().transform((x_pixels, y_pixels))
-        return x_value, y_value
 
     def mouse_move_start(self, x, y):
         """
@@ -151,7 +298,7 @@ class VerticalMarker(QObject):
         :return: True if moved or False if stayed at the old position.
         """
         if self.is_moving and x is not None:
-            self.set_x_position(x)
+            self.set_position(x)
             return True
         return False
 
@@ -177,16 +324,13 @@ class VerticalMarker(QObject):
         :param y: An y mouse coordinate.
         :return: QCursor or None.
         """
-        if self.y_dependent and self.y0 is not None and y < self.y0:
+        if self.y0 is not None and y < self.y0:
             return None
-        if self.y_dependent and self.y1 is not None and y > self.y1:
+        if self.y1 is not None and y > self.y1:
             return None
         if self.is_moving or self.is_above(x, y):
             return self.get_cursor_at_y(y)
         return None
-
-    def set_y_dependent(self, y_dependent):
-        self.y_dependent = y_dependent
 
 
 class CentreMarker(VerticalMarker):
@@ -197,17 +341,15 @@ class CentreMarker(VerticalMarker):
     selected_color = 'red'
     deselected_color = 'grey'
 
-    def __init__(self, canvas, x, y0, y1, y_dependent=True):
+    def __init__(self, canvas, x, y0, y1):
         """
         Init the marker.
         :param canvas: A MPL canvas.
         :param x: The x coordinate (data) of the marker.
         :param y0: The y coordinate (data) of the bottom end of the marker.
         :param y1: The y coordinate (data) of the top end of the marker.
-        :param y_dependent: True if the height of the CentreMarker is important when moving the marker.
         """
         VerticalMarker.__init__(self, canvas, self.deselected_color, x, y0, y1)
-        VerticalMarker.set_y_dependent(self, y_dependent)
         self.is_at_top = False
 
     def _is_at_top(self, y):
@@ -299,7 +441,7 @@ class PeakMarker(QObject):
     peak_moved = Signal(int, float, float)
     fwhm_changed = Signal(int, float)
 
-    def __init__(self, canvas, peak_id, x, y_top, y_bottom, fwhm, y_dependent=True):
+    def __init__(self, canvas, peak_id, x, y_top, y_bottom, fwhm):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -308,11 +450,10 @@ class PeakMarker(QObject):
         :param y_top: Peak's top.
         :param y_bottom: Peaks bottom (background level).
         :param fwhm: A full width at half maximum.
-        :param y_dependent: True if the height of the CentreMarker is important when moving the marker.
         """
         super(PeakMarker, self).__init__()
         self.peak_id = peak_id
-        self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top, y_dependent=y_dependent)
+        self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top)
         self.left_width = WidthMarker(canvas, x - fwhm / 2)
         self.right_width = WidthMarker(canvas, x + fwhm / 2)
         self.is_selected = False
@@ -341,16 +482,12 @@ class PeakMarker(QObject):
                 cursor = self.right_width.override_cursor(x, y)
         return cursor
 
-    def mouse_move_start(self, x, y, pixels=False):
+    def mouse_move_start(self, x, y):
         """
         Start moving an element of this marker if it's under the cursor.
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
-        :param pixels: True if a conversion to coords is needed.
         """
-        if pixels:
-            x, y = self.centre_marker.transform_pixels_to_coords(x, y)
-
         self.centre_marker.mouse_move_start(x, y)
         if self.centre_marker.is_moving:
             self.left_width.is_moving = True
@@ -371,16 +508,12 @@ class PeakMarker(QObject):
             self.right_width.mouse_move_stop()
         self.centre_marker.mouse_move_stop()
 
-    def mouse_move(self, x, y, pixels=False):
+    def mouse_move(self, x, y):
         """
         Move an element of this marker if it's started moving.
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
-        :param pixels: True if a conversion to coords is needed.
         """
-        if pixels:
-            x, y = self.centre_marker.transform_pixels_to_coords(x, y)
-
         moved = self.centre_marker.mouse_move(x, y)
         if moved:
             dx = (self.right_width.x - self.left_width.x) / 2
@@ -469,22 +602,170 @@ class PeakMarker(QObject):
         self.right_width.remove()
 
 
-class RangeMarker(QObject):
+class SingleMarker(QObject):
     """
-    A marker used to mark out a range using two VerticalMarker's which correspond to a minimum and maximum of a range.
+        A marker used to mark out a vertical or horizontal line on a plot.
     """
-    def __init__(self, canvas, color, x_min, x_max, line_style='-'):
+    def __init__(self, canvas, color, position, lower_bound, upper_bound, marker_type='XSingle', line_style='-'):
         """
         Init the marker.
         :param canvas: The MPL canvas.
         :param color: An MPL colour value
-        :param x_min: The x coordinate (data) of the minimum marker.
-        :param x_max: The x coordinate (data) of the maximum marker.
+        :param position: The axes coordinate of the marker.
+        :param lower_bound: The axes coordinate of the lower bound.
+        :param upper_bound: The axes coordinate of the upper bound.
+        :param marker_type: Whether the SingleMarker is vertical or horizontal.
+        :param line_style: An MPL line style value.
+        """
+        super(SingleMarker, self).__init__()
+        self.lower_bound = lower_bound
+        self.upper_bound = upper_bound
+        self.marker_type = marker_type
+        if self.marker_type == 'XSingle':
+            self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
+        elif self.marker_type == 'YSingle':
+            self.marker = HorizontalMarker(canvas, color, position, line_style=line_style)
+        else:
+            raise RuntimeError("Incorrect SingleMarker type provided. Types are XSingle or YSingle.")
+
+    def redraw(self):
+        """
+        Redraw the single marker.
+        """
+        self.marker.redraw()
+
+    def remove(self):
+        """
+        Remove this marker from the canvas.
+        """
+        self.marker.remove()
+
+    def set_color(self, color):
+        """
+        Set the colour of the marker.
+        """
+        self.marker.set_color(color)
+
+    def set_position(self, position):
+        """
+        Sets the positions of the marker's
+        :param position: The position of the marker in axes coords.
+        :return True if the value was changed.
+        """
+        if self.upper_bound >= position >= self.lower_bound:
+            self.marker.set_position(position)
+            self.redraw()
+            return True
+        return False
+
+    def get_position(self):
+        """
+        Gets the position of the marker
+        :return the position of the marker.
+        """
+        return self.marker.get_position()
+
+    def set_bounds(self, minimum, maximum):
+        """
+        Sets the bounds within which the marker is allowed to be moved.
+        :param minimum: The lower end of the marker position.
+        :param maximum: The higher end of the marker position.
+        """
+        self.set_lower_bound(minimum)
+        self.set_upper_bound(maximum)
+
+    def set_lower_bound(self, minimum):
+        """
+        Sets the minimum bound for the marker.
+        :param minimum: The minimum bound for the marker.
+        """
+        self.lower_bound = minimum
+        if self.lower_bound > self.get_position():
+            self.set_position(minimum)
+
+    def set_upper_bound(self, maximum):
+        """
+        Sets the maximum bound for the marker.
+        :param maximum: The maximum bound for the marker.
+        """
+        self.upper_bound = maximum
+        if self.upper_bound < self.get_position():
+            self.set_position(maximum)
+
+    def is_inside_bounds(self, x, y):
+        """
+        Determines if the axis coords are within the bounds specified.
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :return True if the axes coordinate is within the bounds.
+        """
+        position = x if self.marker_type == 'XSingle' else y
+        if position is not None:
+            if position > self.upper_bound or position < self.lower_bound:
+                return False
+        return True
+
+    def mouse_move_start(self, x, y):
+        """
+        Start moving this marker if (x, y) is above it. Ignore otherwise.
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        """
+        if self.marker.is_above(x, y) and self.is_inside_bounds(x, y):
+            self.marker.mouse_move_start(x, y)
+            QApplication.setOverrideCursor(self.marker.override_cursor(x, y))
+
+    def mouse_move(self, x, y=None):
+        """
+        Move this marker to a new position if movement had been started earlier by a call to mouse_move_start(x, y)
+        :param x: An x mouse coordinate.
+        :param y: An y mouse coordinate.
+        :return: True if moved or False if stayed at the old position.
+        """
+        if self.marker.is_marker_moving() and self.is_inside_bounds(x, y):
+            return self.marker.mouse_move(x, y)
+        return False
+
+    def mouse_move_stop(self):
+        """
+        Stop moving.
+        """
+        self.marker.mouse_move_stop()
+        QApplication.restoreOverrideCursor()
+
+    def is_marker_moving(self):
+        """
+        Returns true if the marker is being moved
+        :return: True if the marker is being moved.
+        """
+        return self.marker.is_marker_moving()
+
+
+class RangeMarker(QObject):
+    """
+    A marker used to mark out a vertical or horizontal range using two markers which correspond to a minimum and
+    maximum of that range.
+    """
+    def __init__(self, canvas, color, minimum, maximum, range_type='XMinMax', line_style='-'):
+        """
+        Init the marker.
+        :param canvas: The MPL canvas.
+        :param color: An MPL colour value
+        :param minimum: The axes coordinate of the minimum marker.
+        :param maximum: The axes coordinate of the maximum marker.
+        :param range_type: Whether the RangeMarker is used to select an x or y range.
         :param line_style: An MPL line style value.
         """
         super(RangeMarker, self).__init__()
-        self.min_marker = VerticalMarker(canvas, color, x_min, line_style=line_style)
-        self.max_marker = VerticalMarker(canvas, color, x_max, line_style=line_style)
+        self.range_type = range_type
+        if self.range_type == 'XMinMax':
+            self.min_marker = VerticalMarker(canvas, color, minimum, line_style=line_style)
+            self.max_marker = VerticalMarker(canvas, color, maximum, line_style=line_style)
+        elif self.range_type == 'YMinMax':
+            self.min_marker = HorizontalMarker(canvas, color, minimum, line_style=line_style)
+            self.max_marker = HorizontalMarker(canvas, color, maximum, line_style=line_style)
+        else:
+            raise RuntimeError("Incorrect RangeMarker type provided. Types are XMinMax or YMinMax.")
 
     def redraw(self):
         """
@@ -508,35 +789,59 @@ class RangeMarker(QObject):
         self.max_marker.set_color(color)
         self.redraw()
 
-    def set_x_range(self, minimum, maximum):
+    def set_range(self, minimum, maximum):
         """
-        Sets the positions of the VerticalMarker's
+        Sets the positions of the marker's
         :param minimum: The minimum of the range.
         :param maximum: The maximum of the range.
         """
-        self.min_marker.set_x_position(minimum)
-        self.max_marker.set_x_position(maximum)
+        self.min_marker.set_position(minimum)
+        self.max_marker.set_position(maximum)
         self.redraw()
 
-    def get_x_range(self):
+    def get_range(self):
         """
         Gets the positions of the min and max of the range
         :return the minimum and maximum of the range.
         """
-        minimum = self.min_marker.get_x_position()
-        maximum = self.max_marker.get_x_position()
-        return [minimum, maximum] if minimum <= maximum else [maximum, minimum]
+        return sorted([self.min_marker.get_position(), self.max_marker.get_position()])
 
-    def mouse_move_start(self, x, y, pixels=False):
+    def set_minimum(self, minimum):
+        """
+        Sets the minimum for the range.
+        :param minimum: The minimum of the range.
+        """
+        maximum = max([self.min_marker.get_position(), self.max_marker.get_position()])
+        self.set_range(minimum, maximum)
+
+    def set_maximum(self, maximum):
+        """
+        Sets the maximum for the range.
+        :param maximum: The maximum of the range.
+        """
+        minimum = min([self.min_marker.get_position(), self.max_marker.get_position()])
+        self.set_range(minimum, maximum)
+
+    def get_minimum(self):
+        """
+        Gets the minimum of the range.
+        :return the minimum of the range.
+        """
+        return min([self.min_marker.get_position(), self.max_marker.get_position()])
+
+    def get_maximum(self):
+        """
+        Gets the maximum of the range.
+        :return the maximum of the range.
+        """
+        return max([self.min_marker.get_position(), self.max_marker.get_position()])
+
+    def mouse_move_start(self, x, y):
         """
         Start moving this marker if (x, y) is above it. Ignore otherwise.
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
-        :param pixels: True if a conversion to coords is needed.
         """
-        if pixels:
-            x, y = self.min_marker.transform_pixels_to_coords(x, y)
-
         if self.min_marker.is_above(x, y):
             self.min_marker.mouse_move_start(x, y)
             QApplication.setOverrideCursor(self.min_marker.override_cursor(x, y))
@@ -544,21 +849,17 @@ class RangeMarker(QObject):
             self.max_marker.mouse_move_start(x, y)
             QApplication.setOverrideCursor(self.max_marker.override_cursor(x, y))
 
-    def mouse_move(self, x, y=None, pixels=False):
+    def mouse_move(self, x, y=None):
         """
         Move this marker to a new position if movement had been started earlier by a call to mouse_move_start(x, y)
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
-        :param pixels: True if a conversion to coords is needed.
         :return: True if moved or False if stayed at the old position.
         """
-        if pixels:
-            x, _ = self.min_marker.transform_pixels_to_coords(x, y)
-
         if self.min_marker.is_marker_moving():
-            return self.min_marker.mouse_move(x)
+            return self.min_marker.mouse_move(x, y)
         elif self.max_marker.is_marker_moving():
-            return self.max_marker.mouse_move(x)
+            return self.max_marker.mouse_move(x, y)
         return False
 
     def mouse_move_stop(self):
@@ -568,3 +869,10 @@ class RangeMarker(QObject):
         self.min_marker.mouse_move_stop()
         self.max_marker.mouse_move_stop()
         QApplication.restoreOverrideCursor()
+
+    def is_marker_moving(self):
+        """
+        Returns true if one of the markers is being moved
+        :return: True if one of the markers is being moved.
+        """
+        return self.min_marker.is_marker_moving() or self.max_marker.is_marker_moving()

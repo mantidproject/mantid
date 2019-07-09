@@ -230,22 +230,6 @@ class LoadFileWidgetPresenterMultipleFileModeTest(GuiTest):
         self.assertEqual(self.view.get_file_edit_text(), "C:/dir1/file1.nxs;C:/dir1/file2.nxs")
 
     @run_test_with_and_without_threading
-    def test_that_loading_multiple_files_from_browse_ignores_loads_which_throw(self):
-        workspace = self.create_fake_workspace(1)
-
-        files = ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs", "C:/dir2/file3.nxs"]
-        self.view.show_file_browser_and_return_selection = mock.Mock(return_value=files)
-        load_return_values = [(workspace, 1234 + i, filename, False) for i, filename in enumerate(files)]
-        self.load_utils_patcher.side_effect = iter(IteratorWithException(load_return_values, [1]))
-
-        self.presenter.on_browse_button_clicked()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.model.loaded_filenames, ["C:/dir1/file1.nxs", "C:/dir2/file3.nxs"])
-        self.assertEqual(self.model.loaded_runs, [[1234], [1236]])
-        self.assertEqual(self.view.get_file_edit_text(), "C:/dir1/file1.nxs;C:/dir2/file3.nxs")
-
-    @run_test_with_and_without_threading
     def test_that_browse_allows_loading_of_additional_files(self):
         workspace_1 = self.create_fake_workspace(1)
         workspace_2 = self.create_fake_workspace(2)

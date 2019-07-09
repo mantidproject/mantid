@@ -16,7 +16,6 @@ from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view_new
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
-from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 
 
 def retrieve_combobox_info(combo_box):
@@ -29,10 +28,9 @@ def retrieve_combobox_info(combo_box):
 
 class FFTPresenterTest(GuiTest):
     def setUp(self):
-        self.context = setup_context()
+        self.context = setup_context(True)
 
         self.context.data_context.instrument = 'MUSR'
-        self.frequency_context = FrequencyContext(self.context)
 
         self.context.gui_context.update({'RebinType': 'None'})
 
@@ -181,11 +179,15 @@ class FFTPresenterTest(GuiTest):
 
     @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_PaddingAndApodization')
     @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_FFT')
-    def test_calculate_FFT_calls_correct_algorithm_sequence_for_imaginary_phase_quad(self, fft_mock, apodization_mock):
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.convert_to_field')
+    def test_calculate_FFT_calls_correct_algorithm_sequence_for_imaginary_phase_quad(self, field_mock,fft_mock, apodization_mock):
         apodization_mock_return = mock.MagicMock()
         fft_mock_return = mock.MagicMock()
         fft_mock.return_value = fft_mock_return
+        field_mock_return = mock.MagicMock()
+        field_mock.return_value = field_mock_return
         apodization_mock.return_value = apodization_mock_return
+
         self.presenter.add_fft_workspace_to_ADS = mock.MagicMock()
         self.presenter.calculate_base_name_and_group = mock.MagicMock(
             return_value=('MUSR22725_PhaseQuad_MUSR22725_phase_table',
@@ -207,10 +209,11 @@ class FFTPresenterTest(GuiTest):
                                           'AcceptXRoundingErrors': True, 'AutoShift': True,
                                           'InputImagWorkspace': apodization_mock_return,
                                           'Imaginary': 1})
+        field_mock.assert_called_once_with(fft_mock_return)
 
         self.presenter.add_fft_workspace_to_ADS.assert_called_once_with('MUSR22725_PhaseQuad_MUSR22725_phase_table',
                                                                         'MUSR22725_PhaseQuad_MUSR22725_phase_table',
-                                                                        fft_mock_return)
+                                                                        field_mock_return)
 
 
 if __name__ == '__main__':
