@@ -82,5 +82,6 @@ Bugfixes
 - The units on the y-axis of distribution workspace plots have been corrected
 - Restore Default Layout no longer resizes the main window.
 - Entering an invalid number into a plot's axis editor no longer causes an uncaught error
+- Workbench's scaling of fonts when moved between monitors with different resolutions has been improved
 
 :ref:`Release 4.1.0 <v4.1.0>`
