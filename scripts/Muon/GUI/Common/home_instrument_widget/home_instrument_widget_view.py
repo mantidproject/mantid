@@ -392,7 +392,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.dead_time_label_2.setText("Dead Time Workspace : ")
 
         self.dead_time_label_3 = QtWidgets.QLabel(self)
-        self.dead_time_label_3.setText("")
+        self.dead_time_label_3.setText("No loaded dead time")
 
         self.dead_time_file_selector = QtWidgets.QComboBox(self)
         self.dead_time_file_selector.addItem("None")
@@ -442,9 +442,9 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     def populate_dead_time_combo(self, names):
         self.dead_time_file_selector.blockSignals(True)
         self.dead_time_file_selector.clear()
+        self.dead_time_file_selector.addItem("None")
         for name in names:
             self.dead_time_file_selector.addItem(name)
-        self.dead_time_file_selector.addItem("None")
         self.dead_time_file_selector.blockSignals(False)
 
     def get_dead_time_file_selection(self):

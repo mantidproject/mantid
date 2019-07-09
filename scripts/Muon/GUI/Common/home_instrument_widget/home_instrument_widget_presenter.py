@@ -48,6 +48,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self.handle_loaded_time_zero_checkState_change()
         self.handle_loaded_first_good_data_checkState_change()
         self.handle_loaded_last_good_data_checkState_change()
+        #self.handle_user_selects_dead_time_from_data()
 
     def show(self):
         self._view.show()
@@ -189,17 +190,21 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         """User chooses to load dead time from the currently loaded workspace."""
         dtc = self._model.get_dead_time_table_from_data()
         if dtc is not None:
-            self._model.set_dead_time_from_data()
             dead_times = dtc.toDict()['dead-time']
             dead_time_text = self.dead_time_from_data_text(dead_times)
             self._view.set_dead_time_label(dead_time_text)
         else:
             self._view.set_dead_time_label("No loaded dead time")
 
-        if self._view.dead_time_selector.currentIndex() == 0:
+        index = self._view.dead_time_selector.currentIndex()
+        if index == 0:
+            self._model.set_dead_time_from_data()
             self._view.dead_time_label_3.setVisible(True)
-        else:
+        elif index == 1:
             self._view.dead_time_label_3.hide()
+            self._model.set_user_dead_time_from_ADS()
+        else:
+            self._model.set_dead_time_to_none()
 
     def set_dead_time_text_to_default(self):
         """by default the dead time text should onl contain 0.0."""
