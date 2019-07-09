@@ -284,7 +284,7 @@ class FitInformation(object):
             if len(values) == 1:
                 return values[0]
             elif len(values) > 1:
-                return str(values[0]) + " to " + str(values[len(values) - 1])
+                return str(values[0]) + " to " + str(values[-1])
 
 
 class FittingContext(object):
