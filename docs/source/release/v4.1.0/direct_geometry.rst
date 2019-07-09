@@ -32,6 +32,7 @@ Removed
 #######
 
 - The deprecated versions 1 and 2 of :ref:`algm-GetEiMonDet` have been removed. Use version 3 instead.
+- All algorithms and code related to VATES Quantification have been removed.
 
 Interfaces
 ----------
