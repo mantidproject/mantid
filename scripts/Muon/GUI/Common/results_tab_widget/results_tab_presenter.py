@@ -78,16 +78,17 @@ class ResultsTabPresenter(QObject):
         self._update_logs_view()
         self.view.set_output_results_button_enabled(True)
 
+    def _get_workspace_list(self):
+        fit_context = self.model._fit_context
+        workspace_list = []
+        fit_list = fit_context.fit_list
+        for ii in range(1, fit_context._number_of_fits + 1):
+            workspace_list.append(fit_list[len(fit_list) - ii].parameter_workspace_name)
+        return workspace_list, fit_list[0].fit_function_name
+
     def _update_fit_results_view(self):
         """Update the view of results workspaces based on the current model"""
-        def get_workspace_list(fit_context):
-            workspace_list = []
-            fit_list = fit_context.fit_list
-            for ii in range(1, fit_context._number_of_fits + 1):
-                workspace_list.append(fit_list[len(fit_list) - ii].parameter_workspace_name)
-            return workspace_list, fit_list[0].fit_function_name
-        workspace_list, function_name = get_workspace_list(self.model._fit_context)
-
+        workspace_list, function_name = self._get_workspace_list()
         self.model.set_selected_fit_function(function_name)
         selection = self.model.fit_selection(workspace_list)
         self.view.set_fit_result_workspaces(selection)

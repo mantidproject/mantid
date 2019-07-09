@@ -178,8 +178,8 @@ class ResultsTabModelTest(unittest.TestCase):
                                      [], self.logs)
 
         expected_list_state = {
-            'ws1_Parameters': [0, True, True],
-            'ws2_Parameters': [1, True, True]
+            'ws1_Parameters': [0, False, True],
+            'ws2_Parameters': [1, False, True]
         }
         self.assertDictEqual(expected_list_state, model.fit_selection({}))
 
@@ -187,7 +187,7 @@ class ResultsTabModelTest(unittest.TestCase):
         _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
                                      [], self.logs)
 
-        orig_list_state = {'ws1_Parameters': [0, False, True]}
+        orig_list_state = ["ws2_Parameters"]
         expected_list_state = {
             'ws1_Parameters': [0, False, True],
             'ws2_Parameters': [1, True, True]
