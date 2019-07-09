@@ -193,12 +193,13 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             dead_times = dtc.toDict()['dead-time']
             dead_time_text = self.dead_time_from_data_text(dead_times)
             self._view.set_dead_time_label(dead_time_text)
-            if self._view.dead_time_selector.currentIndex() == 0:
-                self._view.dead_time_label_3.setVisible(True)
-            else:
-                self._view.dead_time_label_3.hide()
         else:
             self._view.set_dead_time_label("No loaded dead time")
+
+        if self._view.dead_time_selector.currentIndex() == 0:
+            self._view.dead_time_label_3.setVisible(True)
+        else:
+            self._view.dead_time_label_3.hide()
 
     def set_dead_time_text_to_default(self):
         """by default the dead time text should onl contain 0.0."""
