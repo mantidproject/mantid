@@ -454,6 +454,16 @@ class SANSILLReduction(PythonAlgorithm):
         else:
             self.log().information('No tau available in IPF, skipping dead time correction.')
 
+    def _finalize(self, ws, process):
+        if process != 'Transmission':
+            if self._instrument == 'D33':
+                CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
+            else:
+                CalculateDynamicRange(Workspace=ws)
+        mtd[ws].getRun().addProperty('ProcessedAs', process, True)
+        RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
+        self.setProperty('OutputWorkspace', mtd[ws[2:]])
+
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
@@ -463,7 +473,10 @@ class SANSILLReduction(PythonAlgorithm):
         # instead we load and list, and merge once with merge runs
         LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         if isinstance(mtd[ws], WorkspaceGroup):
-            MergeRuns(InputWorkspaces=ws, OutputWorkspace=ws)
+            tmp = '__tmp'+ws
+            MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp)
+            DeleteWorkspaces(ws)
+            RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
         self._normalise(ws)
         ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
         self._instrument = mtd[ws].getInstrument().getName()
@@ -521,14 +534,7 @@ class SANSILLReduction(PythonAlgorithm):
                         elif process == 'Sample':
                             self._process_sample(ws)
                             progress.report()
-        if process != 'Transmission':
-            if self._instrument == 'D33':
-                CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
-            else:
-                CalculateDynamicRange(Workspace=ws)
-        mtd[ws].getRun().addProperty('ProcessedAs', process, True)
-        RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
-        self.setProperty('OutputWorkspace', mtd[ws[2:]])
+        self._finalize(ws, process)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSILLReduction)
