@@ -291,7 +291,6 @@ void SliceSelector::spawnPickerLine() {
  */
 void SliceSelector::initPickerLine() {
   auto eRange = m_loadedWorkspace->getErange();
-  // m_pickerLine->setLimits(eRange);
   m_pickerLine->setRange(eRange);
   m_pickerLine->setMinimum(eRange.first);
   m_pickerLine->setMaximum(eRange.second);
