@@ -410,24 +410,10 @@ public:
     runTestForValidPerAngleOptions(optionsTable);
   }
 
-  void testFirstTransmissionRunInvalid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithFirstTransmissionRunInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::FIRST_TRANS);
-  }
-
   void testSetSecondTransmissionRun() {
     OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRun()};
     runTestForInvalidPerAngleOptions(optionsTable, 0,
                                      PerThetaDefaults::Column::FIRST_TRANS);
-  }
-
-  void testSecondTransmissionRunInvalid() {
-    OptionsTable const optionsTable = {
-        optionsRowWithSecondTransmissionRunInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0,
-                                     PerThetaDefaults::Column::SECOND_TRANS);
   }
 
   void testSetBothTransmissionRuns() {
