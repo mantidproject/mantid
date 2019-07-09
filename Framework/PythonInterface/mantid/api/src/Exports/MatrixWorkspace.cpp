@@ -254,9 +254,8 @@ object getSignalAtCoord(MatrixWorkspace &self, const NDArray &npCoords,
                                 "array must have shape (n, 2)");
   }
   Py_intptr_t length = len(npCoords);
-  int datatype = NDArrayTypeIndex<Mantid::coord_t>::typenum;
-  PyArrayObject *signalArray =
-      Impl::func_PyArray_NewFromDescr(datatype, 1, &length);
+  PyArrayObject *signalArray = Impl::func_PyArray_NewFromDescr(
+      NDArrayTypeIndex<Mantid::signal_t>::typenum, 1, &length);
 
   for (Py_intptr_t i = 0; i < length; ++i) {
     // Extract coords, pipe them into getSignalArray and place into our return
@@ -266,9 +265,8 @@ object getSignalAtCoord(MatrixWorkspace &self, const NDArray &npCoords,
         static_cast<float>(PyFloat_AsDouble(object(row[0]).ptr())),
         static_cast<float>(PyFloat_AsDouble(object(row[1]).ptr()))};
     auto signalValue =
-        reinterpret_cast<Mantid::coord_t *>(PyArray_GETPTR1(signalArray, i));
-    *signalValue = self.getSignalAtCoord(
-        static_cast<Mantid::coord_t *>(coords.data()), normalization);
+        reinterpret_cast<Mantid::signal_t *>(PyArray_GETPTR1(signalArray, i));
+    *signalValue = self.getSignalAtCoord(coords.data(), normalization);
   }
   return object(handle<>((PyObject *)(signalArray)));
 }
