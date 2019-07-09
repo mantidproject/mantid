@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_PLOTTING_MPL_RANGESELECTOR_H_
-#define MANTIDQT_PLOTTING_MPL_RANGESELECTOR_H_
+#ifndef MANTIDQT_PLOTTING_MPL_SINGLESELECTOR_H_
+#define MANTIDQT_PLOTTING_MPL_SINGLESELECTOR_H_
 
-#include "MantidQtWidgets/MplCpp/RangeMarker.h"
+#include "MantidQtWidgets/MplCpp/SingleMarker.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
 #include <QWidget>
@@ -17,36 +17,34 @@ namespace MantidWidgets {
 class PreviewPlot;
 
 /**
- * Displays a two lines for selecting a range on a previewplot
+ * Displays a line for selecting a value on a previewplot in MPL
  */
-class EXPORT_OPT_MANTIDQT_PLOTTING RangeSelector : public QObject {
+class EXPORT_OPT_MANTIDQT_PLOTTING SingleSelector : public QObject {
   Q_OBJECT
 
 public:
-  enum SelectType { XMINMAX, YMINMAX };
+  enum SelectType { XSINGLE, YSINGLE };
 
-  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
-                bool visible = true, bool infoOnly = false,
-                const QColor &colour = Qt::black);
+  SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE,
+                 double position = 0.0, bool visible = true,
+                 const QColor &colour = Qt::black);
 
   void setColour(const QColor &colour);
-  void setRange(const std::pair<double, double> &range);
-  void setRange(const double min, const double max);
-  std::pair<double, double> getRange() const;
 
-  void setMinimum(const double min);
-  void setMaximum(const double max);
-  double getMinimum() const;
-  double getMaximum() const;
+  void setBounds(const std::pair<double, double> &bounds);
+  void setBounds(const double minimum, const double maximum);
+  void setLowerBound(const double minimum);
+  void setUpperBound(const double maximum);
+
+  void setPosition(const double position);
+  double getPosition() const;
 
   void setVisible(bool visible);
 
   void detach();
 
 signals:
-  void selectionChanged(double min, double max);
-  void minValueChanged(double min);
-  void maxValueChanged(double max);
+  void valueChanged(double position);
 
 private slots:
   void handleMouseDown(const QPoint &point);
@@ -61,8 +59,8 @@ private:
 
   /// The preview plot containing the range selector
   PreviewPlot *m_plot;
-  /// The range marker
-  std::unique_ptr<MantidQt::Widgets::MplCpp::RangeMarker> m_rangeMarker;
+  /// The single marker
+  std::unique_ptr<MantidQt::Widgets::MplCpp::SingleMarker> m_singleMarker;
   /// Is the marker visible or hidden
   bool m_visible;
   ///	Is the marker moving
@@ -72,4 +70,4 @@ private:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif // MANTIDQT_PLOTTING_MPL_RANGESELECTOR_H_
+#endif // MANTIDQT_PLOTTING_MPL_SINGLESELECTOR_H_

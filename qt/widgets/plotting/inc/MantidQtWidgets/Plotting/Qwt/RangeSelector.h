@@ -35,12 +35,11 @@ public:
                 bool visible = true, bool infoOnly = false);
   ~RangeSelector() override{};
 
-  std::pair<double, double> getRange();
-  void setRange(std::pair<double, double>
-                    range); /// Overloaded function provided for convenience
+  void setRange(const std::pair<double, double> &range);
+  std::pair<double, double> getRange() const;
 
-  double getMinimum() { return m_min; } ///< Returns current min value
-  double getMaximum() { return m_max; } ///< Reutnrs current max value
+  double getMinimum() { return m_min; }
+  double getMaximum() { return m_max; }
 
   SelectType getType() { return m_type; }
   bool isVisible() { return m_visible; }
@@ -53,7 +52,7 @@ signals:
   void selectionChangedLazy(double /*_t1*/, double /*_t2*/);
 
 public slots:
-  void setRange(double /*min*/, double /*max*/);
+  void setRange(double min, double max);
   void setMinimum(double /*val*/); ///< outside setting of value
   void setMaximum(double /*val*/); ///< outside setting of value
   void reapply();                  ///< re-apply the range selector lines

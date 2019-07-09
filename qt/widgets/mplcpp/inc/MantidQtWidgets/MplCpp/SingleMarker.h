@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_RANGEMARKER_H
-#define MPLCPP_RANGEMARKER_H
+#ifndef MPLCPP_SINGLEMARKER_H
+#define MPLCPP_SINGLEMARKER_H
 
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
@@ -19,26 +19,25 @@ namespace Widgets {
 namespace MplCpp {
 
 /**
- * Wraps a python defined range marker object
+ * Wraps a python defined single marker object
  */
-class MANTID_MPLCPP_DLL RangeMarker : public Common::Python::InstanceHolder {
+class MANTID_MPLCPP_DLL SingleMarker : public Common::Python::InstanceHolder {
 public:
-  explicit RangeMarker(
-      FigureCanvasQt *canvas, QString const &color, double x_minimum,
-      double x_maximum, QString const &rangeType,
+  explicit SingleMarker(
+      FigureCanvasQt *canvas, QString const &color, double position,
+      double minimum, double maximum, QString const &markerType,
       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();
   void remove();
 
   void setColor(QString const &color);
-  void setRange(double minimum, double maximum);
-  std::tuple<double, double> getRange() const;
+  bool setPosition(double position);
+  double getPosition() const;
 
-  void setMinimum(double minimum);
-  void setMaximum(double maximum);
-  double getMinimum() const;
-  double getMaximum() const;
+  void setBounds(double minimum, double maximum);
+  void setLowerBound(double minimum);
+  void setUpperBound(double maximum);
 
   void mouseMoveStart(double x, double y);
   void mouseMoveStop();
@@ -51,4 +50,4 @@ public:
 } // namespace Widgets
 } // namespace MantidQt
 
-#endif // MPLCPP_RANGEMARKER_H
+#endif // MPLCPP_SINGLEMARKER_H
