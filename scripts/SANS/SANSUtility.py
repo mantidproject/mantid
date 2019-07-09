@@ -1025,6 +1025,60 @@ class CombineWorkspacesFactory(object):
             return PlusWorkspaces()
 
 
+def _clean_logs(ws, estimate_logs):
+    """
+    Remove bad proton charge times from the logs, if present.
+    :param ws: The workspace to clean
+    :param estimate_logs: bool. If true, estimate "good" values for bad proton logs
+    """
+    run = ws.getRun()
+    if run.hasProperty("proton_charge"):
+        pc = run.getProperty("proton_charge")
+        first_log_time = pc.firstTime().toISO8601String()
+        if int(first_log_time.split("-")[0]) < 1990:
+            # Bug caused bad proton charges in 1700s. 1990 is start of epoch.
+            start = pc.nthTime(1)
+            end = pc.lastTime()
+            # Remove the 0th element in the proton charge logs
+            # we have assumed here that a run can have 1 bad proton charge at a maximum
+            pc.filterByTime(start, end)
+            sanslog.notice("An invalid pulsetime of {} has been detected and removed.".format(first_log_time))
+            if estimate_logs:
+                # Estimate what the data should have been
+                _estimate_good_log(pc)
+
+
+def _estimate_good_log(pc):
+    """
+    The bad proton charge is corrupted data from the end of a run,
+    rather than additional data. Therefore, we can estimate what
+    the data should have been.
+    Naively, we add a log with a time = last time + average time diff
+    and a value equal to the average of the values
+    :param pc: FloatTimeSeriesProperty. The proton charge logs.
+    """
+    average_time_diff = _get_average_time_difference(pc)
+    estimated_time = pc.lastTime().totalNanoseconds() + average_time_diff
+    estimated_charge = pc.lastValue()
+    pc.addValue(estimated_time, estimated_charge)
+    sanslog.notice("A corrected pulsetime of {} has been estimated.".format(estimated_time))
+
+
+def _get_average_time_difference(pc):
+    """
+    Get the average difference between consecutive values,
+    in nanoseconds
+    :param pc: The proton charge logs
+    :return: the average different between times in ns
+    """
+    diffs = []
+    for i in range(pc.size() - 1):
+        first = pc.nthTime(i)
+        second = pc.nthTime(i+1)
+        diffs.append(second.totalNanoseconds()-first.totalNanoseconds())
+    return np.mean(diffs)
+
+
 class PlusWorkspaces(object):
     """
     Wrapper for the Plus algorithm
@@ -1043,6 +1097,10 @@ class PlusWorkspaces(object):
         """
         lhs_ws = self._get_workspace(LHS_workspace)
         rhs_ws = self._get_workspace(RHS_workspace)
+
+        # Remove bad proton charges from logs
+        _clean_logs(lhs_ws, estimate_logs)
+        _clean_logs(rhs_ws, estimate_logs)
 
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
         # cumulative time series correctly at this point
@@ -1082,8 +1140,8 @@ class OverlayWorkspaces(object):
         lhs_ws = self._get_workspace(LHS_workspace)
 
         # Remove bad proton charges from logs
-        self._clean_logs(lhs_ws, estimate_logs)
-        self._clean_logs(rhs_ws, estimate_logs)
+        _clean_logs(lhs_ws, estimate_logs)
+        _clean_logs(rhs_ws, estimate_logs)
 
         # Find the time difference between LHS and RHS workspaces and add optional time shift
         time_difference = self._extract_time_difference_in_seconds(lhs_ws, rhs_ws)
@@ -1111,57 +1169,6 @@ class OverlayWorkspaces(object):
         # Remove the shifted workspace
         if mtd.doesExist(temp_ws_name):
             mtd.remove(temp_ws_name)
-
-    def _clean_logs(self, ws, estimate_logs):
-        """
-        Remove bad proton charge times from the logs, if present.
-        :param ws: The workspace to clean
-        :param estimate_logs: bool. If true, estimate "good" values for bad proton logs
-        """
-        run = ws.getRun()
-        if run.hasProperty("proton_charge"):
-            pc = run.getProperty("proton_charge")
-            first_log_time = pc.firstTime().toISO8601String()
-            if int(first_log_time.split("-")[0]) < 1990:
-                # Bug caused bad proton charges in 1700s. 1990 is start of epoch.
-                start = pc.nthTime(1)
-                end = pc.lastTime()
-                # Remove the 0th element in the proton charge logs
-                # we have assumed here that a run can have 1 bad proton charge at a maximum
-                pc.filterByTime(start, end)
-                sanslog.notice("An invalid pulsetime of {} has been detected and removed.".format(first_log_time))
-                if estimate_logs:
-                    # Estimate what the data should have been
-                    self._estimate_good_log(pc)
-
-    def _estimate_good_log(self, pc):
-        """
-        The bad proton charge is corrupted data from the end of a run,
-        rather than additional data. Therefore, we can estimate what
-        the data should have been.
-        Naively, we add a log with a time = last time + average time diff
-        and a value equal to the average of the values
-        :param pc: FloatTimeSeriesProperty. The proton charge logs.
-        """
-        average_time_diff = self._get_average_time_difference(pc)
-        estimated_time = pc.lastTime().totalNanoseconds() + average_time_diff
-        estimated_charge = np.mean(pc.value)
-        pc.addValue(estimated_time, estimated_charge)
-        sanslog.notice("A corrected pulstime of {} has been estimated.".format(estimated_time))
-
-    def _get_average_time_difference(self, pc):
-        """
-        Get the average difference between consecutive values,
-        in nanoseconds
-        :param pc: The proton charge logs
-        :return: the average different between times in ns
-        """
-        diffs = []
-        for i in range(pc.size() - 1):
-            first = pc.nthTime(i)
-            second = pc.nthTime(i+1)
-            diffs.append(second.totalNanoseconds()-first.totalNanoseconds())
-        return np.mean(diffs)
 
     def _extract_time_difference_in_seconds(self, ws1, ws2):
         # The times which need to be compared are the first entry in the proton charge log
