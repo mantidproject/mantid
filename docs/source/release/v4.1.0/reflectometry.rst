@@ -76,10 +76,10 @@ Algorithms
 Improvements
 ############
 
-- The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
-- In ref:`ReflectometryISISLoadAndPreprocess` all output workspaces have names which give information about the slice.
 - An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
-- In ref:`ReflectometryISISLoadAndPreprocess` the TOF workspaces are now grouped together.
+- The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
+- In :ref:`algm-ReflectometryISISLoadAndProcess` all output workspaces have names which give information about the slice.
+- In :ref:`algm-ReflectometryISISLoadAndProcess` the TOF workspaces are now grouped together.
 
 Bug fixes
 #########
