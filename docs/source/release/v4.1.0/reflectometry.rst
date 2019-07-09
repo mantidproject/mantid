@@ -12,11 +12,6 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ----------------------------
 
-Changes
-#######
-
-- Pushed back deprecation of ISIS Reflectometry (Old) GUI to November 2019 from July 2019.
-
 New
 ###
 
@@ -57,18 +52,18 @@ The Runs Table
   - Renamed workspaces are now tracked, so that the row state is no longer reset if a mandatory output workspace is renamed
   - Cells are greyed out when they have been populated from the algorithm outputs so that you can easily distinguish between inputs and outputs
 
-
 Bug fixes
 #########
 
 - Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
 - Fixed a problem where auto-saving would fail if the output for a row is a group workspace.
 - Fixed a problem where the live data monitor would not start. Also fixed an issue where the output workspace is created prematurely as a clone of the TOF workspace.
-	
-Removed
-#######
+
+Removed/updated
+###############
 
 - The ``Generate Notebook`` checkbox has been removed.
+- The deprecation of ISIS Reflectometry (Old) GUI has been pushed back to November 2019.
 
 Algorithms
 ----------
