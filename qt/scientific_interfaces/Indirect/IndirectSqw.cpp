@@ -85,6 +85,9 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
 #endif
 
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSampleInput->isOptional(true);
+
   // Disables searching for run files in the data archive
   m_uiForm.dsSampleInput->isForRunFiles(false);
 }

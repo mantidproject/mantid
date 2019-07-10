@@ -252,6 +252,9 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsCalibrationFile->isOptional(true);
+
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
 

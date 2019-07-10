@@ -71,6 +71,9 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsInput->isOptional(true);
+
   // Disables searching for run files in the data archive
   m_uiForm.dsInput->isForRunFiles(false);
 }

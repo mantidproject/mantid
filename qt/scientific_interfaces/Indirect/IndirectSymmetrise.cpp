@@ -151,6 +151,9 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_uiForm.pbRun->setEnabled(false);
   m_uiForm.pbPreview->setEnabled(false);
 
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsInput->isOptional(true);
+
   // Disables searching for run files in the data archive
   m_uiForm.dsInput->isForRunFiles(false);
 }
