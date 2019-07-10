@@ -263,8 +263,8 @@ object getSignalAtCoord(MatrixWorkspace &self, const NDArray &npCoords,
     std::array<Mantid::coord_t, 2> coord = {coords[2 * i], coords[2 * i + 1]};
     signalValues[i] = self.getSignalAtCoord(coord.data(), normalization);
   }
-  PyObject *npSignalArray =
-      Impl::wrapWithNDArray(signalValues, 1, &length, NumpyWrapMode::ReadOnly);
+  PyObject *npSignalArray = Impl::wrapWithNDArray(
+      signalValues, 1, &length, NumpyWrapMode::ReadOnly, OwnershipMode::Python);
   return object(handle<>(npSignalArray));
 }
 

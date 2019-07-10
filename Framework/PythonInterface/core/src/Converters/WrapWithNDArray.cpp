@@ -17,6 +17,20 @@
 
 #include <string>
 
+namespace {
+
+/**
+  Destructor for a capsule object being passed to Python. This helps release
+  memory of arrays passed to Python.
+  See: https://stackoverflow.com/questions/52731884/pyarray-simplenewfromdata
+*/
+void capsule_cleanup(PyObject *capsule) {
+  void *memory = PyCapsule_GetPointer(capsule, NULL);
+  delete[] memory;
+}
+
+} // namespace
+
 namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
@@ -57,15 +71,23 @@ void markReadOnly(PyArrayObject *arr) {
  * @param dims :: The length of the arrays in each dimension
  * @param mode :: A mode switch to define whether the final array is read
  *only/read-write
+ * @param oMode :: A mode switch defining whether to transfer ownership of the
+ *returned array to python
  * @return A pointer to a numpy ndarray object
  */
 template <typename ElementType>
 PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
-                          Py_intptr_t *dims, const NumpyWrapMode mode) {
+                          Py_intptr_t *dims, const NumpyWrapMode mode,
+                          const OwnershipMode oMode /* = Cpp */) {
   int datatype = NDArrayTypeIndex<ElementType>::typenum;
   PyArrayObject *nparray = (PyArrayObject *)PyArray_SimpleNewFromData(
       ndims, dims, datatype,
       static_cast<void *>(const_cast<ElementType *>(carray)));
+
+  if (oMode == Python) {
+    PyObject *capsule = PyCapsule_New((void *)carray, NULL, capsule_cleanup);
+    PyArray_SetBaseObject((PyArrayObject *)nparray, capsule);
+  }
 
   if (mode == ReadOnly)
     markReadOnly(nparray);
@@ -78,7 +100,7 @@ PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
 #define INSTANTIATE_WRAPNUMPY(ElementType)                                     \
   template DLLExport PyObject *wrapWithNDArray<ElementType>(                   \
       const ElementType *, const int ndims, Py_intptr_t *dims,                 \
-      const NumpyWrapMode);
+      const NumpyWrapMode mode, const OwnershipMode oMode);
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_WRAPNUMPY(int)
