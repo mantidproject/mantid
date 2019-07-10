@@ -319,7 +319,8 @@ void SolidAngle::exec() {
 void SolidAngle::initSpectrum(const MatrixWorkspace &inputWS,
                               MatrixWorkspace &outputWS,
                               const size_t wsIndex) {
-  outputWS.mutableX(wsIndex) = {inputWS.x(wsIndex).front(), inputWS.x(wsIndex).back()};
+  outputWS.mutableX(wsIndex)[0] = inputWS.x(wsIndex).front();
+  outputWS.mutableX(wsIndex)[1] = inputWS.x(wsIndex).back();
   outputWS.mutableE(wsIndex) = 0.;
   outputWS.mutableY(wsIndex) = 0.; // default value for not calculated
 }
