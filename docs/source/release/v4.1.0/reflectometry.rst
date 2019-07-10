@@ -54,11 +54,11 @@ Transmission Runs
 
 .. figure:: ../../images/ISISReflectometryInterface_transmission_runs.png
   :class: screenshot
-  :width: 700px
+  :width: 600px
   :align: center
-  :alt: Additional transmission run settings
+  :alt: New transmission run options
 
-  *Additional transmission run settings: Multiple input runs can be summed; specific spectra can be extracted; stitching uses the given overlap range and rebin parameters, with the specified workspace being scaled*
+  *New transmission run options*
 
 - There are now separate input boxes for the first and second transmission runs.
 - Multiple runs can be specified for each transmission input - these will be summed prior to reduction. Multiple values are entered as a comma-separated list, similarly to the Run(s) column.
