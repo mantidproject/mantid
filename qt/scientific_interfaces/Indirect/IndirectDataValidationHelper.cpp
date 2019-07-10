@@ -12,9 +12,9 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::CustomInterfaces;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace IndirectDataValidationHelper {
 
 /**
  * Validates that the data selector contains data which is of one of the types
@@ -148,5 +148,4 @@ bool validateDataIsACorrectionsFile(UserInputValidator &uiv,
   return uiv.isAllInputValid();
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace IndirectDataValidationHelper

@@ -4,6 +4,7 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   IndirectDataTablePresenterTest.h
+  IndirectDataValidationHelperTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
   IndirectFitOutputOptionsModelTest.h
@@ -36,6 +37,7 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../IndirectDataValidationHelper.cpp
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}

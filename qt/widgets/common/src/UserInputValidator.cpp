@@ -34,9 +34,12 @@ bool doesExistInADS(std::string const &workspaceName) {
 
 boost::optional<std::string>
 containsInvalidWorkspace(WorkspaceGroup_const_sptr group) {
+  if (group->isEmpty())
+    return "The group workspace " + group->getName() + " is empty.";
+
   for (auto workspace : *group)
     if (!workspace)
-      return "The group workspace called " + group->getName() +
+      return "The group workspace " + group->getName() +
              " contains an invalid workspace.";
   return boost::none;
 }
@@ -45,7 +48,7 @@ containsInvalidWorkspace(WorkspaceGroup_const_sptr group) {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-UserInputValidator::UserInputValidator() : m_errorMessages() {}
+UserInputValidator::UserInputValidator() : m_errorMessages(), m_error(false) {}
 
 /**
  * Check that a given QLineEdit field (with given name) is not empty.  If it is
@@ -412,6 +415,7 @@ bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName,
 void UserInputValidator::addErrorMessage(const QString &message, bool silent) {
   if (!silent && !m_errorMessages.contains(message))
     m_errorMessages.append(message);
+  m_error = true;
 }
 
 /**
@@ -431,7 +435,7 @@ QString UserInputValidator::generateErrorMessage() {
  *
  * @return True if all input is valid, false otherwise
  */
-bool UserInputValidator::isAllInputValid() { return m_errorMessages.isEmpty(); }
+bool UserInputValidator::isAllInputValid() { return !m_error; }
 
 /**
  * Sets a validation label that is displyed next to the widget on the UI.

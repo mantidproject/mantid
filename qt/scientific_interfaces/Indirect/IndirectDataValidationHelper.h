@@ -9,43 +9,41 @@
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace IndirectDataValidationHelper {
 
 enum DataType { Red, Sqw, Calib, Corrections };
 
-bool validateDataIsOneOf(UserInputValidator &uiv,
-                         MantidWidgets::DataSelector *dataSelector,
+bool validateDataIsOneOf(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                         MantidQt::MantidWidgets::DataSelector *dataSelector,
                          std::string const &inputType,
                          DataType const &primaryType,
                          std::vector<DataType> const &otherTypes,
                          bool silent = false);
 
-bool validateDataIsOfType(UserInputValidator &uiv,
-                          MantidWidgets::DataSelector *dataSelector,
+bool validateDataIsOfType(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                          MantidQt::MantidWidgets::DataSelector *dataSelector,
                           std::string const &inputType, DataType const &type,
                           bool silent = false);
 
-bool validateDataIsAReducedFile(UserInputValidator &uiv,
-                                MantidWidgets::DataSelector *dataSelector,
-                                std::string const &inputType,
-                                bool silent = false);
+bool validateDataIsAReducedFile(
+    MantidQt::CustomInterfaces::UserInputValidator &uiv,
+    MantidQt::MantidWidgets::DataSelector *dataSelector,
+    std::string const &inputType, bool silent = false);
 
-bool validateDataIsASqwFile(UserInputValidator &uiv,
-                            MantidWidgets::DataSelector *dataSelector,
+bool validateDataIsASqwFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                            MantidQt::MantidWidgets::DataSelector *dataSelector,
                             std::string const &inputType, bool silent = false);
 
-bool validateDataIsACalibrationFile(UserInputValidator &uiv,
-                                    MantidWidgets::DataSelector *dataSelector,
-                                    std::string const &inputType,
-                                    bool silent = false);
+bool validateDataIsACalibrationFile(
+    MantidQt::CustomInterfaces::UserInputValidator &uiv,
+    MantidQt::MantidWidgets::DataSelector *dataSelector,
+    std::string const &inputType, bool silent = false);
 
-bool validateDataIsACorrectionsFile(UserInputValidator &uiv,
-                                    MantidWidgets::DataSelector *dataSelector,
-                                    std::string const &inputType,
-                                    bool silent = false);
+bool validateDataIsACorrectionsFile(
+    MantidQt::CustomInterfaces::UserInputValidator &uiv,
+    MantidQt::MantidWidgets::DataSelector *dataSelector,
+    std::string const &inputType, bool silent = false);
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace IndirectDataValidationHelper
 
 #endif /* MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPER_H_ */

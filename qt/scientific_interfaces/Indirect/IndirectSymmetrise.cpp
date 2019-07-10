@@ -13,11 +13,12 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
+using namespace IndirectDataValidationHelper;
+using namespace Mantid::API;
+
 namespace {
 Mantid::Kernel::Logger g_log("IndirectSymmetrise");
 }
-
-using namespace Mantid::API;
 
 namespace MantidQt {
 using MantidWidgets::AxisID;

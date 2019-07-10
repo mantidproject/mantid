@@ -15,6 +15,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 

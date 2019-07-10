@@ -14,6 +14,7 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
+using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
 namespace MantidQt {

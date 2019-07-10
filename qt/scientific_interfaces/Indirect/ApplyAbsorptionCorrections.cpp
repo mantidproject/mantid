@@ -16,6 +16,7 @@
 
 #include <QStringList>
 
+using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
 namespace {

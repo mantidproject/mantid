@@ -112,6 +112,8 @@ private:
 
   /// Any raised error messages.
   QStringList m_errorMessages;
+  /// True if there has been an error.
+  bool m_error;
 };
 
 /**
