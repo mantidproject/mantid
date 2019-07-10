@@ -23,4 +23,8 @@ class GetEiT0atSNSSystemTest(MantidSystemTest):
         ws = sm.LoadNexusMonitors('SEQ_176472.nxs.h5')
         Ei, T0 = sm.GetEiT0atSNS(ws)
         assert abs(Ei-8.27)< 0.01
-        return
+        # new DAS. monitor peak near pump pulse
+        ws = sm.LoadNexusMonitors('SEQ_181261.nxs.h5')
+        Ei, T0 = sm.GetEiT0atSNS(ws)
+        assert abs(Ei-18.43)< 0.01
+        return    
