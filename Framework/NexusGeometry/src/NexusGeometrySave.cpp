@@ -39,7 +39,7 @@ const std::string NX_ENTRY = "NXentry";
 const std::string NX_INSTRUMENT = "NXinstrument";
 const std::string NX_CHAR = "NX_CHAR";
 const std::string NX_SOURCE = "NXsource";
-const std::string NX_TRANSFORMATIONS = "NXtransformations";
+const std::string NX_TRANSFORMATION = "NXtransformation";
 
 // group/attribute/dataset names
 const std::string SHORT_NAME = "short_name";
@@ -58,13 +58,13 @@ const std::string DETECTOR_NUMBER = "depends_on";
 // metadata
 const std::string METRES = "m";
 const std::string NAME = "name";
-const std::string UNITS = "UNITS";
+const std::string UNITS = "units";
 const std::string SHAPE = "shape";
 
 // NEXUS COMPLIANT ATTRIBUTE VALUES
 
 //
-const H5::StrType H5VARIABLE(0, H5T_VARIABLE); // this may be inefficient
+
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
 } // namespace
@@ -74,21 +74,29 @@ const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
     Helper functions
 
+
 ==============================================================================================================
 */
+
+inline H5::StrType strTypeOfSize(const std::string &str) {
+  H5::StrType stringType(1, (size_t)str.length());
+  return stringType;
+}
 
 inline void writeStrAttributeToGroupHelper(H5::Group &grp,
                                            const std::string &attrName,
                                            const std::string &attrVal,
-                                           H5::StrType dataType = H5VARIABLE,
                                            H5::DataSpace dataSpace = H5SCALAR) {
+  H5::StrType dataType = strTypeOfSize(attrVal);
   H5::Attribute attribute = grp.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
 }
 
-inline void writeStrAttributeToDataSetHelper(
-    H5::DataSet &dSet, const std::string &attrName, const std::string &attrVal,
-    H5::StrType dataType = H5VARIABLE, H5::DataSpace dataSpace = H5SCALAR) {
+inline void
+writeStrAttributeToDataSetHelper(H5::DataSet &dSet, const std::string &attrName,
+                                 const std::string &attrVal,
+                                 H5::DataSpace dataSpace = H5SCALAR) {
+  H5::StrType dataType = strTypeOfSize(attrVal);
   auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
 }
@@ -99,8 +107,8 @@ inline void writeStrValueToDataSetHelper(H5::DataSet &dSet,
   dSet.write(dSetValue, dSet.getDataType(), H5SCALAR);
 }
 
-inline void writeDetectorNumberDataSetToGroupHelper(
-    H5::Group &grp, const Geometry::ComponentInfo &compInfo) {
+inline void writeDetectorNumberHelper(H5::Group &grp,
+                                      const Geometry::ComponentInfo &compInfo) {
 
   std::vector<int> detectorIndices;
   for (int i = compInfo.root(); i >= 0; --i) {
@@ -126,26 +134,67 @@ inline void writeDetectorNumberDataSetToGroupHelper(
   free(data);
 }
 
-inline void
-writeLocationToDataSetHelper(H5::Group &grp,
-                             const Geometry::ComponentInfo &compInfo) {
-  /*
+inline void writeLocationHelper(H5::Group &grp,
+                                const Geometry::ComponentInfo &compInfo) {
+
+  Eigen::Vector3d position, normalisedPosition;
+  double norm;
+
+  H5::DataSet location;
+  H5::DataSpace space;
+
+  H5::Attribute vector;
+  H5::Attribute units;
+  H5::Attribute transformatioType;
+  H5::Attribute dependsOn;
+  H5::Attribute nxClass;
+
+  /*single dimension and rank for entry of norm value of position vector. fixed
+   to 1 dimensions (rank 1)*/
   int rank = 1;
-  hsize_t dims[1];
+  hsize_t dims[(hsize_t)1];
   dims[0] = 1;
 
-  int *data = (int *)malloc(rank * sizeof(int));
+  space = H5Screate_simple(rank, dims, NULL);
+  location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, space);
+
+  // write attributes
+  H5::StrType strSize = strTypeOfSize(NX_TRANSFORMATION);
+  nxClass = location.createAttribute(NX_CLASS, strSize, H5SCALAR);
+  nxClass.write(strSize, NX_TRANSFORMATION);
+
+  // write norm value to dataset
+  position = Kernel::toVector3d(compInfo.position(compInfo.root()));
+  normalisedPosition = position.normalized();
+  norm = position.norm();
+
+  float *data = (float *)malloc(rank * sizeof(float));
+  data[0] = norm;
+
+  location.write(data, H5::PredType::NATIVE_DOUBLE, space);
+  free(data);
+}
+
+inline void writeOrientationHelper(H5::Group &grp,
+                                   const Geometry::ComponentInfo &compInfo) {
+
+  int rank = 1;
+  hsize_t dims[(hsize_t)1]; // number of dimensions
+  dims[0] = 1;              // number of entries in first dimension
+
+  float *data = (float *)malloc(rank * sizeof(float));
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
-  hsize_t val = 13;
+  float val = 14.44444; // placeholder
   data[0] = val;
 
   H5::DataSet dset =
-      grp.createDataSet("detector_number", H5::PredType::NATIVE_INT, space);
-  dset.write(data, H5::PredType::NATIVE_INT, space);
+      grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, space);
+  dset.write(data, H5::PredType::NATIVE_DOUBLE, space);
   free(data);
-  */
 }
+
+inline void writePixelOffsetsHelper() {}
 
 /*
 ==============================================================================================================
@@ -161,14 +210,17 @@ public:
   NGSInstrument(const H5::Group &parent,
                 const Geometry::ComponentInfo &compInfo) {
 
-    m_group = parent.createGroup(compInfo.name(compInfo.root()));
+    std::string instrumentNameStr = compInfo.name(compInfo.root());
+
+    m_group = parent.createGroup(instrumentNameStr);
     writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_INSTRUMENT);
 
-    H5::DataSet name = m_group.createDataSet("name", H5VARIABLE, H5SCALAR);
+    H5::StrType nameStrSize = strTypeOfSize(instrumentNameStr);
+    H5::DataSet name = m_group.createDataSet("name", nameStrSize, H5SCALAR);
     writeStrAttributeToDataSetHelper(name, SHORT_NAME,
-                                     compInfo.name(compInfo.root()));
+                                     instrumentNameStr); // placeholder
 
-    writeStrValueToDataSetHelper(name, compInfo.name(compInfo.root()).c_str());
+    writeStrValueToDataSetHelper(name, instrumentNameStr.c_str());
   }
 
   void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
@@ -186,7 +238,9 @@ class NGSSample {
 public:
   NGSSample(const H5::Group &parent, const Geometry::ComponentInfo &compInfo) {
 
-    m_group = parent.createGroup(compInfo.name(compInfo.sample()));
+    std::string sampleName = compInfo.name(compInfo.sample());
+
+    m_group = parent.createGroup(sampleName);
     writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SAMPLE);
   }
 
@@ -204,29 +258,38 @@ public:
   NGSDetector(const std::string &name, const H5::Group &parent,
               const Geometry::ComponentInfo &compInfo) {
 
-    m_group = parent.createGroup("detector_0");
+	  
+
+    std::string detectorBankNameStr = "detector_0"; // placeholder
+    std::string localNameStr = "INST";              // placeholder
+
+	m_group = parent.createGroup(detectorBankNameStr);
     writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_DETECTOR);
 
-    writeDetectorNumberDataSetToGroupHelper(m_group, compInfo);
-    // writeLocationToDataSetHelper(m_group, compInfo);
+	// dependency of component
+    std::string dependencyStr = m_group.getObjName() + "/" + LOCATION;
 
+    H5::StrType localNameStrSize = strTypeOfSize(localNameStr);
+    H5::StrType dependencyStrSize = strTypeOfSize(dependencyStr);
+
+    
+    writeDetectorNumberHelper(m_group, compInfo);
+    writeLocationHelper(m_group, compInfo);
+    writeOrientationHelper(m_group, compInfo);
+
+    writePixelOffsetsHelper();
+
+    // string type datasets.
     H5::DataSet localName =
-        m_group.createDataSet(LOCAL_NAME, H5VARIABLE, H5SCALAR);
-    H5::DataSet orientation =
-        m_group.createDataSet(ORIENTATION, H5VARIABLE, H5SCALAR);
-    H5::DataSet xPixelOffset =
-        m_group.createDataSet(X_PIXEL_OFFSET, H5VARIABLE, H5SCALAR);
-    H5::DataSet yPixelOffset =
-        m_group.createDataSet(Y_PIXEL_OFFSET, H5VARIABLE, H5SCALAR);
+        m_group.createDataSet(LOCAL_NAME, localNameStrSize, H5SCALAR);
     H5::DataSet dependency =
-        m_group.createDataSet(DEPENDS_ON, H5VARIABLE, H5SCALAR);
+        m_group.createDataSet(DEPENDS_ON, dependencyStrSize, H5SCALAR);
 
-    // dataset values
-    writeStrValueToDataSetHelper(localName, "INST");
-    writeStrValueToDataSetHelper(dependency,
-                                 m_group.getObjName() + "/" + LOCATION);
+    // write string type dataset values
+    writeStrValueToDataSetHelper(localName, localNameStr); // placeholder
+    writeStrValueToDataSetHelper(dependency, dependencyStr);
 
-    // dataset attributes
+
   }
 
   void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
@@ -246,6 +309,24 @@ public:
 
     m_group = parent.createGroup(compInfo.name(compInfo.source()));
     writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SOURCE);
+  }
+
+  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
+  H5::Group group() const { return m_group; }
+
+private:
+  H5::Group m_group;
+  std::vector<H5::Group> m_childrenGroups;
+};
+
+class NGSPixelShape {
+
+public:
+  NGSPixelShape(const H5::Group &parent,
+                const Geometry::ComponentInfo &compInfo) {
+
+    m_group = parent.createGroup(PIXEL_SHAPE);
+    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_OFF_GEOMETRY);
   }
 
   void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
@@ -324,6 +405,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   NGSDetector detector1("detector_1", instr.group(), compInfo);
   NGSSource source(instr.group(), compInfo);
   NGSSample sample(rootGroup, compInfo);
+  NGSPixelShape pixelShape(detector1.group(), compInfo);
 
   file.close();
 

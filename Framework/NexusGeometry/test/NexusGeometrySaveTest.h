@@ -450,6 +450,10 @@ public:
     TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
                      std::invalid_argument &);
   }
+
+  void test_detetctor_bank_has_valid_location() {
+  
+  }
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
