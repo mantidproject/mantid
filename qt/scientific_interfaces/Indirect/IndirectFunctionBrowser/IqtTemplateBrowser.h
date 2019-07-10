@@ -68,6 +68,7 @@ public:
   void clear() override;
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
+  void setBackgroundA0(double value) override;
 
 protected slots:
   void intChanged(QtProperty *) override;
@@ -80,6 +81,7 @@ protected slots:
 private:
   void createProperties() override;
   void popupMenu(const QPoint &);
+  double getParameterPropertyValue(QtProperty *prop) const;
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
   void setTieIntensitiesQuiet(bool on);

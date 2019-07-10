@@ -235,6 +235,14 @@ void IqtFunctionModel::updateParameterEstimationData(
   m_estimationData = std::move(data);
 }
 
+QString IqtFunctionModel::setBackgroundA0(double value) {
+  if (hasBackground()) {
+    setParameter(ParamID::BG_A0, value);
+    return *getParameterName(ParamID::BG_A0);
+  }
+  return "";
+}
+
 void IqtFunctionModel::setNumberDomains(int n) { m_model.setNumberDomains(n); }
 
 int IqtFunctionModel::getNumberDomains() const {
@@ -242,7 +250,7 @@ int IqtFunctionModel::getNumberDomains() const {
 }
 
 void IqtFunctionModel::setParameter(const QString &paramName, double value) {
-  m_model.setParameterError(paramName, value);
+  m_model.setParameter(paramName, value);
 }
 
 void IqtFunctionModel::setParameterError(const QString &paramName,

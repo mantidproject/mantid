@@ -218,6 +218,11 @@ void IqtTemplatePresenter::updateParameterEstimationData(
   m_model.updateParameterEstimationData(std::move(data));
 }
 
+void IqtTemplatePresenter::setBackgroundA0(double value) {
+  m_model.setBackgroundA0(value);
+  m_view->setA0(value, 0.0);
+}
+
 void IqtTemplatePresenter::updateViewParameters()
 {
   static std::map<IqtFunctionModel::ParamID, void (IqtTemplateBrowser::*)(double, double)> setters{

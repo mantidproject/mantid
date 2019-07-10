@@ -64,6 +64,7 @@ public:
   virtual void clear() = 0;
   virtual void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) = 0;
+  virtual void setBackgroundA0(double value) = 0;
 
 signals:
   void functionStructureChanged();

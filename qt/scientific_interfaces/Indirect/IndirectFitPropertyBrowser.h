@@ -67,6 +67,7 @@ public:
   void updatePlotGuess(MatrixWorkspace_const_sptr sampleWorkspace);
   void setErrorsEnabled(bool enabled);
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void setBackgroundA0(double value);
 
 public slots:
   void fit();

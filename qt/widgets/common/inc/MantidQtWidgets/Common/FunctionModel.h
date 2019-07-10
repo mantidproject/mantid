@@ -71,6 +71,7 @@ public:
                                     const QString &tie) = 0;
   virtual void setLocalParameterConstraint(const QString &parName, int i,
                                            const QString &constraint) = 0;
+  virtual QString setBackgroundA0(double value) = 0;
 
 protected:
   static void copyParametersAndErrors(const IFunction &funFrom,
@@ -125,6 +126,7 @@ public:
   QStringList getLocalParameters() const override;
   void updateMultiDatasetParameters(const IFunction &fun) override;
   void updateParameters(const IFunction &fun) override;
+  QString setBackgroundA0(double value) override;
 
 private:
   void checkIndex(int) const;

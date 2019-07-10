@@ -116,6 +116,8 @@ public:
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
   void clearErrors() override;
+  /// Set a parameter that is responsible for the background level
+  void setBackgroundA0(double value);
 
 signals:
   void parameterChanged(const QString &funcIndex, const QString &paramName);

@@ -335,5 +335,9 @@ QString FunctionBrowser::getFitFunctionString() const {
   return m_presenter->getFitFunctionString();
 }
 
+void FunctionBrowser::setBackgroundA0(double value) {
+  m_presenter->setBackgroundA0(value);
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

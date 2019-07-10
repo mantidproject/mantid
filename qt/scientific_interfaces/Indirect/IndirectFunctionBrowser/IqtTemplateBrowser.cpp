@@ -353,8 +353,14 @@ void IqtTemplateBrowser::updateParameterEstimationData(
   m_presenter.updateParameterEstimationData(std::move(data));
 }
 
+void IqtTemplateBrowser::setBackgroundA0(double value) { m_presenter.setBackgroundA0(value); }
+
 void IqtTemplateBrowser::popupMenu(const QPoint &) {
   std::cerr << "Popup" << std::endl;
+}
+
+double IqtTemplateBrowser::getParameterPropertyValue(QtProperty *prop) const {
+  return prop ? m_parameterManager->value(prop) : 0.0;
 }
 
 void IqtTemplateBrowser::setParameterPropertyValue(QtProperty *prop,

@@ -264,6 +264,13 @@ void IndirectFitPropertyBrowser::updateParameterEstimationData(
   m_templateBrowser->updateParameterEstimationData(std::move(data));
 }
 
+void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
+  if (isFullFunctionBrowserActive()) {
+    m_functionBrowser->setBackgroundA0(value);
+  } else {
+    m_templateBrowser->setBackgroundA0(value);
+  }
+}
 
 void IndirectFitPropertyBrowser::setCurrentDataset(SpectrumRowIndex i) {
   if (m_functionBrowser->getNumberOfDatasets() == 0) return;

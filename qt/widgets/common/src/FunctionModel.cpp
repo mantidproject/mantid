@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/FunctionModel.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
@@ -499,6 +500,35 @@ void MultiDomainFunctionModel::updateGlobals() {
 
 bool MultiDomainFunctionModel::isGlobal(const QString &parName) const {
   return m_globalParameterNames.contains(parName);
+}
+
+QString MultiDomainFunctionModel::setBackgroundA0(double value) {
+  std::string foundName;
+  auto const fun = getCurrentFunction();
+  auto getA0 = [](IFunction const &f) -> std::string {
+    return (dynamic_cast<IBackgroundFunction const *>(&f) &&
+            f.hasParameter("A0"))
+               ? "A0"
+               : "";
+  };
+  auto const cf = boost::dynamic_pointer_cast<CompositeFunction>(fun);
+  if (cf) {
+    if (fun->name() != "CompositeFunction")
+      return QString();
+    for (size_t i = 0; i < cf->nFunctions(); ++i) {
+      foundName = getA0(*cf->getFunction(i));
+      if (!foundName.empty()) {
+        foundName.insert(0, "f" + std::to_string(i) + ".");
+        break;
+      }
+    }
+  } else {
+    foundName = getA0(*fun);
+  }
+  if (!foundName.empty()) {
+    fun->setParameter(foundName, value);
+  }
+  return QString::fromStdString(foundName);
 }
 
 } // namespace MantidWidgets

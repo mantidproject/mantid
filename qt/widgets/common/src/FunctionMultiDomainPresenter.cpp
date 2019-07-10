@@ -272,6 +272,12 @@ QStringList FunctionMultiDomainPresenter::getLocalParameters() const {
   return m_model->getLocalParameters();
 }
 
+void FunctionMultiDomainPresenter::setBackgroundA0(double value) {
+  auto const paramName = m_model->setBackgroundA0(value);
+  if (!paramName.isEmpty())
+    m_view->setParameter(paramName, value);
+}
+
 void FunctionMultiDomainPresenter::viewPastedFunction(const QString &funStr) {
   m_model->setFunctionString(funStr);
   emit functionStructureChanged();

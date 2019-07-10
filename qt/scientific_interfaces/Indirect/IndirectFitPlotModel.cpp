@@ -236,7 +236,14 @@ boost::optional<double> IndirectFitPlotModel::getFirstPeakCentre() const {
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstBackgroundLevel() const {
-  return findFirstBackgroundLevel(m_fittingModel->getFittingFunction());
+  auto const spectra = m_fittingModel->getSpectra(m_activeIndex);
+  if (spectra.empty())
+    return boost::optional<double>();
+  auto index = spectra.indexOf(m_activeSpectrum);
+  IFunction_sptr fun = m_fittingModel->getFittingFunction();
+  if (!fun)
+    return boost::optional<double>();
+  return findFirstBackgroundLevel(fun->getFunction(index.value));
 }
 
 double IndirectFitPlotModel::calculateHWHMMaximum(double minimum) const {

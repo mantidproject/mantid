@@ -363,6 +363,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   m_fitPropertyBrowser->setErrorsEnabled(!error);
   if (!error) {
     updateParameterValues();
+    setModelFitFunction();
   }
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
@@ -743,8 +744,9 @@ void IndirectFitAnalysisTab::respondToFwhmChanged(double) {
   m_plotPresenter->updateGuess();
 }
 
-void IndirectFitAnalysisTab::respondToBackgroundChanged(double) {
-  updateFitBrowserParameterValues();
+void IndirectFitAnalysisTab::respondToBackgroundChanged(double value) {
+  m_fitPropertyBrowser->setBackgroundA0(value);
+  setModelFitFunction();
   m_plotPresenter->updateGuess();
 }
 

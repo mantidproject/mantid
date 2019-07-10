@@ -68,6 +68,7 @@ public:
   QStringList getGlobalParameters() const;
   void setGlobalParameters(const QStringList &globals);
   QStringList getLocalParameters() const;
+  void setBackgroundA0(double value);
 
   void setColumnSizes(int s0, int s1, int s2);
   void setErrorsEnabled(bool enabled);
