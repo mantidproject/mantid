@@ -68,6 +68,9 @@ ALL_KEYWORDS_ATOMS_S_DATA = ["s"]
 S_LABEL = "s"
 ATOM_LABEL = "atom"
 
+# user syntax for specifying atoms
+ATOM_PREFIX = "atom"
+
 FLOAT_ID = np.dtype(np.float64).num
 FLOAT_TYPE = np.dtype(np.float64)
 
