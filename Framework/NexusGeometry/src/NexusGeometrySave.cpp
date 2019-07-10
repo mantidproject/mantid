@@ -55,7 +55,6 @@ const std::string SOURCE = "source";
 const std::string SAMPLE = "sample";
 const std::string DETECTOR_NUMBER = "detector_number";
 
-
 // metadata
 const std::string METRES = "m";
 const std::string NAME = "name";
