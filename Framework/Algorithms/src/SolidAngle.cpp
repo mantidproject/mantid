@@ -268,7 +268,7 @@ void SolidAngle::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int j = m_MinSpec; j <= m_MaxSpec; ++j) {
     PARALLEL_START_INTERUPT_REGION
-    initSpectrum(inputWS, outputWS, j);
+    initSpectrum(*inputWS, *outputWS, j);
     if (spectrumInfo.hasDetectors(j)) {
       double solidAngle = 0.0;
       for (const auto detID : inputWS->getSpectrum(j).getDetectorIDs()) {
@@ -291,7 +291,7 @@ void SolidAngle::exec() {
   auto &outputSpectrumInfo = outputWS->mutableSpectrumInfo();
   // Loop over the histograms (detector spectra)
   for (int j = 0; j < m_MinSpec; ++j) {
-    initSpectrum(inputWS, outputWS, j);
+    initSpectrum(*inputWS, *outputWS, j);
     // SpectrumInfo::setMasked is NOT threadsafe.
     outputSpectrumInfo.setMasked(j, true);
     prog.report();
@@ -299,7 +299,7 @@ void SolidAngle::exec() {
 
   // Loop over the histograms (detector spectra)
   for (int j = m_MaxSpec + 1; j < numberOfSpectra; ++j) {
-    initSpectrum(inputWS, outputWS, j);
+    initSpectrum(*inputWS, *outputWS, j);
     // SpectrumInfo::setMasked is NOT threadsafe.
     outputSpectrumInfo.setMasked(j, true);
     prog.report();
@@ -316,13 +316,12 @@ void SolidAngle::exec() {
  * SolidAngle::initSpectrum Sets the default value for the spectra for which
  * solid angle is not calculated.
  */
-void SolidAngle::initSpectrum(MatrixWorkspace_const_sptr inputWS,
-                              MatrixWorkspace_sptr outputWS,
+void SolidAngle::initSpectrum(const MatrixWorkspace &inputWS,
+                              MatrixWorkspace &outputWS,
                               const size_t wsIndex) {
-  outputWS->mutableX(wsIndex)[0] = inputWS->x(wsIndex).front();
-  outputWS->mutableX(wsIndex)[1] = inputWS->x(wsIndex).back();
-  outputWS->mutableE(wsIndex) = 0.;
-  outputWS->mutableY(wsIndex) = 0.; // default value for not calculated
+  outputWS.mutableX(wsIndex) = {inputWS.x(wsIndex).front(), inputWS.x(wsIndex).back()};
+  outputWS.mutableE(wsIndex) = 0.;
+  outputWS.mutableY(wsIndex) = 0.; // default value for not calculated
 }
 
 } // namespace Algorithms

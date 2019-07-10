@@ -45,8 +45,8 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void initSpectrum(API::MatrixWorkspace_const_sptr, API::MatrixWorkspace_sptr,
-                    const size_t);
+  void initSpectrum(const API::MatrixWorkspace &input, API::MatrixWorkspace &output,
+                    const size_t j);
 };
 
 } // namespace Algorithms
