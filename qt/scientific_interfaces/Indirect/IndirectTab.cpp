@@ -468,7 +468,8 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
     m_pythonRunner.runPythonCode(pyInput);
 #else
     using MantidQt::Widgets::MplCpp::plot;
-    plot(workspaceNames, boost::none, std::vector<int>{wsIndex});
+    plot(workspaceNames, boost::none, std::vector<int>{wsIndex}, boost::none,
+         boost::none, boost::none, boost::none, m_plotErrorBars);
 #endif
   }
 }
@@ -687,7 +688,7 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   QHash<QString, QVariant> plotKwargs{
       {"axis", static_cast<int>(MantidAxType::Bin)}};
   plot(workspaceNames, boost::none, std::vector<int>{binIndex}, boost::none,
-       plotKwargs);
+       plotKwargs, boost::none, boost::none, m_plotErrorBars);
 #endif
 }
 
