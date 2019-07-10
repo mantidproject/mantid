@@ -7,9 +7,7 @@
 
 /*
 ==============================================================================================================
-
     saves the instrument to file.
-
 ==============================================================================================================
 */
 
@@ -71,10 +69,7 @@ const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
 /*
 ==============================================================================================================
-
     Helper functions
-
-
 ==============================================================================================================
 */
 
@@ -117,7 +112,7 @@ inline void writeDetectorNumberHelper(H5::Group &grp,
     }
   }
 
-  const hsize_t dsz = detectorIndices.size();
+  const hsize_t dsz = (hsize_t)detectorIndices.size();
 
   int rank = 1;
   hsize_t dims[1];
@@ -125,7 +120,7 @@ inline void writeDetectorNumberHelper(H5::Group &grp,
 
   int *data = (int *)malloc(dsz * sizeof(int));
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
-  for (int i = 0; i < dsz; i++) {
+  for (hsize_t i = 0; i < dsz; i++) {
     data[i] = i + 1; // placeholder
   }
   H5::DataSet detectorNumber =
@@ -149,8 +144,6 @@ inline void writeLocationHelper(H5::Group &grp,
   H5::Attribute dependsOn;
   H5::Attribute nxClass;
 
-  /*single dimension and rank for entry of norm value of position vector. fixed
-   to 1 dimensions (rank 1)*/
   int rank = 1;
   hsize_t dims[(hsize_t)1];
   dims[0] = 1;
@@ -178,19 +171,39 @@ inline void writeLocationHelper(H5::Group &grp,
 inline void writeOrientationHelper(H5::Group &grp,
                                    const Geometry::ComponentInfo &compInfo) {
 
+  Eigen::Quaterniond rotation;
+  double norm;
+
+  H5::DataSet orientation;
+  H5::DataSpace space;
+
+  H5::Attribute vector;
+  H5::Attribute units;
+  H5::Attribute transformatioType;
+  H5::Attribute dependsOn;
+  H5::Attribute nxClass;
+
   int rank = 1;
-  hsize_t dims[(hsize_t)1]; // number of dimensions
-  dims[0] = 1;              // number of entries in first dimension
+  hsize_t dims[(hsize_t)1];
+  dims[0] = 1;
+
+  space = H5Screate_simple(rank, dims, NULL);
+  orientation =
+      grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, space);
+
+  // write attributes
+  H5::StrType strSize = strTypeOfSize(NX_TRANSFORMATION);
+  nxClass = orientation.createAttribute(NX_CLASS, strSize, H5SCALAR);
+  nxClass.write(strSize, NX_TRANSFORMATION);
+
+  // write norm value to dataset
+  rotation = Kernel::toQuaterniond(compInfo.rotation(compInfo.root()));
+  norm = rotation.norm();
 
   double *data = (double *)malloc(rank * sizeof(double));
-  H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+  data[0] = norm;
 
-  double val = 14.44444; // placeholder
-  data[0] = val;
-
-  H5::DataSet dset =
-      grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, space);
-  dset.write(data, H5::PredType::NATIVE_DOUBLE, space);
+  orientation.write(data, H5::PredType::NATIVE_DOUBLE, space);
   free(data);
 }
 
@@ -198,9 +211,7 @@ inline void writeOrientationHelper(H5::Group &grp,
 
 /*
 ==============================================================================================================
-
     classes for NGS
-
 ==============================================================================================================
 */
 
@@ -311,6 +322,7 @@ private:
   std::vector<H5::Group> m_childrenGroups;
 };
 
+/*
 class NGSPixelShape {
 
 public:
@@ -328,12 +340,11 @@ private:
   H5::Group m_group;
   std::vector<H5::Group> m_childrenGroups;
 };
+*/
 
 /*
 ==============================================================================================================
-
       Beginning of saveInstrument
-
 ==============================================================================================================
 */
 
@@ -381,9 +392,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
   /*
 ==============================================================================================================
-
  write component to tree structure.
-
 ==============================================================================================================
 */
 
@@ -397,7 +406,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   NGSDetector detector1("detector_0", instr.group(), compInfo);
   NGSSource source(instr.group(), compInfo);
   NGSSample sample(rootGroup, compInfo);
-  NGSPixelShape pixelShape(detector1.group(), compInfo);
+  // NGSPixelShape pixelShape(detector1.group(), compInfo);
 
   file.close();
 

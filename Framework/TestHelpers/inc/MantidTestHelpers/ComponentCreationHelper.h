@@ -222,6 +222,7 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
                         const Mantid::Kernel::V3D &samplePos,
                         const Mantid::Kernel::V3D &detectorPos);
 
+// creates a minimal instrument with optional source, sample, and detector.
 Mantid::Geometry::Instrument_sptr
 createInstrumentWithOptionalComponents(bool haveSource, bool haveSample,
                                        bool haveDetector);
