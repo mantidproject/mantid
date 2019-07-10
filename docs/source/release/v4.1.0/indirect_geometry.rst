@@ -14,7 +14,7 @@ Indirect Geometry Changes
 Instrument Definitions
 ----------------------
 
-The IDF of IN16B has been rewritten to properly model the neutronic positions of the pixels as reflections wrt spherical analysers.
+The IDF of IN16B has been rewritten to properly model the neutronic positions of the pixels as reflections with respect to spherical analysers.
 This is needed for the new inverted time-of-flight mode (BATS), but also improves the model for the standard doppler mode.
 Particularly, this will allow to calculate correct absorption corrections before grouping the pixels tube by tube.
 With the new IDF the flight-paths inside the sample will properly take into account the off-plane angle, which was not the case with the previous IDF.
@@ -153,6 +153,7 @@ The Workbench
   :align: center
   :figwidth: 90%
   :alt: The Indirect Data Reduction GUI in the Workbench.
+
 
 Tools Interface
 ---------------
