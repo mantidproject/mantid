@@ -17,17 +17,17 @@ using namespace MantidQt::Widgets::MplCpp;
 namespace {
 
 Python::Object
-newMarker(FigureCanvasQt *canvas, QString const &colour, double x_minimum,
-          double x_maximum,
+newMarker(FigureCanvasQt *canvas, QString const &colour, double minimum,
+          double maximum, QString const &rangeType,
           boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(
       PyImport_ImportModule("mantidqt.widgets.fitpropertybrowser.markers"))};
 
-  auto const args = Python::NewRef(
-      Py_BuildValue("(Osdd)", canvas->pyobj().ptr(),
-                    colour.toLatin1().constData(), x_minimum, x_maximum));
+  auto const args = Python::NewRef(Py_BuildValue(
+      "(Osdds)", canvas->pyobj().ptr(), colour.toLatin1().constData(), minimum,
+      maximum, rangeType.toLatin1().constData()));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("RangeMarker")(*args, **kwargs);
@@ -44,14 +44,15 @@ namespace MplCpp {
  * @brief Create a RangeMarker instance
  * @param canvas The canvas to draw the range marker on to
  * @param colour The color of the range marker
- * @param x_minimum The x coordinate of the minimum marker
- * @param x_maximum The x coordinate of the maximum marker
+ * @param minimum The coordinate of the minimum marker
+ * @param maximum The coordinate of the maximum marker
  */
 RangeMarker::RangeMarker(FigureCanvasQt *canvas, QString const &color,
-                         double x_minimum, double x_maximum,
+                         double minimum, double maximum,
+                         QString const &rangeType,
                          QHash<QString, QVariant> const &otherKwargs)
     : InstanceHolder(
-          newMarker(canvas, color, x_minimum, x_maximum, otherKwargs)) {}
+          newMarker(canvas, color, minimum, maximum, rangeType, otherKwargs)) {}
 
 /**
  * @brief Redraw the RangeMarker
@@ -72,28 +73,62 @@ void RangeMarker::setColor(QString const &color) {
 }
 
 /**
- * @brief Sets the x range for the RangeMarker.
+ * @brief Sets the range marked by the RangeMarker.
  * @param minimum The minimum of the range.
  * @param maximum The maximum of the range.
  */
-void RangeMarker::setXRange(double minimum, double maximum) {
-  callMethodNoCheck<void>(pyobj(), "set_x_range", minimum, maximum);
+void RangeMarker::setRange(double minimum, double maximum) {
+  callMethodNoCheck<void>(pyobj(), "set_range", minimum, maximum);
 }
 
 /**
- * @brief Gets the x range for the RangeMarker.
+ * @brief Gets the range marked by the RangeMarker.
  * @return A tuple containing the minimum and maximum of the range.
  */
-std::tuple<double, double> RangeMarker::getXRange() const {
+std::tuple<double, double> RangeMarker::getRange() const {
   GlobalInterpreterLock lock;
 
   auto const toDouble = [](Python::Object const &value) {
     return PyFloat_AsDouble(value.ptr());
   };
 
-  auto const coords = pyobj().attr("get_x_range")();
+  auto const coords = pyobj().attr("get_range")();
   return std::make_tuple<double, double>(toDouble(coords[0]),
                                          toDouble(coords[1]));
+}
+
+/**
+ * @brief Sets the minimum the RangeMarker.
+ * @param minimum The minimum of the range.
+ */
+void RangeMarker::setMinimum(double minimum) {
+  callMethodNoCheck<void>(pyobj(), "set_minimum", minimum);
+}
+
+/**
+ * @brief Sets the minimum the RangeMarker.
+ * @param minimum The minimum of the range.
+ */
+void RangeMarker::setMaximum(double maximum) {
+  callMethodNoCheck<void>(pyobj(), "set_maximum", maximum);
+}
+
+/**
+ * @brief Gets minimum of the RangeMarker.
+ * @return The minimum of the range.
+ */
+double RangeMarker::getMinimum() const {
+  GlobalInterpreterLock lock;
+  return PyFloat_AsDouble(pyobj().attr("get_minimum")().ptr());
+}
+
+/**
+ * @brief Gets maximum of the RangeMarker.
+ * @return The maximum of the range.
+ */
+double RangeMarker::getMaximum() const {
+  GlobalInterpreterLock lock;
+  return PyFloat_AsDouble(pyobj().attr("get_maximum")().ptr());
 }
 
 /**
@@ -102,16 +137,7 @@ std::tuple<double, double> RangeMarker::getXRange() const {
  * @param y The y position of the mouse press in axes coords.
  */
 void RangeMarker::mouseMoveStart(double x, double y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y, false);
-}
-
-/**
- * @brief Notifies the relevant marker to start moving.
- * @param x The x position of the mouse press in pixels.
- * @param y The y position of the mouse press in pixels.
- */
-void RangeMarker::mouseMoveStart(int x, int y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y, true);
+  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
 }
 
 /**
@@ -125,27 +151,24 @@ void RangeMarker::mouseMoveStop() {
  * @brief Notifies the relevant marker to start moving.
  * @param x The x position of the mouse press in axes coords.
  * @param y The y position of the mouse press in axes coords.
- * @return True if one of the VerticalMarker's within the RangeMarker has been
+ * @return True if one of the marker's within the RangeMarker has been
  * moved.
  */
 bool RangeMarker::mouseMove(double x, double y) {
   GlobalInterpreterLock lock;
 
-  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y, false));
+  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y));
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
 /**
- * @brief Notifies the relevant marker to start moving.
- * @param x The x position of the mouse press in pixels.
- * @param y The y position of the mouse press in pixels.
- * @return True if one of the VerticalMarker's within the RangeMarker has been
- * moved.
+ * @brief Returns true if one of the marker's is moving.
+ * @return True if one of the marker's within the RangeMarker is being moved.
  */
-bool RangeMarker::mouseMove(int x, int y) {
+bool RangeMarker::isMoving() {
   GlobalInterpreterLock lock;
 
-  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y, true));
+  auto const movedPy = Python::Object(pyobj().attr("is_marker_moving")());
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 

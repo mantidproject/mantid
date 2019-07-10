@@ -42,7 +42,7 @@ class HomeTabPlotPresenterTest(GuiTest):
         self.presenter.handle_use_raw_workspaces_changed()
 
         self.model.plot.assert_called_once_with(['MUSR62260; Group; bottom; Asymmetry; MA',
-                                                 'MUSR62261; Group; bottom; Asymmetry; MA'], 'MUSR62260-62261 bottom')
+                                                 'MUSR62261; Group; bottom; Asymmetry; MA'], 'MUSR62260-62261 bottom', 'Time', False, mock.ANY)
 
     def test_handle_data_updated_does_nothing_if_workspace_list_has_not_changed(self):
         self.presenter.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
@@ -59,7 +59,7 @@ class HomeTabPlotPresenterTest(GuiTest):
 
         self.presenter.handle_data_updated()
 
-        self.model.plot.assert_called_once_with(self.workspace_list, 'MUSR62260-62261 bottom')
+        self.model.plot.assert_called_once_with(self.workspace_list, 'MUSR62260-62261 bottom', 'Time', False, mock.ANY)
 
     def test_handle_plot_type_changed_displays_a_warning_if_trying_to_plot_counts_on_a_pair(self):
         self.context.group_pair_context.__getitem__.return_value = MuonPair('long', 'bwd', 'fwd')
@@ -77,7 +77,7 @@ class HomeTabPlotPresenterTest(GuiTest):
 
         self.presenter.handle_plot_type_changed()
 
-        self.model.plot.assert_called_once_with(self.workspace_list, 'MUSR62260-62261 bottom')
+        self.model.plot.assert_called_once_with(self.workspace_list, 'MUSR62260-62261 bottom', 'Time', True, mock.ANY)
 
     def test_handle_group_pair_to_plot_changed_does_nothing_if_group_not_changed(self):
         self.model.plotted_group = 'bottom'
@@ -103,11 +103,11 @@ class HomeTabPlotPresenterTest(GuiTest):
 
         self.presenter.handle_group_pair_to_plot_changed()
 
-        self.model.plot.assert_called_once_with(self.workspace_list, 'MUSR62260-62261 bottom')
+        self.model.plot.assert_called_once_with(self.workspace_list, 'MUSR62260-62261 bottom', 'Time', False, mock.ANY)
 
     def test_handle_fit_completed_adds_appropriate_fits_to_plot(self):
         self.model.plotted_workspaces = self.workspace_list
-        self.model.plotted_workspaces_inverse_binning = []
+        self.model.plotted_workspaces_inverse_binning = {}
         fit_information = FitInformation(mock.MagicMock(),
                                          'GaussOsc',
                                          ['MUSR62260; Group; bottom; Asymmetry; MA'],

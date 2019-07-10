@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2019-05-03 11:30:00" name="CNCS" valid-from="2019-02-01 00:00:01" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2019-06-25 14:11:19.918208" name="CNCS" valid-from="2019-06-02 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Andrei Savici-->
   <defaults>
     <length unit="metre"/>
@@ -29,6 +29,7 @@
       <location name="monitor1" z="-29.949"/>
       <location name="monitor2" z="-28.706"/>
       <location name="monitor3" z="-1.416"/>
+      <location name="monitor4" z="3.7338"/>
     </component>
   </type>
   <component idlist="detectors" type="detectors">
@@ -188,253 +189,253 @@
   </type>
   <type name="bank1">
     <component type="eightpack">
-      <location x="2.64833514869" y="-0.0094501982311" z="-2.30501105921">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="310.03212828"/>
+      <location x="2.64623477185" y="-0.00904297322071" z="-2.3031829704">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="311.035082035"/>
       </location>
     </component>
   </type>
   <type name="bank2">
     <component type="eightpack">
-      <location x="2.78798631032" y="-0.0131503498323" z="-2.13504580264">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="307.040498625"/>
+      <location x="2.78621803989" y="-0.013993852524" z="-2.13369165741">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="307.444968608"/>
       </location>
     </component>
   </type>
   <type name="bank3">
     <component type="eightpack">
-      <location x="2.91500170608" y="-0.00246268117797" z="-1.9554777576">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="303.185233799"/>
+      <location x="2.91340581558" y="-0.000912801945624" z="-1.95440718245">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="303.854991514"/>
       </location>
     </component>
   </type>
   <type name="bank4">
     <component type="eightpack">
-      <location x="3.03121876396" y="-0.00651336106442" z="-1.7688185725">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="300.351193611"/>
+      <location x="3.02988124089" y="-0.00742723440965" z="-1.76803808259">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="300.265005758"/>
       </location>
     </component>
   </type>
   <type name="bank5">
     <component type="eightpack">
-      <location x="3.13472889057" y="-0.0104717314365" z="-1.57489336682">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="296.353493225"/>
+      <location x="3.13369598962" y="-0.00811281762111" z="-1.57437443555">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="296.675034754"/>
       </location>
     </component>
   </type>
   <type name="bank6">
     <component type="eightpack">
-      <location x="3.227131436" y="-0.0120063546042" z="-1.37548547892">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="292.632140155"/>
+      <location x="3.2261484731" y="-0.0132523531852" z="-1.37506651513">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="293.084935857"/>
       </location>
     </component>
   </type>
   <type name="bank7">
     <component type="eightpack">
-      <location x="3.3066735589" y="-0.0113361181738" z="-1.17063005574">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="288.822502383"/>
+      <location x="3.30580875912" y="-0.0127594181343" z="-1.17032389894">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="289.495004196"/>
       </location>
     </component>
   </type>
   <type name="bank8">
     <component type="eightpack">
-      <location x="3.37201711159" y="-0.0124970154917" z="-0.960864090443">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="285.850845158"/>
+      <location x="3.37139184965" y="-0.011506013114" z="-0.960685920604">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="285.905025127"/>
       </location>
     </component>
   </type>
   <type name="bank9">
     <component type="eightpack">
-      <location x="3.42425181966" y="-0.0120619728845" z="-0.747551819806">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="280.322654335"/>
+      <location x="3.42394686921" y="-0.0109746498019" z="-0.74748524577">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="282.315080565"/>
       </location>
     </component>
   </type>
   <type name="bank10">
     <component type="eightpack">
-      <location x="3.46477050299" y="-0.00603943391012" z="-0.531733536364">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="277.975073724"/>
+      <location x="3.46335324005" y="-0.00780641251739" z="-0.531516030982">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="278.725029926"/>
       </location>
     </component>
   </type>
   <type name="bank11">
     <component type="eightpack">
-      <location x="3.48429044898" y="-0.00796683636701" z="-0.313107076048">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="274.890391343"/>
+      <location x="3.4831325984" y="-0.00717567933634" z="-0.313003028692">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="275.13495001"/>
       </location>
     </component>
   </type>
   <type name="bank12">
     <component type="eightpack">
-      <location x="3.50205644971" y="-0.00747710333246" z="-0.0944605222986">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="272.062032731"/>
+      <location x="3.50111429079" y="-0.0053259241611" z="-0.0944351095661">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="271.545057137"/>
       </location>
     </component>
   </type>
   <type name="bank13">
     <component type="eightpack">
-      <location x="3.50521898014" y="-0.00745746569283" z="0.125157359804">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="268.827834505"/>
+      <location x="3.50453971681" y="-0.00795733361848" z="0.125133106026">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="267.955065465"/>
       </location>
     </component>
   </type>
   <type name="bank14">
     <component type="eightpack">
-      <location x="3.48873799924" y="-0.0146820327739" z="0.344227179502">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="265.295117626"/>
+      <location x="3.48853341669" y="-0.0130637924884" z="0.344206993729">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="264.364972982"/>
       </location>
     </component>
   </type>
   <type name="bank15">
     <component type="eightpack">
-      <location x="3.45868370873" y="-0.00606093766155" z="0.561732705399">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="260.170471412"/>
+      <location x="3.45836782325" y="-0.00386740283784" z="0.561681401717">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="260.775010532"/>
       </location>
     </component>
   </type>
   <type name="bank16">
     <component type="eightpack">
-      <location x="3.41636268393" y="-0.00599334071091" z="0.777115296687">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="257.496793804"/>
+      <location x="3.41620389372" y="-0.00575800745781" z="0.777079176899">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="257.185061963"/>
       </location>
     </component>
   </type>
   <type name="bank17">
     <component type="eightpack">
-      <location x="3.35964020536" y="-0.00727589979489" z="0.989116660475">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="252.742119687"/>
+      <location x="3.35976887922" y="-0.00715077230924" z="0.989154543538">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="253.594965667"/>
       </location>
     </component>
   </type>
   <type name="bank18">
     <component type="eightpack">
-      <location x="3.2916850638" y="-0.0151786752554" z="1.19775326292">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="250.634505881"/>
+      <location x="3.29237939365" y="-0.0119565836618" z="1.19800591037">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="250.004951178"/>
       </location>
     </component>
   </type>
   <type name="bank19">
     <component type="eightpack">
-      <location x="3.20980977133" y="-0.00421158023472" z="1.40132722828">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="245.748482776"/>
+      <location x="3.21036381371" y="-0.00419344707095" z="1.40156911011">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="246.415053566"/>
       </location>
     </component>
   </type>
   <type name="bank20">
     <component type="eightpack">
-      <location x="3.11467399534" y="-0.0114264118644" z="1.59900201011">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="244.304349727"/>
+      <location x="3.1152731715" y="-0.00996132909587" z="1.59930961337">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="242.825078491"/>
       </location>
     </component>
   </type>
   <type name="bank21">
     <component type="eightpack">
-      <location x="3.00775895155" y="-0.0125975007027" z="1.79049389562">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="237.72620295"/>
+      <location x="3.00799476748" y="-0.0117252461735" z="1.79063427488">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="239.235013316"/>
       </location>
     </component>
   </type>
   <type name="bank22">
     <component type="eightpack">
-      <location x="2.89082247756" y="-0.0110097554732" z="1.97605896617">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="236.480504682"/>
+      <location x="2.89129678239" y="-0.00973731832824" z="1.97638318335">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="235.64493757"/>
       </location>
     </component>
   </type>
   <type name="bank23">
     <component type="eightpack">
-      <location x="2.76269145965" y="-0.00797135202862" z="2.15418295023">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="232.900275226"/>
+      <location x="2.76292420981" y="-0.00894036963117" z="2.154364435">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="232.055007578"/>
       </location>
     </component>
   </type>
   <type name="bank24">
     <component type="eightpack">
-      <location x="2.62167151805" y="-0.0142245235678" z="2.32231554457">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="229.389720537"/>
+      <location x="2.62171603943" y="-0.0120456912143" z="2.32235498227">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="228.465000757"/>
       </location>
     </component>
   </type>
   <type name="bank25">
     <component type="eightpack">
-      <location x="2.47087167589" y="-0.00639767435336" z="2.481674079">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="224.49594458"/>
+      <location x="2.47088520218" y="-0.00599075568002" z="2.48168766443">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="224.875027682"/>
       </location>
     </component>
   </type>
   <type name="bank26">
     <component type="eightpack">
-      <location x="2.31154296286" y="-0.0114417762075" z="2.63256162568">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="222.391967923"/>
+      <location x="2.31154226199" y="-0.0112918583284" z="2.63256082747">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="221.285023511"/>
       </location>
     </component>
   </type>
   <type name="bank27">
     <component type="eightpack">
-      <location x="2.14162064601" y="-0.00996243779723" z="2.77142824982">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="217.553843981"/>
+      <location x="2.14156994789" y="-0.00906058147102" z="2.77136264241">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="217.69504888"/>
       </location>
     </component>
   </type>
   <type name="bank28">
     <component type="eightpack">
-      <location x="1.96431854531" y="-0.00652460253613" z="2.90073954163">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="215.451561024"/>
+      <location x="1.9641205607" y="-0.00896123498282" z="2.9004471747">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="214.105013978"/>
       </location>
     </component>
   </type>
   <type name="bank29">
     <component type="eightpack">
-      <location x="1.77766527617" y="-0.00726465940814" z="3.01606599981">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="209.684353775"/>
+      <location x="1.77746384376" y="-0.00910506371999" z="3.01572424063">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="210.515040737"/>
       </location>
     </component>
   </type>
   <type name="bank30">
     <component type="eightpack">
-      <location x="1.58610285419" y="-0.00753268450759" z="3.12300524792">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="208.609377266"/>
+      <location x="1.58591306436" y="-0.00868312504708" z="3.12263155549">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="206.924972124"/>
       </location>
     </component>
   </type>
   <type name="bank31">
     <component type="eightpack">
-      <location x="1.38626765293" y="-0.00426192882482" z="3.21346635962">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="201.875903837"/>
+      <location x="1.38606441652" y="-0.00531014773993" z="3.21299524325">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="203.335040609"/>
       </location>
     </component>
   </type>
   <type name="bank32">
     <component type="eightpack">
-      <location x="1.18266807977" y="-0.011337126713" z="3.29491425328">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="200.773342857"/>
+      <location x="1.18243062048" y="-0.0112480774034" z="3.2942526915">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="199.744962636"/>
       </location>
     </component>
   </type>
   <type name="bank33">
     <component type="eightpack">
-      <location x="0.973795498995" y="-0.00650473952048" z="3.36169545594">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="195.189607229"/>
+      <location x="0.973685328882" y="-0.00611769454265" z="3.36131513135">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="196.154923831"/>
       </location>
     </component>
   </type>
   <type name="bank34">
     <component type="eightpack">
-      <location x="0.758988826738" y="0.00712637688642" z="3.40529874831">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="190.707282247"/>
+      <location x="0.761435052614" y="-0.00315860615156" z="3.4162740481">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="192.564970975"/>
       </location>
     </component>
   </type>
   <type name="bank35">
     <component type="eightpack">
-      <location x="0.545080793902" y="-0.01" z="3.45122049833">
+      <location x="0.545080793903" y="-0.01" z="3.45122049833">
         <rot axis-x="0" axis-y="1" axis-z="0" val="188.975076375"/>
       </location>
     </component>
   </type>
   <type name="bank36">
     <component type="eightpack">
-      <location x="0.327268221737" y="0.00517166133496" z="3.47185464381">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="186.513009027"/>
+      <location x="0.327902139882" y="-0.01" z="3.47857962201">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="185.384973183"/>
       </location>
     </component>
   </type>
@@ -447,8 +448,8 @@
   </type>
   <type name="bank38">
     <component type="eightpack">
-      <location x="-0.544507966773" y="0.0048285072031" z="3.4476016673">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="171.941469563"/>
+      <location x="-0.545079549438" y="-0.01" z="3.45122069488">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="171.024944285"/>
       </location>
     </component>
   </type>
@@ -461,78 +462,78 @@
   </type>
   <type name="bank40">
     <component type="eightpack">
-      <location x="-0.972499420706" y="-0.00422438850886" z="3.35718698334">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="169.444607813"/>
+      <location x="-0.972164081156" y="-0.01" z="3.35602935019">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="163.844920154"/>
       </location>
     </component>
   </type>
   <type name="bank41">
     <component type="eightpack">
-      <location x="-1.18389219321" y="-0.00677922949799" z="3.29832947087">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="160.241331272"/>
+      <location x="-1.18263876805" y="-0.00600443659408" z="3.29483742221">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="160.255064078"/>
       </location>
     </component>
   </type>
   <type name="bank42">
     <component type="eightpack">
-      <location x="-1.3883046843" y="-0.0062596245386" z="3.21820670312">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="156.782049049"/>
+      <location x="-1.387366951" y="-0.00597721666319" z="3.21603295868">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="156.665078283"/>
       </location>
     </component>
   </type>
   <type name="bank43">
     <component type="eightpack">
-      <location x="-1.58601648561" y="-0.00563240321821" z="3.1228287992">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="152.408246145"/>
+      <location x="-1.58431466481" y="-0.00722210044314" z="3.11947795445">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="153.074980537"/>
       </location>
     </component>
   </type>
   <type name="bank44">
     <component type="eightpack">
-      <location x="-1.7801957537" y="-0.0113026093919" z="3.02036901005">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="149.606994471"/>
+      <location x="-1.77781612706" y="-0.0122383598605" z="3.01633161667">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="149.485039668"/>
       </location>
     </component>
   </type>
   <type name="bank45">
     <component type="eightpack">
-      <location x="-1.9656560619" y="-0.0149141055237" z="2.90270766061">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="145.305359381"/>
+      <location x="-1.96318867535" y="-0.0163260390653" z="2.89906404157">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="145.894921759"/>
       </location>
     </component>
   </type>
   <type name="bank46">
     <component type="eightpack">
-      <location x="-2.14435375305" y="-0.0097463399885" z="2.77496337112">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="143.349048714"/>
+      <location x="-2.142222282" y="-0.0117748544512" z="2.77220507898">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="142.304933762"/>
       </location>
     </component>
   </type>
   <type name="bank47">
     <component type="eightpack">
-      <location x="-2.31233692641" y="-0.00475176617538" z="2.63347170423">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="137.493833087"/>
+      <location x="-2.30841120301" y="-0.00526163095443" z="2.62900078074">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="138.715039617"/>
       </location>
     </component>
   </type>
   <type name="bank48">
     <component type="eightpack">
-      <location x="-2.47132434499" y="0.00184081940157" z="2.48213214918">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="135.581523766"/>
+      <location x="-2.45789170993" y="0.0016671025144" z="2.46864076939">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="135.125011814"/>
       </location>
     </component>
   </type>
   <type name="bank49">
     <component type="eightpack">
-      <location x="-2.62005260739" y="-0.0124191484111" z="2.32087666685">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="129.420954565"/>
+      <location x="-2.61701338539" y="-0.0126483601059" z="2.31818448448">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="131.53494015"/>
       </location>
     </component>
   </type>
   <type name="bank50">
     <component type="eightpack">
-      <location x="-2.74208163555" y="-0.0153130741761" z="2.13811473626">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="125.287466022"/>
+      <location x="-2.73902628562" y="-0.0145672321557" z="2.13573235325">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="127.945019769"/>
       </location>
     </component>
   </type>
@@ -714,6 +715,7 @@
     <id val="-1"/>
     <id val="-2"/>
     <id val="-3"/>
+    <id val="-4"/>
   </idlist>
   <!--DETECTOR PARAMETERS-->
   <component-link name="detectors">

@@ -136,5 +136,28 @@ Simulations Interface
 
 Bug Fixes
 #########
-- Fixed a crash in MolDyn caused by plotting output data.
+- Fixed a crash in MolDyn when plotting output data.
+
+
+The Workbench
+-------------
+
+- The Indirect Corrections GUI has been added to the Workbench.
+- The Indirect Data Reduction GUI has been added to the Workbench.
+- The Indirect Diffraction GUI has been added to the Workbench.
+- The Indirect Simulations GUI has been added to the Workbench.
+- The Indirect Tools GUI has been added to the Workbench.
+
+.. figure:: ../../images/Indirect_Data_Reduction_Sqw.png
+  :class: screenshot
+  :align: center
+  :figwidth: 90%
+  :alt: The Indirect Data Reduction GUI in the Workbench.
+
+Tools Interface
+---------------
+
+Improvements
+############
+- Added a verification for the chemical formula input on the Transmission tab.
 

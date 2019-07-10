@@ -9,12 +9,14 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT
+from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, convert_to_field, extract_single_spec
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
-    get_base_data_directory
+    get_base_data_directory, get_group_or_pair_from_name
 import re
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.observer_pattern import GenericObservable
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
 
 
 class FFTPresenter(object):
@@ -33,7 +35,7 @@ class FFTPresenter(object):
         self.view.tableClickSignal.connect(self.tableClicked)
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
-
+        self.calculation_finished_notifier = GenericObservable()
         self.view.setup_raw_checkbox_changed(self.handle_use_raw_data_changed)
 
     def cancel(self):
@@ -155,6 +157,7 @@ class FFTPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
+        self.calculation_finished_notifier.notify_subscribers()
 
     def calculate_FFT(self):
         imaginary_workspace_index = 0
@@ -176,7 +179,7 @@ class FFTPresenter(object):
 
         fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input, imaginary_workspace_index)
 
-        frequency_domain_workspace = run_FFT(fft_parameters)
+        frequency_domain_workspace = convert_to_field(run_FFT(fft_parameters))
 
         self.add_fft_workspace_to_ADS(real_workspace_padding_parameters['InputWorkspace'],
                                       imaginary_workspace_padding_parameters['InputWorkspace'],
@@ -184,12 +187,26 @@ class FFTPresenter(object):
 
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
         run = re.search('[0-9]+', input_workspace).group()
+        Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
         group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument, self.load.workspace_suffix)
         directory = get_base_data_directory(self.load, run) + group
 
-        muon_workspace_wrapper = MuonWorkspaceWrapper(fft_workspace, directory + fft_workspace_name)
-        muon_workspace_wrapper.show()
+        Re = get_group_or_pair_from_name(input_workspace)
+        Im = get_group_or_pair_from_name(imaginary_input_workspace)
+
+        shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
+        spectra = {"_"+FREQUENCY_EXTENSIONS["RE"]:0+shift, "_"+FREQUENCY_EXTENSIONS["IM"]:1+shift, "_"+FREQUENCY_EXTENSIONS["MOD"]:2+shift}
+        for spec_type in list(spectra.keys()):
+            extracted_ws = extract_single_spec(fft_workspace,spectra[spec_type])
+
+            if 'PhaseQuad' in self.view.workspace:
+                self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re,Im_run, Im, phasequad = True)
+            else:
+                self.load._frequency_context.add_FFT(fft_workspace_name  + spec_type, run, Re,Im_run, Im)
+
+            muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws, directory + fft_workspace_name + spec_type)
+            muon_workspace_wrapper.show()
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

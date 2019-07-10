@@ -56,41 +56,31 @@ class ResultsTabPresenterTest(unittest.TestCase):
         new_name = 'func 2'
         self.mock_view.selected_fit_function.return_value = new_name
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter._get_workspace_list = mock.MagicMock(return_value=(['ws1', 'ws3'], "func 2"))
         presenter.on_function_selection_changed()
 
         self.mock_view.selected_fit_function.assert_called_once_with()
-        self.mock_model.set_selected_fit_function.assert_called_once_with(
-            new_name)
+        self.mock_model.set_selected_fit_function.assert_called_once_with(new_name)
 
     def test_adding_new_fit_to_existing_fits_preserves_current_selections(
             self):
-        orig_ws_list_state = {
-            name: [index, checked, True]
-            for index, (name, checked) in enumerate((('ws1', True), ('ws2',
-                                                                     False)))
-        }
-        final_ws_list_state = {
-            name: [index, checked, True]
-            for index, (name, checked) in enumerate((('ws1', True),
-                                                     ('ws2', False), ('ws3',
-                                                                      True)))
-        }
+        orig_ws_list_state = ['ws1', 'ws3']
+        final_ws_list_state = ['ws1', 'ws3']
         test_functions = ['func1', 'func2']
         self.mock_model.fit_functions.return_value = test_functions
         self.mock_model.fit_selection.return_value = final_ws_list_state
         self.mock_view.fit_result_workspaces.return_value = orig_ws_list_state
 
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter._get_workspace_list = mock.MagicMock(return_value=(['ws1', 'ws3'], "func1"))
         # previous test verifies this is correct on construction
         self.mock_view.set_output_results_button_enabled.reset_mock()
         presenter.on_new_fit_performed()
 
         self.mock_model.fit_functions.assert_called_once_with()
-        self.mock_model.fit_selection.assert_called_once_with(
-            existing_selection=orig_ws_list_state)
+        self.mock_model.fit_selection.assert_called_once_with(orig_ws_list_state)
         self.mock_view.set_fit_function_names.assert_called_once_with(
             test_functions)
-        self.mock_view.fit_result_workspaces.assert_called_once_with()
         self.mock_view.set_fit_result_workspaces.assert_called_once_with(
             final_ws_list_state)
         self.mock_view.set_output_results_button_enabled.assert_called_once_with(
@@ -110,6 +100,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_model.log_selection.return_value = final_selection
 
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter._get_workspace_list = mock.MagicMock(return_value=(['ws1', 'ws3'], "func1"))
         # previous test verifies this is correct on construction
         self.mock_view.set_output_results_button_enabled.reset_mock()
         presenter.on_new_fit_performed()

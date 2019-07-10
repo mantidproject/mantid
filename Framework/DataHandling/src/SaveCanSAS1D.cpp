@@ -22,6 +22,8 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <list>
+
 namespace {
 void encode(std::string &data) {
   std::string buffer;
@@ -560,9 +562,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
   std::list<std::string> detList;
   boost::algorithm::split(detList, detectorNames,
                           std::bind2nd(std::equal_to<char>(), ','));
-  for (std::list<std::string>::const_iterator itr = detList.begin();
-       itr != detList.end(); ++itr) {
-    std::string detectorName = *itr;
+  for (auto detectorName : detList) {
     boost::algorithm::trim(detectorName);
 
     // get first component with name detectorName in IDF

@@ -4,9 +4,7 @@ set(SRC_FILES
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
     src/CompressEvents.cpp
-    src/CreateChopperModel.cpp
     src/CreateChunkingFromInstrument.cpp
-    src/CreateModeratorModel.cpp
     src/CreatePolarizationEfficiencies.cpp
     src/CreatePolarizationEfficienciesBase.cpp
     src/CreateSampleShape.cpp
@@ -204,9 +202,7 @@ set(INC_FILES
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/CheckMantidVersion.h
     inc/MantidDataHandling/CompressEvents.h
-    inc/MantidDataHandling/CreateChopperModel.h
     inc/MantidDataHandling/CreateChunkingFromInstrument.h
-    inc/MantidDataHandling/CreateModeratorModel.h
     inc/MantidDataHandling/CreatePolarizationEfficiencies.h
     inc/MantidDataHandling/CreatePolarizationEfficienciesBase.h
     inc/MantidDataHandling/CreateSampleShape.h
@@ -405,9 +401,7 @@ set(TEST_FILES
     AppendGeometryToSNSNexusTest.h
     CheckMantidVersionTest.h
     CompressEventsTest.h
-    CreateChopperModelTest.h
     CreateChunkingFromInstrumentTest.h
-    CreateModeratorModelTest.h
     CreatePolarizationEfficienciesTest.h
     CreateSampleShapeTest.h
     CreateSimulationWorkspaceTest.h

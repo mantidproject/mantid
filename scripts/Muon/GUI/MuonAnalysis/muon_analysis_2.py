@@ -98,7 +98,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         central_widget.setLayout(vertical_layout)
 
         self.setCentralWidget(central_widget)
-        self.setWindowTitle("Muon Analysis")
+        self.setWindowTitle(self.context.window_title)
 
         self.setup_load_observers()
 

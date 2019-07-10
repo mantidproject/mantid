@@ -8,10 +8,10 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
-from __future__ import  (absolute_import, unicode_literals)
+from __future__ import (absolute_import, unicode_literals)
 
-from functools import wraps
 import sys
+from functools import wraps
 
 # 3rdparty imports
 import matplotlib
@@ -21,17 +21,16 @@ from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
 from matplotlib.axes import Axes
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
-
 # local imports
 from mantid.api import AnalysisDataServiceObserver
 from mantid.plots import MantidAxes
 from mantid.py3compat import text_type
 from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from .figureinteraction import FigureInteraction
 from .figurewindow import FigureWindow
-from .qappthreadcall import QAppThreadCall
 from .toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
 
 

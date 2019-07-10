@@ -400,6 +400,20 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws1"));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
+    removeFromADS("", inputs);
+  }
+
+  void test_OutputWorkspace_can_overwrite_input_group_workspaces() {
+    const std::vector<std::string> inputs{"ws1", "ws2", "ws3"};
+    addTestMatrixWorkspacesToADS(inputs);
+    const std::vector<std::string> group1{"ws1", "ws2"};
+    runAlgorithm(group1, "Group", false);
+
+    const std::vector<std::string> group2{"Group", "ws3"};
+    runAlgorithm(group2, "Group", false);
+
+    checkGroupExistsWithMembers("Group", {"ws1", "ws2", "ws3"});
+    removeFromADS("Group", inputs);
   }
 
 private:
