@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+from mantid.api import FileFinder
 from qtpy import PYQT4, QtWidgets
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS", "PSI"]
 allowed_extensions = ["nxs", "bin"]
@@ -45,21 +46,19 @@ def get_current_run_filename(instrument):
     if instrument_directory is None:
         return ""
 
-    autosave_file_name = _instrument_data_directory(instrument_directory) + FILE_SEP + "autosave.run"
-    autosave_points_to = ""
+    file_path = _instrument_data_directory(instrument_directory) + FILE_SEP
+    autosave_file_name = file_path + "autosave.run"
+    current_run_filename = ""
     if not check_file_exists(autosave_file_name):
         raise ValueError("Cannot find file : " + autosave_file_name)
     with open(autosave_file_name, 'r') as autosave_file:
         for line in autosave_file:
-            if os.path.isfile(line):
-                autosave_points_to = line
-    if autosave_points_to == "":
-        # Default to auto_A (replicates MuonAnalysis 1.0 behaviour)
-        current_run_filename = _instrument_data_directory(instrument_directory) \
-                               + FILE_SEP + instrument_directory + "auto_A.tmp"
-    else:
-        current_run_filename = _instrument_data_directory(instrument_directory) \
-                               + FILE_SEP + autosave_points_to
+            line.replace(" ", "")
+            file_name = file_path + line
+            if check_file_exists(FileFinder.getFullPath(file_name)):
+                current_run_filename = file_name
+    if current_run_filename == "":
+        raise ValueError("Failed to find latest run")
     return current_run_filename
 
 

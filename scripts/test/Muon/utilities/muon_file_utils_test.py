@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+from io import StringIO
 import unittest
 
 from mantid.py3compat import mock
@@ -62,6 +63,18 @@ class MuonFileUtilsTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             utils.get_current_run_filename("EMU")
 
+    def test_that_get_current_run_returns_correct_run(self):
+        utils.check_file_exists = mock.Mock(return_value=True)
+        file_name = os.sep + os.sep + "EMU" + os.sep + "data" + os.sep + "autoA"
+        file = StringIO(u"autoA")
+        utils.open = mock.Mock(return_value = file)
+        current_file_name = utils.get_current_run_filename("EMU")
+        self.assertEqual(current_file_name, file_name)
+
+    def test_that_get_current_run_throws_if_no_valid_run_in_autosave_run(self):
+        utils.check_file_exists = mock.Mock(side_effect = [True, False])
+        with self.assertRaises(ValueError):
+            utils.get_current_run_filename("EMU")
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
