@@ -125,12 +125,22 @@ class CurveProperties(dict):
         return self[item]
 
     def get_plot_kwargs(self):
-        """Return curve properties that can be used a plot kwargs"""
+        """Return curve properties that can be used as plot kwargs"""
         kwargs = {}
         for k, v in self.items():
             if k not in ['hide', 'hide_errors']:
                 kwargs[k] = v
         kwargs['visible'] = not self.hide
+        return kwargs
+
+    @classmethod
+    def get_mpl_plot_kwargs_from_curve(cls, curve):
+        """
+        Return ONLY curve properties that matplotlib recognises.
+        Removes any custom properties appended by this class
+        """
+        kwargs = cls.from_curve(curve)
+        kwargs = {key: value for key, value in kwargs.items() if key not in ['hide', 'hide_errors']}
         return kwargs
 
     @classmethod
@@ -211,7 +221,7 @@ class CurveProperties(dict):
         props['errorevery'] = getattr(curve, 'errorevery', 1)
         try:
             caps = curve[1]
-            props['capsize'] = float(caps[0].get_markersize()/2)
+            props['capsize'] = float(caps[0].get_markersize() / 2)
             props['capthick'] = float(caps[0].get_markeredgewidth())
         except (IndexError, TypeError):
             props['capsize'] = 0.0
@@ -222,5 +232,6 @@ class CurveProperties(dict):
             props['ecolor'] = convert_color_to_hex(bars[0].get_color()[0])
         except (IndexError, TypeError):
             props['elinewidth'] = 1.0
-            props['ecolor'] = convert_color_to_hex(rcParams['lines.color'])
+            # if the errorbars don't have a default color, use the line's color
+            props['ecolor'] = curve.get_color()
         return props

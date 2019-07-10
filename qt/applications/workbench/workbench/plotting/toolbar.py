@@ -31,7 +31,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_plot_options_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'on_home_clicked', None),
+        # ('Home', 'Reset original view', 'mdi.home', 'on_home_clicked', None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'mdi.magnify-plus-outline', 'zoom', False),
         (None, None, None, None, None),

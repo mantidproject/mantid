@@ -1010,47 +1010,47 @@ class MantidAxes(Axes):
         else:
             return Axes.tricontourf(self, *args, **kwargs)
 
-    def legend(self, *args, **kwargs):
-        """
-        In the case where there are no arguments to the legend function,
-        but errors are present on the plot, we make our own legend order
-        to prevent MPL always appending errors on the bottom of the legend.
-
-        Make our own labels if:
-          -> no args are provided
-          -> any errors are plotted
-
-        If there are no args or no errors, we back out to use the original MPL implementation
-        :rtype: matplotlib.legend.Legend
-        """
-        if len(args) == 0 or len(self.containers) == 0:
-            handles = []
-            labels = []
-            for line in self.lines:
-                if line.get_label() == self.MPL_NOLEGEND:
-                    errorbar = find_errorbar_container(line, self.containers)
-                    if not errorbar:
-                        # the line does not have an errorbar container that would have the label
-                        # nor does it have a label, as it has been marked with NOLEGEND
-                        # simply continue to the next line
-                        continue
-
-                    handle = errorbar
-                    label = errorbar.get_label()
-                else:
-                    handle = line
-                    label = line.get_label()
-
-                # if the label starts with an underscore then
-                # it should not be part of the legend as it is hidden
-                # this can't be checked before the error line check above
-                if not label.startswith("_"):
-                    handles.append(handle)
-                    labels.append(label)
-
-            return Axes.legend(self, handles, labels)
-        else:
-            return Axes.legend(self, *args, **kwargs)
+    # def legend(self, *args, **kwargs):
+    #     """
+    #     In the case where there are no arguments to the legend function,
+    #     but errors are present on the plot, we make our own legend order
+    #     to prevent MPL always appending errors on the bottom of the legend.
+    #
+    #     Make our own labels if:
+    #       -> no args are provided
+    #       -> any errors are plotted
+    #
+    #     If there are no args or no errors, we back out to use the original MPL implementation
+    #     :rtype: matplotlib.legend.Legend
+    #     """
+    #     if len(args) == 0 or len(self.containers) == 0:
+    #         handles = []
+    #         labels = []
+    #         for line in self.lines:
+    #             if line.get_label() == self.MPL_NOLEGEND:
+    #                 errorbar = find_errorbar_container(line, self.containers)
+    #                 if not errorbar:
+    #                     # the line does not have an errorbar container that would have the label
+    #                     # nor does it have a label, as it has been marked with NOLEGEND
+    #                     # simply continue to the next line
+    #                     continue
+    #
+    #                 handle = errorbar
+    #                 label = errorbar.get_label()
+    #             else:
+    #                 handle = line
+    #                 label = line.get_label()
+    #
+    #             # if the label starts with an underscore then
+    #             # it should not be part of the legend as it is hidden
+    #             # this can't be checked before the error line check above
+    #             if not label.startswith("_"):
+    #                 handles.append(handle)
+    #                 labels.append(label)
+    #
+    #         return Axes.legend(self, handles, labels)
+    #     else:
+    #         return Axes.legend(self, *args, **kwargs)
 
     # ------------------ Private api --------------------------------------------------------
 

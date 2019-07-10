@@ -56,12 +56,16 @@ class CurvesTabWidgetPresenter:
         curve = self.get_selected_curve()
         # Set the curve's new name in the names dict and combo box
         self.set_new_curve_name_in_dict_and_combo_box(curve, view_props.label)
+        self.toggle_errors(self.get_selected_ax(), curve, view_props)
+        self.current_view_properties = view_props
+
+    @staticmethod
+    def toggle_errors(ax, curve, view_props):
         setattr(curve, 'hide_errors', view_props.hide_errors)
         set_errorbars_hidden(curve, view_props.hide_errors)
-        if self.get_selected_ax().legend_:
-            self.get_selected_ax().legend().draggable()
-        self.current_view_properties = view_props
-        self.get_selected_ax().relim()
+        if ax.legend_:
+            ax.legend().draggable()
+        ax.relim()
 
     def close_tab(self):
         """Close the tab and set the view to None"""
@@ -128,8 +132,8 @@ class CurvesTabWidgetPresenter:
             new_curve = self.replot_curve(ax, curve, plot_kwargs)
         setattr(new_curve, 'errorevery', plot_kwargs.get('errorevery', 1))
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
-        if self.get_selected_ax().legend_:
-            self.get_selected_ax().legend().draggable()
+        if ax.legend_:
+            ax.legend().draggable()
 
     def populate_curve_combo_box_and_update_view(self):
         """
@@ -230,6 +234,10 @@ class CurvesTabWidgetPresenter:
     def _get_selected_ax_errorbars(self):
         """Get all errorbar containers in selected axes"""
         ax = self.get_selected_ax()
+        return self.get_errorbars_from_ax(ax)
+
+    @staticmethod
+    def get_errorbars_from_ax(ax):
         return [cont for cont in ax.containers if isinstance(cont,
                                                              ErrorbarContainer)]
 
@@ -246,14 +254,22 @@ class CurvesTabWidgetPresenter:
             self.view.close()
             return False
 
-        for errorbar_container in self._get_selected_ax_errorbars():
-            self._update_selected_curve_name(errorbar_container)
-        for line in selected_ax.get_lines():
+        active_lines = self.get_active_lines(selected_ax, self._get_selected_ax_errorbars())
+        for line in active_lines:
             self._update_selected_curve_name(line)
 
         self.view.populate_select_curve_combo_box(
             sorted(self.curve_names_dict.keys(), key=lambda s: s.lower()))
         return True
+
+    @staticmethod
+    def get_active_lines(selected_ax, errorbars):
+        active_lines = []
+        for errorbar_container in errorbars:
+            active_lines.append(errorbar_container)
+        for line in selected_ax.get_lines():
+            active_lines.append(line)
+        return active_lines
 
     def _update_selected_curve_name(self, curve):
         """Update the selected curve's name in the curve_names_dict"""
