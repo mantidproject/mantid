@@ -19,7 +19,7 @@ ISIS Reflectometry Interface
 Workbench Support
 #################
 
-The ISIS Reflectometry interface is now fully supported in Workbench. You can also continue to use it in MantidPlot.
+The ISIS Reflectometry interface is now available in ``MantidWorkbench``, as well as ``MantidPlot``. See the :doc:`workbench documentation <workbench>` for more details about ``MantidWorkbench`` and the :doc:`workbench release notes <mantidworkbench>` to see what else is included in this version.
 
 Usability Improvements
 ######################
@@ -109,27 +109,27 @@ Processing and highlighting
 
 .. figure:: ../../images/ISISReflectometryInterface_row_highlighting.png
   :class: screenshot
-  :width: 400px
+  :width: 650px
   :align: center
   :alt: Highlighting on the runs table
 
-  *Highlighting on the runs table: Yellow=processing; green=complete; grey=invalid; blue=error. A star indicates invalid or missing values.*
+  *Highlighting on the runs table*
 
-- Input validation is more intuitive - invalid values are highlighted with a red background, or, in the table, cells with an invalid value are marked with a red star
 - Additional highlighting has been added for rows and groups in the table to indicate which row is currently processing (yellow) and rows that are invalid and will be ignored (grey).
 - A row or group's state is reset if its final output workspace(s) have been deleted
 - Renamed workspaces now remain associated with the correct row/group in the table, so they can still be plotted
 - Q min, Q max and dQ/Q are greyed out when they have been populated from the algorithm outputs so that you can easily distinguish between inputs and outputs
+- Input validation is more intuitive - invalid values are highlighted with a red background, or, in the table, cells with an invalid value are marked with a red star
 - The progress bar is more accurate, and remembers previous progress when you pause and restart processing.
 - Processing in event mode is now done asynchronously, so it no longer locks up MantidPlot.
 
 .. figure:: ../../images/ISISReflectometryInterface_validation.png
   :class: screenshot
-  :width: 700px
+  :width: 650px
   :align: center
   :alt: The ISIS Reflectometry Interface showing invalid input values highlighted in red
 
-  *Invalid input values are highlighted in red*
+  *Examples of invalid input checks*
 
 Bug fixes
 #########
