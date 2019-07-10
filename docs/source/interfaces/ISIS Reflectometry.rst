@@ -22,9 +22,6 @@ data is being processed, and easy to adjust any of the options used.
 Integration with data archives is also provided, allowing for data to
 be located and prepared for reduction automatically.
 
-IPython notebooks which document the processing steps and output
-relevant plots can also be produced from the interface.
-
 Information on how to resolve common problems can be found in the
 `Troubleshooting`_ section of this document.
 
@@ -33,7 +30,6 @@ Example Workflow
 
 To follow this example you will need the ISIS reflectometry example materials:
 
-* ``INTER_NR_test2.tbl``
 * ``INTER00013460.nxs``
 * ``INTER00013462.nxs``
 * ``INTER00013463.nxs``
@@ -43,19 +39,13 @@ These can be downloaded as part of the `ISIS example data <http://download.manti
 
 Once they are downloaded, place the nxs files in one of Mantid's user directories.
 To see a list of directories, click on **File -> Manage User Directories**.
-``INTER_NR_test2.tbl`` can be saved anywhere you like, as long as you know where it is.
 
-Open MantidPlot, and open the ISIS Reflectometry interface.
+Open Workbench or MantidPlot, and open the ISIS Reflectometry interface.
 **Interfaces -> Reflectometry -> ISIS Reflectometry**
 
-Within the interface, we first want to import the tbl file as a TableWorkspace.
-To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadTBL <algm-LoadTBL>`
-dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable``
-as the output workspace.
-
-A table workspace called ``MyTable`` should now exist in the ADS (:ref:`Analysis Data Service <Analysis Data Service>`).
-In addition the table workspace should be opened as well and the processing table
-(shown below) should now contain four rows (13460, 13462, 13469, 13470).
+First, we want to enter the run numbers and angles into the table. Enter the
+values as shown in the figure below. You can use various keyboard shortcuts to
+enter data quickly, e.g. tab between cells or Enter to add a new row.
 
 .. figure:: /images/ISISReflectometryPolref_INTER_table.png
   :align: center
@@ -106,42 +96,13 @@ Menu bar
 .. interface:: ISIS Reflectometry
   :widget: menuBar
 
-The **Reflectometry** menu provides access to the following functionality:
+The **Batch** menu provides access to the following functionality:
 
 +------------------+----------------------------------------------------------+
 | Action           | Effect                                                   |
 +==================+==========================================================+
-| Open Table       | Opens a valid *TableWorkspace* in the `Processing Table`_|
-|                  | for processing.                                          |
+| New              | Add a new Batch tab                                      |
 +------------------+----------------------------------------------------------+
-| New Table        | Discards the current contents of the `Processing Table`_ |
-|                  | presenting a blank table.                                |
-+------------------+----------------------------------------------------------+
-| Save Table       | Saves the current contents of the `Processing Table`_ to |
-|                  | the *TableWorkspace* it came from. If no such workspace  |
-|                  | already exists, a new one can be created.                |
-+------------------+----------------------------------------------------------+
-| Save Table As    | Saves the current contents of the `Processing Table`_ to |
-|                  | a new *TableWorkspace*.                                  |
-+------------------+----------------------------------------------------------+
-| Import .TBL      | Opens a :ref:`LoadTBL <algm-LoadTBL>` dialog,            |
-|                  | enabling you to load a ``.tbl`` file into a              |
-|                  | *TableWorkspace*.                                        |
-+------------------+----------------------------------------------------------+
-| Export .TBL      | Opens a :ref:`SaveTBL <algm-SaveTBL>` dialog,            |
-|                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
-|                  | file.                                                    |
-+------------------+----------------------------------------------------------+
-| Options          | Opens the `Options`_                             menu.   |
-+------------------+----------------------------------------------------------+
-| Slit Calculator  | Opens the slit calculator: a tool to help calculate the  |
-|                  | correct geometry for the instruments' slits. It's powered|
-|                  | by the :ref:`CalculateSlits <algm-CalculateSlits>`       |
-|                  | algorithm.                                               |
-+------------------+----------------------------------------------------------+
-
-The **Edit** menu provides access to the same actions found in the tool bar.
-These are documented in the `Tool Bar`_ section of this document.
 
 Processing Table
 ^^^^^^^^^^^^^^^^
@@ -355,15 +316,15 @@ wish to transfer, and click the **Transfer** button. You can also right-click
 on one of the selected runs and select *Transfer* in the context menu that
 appears.
 
-Description Based Search Transfer
-==================================
+Search Transfer
+===============
 
-Description based search transfer uses the descriptions associated with raw files from the experiment.
+Search transfer uses the descriptions associated with raw files from the experiment.
 
-If a run's description contains the text ``in 0.7 theta``, or ``th=0.7``, or
-``th:0.7``, then the interface will deduce that the run's angle (also known
-as theta), was ``0.7``, and enter this value into the angle column for you.
-This holds true for any numeric value.
+If a run's description contains the text ``th=0.7`` at the end of the
+description then the interface will deduce that the run's angle (also known as
+theta), was ``0.7``, and enter this value into the angle column for you.  This
+holds true for any numeric value.
 
 When multiple runs are selected and transferred simultaneously, the interface
 will attempt to organise them appropriately in the processing table. The exact
@@ -374,21 +335,11 @@ behaviour of this is as follows:
 - Any runs with the same description, including their theta value, will be
   merged into a single row, with all the runs listed in the **Run(s)** column
   in the format, ``123+124+125``.
-
-.. _interface-isis-refl-measure-based-search-transfer:
-
-Measure Based Search Transfer
-==============================
-
-Measure based search transfer uses the log-values within nexus files from the experiment to assemble the batch. Since the files themselves are required, not just the overview metadata, the files must be accessible by mantid. One way of doing this is to mount the archive and set the user property ``icatDownload.mountPoint`` to your mount point. It may end up looking something like this ``icatDownload.mountPoint=/Volumes/inst$``. Alternately, you can download the files to your local disk and simply add that directory to the managed search directories in ``Manage User Directories``.
-
-- Any runs with the ``measurement_id`` log, will be
-  placed into the same group.
-- Any runs with the same ``measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``.
+- Rows within a group will be sorted by angle.
 
 Failed transfers
 ================
-When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, if a Measure-based run has an invalid measurement id.
+When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, where theta could not be found or is zero.
 In the image below we select three runs from the Search table that we wish to transfer to the processing table.
 
 .. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.png
@@ -662,40 +613,6 @@ use the settings in the first group to reduce runs in the first processing table
 second group to reduce runs in the second processing table. The process is analogous for time slicing options
 specified in the **Event Handling** tab.
 
-.. _ISIS_Reflectomety-Options:
-
-Options
--------
-
-Through the options menu, a small number of options may be configured to adjust
-the behaviour of the interface.
-
-To open the options menu, click on **Reflectometry -> Options**.
-
-+-------------------------------+------------------------------------------------------+
-| Name                          | Description                                          |
-+===============================+======================================================+
-| Warn when processing all rows | When the **Process** button is pressed with no rows  |
-|                               | selected, all rows will be processed.                |
-|                               | If this is enabled, you will be asked if you're sure |
-|                               | you want to process all rows first.                  |
-+-------------------------------+------------------------------------------------------+
-| Warn when processing only     | If this is enabled and you press **Process** with    |
-| part of a group               | only a subset of a group's rows selected, you will be|
-|                               | asked if you're sure you that's what you intended to |
-|                               | do.                                                  |
-+-------------------------------+------------------------------------------------------+
-| Warn when discarding unsaved  | If this is enabled and you try to open an existing   |
-| changes                       | table, or start a new table, with unsaved changes to |
-|                               | the current table, you will be asked if you're sure  |
-|                               | you want to discard the current table.               |
-+-------------------------------+------------------------------------------------------+
-| Rounding                      | When a column is left blank, the Reflectometry       |
-|                               | interface will try to fill it with a sensible value  |
-|                               | for you. This option allows you to configure whether |
-|                               | the value should be rounded, and if so, to how many  |
-|                               | decimal places.                                      |
-+-------------------------------+------------------------------------------------------+
 
 Troubleshooting
 ---------------
@@ -738,13 +655,6 @@ When I try to process I get an error: "Invalid value for property ... Can not co
 
 This occurs when a boolean property is set to "True" or "False". Please, use ``1`` or ``0`` instead.
 
-The *Open Table* menu doesn't do anything
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The **Open Table** menu contains a list of valid table workspaces to open in the
-processing table. If a workspace is not compatible, it will not be listed. So,
-if there are no compatible workspaces the **Open Table** menu will be empty.
-
 My IvsQ workspaces are not being stitched correctly
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -756,13 +666,5 @@ rows you want stitched, and then in the menu bar select **Edit -> Expand Selecti
 This will select the group your row is in. If you have another row that you
 would like to add to the group, you can do this easily by adding it to the
 selection, and then in the menu bar selecting **Edit -> Group Selected**.
-
-The *Save Table* option does not output a .TBL file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In the old interface (ISIS Reflectometry) the "Save Table" and "Save Table as.." options
-were used to output a .TBL file into a directory of your choice. This functionality is now
-provided by the "Export .TBL" option in the Options Menu. This will allow you to save a .TBL file
-to a directory of your choice. The "Save Table" option in the Options menu now provides a way for you
-to save the processing table in a TableWorkspace where the name of the TableWorkspace is provided by the user.
 
 .. categories:: Interfaces Reflectometry
