@@ -19,7 +19,7 @@ ISIS Reflectometry Interface
 Workbench Support
 #################
 
-The ISIS Reflectometry interface is now available in ``MantidWorkbench``, as well as ``MantidPlot``. See the :doc:`workbench documentation <workbench>` for more details about ``MantidWorkbench`` and the :doc:`workbench release notes <mantidworkbench>` to see what else is included in this version.
+The ISIS Reflectometry interface is now available in ``MantidWorkbench``, as well as ``MantidPlot``. See the :ref:`workbench documentation <workbench>` for more details and the :doc:`workbench release notes <mantidworkbench>` to see what else is included in this version.
 
 Usability Improvements
 ######################
@@ -66,8 +66,8 @@ Transmission Runs
 - A new ``Transmission stitch params`` input allows you to stitch parameters specifically for the transmission runs rather than using the same parameters as for the output IvsQ workspaces.
 - A new ``Scale RHS transmission workspace`` check box allows you to control which workspace is scaled when stitching transmission runs.
 
-The Toobar
-^^^^^^^^^^
+The Toolbar
+^^^^^^^^^^^
 
 .. |filldown| image:: ../../images/arrow-expand-down.png
 
@@ -85,24 +85,44 @@ The Toobar
 Keyboard shortcuts
 ^^^^^^^^^^^^^^^^^^
 
+Additional keyboard shortcuts have been added to aid navigation/editing in the runs table.
+
++-----------------------------+---------------------------------------+
+| Shortcut                    | Action                                |
++=============================+=======================================+
+|``F2``                       | Edit the current cell                 |
++-----------------------------+---------------------------------------+
+|``Esc``                      | Cancel editing                        |
++-----------------------------+---------------------------------------+
+|``Tab``                      | Next cell                             |
++-----------------------------+---------------------------------------+
+|``Shift-Tab``                | Previous cell                         |
++-----------------------------+---------------------------------------+
+|``Enter``                    | Edit the next row / append a new row  |
++-----------------------------+---------------------------------------+
+|``Ctrl-I``                   | Insert child row                      |
++-----------------------------+---------------------------------------+
+|``Ctrl-X``                   | Cut                                   |
++-----------------------------+---------------------------------------+
+|``Ctrl-C``                   | Copy                                  |
++-----------------------------+---------------------------------------+
+|``Ctrl-V``                   | Paste                                 |
++-----------------------------+---------------------------------------+
+|``Delete``                   | Delete the selected rows/groups       |
++-----------------------------+---------------------------------------+
+|``Up``/``Down``              | Select next/previous row              |
++-----------------------------+---------------------------------------+
+|``Shift-Up``/``Shift-Down``  | Extend selection to next/previous row |
++-----------------------------+---------------------------------------+
+|``Ctrl-A``                   | Select all                            |
++-----------------------------+---------------------------------------+
+
 .. figure:: ../../images/ISISReflectometryInterface_table_editing.png
   :class: screenshot
-  :align: right
+  :align: center
   :alt: Editing the Runs table
 
   *Editing the Runs table*
-
-Navigation by keyboard shortcuts has been added to the Runs table:
-
-- ``F2`` edits a cell
-- ``Esc`` cancels the current edit operation
-- ``Tab``/``Shift-Tab`` moves to the next/previous cell
-- Pressing ``Tab`` when in the last cell of a row adds a new row and moves to the first cell in it
-- ``Enter`` adds a new row/group at the same level
-- ``Ctrl-I`` inserts a new child row to a group
-- ``Ctrl-X``/``Ctrl-C``/``Ctrl-V`` perform cut/copy/paste. Note that 
-- The ``Delete`` key removes the selected rows/groups
-- Copy/paste functionality is more intuitive - you can select the destination rows/groups to paste over or paste into the "root" of the table to create a new group
 
 Processing and highlighting
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
