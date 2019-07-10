@@ -12,7 +12,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
-#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
@@ -42,9 +41,6 @@ using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(MatrixWorkspace)
-
-extern template int Mantid::PythonInterface::Converters::NDArrayTypeIndex<
-    Mantid::signal_t>::typenum;
 
 namespace {
 /// Typedef for data access, i.e. dataX,Y,E members
@@ -264,7 +260,7 @@ object getSignalAtCoord(MatrixWorkspace &self, const NDArray &npCoords,
 
   // Fill output array
   for (int i = 0; i < length; ++i) {
-    std::vector<Mantid::coord_t> coord = {coords[2 * i], coords[2 * i + 1]};
+    std::array<Mantid::coord_t, 2> coord = {coords[2 * i], coords[2 * i + 1]};
     signalValues[i] = self.getSignalAtCoord(coord.data(), normalization);
   }
   PyObject *npSignalArray =
