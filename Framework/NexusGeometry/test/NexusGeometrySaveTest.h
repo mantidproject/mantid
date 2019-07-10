@@ -451,9 +451,7 @@ public:
                      std::invalid_argument &);
   }
 
-  void test_detetctor_bank_has_valid_location() {
-  
-  }
+  void test_detetctor_bank_has_valid_location() {}
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

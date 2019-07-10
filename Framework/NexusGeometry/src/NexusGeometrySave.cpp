@@ -53,7 +53,8 @@ const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
 const std::string SOURCE = "source";
 const std::string SAMPLE = "sample";
-const std::string DETECTOR_NUMBER = "depends_on";
+const std::string DETECTOR_NUMBER = "detector_number";
+
 
 // metadata
 const std::string METRES = "m";
@@ -111,9 +112,9 @@ inline void writeDetectorNumberHelper(H5::Group &grp,
                                       const Geometry::ComponentInfo &compInfo) {
 
   std::vector<int> detectorIndices;
-  for (int i = compInfo.root(); i >= 0; --i) {
-    if (compInfo.isDetector(i)) {
-      detectorIndices.push_back(i);
+  for (hsize_t i = compInfo.root(); i > 0; --i) {
+    if (compInfo.isDetector(i - 1)) {
+      detectorIndices.push_back(i - 1);
     }
   }
 
@@ -128,9 +129,9 @@ inline void writeDetectorNumberHelper(H5::Group &grp,
   for (int i = 0; i < dsz; i++) {
     data[i] = i + 1; // placeholder
   }
-  H5::DataSet dset =
-      grp.createDataSet("detector_number", H5::PredType::NATIVE_INT, space);
-  dset.write(data, H5::PredType::NATIVE_INT, space);
+  H5::DataSet detectorNumber =
+      grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
+  detectorNumber.write(data, H5::PredType::NATIVE_INT, space);
   free(data);
 }
 
@@ -168,7 +169,7 @@ inline void writeLocationHelper(H5::Group &grp,
   normalisedPosition = position.normalized();
   norm = position.norm();
 
-  float *data = (float *)malloc(rank * sizeof(float));
+  double *data = (double *)malloc(rank * sizeof(double));
   data[0] = norm;
 
   location.write(data, H5::PredType::NATIVE_DOUBLE, space);
@@ -182,10 +183,10 @@ inline void writeOrientationHelper(H5::Group &grp,
   hsize_t dims[(hsize_t)1]; // number of dimensions
   dims[0] = 1;              // number of entries in first dimension
 
-  float *data = (float *)malloc(rank * sizeof(float));
+  double *data = (double *)malloc(rank * sizeof(double));
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
-  float val = 14.44444; // placeholder
+  double val = 14.44444; // placeholder
   data[0] = val;
 
   H5::DataSet dset =
@@ -194,7 +195,7 @@ inline void writeOrientationHelper(H5::Group &grp,
   free(data);
 }
 
-inline void writePixelOffsetsHelper() {}
+// inline void writePixelOffsetsHelper() {} TODO
 
 /*
 ==============================================================================================================
@@ -258,26 +259,20 @@ public:
   NGSDetector(const std::string &name, const H5::Group &parent,
               const Geometry::ComponentInfo &compInfo) {
 
-	  
-
-    std::string detectorBankNameStr = "detector_0"; // placeholder
-    std::string localNameStr = "INST";              // placeholder
-
-	m_group = parent.createGroup(detectorBankNameStr);
+    m_group = parent.createGroup(name);
     writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_DETECTOR);
 
-	// dependency of component
+    // depencency
     std::string dependencyStr = m_group.getObjName() + "/" + LOCATION;
+    std::string localNameStr = "INST"; // placeholder
 
-    H5::StrType localNameStrSize = strTypeOfSize(localNameStr);
     H5::StrType dependencyStrSize = strTypeOfSize(dependencyStr);
+    H5::StrType localNameStrSize = strTypeOfSize(localNameStr);
 
-    
     writeDetectorNumberHelper(m_group, compInfo);
     writeLocationHelper(m_group, compInfo);
     writeOrientationHelper(m_group, compInfo);
-
-    writePixelOffsetsHelper();
+    // writePixelOffsetsHelper();
 
     // string type datasets.
     H5::DataSet localName =
@@ -288,8 +283,6 @@ public:
     // write string type dataset values
     writeStrValueToDataSetHelper(localName, localNameStr); // placeholder
     writeStrValueToDataSetHelper(dependency, dependencyStr);
-
-
   }
 
   void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
@@ -402,7 +395,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writeStrAttributeToGroupHelper(rootGroup, NX_CLASS, NX_ENTRY);
 
   NGSInstrument instr(rootGroup, compInfo);
-  NGSDetector detector1("detector_1", instr.group(), compInfo);
+  NGSDetector detector1("detector_0", instr.group(), compInfo);
   NGSSource source(instr.group(), compInfo);
   NGSSample sample(rootGroup, compInfo);
   NGSPixelShape pixelShape(detector1.group(), compInfo);
