@@ -10,6 +10,17 @@ from qtpy import QtWidgets, QtCore
 from six import iteritems
 
 from Muon.GUI.Common.checkbox import Checkbox
+from Muon.GUI.Common import message_box
+
+
+# Check that the new data format contains at least A, Z, primary (they can be empty)
+def is_valid_data(peak_data):
+    data_present = [str(k) for k in peak_data.keys()]
+    if any(['Z' not in data_present,
+            'A' not in data_present]):
+        return False
+
+    return True
 
 
 class PeakSelectorView(QtWidgets.QListWidget):
@@ -20,15 +31,18 @@ class PeakSelectorView(QtWidgets.QListWidget):
         widget = QtWidgets.QWidget()
 
         self.new_data = {}
+        if not is_valid_data(peak_data):
+            raise ValueError
+
         self.update_new_data(peak_data)
         self.element = element
         self.setWindowTitle(element)
         self.list = QtWidgets.QVBoxLayout(self)
 
+        # Labels might not be present, if so return empty list
         try:
             primary = peak_data["Primary"]
-            self.primary_checkboxes = self._create_checkbox_list(
-                "Primary", primary)
+            self.primary_checkboxes = self._create_checkbox_list("Primary", primary)
         except KeyError:
             self.primary_checkboxes = []
         try:
@@ -69,7 +83,11 @@ class PeakSelectorView(QtWidgets.QListWidget):
         for el, values in iteritems(data):
             if values is None:
                 data[el] = {}
-        new_data = data["Primary"].copy()
+        try:
+            new_data = data["Primary"].copy()
+        except KeyError:
+            new_data = {}
+
         self.new_data = new_data
 
     def _setup_checkbox(self, name, checked):

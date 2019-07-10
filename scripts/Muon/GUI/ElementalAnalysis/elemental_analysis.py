@@ -30,6 +30,8 @@ from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_presenter import PeakSelectorPresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
 
+from Muon.GUI.Common import message_box
+
 import mantid.simpleapi as mantid
 
 offset = 0.9
@@ -54,8 +56,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.menu.addAction("Normalise")
 
         # periodic table stuff
-        self.ptable = PeriodicTablePresenter(
-            PeriodicTableView(), PeriodicTableModel())
+        self.ptable = PeriodicTablePresenter(PeriodicTableView(), PeriodicTableModel())
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
@@ -308,7 +309,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # these are commneted out as they are a bug
         # see issue 25326
         #self._clear_lines_after_data_file_selected()
-        self._generate_element_widgets()
+        try:
+            self._generate_element_widgets()
+        except ValueError:
+            # todo: add link to elemental analysis documentation after it is merged
+            message_box.warning('The file does not contain correctly formatted data, resetting to default data file')
+            self.ptable.set_peak_datafile(None)
+            self._generate_element_widgets()
         for element in old_lines:
             if element not in self.element_widgets.keys():
                 self._remove_element_lines(element)
