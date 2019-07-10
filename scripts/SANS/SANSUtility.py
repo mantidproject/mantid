@@ -13,7 +13,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
-from mantid.kernel import DateAndTime, FloatTimeSeriesProperty
+from mantid.kernel import DateAndTime
 import inspect
 import math
 import os
