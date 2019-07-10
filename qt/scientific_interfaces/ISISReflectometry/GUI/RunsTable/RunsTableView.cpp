@@ -22,9 +22,8 @@ RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
   m_ui.setupUi(this);
   m_ui.progressBar->setRange(0, 100);
   m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
-      QStringList({"Run(s)", "Angle", "First Transmission Run",
-                   "Second Transmission Run", "Q min", "Q max", "dQ/Q", "Scale",
-                   "Options"}),
+      QStringList({"Run(s)", "Angle", "1st Trans Run(s)", "2nd Trans Run(s)",
+                   "Q min", "Q max", "dQ/Q", "Scale", "Options"}),
       MantidQt::MantidWidgets::Batch::Cell(""), this);
   m_ui.mainLayout->insertWidget(2, m_jobs.get());
   showAlgorithmPropertyHintsInOptionsColumn();
