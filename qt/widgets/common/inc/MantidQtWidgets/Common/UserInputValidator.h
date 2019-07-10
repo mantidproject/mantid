@@ -72,8 +72,7 @@ public:
                      double tolerance = 0.00000001);
 
   /// Checks that a workspace has the correct workspace type
-  template <typename T = Mantid::API::MatrixWorkspace,
-            typename R = Mantid::API::MatrixWorkspace_sptr>
+  template <typename T = Mantid::API::MatrixWorkspace>
   bool checkWorkspaceType(QString const &workspaceName,
                           QString const &inputType, QString const &validType,
                           bool silent = false);
@@ -108,9 +107,8 @@ public:
 
 private:
   /// Gets a workspace from the ADS
-  template <typename T = Mantid::API::MatrixWorkspace,
-            typename R = Mantid::API::MatrixWorkspace_sptr>
-  R getADSWorkspace(std::string const &workspaceName);
+  template <typename T = Mantid::API::MatrixWorkspace>
+  boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName);
 
   /// Any raised error messages.
   QStringList m_errorMessages;
@@ -125,13 +123,13 @@ private:
  * @param silent True if an error should not be added to the validator.
  * @return True if the workspace has the correct type
  */
-template <typename T, typename R>
+template <typename T>
 bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
                                             QString const &inputType,
                                             QString const &validType,
                                             bool silent) {
   if (checkWorkspaceExists(workspaceName, silent)) {
-    if (!getADSWorkspace<T, R>(workspaceName.toStdString())) {
+    if (!getADSWorkspace<T>(workspaceName.toStdString())) {
       addErrorMessage("The " + inputType + " workspace is not a " + validType +
                           ".",
                       silent);
@@ -148,8 +146,9 @@ bool UserInputValidator::checkWorkspaceType(QString const &workspaceName,
  * @param workspaceName The name of the workspace
  * @return The workspace
  */
-template <typename T, typename R>
-R UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
+template <typename T>
+boost::shared_ptr<T>
+UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(
       workspaceName);
 }

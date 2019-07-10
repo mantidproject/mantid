@@ -21,8 +21,8 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 
-template <typename T = MatrixWorkspace, typename R = MatrixWorkspace_sptr>
-R getADSWorkspace(std::string const &workspaceName) {
+template <typename T = MatrixWorkspace>
+boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
@@ -253,8 +253,8 @@ void ApplyAbsorptionCorrections::run() {
 
   QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-  auto const corrections = getADSWorkspace<WorkspaceGroup, WorkspaceGroup_sptr>(
-      correctionsWsName.toStdString());
+  auto const corrections =
+      getADSWorkspace<WorkspaceGroup>(correctionsWsName.toStdString());
   bool interpolateAll = false;
   for (std::size_t i = 0; i < corrections->size(); i++) {
     MatrixWorkspace_sptr factorWs =

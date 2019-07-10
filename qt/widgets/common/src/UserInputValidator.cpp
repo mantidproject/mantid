@@ -389,10 +389,10 @@ bool UserInputValidator::checkWorkspaceNumberOfBins(
 bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName,
                                                     QString const &inputType,
                                                     bool silent) {
-  if (checkWorkspaceType<WorkspaceGroup, WorkspaceGroup_sptr>(
-          groupName, inputType, "WorkspaceGroup", silent)) {
-    if (auto const group = getADSWorkspace<WorkspaceGroup, WorkspaceGroup_sptr>(
-            groupName.toStdString())) {
+  if (checkWorkspaceType<WorkspaceGroup>(groupName, inputType, "WorkspaceGroup",
+                                         silent)) {
+    if (auto const group =
+            getADSWorkspace<WorkspaceGroup>(groupName.toStdString())) {
       if (auto const error = containsInvalidWorkspace(group)) {
         addErrorMessage(QString::fromStdString(error.get()), silent);
         return false;

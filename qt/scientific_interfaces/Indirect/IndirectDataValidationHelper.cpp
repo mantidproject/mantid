@@ -81,11 +81,11 @@ bool validateDataIsAReducedFile(UserInputValidator &uiv,
   auto const dataName = dataSelector->getCurrentDataName();
   uiv.checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector,
                                silent);
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
+  uiv.checkWorkspaceType<MatrixWorkspace>(
       dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
   // TODO :: check the axis labels for the data units
   return uiv.isAllInputValid();
-};
+}
 
 /**
  * Validates that the data selector is holding a S(Q,w) file or workspace.
@@ -100,11 +100,11 @@ bool validateDataIsASqwFile(UserInputValidator &uiv, DataSelector *dataSelector,
   auto const dataName = dataSelector->getCurrentDataName();
   uiv.checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector,
                                silent);
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
+  uiv.checkWorkspaceType<MatrixWorkspace>(
       dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
   // TODO :: check the axis labels for the data units
   return uiv.isAllInputValid();
-};
+}
 
 /**
  * Validates that the data selector is holding a S(Q,w) file or workspace.
@@ -120,11 +120,11 @@ bool validateDataIsACalibrationFile(UserInputValidator &uiv,
   auto const dataName = dataSelector->getCurrentDataName();
   uiv.checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector,
                                silent);
-  uiv.checkWorkspaceType<MatrixWorkspace, MatrixWorkspace_sptr>(
+  uiv.checkWorkspaceType<MatrixWorkspace>(
       dataName, QString::fromStdString(inputType), "MatrixWorkspace", silent);
   // TODO :: check the axis labels for the data units
   return uiv.isAllInputValid();
-};
+}
 
 /**
  * Validates that the data selector is holding a corrections file or workspace.
@@ -140,13 +140,13 @@ bool validateDataIsACorrectionsFile(UserInputValidator &uiv,
   auto const dataName = dataSelector->getCurrentDataName();
   uiv.checkDataSelectorIsValid(QString::fromStdString(inputType), dataSelector,
                                silent);
-  uiv.checkWorkspaceType<WorkspaceGroup, WorkspaceGroup_sptr>(
+  uiv.checkWorkspaceType<WorkspaceGroup>(
       dataName, QString::fromStdString(inputType), "WorkspaceGroup", silent);
   uiv.checkWorkspaceGroupIsValid(dataName, QString::fromStdString(inputType),
                                  silent);
   // TODO :: check the axis labels for the data units
   return uiv.isAllInputValid();
-};
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
