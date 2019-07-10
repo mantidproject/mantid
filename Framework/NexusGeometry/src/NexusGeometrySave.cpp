@@ -220,7 +220,7 @@ public:
     writeStrAttributeToDataSetHelper(name, SHORT_NAME,
                                      instrumentNameStr); // placeholder
 
-    writeStrValueToDataSetHelper(name, instrumentNameStr.c_str());
+    writeStrValueToDataSetHelper(name, instrumentNameStr);
   }
 
   void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
@@ -382,7 +382,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   /*
 ==============================================================================================================
 
- Parse tree structure in component
+ write component to tree structure.
 
 ==============================================================================================================
 */
