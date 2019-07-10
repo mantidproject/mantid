@@ -15,9 +15,11 @@ from Muon.GUI.Common import message_box
 
 # Check that the new data format contains at least A, Z, primary (they can be empty)
 def is_valid_data(peak_data):
-    data_present = [str(k) for k in peak_data.keys()]
-    if any(['Z' not in data_present,
-            'A' not in data_present]):
+    data_label = [str(k) for k in peak_data.keys()]
+    if any(['Z' not in data_label,
+            'A' not in data_label,
+            'Primary' not in data_label,
+            'Secondary' not in data_label]):
         return False
 
     return True
@@ -40,17 +42,10 @@ class PeakSelectorView(QtWidgets.QListWidget):
         self.list = QtWidgets.QVBoxLayout(self)
 
         # Labels might not be present, if so return empty list
-        try:
-            primary = peak_data["Primary"]
-            self.primary_checkboxes = self._create_checkbox_list("Primary", primary)
-        except KeyError:
-            self.primary_checkboxes = []
-        try:
-            secondary = peak_data["Secondary"]
-            self.secondary_checkboxes = self._create_checkbox_list(
-                "Secondary", secondary, checked=False)
-        except KeyError:
-            self.secondary_checkboxes = []
+        primary = peak_data["Primary"]
+        self.primary_checkboxes = self._create_checkbox_list("Primary", primary)
+        secondary = peak_data["Secondary"]
+        self.secondary_checkboxes = self._create_checkbox_list("Secondary", secondary, checked=False)
         try:
             gammas = peak_data["Gammas"]
             self.gamma_checkboxes = self._create_checkbox_list(
@@ -83,10 +78,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
         for el, values in iteritems(data):
             if values is None:
                 data[el] = {}
-        try:
-            new_data = data["Primary"].copy()
-        except KeyError:
-            new_data = {}
+        new_data = data["Primary"].copy()
 
         self.new_data = new_data
 

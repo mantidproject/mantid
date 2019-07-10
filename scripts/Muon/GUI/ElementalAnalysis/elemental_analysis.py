@@ -316,8 +316,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             message_box.warning('The file does not contain correctly formatted data, resetting to default data file')
             self.ptable.set_peak_datafile(None)
             self._generate_element_widgets()
+
         for element in old_lines:
-            if element not in self.element_widgets.keys():
+            if element in self.element_widgets.keys():
+                self.ptable.select_element(element)
+            else:
                 self._remove_element_lines(element)
         #self._generate_element_data()
 
