@@ -468,8 +468,9 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
     m_pythonRunner.runPythonCode(pyInput);
 #else
     using MantidQt::Widgets::MplCpp::plot;
+    QHash<QString, QVariant> plotKwargs{{"capsize", 3}};
     plot(workspaceNames, boost::none, std::vector<int>{wsIndex}, boost::none,
-         boost::none, boost::none, boost::none, m_plotErrorBars);
+         plotKwargs, boost::none, boost::none, m_plotErrorBars);
 #endif
   }
 }
@@ -525,7 +526,8 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   const auto nSpectra = specEnd - specStart + 1;
   std::vector<int> wkspIndices(nSpectra);
   std::iota(std::begin(wkspIndices), std::end(wkspIndices), specStart);
-  plot(workspaceNames, boost::none, wkspIndices, boost::none, boost::none,
+  QHash<QString, QVariant> plotKwargs{{"capsize", 3}};
+  plot(workspaceNames, boost::none, wkspIndices, boost::none, plotKwargs,
        boost::none, boost::none, m_plotErrorBars);
 #endif
 }
@@ -581,7 +583,8 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
   m_pythonRunner.runPythonCode(pyInput);
 #else
   using MantidQt::Widgets::MplCpp::plot;
-  plot(workspaceNames, boost::none, wsIndices, boost::none, boost::none,
+  QHash<QString, QVariant> plotKwargs{{"capsize", 3}};
+  plot(workspaceNames, boost::none, wsIndices, boost::none, plotKwargs,
        boost::none, boost::none, m_plotErrorBars);
 #endif
 }
@@ -686,7 +689,7 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   using MantidQt::Widgets::MplCpp::MantidAxType;
   using MantidQt::Widgets::MplCpp::plot;
   QHash<QString, QVariant> plotKwargs{
-      {"axis", static_cast<int>(MantidAxType::Bin)}};
+      {"axis", static_cast<int>(MantidAxType::Bin)}, {"capsize", 3}};
   plot(workspaceNames, boost::none, std::vector<int>{binIndex}, boost::none,
        plotKwargs, boost::none, boost::none, m_plotErrorBars);
 #endif
