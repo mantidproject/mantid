@@ -312,8 +312,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         try:
             self._generate_element_widgets()
         except ValueError:
-            # todo: add link to elemental analysis documentation after it is merged
-            message_box.warning('The file does not contain correctly formatted data, resetting to default data file')
+            message_box.warning('The file does not contain correctly formatted data, resetting to default data file.'
+                                'See "https://docs.mantidproject.org/nightly/interfaces/'
+                                'Muon%20Elemental%20Analysis.html" for more information.')
             self.ptable.set_peak_datafile(None)
             self._generate_element_widgets()
 

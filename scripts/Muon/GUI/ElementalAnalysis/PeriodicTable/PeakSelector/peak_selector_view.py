@@ -10,12 +10,11 @@ from qtpy import QtWidgets, QtCore
 from six import iteritems
 
 from Muon.GUI.Common.checkbox import Checkbox
-from Muon.GUI.Common import message_box
 
 
 # Check that the new data format contains at least A, Z, primary (they can be empty)
-def is_valid_data(peak_data):
-    data_label = [str(k) for k in peak_data.keys()]
+def valid_data(peak_data):
+    data_label = peak_data.keys()
     if any(['Z' not in data_label,
             'A' not in data_label,
             'Primary' not in data_label,
@@ -33,7 +32,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
         widget = QtWidgets.QWidget()
 
         self.new_data = {}
-        if not is_valid_data(peak_data):
+        if not valid_data(peak_data):
             raise ValueError
 
         self.update_new_data(peak_data)
