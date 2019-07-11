@@ -102,7 +102,6 @@ class FFTModel(object):
         self.alg.setRethrows(True)
 
         for name, value in iteritems(preInputs):
-            print(name, value)
             self.alg.setProperty(name, value)
         self.alg.execute()
         self.alg = None
@@ -127,7 +126,7 @@ class FFTModel(object):
         """
         generates a phase table from CalMuonDetectorPhases
         """
-        cloned_workspace_CalMuon = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], OutputWorkspace="__tmp__")
+        mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], OutputWorkspace="__tmp__")
         mantid.MaskDetectors(Workspace="__tmp__", DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
 
         self.alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
@@ -151,10 +150,9 @@ class FFTModel(object):
         do the phaseQuad algorithm
         groups data into a single set
         """
-        # falls over in here
         cloned_workspace = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], StoreInADS=False)
         mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
-        cropped_workspace_pre_phasequad = mantid.CropWorkspace(InputWorkspace=cloned_workspace,
+        mantid.CropWorkspace(InputWorkspace=cloned_workspace,
                                                                XMin=inputs['FirstGoodData'],
                                                                XMax=inputs['LastGoodData'])
 
