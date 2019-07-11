@@ -265,10 +265,8 @@ class CurvesTabWidgetPresenter:
     @staticmethod
     def get_active_lines(selected_ax, errorbars):
         active_lines = []
-        for errorbar_container in errorbars:
-            active_lines.append(errorbar_container)
-        for line in selected_ax.get_lines():
-            active_lines.append(line)
+        active_lines += errorbars
+        active_lines += selected_ax.get_lines()
         return active_lines
 
     def _update_selected_curve_name(self, curve):

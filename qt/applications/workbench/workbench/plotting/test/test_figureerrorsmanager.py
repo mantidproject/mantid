@@ -21,6 +21,28 @@ from mantidqt.utils.qt.testing import GuiTest  # noqa: E402
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager  # noqa: E402
 
 
+def plot_things(make_them_errors):
+    def function_reference(func):
+        def function_parameters(self):
+            if not make_them_errors:
+                # plot this line with specNum
+                self.ax.plot(self.ws2d_histo, specNum=1)
+                # and another one with wkspIndex
+                self.ax.plot(self.ws2d_histo, wkspIndex=2)
+            else:
+                self.ax.errorbar(self.ws2d_histo, specNum=1)
+                self.ax.errorbar(self.ws2d_histo, wkspIndex=2)
+
+            anonymous_menu = QMenu()
+            # this initialises some of the class internals
+            self.errors_manager.add_error_bars_menu(anonymous_menu)
+            return func(self)
+
+        return function_parameters
+
+    return function_reference
+
+
 class FigureErrorsManagerTest(GuiTest):
     """
     Test class that covers the interaction of the FigureErrorsManager with plots
@@ -62,127 +84,25 @@ class FigureErrorsManagerTest(GuiTest):
             any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
         self.assertTrue(
             any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
-        self.assertEqual(3, len(added_menu.children()))
 
-    def test_show_error_bar_for(self):
-        self.ax.plot(self.ws2d_histo, specNum=1)
+    @plot_things(make_them_errors=False)
+    def test_show_all_errors(self):
         # assert plot does not have errors
         self.assertEqual(0, len(self.ax.containers))
 
-        self.errors_manager.show_error_bar_for(0)
+        self.errors_manager._toggle_all_errors(self.ax, make_visible=True)
 
         # check that the errors have been added
-        self.assertEqual(1, len(self.ax.containers))
-        # check the errors have the correct line
-        self.assertEqual(self.ax.lines[0], self.ax.containers[0][0])
-        # check that the errors are visible
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+        self.assertEqual(2, len(self.ax.containers))
 
-        # Add an actual line with errors
-        self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=False)
-        # should be hidden because of errors_visible=False
-        self.assertFalse(self.ax.containers[1][2][0].get_visible())
-        # so show it
-        self.errors_manager.show_error_bar_for(1)
-        # now it should be visible
-        self.assertTrue(self.ax.containers[1][2][0].get_visible())
-
-    def test_hide_error_bar_for(self):
-        # default error plot shows the errors
-        self.ax.errorbar(self.ws2d_histo, specNum=1)
-        self.assertEqual(1, len(self.ax.containers))
-
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-        self.errors_manager.hide_error_bar_for(0)
-        # assert that the errors have been hidden
+    @plot_things(make_them_errors=True)
+    def test_hide_all_errors(self):
+        self.assertEqual(2, len(self.ax.containers))
+        self.errors_manager._toggle_all_errors(self.ax, make_visible=False)
+        # errors still exist
+        self.assertEqual(2, len(self.ax.containers))
+        # they are just invisible
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
-
-        # Add an actual line with errors
-        self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=True)
-        # should be visible because of errors_visible=True
-        self.assertTrue(self.ax.containers[1][2][0].get_visible())
-        # so hide it
-        self.errors_manager.hide_error_bar_for(1)
-        # now it should be hidden
-        self.assertFalse(self.ax.containers[1][2][0].get_visible())
-
-    def test_toggle_all_error_bars_make_visible_False_single_line(self):
-        """
-        Test checking that clicking `Hide all` does not try to
-        toggle errors on a single line that does not have errors plotted.
-        Instead it just skips it
-        :return:
-        """
-        # add one errorbar with visible and one with hidden errors
-        self.ax.plot(self.ws2d_histo, specNum=1)
-        self.assertEqual(0, len(self.ax.containers))
-
-        self.errors_manager.toggle_all_error_bars(make_visible=False)
-
-        # nothing should be done as the state being forced is False,
-        # which should not add new errors for lines
-        self.assertEqual(0, len(self.ax.containers))
-
-    def test_toggle_all_error_bars_make_visible_True_single_line(self):
-        """
-        Test checking that clicking `Show all` adds errors to the line.
-        :return:
-        """
-        # add one errorbar with visible and one with hidden errors
-        self.ax.plot(self.ws2d_histo, specNum=1)
-        self.assertEqual(0, len(self.ax.containers))
-
-        self.errors_manager.toggle_all_error_bars(make_visible=True)
-
-        # a container for the error should have been added
-        self.assertEqual(1, len(self.ax.containers))
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-    def test_toggle_all_error_bars(self):
-        # add one errorbar with visible and one with hidden errors
-        self.ax.errorbar(self.ws2d_histo, specNum=1)
-        self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=False)
-        # first is visible
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-        # second is hidden
-        self.assertFalse(self.ax.containers[1][2][0].get_visible())
-
-        # toggle will now force all the states to visible
-        self.errors_manager.toggle_all_error_bars(make_visible=True)
-
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-        self.assertTrue(self.ax.containers[1][2][0].get_visible())
-
-        # toggle will now force all the states to hidden
-        self.errors_manager.toggle_all_error_bars(make_visible=False)
-        self.assertFalse(self.ax.containers[0][2][0].get_visible())
-        self.assertFalse(self.ax.containers[1][2][0].get_visible())
-
-    def test_get_data_lines(self):
-        self.ax.errorbar(self.ws2d_histo, specNum=1)
-        data_lines = self.errors_manager.get_data_lines(self.ax)
-        self.assertEqual(1, len(data_lines))
-
-        self.ax.errorbar(self.ws2d_histo, specNum=2)
-        data_lines = self.errors_manager.get_data_lines(self.ax)
-        self.assertEqual(2, len(data_lines))
-
-    def test_get_data_lines_keeps_order(self):
-        self.ax.errorbar(self.ws2d_histo, specNum=1)
-        self.ax.errorbar(self.ws2d_histo, specNum=2)
-        self.ax.errorbar(self.ws2d_histo, specNum=3)
-
-        data_lines = self.errors_manager.get_data_lines(self.ax)
-
-        index = 0
-        # iterate all lines
-        for line in data_lines:
-            # while the current line is not in the `lines` list, we keep moving forward
-            # if the order is kept this will pass
-            # if the order is changed, this will fail with an IndexError
-            while line != self.ax.lines[index]:
-                index += 1
 
 
 class ScriptedPlotFigureErrorsManagerTest(GuiTest):
@@ -244,7 +164,7 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
         self.assertEqual(1, len(main_menu.children()))
 
         # plot above doesn't have errors, nor is a MantidAxes
-        # so no context menu will be added
+        # so no context menu will be added for error bars
         self.errors_manager.add_error_bars_menu(main_menu)
 
         # number of children should remain unchanged
@@ -270,70 +190,22 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
             any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
         self.assertTrue(
             any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
-        self.assertEqual(2, len(main_menu.children()))
+        self.assertEqual(2, len(added_menu.children()))
 
-    def test_scripted_plot_hide_error_for(self):
+    def test_scripted_plot_show_and_hide_all(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
 
+        anonymous_menu = QMenu()
+        # this initialises some of the class internals
+        self.errors_manager.add_error_bars_menu(anonymous_menu)
+
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-        self.errors_manager.hide_error_bar_for(1)
-
+        self.errors_manager._toggle_all_errors(self.ax, make_visible=False)
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
 
-    def test_scripted_plot_show_error_for(self):
-        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
-        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
-
+        # make the menu again, this updates the internal state of the errors manager
+        # and is what actually happens when the user opens the menu again
+        self.errors_manager.add_error_bars_menu(anonymous_menu)
+        self.errors_manager._toggle_all_errors(self.ax, make_visible=True)
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-        self.errors_manager.hide_error_bar_for(1)
-
-        self.assertFalse(self.ax.containers[0][2][0].get_visible())
-
-        self.errors_manager.show_error_bar_for(1)
-
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-    def test_scripted_plot_toggle_all(self):
-        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
-        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
-
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-        self.errors_manager.toggle_all_error_bars(make_visible=False)
-
-        self.assertFalse(self.ax.containers[0][2][0].get_visible())
-
-        self.errors_manager.toggle_all_error_bars(make_visible=True)
-
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-    def test_scripted_plot_with_y_x_errors(self):
-        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
-        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], xerr=[10, 10000], label='MyLabel 2')
-
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-        # line with X Errors
-        self.assertTrue(self.ax.containers[1][2][0].get_visible())
-
-        self.errors_manager.toggle_all_error_bars(make_visible=False)
-
-        self.assertFalse(self.ax.containers[0][2][0].get_visible())
-        # line with X Errors is not affected by the toggle
-        self.assertTrue(self.ax.containers[1][2][0].get_visible())
-
-    def test_scripted_plot_with_only_x_errors(self):
-        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], xerr=[10, 10000], label='MyLabel 2')
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-        self.errors_manager.toggle_all_error_bars(make_visible=False)
-        # state does not change, because the toggle does not affect X errors
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-    def test_scripted_plot_show_unsupported_axis_raises_not_implemented(self):
-        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
-
-        self.assertRaisesRegexp(ValueError, FigureErrorsManager.AXES_NOT_MANTIDAXES_ERR_MESSAGE,
-                                self.errors_manager.show_error_bar_for, 0)

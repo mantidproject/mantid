@@ -28,9 +28,7 @@ class FigureErrorsManager(object):
         self.canvas = canvas
         self.active_lines = []
 
-        # @staticmethod
-
-    def add_error_bars_menu(self, menu):
+    def add_error_bars_menu(self, parent_menu):
         """
         Add menu actions to toggle the errors for all lines in the plot.
 
@@ -43,22 +41,21 @@ class FigureErrorsManager(object):
         Relevant source, as of 10 July 2019:
         https://github.com/matplotlib/matplotlib/blob/154922992722db37a9d9c8680682ccc4acf37f8c/lib/matplotlib/legend.py#L1201
 
-        :param menu: The menu to which the actions will be added
-        :type menu: QMenu
+        :param parent_menu: The menu to which the actions will be added
+        :type parent_menu: QMenu
         """
         ax = self.canvas.figure.axes[0]  # type: matplotlib.axes.Axes
         # if the ax is not a MantidAxes, and there are no errors plotted,
         # then do not add any options for the menu
-        containers = ax.containers
-        if not isinstance(ax, MantidAxes) and len(containers) == 0:
+        if not isinstance(ax, MantidAxes) and len(ax.containers) == 0:
             return
 
-        error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, menu)
+        error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, parent_menu)
         error_bars_menu.addAction(self.SHOW_ERROR_BARS_BUTTON_TEXT,
                                   partial(self._update_plot_after, self._toggle_all_errors, ax, make_visible=True))
         error_bars_menu.addAction(self.HIDE_ERROR_BARS_BUTTON_TEXT,
                                   partial(self._update_plot_after, self._toggle_all_errors, ax, make_visible=False))
-        menu.addMenu(error_bars_menu)
+        parent_menu.addMenu(error_bars_menu)
 
         self.active_lines = CurvesTabWidgetPresenter.get_active_lines(
             ax, CurvesTabWidgetPresenter.get_errorbars_from_ax(ax))
@@ -74,12 +71,12 @@ class FigureErrorsManager(object):
                 # Add lines without errors first, lines with errors are appended later. Read docstring for more info
                 if not isinstance(line, ErrorbarContainer):
                     action = error_bars_menu.addAction(line.get_label(), partial(
-                        self._update_plot_after, self._toggle_error_bars_for, ax, line))
+                        self._update_plot_after, self.toggle_error_bars_for, ax, line))
                     action.setCheckable(True)
                     action.setChecked(not curve_props.hide_errors)
                 else:
                     add_later.append((line.get_label(), partial(
-                        self._update_plot_after, self._toggle_error_bars_for, ax, line),
+                        self._update_plot_after, self.toggle_error_bars_for, ax, line),
                                       not curve_props.hide_errors))
 
         for label, function, visible in add_later:
@@ -91,16 +88,18 @@ class FigureErrorsManager(object):
         # TODO if hidden and new state is make_visible==False then do nothing?
         for line in self.active_lines:
             if curve_has_errors(line):
-                self._toggle_error_bars_for(ax, line, make_visible)
+                self.toggle_error_bars_for(ax, line, make_visible)
 
     @staticmethod
-    def _toggle_error_bars_for(ax, curve, make_visible=None):
+    def toggle_error_bars_for(ax, curve, make_visible=None):
         curve_props = CurveProperties.from_curve(curve)
         plot_kwargs = {key: value for key, value in curve_props.items() if key not in ['hide', 'hide_errors']}
         if isinstance(ax, MantidAxes):
             try:
                 new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
             except ValueError:  # ValueError raised if Artist not tracked by Axes
+                # TODO does this need to update the creation args?
+                # this might not have a creation_args
                 new_curve = CurvesTabWidgetPresenter.replot_curve(ax, curve, plot_kwargs)
         else:
             new_curve = CurvesTabWidgetPresenter.replot_curve(ax, curve, plot_kwargs)

@@ -31,7 +31,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_plot_options_triggered = QtCore.Signal()
 
     toolitems = (
-        # ('Home', 'Reset original view', 'mdi.home', 'on_home_clicked', None),
+        ('Home', 'Reset original view', 'mdi.home', 'home', None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
         ('Zoom', 'Zoom to rectangle', 'mdi.magnify-plus-outline', 'zoom', False),
         (None, None, None, None, None),
@@ -80,11 +80,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
         # Adjust icon size or they are too small in PyQt5 by default
         self.setIconSize(QtCore.QSize(24, 24))
-
-    # TODO remove & use Harry's changes
-    # def on_home_clicked(self, *args, **kwargs):
-    #     self.home(*args, **kwargs)
-    #     self.home_clicked.emit()
 
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()
