@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
+import numpy as np
 """
 Parameters for instruments and Abins
 
@@ -21,7 +22,11 @@ value dictionaries through the Python API if possible. e.g.::
 instruments = {
     'fwhm': 3.0,  # approximate value for the full width at half maximum for Gaussian experimental resolutions
     'TwoDMap': {
+        'resolution': 0.01,  # same as delta_width?
         'delta_width': 0.1,  # width of narrow Gaussian which approximates Dirac delta
+        'q_size': 60,  # Number of q slices
+        'e_init': [4100.0],  # Incident energies in cm-1
+        'angles': np.arange(3.0, 140.0, 1), # All measurement angles for direct sweeps
         },
     'TOSCA': {
         #    TOSCA parameters for calculating Q^2
@@ -56,7 +61,7 @@ sampling = {
 # Parameters related to performance optimisation that do NOT impact calculation results
 performance = {
     'optimal_size': 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
-    'threads': 3  # number of threads used in parallel calculations
+    'threads': 4  # number of threads used in parallel calculations
     }
 
 all_parameters = {'instruments': instruments,

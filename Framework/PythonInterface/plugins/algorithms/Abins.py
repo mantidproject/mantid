@@ -480,24 +480,23 @@ class Abins(PythonAlgorithm):
         :param protons_number: number of protons in the given type fo atom
         :param nucleons_number: number of nucleons in the given type of atom
         """
-        from abins.constants import FUNDAMENTALS, ONE_DIMENSIONAL_INSTRUMENTS, ONE_DIMENSIONAL_SPECTRUM
 
+        from abins.constants import (FUNDAMENTALS,
+                                     ONE_DIMENSIONAL_INSTRUMENTS, ONE_DIMENSIONAL_SPECTRUM, TWO_DIMENSIONAL_INSTRUMENTS)
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            # only FUNDAMENTALS
+            # only FUNDAMENTALS [data is 2d with one row]
             if s_points.shape[0] == FUNDAMENTALS:
-
                 self._fill_s_1d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
                                           nucleons_number=nucleons_number)
 
-            # total workspaces
+            # total workspaces [data is 1d vector]
             elif len(s_points.shape) == ONE_DIMENSIONAL_SPECTRUM:
-
                 self._fill_s_1d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
                                           nucleons_number=nucleons_number)
 
             # quantum order events (fundamentals  or  overtones + combinations for the given order)
+            # [data is 2d table of S with a row for each quantum order]
             else:
-
                 dim = s_points.shape[0]
                 partial_wrk_names = []
 
@@ -511,10 +510,35 @@ class Abins(PythonAlgorithm):
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
 
+        elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+
+            # only FUNDAMENTALS [data is 3d with length 1 in axis 0]
+            if s_points.shape[0] == FUNDAMENTALS:
+                self._fill_s_2d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
+                                          nucleons_number=nucleons_number)
+
+            # total workspaces [data is 2d array of S]
+            elif s_points.shape[0] == abins.parameters.q_size:
+                self._fill_s_2d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
+                                          nucleons_number=nucleons_number)
+
+            # Multiple quantum order events [data is 3d table of S using axis 0 for quantum orders]
+            else:
+                dim = s_points.shape[0]
+                partial_wrk_names = []
+
+                for n in range(dim):
+                    seed = "quantum_event_%s" % (n + 1)
+                    wrk_name = workspace + "_" + seed
+                    partial_wrk_names.append(wrk_name)
+
+                    self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
+                                              nucleons_number=nucleons_number)                
+
     def _fill_s_1d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         """
         Puts 1D S into workspace.
-        :param protons_number: number of protons in the given type fo atom
+        :param protons_number: number of protons in the given type of atom
         :param nucleons_number: number of nucleons in the given type of atom
         :param s_points: dynamical factor for the given atom
         :param workspace: workspace to be filled with S
@@ -534,6 +558,42 @@ class Abins(PythonAlgorithm):
 
         # Set correct units on workspace
         self._set_workspace_units(wrk=workspace)
+
+    def _fill_s_2d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
+        from mantid.api import NumericAxis
+        from abins.constants import Q_BEGIN, Q_END
+
+        if protons_number is not None:
+            s_points = s_points * self._scale * self._get_cross_section(protons_number=protons_number,
+                                                                        nucleons_number=nucleons_number)
+
+        dim, length = s_points.shape
+        wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
+        q_axis = NumericAxis.create(length)
+
+        q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=abins.parameters.q_size)
+
+        for i in range(dim):
+            wrk.setX(i, self._bins)
+            wrk.setY(i, s_points[i, :])
+            q_axis.setValue(i, q_bins[i])
+        q_axis.setUnit('MomentumTransfer')
+        wrk.replaceAxis(1, q_axis)
+        AnalysisDataService.addOrReplace(workspace, wrk)
+
+        self._set_workspace_units(wrk=workspace)
+
+        # wspace = WorkspaceFactory.create("Workspace2D",NVectors=10,XLength=10,YLength=10)
+        # wspace.getAxis(0).setUnit('tof')
+        # newAxis = NumericAxis.create(10)
+        # for i in range(10):
+        #    wspace.setX(i,np.arange(10))
+        #    wspace.setY(i,np.arange(10)*np.sin(0.1*i))
+        #    wspace.setE(i,np.arange(10))
+        #    newAxis.setValue(i,0.3*i**2)
+        # newAxis.setUnit('DeltaE')
+        # wspace.replaceAxis(1, newAxis)
+        # AnalysisDataService.addOrReplace('testWS',wspace)        
 
     def _get_cross_section(self, protons_number=None, nucleons_number=None):
         """
@@ -567,7 +627,7 @@ class Abins(PythonAlgorithm):
         :param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
         :returns: workspace with total S from partial_workspaces
                 """
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
         total_workspace = self._out_ws_name + "_total"
 
         if isinstance(mtd[partial_workspaces[0]], WorkspaceGroup):
@@ -581,12 +641,18 @@ class Abins(PythonAlgorithm):
             ws = mtd[local_partial_workspaces[0]]
 
             # initialize S
-            s_atoms = np.zeros_like(ws.dataY(0))
+            if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+                s_atoms = np.zeros_like(ws.dataY(0))
+            if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+                s_atoms = np.zeros([abins.parameters.q_size] + list(ws.dataY(0).shape))
 
             # collect all S
             for partial_ws in local_partial_workspaces:
                 if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
                     s_atoms += mtd[partial_ws].dataY(0)
+                elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+                    for i in range(abins.parameters.q_size):
+                        s_atoms[i] += mtd[partial_ws].dataY(i)
 
             # create workspace with S
             self._fill_s_workspace(s_atoms, total_workspace)
@@ -615,6 +681,7 @@ class Abins(PythonAlgorithm):
         ws_name = self._out_ws_name + "_" + atom_name + optional_name
         self._fill_s_workspace(s_points=s_points, workspace=ws_name, protons_number=protons_number,
                                nucleons_number=nucleons_number)
+
 
         return ws_name
 

@@ -8,8 +8,12 @@ import gc
 import numpy as np
 
 import abins
-from abins.constants import (CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
-                             HIGHER_ORDER_QUANTUM_EVENTS, MAX_ORDER, MIN_SIZE, ONE_DIMENSIONAL_INSTRUMENTS,
+from abins.constants import (ANGLE_MESSAGE_INDENTATION,
+                             CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
+                             HIGHER_ORDER_QUANTUM_EVENTS, INCIDENT_ENERGY_MESSAGE_INDENTATION
+                             MAX_ORDER, MIN_SIZE, PYTHON_INDEX_SHIFT,
+                             ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS,
+                             Q_BEGIN, Q_END,
                              QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR,
                              S_LAST_INDEX)
 from abins.instruments import Instrument
@@ -44,6 +48,7 @@ class SPowderSemiEmpiricalCalculator(object):
             self._abins_data = abins_data
         else:
             raise ValueError("Object of type AbinsData was expected.")
+
         self._num_k = len(self._abins_data.get_kpoints_data())
 
         if isinstance(abins_data, abins.AbinsData):
@@ -113,10 +118,54 @@ class SPowderSemiEmpiricalCalculator(object):
         calculate_s_powder = None
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             calculate_s_powder = self._calculate_s_powder_1d
+        elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+            calculate_s_powder = self._calculate_s_powder_2d
+        else:
+            raise ValueError('Instrument "{}" is not recognised, cannot perform semi-empirical '
+                             'powder averaging.'.format(self._instrument.get_name()))
 
         s_data = calculate_s_powder()
 
         return s_data
+
+    def _calculate_s_powder_2d(self):
+        """
+        Calculates 2D S for the powder case.
+        :return:  object of type SData with 2D dynamical structure factors for the powder case
+        """
+
+        # calculate 2D S for all incident energies
+        atoms_items = self._calculate_s_powder_2d_core()
+
+        # put 2D S into SData object
+        s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data.set(items=atoms_items)
+
+        return s_data
+
+    def _calculate_s_powder_2d_core(self):
+        """
+        Helper function for _calculate_s_powder_2d. It calculates S for all incident energies, all q-point, all angles
+        and all atoms.
+        :return: dictionary with two dimensional S which correspond to all incident energies and all k-points.
+        """
+        e_init = abins.parameters.instruments[self._instrument.get_name()]['e_init']
+        indent = INCIDENT_ENERGY_MESSAGE_INDENTATION
+
+        energy = e_init[0]
+        self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % energy)
+        self._instrument.set_incident_energy(e_init=energy)
+        data = self._calculate_s_powder_over_k()
+
+        for energy in e_init[1:]:
+            self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % energy)
+            self._instrument.set_incident_energy(e_init=energy)
+            local_data = self._calculate_s_powder_over_k()
+            self._sum_s(current_val=data, addition=local_data)
+
+        data.update({"frequencies": self._frequencies})
+
+        return data
 
     def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None):
         """
@@ -316,7 +365,8 @@ class SPowderSemiEmpiricalCalculator(object):
     def _helper_atom(self, atom=None, local_freq=None, local_coeff=None, fundamentals_freq=None, fund_coeff=None,
                      order=None):
         """
-        Helper function for _calculate_s_powder_1d_one_atom.
+        Helper function. It calculates S for one atom, q-index, order and for one
+        or more angles (detectors).
         :param atom: number of atom
         :param local_freq: frequency from the previous transition
         :param local_coeff: coefficients from the previous transition
@@ -333,17 +383,37 @@ class SPowderSemiEmpiricalCalculator(object):
 
         if local_freq.any():  # check if local_freq has non-zero values
 
-            q2 = None
             if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-                q2 = self._instrument.calculate_q_powder(input_data=local_freq)
 
-            value_dft = self._calculate_order[order](q2=q2,
-                                                     frequencies=local_freq,
-                                                     indices=local_coeff,
-                                                     a_tensor=self._a_tensors[atom],
-                                                     a_trace=self._a_traces[atom],
-                                                     b_tensor=self._b_tensors[atom],
-                                                     b_trace=self._b_traces[atom])
+                q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+                local_freq, local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
+                    atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
+
+            elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+
+                angles = abins.parameters.angles
+                first_angle = angles[0]
+                self._instrument.set_detector_angle(angle=first_angle)
+                intend = ANGLE_MESSAGE_INDENTATION
+                q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+                self._report_progress(msg=intend + "Calculation for the detector at angle %s (atom=%s)" %
+                                                   (first_angle, atom))
+                opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
+                    atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
+
+                for angle in angles[1:]:
+                    self._report_progress(msg=intend + "Calculation for the detector at angle %s (atom=%s)" %
+                                                       (angle, atom))
+                    self._instrument.set_detector_angle(angle=angle)
+                    q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+                    temp = self._helper_atom_angle(atom=atom, local_freq=local_freq, local_coeff=local_coeff,
+                                                   order=order, return_freq=False, q2=q2)
+
+                    rebinned_broad_spectrum += temp
+
+                local_coeff = opt_local_coeff
+                local_freq = opt_local_freq
+
 
             broadening_scheme = abins.parameters.sampling['broadening_scheme']
             _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq,
@@ -354,14 +424,75 @@ class SPowderSemiEmpiricalCalculator(object):
             local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
                                                                        freq=local_freq,
                                                                        coeff=local_coeff)
-
         else:
             rebinned_broad_spectrum = np.zeros_like(self._frequencies)
 
-        # multiply by k-point weight and scaling constant
-        factor = self._weight
-        rebinned_broad_spectrum = rebinned_broad_spectrum * factor
-        return local_freq, local_coeff, rebinned_broad_spectrum
+        # multiply by k-point weight
+        rebinned_broad_spectrum = rebinned_broad_spectrum * self._weight
+
+        return local_freq, local_coeff, rebined_broad_spectrum
+
+    def _helper_atom_angle(self, atom=None, local_freq=None, local_coeff=None, order=None, return_freq=True, q2=None):
+        """
+        Helper function. It calculates S for one atom, q-index, order and angle (detector).
+        In case 2D instrument rebining over q is performed.
+        :param q2: squared momentum transfer
+        :param atom: number of atom
+        :param local_freq: frequency from the previous transition
+        :param local_coeff: coefficients from the previous transition
+        :param order: order of quantum event
+        :param return_freq: if true frequencies and corresponding coefficients are returned together with rebined
+                            spectrum; otherwise only rebined spectrum is returned
+        :return: (optionally) frequencies and corresponding coefficients are returned together
+                 (always) with rebined spectrum
+        """
+        # calculate discrete S for the given quantum order event
+        value_dft = self._calculate_order[order](q2=q2,
+                                                 frequencies=local_freq,
+                                                 indices=local_coeff,
+                                                 a_tensor=self._a_tensors[atom],
+                                                 a_trace=self._a_traces[atom],
+                                                 b_tensor=self._b_tensors[atom],
+                                                 b_trace=self._b_traces[atom])
+
+        # rebin if necessary
+        rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
+
+        # convolve with instrumental resolution
+        broadening_scheme = abins.parameters.sampling['broadening_scheme']
+        _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq,
+                                                                                        bins=self._bins,
+                                                                                        s_dft=value_dft,
+                                                                                        scheme=broadening_scheme)
+
+        # in case of 2D instrument rebin over q
+        # TODO: THIS NEEDS CLOSER EXAMINATION
+        if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+            q_size = abins.parameters.instruments['TwoDMap']['q_size']
+            temp_full_s = np.zeros(shape=(q_size + 1, rebinned_broad_spectrum.size),
+                                   dtype=FLOAT_TYPE)
+
+            all_q2 = self._instrument.calculate_q_powder(input_data=self._frequencies)
+            all_q = np.sqrt(all_q2)
+
+            _q_bins = np.linspace(start=Q_BEGIN,
+                                  stop=Q_END,
+                                  num=q_size)
+
+            bins_q = np.digitize(all_q, _q_bins) - PYTHON_INDEX_SHIFT
+            small_q_indx = all_q < Q_END
+            temp_full_s[bins_q[small_q_indx], small_q_indx] = rebinned_broad_spectrum[small_q_indx]
+            # the last q-bin stores data outside the range requested by a user so should be neglected
+            rebinned_broad_spectrum = temp_full_s[:-1]
+
+        # calculate transition energies for construction of higher order quantum event
+        local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft, freq=local_freq,
+                                                                   coeff=local_coeff, atom=atom, order=order)
+
+        if return_freq:
+            return local_freq, local_coeff, rebinned_broad_spectrum
+        else:
+            return rebinned_broad_spectrum
 
     # noinspection PyUnusedLocal
     def _calculate_order_one(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
