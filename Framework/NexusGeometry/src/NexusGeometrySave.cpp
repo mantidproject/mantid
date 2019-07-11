@@ -106,13 +106,15 @@ inline void writeDetectorNumber(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo) {
 
   std::vector<int> detectorIndices;
-  for (hsize_t i = compInfo.root(); i > (hsize_t)0; --i) {
-    if (compInfo.isDetector(i - (hsize_t)1)) {
-      detectorIndices.push_back(i - (hsize_t)1);
+  hsize_t ullOne = (hsize_t)1;
+  hsize_t ullZero = (hsize_t)0;
+  for (hsize_t i = compInfo.root(); i > ullZero; --i) {
+    if (compInfo.isDetector(i - ullOne)) {
+      detectorIndices.push_back(i - ullOne);
     }
   }
 
-  const hsize_t dsz = (hsize_t)detectorIndices.size();
+  const double dsz = (double)detectorIndices.size();
 
   int rank = 1;
   hsize_t dims[1];
@@ -121,8 +123,8 @@ inline void writeDetectorNumber(H5::Group &grp,
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
   std::vector<double> data;
-  for (hsize_t i = (hsize_t)0; i < dsz; i++) {
-    data.push_back(i - (hsize_t)1); // placeholder
+  for (double i = 0.0; i < dsz; i++) {
+    data.push_back(i + 1.0); // placeholder
   }
   H5::DataSet detectorNumber =
       grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
@@ -270,6 +272,10 @@ H5::Group detector(const std::string &name, const H5::Group &parent,
   return m_group;
 }
 
+/*
+ * create source group in parent, write Nexus class datasets to the group, and
+ * return the source group. Nexus Class Type : NXsource
+ */
 H5::Group source(const H5::Group &parent,
                  const Geometry::ComponentInfo &compInfo) {
 
@@ -279,14 +285,6 @@ H5::Group source(const H5::Group &parent,
   return m_group;
 }
 
-H5::Group NGSPixelShape(const H5::Group &parent,
-                        const Geometry::ComponentInfo &compInfo) {
-  H5::Group m_group;
-
-  m_group = parent.createGroup(PIXEL_SHAPE);
-  writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_OFF_GEOMETRY);
-  return m_group;
-}
 } // namespace NexusGeometrySave
 
 /*

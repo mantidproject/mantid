@@ -158,8 +158,8 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool hasDataSetValue(const std::string &dataSetValue,
-                       const std::string &pathToGroup) const {
+  bool expectedValue(const std::string &dataSetValue,
+                     const std::string &pathToGroup) const {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
@@ -168,7 +168,7 @@ public:
       std::string dataSetVal;
       dataSet.read(dataSetVal, dataSet.getDataType());
       return dataSetVal == dataSetValue;
-    } catch (H5::DataSetIException) {
+    } catch (H5::DataSetIException &) {
       return false;
     }
   }
@@ -359,7 +359,7 @@ public:
     saveInstrument(compInfo, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    TS_ASSERT(testUtility.hasDataSetValue(
+    TS_ASSERT(testUtility.expectedValue(
         expectedInstrumentName, "/raw_data_1/" + expectedInstrumentName));
 
     TS_ASSERT(testUtility.hasAttributeInDataSet(
