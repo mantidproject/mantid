@@ -147,8 +147,7 @@ public:
   }
 
   bool groupHasNxClass(const std::string &attrVal,
-                       const std::string &pathToGroup,
-                       std::string *dataSetname = nullptr) const {
+                       const std::string &pathToGroup) const {
 
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -159,7 +158,7 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool hasDataSetValue(const std::string dataSetValue,
+  bool hasDataSetValue(const std::string &dataSetValue,
                        const std::string &pathToGroup) const {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -176,8 +175,8 @@ public:
 
   // check if dataset or group has name-specific attribute
   bool hasAttributeInGroup(const std::string &pathToGroup,
-                           const std::string attrName,
-                           const std::string attrVal) {
+                           const std::string &attrName,
+                           const std::string &attrVal) {
 
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -189,8 +188,8 @@ public:
   }
 
   bool hasAttributeInDataSet(const std::string &pathToGroup,
-                             const std::string attrName,
-                             const std::string attrVal) {
+                             const std::string &attrName,
+                             const std::string &attrVal) {
 
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);

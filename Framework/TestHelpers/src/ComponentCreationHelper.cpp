@@ -744,6 +744,8 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
  * @param sourcePos : V3D position
  * @param samplePos : V3D sample position
  * @param detectorPos : V3D detector position
+ * @param relativeBankRotation : Quat relative bank rotation
+ * @param relativeDetRotation : Quat relative detector rotation
  * @return Instrument generated.
  */
 Instrument_sptr createSimpleInstrumentWithRotation(

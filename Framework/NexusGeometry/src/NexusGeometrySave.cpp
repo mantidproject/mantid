@@ -67,6 +67,8 @@ const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
 } // namespace
 
+namespace NexusGeometrySave {
+
 /*
 ==============================================================================================================
     Helper functions
@@ -87,28 +89,26 @@ inline void writeStrAttributeToGroupHelper(H5::Group &grp,
   attribute.write(dataType, attrVal);
 }
 
-inline void
-writeStrAttributeToDataSetHelper(H5::DataSet &dSet, const std::string &attrName,
-                                 const std::string &attrVal,
-                                 H5::DataSpace dataSpace = H5SCALAR) {
+inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
+                              const std::string &attrVal,
+                              H5::DataSpace dataSpace = H5SCALAR) {
   H5::StrType dataType = strTypeOfSize(attrVal);
   auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
 }
 
-inline void writeStrValueToDataSetHelper(H5::DataSet &dSet,
-                                         std::string dSetValue) {
+inline void writeStrValue(H5::DataSet &dSet, std::string dSetValue) {
 
   dSet.write(dSetValue, dSet.getDataType(), H5SCALAR);
 }
 
-inline void writeDetectorNumberHelper(H5::Group &grp,
-                                      const Geometry::ComponentInfo &compInfo) {
+inline void writeDetectorNumber(H5::Group &grp,
+                                const Geometry::ComponentInfo &compInfo) {
 
   std::vector<int> detectorIndices;
-  for (hsize_t i = compInfo.root(); i > 0; --i) {
-    if (compInfo.isDetector(i - 1)) {
-      detectorIndices.push_back(i - 1);
+  for (hsize_t i = compInfo.root(); i > (hsize_t)0; --i) {
+    if (compInfo.isDetector(i - (hsize_t)1)) {
+      detectorIndices.push_back(i - (hsize_t)1);
     }
   }
 
@@ -118,19 +118,19 @@ inline void writeDetectorNumberHelper(H5::Group &grp,
   hsize_t dims[1];
   dims[0] = dsz;
 
-  int *data = (int *)malloc(dsz * sizeof(int));
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
-  for (hsize_t i = 0; i < dsz; i++) {
-    data[i] = i + 1; // placeholder
+
+  std::vector<double> data;
+  for (hsize_t i = (hsize_t)0; i < dsz; i++) {
+    data.push_back(i - (hsize_t)1); // placeholder
   }
   H5::DataSet detectorNumber =
       grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(data, H5::PredType::NATIVE_INT, space);
-  free(data);
+  detectorNumber.write(&data, H5::PredType::NATIVE_INT, space);
 }
 
-inline void writeLocationHelper(H5::Group &grp,
-                                const Geometry::ComponentInfo &compInfo) {
+inline void writeLocation(H5::Group &grp,
+                          const Geometry::ComponentInfo &compInfo) {
 
   Eigen::Vector3d position, normalisedPosition;
   double norm;
@@ -161,15 +161,12 @@ inline void writeLocationHelper(H5::Group &grp,
   normalisedPosition = position.normalized();
   norm = position.norm();
 
-  double *data = (double *)malloc(rank * sizeof(double));
-  data[0] = norm;
-
-  location.write(data, H5::PredType::NATIVE_DOUBLE, space);
-  free(data);
+  std::vector<double> data = {norm};
+  location.write(&data, H5::PredType::NATIVE_DOUBLE, space);
 }
 
-inline void writeOrientationHelper(H5::Group &grp,
-                                   const Geometry::ComponentInfo &compInfo) {
+inline void writeOrientation(H5::Group &grp,
+                             const Geometry::ComponentInfo &compInfo) {
 
   Eigen::Quaterniond rotation;
   double norm;
@@ -200,147 +197,97 @@ inline void writeOrientationHelper(H5::Group &grp,
   rotation = Kernel::toQuaterniond(compInfo.rotation(compInfo.root()));
   norm = rotation.norm();
 
-  double *data = (double *)malloc(rank * sizeof(double));
-  data[0] = norm;
-
-  orientation.write(data, H5::PredType::NATIVE_DOUBLE, space);
-  free(data);
+  std::vector<double> data = {norm};
+  orientation.write(&data, H5::PredType::NATIVE_DOUBLE, space);
 }
 
-// inline void writePixelOffsetsHelper() {} TODO
-
 /*
 ==============================================================================================================
-    classes for NGS
+    Functions for NexusGeometrySave
 ==============================================================================================================
 */
 
-class NGSInstrument {
+H5::Group instrument(const H5::Group &parent,
+                     const Geometry::ComponentInfo &compInfo) {
 
-public:
-  NGSInstrument(const H5::Group &parent,
-                const Geometry::ComponentInfo &compInfo) {
+  std::string instrumentNameStr = compInfo.name(compInfo.root());
 
-    std::string instrumentNameStr = compInfo.name(compInfo.root());
+  H5::Group group = parent.createGroup(instrumentNameStr);
+  writeStrAttributeToGroupHelper(group, NX_CLASS, NX_INSTRUMENT);
 
-    m_group = parent.createGroup(instrumentNameStr);
-    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_INSTRUMENT);
+  H5::StrType nameStrSize = strTypeOfSize(instrumentNameStr);
+  H5::DataSet name = group.createDataSet("name", nameStrSize, H5SCALAR);
+  writeStrAttribute(name, SHORT_NAME,
+                    instrumentNameStr); // placeholder
+  writeStrValue(name, instrumentNameStr);
 
-    H5::StrType nameStrSize = strTypeOfSize(instrumentNameStr);
-    H5::DataSet name = m_group.createDataSet("name", nameStrSize, H5SCALAR);
-    writeStrAttributeToDataSetHelper(name, SHORT_NAME,
-                                     instrumentNameStr); // placeholder
+  return group;
+}
 
-    writeStrValueToDataSetHelper(name, instrumentNameStr);
-  }
+H5::Group sample(const H5::Group &parent,
+                 const Geometry::ComponentInfo &compInfo) {
 
-  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
-  H5::Group group() const { return m_group; }
-
-private:
-  const std::string m_name;
-  const std::string m_dependency;
   H5::Group m_group;
-  std::vector<H5::Group> m_childrenGroups;
-};
 
-class NGSSample {
+  std::string sampleName = compInfo.name(compInfo.sample());
 
-public:
-  NGSSample(const H5::Group &parent, const Geometry::ComponentInfo &compInfo) {
+  m_group = parent.createGroup(sampleName);
+  writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SAMPLE);
 
-    std::string sampleName = compInfo.name(compInfo.sample());
+  return m_group;
+}
 
-    m_group = parent.createGroup(sampleName);
-    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SAMPLE);
-  }
+H5::Group detector(const std::string &name, const H5::Group &parent,
+                   const Geometry::ComponentInfo &compInfo) {
 
-  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
-  H5::Group group() const { return m_group; }
-
-private:
   H5::Group m_group;
-  std::vector<H5::Group> m_childrenGroups;
-};
 
-class NGSDetector {
+  m_group = parent.createGroup(name);
+  writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_DETECTOR);
 
-public:
-  NGSDetector(const std::string &name, const H5::Group &parent,
-              const Geometry::ComponentInfo &compInfo) {
+  // depencency
+  std::string dependencyStr = m_group.getObjName() + "/" + LOCATION;
+  std::string localNameStr = "INST"; // placeholder
 
-    m_group = parent.createGroup(name);
-    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_DETECTOR);
+  H5::StrType dependencyStrSize = strTypeOfSize(dependencyStr);
+  H5::StrType localNameStrSize = strTypeOfSize(localNameStr);
 
-    // depencency
-    std::string dependencyStr = m_group.getObjName() + "/" + LOCATION;
-    std::string localNameStr = "INST"; // placeholder
+  writeDetectorNumber(m_group, compInfo);
+  writeLocation(m_group, compInfo);
+  writeOrientation(m_group, compInfo);
+  // writePixelOffsetsHelper();
 
-    H5::StrType dependencyStrSize = strTypeOfSize(dependencyStr);
-    H5::StrType localNameStrSize = strTypeOfSize(localNameStr);
+  // string type datasets.
+  H5::DataSet localName =
+      m_group.createDataSet(LOCAL_NAME, localNameStrSize, H5SCALAR);
+  H5::DataSet dependency =
+      m_group.createDataSet(DEPENDS_ON, dependencyStrSize, H5SCALAR);
 
-    writeDetectorNumberHelper(m_group, compInfo);
-    writeLocationHelper(m_group, compInfo);
-    writeOrientationHelper(m_group, compInfo);
-    // writePixelOffsetsHelper();
+  // write string type dataset values
+  writeStrValue(localName, localNameStr); // placeholder
+  writeStrValue(dependency, dependencyStr);
 
-    // string type datasets.
-    H5::DataSet localName =
-        m_group.createDataSet(LOCAL_NAME, localNameStrSize, H5SCALAR);
-    H5::DataSet dependency =
-        m_group.createDataSet(DEPENDS_ON, dependencyStrSize, H5SCALAR);
+  return m_group;
+}
 
-    // write string type dataset values
-    writeStrValueToDataSetHelper(localName, localNameStr); // placeholder
-    writeStrValueToDataSetHelper(dependency, dependencyStr);
-  }
+H5::Group source(const H5::Group &parent,
+                 const Geometry::ComponentInfo &compInfo) {
 
-  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
-  H5::Group group() const { return m_group; }
-
-private:
-  const std::string m_name;
-  const std::string m_dependency;
   H5::Group m_group;
-  std::vector<H5::Group> m_childrenGroups;
-};
+  m_group = parent.createGroup(compInfo.name(compInfo.source()));
+  writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SOURCE);
+  return m_group;
+}
 
-class NGSSource {
-
-public:
-  NGSSource(const H5::Group &parent, const Geometry::ComponentInfo &compInfo) {
-
-    m_group = parent.createGroup(compInfo.name(compInfo.source()));
-    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SOURCE);
-  }
-
-  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
-  H5::Group group() const { return m_group; }
-
-private:
+H5::Group NGSPixelShape(const H5::Group &parent,
+                        const Geometry::ComponentInfo &compInfo) {
   H5::Group m_group;
-  std::vector<H5::Group> m_childrenGroups;
-};
 
-/*
-class NGSPixelShape {
-
-public:
-  NGSPixelShape(const H5::Group &parent,
-                const Geometry::ComponentInfo &compInfo) {
-
-    m_group = parent.createGroup(PIXEL_SHAPE);
-    writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_OFF_GEOMETRY);
-  }
-
-  void addChild(H5::Group &child) { m_childrenGroups.push_back(child); }
-  H5::Group group() const { return m_group; }
-
-private:
-  H5::Group m_group;
-  std::vector<H5::Group> m_childrenGroups;
-};
-*/
+  m_group = parent.createGroup(PIXEL_SHAPE);
+  writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_OFF_GEOMETRY);
+  return m_group;
+}
+} // namespace NexusGeometrySave
 
 /*
 ==============================================================================================================
@@ -353,30 +300,21 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     Kernel::ProgressBase *reporter) {
 
   boost::filesystem::path tmp(fullPath);
-
-  // check the directory for the file is valid.
   if (!boost::filesystem::is_directory(tmp.root_directory())) {
     throw std::invalid_argument(
         "The path provided for saving the file is invalid: " + fullPath + "\n");
   }
-
-  // check the file itself has valid extensions.
   const auto ext = boost::filesystem::path(tmp).extension();
   if ((ext != ".nxs") && (ext != ".hdf5")) {
-
     throw std::invalid_argument("invalid extension for file: " +
                                 ext.generic_string());
   }
-
-  // does reporting if optional reporter exists.
   if (reporter != nullptr) {
     reporter->report();
   }
-
   if (!compInfo.hasDetectorInfo()) {
     throw std::invalid_argument("The component has no detector info.\n");
   }
-
   if (!compInfo.hasSample()) {
 
     throw std::invalid_argument("The component has no sample.\n");
@@ -391,24 +329,19 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   }
 
   /*
-==============================================================================================================
- write component to tree structure.
-==============================================================================================================
-*/
+ ==============================================================================================================
+  write component to tree structure.
+ ==============================================================================================================
+ */
 
   H5::H5File file(fullPath, H5F_ACC_TRUNC);
-
-  // create root group @NXentry
-  H5::Group rootGroup = file.createGroup("/raw_data_1");
-  writeStrAttributeToGroupHelper(rootGroup, NX_CLASS, NX_ENTRY);
-
-  NGSInstrument instr(rootGroup, compInfo);
-  NGSDetector detector1("detector_0", instr.group(), compInfo);
-  NGSSource source(instr.group(), compInfo);
-  NGSSample sample(rootGroup, compInfo);
-  // NGSPixelShape pixelShape(detector1.group(), compInfo);
-
-  file.close();
+  H5::Group root = file.createGroup("/raw_data_1");
+  NexusGeometrySave::writeStrAttributeToGroupHelper(root, NX_CLASS, NX_ENTRY);
+  H5::Group instr = NexusGeometrySave::instrument(root, compInfo);
+  H5::Group detector =
+      NexusGeometrySave::detector("detector_0", instr, compInfo);
+  H5::Group source = NexusGeometrySave::source(instr, compInfo);
+  H5::Group sample = NexusGeometrySave::sample(root, compInfo);
 
 } // saveInstrument
 
