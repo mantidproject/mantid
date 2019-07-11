@@ -19,7 +19,6 @@ try:
 except ImportError:
     from matplotlib.colors import colorConverter, rgb2hex
 
-
     def to_hex(color):
         return rgb2hex(colorConverter.to_rgb(color))
 

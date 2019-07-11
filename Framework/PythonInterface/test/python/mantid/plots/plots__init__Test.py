@@ -244,19 +244,6 @@ class Plots__init__Test(unittest.TestCase):
         self.assertRaises(Exception, ax.plot_wireframe, self.ws2d_histo)
         self.assertRaises(Exception, ax.plot_surface, self.ws2d_histo)
 
-    def test_legend_executes(self):
-        self.ax.errorbar(self.ws2d_histo, 'rs', specNum=1)
-        self.ax.plot(self.ws2d_histo, specNum=2)
-        self.ax.errorbar(self.ws2d_histo, 'rs', specNum=3)
-        legend = self.ax.legend()
-        # assert that the order is as plotted -> line with error is first,
-        # then the line without errors is shown
-        # this tests our custom behaviour, as MPL's default is to append errors at the bottom
-
-        self.assertTrue("spec 1" in legend.texts[0].get_text())
-        self.assertTrue("spec 2" in legend.texts[1].get_text())
-        self.assertTrue("spec 3" in legend.texts[2].get_text())
-
     def test_artists_normalization_state_labeled_correctly_for_dist_workspace(self):
         dist_ws = CreateWorkspace(DataX=[10, 20],
                                   DataY=[2, 3],

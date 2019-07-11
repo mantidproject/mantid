@@ -182,10 +182,6 @@ class MantidAxes(Axes):
     HORIZONTAL = BIN = 0
     VERTICAL = SPECTRUM = 1
 
-    # label for a line that signifies the lack of label on it
-    # present for lines with errors, where the label is in the errorbar container
-    MPL_NOLEGEND = "_nolegend_"
-
     # Store information for any workspaces attached to this axes instance
     tracked_workspaces = None
 

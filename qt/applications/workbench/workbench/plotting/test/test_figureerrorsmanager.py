@@ -155,8 +155,8 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
     def test_scripted_plot_line_without_label_handled_properly(self):
         # having the special nolabel is usually present on lines with errors,
         # but sometimes can be present on lines without errors, this test covers that case
-        self.ax.plot([0, 15000], [0, 15000], label=MantidAxes.MPL_NOLEGEND)
-        self.ax.plot([0, 15000], [0, 15000], label=MantidAxes.MPL_NOLEGEND)
+        self.ax.plot([0, 15000], [0, 15000], label='_nolegend_')
+        self.ax.plot([0, 15000], [0, 15000], label='_nolegend_')
 
         main_menu = QMenu()
         # QMenu always seems to have 1 child when empty,
@@ -190,7 +190,6 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
             any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
         self.assertTrue(
             any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
-        self.assertEqual(2, len(added_menu.children()))
 
     def test_scripted_plot_show_and_hide_all(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
