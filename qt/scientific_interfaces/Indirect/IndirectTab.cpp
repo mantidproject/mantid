@@ -120,6 +120,7 @@ QStringList convertToQStringList(std::string const &str,
  *
  * @param workspaceNames List of names of workspaces to plot
  * @param indices The workspace indices to plot
+ * @param errorBars True if error bars are enabled
  * @param kwargs Other arguments for plotting
  */
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
