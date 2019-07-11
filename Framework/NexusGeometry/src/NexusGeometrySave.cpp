@@ -13,7 +13,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include <H5Cpp.h>
 #include <boost/filesystem/operations.hpp>
-#include <stdlib.h>
+#include <utility>
 #include <string>
 #include <vector>
 
@@ -95,7 +95,7 @@ inline void writeDetectorNumber(H5::Group &grp,
     }
   }
 
-  const double dsz = (double)detectorIndices.size();
+  const hsize_t dsz = (hsize_t)detectorIndices.size();
 
   int rank = 1;
   hsize_t dims[1];
@@ -104,8 +104,8 @@ inline void writeDetectorNumber(H5::Group &grp,
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
   std::vector<double> data;
-  for (double i = 0.0; i < dsz; i++) {
-    data.push_back(i + 1.0); // placeholder
+  for (hsize_t i = 0; i < dsz; i++) {
+    data.push_back((double)13.0); // placeholder
   }
   H5::DataSet detectorNumber =
       grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
@@ -165,7 +165,7 @@ inline void writeOrientation(H5::Group &grp,
 
   int rank = 1;
   hsize_t dims[(hsize_t)1];
-  dims[0] = 1;
+  dims[0] = (hsize_t)1;
 
   space = H5Screate_simple(rank, dims, NULL);
   orientation =
@@ -217,39 +217,40 @@ H5::Group sample(const H5::Group &parent,
 H5::Group detector(const std::string &name, const H5::Group &parent,
                    const Geometry::ComponentInfo &compInfo) {
 
-  H5::Group m_group;
+  H5::Group child;
 
-  m_group = parent.createGroup(name);
-  writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_DETECTOR);
+  child = parent.createGroup(name);
 
-  std::string dependencyStr = m_group.getObjName() + "/" + LOCATION;
+  writeStrAttributeToGroupHelper(child, NX_CLASS, NX_DETECTOR);
+
+  std::string dependencyStr = name + "/" + LOCATION; // needs to be full path to group
   std::string localNameStr = "INST"; // placeholder
 
   H5::StrType dependencyStrSize = strTypeOfSize(dependencyStr);
   H5::StrType localNameStrSize = strTypeOfSize(localNameStr);
 
-  writeDetectorNumber(m_group, compInfo);
-  writeLocation(m_group, compInfo);
-  writeOrientation(m_group, compInfo);
+  writeDetectorNumber(child, compInfo);
+  writeLocation(child, compInfo);
+  writeOrientation(child, compInfo);
 
   H5::DataSet localName =
-      m_group.createDataSet(LOCAL_NAME, localNameStrSize, H5SCALAR);
+      child.createDataSet(LOCAL_NAME, localNameStrSize, H5SCALAR);
   H5::DataSet dependency =
-      m_group.createDataSet(DEPENDS_ON, dependencyStrSize, H5SCALAR);
+      child.createDataSet(DEPENDS_ON, dependencyStrSize, H5SCALAR);
 
   writeStrValue(localName, localNameStr); // placeholder
   writeStrValue(dependency, dependencyStr);
 
-  return m_group;
+  return child;
 }
 
 H5::Group source(const H5::Group &parent,
                  const Geometry::ComponentInfo &compInfo) {
 
-  H5::Group m_group;
-  m_group = parent.createGroup(compInfo.name(compInfo.source()));
-  writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SOURCE);
-  return m_group;
+  H5::Group child;
+  child = parent.createGroup(compInfo.name(compInfo.source()));
+  writeStrAttributeToGroupHelper(child, NX_CLASS, NX_SOURCE);
+  return child;
 }
 
 } // namespace NexusGeometrySave
