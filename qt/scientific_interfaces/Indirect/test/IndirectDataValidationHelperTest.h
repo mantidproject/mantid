@@ -61,6 +61,8 @@ TableWorkspace_sptr createTableWorkspace(std::size_t const &size) {
   return boost::make_shared<TableWorkspace>(size);
 }
 
+} // namespace
+
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the data selector
@@ -72,8 +74,6 @@ public:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-} // namespace
 
 class IndirectDataValidationHelperTest : public CxxTest::TestSuite {
 public:
