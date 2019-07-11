@@ -9,7 +9,6 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import copy
-
 import matplotlib.axes
 import matplotlib.cm as cm
 import matplotlib.colors
@@ -18,9 +17,7 @@ from matplotlib import axis, ticker  # noqa
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 # Constants set in workbench.plotting.functions but would cause backwards reliability
-from mantid.plots.utility import MantidAxPostCreationArgs
 from mantidqt.plotting.functions import pcolormesh
-from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
@@ -54,28 +51,24 @@ class PlotsLoader(object):
         # Grab creation arguments
         creation_args = plot_dict["creationArguments"]
 
+        if len(creation_args) == 0:
+            logger.information(
+                "A plot could not be loaded from the save file, as it did not have creation_args. "
+                "The original plot title was: {}".format(plot_dict["label"]))
+            return
+
         # Make a copy so it can be applied to the axes, of the plot once created.
         creation_args_copy = copy.deepcopy(creation_args[0])
 
         # Make initial plot
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
 
-        pcargs = []
         # If an overplot is necessary plot onto the same figure
         for cargs in creation_args[0]:
             if "workspaces" in cargs:
                 workspace_name = cargs.pop('workspaces')
-                pcargs.append(cargs.pop(MantidAxPostCreationArgs.POST_CREATION_ARGS, {}))
                 workspace = ADS.retrieve(workspace_name)
                 self.plot_func(workspace, ax, ax.figure, cargs)
-
-        fem = FigureErrorsManager(ax.figure.canvas)
-        for index, pcargs in enumerate(pcargs):
-            if MantidAxPostCreationArgs.ERRORS_ADDED in pcargs and pcargs[MantidAxPostCreationArgs.ERRORS_ADDED]:
-                if MantidAxPostCreationArgs.ERRORS_VISIBLE in pcargs and pcargs[MantidAxPostCreationArgs.ERRORS_VISIBLE]:
-                    fem.show_error_bar_for(index)
-                else:
-                    fem.hide_error_bar_for(index)
 
         # Make sure that the axes gets it's creation_args as loading doesn't add them
         ax.creation_args = creation_args_copy
@@ -91,7 +84,7 @@ class PlotsLoader(object):
         else:
             return fig
 
-    def plot_func(self, workspace, axes, fig,creation_arg):
+    def plot_func(self, workspace, axes, fig, creation_arg):
         """
         Plot's the graph from the given workspace, axes and creation_args. then returns the function used to create it.
         :param workspace: mantid.Workspace; Workspace to create the graph from
@@ -108,7 +101,7 @@ class PlotsLoader(object):
             creation_arg["cmap"] = getattr(matplotlib.cm, creation_arg["cmap"])
 
         function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar,
-                         "pcolor": axes.pcolor, "pcolorfast": axes.pcolorfast,"pcolormesh": pcolormesh,
+                         "pcolor": axes.pcolor, "pcolorfast": axes.pcolorfast, "pcolormesh": pcolormesh,
                          "imshow": pcolormesh, "contour": axes.contour, "contourf": axes.contourf,
                          "tripcolor": axes.tripcolor, "tricontour": axes.tricontour, "tricontourf": axes.tricontourf}
 

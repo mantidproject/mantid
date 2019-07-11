@@ -13,12 +13,12 @@ from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
-from mantid.plots import MantidAxPostCreationArgs
 
 try:
     from matplotlib.colors import to_hex
 except ImportError:
     from matplotlib.colors import colorConverter, rgb2hex
+
 
     def to_hex(color):
         return rgb2hex(colorConverter.to_rgb(color))
@@ -53,7 +53,7 @@ class PlotsSaver(object):
                 create_list.append(ax.creation_args)
                 self.figure_creation_args = ax.creation_args
             except AttributeError:
-                logger.debug("Axis had a axis without creation_args - Common with colorfill")
+                logger.debug("Axis had an axis without creation_args - Common with a Colorfill plot")
                 continue
             axes_list.append(self.get_dict_for_axes(ax))
 
@@ -213,21 +213,12 @@ class PlotsSaver(object):
         return line_dict
 
     def get_dict_for_errorbars(self, line):
-        cargs = self.figure_creation_args[0]
-
-        # cargs may not have POST_CREATION_ARGS. Set visible to false if not, so plots can
-        # be saved/loaded.
-        if MantidAxPostCreationArgs.POST_CREATION_ARGS not in cargs:
-            cargs[MantidAxPostCreationArgs.POST_CREATION_ARGS] = {MantidAxPostCreationArgs.ERRORS_VISIBLE: False,
-                                                        MantidAxPostCreationArgs.ERRORS_ADDED: False}
-        if (cargs["function"] == "errorbar" or
-                cargs[MantidAxPostCreationArgs.POST_CREATION_ARGS][MantidAxPostCreationArgs.ERRORS_ADDED]):
+        if self.figure_creation_args[0]["function"] == "errorbar":
             return {"exists": True,
                     "dashCapStyle": line.get_dash_capstyle(),
                     "dashJoinStyle": line.get_dash_joinstyle(),
                     "solidCapStyle": line.get_solid_capstyle(),
-                    "solidJoinStyle": line.get_solid_joinstyle(),
-                    "visible": cargs[MantidAxPostCreationArgs.POST_CREATION_ARGS][MantidAxPostCreationArgs.ERRORS_VISIBLE]}
+                    "solidJoinStyle": line.get_solid_joinstyle()}
         else:
             return {"exists": False}
 
