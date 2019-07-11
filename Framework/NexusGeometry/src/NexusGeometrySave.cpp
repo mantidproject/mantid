@@ -5,12 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-/*
-==============================================================================================================
-    saves the instrument to file.
-==============================================================================================================
-*/
-
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -28,7 +22,6 @@ namespace NexusGeometry {
 
 namespace {
 
-// NEXUS NAMES
 const std::string NX_CLASS = "NX_class";
 const std::string NX_SAMPLE = "NXsample";
 const std::string NX_DETECTOR = "NXdetector";
@@ -39,7 +32,6 @@ const std::string NX_CHAR = "NX_CHAR";
 const std::string NX_SOURCE = "NXsource";
 const std::string NX_TRANSFORMATION = "NXtransformation";
 
-// group/attribute/dataset names
 const std::string SHORT_NAME = "short_name";
 const std::string TRANSFORMATIONS = "transformations";
 const std::string LOCAL_NAME = "local_name";
@@ -53,27 +45,16 @@ const std::string SOURCE = "source";
 const std::string SAMPLE = "sample";
 const std::string DETECTOR_NUMBER = "detector_number";
 
-// metadata
 const std::string METRES = "m";
 const std::string NAME = "name";
 const std::string UNITS = "units";
 const std::string SHAPE = "shape";
-
-// NEXUS COMPLIANT ATTRIBUTE VALUES
-
-//
 
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
 } // namespace
 
 namespace NexusGeometrySave {
-
-/*
-==============================================================================================================
-    Helper functions
-==============================================================================================================
-*/
 
 inline H5::StrType strTypeOfSize(const std::string &str) {
   H5::StrType stringType(1, (size_t)str.length());
@@ -105,7 +86,7 @@ inline void writeStrValue(H5::DataSet &dSet, std::string dSetValue) {
 inline void writeDetectorNumber(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo) {
 
-  std::vector<int> detectorIndices;
+  std::vector<hsize_t> detectorIndices;
   hsize_t ullOne = (hsize_t)1;
   hsize_t ullZero = (hsize_t)0;
   for (hsize_t i = compInfo.root(); i > ullZero; --i) {
@@ -203,12 +184,6 @@ inline void writeOrientation(H5::Group &grp,
   orientation.write(&data, H5::PredType::NATIVE_DOUBLE, space);
 }
 
-/*
-==============================================================================================================
-    Functions for NexusGeometrySave
-==============================================================================================================
-*/
-
 H5::Group instrument(const H5::Group &parent,
                      const Geometry::ComponentInfo &compInfo) {
 
@@ -247,7 +222,6 @@ H5::Group detector(const std::string &name, const H5::Group &parent,
   m_group = parent.createGroup(name);
   writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_DETECTOR);
 
-  // depencency
   std::string dependencyStr = m_group.getObjName() + "/" + LOCATION;
   std::string localNameStr = "INST"; // placeholder
 
@@ -257,25 +231,18 @@ H5::Group detector(const std::string &name, const H5::Group &parent,
   writeDetectorNumber(m_group, compInfo);
   writeLocation(m_group, compInfo);
   writeOrientation(m_group, compInfo);
-  // writePixelOffsetsHelper();
 
-  // string type datasets.
   H5::DataSet localName =
       m_group.createDataSet(LOCAL_NAME, localNameStrSize, H5SCALAR);
   H5::DataSet dependency =
       m_group.createDataSet(DEPENDS_ON, dependencyStrSize, H5SCALAR);
 
-  // write string type dataset values
   writeStrValue(localName, localNameStr); // placeholder
   writeStrValue(dependency, dependencyStr);
 
   return m_group;
 }
 
-/*
- * create source group in parent, write Nexus class datasets to the group, and
- * return the source group. Nexus Class Type : NXsource
- */
 H5::Group source(const H5::Group &parent,
                  const Geometry::ComponentInfo &compInfo) {
 
@@ -286,12 +253,6 @@ H5::Group source(const H5::Group &parent,
 }
 
 } // namespace NexusGeometrySave
-
-/*
-==============================================================================================================
-      Beginning of saveInstrument
-==============================================================================================================
-*/
 
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
