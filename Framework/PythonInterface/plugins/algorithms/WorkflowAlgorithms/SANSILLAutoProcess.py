@@ -66,7 +66,7 @@ def needs_processing(property_value, process_reduction_type):
     return [do_process, ws_name]
 
 
-class SANSILLAuto(DataProcessorAlgorithm):
+class SANSILLAutoProcess(DataProcessorAlgorithm):
     """
     Performs complete treatment of ILL SANS data; instruments D11, D22, D33.
     """
@@ -99,7 +99,7 @@ class SANSILLAuto(DataProcessorAlgorithm):
         return ['SANSILLReduction', 'SANSILLIntegration',]
 
     def name(self):
-        return 'SANSILLAuto'
+        return 'SANSILLAutoProcess'
 
     def validateInputs(self):
         result = dict()
@@ -404,4 +404,4 @@ class SANSILLAuto(DataProcessorAlgorithm):
                              FluxInputWorkspace=flux_name,
                              SampleThickness=self.getProperty('SampleThickness').value)
 
-AlgorithmFactory.subscribe(SANSILLAuto)
+AlgorithmFactory.subscribe(SANSILLAutoProcess)
