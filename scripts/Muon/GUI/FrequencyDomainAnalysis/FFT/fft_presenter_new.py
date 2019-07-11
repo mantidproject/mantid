@@ -188,7 +188,7 @@ class FFTPresenter(object):
         run = re.search('[0-9]+', input_workspace).group()
         Im_run = ""
         if imaginary_input_workspace is not "":
-             Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
+            Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
         group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument, self.load.workspace_suffix)
         directory = get_base_data_directory(self.load, run) + group
