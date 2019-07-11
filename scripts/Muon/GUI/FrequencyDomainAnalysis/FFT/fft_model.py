@@ -99,15 +99,12 @@ class FFTModel(object):
         """
         self.alg = mantid.AlgorithmManager.create("PaddingAndApodization")
         self.alg.initialize()
-        self.alg.setAlwaysStoreInADS(False)
         self.alg.setRethrows(True)
 
         for name, value in iteritems(preInputs):
+            print(name, value)
             self.alg.setProperty(name, value)
         self.alg.execute()
-        mantid.AnalysisDataService.addOrReplace(
-            preInputs["OutputWorkspace"],
-            self.alg.getProperty("OutputWorkspace").value)
         self.alg = None
 
     def FFTAlg(self, FFTInputs):
@@ -116,15 +113,11 @@ class FFTModel(object):
         """
         self.alg = mantid.AlgorithmManager.create("FFT")
         self.alg.initialize()
-        self.alg.setAlwaysStoreInADS(False)
         self.alg.setRethrows(True)
 
         for name, value in iteritems(FFTInputs):
             self.alg.setProperty(name, value)
         self.alg.execute()
-        mantid.AnalysisDataService.addOrReplace(
-            FFTInputs["OutputWorkspace"],
-            self.alg.getProperty("OutputWorkspace").value)
 
         group = mantid.AnalysisDataService.retrieve(self.runName)
         group.add(FFTInputs["OutputWorkspace"])
@@ -134,25 +127,23 @@ class FFTModel(object):
         """
         generates a phase table from CalMuonDetectorPhases
         """
-        cloned_workspace_CalMuon = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], StoreInADS=False)
-        mantid.MaskDetectors(Workspace=cloned_workspace_CalMuon, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
+        cloned_workspace_CalMuon = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], OutputWorkspace="__tmp__")
+        mantid.MaskDetectors(Workspace="__tmp__", DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
 
         self.alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         self.alg.initialize()
-        self.alg.setAlwaysStoreInADS(False)
         self.alg.setRethrows(True)
 
         self.alg.setProperty("FirstGoodData", inputs["FirstGoodData"])
         self.alg.setProperty("LastGoodData", inputs["LastGoodData"])
 
-        self.alg.setProperty("InputWorkspace", cloned_workspace_CalMuon)
+        self.alg.setProperty("InputWorkspace", "__tmp__")
         self.alg.setProperty("DetectorTable", "PhaseTable")
         self.alg.setProperty("DataFitted", "fits")
 
         self.alg.execute()
-        mantid.AnalysisDataService.addOrReplace(
-            "PhaseTable",
-            self.alg.getProperty("DetectorTable").value)
+        mantid.DeleteWorkspace("__tmp__")
+        mantid.DeleteWorkspace("fits")
         self.alg = None
 
     def PhaseQuad(self, inputs):
@@ -160,22 +151,24 @@ class FFTModel(object):
         do the phaseQuad algorithm
         groups data into a single set
         """
+        # falls over in here
         cloned_workspace = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], StoreInADS=False)
         mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
         cropped_workspace_pre_phasequad = mantid.CropWorkspace(InputWorkspace=cloned_workspace,
                                                                XMin=inputs['FirstGoodData'],
-                                                               XMax=inputs['LastGoodData'],
-                                                               StoreInADS=False)
+                                                               XMax=inputs['LastGoodData'])
 
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()
         self.alg.setChild(False)
         self.alg.setRethrows(True)
 
-        self.alg.setProperty("InputWorkspace", cropped_workspace_pre_phasequad)
+        self.alg.setProperty("InputWorkspace", 'cropped_workspace_pre_phasequad')
         self.alg.setProperty("PhaseTable", "PhaseTable")
         self.alg.setProperty("OutputWorkspace", "__phaseQuad__")
         self.alg.execute()
+
+        mantid.DeleteWorkspace("cropped_workspace_pre_phasequad")
         self.alg = None
 
     def getName(self):
