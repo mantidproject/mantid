@@ -52,14 +52,72 @@ const std::string SHAPE = "shape";
 
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
+namespace forwardCompatibility {
+
+	/*
+	* Function "getObjName" 
+	* Ported from newer versions of the HDF API for forward compatibility.
+	*/
+
+ssize_t getObjName(const H5::H5Object &obj, char *obj_name, size_t buf_size) {
+  // H5Iget_name will get buf_size-1 chars of the name to null terminate it
+  ssize_t name_size = H5Iget_name(obj.getId(), obj_name, buf_size);
+
+  // If H5Iget_name returns a negative value, raise an exception
+  if (name_size < 0) {
+    throw H5::Exception("getObjName", "H5Iget_name failed");
+  } else if (name_size == 0) {
+    throw H5::Exception("getObjName",
+                        "Object must have a name, but name length is 0");
+  }
+  // Return length of the name
+  return (name_size);
+}
+
+std::string getObjName(const H5::H5Object &obj) {
+  std::string obj_name(""); // object name to return
+
+  // Preliminary call to get the size of the object name
+  ssize_t name_size = H5Iget_name(obj.getId(), NULL, static_cast<size_t>(0));
+
+  // If H5Iget_name failed, throw exception
+  if (name_size < 0) {
+    throw H5::Exception("getObjName", "H5Iget_name failed");
+  } else if (name_size == 0) {
+    throw H5::Exception("getObjName",
+                        "Object must have a name, but name length is 0");
+  }
+  // Object's name exists, retrieve it
+  else if (name_size > 0) {
+    char *name_C = new char[name_size + 1]; // temporary C-string
+    memset(name_C, 0, name_size + 1);       // clear buffer
+
+    // Use overloaded function
+    name_size = getObjName(obj, name_C, name_size + 1);
+
+    // Convert the C object name to return
+    obj_name = name_C;
+
+    // Clean up resource
+    delete[] name_C;
+  }
+  // Return object's name
+  return (obj_name);
+}
+
+} // namespace forward
+
 } // namespace
 
 namespace NexusGeometrySave {
+
 
 inline H5::StrType strTypeOfSize(const std::string &str) {
   H5::StrType stringType(1, (size_t)str.length());
   return stringType;
 }
+
+
 
 inline void writeStrAttributeToGroupHelper(H5::Group &grp,
                                            const std::string &attrName,
@@ -69,6 +127,8 @@ inline void writeStrAttributeToGroupHelper(H5::Group &grp,
   H5::Attribute attribute = grp.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
 }
+
+
 
 inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
                               const std::string &attrVal,
@@ -148,6 +208,7 @@ inline void writeLocation(H5::Group &grp,
   location.write(&data, H5::PredType::NATIVE_DOUBLE, space);
 }
 
+
 inline void writeOrientation(H5::Group &grp,
                              const Geometry::ComponentInfo &compInfo) {
 
@@ -179,19 +240,17 @@ inline void writeOrientation(H5::Group &grp,
   // write norm value to dataset
   rotation = Kernel::toQuaterniond(compInfo.rotation(compInfo.root()));
   norm = rotation.norm();
-
   std::vector<double> data = {norm};
   orientation.write(&data, H5::PredType::NATIVE_DOUBLE, space);
 }
+
 
 H5::Group instrument(const H5::Group &parent,
                      const Geometry::ComponentInfo &compInfo) {
 
   std::string instrumentNameStr = compInfo.name(compInfo.root());
-
   H5::Group group = parent.createGroup(instrumentNameStr);
   writeStrAttributeToGroupHelper(group, NX_CLASS, NX_INSTRUMENT);
-
   H5::StrType nameStrSize = strTypeOfSize(instrumentNameStr);
   H5::DataSet name = group.createDataSet("name", nameStrSize, H5SCALAR);
   writeStrAttribute(name, SHORT_NAME,
@@ -205,28 +264,27 @@ H5::Group sample(const H5::Group &parent,
                  const Geometry::ComponentInfo &compInfo) {
 
   H5::Group m_group;
-
   std::string sampleName = compInfo.name(compInfo.sample());
-
   m_group = parent.createGroup(sampleName);
   writeStrAttributeToGroupHelper(m_group, NX_CLASS, NX_SAMPLE);
 
   return m_group;
 }
 
+
+
+
+
 H5::Group detector(const std::string &name, const H5::Group &parent,
                    const Geometry::ComponentInfo &compInfo) {
 
   H5::Group child;
-
   child = parent.createGroup(name);
-
   writeStrAttributeToGroupHelper(child, NX_CLASS, NX_DETECTOR);
 
   std::string dependencyStr =
-      name + "/" + LOCATION;         // needs to be full path to group
+      forwardCompatibility::getObjName(child) + "/" + LOCATION;         // needs to be full path to group
   std::string localNameStr = "INST"; // placeholder
-
   H5::StrType dependencyStrSize = strTypeOfSize(dependencyStr);
   H5::StrType localNameStrSize = strTypeOfSize(localNameStr);
 
@@ -238,12 +296,13 @@ H5::Group detector(const std::string &name, const H5::Group &parent,
       child.createDataSet(LOCAL_NAME, localNameStrSize, H5SCALAR);
   H5::DataSet dependency =
       child.createDataSet(DEPENDS_ON, dependencyStrSize, H5SCALAR);
-
   writeStrValue(localName, localNameStr); // placeholder
   writeStrValue(dependency, dependencyStr);
 
   return child;
 }
+
+
 
 H5::Group source(const H5::Group &parent,
                  const Geometry::ComponentInfo &compInfo) {
@@ -255,6 +314,10 @@ H5::Group source(const H5::Group &parent,
 }
 
 } // namespace NexusGeometrySave
+
+
+
+
 
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath,
@@ -304,6 +367,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   H5::Group source = NexusGeometrySave::source(instr, compInfo);
   H5::Group sample = NexusGeometrySave::sample(root, compInfo);
 
+
+  file.close();
 } // saveInstrument
 
 } // namespace NexusGeometry
