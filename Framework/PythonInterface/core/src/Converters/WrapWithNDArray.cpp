@@ -24,8 +24,8 @@ namespace {
   memory of arrays passed to Python.
   See: https://stackoverflow.com/questions/52731884/pyarray-simplenewfromdata
 */
-void capsule_cleanup(PyObject *capsule) {
-  void *memory = PyCapsule_GetPointer(capsule, NULL);
+template <typename T> void capsule_cleanup(PyObject *capsule) {
+  auto *memory = static_cast<T *>(PyCapsule_GetPointer(capsule, NULL));
   delete[] memory;
 }
 
@@ -85,7 +85,8 @@ PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
       static_cast<void *>(const_cast<ElementType *>(carray)));
 
   if (oMode == Python) {
-    PyObject *capsule = PyCapsule_New((void *)carray, NULL, capsule_cleanup);
+    PyObject *capsule = PyCapsule_New(const_cast<ElementType *>(carray), NULL,
+                                      capsule_cleanup<ElementType>);
     PyArray_SetBaseObject((PyArrayObject *)nparray, capsule);
   }
 
