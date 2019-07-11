@@ -16,7 +16,6 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 from __future__ import (absolute_import, division, print_function)
 
 from collections import Iterable
-
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
@@ -28,10 +27,8 @@ from matplotlib.projections import register_projection
 from matplotlib.scale import register_scale
 from matplotlib.table import Table
 
-from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
-from mantid.plots.utility import MantidAxPostCreationArgs, find_errorbar_container
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -83,6 +80,7 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
+
     def __init__(self, artists, data_replace_cb, is_normalized,
                  spec_num=None):
         """
@@ -437,12 +435,11 @@ class MantidAxes(Axes):
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         self.remove_artists_if(lambda art: art == artist)
         workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+        self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
         if errorbars:
-            new_artist = self.errorbar(workspace, wkspIndex=workspace_index,
-                                       **kwargs)
+            new_artist = self.errorbar(workspace, wkspIndex=workspace_index, **kwargs)
         else:
-            new_artist = self.plot(workspace, wkspIndex=workspace_index,
-                                   **kwargs)
+            new_artist = self.plot(workspace, wkspIndex=workspace_index, **kwargs)
         return new_artist
 
     def relim(self, visible_only=True):
@@ -1010,48 +1007,6 @@ class MantidAxes(Axes):
         else:
             return Axes.tricontourf(self, *args, **kwargs)
 
-    # def legend(self, *args, **kwargs):
-    #     """
-    #     In the case where there are no arguments to the legend function,
-    #     but errors are present on the plot, we make our own legend order
-    #     to prevent MPL always appending errors on the bottom of the legend.
-    #
-    #     Make our own labels if:
-    #       -> no args are provided
-    #       -> any errors are plotted
-    #
-    #     If there are no args or no errors, we back out to use the original MPL implementation
-    #     :rtype: matplotlib.legend.Legend
-    #     """
-    #     if len(args) == 0 or len(self.containers) == 0:
-    #         handles = []
-    #         labels = []
-    #         for line in self.lines:
-    #             if line.get_label() == self.MPL_NOLEGEND:
-    #                 errorbar = find_errorbar_container(line, self.containers)
-    #                 if not errorbar:
-    #                     # the line does not have an errorbar container that would have the label
-    #                     # nor does it have a label, as it has been marked with NOLEGEND
-    #                     # simply continue to the next line
-    #                     continue
-    #
-    #                 handle = errorbar
-    #                 label = errorbar.get_label()
-    #             else:
-    #                 handle = line
-    #                 label = line.get_label()
-    #
-    #             # if the label starts with an underscore then
-    #             # it should not be part of the legend as it is hidden
-    #             # this can't be checked before the error line check above
-    #             if not label.startswith("_"):
-    #                 handles.append(handle)
-    #                 labels.append(label)
-    #
-    #         return Axes.legend(self, handles, labels)
-    #     else:
-    #         return Axes.legend(self, *args, **kwargs)
-
     # ------------------ Private api --------------------------------------------------------
 
     def _attach_colorbar(self, mappable, colorbar):
@@ -1066,6 +1021,27 @@ class MantidAxes(Axes):
         mappable.colorbar = cb
         mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
         cb.update_normal(mappable)
+
+    def _remove_matching_curve_from_creation_args(self, workspace_name, workspace_index, spec_num):
+        """
+        Finds a curve from the same workspace and index, then removes it from the creation args.
+
+        :param workspace_name: Name of the workspace from which the curve was plotted
+        :type workspace_name: str
+        :param workspace_index: Index in the workspace that contained the data
+        :type workspace_index: int
+        :param spec_num: Spectrum number that contained the data. Used if the workspace was plotted using specNum kwarg.
+                         Workspace index has priority if both are provided.
+        :type spec_num: int
+        :raises ValueError: if the curve does not exist in the creation_args of the axis
+        :returns: None
+        """
+        for index, creation_arg in enumerate(self.creation_args):  # type: int, dict
+            if workspace_name == creation_arg["workspaces"]:
+                if creation_arg.get("wkspIndex", -1) == workspace_index or creation_arg.get("specNum", -1) == spec_num:
+                    del self.creation_args[index]
+                    return
+        raise ValueError("Curve does not have existing creation args")
 
 
 class MantidAxes3D(Axes3D):

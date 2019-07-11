@@ -114,9 +114,9 @@ class PlotFunctionsTest(unittest.TestCase):
 
     def test_1d_errorbars_specifying_error_visibility(self):
         fig, ax = plt.subplots()
-        errorbar_container = funcs.errorbar(ax, self.ws2d_histo, 'rs', specNum=1, errors_visible=True)
+        errorbar_container = funcs.errorbar(ax, self.ws2d_histo, 'rs', specNum=1)
         self.assertTrue(errorbar_container[2][0].get_visible())
-        errorbar_container = funcs.errorbar(ax, self.ws2d_histo, 'rs', specNum=1, errors_visible=False)
+        errorbar_container = funcs.errorbar(ax, self.ws2d_histo, 'rs', specNum=1)
         self.assertFalse(errorbar_container[2][0].get_visible())
 
     def test_1d_scatter(self):

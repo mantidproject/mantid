@@ -245,9 +245,9 @@ class Plots__init__Test(unittest.TestCase):
         self.assertRaises(Exception, ax.plot_surface, self.ws2d_histo)
 
     def test_legend_executes(self):
-        self.ax.errorbar(self.ws2d_histo, 'rs', specNum=1, errors_visible=True)
+        self.ax.errorbar(self.ws2d_histo, 'rs', specNum=1)
         self.ax.plot(self.ws2d_histo, specNum=2)
-        self.ax.errorbar(self.ws2d_histo, 'rs', specNum=3, errors_visible=True)
+        self.ax.errorbar(self.ws2d_histo, 'rs', specNum=3)
         legend = self.ax.legend()
         # assert that the order is as plotted -> line with error is first,
         # then the line without errors is shown
