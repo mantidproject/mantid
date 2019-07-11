@@ -38,6 +38,13 @@ class SANSILLReduction(PythonAlgorithm):
         return issues
 
     @staticmethod
+    def _get_solid_angle_method(instrument):
+        if instrument in ['D11', 'D11lr']:
+            return 'Rectangle'
+        else:
+            return 'GenericShape'
+
+    @staticmethod
     def _make_solid_angle_name(ws):
         return mtd[ws].getInstrument().getName()+'_'+str(int(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
 
@@ -212,9 +219,7 @@ class SANSILLReduction(PythonAlgorithm):
         normalise_by = self.getPropertyValue('NormaliseBy')
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
-            monID = 100000
-            if mtd[ws].getInstrument().getName() == 'D33':
-                monID = 500000
+            monID = 100000 if self._instrument != 'D33' else 500000
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
             if mtd[mon].readY(0)[0] == 0:
                 raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
@@ -498,7 +503,8 @@ class SANSILLReduction(PythonAlgorithm):
                     cache = self.getProperty('CacheSolidAngle').value
                     if cache:
                         if not mtd.doesExist(solid_angle):
-                            SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                            SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
+                                       Method=self._get_solid_angle_method(self._instrument))
                     else:
                         SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
