@@ -35,7 +35,6 @@ class Instrument(object):
             off between speed and accuracy. Not all schemes must (or should?) be implemented for all instruments, but
             'auto' should select something sensible.
         :type scheme: str
-
         """
         raise NotImplementedError()
 
