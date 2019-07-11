@@ -13,8 +13,8 @@
 #include "MantidKernel/ProgressBase.h"
 #include <H5Cpp.h>
 #include <boost/filesystem/operations.hpp>
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Mantid {
@@ -223,7 +223,8 @@ H5::Group detector(const std::string &name, const H5::Group &parent,
 
   writeStrAttributeToGroupHelper(child, NX_CLASS, NX_DETECTOR);
 
-  std::string dependencyStr = name + "/" + LOCATION; // needs to be full path to group
+  std::string dependencyStr =
+      name + "/" + LOCATION;         // needs to be full path to group
   std::string localNameStr = "INST"; // placeholder
 
   H5::StrType dependencyStrSize = strTypeOfSize(dependencyStr);
