@@ -85,7 +85,6 @@ class FigureErrorsManager(object):
             action.setChecked(visible)
 
     def _toggle_all_errors(self, ax, make_visible):
-        # TODO if hidden and new state is make_visible==False then do nothing?
         for line in self.active_lines:
             if curve_has_errors(line):
                 self.toggle_error_bars_for(ax, line, make_visible)
@@ -98,7 +97,6 @@ class FigureErrorsManager(object):
             try:
                 new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
             except ValueError:  # ValueError raised if Artist not tracked by Axes
-                # TODO does this need to update the creation args?
                 # this might not have a creation_args
                 new_curve = CurvesTabWidgetPresenter.replot_curve(ax, curve, plot_kwargs)
         else:
