@@ -41,20 +41,20 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 	
 	<INTERFACE id="CalculatePaalmanPings">
 		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs"/>
-		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw"/>
+		<FILE-SUFFIXES sample="_red.nxs" container="_red.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red" container="_red"/>
 	</INTERFACE>
 	
 	<INTERFACE id="CalculateMonteCarlo">
 		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs"/>
-		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw"/>
+		<FILE-SUFFIXES sample="_red.nxs" container="_red.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red" container="_red"/>
 	</INTERFACE>
 	
 	<INTERFACE id="ApplyCorrections">
 		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs" corrections="_Corrections.nxs"/>
-		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw" corrections="_Corrections"/>
+		<FILE-SUFFIXES sample="_red.nxs" container="_red.nxs" corrections="_Corrections.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red" container="_red" corrections="_Corrections"/>
 	</INTERFACE>
 	
 	<INTERFACE id="Elwin">

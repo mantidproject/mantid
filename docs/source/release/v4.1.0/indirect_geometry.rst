@@ -63,6 +63,7 @@ Bug Fixes
 - Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
 - Fixed a bug where the loaded workspace in Data Analysis doesn't update after being changed on a different
   interface.
+- Fixed a bug with the StartX and EndX selectors seen on the Preview Plots.
 - Fixed a bug causing the errors calculated on Iqt to be too small towards the end of the spectra.
 
 .. figure:: ../../images/Iqt_Errors_Bug.PNG
@@ -96,7 +97,8 @@ Improvements
 ############
 - Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
 - Improved ISISEnergyTransfer by automatically loading the Detailed Balance from the sample logs if available.
-- Removed the obsolete *Plot Raw* button.
+- Removed the obsolete *Plot Raw* button in ISIS Calibration.
+- Improved the validation checks for input data on all tabs.
 
 Bug Fixes
 #########

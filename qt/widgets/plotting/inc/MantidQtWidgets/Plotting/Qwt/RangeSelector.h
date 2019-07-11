@@ -69,7 +69,7 @@ private:
   void setMinLinePos(double /*val*/);
   void setMaxLinePos(double /*val*/);
   void verify();
-  bool inRange(double /*x*/);
+  bool inRange(double x, double dx = 0.0);
   bool changingMin(double /*x*/, double /*xPlusdx*/);
   bool changingMax(double /*x*/, double /*xPlusdx*/);
   bool eventFilter(QObject * /*unused*/, QEvent * /*unused*/) override;
