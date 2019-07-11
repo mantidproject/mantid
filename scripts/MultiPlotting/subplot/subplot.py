@@ -253,7 +253,7 @@ class subplot(QtWidgets.QWidget):
 
     def _replaced_ws(self, workspace):
         # Close all old subplots and create a new canvas
-        subplot_names = self._context.subplots.keys()
+        subplot_names = deepcopy(self._context.subplots.keys())
         for to_del in subplot_names:
             try:
                 self.figure.delaxes(self.plotObjects[to_del])
@@ -265,7 +265,8 @@ class subplot(QtWidgets.QWidget):
         self.canvas = FigureCanvas(self.figure)
         self.canvas.mpl_connect("draw_event", self.draw_event_callback)
 
-        for subplot in self._context.subplots.keys():
+        subplot_names = deepcopy(self._context.subplots.keys())
+        for subplot in subplot_names:
             redraw = self._context.subplots[subplot].replace_ws(workspace)
             if redraw:
                 self.canvas.draw()
