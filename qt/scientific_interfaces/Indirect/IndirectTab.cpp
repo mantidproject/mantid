@@ -134,8 +134,8 @@ void workbenchPlot(QStringList const &workspaceNames,
     plotKwargs["capsize"] = 3;
 
   using MantidQt::Widgets::MplCpp::plot;
-  plot(workspaceNames, boost::none, indices, boost::none, kwargs, boost::none,
-       boost::none, errorBars);
+  plot(workspaceNames, boost::none, indices, boost::none, plotKwargs,
+       boost::none, boost::none, errorBars);
 }
 #endif
 
