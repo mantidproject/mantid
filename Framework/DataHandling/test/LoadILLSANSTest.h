@@ -87,8 +87,8 @@ public:
     const auto &spec6 = outputWS->y(6).rawData();
     const auto &err6 = outputWS->e(6).rawData();
     TS_ASSERT_EQUALS(xAxis.size(), 2)
-    TS_ASSERT_DELTA(xAxis[0], 5.72778, 1E-5)
-    TS_ASSERT_DELTA(xAxis[1], 6.26757, 1E-5)
+    TS_ASSERT_DELTA(xAxis[0], 5.73, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 6.27, 1E-5)
     TS_ASSERT_EQUALS(spec6[0], 20)
     TS_ASSERT_DELTA(err6[0], sqrt(20), 1E-5)
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
@@ -122,8 +122,8 @@ public:
     const auto &spec6 = outputWS->y(6).rawData();
     const auto &err6 = outputWS->e(6).rawData();
     TS_ASSERT_EQUALS(xAxis.size(), 2)
-    TS_ASSERT_DELTA(xAxis[0], 4.75015, 1E-5)
-    TS_ASSERT_DELTA(xAxis[1], 5.25016, 1E-5)
+    TS_ASSERT_DELTA(xAxis[0], 4.75, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 5.25, 1E-5)
     TS_ASSERT_EQUALS(spec6[0], 45)
     TS_ASSERT_DELTA(err6[0], sqrt(45), 1E-5)
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
