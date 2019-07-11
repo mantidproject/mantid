@@ -65,11 +65,11 @@ class MuonFileUtilsTest(unittest.TestCase):
 
     def test_that_get_current_run_returns_correct_run(self):
         utils.check_file_exists = mock.Mock(return_value=True)
-        file_name = os.sep + os.sep + "EMU" + os.sep + "data" + os.sep + "autoA"
-        file = StringIO(u"autoA")
-        utils.open = mock.Mock(return_value = file)
+        expected_file_name = os.sep + os.sep + "EMU" + os.sep + "data" + os.sep + "autoA"
+        test_file_name = StringIO(u"autoA")
+        utils.open = mock.Mock(return_value = test_file_name)
         current_file_name = utils.get_current_run_filename("EMU")
-        self.assertEqual(current_file_name, file_name)
+        self.assertEqual(current_file_name, expected_file_name)
 
     def test_that_get_current_run_throws_if_no_valid_run_in_autosave_run(self):
         utils.check_file_exists = mock.Mock(side_effect = [True, False])
