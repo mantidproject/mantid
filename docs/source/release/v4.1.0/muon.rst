@@ -18,7 +18,7 @@ New
 * Frequency Domain Analysis GUI added to workbench.
 * Muon ALC GUI added to workbench.
 * Added phase tab for calculating :ref:`phase tables <algm-CalMuonDetectorPhases>` and :ref:`PhaseQuad <algm-PhaseQuad>` workspaces to Frequency Domain Analysis GUI.
-* :ref:`Muon Analysis v2 <https://docs.mantidproject.org/nightly/interfaces/Muon%20Analysis%202.html>` added to MantidPlot and workbench.
+* :ref:`Muon Analysis v2 <Muon_Elemental_Analysis-ref>` added to MantidPlot and workbench.
 * Elemental analysis interface added to workbench.
 
 Improvements
