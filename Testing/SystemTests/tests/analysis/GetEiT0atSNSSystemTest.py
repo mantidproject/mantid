@@ -14,6 +14,9 @@ import mantid.simpleapi as sm
 
 class GetEiT0atSNSSystemTest(MantidSystemTest):
 
+    def requiredFiles(self):
+        return ["SEQ_169004.nxs.h5", "SEQ_176472.nxs.h5", "SEQ_181261.nxs.h5"]
+
     def runTest(self):
         # old DAS. all data in first frame
         ws = sm.LoadNexusMonitors('SEQ_169004.nxs.h5')
