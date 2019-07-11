@@ -124,13 +124,16 @@ QStringList convertToQStringList(std::string const &str,
  * @param kwargs Other arguments for plotting
  */
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-void workbenchPlot(
-    QStringList const &workspaceNames, std::vector<int> const &indices,
-    bool errorBars,
-    QHash<QString, QVariant> &kwargs = QHash<QString, QVariant>()) {
-  using MantidQt::Widgets::MplCpp::plot;
+void workbenchPlot(QStringList const &workspaceNames,
+                   std::vector<int> const &indices, bool errorBars,
+                   boost::optional<QHash<QString, QVariant>> kwargs) {
+  QHash<QString, QVariant> plotKwargs;
+  if (kwargs)
+    plotKwargs = kwargs.get();
   if (errorBars)
-    kwargs["capsize"] = 3;
+    plotKwargs["capsize"] = 3;
+
+  using MantidQt::Widgets::MplCpp::plot;
   plot(workspaceNames, boost::none, indices, boost::none, kwargs, boost::none,
        boost::none, errorBars);
 }
@@ -459,7 +462,7 @@ void IndirectTab::plotMultipleSpectra(
   }
   m_pythonRunner.runPythonCode(pyInput);
 #else
-  workbenchPlot(workspaceNames, workspaceIndices, m_plotErrorBars);
+  workbenchPlot(workspaceNames, workspaceIndices, m_plotErrorBars, boost::none);
 #endif
 }
 
@@ -487,7 +490,8 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
 
     m_pythonRunner.runPythonCode(pyInput);
 #else
-    workbenchPlot(workspaceNames, std::vector<int>{wsIndex}, m_plotErrorBars);
+    workbenchPlot(workspaceNames, std::vector<int>{wsIndex}, m_plotErrorBars,
+                  boost::none);
 #endif
   }
 }
@@ -543,7 +547,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   const auto nSpectra = specEnd - specStart + 1;
   std::vector<int> wkspIndices(nSpectra);
   std::iota(std::begin(wkspIndices), std::end(wkspIndices), specStart);
-  workbenchPlot(workspaceNames, wkspIndices, m_plotErrorBars);
+  workbenchPlot(workspaceNames, wkspIndices, m_plotErrorBars, boost::none);
 #endif
 }
 
@@ -597,7 +601,7 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
   pyInput += ", error_bars=" + errors + ")\n";
   m_pythonRunner.runPythonCode(pyInput);
 #else
-  workbenchPlot(workspaceNames, wsIndices, m_plotErrorBars);
+  workbenchPlot(workspaceNames, wsIndices, m_plotErrorBars, boost::none);
 #endif
 }
 
