@@ -13,7 +13,7 @@ Concepts
 - Support has been added for negative indexing of :ref:`WorkspaceGroups <WorkspaceGroup>`.
   Try :code:`ws_group[-1]` to get the last workspace in the WorkspaceGroup :code:`ws_group`.
 - Updated the clone method of IFunction to copy parameter errors across as well as parameter values.
-  
+
 Algorithms
 ----------
 
@@ -54,6 +54,8 @@ Bug fixes
 
 - :ref:`SetSample <algm-SetSample>` now correctly handles the Sample number density being passed as a string, before the algorithm would execute, but silently ignored the provided number density, the number density is now properly used.
 - Mantid no longer crashed when invalid period logs encountered in `LoadEventNexus <algm-LoadEventNexus>`. A clear error message is displayed which explains the problem.
+- ISIS sample logs are now correctly filtered by status and period on loading.
+- A bug has been fixed in status log filtering where if a log contained times before the first running log entry then they would be included rather than excluded.
 
 Removed
 #######
