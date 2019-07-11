@@ -169,9 +169,7 @@ class SubplotTest(GuiTest):
         self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = False)
 
         self.subplot._replaced_ws(ws)
-        self.assertEqual(self.subplot.canvas.draw.call_count,0)
-
-
+        self.assertEqual(self.subplot._context.subplots, {})
 
     def test_replaced_ws(self):
         one = mock.Mock()
@@ -184,9 +182,7 @@ class SubplotTest(GuiTest):
         self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = True)
 
         self.subplot._replaced_ws(ws)
-        self.assertEqual(self.subplot.canvas.draw.call_count,1)
-
-
+        self.assertEqual(self.subplot._context.subplots, {})
 
     def test_replaced_ws_true(self):
         one = mock.Mock()
@@ -195,11 +191,12 @@ class SubplotTest(GuiTest):
         self.subplot._context.subplots["two"] = two
         self.subplot.canvas.draw = mock.Mock()
         ws = mock.Mock()
+
         self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value = True)
         self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = True)
 
         self.subplot._replaced_ws(ws)
-        self.assertEqual(self.subplot.canvas.draw.call_count,2)
+        self.assertEqual(self.subplot._context.subplots, {})
 
 
 if __name__ == "__main__":

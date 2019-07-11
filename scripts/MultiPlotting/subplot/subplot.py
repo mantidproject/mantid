@@ -252,6 +252,19 @@ class subplot(QtWidgets.QWidget):
                 self._remove_subplot(subplot)
 
     def _replaced_ws(self, workspace):
+        # Close all old subplots and create a new canvas
+        subplot_names = self._context.subplots.keys()
+        for to_del in subplot_names:
+            try:
+                self.figure.delaxes(self.plotObjects[to_del])
+                del self.plotObjects[to_del]
+            except KeyError:
+                pass
+            self._context.delete(to_del)
+            self._context.update_gridspec(len(list(self.plotObjects.keys())))
+        self.canvas = FigureCanvas(self.figure)
+        self.canvas.mpl_connect("draw_event", self.draw_event_callback)
+
         for subplot in self._context.subplots.keys():
             redraw = self._context.subplots[subplot].replace_ws(workspace)
             if redraw:
