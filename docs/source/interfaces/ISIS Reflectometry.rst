@@ -728,14 +728,19 @@ global options that will be applied to all the rows in the table, whereas the
 row values will only be applicable to the specific row for which those options
 are defined.
 
-Save ASCII tab
+Save ASCII Tab
 ~~~~~~~~~~~~~~
 
-.. figure:: /images/ISISReflectometryPolref_save_tab.png
-   :alt: Showing view of the save ASCII tab.
-
-The *Save ASCII* tab allows for processed workspaces to be saved in specific
+The ``Save ASCII`` tab allows for processed workspaces to be saved in specific
 ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
+
+.. figure:: /images/ISISReflectometryInterface/save_tab.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: The save ASCII tab
+
+  *The save ASCII tab*
 
 +-------------------------------+------------------------------------------------------+
 | Name                          | Description                                          |
@@ -782,6 +787,12 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 | Custom Format Options         | When saving in 'Custom' this section allows you      |
 |                               | to specify if you want a Title and/or Q Resolution   |
 |                               | column as well as specifying the delimiter.          |
++-------------------------------+------------------------------------------------------+
+| Automatic Save                | Automatically save the main output workspace for     |
+|                               | groups in the runs table. Note that the stitched     |
+|                               | group output will be saved if there is one or, for   |
+|                               | a single-row group, the ``IvsQ_binned`` row output   |
+|                               | will be saved instead.                               |
 +-------------------------------+------------------------------------------------------+
 
 Troubleshooting
