@@ -32,13 +32,16 @@ class PlottingContext(object):
 
     def addLine(self, subplotName, workspace, specNum):
         try:
+            ws = None
             if isinstance(workspace, str):
                 ws = mantid.AnalysisDataService.retrieve(workspace)
             elif len(workspace) > 1:
                 ws = workspace.OutputWorkspace
             else:
                 ws = workspace
-            self.subplots[subplotName].addLine(ws, specNum)
+
+            if ws is not None:
+                self.subplots[subplotName].addLine(ws, specNum)
         except:
             return
 
