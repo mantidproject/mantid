@@ -2,73 +2,169 @@
 Reflectometry Changes
 =====================
 
+.. figure:: ../../images/ISISReflectometryInterface_processing.png
+  :class: screenshot
+  :width: 700px
+  :align: right
+  :alt: The improved ISIS Reflectometry Interface
+
+  *Usability improvements in the ISIS Reflectometry Interface*
+
 .. contents:: Table of Contents
    :local:
-
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
 
 ISIS Reflectometry Interface
 ----------------------------
 
-Changes
-#######
+Workbench Support
+#################
 
-- Pushed back deprecation of ISIS Reflectometry (Old) GUI to November 2019 from July 2019.
+The ISIS Reflectometry interface is now available in ``MantidWorkbench``, as well as ``MantidPlot``. See the :ref:`workbench documentation <workbench>` for more details and the :doc:`workbench release notes <mantidworkbench>` to see what else is included in this version.
 
-New
-###
+Usability Improvements
+######################
 
-- Tabs are now grouped inside "Batches" rather than having two separate "Groups" within each tab. This makes it easier to see which set of settings will be used together. Batches can be added/removed using the menu and the Batch tabs on the left.
-- The Settings tab has been split into two separate tabs, Experiment Settings and Instrument Settings.
-- The first and second transmission runs are now entered via two separate boxes. Multiple runs can be summed for either of these inputs by entering the run numbers as a comma-separated list.
-- New inputs have been added to control stitching of transmission runs: you can select whether to scale the left or right workspace; you can enter rebin parameters specifically for transmission run stitching (previously the same parameters as stitching of the output workspaces were used).
-- Spectra of interest can be specified for the transmission runs via a new column on the Experiment Settings tab (previously the same spectra as the run workspaces was used).
-- Default values for the current instrument are automatically set in the Experiment and Instrument Settings tabs when the interface is opened or the instrument is changed.
-- Processing in event mode is now done asynchronously. Previously this used to lock up MantidPlot.
-- Error handling has been improved to catch invalid inputs earlier. Errors are highlighted in red or (for the table) with a red star.
-- The progress bar now remembers previous progress when you pause and restart processing.
+Major usability improvements have been added to the interface in this release. There are general layout improvements as well as new functionality for:
 
-The Runs Table
-^^^^^^^^^^^^^^
+- keyboard navigation;
+- input validation; and
+- pre-processing and stitching transmission runs.
+
+The rest of this section describes the changes in more detail.
+
+Significant under-the-hood changes have also taken place to update the interface to modern design and engineering standards, resulting in a much more stable, extensible interface.
+
+Batches and Settings
+^^^^^^^^^^^^^^^^^^^^
+.. figure:: ../../images/ISISReflectometryInterface_batches.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: Batch tabs on the ISIS Reflectometry interface
+
+  *Batch tabs on the left contain all of the settings for a particular reduction*
+
+- Tabs are now grouped inside "Batches" rather than having separate "Groups" within each tab. This makes it easier to see which settings will be used for the current reduction.
+- Any number of Batches is now supported - batches can be added using the Batch menu, or removed by clicking the X on the tab.
+- The Settings tab has been split into two separate tabs for Experiment and Instrument Settings.
+- Default values for the Experiment and Instrument Settings tabs are automatically populated for the selected instrument.
+
+Transmission Runs
+^^^^^^^^^^^^^^^^^
+
+.. figure:: ../../images/ISISReflectometryInterface_transmission_runs.png
+  :class: screenshot
+  :width: 600px
+  :align: center
+  :alt: New transmission run options
+
+  *New transmission run options*
+
+- There are now separate input boxes for the first and second transmission runs.
+- Multiple runs can be specified for each transmission input - these will be summed prior to reduction. Multiple values are entered as a comma-separated list, similarly to the Run(s) column.
+- Specific spectra (i.e. ``processing instructions``) can be specified for the transmission runs on the Experiment Settings tab. If none are specified then the same spectra will be used as for the input runs.
+- A new ``Transmission stitch params`` input allows you to stitch parameters specifically for the transmission runs rather than using the same parameters as for the output IvsQ workspaces.
+- A new ``Scale RHS transmission workspace`` check box allows you to control which workspace is scaled when stitching transmission runs.
+
+The Toolbar
+^^^^^^^^^^^
+
 .. |filldown| image:: ../../images/arrow-expand-down.png
 
-- Added a "Fill Down" (|filldown|) functionality which allows filling all selected cells below the highest selected cell, in the column that is selected.
+- A "Fill Down" |filldown| button has been added, which allows filling all selected cells below the highest selected cell, in the column that is selected.
 - Filtering by run or group name is now possible using the search bar above the table. This accepts regular expressions.
+- Icons have been updated to be consistent between Workbench and MantidPlot.
 
-- Navigation by keyboard shortcuts has been added:
-  - F2 edits a cell
-  - Tab/Shift-Tab moves to the next/previous cell
-  - Pressing Tab when in the last cell of a row adds a new row and moves to the first cell in it
-  - Enter adds a new row/group at the same level
-  - Ctrl-I inserts a new child row to a group
-  - Ctrl-X/Ctrl-C/Ctrl-V perform cut/copy/paste
-  - The Delete key removes the selected rows/groups
-  - Copy/paste functionality is more intuitive - you can select the destination rows/groups to paste over or paste into the "root" of the table to create a new group
+.. figure:: ../../images/ISISReflectometryInterface_toolbar_and_filter.png
+  :class: screenshot
+  :align: center
+  :alt: The new toolbar icons and filter box
 
-- Additional highlighting has been added for rows in the table:
+  *The new toolbar icons and filter box*
 
-  - Grey rows are invalid and will not be processed
-  - Yellow rows are currently processing
-  - Green rows have completed successfully
-  - Blue rows completed with an error - a tooltip will display the error message
-  - Rows are also highlighted in blue if their mandatory output workspaces have been deleted - again, a tooltip will explain the issue
-  - Renamed workspaces are now tracked, so that the row state is no longer reset if a mandatory output workspace is renamed
-  - Cells are greyed out when they have been populated from the algorithm outputs so that you can easily distinguish between inputs and outputs
+Keyboard shortcuts
+^^^^^^^^^^^^^^^^^^
 
+Additional keyboard shortcuts have been added to aid navigation/editing in the runs table.
+
++-----------------------------+---------------------------------------+
+| Shortcut                    | Action                                |
++=============================+=======================================+
+|``F2``                       | Edit the current cell                 |
++-----------------------------+---------------------------------------+
+|``Esc``                      | Cancel editing                        |
++-----------------------------+---------------------------------------+
+|``Tab``                      | Next cell                             |
++-----------------------------+---------------------------------------+
+|``Shift-Tab``                | Previous cell                         |
++-----------------------------+---------------------------------------+
+|``Enter``                    | Edit the next row / append a new row  |
++-----------------------------+---------------------------------------+
+|``Ctrl-I``                   | Insert child row                      |
++-----------------------------+---------------------------------------+
+|``Ctrl-X``                   | Cut                                   |
++-----------------------------+---------------------------------------+
+|``Ctrl-C``                   | Copy                                  |
++-----------------------------+---------------------------------------+
+|``Ctrl-V``                   | Paste                                 |
++-----------------------------+---------------------------------------+
+|``Delete``                   | Delete the selected rows/groups       |
++-----------------------------+---------------------------------------+
+|``Up``/``Down``              | Select next/previous row              |
++-----------------------------+---------------------------------------+
+|``Shift-Up``/``Shift-Down``  | Extend selection to next/previous row |
++-----------------------------+---------------------------------------+
+|``Ctrl-A``                   | Select all                            |
++-----------------------------+---------------------------------------+
+
+.. figure:: ../../images/ISISReflectometryInterface_table_editing.png
+  :class: screenshot
+  :align: center
+  :alt: Editing the Runs table
+
+  *Editing the Runs table*
+
+Processing and highlighting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. figure:: ../../images/ISISReflectometryInterface_row_highlighting.png
+  :class: screenshot
+  :width: 650px
+  :align: center
+  :alt: Highlighting on the runs table
+
+  *Highlighting on the runs table*
+
+- Additional highlighting has been added for rows and groups in the table to indicate which row is currently processing (yellow) and rows that are invalid and will be ignored (grey).
+- A row or group's state is reset if its final output workspace(s) have been deleted
+- Renamed workspaces now remain associated with the correct row/group in the table, so they can still be plotted
+- Q min, Q max and dQ/Q are greyed out when they have been populated from the algorithm outputs so that you can easily distinguish between inputs and outputs
+- Input validation is more intuitive - invalid values are highlighted with a red background, or, in the table, cells with an invalid value are marked with a red star
+- The progress bar is more accurate, and remembers previous progress when you pause and restart processing.
+- Processing in event mode is now done asynchronously, so it no longer locks up MantidPlot.
+
+.. figure:: ../../images/ISISReflectometryInterface_validation.png
+  :class: screenshot
+  :width: 650px
+  :align: center
+  :alt: The ISIS Reflectometry Interface showing invalid input values highlighted in red
+
+  *Examples of invalid input checks*
 
 Bug fixes
 #########
 
+The following bugs have been fixed since the last release:
+
 - Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
 - Fixed a problem where auto-saving would fail if the output for a row is a group workspace.
 - Fixed a problem where the live data monitor would not start. Also fixed an issue where the output workspace is created prematurely as a clone of the TOF workspace.
-	
-Removed
-#######
 
-- The ``Generate Notebook`` checkbox has been removed.
+Removed/updated
+###############
+
+- The ``Generate Notebook`` checkbox has been removed as this was not used and not useful in its current state.
+- The deprecation of ISIS Reflectometry (Old) GUI has been pushed back to November 2019.
 
 Algorithms
 ----------
@@ -76,11 +172,11 @@ Algorithms
 Improvements
 ############
 
-- The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
-- In ref:`ReflectometryISISLoadAndPreprocess` all output workspaces have names which give information about the slice.
 - An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
+- The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
+- In :ref:`algm-ReflectometryISISLoadAndProcess` all output workspaces have names which give information about the slice.
+- In :ref:`algm-ReflectometryISISLoadAndProcess` the TOF workspaces are now grouped together.
 - Changes have been made to the Polynomial method in :ref:`algm-ReflectometryBackgroundSubtraction` to improve fitting for high degree polynomials.
-- In ref:`ReflectometryISISLoadAndPreprocess` the TOF workspaces are now grouped together.
 
 Bug fixes
 #########
