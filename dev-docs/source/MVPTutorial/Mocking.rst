@@ -31,9 +31,9 @@ The test class is then initialised:
 
 .. code-block:: python
 
-    class presenterTest(unittest.TestCase):
+    class PresenterTest(unittest.TestCase):
         def setUp(self):
-            self.view = mock.create_autospec(view.view)
+            self.view = mock.create_autospec(view.View)
         
             # mock view
             self.view.doSomethingSignal = mock.Mock()
@@ -56,7 +56,7 @@ A test is shown below:
             assert(self.view.getValue.call_count == 1)
 
 We call the ``handleButton`` function and then use ``call_count`` to
-ensure that the method from the View is called the correct number of
+ensure that the method from the view is called the correct number of
 times. This is a more robust method for checking how many times a
 function is called.
 
