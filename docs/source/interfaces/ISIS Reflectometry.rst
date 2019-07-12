@@ -511,7 +511,7 @@ transfered to the processing table.
 
 .. figure:: /images/ISISReflectometryInterface/transfer.png
   :class: screenshot
-  :width: 500px
+  :width: 800px
   :align: center
   :alt: Selecting runs from search table to transfer to processing table
 
