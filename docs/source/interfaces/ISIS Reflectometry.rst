@@ -109,11 +109,11 @@ Editing Settings
 
 The above is a minimal reduction. We also want to use some transmission runs to
 correct this data. We could enter these into the runs table but instead we will
-use the ``Experiment Settings`` tab to set them as defaults for all runs.  We
+use the **Experiment Settings** tab to set them as defaults for all runs.  We
 will also set the limits and resolution for the final rebinning in ``Q``, and
 output the debug workspaces.
 
-Enter the following information on the table on the ``Experiment Settings``
+Enter the following information on the table on the **Experiment Settings**
 tab, and tick the ``Debug`` option. Then re-process the group.
 
 .. figure:: /images/ISISReflectometryInterface/workflow_settings.png
@@ -240,7 +240,7 @@ table by group or run name. Various `Keyboard Shortcuts`_ are available to help
 with quickly editing the table.
 
 To process, simply select the rows or groups you want to process and click
-``Process`` |process|. Alternatively, if nothing is selected, the entire table
+**Process** |process|. Alternatively, if nothing is selected, the entire table
 will be processed.
 
 Below the table is a progress bar, which shows the current progress of any
@@ -274,13 +274,13 @@ If reduction stops and is then resumed, the interface will re-process any rows
 and groups within the current selection that have not been processed, or whose
 state has been reset. If you manually select rows/groups that have an error
 then they too will be reprocessed. However if you process the entire table
-(i.e. click ``Process`` |process| when nothing is selected), rows/groups that
+(i.e. click **Process** |process| when nothing is selected), rows/groups that
 have errors will **not** be reprocessed - you can manually select all rows in
 the table if you want to reprocess them.
 
 **Note**: The interface cannot be closed while runs are being processed. To
 close the interface, you must first stop the reduction by clicking on the
-``Pause`` |pause| button.
+**Pause** |pause| button.
 
 Columns
 =======
@@ -472,11 +472,11 @@ Search Interface
   *The search interface*
 
 To search for runs, select the instrument the runs are from, enter the id of
-the investigation the runs are part of, and click on ``Search``.
+the investigation the runs are part of, and click on **Search**.
 
 In the table below, valid runs and their descriptions will be listed. You can
 then transfer runs to the processing table by selecting the runs you wish to
-transfer, and click the ``Transfer`` |transfer| button. You can also
+transfer, and click the **Transfer** |transfer| button. You can also
 right-click on one of the selected runs and select *Transfer* in the context
 menu that appears.
 
@@ -630,7 +630,7 @@ Event Handling Tab
 
   *The event handling tab*
 
-The ``Event Handling`` tab can be used to analyze event workspaces. It contains four text boxes for
+The **Event Handling** tab can be used to analyze event workspaces. It contains four text boxes for
 specifying uniform even, uniform, custom and log value slicing respectively. Each of these slicing
 options are exclusive, no more than one can be applied. If the text box for the selected slicing
 method is empty no event analysis will be performed, runs will be loaded using
@@ -686,12 +686,12 @@ Experiment and Instrument Settings Tabs
 
   *The experiment Settings tab*
 
-The ``Experiment Settings`` and ``Instrument Settings`` tabs can be used to
+The **Experiment Settings** and **Instrument Settings** tabs can be used to
 specify options for the reduction and post-processing releting to a specific
 experiment. The Experiment settings are variables that are mostly set by the
-user, whereas the ``Instrument Settings`` are variables relating to the
+user, whereas the **Instrument Settings** are variables relating to the
 instrument used to perform the reduction. Both are populated with default
-values for the current instrument. The ``Restore Defaults`` button allows you
+values for the current instrument. The **Restore Defaults** button allows you
 to revert the settings to the default values for the instrument.
 
 The majority of these options are used by the interface to provide argument
@@ -707,7 +707,7 @@ calculated from the slits, if possible.
 
 Note that when conflicting options are specified for the reduction,
 i.e. different values for the same property are specified via one of the
-settings tabs and the cells in the *Runs* tab, the latter will take
+settings tabs and the cells in the **Runs** tab, the latter will take
 precedence. Therefore, the Settings tabs should be used to specify
 global options that will be applied to all the rows in the table, whereas the
 row values will only be applicable to the specific row for which those options
@@ -752,7 +752,7 @@ specified, then they will be stitched using the options specified.
 Save ASCII Tab
 ~~~~~~~~~~~~~~
 
-The ``Save ASCII`` tab allows for processed workspaces to be saved in specific
+The **Save ASCII** tab allows for processed workspaces to be saved in specific
 ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
 
 .. figure:: /images/ISISReflectometryInterface/save_tab.png
