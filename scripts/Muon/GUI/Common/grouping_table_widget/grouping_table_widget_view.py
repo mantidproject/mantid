@@ -167,10 +167,11 @@ class GroupingTableView(QtWidgets.QWidget):
                 item.setFlags(QtCore.Qt.ItemIsSelectable)
             if group_table_columns[i] == group_table_columns[1]:
                 # column 1 : detector IDs
-                detector_widget = table_utils.ValidatedTableItem(self._validate_detector_ID_entry)
+                detector_widget = table_utils.ValidatedTableItem()
                 detector_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 1, detector_widget)
                 self.grouping_table.item(row_position, 1).setToolTip(entry)
+                detector_widget.set_validator(self._validate_detector_ID_entry)
             if group_table_columns[i] == group_table_columns[2]:
                 # column 2 : number of detectors
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
