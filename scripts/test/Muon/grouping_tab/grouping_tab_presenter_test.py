@@ -23,11 +23,14 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 class GroupingTabPresenterTest(GuiTest):
     def setUp(self):
         self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
-        self.context = self.context = setup_context(False)
 
+        self.context = setup_context(False)
+
+        self.data_context =self.context.data_context 
+        self.gui_context = self.context.gui_context
+        self.group_context=self.context.group_pair_context  
+
+ 
         self.model = GroupingTabModel(context=self.context)
 
         self.grouping_table_view = GroupingTableView()
