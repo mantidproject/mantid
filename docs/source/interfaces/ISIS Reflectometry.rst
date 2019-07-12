@@ -308,9 +308,11 @@ The processing table contains the following columns:
 |                     |           |                                                                                 |
 |                     |           | Example: ``0.7``                                                                |
 +---------------------+-----------+---------------------------------------------------------------------------------+
-| Transmission Run(s) | No        | Contains the transmission run(s) used to                                        |
+| 1st Trans Run(s)    | No        | Contains the transmission run(s) used to                                        |
 |                     |           | normalise the sample runs. To specify two                                       |
-|                     |           | transmission runs, separate them with a comma.                                  |
+| 2nd Trans Run(s)    |           | transmission runs, enter them in each input box.                                |
+|                     |           | Note that as per the Run(s) column, you can sum multiple                        |
+|                     |           | runs for each input by entering multiple values separated by ``+`` or ``,`.     |
 |                     |           | If left blank, the sample runs will be                                          |
 |                     |           | normalised by monitor only.                                                     |
 |                     |           |                                                                                 |
@@ -461,18 +463,21 @@ table.
 Search Interface
 ^^^^^^^^^^^^^^^^
 
-.. interface:: ISIS Reflectometry
-  :widget: groupSearchPane
+.. figure:: /images/ISISReflectometryInterface/search.png
+  :class: screenshot
   :align: right
+  :alt: The search interface
+
+  *The search interface*
 
 To search for runs, select the instrument the runs are from, enter the id of
-the investigation the runs are part of, and click on **Search**.
+the investigation the runs are part of, and click on ``Search``.
 
-In the table below, valid runs and their descriptions will be listed. You
-can then transfer runs to the processing table by selecting the runs you
-wish to transfer, and click the **Transfer** button. You can also right-click
-on one of the selected runs and select *Transfer* in the context menu that
-appears.
+In the table below, valid runs and their descriptions will be listed. You can
+then transfer runs to the processing table by selecting the runs you wish to
+transfer, and click the ``Transfer`` |transfer| button. You can also
+right-click on one of the selected runs and select *Transfer* in the context
+menu that appears.
 
 Search Transfer
 ===============
@@ -497,22 +502,25 @@ behaviour of this is as follows:
 
 Failed transfers
 ================
-When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, where theta could not be found or is zero.
-In the image below we select three runs from the Search table that we wish to transfer to the processing table.
 
-.. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.png
-   :alt: Selecting runs from search table to transfer to processing table
+When transferring a run from the Search table to the Processing table there may
+exist invalid runs. For example, where theta could not be found or is zero. In
+the image below we have selected four runs from the Search table that we have
+transfered to the processing table.
 
-Attempting to transfer an invalid run will result in that run not being transferred to the processing table. If the transfer was not successful then that specific
-run will be highlighted in the Search table.
+.. figure:: /images/ISISReflectometryInterface/transfer.png
+  :class: screenshot
+  :width: 500px
+  :align: center
+  :alt: Selecting runs from search table to transfer to processing table
 
-.. figure:: /images/ISISReflectometryPolref_failed_transfer_run.png
-   :alt: Failed transfer will be highlighted in orange, successful transfer is put into processing table
+  *Selecting runs from search table to transfer to processing table*
 
-Hovering over the highlighted run with your cursor will allow you to see why the run was invalid.
-
-.. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
-   :alt: Showing tooltip from failed transfer.
+Attempting to transfer an invalid run will result in that run not being
+transferred to the processing table. If the transfer was not successful then
+that specific run will be highlighted in blue in the Search table. Hovering
+over the highlighted run with your cursor will allow you to see why the run was
+invalid.
 
 Autoprocessing
 ^^^^^^^^^^^^^^
