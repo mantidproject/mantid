@@ -5,17 +5,7 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 :ref:`Release 4.1.0 <v4.1.0>`
-
-- New algorithm :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>`
-- New IDF for ``EQ-SANS``
-- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
-- New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
-- New version of algorithm :ref:`CalculateEfficiency <algm-CalculateEfficiency-v2>`
 
 ISIS SANS Interface
 -------------------
@@ -54,3 +44,18 @@ Bug Fixes
 - You can now process in **memory** mode with no file type buttons selected. A warning box will open if you process with no file types while in **file** or **both** mode, and processing will not continue.
 - A bug in which the final column in a batch file was sometimes ignored if empty, and therefore impossible to load, has been fixed.
 - A bug in which a row was added if the only row is the table was erased, has been fixed.
+
+Algorithms
+----------
+
+New
+###
+- New algorithm :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>`
+- New IDF for ``EQ-SANS``
+- New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
+- New version of algorithm :ref:`CalculateEfficiency <algm-CalculateEfficiency-v2>`
+
+Improved
+########
+- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
+
