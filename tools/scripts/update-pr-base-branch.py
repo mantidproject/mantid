@@ -13,7 +13,6 @@ import sys
 
 # 3rd party libs
 import requests
-from six import iteritems
 
 # Constants
 DEBUG = True
@@ -29,6 +28,7 @@ def info(msg):
     :param msg: A string to display
     """
     print(msg)
+
 
 def debug(msg):
     """
@@ -75,14 +75,22 @@ def parse_arguments(argv):
     :param argv: The list of command line arguments
     :return: The arguments as a argparse object
     """
-    parser = argparse.ArgumentParser(description="Update the base branch of pull requests")
-    parser.add_argument("--repo", dest="repo", default=DEFAULT_REPO,
+    parser = argparse.ArgumentParser(
+        description="Update the base branch of pull requests")
+    parser.add_argument("--repo",
+                        dest="repo",
+                        default=DEFAULT_REPO,
                         help="The full org/repo name of a GitHubrepository")
-    parser.add_argument("--token", required=True,
+    parser.add_argument("--token",
+                        required=True,
                         help="GitHub authorization token")
-    parser.add_argument("milestone",
-                        help="A milestone on the project. Updates all open PRs against this milestone")
-    parser.add_argument("newbase", help="The new base branch of the pull requests")
+    parser.add_argument(
+        "milestone",
+        help=
+        "A milestone on the project. Updates all open PRs against this milestone"
+    )
+    parser.add_argument("newbase",
+                        help="The new base branch of the pull requests")
     return parser.parse_args()
 
 
@@ -96,8 +104,10 @@ def get_open_pull_request_ids(repo, milestone):
     info("Fetching IDs of all open pull requests")
 
     issues_search_url = GH_API_URL + "/" + GH_SEARCH_ISSUES_ENDPOINT
-    search_string = "repo:{} is:pr is:open milestone:\"{}\"".format(repo, milestone)
-    debug("Sending query '{}' to '{}'".format(search_string, issues_search_url))
+    search_string = "repo:{} is:pr is:open milestone:\"{}\"".format(
+        repo, milestone)
+    debug("Sending query '{}' to '{}'".format(search_string,
+                                              issues_search_url))
     response = requests.get(issues_search_url, params={"q": search_string})
     response.raise_for_status()
 
@@ -105,7 +115,7 @@ def get_open_pull_request_ids(repo, milestone):
     debug("Raw response:\n    " + response.text)
     milestone_prs = []
     for pr in response_json["items"]:
-         milestone_prs.append(PullRequest(repo, int(pr["number"])))
+        milestone_prs.append(PullRequest(repo, int(pr["number"])))
 
     debug("Found {} open pull requests: {}".format(len(milestone_prs),
                                                    str(milestone_prs)))
@@ -131,7 +141,8 @@ def update_pr_base_branch(pr, newbase, token):
 
     """
     info("Updating base branch of #{} to {}".format(pr.id, newbase))
-    pull_url = "{}/{}/{}".format(GH_API_URL, GH_PULLS_ENDPOINT.format(pr.repo), pr.id)
+    pull_url = "{}/{}/{}".format(GH_API_URL, GH_PULLS_ENDPOINT.format(pr.repo),
+                                 pr.id)
     headers = {"Authorization": "token {}".format(token)}
     data = {"base": newbase}
 
