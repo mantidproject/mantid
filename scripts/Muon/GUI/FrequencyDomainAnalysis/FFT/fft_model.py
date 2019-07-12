@@ -60,16 +60,12 @@ class FFTWrapper(object):
             if self.phaseTable["newTable"]:
                 self.model.makePhaseQuadTable(self.phaseTable)
             self.model.PhaseQuad(self.phaseTable)
-
         if self.preRe is not None:
             self.model.preAlg(self.preRe)
-
         if self.preIm is not None:
             self.model.preAlg(self.preIm)
-
         if self.FFT is not None:
             self.model.FFTAlg(self.FFT)
-
     def output(self):
         return
 
@@ -154,18 +150,16 @@ class FFTModel(object):
         mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
         mantid.CropWorkspace(InputWorkspace=cloned_workspace,
                              XMin=inputs['FirstGoodData'],
-                             XMax=inputs['LastGoodData'])
+                             XMax=inputs['LastGoodData'], OutputWorkspace = 'cropped_workspace_pre_phasequad')
 
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()
-        self.alg.setChild(False)
         self.alg.setRethrows(True)
 
         self.alg.setProperty("InputWorkspace", 'cropped_workspace_pre_phasequad')
         self.alg.setProperty("PhaseTable", "PhaseTable")
         self.alg.setProperty("OutputWorkspace", "__phaseQuad__")
         self.alg.execute()
-
         mantid.DeleteWorkspace("cropped_workspace_pre_phasequad")
         self.alg = None
 
