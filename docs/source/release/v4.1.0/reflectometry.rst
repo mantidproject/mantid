@@ -127,7 +127,7 @@ Additional keyboard shortcuts have been added to aid navigation/editing in the r
 Processing and highlighting
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. figure:: ../../images/ISISReflectometryInterface/row_highlighting.png
+.. figure:: ../../images/ISISReflectometryInterface/processing_table.png
   :class: screenshot
   :width: 650px
   :align: center

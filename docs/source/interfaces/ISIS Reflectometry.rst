@@ -196,7 +196,7 @@ second set in the processing table in another batch, and update the settings in
 each batch accordingly. The interface will use the settings from the relevant
 batch to reduce runs in that batch's processing table.
 
-Menu bar
+Menu Bar
 ~~~~~~~~
 
 The main menu currently just contains options for managing batches via the
@@ -208,7 +208,7 @@ The main menu currently just contains options for managing batches via the
 | New              | Add a new Batch tab                                      |
 +------------------+----------------------------------------------------------+
 
-Runs tab
+Runs Tab
 ~~~~~~~~
 
 This section describes the different elements in the *Runs* tab.
@@ -249,7 +249,7 @@ selection it will show the percentage of that selection that is complete.
 
 .. figure:: /images/ISISReflectometryInterface/processing_table.png
   :class: screenshot
-  :width: 700px
+  :width: 800px
   :align: center
   :alt: The processing table
 
@@ -500,7 +500,7 @@ behaviour of this is as follows:
   in the format, ``123+124+125``.
 - Rows within a group will be sorted by angle.
 
-Failed transfers
+Failed Transfers
 ================
 
 When transferring a run from the Search table to the Processing table there may
@@ -618,27 +618,29 @@ Live data monitoring has the following requirements:
 - The instrument must be on IBEX or have additional processes installed to supply the EPICS values. If it does not, you will get an error that live values could not be found for `Theta` and the slits.
 
 
-Event Handling tab
+Event Handling Tab
 ~~~~~~~~~~~~~~~~~~
 
-.. figure:: /images/ISISReflectometryPolref_event_handling_tab.png
-   :alt: Showing view of the settings tab.
+.. figure:: /images/ISISReflectometryInterface/event_handling_tab.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: The event handling tab
 
-The *Event Handling* tab can be used to analyze event workspaces. It contains four text boxes for
+  *The event handling tab*
+
+The ``Event Handling`` tab can be used to analyze event workspaces. It contains four text boxes for
 specifying uniform even, uniform, custom and log value slicing respectively. Each of these slicing
 options are exclusive, no more than one can be applied. If the text box for the selected slicing
 method is empty no event analysis will be performed, runs will be loaded using
 :ref:`LoadISISNexus <algm-LoadISISNexus>` and analyzed as histogram workspaces. When this text box
 is not empty, runs will be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>` and the
 interface will try to parse the user input to obtain a set of start and stop values. These define
-different time slices that will be passed on to an appropriate filtering algorithm
-(:ref:`FilterByTime <algm-FilterByTime>` for uniform even, uniform and custom slicing,
-:ref:`FilterByLogValue <algm-FilterByLogValue>` for log value slicing). Each time slice will be
+different time slices that will be passed on to the filtering algorithms
+(:ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` and :ref:`FilterEvents <algm-FilterEvents>`). Each time slice will be
 normalized by the total proton charge and reduced as described in the previous section. Note that,
-if any of the runs in a group could not be loaded as an event workspace, the interface will load
-the runs within that group as histogram workspaces and no event analysis will be performed for that
-group. A warning message will be shown when the reduction is complete indicating that some groups
-could not be processed as event data.
+if any of the runs in a group could not be loaded as an event workspace, you will get an error message
+and the reduction will not be performed.
 
 The four slicing options are described in more detail below:
 
@@ -664,51 +666,67 @@ The four slicing options are described in more detail below:
     ``200`` seconds after the start of the run, and the second one starting at ``200`` seconds
     and ending at ``300`` seconds.
 
-- **LogValue** - Like custom slicing this takes a list of comma-separated numbers and are parsed
-  in the same manner as shown above. The values however indicate the minimum and maximum values of
-  the logs we wish to filter rather than times. In addition, this takes a second entry 'Log Name'
+- **LogValue** - This takes a single value which is the log value interval, and also the log name
   which is the name of the log we wish to filter the run for. For example, given a run and entries
-  of ``100, 200, 300`` and ``proton_charge`` for slicing values and log name respectively, we would
-  produce two slices - the first containing all log values between ``100`` and ``200`` seconds, the
-  second containing all log values between ``200`` and ``300`` seconds.
+  of ``100`` and ``proton_charge`` for slicing values and log name respectively, we would
+  produce a number of slices each with interval ``100``.
 
-Workspaces will be named according to the index of the slice, e.g ``IvsQ_13460_slice_0``, ``IvsQ_13460_slice_1``, etc.
+Workspaces will be named with a suffix providing information about the slice, e.g
+``IvsQ_13460_slice_50_75``, ``IvsQ_13460_slice_75_100``, etc.
 
-Settings tab
-~~~~~~~~~~~~
+Experiment and Instrument Settings Tabs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: /images/ISISReflectometryPolref_settings_tab.png
-   :alt: Showing view of the settings tab.
+.. figure:: /images/ISISReflectometryInterface/experiment_settings_tab.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: The experiment settings tab
 
-The *Settings* tab can be used to specify options for the reduction and post-processing.
-These options are used by the interface to provide argument values for the pre-processing,
-processing and post-processing algorithms. Each of these respectively refer to the
-following algorithms:
+  *The experiment Settings tab*
 
-- :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
-  (applied to **Transmission Run(s)**).
-- :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`, main reduction algorithm.
-- :ref:`Stitch1DMany <algm-Stitch1DMany>` (note that at least a bin width must be
-  specified for this algorithm to run successfully, for instance *Params="-0.03"*).
+The ``Experiment Settings`` and ``Instrument Settings`` tabs can be used to
+specify options for the reduction and post-processing releting to a specific
+experiment. The Experiment settings are variables that are mostly set by the
+user, whereas the ``Instrument Settings`` are variables relating to the
+instrument used to perform the reduction. Both are populated with default
+values for the current instrument. The ``Restore Defaults`` button allows you
+to revert the settings to the default values for the instrument.
 
-Note that when conflicting options are specified for the reduction, i.e. different
-values for the same property are specified via the *Settings* tab and the **Options**
-column in the *Runs* tab, the latter will prevail. Therefore, the **ReflectometryReductionOneAuto**
-settings should be used to specify global options that will be applied to all the
-rows in the table, whereas the **Options** column will only be applicable to the
-specific row for which those options are defined.
+The majority of these options are used by the interface to provide argument
+values for the pre-processing and reduction steps, which are handled by the
+algorithm: :ref:`ReflectometryISISLoadAndProcess
+<algm-ReflectometryISISLoadAndProcess>`
 
-The *Settings* tab is split into two sections, **Experiment settings** and **Instrument
-settings**. The former refers to variables set mostly by the user, while the latter
-refers to variables set by the instrument used to perform the reduction. Both have
-a **Get Defaults** button that fills some of the variables with default values.
-For experiment settings, these are pulled from the **ReflectometryReductionOneAuto**
-algorithm whereas for instrument settings, they are pulled from the current instrument
-being used in the run.
+The exception is ``Output Stitch Params``, which is used for the final
+stitching done by the algorithm :ref:`Stitch1DMany <algm-Stitch1DMany>`. Note
+however that if a bin width is not provided, for instance ``Params="-0.03"``,
+then ``-dQ/Q`` will be used, if specified; otherwise a default value will be
+calculated from the slits, if possible.
 
-If either the *Experiment* or the *Instrument* settings sections are unchecked, this will disable
-all the of the entries for each respective section. In addition, the reduction will not make use of
-the values from any of the disabled entries.
+The **Experiment Settings** tab allows some options to be specified on a
+per-angle basis, that is, to specify defaults that will apply only to runs with
+a specific angle. Note that matching angles are searched for within a tolerance
+of ``0.01``. In the per-angle defaults table, you can also specify a "wildcard"
+row, which will apply to all runs that don't also have a matching angle - just
+leave the angle blank to create a wildcard row. Only one wildcard row may
+exist.
+
+.. figure:: /images/ISISReflectometryInterface/workflow_settings.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The per-angle defaults table
+
+  *The per-angle defaults table*
+  
+Note that when conflicting options are specified for the reduction,
+i.e. different values for the same property are specified via one of the
+settings tabs and the cells in the *Runs* tab, the latter will take
+precedence. Therefore, the Settings tabs should be used to specify
+global options that will be applied to all the rows in the table, whereas the
+row values will only be applicable to the specific row for which those options
+are defined.
 
 Save ASCII tab
 ~~~~~~~~~~~~~~
