@@ -117,7 +117,7 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
       xPlusdx = m_plot->invTransform(QwtPlot::yLeft, p.y() + 3);
       break;
     }
-    if (inRange(x)) {
+    if (inRange(x, fabs(x - xPlusdx))) {
       if (changingMin(x, xPlusdx)) {
         m_minChanging = true;
         m_canvas->setCursor(m_movCursor);
@@ -143,18 +143,20 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
   {
     if (m_minChanging || m_maxChanging) {
       QPoint p = ((QMouseEvent *)evn)->pos();
-      double x(0.0);
+      double x(0.0), xPlusdx(0.0);
       switch (m_type) {
       case XMINMAX:
       case XSINGLE:
         x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+        xPlusdx = m_plot->invTransform(QwtPlot::xBottom, p.x() + 3);
         break;
       case YMINMAX:
       case YSINGLE:
         x = m_plot->invTransform(QwtPlot::yLeft, p.y());
+        xPlusdx = m_plot->invTransform(QwtPlot::yLeft, p.y() + 3);
         break;
       }
-      if (inRange(x)) {
+      if (inRange(x, fabs(x - xPlusdx))) {
         if (m_minChanging) {
           if (x <= m_max) {
             setMin(x);
@@ -433,6 +435,6 @@ void RangeSelector::verify() {
  * @param x
  * @return true if position within the allowed range
  */
-bool RangeSelector::inRange(double x) {
-  return (x >= m_lower && x <= m_higher);
+bool RangeSelector::inRange(double x, double dx) {
+  return (x >= m_lower - dx && x <= m_higher + dx);
 }

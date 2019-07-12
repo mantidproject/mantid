@@ -1,5 +1,3 @@
-.. _MantidUsedIconsTable:
-
 .. |copy| image:: images/LocalIcons/content-copy.png
 .. |paste| image:: images/LocalIcons/content-paste.png
 .. |cut| image:: images/LocalIcons/content-cut.png
@@ -36,6 +34,8 @@
 .. |remove-table| image:: images/LocalIcons/table-remove.png
 .. |expand| image:: images/LocalIcons/expand-all.png
 .. |collapse| image:: images/LocalIcons/collapse-all.png
+
+.. _MantidUsedIconsTable:
 
 Mantid Icon Table
 #################

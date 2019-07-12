@@ -249,7 +249,7 @@ public:
 
   void setPlotType(PlotType type) { m_plotType = type; }
   PlotType getPlotType() const { return m_plotType; }
-  void setTubeXUnits(TubeXUnits units) { m_tubeXUnits = units; }
+  void setTubeXUnits(TubeXUnits units);
   TubeXUnits getTubeXUnits() const { return m_tubeXUnits; }
   QString getTubeXUnitsName() const;
   QString getTubeXUnitsUnits() const;

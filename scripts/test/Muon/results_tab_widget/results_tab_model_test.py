@@ -15,6 +15,7 @@ import unittest
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import iteritems, mock, string_types
+from mantid.simpleapi import Load
 from mantidqt.utils.qt.testing import GuiTest
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
@@ -23,10 +24,9 @@ from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformat
 
 
 def create_test_workspace(ws_name=None):
-    fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
     ws_name = ws_name if ws_name is not None else 'results_tab_model_test'
-    AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
-    return fake_ws
+    Load("MUSR22725", OutputWorkspace=ws_name)
+    return AnalysisDataService.Instance().retrieve(ws_name)
 
 
 def create_test_fits(input_workspaces,

@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::PythonException;
 using Mantid::PythonInterface::callMethodNoCheck;
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
@@ -62,7 +63,13 @@ void RangeMarker::redraw() { callMethodNoCheck<void>(pyobj(), "redraw"); }
 /**
  * @brief Remove the RangeMarker from the plot
  */
-void RangeMarker::remove() { callMethodNoCheck<void>(pyobj(), "remove"); }
+void RangeMarker::remove() {
+  try {
+    callMethodNoCheck<void>(pyobj(), "remove");
+  } catch (PythonException const &) {
+    // Marker has already been removed
+  }
+}
 
 /**
  * @brief Sets the color of the RangeMarker.

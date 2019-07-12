@@ -11,8 +11,7 @@ main.py
 
     from __future__ import (absolute_import,division,print_function)
 
-    import PyQt4.QtGui as QtGui 
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets
 
     import sys
 
@@ -21,26 +20,26 @@ main.py
     """
     A wrapper class for setting the main window
     """
-    class demo(QtGui.QMainWindow):
+    class Demo(QtWidgets.QMainWindow):
         def __init__(self,parent=None):
-            super(demo,self).__init__(parent)
+            super(Demo,self).__init__(parent)
 
-            self.window = QtGui.QMainWindow()
-            my_view = view.view()
+            self.window = QtWidgets.QMainWindow()
+            my_view = view.View()
 
             # set the view for the main window
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-        def qapp():
-            if QtGui.QApplication.instance():
-                _app = QtGui.QApplication.instance()
-            else:
-                _app = QtGui.QApplication(sys.argv)
-            return _app
+    def get_qapplication_instance():
+        if QtWidgets.QApplication.instance():
+            app = QtWidgets.QApplication.instance()
+        else:
+            app = QtWidgets.QApplication(sys.argv)
+        return app
 
-    app = qapp()
-    window = demo()
+    app = get_qapplication_instance()
+    window = Demo()
     window.show()
     app.exec_()
 
@@ -50,39 +49,38 @@ view.py
 .. code-block:: python
 
     from __future__ import (absolute_import,division,print_function)
-    import PyQt4.QtGui as QtGui
-    import PyQt4.QtCore as QtCore
+    from qtpy import QtWidgets, QtCore, QtGui
 
 
-    class view(QtGui.QWidget):
+    class View(QtWidgets.QWidget):
 
         def __init__(self, parent=None):
             super(view, self).__init__(parent)
 
-            grid = QtGui.QVBoxLayout(self)
+            grid = QtWidgets.QVBoxLayout(self)
 
-            self.table = QtGui.QTableWidget(self)
+            self.table = QtWidgets.QTableWidget(self)
             self.table.setRowCount(4)
             self.table.setColumnCount(2)
             grid.addWidget(self.table)           
 
-            self.colours = QtGui.QComboBox()
+            self.colours = QtWidgets.QComboBox()
             options = ["Blue", "Green", "Red"]
             self.colours.addItems(options)
 
-            self.grid_lines = QtGui.QTableWidgetItem()
+            self.grid_lines = QtWidgets.QTableWidgetItem()
             self.grid_lines.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
             self.grid_lines.setCheckState(QtCore.Qt.Unchecked)
             self.addItemToTable("Show grid lines", self.grid_lines, 1)
 
-            self.freq = QtGui.QTableWidgetItem("1.0")
-            self.phi = QtGui.QTableWidgetItem("0.0")
+            self.freq = QtWidgets.QTableWidgetItem("1.0")
+            self.phi = QtWidgets.QTableWidgetItem("0.0")
 
             self.addWidgetToTable("Colour", self.colours, 0)
             self.addItemToTable("Frequency", self.freq, 2)
             self.addItemToTable("Phase", self.phi, 3)
 
-            self.plot = QtGui.QPushButton('Add', self)
+            self.plot = QtWidgets.QPushButton('Add', self)
             self.plot.setStyleSheet("background-color:lightgrey")
 
             grid.addWidget(self.plot)           
@@ -90,7 +88,7 @@ view.py
             self.setLayout(grid)
 
      def setTableRow(self, name, row):
-            text = QtGui.QTableWidgetItem(name)
+            text = QtWidgets.QTableWidgetItem(name)
             text.setFlags(QtCore.Qt.ItemIsEnabled)
             col = 0
             self.table.setItem(row, col, text)

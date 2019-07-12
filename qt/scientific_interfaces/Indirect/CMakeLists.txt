@@ -26,6 +26,7 @@ set(
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
   IndirectDataTablePresenter.cpp
+  IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectEditResultsDialog.cpp
   IndirectFitAnalysisTab.cpp
@@ -83,6 +84,7 @@ set(
   QT4_INC_FILES
   ConvFitModel.h
   DllConfig.h
+  IndirectDataValidationHelper.h
   IndirectFitData.h
   IndirectFitOutput.h
   IndirectFitOutputOptionsModel.h
@@ -268,6 +270,7 @@ set(
   IndirectCorrections.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
+  IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
@@ -327,7 +330,10 @@ set(
   IndirectTransmissionCalc.h
 )
 
-set(INC_FILES)
+set(
+  INC_FILES
+  IndirectDataValidationHelper.h
+)
 
 set(
   UI_FILES
