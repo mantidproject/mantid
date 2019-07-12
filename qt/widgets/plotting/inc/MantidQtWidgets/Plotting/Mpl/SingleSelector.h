@@ -51,6 +51,7 @@ private slots:
   void handleMouseMove(const QPoint &point);
   void handleMouseUp(const QPoint &point);
 
+  void resetBounds();
   void redrawMarker();
 
 private:
@@ -61,6 +62,8 @@ private:
   PreviewPlot *m_plot;
   /// The single marker
   std::unique_ptr<MantidQt::Widgets::MplCpp::SingleMarker> m_singleMarker;
+  /// The type of the single marker
+  SelectType m_type;
   /// Is the marker visible or hidden
   bool m_visible;
   ///	Is the marker moving
