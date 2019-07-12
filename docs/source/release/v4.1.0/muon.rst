@@ -32,4 +32,4 @@ Bug Fixes
 * Muon Analysis (original) can now produce results tables when columns contain both ranges and single values.
 * Issue where imaginary box was reappearing for FFT transforms after being unselected fixed.
 * Elemental Analysis no longer crashes when an ill formatted data file is loaded.
-* Changed the y-axis unit in Elemental Analysis to `Counts`.
+* Changed the y-axis label in Elemental Analysis to `Counts`.
