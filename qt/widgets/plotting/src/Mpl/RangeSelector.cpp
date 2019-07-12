@@ -29,7 +29,7 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
           m_plot->canvas(), colour.name(QColor::HexRgb),
           std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
           selectTypeAsQString(type), defaultLineKwargs())),
-      m_visible(visible), m_markerMoving(false) {
+      m_type(type), m_visible(visible), m_markerMoving(false) {
   Q_UNUSED(infoOnly);
 
   m_plot->canvas()->draw();
@@ -40,6 +40,7 @@ RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
           SLOT(handleMouseMove(QPoint)));
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
 
+  connect(m_plot, SIGNAL(resetSelectorBounds()), this, SLOT(resetBounds()));
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
 }
 
@@ -64,6 +65,11 @@ QString RangeSelector::selectTypeAsQString(const SelectType &type) const {
   }
   throw std::runtime_error("Incorrect SelectType provided. Select types are "
                            "XMINMAX and YMINMAX.");
+}
+
+void RangeSelector::resetBounds() {
+  auto const axisRange = getAxisRange(m_type);
+  m_rangeMarker->setBounds(std::get<0>(axisRange), std::get<1>(axisRange));
 }
 
 void RangeSelector::setRange(const std::pair<double, double> &range) {

@@ -30,7 +30,7 @@ SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
           m_plot->canvas(), colour.name(QColor::HexRgb), position,
           std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
           selectTypeAsQString(type), defaultLineKwargs())),
-      m_visible(visible), m_markerMoving(false) {
+      m_type(type), m_visible(visible), m_markerMoving(false) {
 
   m_plot->canvas()->draw();
 
@@ -40,6 +40,7 @@ SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type,
           SLOT(handleMouseMove(QPoint)));
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
 
+  connect(m_plot, SIGNAL(resetSelectorBounds()), this, SLOT(resetBounds()));
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
 }
 
@@ -64,6 +65,11 @@ QString SingleSelector::selectTypeAsQString(const SelectType &type) const {
   }
   throw std::runtime_error("Incorrect SelectType provided. Select types are "
                            "XSINGLE and YSINGLE.");
+}
+
+void SingleSelector::resetBounds() {
+  auto const axisRange = getAxisRange(m_type);
+  m_singleMarker->setBounds(std::get<0>(axisRange), std::get<1>(axisRange));
 }
 
 void SingleSelector::setBounds(const std::pair<double, double> &bounds) {
