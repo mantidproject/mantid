@@ -220,7 +220,7 @@ inline void writeDetectorNumber(H5::Group &grp,
 inline void writeLocation(H5::Group &grp,
                           const Geometry::ComponentInfo &compInfo) {
 
-  Eigen::Vector3d position, normalisedPosition;
+  Eigen::Vector3d position;
   double norm;
 
   H5::DataSet location;
@@ -245,13 +245,12 @@ inline void writeLocation(H5::Group &grp,
   dspace = H5Screate_simple(drank, ddims, NULL);
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, dspace);
 
-  // write norm of absolute position vector of detector bank to dataset
-  position = Kernel::toVector3d(compInfo.position(compInfo.root()));
-  normalisedPosition = position.normalized();
+  // write norm of absolute (normalised) position vector of detector to dataset
+  // TODO: these should take the idices of detectors instead of hard-coded zero
+  position = Kernel::toVector3d(compInfo.position(0));
   norm = position.norm();
-
-  std::vector<double> data = {norm};
-  location.write(&data, H5::PredType::NATIVE_DOUBLE, dspace);
+  position.normalize(); // inline?
+  location.write(&norm, H5::PredType::NATIVE_DOUBLE, dspace);
 
   // vector attribute
   strSize = strTypeOfSize(NX_TRANSFORMATION);
@@ -263,10 +262,10 @@ inline void writeLocation(H5::Group &grp,
    * stdNormAxis is the position vector as a std::vector<>. Normalised if norm
    * != 0.
    */
-  auto asize = normalisedPosition.size();
+  auto asize = position.size();
   std::vector<double> stdNormPos;
   stdNormPos.resize(asize);
-  Eigen::VectorXd::Map(&stdNormPos[0], asize) = normalisedPosition;
+  Eigen::VectorXd::Map(&stdNormPos[0], asize) = position;
 
   int arank = 1;
   hsize_t adims[(hsize_t)3];
@@ -342,10 +341,9 @@ inline void writeOrientation(H5::Group &grp,
       grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, dspace);
 
   // write absolute rotation in degrees of detector bank to dataset
-  rotation = Kernel::toQuaterniond(compInfo.rotation(compInfo.root()));
+  rotation = Kernel::toQuaterniond(compInfo.rotation(0));
   angle = std::acos(rotation.w()) * (360.0 / M_PI);
-  std::vector<double> data = {angle};
-  orientation.write(&data, H5::PredType::NATIVE_DOUBLE, dspace);
+  orientation.write(&angle, H5::PredType::NATIVE_DOUBLE, dspace);
 
   // NX_class attribute
   strSize = strTypeOfSize(NX_TRANSFORMATION);
@@ -471,6 +469,9 @@ H5::Group detector(const std::string &name, const H5::Group &parent,
   H5::DataSet dependsOn =
       child.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
   dependsOn.write(dependency, dependencyStrType, H5SCALAR);
+
+  // TODO: WRITE XY PIXEL OFFSETS RELATIVE TO THE DETECTOR BANK
+  // LOCATION/ORIENTATION.
 
   return child;
 }
