@@ -99,6 +99,7 @@ signals:
   void mouseMove(const QPoint &point);
 
   void redraw();
+  void resetSelectorBounds();
 
 public:
   QColor canvasColour() const;

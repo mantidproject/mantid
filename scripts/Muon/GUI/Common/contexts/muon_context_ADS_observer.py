@@ -61,3 +61,8 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
         Called when the ADS has been cleared, removes all data and rests the GUI
         """
         self.clear_callback()
+
+    def unsubscribe(self):
+        self.observeDelete(False)
+        self.observeRename(False)
+        self.observeClear(False)

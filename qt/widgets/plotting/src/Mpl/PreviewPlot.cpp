@@ -136,7 +136,9 @@ void PreviewPlot::addSpectrum(const QString &lineName,
 
   regenerateLegend();
   axes.relim();
-  this->replot();
+
+  emit resetSelectorBounds();
+  replot();
 }
 
 /**
@@ -388,6 +390,7 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseUp(position);
+    QTimer::singleShot(0, this, SLOT(replot()));
   }
   return stopEvent;
 }
