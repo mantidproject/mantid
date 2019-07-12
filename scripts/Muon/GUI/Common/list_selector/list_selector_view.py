@@ -26,7 +26,7 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         self.item_table_widget = TableWidgetDragRows()
 
         self.item_table_widget.setColumnCount(2)
-        self.item_table_widget.setColumnWidth(CHECKBOX_COLUMN, 10)
+        self.item_table_widget.setColumnWidth(CHECKBOX_COLUMN, 30)
         self.item_table_widget.verticalHeader().setVisible(False)
         self.item_table_widget.horizontalHeader().setStretchLastSection(True)
         self.item_table_widget.horizontalHeader().setVisible(False)
