@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithms performs complete treatment of SANS data recorded with the ILL instruments D11, D22 and D33.
-This high level algorithm steers the reduction and performs the full set of corrections for a given sample run.
+This high level algorithm steers the reduction and performs the full set of corrections for a given sample run; measured with one or more detector distances.
 It has two operation modes: *ReduceSample* (default) and *ReduceWater* as follows:
 
 ReduceSample
@@ -30,9 +30,10 @@ Caching with ADS
 
 This algorithm **does not** clean-up the intermediate workspaces after execution. This is done intentionally for performance reasons.
 For example, once the transmission of a sample is calculated, it will be reused for further iterations of processing of the same sample at different detector distances.
-The same caching is done for absorber, empty beam, container, sensitivity and mask workspaces; nothing is processed more than needed.
+As other example, once the container is processed at a certain distance, it will be reused for all the subsequent samples measured at the same distance, if the container run is the same.
+The same caching is done for absorber, empty beam, container, sensitivity and mask workspaces.
 The caching relies on Analysis Data Service (ADS) through naming convention by appending the relevant process name to the run number.
-When multiple runs are summed, the run number of the first run is attributed to the summed workspace.
+When multiple runs are summed, the run number of the first run is attributed to the summed workspace name.
 
 .. categories::
 
