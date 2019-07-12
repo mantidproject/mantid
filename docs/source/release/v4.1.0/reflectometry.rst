@@ -79,6 +79,7 @@ Improvements
 - The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
 - In ref:`ReflectometryISISLoadAndPreprocess` all output workspaces have names which give information about the slice.
 - An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
+- Changes have been made to the Polynomial method in :ref:`algm-ReflectometryBackgroundSubtraction` to improve fitting for high degree polynomials.
 - In ref:`ReflectometryISISLoadAndPreprocess` the TOF workspaces are now grouped together.
 
 Bug fixes
