@@ -196,21 +196,11 @@ second set in the processing table in another batch, and update the settings in
 each batch accordingly. The interface will use the settings from the relevant
 batch to reduce runs in that batch's processing table.
 
-Runs tab
+Menu bar
 ~~~~~~~~
 
-This section describes the different elements in the *Runs* tab.
-
-.. interface:: ISIS Reflectometry
-  :widget: tabRuns
-
-Menu bar
-^^^^^^^^
-
-.. interface:: ISIS Reflectometry
-  :widget: menuBar
-
-The **Batch** menu provides access to the following functionality:
+The main menu currently just contains options for managing batches via the
+**Batch** menu:
 
 +------------------+----------------------------------------------------------+
 | Action           | Effect                                                   |
@@ -218,11 +208,21 @@ The **Batch** menu provides access to the following functionality:
 | New              | Add a new Batch tab                                      |
 +------------------+----------------------------------------------------------+
 
+Runs tab
+~~~~~~~~
+
+This section describes the different elements in the *Runs* tab.
+
+.. figure:: /images/ISISReflectometryInterface/runs_tab.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: The runs tab
+
+  *The runs tab*
+
 Processing Table
 ^^^^^^^^^^^^^^^^
-
-.. interface:: ISIS Reflectometry
-  :widget: groupProcessPane
 
 The processing table is where the bulk of the work takes place. It is used to
 specify which runs to process, the properties that should be used to process
@@ -233,96 +233,58 @@ Each row represents a single reduction (i.e. execution of
 and belongs to a group. Rows that are grouped together will have their output stitched
 together using :ref:`Stitch1DMany <algm-Stitch1DMany>`.
 
-Above the processing table is a tool bar containing various actions for
-manipulating the processing table.
+Above the processing table is a `Toolbar`_ containing various actions for
+manipulating the processing table, and a filter bar to allow filtering of the
+table by group or run name. Various `Keyboard Shortcuts`_ are available to help
+with quickly editing the table.
+
+To process, simply select the rows or groups you want to process and click
+``Process`` |process|. Alternatively, if nothing is selected, the entire table
+will be processed.
 
 Below the table is a progress bar, which shows the current progress of any
-processing that is in progress. And at the bottom, near the **Process**
-button is the processing instrument selector. The processing instrument is
-used to help identify the correct data to load when processing runs.
+processing that is in progress. When processing the entire table, this will
+show the percentage of the entire table that is complete. When processing a
+selection it will show the percentage of that selection that is complete.
 
-While processing, any runs that have been successfully processed will have their
-row highlighted green. Any groups that have been post-processed successfully
-will also be highlighted. Starting a new reduction will clear all highlighted
-rows and groups.
-
-If reduction is paused and then resumed again, the interface will check if any
-data in previously processed rows and groups had been manually changed in
-between. If data within a row has been altered, the row and its containing group
-will be reprocessed. If rows are added or removed from a group, the group will
-need to be processed again as well. Deleting or renaming the output workspaces
-for processed rows or groups will cause only that item to be processed again. It
-is also possible to change the selection of rows and groups and doing so will
-process new data items while ignoring any deselected ones.
-
-Next to the **Process** button there is a checkbox which allows enabling and
-disabling output to an ipython notebook. If the checkbox is enabled, a dialog
-window will ask for a save location for the notebook after processing is
-complete. A generated notebook contains python code to repeat the processing
-steps and output relevant plots.
-
-**Note**: The interface cannot be closed while runs are being processed. To close
-the interface, you must first stop the reduction by clicking on the **Pause** button.
-
-Toolbar
-^^^^^^^
-
-This table details the behaviour of the actions in the tool bar, from left to right.
-
-.. figure:: /images/ISISReflectometryInterface/toolbar.png
+.. figure:: /images/ISISReflectometryInterface/processing_table.png
   :class: screenshot
+  :width: 700px
   :align: center
-  :alt: The runs table toolbar
+  :alt: The processing table
 
-  *The runs table yoolbar*
+  *The processing table*
 
-+----------------------------------------+----------------------------------------------------------+
-| Action                                 | Effect                                                   |
-+========================================+==========================================================+
-| |process| Process                      | Processes the selected runs, or, if no runs are selected,|
-|                                        | all of the runs in the table. When a group is selected,  |
-|                                        | runs belonging to the same group are stitched together.  |
-+----------------------------------------+----------------------------------------------------------+
-| |pause| Pause                          | Pauses processing any selected runs. Processing may be   |
-|                                        | resumed by clicking on the 'Process' button. If the      |
-|                                        | selection has changed, the new selection will be         |
-|                                        | processed.                                               |
-+----------------------------------------+----------------------------------------------------------+
-| |expandall| Expand Groups              | Expand all groups so that you can see all child rows.    |
-+----------------------------------------+----------------------------------------------------------+
-| |collapseall| Collapse Groups          | Collapse all groups to hide all child rows.              |
-+----------------------------------------+----------------------------------------------------------+
-| |plotrow| Plot Selected                | Creates a plot of the IvsQ workspaces generated by any of|
-| Rows                                   | the selected rows (or all child rows of the selected     |
-| Rows                                   | groups).                                                 |
-+----------------------------------------+----------------------------------------------------------+
-| |plotgroup| Plot Selected              | Creates a plot of the stitched IvsQ workspaces generated |
-| Groups                                 | by any of the selected groups.                           |
-+----------------------------------------+----------------------------------------------------------+
-| |insertrow| Insert Row                 | Inserts a new child row into the selected group          |
-+----------------------------------------+----------------------------------------------------------+
-| |removerow| Delete Row                 | Deletes any selected rows. If no rows are selected,      |
-|                                        | nothing happens.                                         |
-+----------------------------------------+----------------------------------------------------------+
-| |insertgroup| Insert Group             | Adds a new group after the first selected group, or at   |
-|                                        | the end of the table if no groups were selected.         |
-+----------------------------------------+----------------------------------------------------------+
-| |removegroup| Delete Group             | Deletes any selected Groups. If no groups are selected,  |
-|                                        | nothing happens.                                         |
-+----------------------------------------+----------------------------------------------------------+
-| |copy| Copy Rows                       | Copies the selected rows or groups into the clipboard.   |
-+----------------------------------------+----------------------------------------------------------+
-| |paste| Paste Rows                     | Pastes the contents of the clipboard onto the selected   |
-|                                        | rows or groups. For groups, if no destination is selected|
-|                                        | the they will be pasted as new groups at the end of the  |
-|                                        | table. Rows must always be pasted onto a destination     |
-|                                        | selection of the same size.                              |
-+----------------------------------------+----------------------------------------------------------+
-| |cut| Cut Rows                         | Copies the selected rows, and then deletes them.         |
-+----------------------------------------+----------------------------------------------------------+
+Rows or groups that are currently processing will be highlighted in yellow, and
+those that are successfully complete will be highlighted in green. Note that
+groups that only have a single row do not have any stitching to do so will not
+be processed and therefore will not turn green. If processing fails for any
+reason, the row/group will be highlighted in blue and you can over over it to
+see a tooltip displaying the error message.
+
+Editing any settings that may change the outputs will reset the state for all
+rows and groups. If any rows are added to or removed from a group, the group's
+state will be reset. Deleting any of the mandatory output workspaces will also
+reset the relevant row or group states. Note however that if you rename a
+workspace, the interface will track it, so it will remain associated with its
+original row or group.
+
+If reduction stops and is then resumed, the interface will re-process any rows
+and groups within the current selection that have not been processed, or whose
+state has been reset. If you manually select rows/groups that have an error
+then they too will be reprocessed. However if you process the entire table
+(i.e. click ``Process`` |process| when nothing is selected), rows/groups that
+have errors will **not** be reprocessed - you can manually select all rows in
+the table if you want to reprocess them.
+
+**Note**: The interface cannot be closed while runs are being processed. To
+close the interface, you must first stop the reduction by clicking on the
+``Pause`` |pause| button.
 
 Columns
-^^^^^^^
+=======
+
+The processing table contains the following columns:
 
 +---------------------+-----------+---------------------------------------------------------------------------------+
 | Column Title        | Required? |  Description                                                                    |
@@ -330,11 +292,14 @@ Columns
 | Run(s)              | **Yes**   | Contains the sample runs to be processed.                                       |
 |                     |           | Runs may be given as run numbers or workspace                                   |
 |                     |           | names. Multiple runs may be added together by                                   |
-|                     |           | separating them with a '+'.                                                     |
+|                     |           | separating them with a ``+`` or ``,``.                                          |
 |                     |           |                                                                                 |
 |                     |           | Example: ``1234+1235+1236``                                                     |
+|                     |           |                                                                                 |
+|                     |           | Note that if a workspace name contains ``+`` or ``,`` you must enter it in      |
+|                     |           | quotes, e.g. ``"TOF_1234+1235+1236"``                                           |
 +---------------------+-----------+---------------------------------------------------------------------------------+
-| Angle               | No        | Contains the angle used during the run, in                                      |
+| Angle               | **Yes**   | Contains the angle used during the run, in                                      |
 |                     |           | degrees. If left blank,                                                         |
 |                     |           | :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`       |
 |                     |           | will calculate theta using                                                      |
@@ -400,6 +365,99 @@ Columns
 |                     |           | Example: ``RegionOfDirectBeam="0,2", Params="1,2,3"``                           |
 +---------------------+-----------+---------------------------------------------------------------------------------+
 
+Toolbar
+=======
+
+This table details the behaviour of the actions in the tool bar, from left to right.
+
+.. figure:: /images/ISISReflectometryInterface/toolbar.png
+  :class: screenshot
+  :align: center
+  :alt: The runs table toolbar
+
+  *The runs table toolbar*
+
++----------------------------------------+----------------------------------------------------------+
+| Action                                 | Effect                                                   |
++========================================+==========================================================+
+| |process| Process                      | Processes the selected runs, or, if no runs are selected,|
+|                                        | all of the runs in the table. When a group is selected,  |
+|                                        | runs belonging to the same group are stitched together.  |
++----------------------------------------+----------------------------------------------------------+
+| |pause| Pause                          | Pauses processing any selected runs. Processing may be   |
+|                                        | resumed by clicking on the 'Process' button. If the      |
+|                                        | selection has changed, the new selection will be         |
+|                                        | processed.                                               |
++----------------------------------------+----------------------------------------------------------+
+| |expandall| Expand Groups              | Expand all groups so that you can see all child rows.    |
++----------------------------------------+----------------------------------------------------------+
+| |collapseall| Collapse Groups          | Collapse all groups to hide all child rows.              |
++----------------------------------------+----------------------------------------------------------+
+| |plotrow| Plot Selected                | Creates a plot of the IvsQ workspaces generated by any of|
+| Rows                                   | the selected rows (or all child rows of the selected     |
+| Rows                                   | groups).                                                 |
++----------------------------------------+----------------------------------------------------------+
+| |plotgroup| Plot Selected              | Creates a plot of the stitched IvsQ workspaces generated |
+| Groups                                 | by any of the selected groups.                           |
++----------------------------------------+----------------------------------------------------------+
+| |insertrow| Insert Row                 | Inserts a new child row into the selected group          |
++----------------------------------------+----------------------------------------------------------+
+| |removerow| Delete Row                 | Deletes any selected rows. If no rows are selected,      |
+|                                        | nothing happens.                                         |
++----------------------------------------+----------------------------------------------------------+
+| |insertgroup| Insert Group             | Adds a new group after the first selected group, or at   |
+|                                        | the end of the table if no groups were selected.         |
++----------------------------------------+----------------------------------------------------------+
+| |removegroup| Delete Group             | Deletes any selected Groups. If no groups are selected,  |
+|                                        | nothing happens.                                         |
++----------------------------------------+----------------------------------------------------------+
+| |copy| Copy Rows                       | Copies the selected rows or groups into the clipboard.   |
++----------------------------------------+----------------------------------------------------------+
+| |paste| Paste Rows                     | Pastes the contents of the clipboard onto the selected   |
+|                                        | rows or groups. For groups, if no destination is selected|
+|                                        | the they will be pasted as new groups at the end of the  |
+|                                        | table. Rows must always be pasted onto a destination     |
+|                                        | selection of the same size.                              |
++----------------------------------------+----------------------------------------------------------+
+| |cut| Cut Rows                         | Copies the selected rows, and then deletes them.         |
++----------------------------------------+----------------------------------------------------------+
+
+Keyboard Shortcuts
+==================
+
+The following keyboard shortcuts are available for editing in the the runs
+table.
+
++-----------------------------+---------------------------------------+
+| Shortcut                    | Action                                |
++=============================+=======================================+
+|``F2``                       | Edit the current cell                 |
++-----------------------------+---------------------------------------+
+|``Esc``                      | Cancel editing                        |
++-----------------------------+---------------------------------------+
+|``Tab``                      | Next cell                             |
++-----------------------------+---------------------------------------+
+|``Shift-Tab``                | Previous cell                         |
++-----------------------------+---------------------------------------+
+|``Enter``                    | Edit the next row / append a new row  |
++-----------------------------+---------------------------------------+
+|``Ctrl-I``                   | Insert child row                      |
++-----------------------------+---------------------------------------+
+|``Ctrl-X``                   | Cut                                   |
++-----------------------------+---------------------------------------+
+|``Ctrl-C``                   | Copy                                  |
++-----------------------------+---------------------------------------+
+|``Ctrl-V``                   | Paste                                 |
++-----------------------------+---------------------------------------+
+|``Delete``                   | Delete the selected rows/groups       |
++-----------------------------+---------------------------------------+
+|``Up``/``Down``              | Select next/previous row              |
++-----------------------------+---------------------------------------+
+|``Shift-Up``/``Shift-Down``  | Extend selection to next/previous row |
++-----------------------------+---------------------------------------+
+|``Ctrl-A``                   | Select all                            |
++-----------------------------+---------------------------------------+
+
 Search Interface
 ^^^^^^^^^^^^^^^^
 
@@ -456,16 +514,16 @@ Hovering over the highlighted run with your cursor will allow you to see why the
 .. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
    :alt: Showing tooltip from failed transfer.
 
-Autoprocess
-===========
+Autoprocessing
+^^^^^^^^^^^^^^
 
-The **Autoprocess** button allows fully automatic processing of runs for a
-particular investigation. Enter the instrument and investigation ID and then
-click `Autoprocess` to start. This then:
+The interface provides **Autoprocessing**, which allows fully automatic
+processing of runs for a particular investigation. Enter the instrument and
+investigation ID and then click `Autoprocess` to start. This then:
 
 - Searches for runs that are part of the investigation the id was supplied for.
 - Transfers any initial runs found for that investigation from the Search table
-  into the Processing table and processes them.
+  into the Processing table and processes them.y
 - Polls for new runs and transfers and processes any as they are found.
 
 If the investigation has not started yet, polling will begin straight away and
@@ -550,50 +608,6 @@ Live data monitoring has the following requirements:
 
 - CaChannel must be installed in Mantid. See the instructions `here <https://www.mantidproject.org/CaChannel_In_Mantid>`_.
 - The instrument must be on IBEX or have additional processes installed to supply the EPICS values. If it does not, you will get an error that live values could not be found for `Theta` and the slits.
-
-Keyboard Shortcuts
-^^^^^^^^^^^^^^^^^^
-
-The following keyboard shortcuts are available for editing in the the runs
-table.
-
-+-----------------------------+---------------------------------------+
-| Shortcut                    | Action                                |
-+=============================+=======================================+
-|``F2``                       | Edit the current cell                 |
-+-----------------------------+---------------------------------------+
-|``Esc``                      | Cancel editing                        |
-+-----------------------------+---------------------------------------+
-|``Tab``                      | Next cell                             |
-+-----------------------------+---------------------------------------+
-|``Shift-Tab``                | Previous cell                         |
-+-----------------------------+---------------------------------------+
-|``Enter``                    | Edit the next row / append a new row  |
-+-----------------------------+---------------------------------------+
-|``Ctrl-I``                   | Insert child row                      |
-+-----------------------------+---------------------------------------+
-|``Ctrl-X``                   | Cut                                   |
-+-----------------------------+---------------------------------------+
-|``Ctrl-C``                   | Copy                                  |
-+-----------------------------+---------------------------------------+
-|``Ctrl-V``                   | Paste                                 |
-+-----------------------------+---------------------------------------+
-|``Delete``                   | Delete the selected rows/groups       |
-+-----------------------------+---------------------------------------+
-|``Up``/``Down``              | Select next/previous row              |
-+-----------------------------+---------------------------------------+
-|``Shift-Up``/``Shift-Down``  | Extend selection to next/previous row |
-+-----------------------------+---------------------------------------+
-|``Ctrl-A``                   | Select all                            |
-+-----------------------------+---------------------------------------+
-
-.. figure:: /images/ISISReflectometryInterface/table_editing.png
-  :class: screenshot
-  :align: center
-  :alt: Editing the Runs table
-
-  *Editing the Runs table*
-
 
 
 Event Handling tab

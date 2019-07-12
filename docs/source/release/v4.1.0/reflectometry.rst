@@ -2,7 +2,7 @@
 Reflectometry Changes
 =====================
 
-.. figure:: ../../images/ISISReflectometryInterface/processing.png
+.. figure:: ../../images/ISISReflectometryInterface/runs_tab_processing.png
   :class: screenshot
   :width: 700px
   :align: right
