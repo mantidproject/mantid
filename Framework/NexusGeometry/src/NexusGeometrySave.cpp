@@ -34,6 +34,8 @@ const std::string NX_TRANSFORMATION = "NXtransformation";
 
 const std::string SHORT_NAME = "short_name";
 const std::string TRANSFORMATIONS = "transformations";
+const std::string TRANSLATION = "translation";
+const std::string ROTATION = "rotation";
 const std::string LOCAL_NAME = "local_name";
 const std::string LOCATION = "location";
 const std::string ORIENTATION = "orientation";
@@ -44,8 +46,10 @@ const std::string PIXEL_SHAPE = "pixel_shape";
 const std::string SOURCE = "source";
 const std::string SAMPLE = "sample";
 const std::string DETECTOR_NUMBER = "detector_number";
+const std::string TRANSFORMATION_TYPE = "transformation_type";
 
 const std::string METRES = "m";
+const std::string DEGREES = "degrees";
 const std::string NAME = "name";
 const std::string UNITS = "units";
 const std::string SHAPE = "shape";
@@ -198,8 +202,8 @@ inline void writeDetectorNumber(H5::Group &grp,
 
 /*
  * Function: writeLocation
- * For use with NXdetector group. Writes position of detector bank to dataset
- * and metadata as attributes:
+ * For use with NXdetector group. Writes absolute position of detector bank to
+ *dataset and metadata as attributes:
  *
  * =>	norm of position vector stored as value in NXtransformation dataset
  *		'location'.
@@ -225,18 +229,23 @@ inline void writeLocation(H5::Group &grp,
 
   H5::Attribute vector;
   H5::Attribute units;
-  H5::Attribute transformatioType;
+  H5::Attribute transformationType;
   H5::Attribute dependsOn;
   H5::Attribute nxClass;
+
+  H5::StrType strSize;
 
   int drank = 1;
   hsize_t ddims[(hsize_t)1];
   ddims[0] = 1;
 
+  // dependency for location
+  std::string dependency = "."; // self dependent
+
   dspace = H5Screate_simple(drank, ddims, NULL);
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, dspace);
 
-  // write norm value to dataset
+  // write norm of absolute position vector of detector bank to dataset
   position = Kernel::toVector3d(compInfo.position(compInfo.root()));
   normalisedPosition = position.normalized();
   norm = position.norm();
@@ -244,33 +253,51 @@ inline void writeLocation(H5::Group &grp,
   std::vector<double> data = {norm};
   location.write(&data, H5::PredType::NATIVE_DOUBLE, dspace);
 
-  // write attributes
-  H5::StrType strSize = strTypeOfSize(NX_TRANSFORMATION);
+  // vector attribute
+  strSize = strTypeOfSize(NX_TRANSFORMATION);
   nxClass = location.createAttribute(NX_CLASS, strSize, H5SCALAR);
   nxClass.write(strSize, NX_TRANSFORMATION);
 
+  /*
+   * Convert Eigen::Vector to std::vector buffer to write to attribute 'vector'.
+   * stdNormAxis is the position vector as a std::vector<>. Normalised if norm
+   * != 0.
+   */
+  auto asize = normalisedPosition.size();
   std::vector<double> stdNormPos;
-  stdNormPos.resize(normalisedPosition.size());
-  Eigen::VectorXd::Map(&stdNormPos[0], normalisedPosition.size()) =
-      normalisedPosition;
+  stdNormPos.resize(asize);
+  Eigen::VectorXd::Map(&stdNormPos[0], asize) = normalisedPosition;
 
   int arank = 1;
   hsize_t adims[(hsize_t)3];
-  adims[0] = 1;
-  adims[1] = 1;
-  adims[2] = 1;
+  adims[0] = 3;
 
-  aspace = H5Screate_simple(3, adims, NULL);
+  aspace = H5Screate_simple(arank, adims, NULL);
   vector =
       location.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE, aspace);
+  vector.write(H5::PredType::NATIVE_DOUBLE, stdNormPos.data());
 
-  vector.write(H5::PredType::NATIVE_DOUBLE, "y");
+  // units attribute
+  strSize = strTypeOfSize(METRES);
+  units = location.createAttribute(UNITS, strSize, H5SCALAR);
+  units.write(strSize, METRES);
+
+  // transformation-type attribute
+  strSize = strTypeOfSize(TRANSLATION);
+  transformationType =
+      location.createAttribute(TRANSFORMATION_TYPE, strSize, H5SCALAR);
+  transformationType.write(strSize, TRANSLATION);
+
+  // dependency attribute
+  strSize = strTypeOfSize(dependency);
+  dependsOn = location.createAttribute(DEPENDS_ON, strSize, H5SCALAR);
+  dependsOn.write(strSize, dependency);
 }
 
 /*
  * Function: writeOrientation
- * For use with NXdetector group. Writes rotation of detector bank to dataset
- * and metadata as attributes:
+ * For use with NXdetector group. Writes the absolute rotation of detector bank
+ *to dataset and metadata as attributes:
  *
  * =>	magnitude of angle of rotation stored as value in NXtransformation
  *dataset 'location'.
@@ -288,35 +315,80 @@ inline void writeOrientation(H5::Group &grp,
                              const Geometry::ComponentInfo &compInfo) {
 
   Eigen::Quaterniond rotation;
-  double norm;
+  double angle;
 
   H5::DataSet orientation;
-  H5::DataSpace space;
+  H5::DataSpace dspace;
+  H5::DataSpace aspace;
 
   H5::Attribute vector;
   H5::Attribute units;
-  H5::Attribute transformatioType;
+  H5::Attribute transformationType;
   H5::Attribute dependsOn;
   H5::Attribute nxClass;
 
+  H5::StrType strSize;
+
   int rank = 1;
-  hsize_t dims[(hsize_t)1];
-  dims[0] = (hsize_t)1;
+  hsize_t ddims[(hsize_t)1];
+  ddims[0] = (hsize_t)1;
 
-  space = H5Screate_simple(rank, dims, NULL);
+  // dependency for orientation
+  std::string dependency = forwardCompatibility::getObjName(grp) + "/" +
+                           LOCATION; // depends on location
+
+  dspace = H5Screate_simple(rank, ddims, NULL);
   orientation =
-      grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, space);
+      grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, dspace);
 
-  // write attributes
-  H5::StrType strSize = strTypeOfSize(NX_TRANSFORMATION);
+  // write absolute rotation in degrees of detector bank to dataset
+  rotation = Kernel::toQuaterniond(compInfo.rotation(compInfo.root()));
+  angle = std::acos(rotation.w()) * (360.0 / M_PI);
+  std::vector<double> data = {angle};
+  orientation.write(&data, H5::PredType::NATIVE_DOUBLE, dspace);
+
+  // NX_class attribute
+  strSize = strTypeOfSize(NX_TRANSFORMATION);
   nxClass = orientation.createAttribute(NX_CLASS, strSize, H5SCALAR);
   nxClass.write(strSize, NX_TRANSFORMATION);
 
-  // write norm value to dataset
-  rotation = Kernel::toQuaterniond(compInfo.rotation(compInfo.root()));
-  norm = rotation.norm();
-  std::vector<double> data = {norm};
-  orientation.write(&data, H5::PredType::NATIVE_DOUBLE, space);
+  // vector atrribute
+  Eigen::Vector3d axisOfRotation = rotation.vec().normalized();
+
+  /*
+   * Convert Eigen::Vector to std::vector buffer to write to attribute 'vector'.
+   * stdNormAxis is the Axis of rotation as a std::vector<>. Normalised if norm
+   * != 0.
+   */
+  auto asize = axisOfRotation.size();
+  std::vector<double> stdNormAxis;
+  stdNormAxis.resize(asize);
+  Eigen::VectorXd::Map(&stdNormAxis[0], asize) = axisOfRotation;
+
+  int arank = 1;
+  hsize_t adims[(hsize_t)3];
+  adims[0] = 3;
+
+  aspace = H5Screate_simple(arank, adims, NULL);
+  vector =
+      orientation.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE, aspace);
+  vector.write(H5::PredType::NATIVE_DOUBLE, stdNormAxis.data());
+
+  // units attribute
+  strSize = strTypeOfSize(DEGREES);
+  units = orientation.createAttribute(UNITS, strSize, H5SCALAR);
+  units.write(strSize, DEGREES);
+
+  // transformation-type attribute
+  strSize = strTypeOfSize(TRANSLATION);
+  transformationType =
+      orientation.createAttribute(TRANSFORMATION_TYPE, strSize, H5SCALAR);
+  transformationType.write(strSize, TRANSLATION);
+
+  // dependency attribute
+  strSize = strTypeOfSize(dependency);
+  dependsOn = orientation.createAttribute(DEPENDS_ON, strSize, H5SCALAR);
+  dependsOn.write(strSize, dependency);
 }
 
 /*
@@ -334,12 +406,12 @@ H5::Group instrument(const H5::Group &parent,
   std::string instrumentNameStr = compInfo.name(compInfo.root());
   H5::Group group = parent.createGroup(instrumentNameStr);
   writeStrAttribute(group, NX_CLASS, NX_INSTRUMENT);
-  H5::StrType nameStrSize = strTypeOfSize(instrumentNameStr);
-  H5::DataSet name = group.createDataSet("name", nameStrSize, H5SCALAR);
+  H5::StrType nameStrType = strTypeOfSize(instrumentNameStr);
+  H5::DataSet name = group.createDataSet("name", nameStrType, H5SCALAR);
   writeStrAttribute(name, SHORT_NAME,
                     instrumentNameStr); // placeholder
 
-  name.write(instrumentNameStr, name.getDataType(), H5SCALAR);
+  name.write(instrumentNameStr, nameStrType, H5SCALAR);
 
   return group;
 }
@@ -369,8 +441,8 @@ H5::Group sample(const H5::Group &parent,
  * Function: detector
  * For NXinstrument parent (root group). Produces an NXdetctor group in the
  * parent group, and writes the Nexus compliant datasets and metadata stored in
- * attributes to the new group.
- *
+ * attributes to the new group. The NXdetector group created will be orientation
+ * dependent.
  *
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
@@ -382,23 +454,23 @@ H5::Group detector(const std::string &name, const H5::Group &parent,
   child = parent.createGroup(name);
   writeStrAttribute(child, NX_CLASS, NX_DETECTOR);
 
-  std::string dependencyStr = forwardCompatibility::getObjName(child) + "/" +
-                              LOCATION; // needs to be full path to group
-  std::string localNameStr = "INST";    // placeholder
-  H5::StrType dependencyStrSize = strTypeOfSize(dependencyStr);
-  H5::StrType localNameStrSize = strTypeOfSize(localNameStr);
+  std::string localNameStr = "INST"; // placeholder
+  H5::StrType localNameStrType = strTypeOfSize(localNameStr);
+
+  std::string dependency =
+      forwardCompatibility::getObjName(child) + "/" + ORIENTATION;
+  H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
   writeDetectorNumber(child, compInfo);
   writeLocation(child, compInfo);
   writeOrientation(child, compInfo);
 
   H5::DataSet localName =
-      child.createDataSet(LOCAL_NAME, localNameStrSize, H5SCALAR);
-  H5::DataSet dependency =
-      child.createDataSet(DEPENDS_ON, dependencyStrSize, H5SCALAR);
-
-  localName.write(localNameStr, localName.getDataType(), H5SCALAR);
-  dependency.write(dependencyStr, dependency.getDataType(), H5SCALAR);
+      child.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
+  localName.write(localNameStr, localNameStrType, H5SCALAR);
+  H5::DataSet dependsOn =
+      child.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
+  dependsOn.write(dependency, dependencyStrType, H5SCALAR);
 
   return child;
 }
