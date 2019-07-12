@@ -704,6 +704,17 @@ however that if a bin width is not provided, for instance ``Params="-0.03"``,
 then ``-dQ/Q`` will be used, if specified; otherwise a default value will be
 calculated from the slits, if possible.
 
+Note that when conflicting options are specified for the reduction,
+i.e. different values for the same property are specified via one of the
+settings tabs and the cells in the *Runs* tab, the latter will take
+precedence. Therefore, the Settings tabs should be used to specify
+global options that will be applied to all the rows in the table, whereas the
+row values will only be applicable to the specific row for which those options
+are defined.
+
+Per-Angle Defaults
+^^^^^^^^^^^^^^^^^^
+
 The **Experiment Settings** tab allows some options to be specified on a
 per-angle basis, that is, to specify defaults that will apply only to runs with
 a specific angle. Note that matching angles are searched for within a tolerance
@@ -719,14 +730,23 @@ exist.
   :alt: The per-angle defaults table
 
   *The per-angle defaults table*
+
+Entries in the per-angle defaults table are similar to the table on the Runs
+tab. Default transmission runs can be specified and each input can take a
+single run/workspace or a number of runs/workspaces that will be summed before
+processing. Specific spectra of interest can be specified for the input runs
+and separate spectra, if required, can be specified for the transmission runs -
+if the latter are not specified then the ``Run Spectra`` will also be used for
+the transmission runs. If both a First and Second tranmission input is
+specified, then they will be stitched using the options specified.
   
-Note that when conflicting options are specified for the reduction,
-i.e. different values for the same property are specified via one of the
-settings tabs and the cells in the *Runs* tab, the latter will take
-precedence. Therefore, the Settings tabs should be used to specify
-global options that will be applied to all the rows in the table, whereas the
-row values will only be applicable to the specific row for which those options
-are defined.
+.. figure:: /images/ISISReflectometryInterface/transmission_runs.png
+  :class: screenshot
+  :width: 600px
+  :align: center
+  :alt: Transmission run options
+
+  *Transmission run options*
 
 Save ASCII Tab
 ~~~~~~~~~~~~~~

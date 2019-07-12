@@ -69,7 +69,7 @@ Transmission Runs
 The Toolbar
 ^^^^^^^^^^^
 
-.. |filldown| image:: ../../images/arrow-expand-down.png
+.. |filldown| image:: ../../images/icons/arrow-expand-down.png
 
 - A "Fill Down" |filldown| button has been added, which allows filling all selected cells below the highest selected cell, in the column that is selected.
 - Filtering by run or group name is now possible using the search bar above the table. This accepts regular expressions.
@@ -129,7 +129,7 @@ Processing and highlighting
 
 .. figure:: ../../images/ISISReflectometryInterface/processing_table.png
   :class: screenshot
-  :width: 650px
+  :width: 800px
   :align: center
   :alt: Highlighting on the runs table
 
