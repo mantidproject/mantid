@@ -22,6 +22,7 @@ ISIS Reflectometry Interface
 .. |paste| image:: /images/icons/content-paste.png
 .. |cut| image:: /images/icons/content-cut.png
 .. |filldown| image:: /images/icons/arrow-expand-down.png
+.. |transfer| image:: /images/icons/file-move.png
 
 Purpose
 -------
@@ -312,7 +313,7 @@ The processing table contains the following columns:
 |                     |           | normalise the sample runs. To specify two                                       |
 | 2nd Trans Run(s)    |           | transmission runs, enter them in each input box.                                |
 |                     |           | Note that as per the Run(s) column, you can sum multiple                        |
-|                     |           | runs for each input by entering multiple values separated by ``+`` or ``,`.     |
+|                     |           | runs for each input by entering multiple values separated by ``+`` or ``,``.    |
 |                     |           | If left blank, the sample runs will be                                          |
 |                     |           | normalised by monitor only.                                                     |
 |                     |           |                                                                                 |
