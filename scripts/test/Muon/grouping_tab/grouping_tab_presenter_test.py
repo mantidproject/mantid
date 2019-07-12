@@ -9,10 +9,6 @@ import six
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
@@ -21,6 +17,7 @@ from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import Gro
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 class GroupingTabPresenterTest(GuiTest):
@@ -29,8 +26,7 @@ class GroupingTabPresenterTest(GuiTest):
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
         self.group_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        self.context = self.context = setup_context(False)
 
         self.model = GroupingTabModel(context=self.context)
 
