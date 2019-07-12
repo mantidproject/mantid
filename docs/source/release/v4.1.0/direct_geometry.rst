@@ -5,10 +5,6 @@ Direct Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 New Instruments
 ---------------
 
@@ -27,6 +23,9 @@ Improvements
 ############
 
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now has a `CylinderAxis` property to set the direction of the cylinder axis.
+- Improved support for thin-walled hollow cylinder shapes in :ref:`algm-MonteCarloAbsorption`.
+  The points are now generated in cylindrical coordinates to improve performance.
+
 
 Removed
 #######
