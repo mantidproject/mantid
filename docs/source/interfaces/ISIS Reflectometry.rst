@@ -623,7 +623,7 @@ Event Handling Tab
 
 .. figure:: /images/ISISReflectometryInterface/event_handling_tab.png
   :class: screenshot
-  :width: 700px
+  :width: 800px
   :align: center
   :alt: The event handling tab
 
@@ -679,7 +679,7 @@ Experiment and Instrument Settings Tabs
 
 .. figure:: /images/ISISReflectometryInterface/experiment_settings_tab.png
   :class: screenshot
-  :width: 700px
+  :width: 800px
   :align: center
   :alt: The experiment settings tab
 
@@ -736,7 +736,7 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 
 .. figure:: /images/ISISReflectometryInterface/save_tab.png
   :class: screenshot
-  :width: 700px
+  :width: 800px
   :align: center
   :alt: The save ASCII tab
 
@@ -818,8 +818,8 @@ When I try to process I get an error: "Error encountered while stitching group .
 
 This occurs when Mantid is unable to stitch a group. Please check that at you have
 specified at least the bin width. This can be done either by setting a value in column
-**dQ/Q** before processing the data, or by using the *Stitch1DMany* text
-box in the **Settings** tab to provide the *Params* input property like this:
+**dQ/Q** before processing the data, or by using the ``Output Stitch Params`` text
+box in the **Experiment Settings** tab to provide the *Params* input property like this:
 ``Params="-0.03"`` (you may want to replace ``0.03`` with a bin size suitable for
 your reduction). Note that the "-" sign in this case will produce a logarithmic binning in the
 stitched workspace. For linear binning, use ``Params="0.03"``.
@@ -840,12 +840,8 @@ My IvsQ workspaces are not being stitched correctly
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Stitching is controlled by the group a row is in. For stitching to occur, the
-rows must be in the same group, and be processed simultaneously.
-
-An easy way to select all the rows in the same group for stitching is to select one of the
-rows you want stitched, and then in the menu bar select **Edit -> Expand Selection**.
-This will select the group your row is in. If you have another row that you
-would like to add to the group, you can do this easily by adding it to the
-selection, and then in the menu bar selecting **Edit -> Group Selected**.
+rows must be in the same group, and be processed simultaneously. To select all
+rows in a group, just select the group itself - its child rows are implicitly
+selected.
 
 .. categories:: Interfaces Reflectometry
