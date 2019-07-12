@@ -2,7 +2,7 @@
 Reflectometry Changes
 =====================
 
-.. figure:: ../../images/ISISReflectometryInterface_processing.png
+.. figure:: ../../images/ISISReflectometryInterface/runs_tab_processing.png
   :class: screenshot
   :width: 700px
   :align: right
@@ -36,7 +36,7 @@ Significant under-the-hood changes have also taken place to update the interface
 
 Batches and Settings
 ^^^^^^^^^^^^^^^^^^^^
-.. figure:: ../../images/ISISReflectometryInterface_batches.png
+.. figure:: ../../images/ISISReflectometryInterface/batches.png
   :class: screenshot
   :width: 700px
   :align: center
@@ -52,7 +52,7 @@ Batches and Settings
 Transmission Runs
 ^^^^^^^^^^^^^^^^^
 
-.. figure:: ../../images/ISISReflectometryInterface_transmission_runs.png
+.. figure:: ../../images/ISISReflectometryInterface/transmission_runs.png
   :class: screenshot
   :width: 600px
   :align: center
@@ -69,13 +69,13 @@ Transmission Runs
 The Toolbar
 ^^^^^^^^^^^
 
-.. |filldown| image:: ../../images/arrow-expand-down.png
+.. |filldown| image:: ../../images/icons/arrow-expand-down.png
 
 - A "Fill Down" |filldown| button has been added, which allows filling all selected cells below the highest selected cell, in the column that is selected.
 - Filtering by run or group name is now possible using the search bar above the table. This accepts regular expressions.
 - Icons have been updated to be consistent between Workbench and MantidPlot.
 
-.. figure:: ../../images/ISISReflectometryInterface_toolbar_and_filter.png
+.. figure:: ../../images/ISISReflectometryInterface/toolbar_and_filter.png
   :class: screenshot
   :align: center
   :alt: The new toolbar icons and filter box
@@ -117,7 +117,7 @@ Additional keyboard shortcuts have been added to aid navigation/editing in the r
 |``Ctrl-A``                   | Select all                            |
 +-----------------------------+---------------------------------------+
 
-.. figure:: ../../images/ISISReflectometryInterface_table_editing.png
+.. figure:: ../../images/ISISReflectometryInterface/table_editing.png
   :class: screenshot
   :align: center
   :alt: Editing the Runs table
@@ -127,9 +127,9 @@ Additional keyboard shortcuts have been added to aid navigation/editing in the r
 Processing and highlighting
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. figure:: ../../images/ISISReflectometryInterface_row_highlighting.png
+.. figure:: ../../images/ISISReflectometryInterface/processing_table.png
   :class: screenshot
-  :width: 650px
+  :width: 800px
   :align: center
   :alt: Highlighting on the runs table
 
@@ -143,7 +143,7 @@ Processing and highlighting
 - The progress bar is more accurate, and remembers previous progress when you pause and restart processing.
 - Processing in event mode is now done asynchronously, so it no longer locks up MantidPlot.
 
-.. figure:: ../../images/ISISReflectometryInterface_validation.png
+.. figure:: ../../images/ISISReflectometryInterface/validation.png
   :class: screenshot
   :width: 650px
   :align: center
