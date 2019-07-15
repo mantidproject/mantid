@@ -92,13 +92,16 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
   connect(m_dataPresenter.get(),
           SIGNAL(endXChanged(double, DatasetIndex, WorkspaceIndex)), this,
           SLOT(tableEndXChanged(double, DatasetIndex, WorkspaceIndex)));
-
   connect(m_dataPresenter.get(),
           SIGNAL(excludeRegionChanged(const std::string &, DatasetIndex,
                                       WorkspaceIndex)),
           this,
           SLOT(tableExcludeChanged(const std::string &, DatasetIndex,
                                    WorkspaceIndex)));
+  connect(m_dataPresenter.get(), SIGNAL(startXChanged(double)), this,
+          SLOT(startXChanged(double)));
+  connect(m_dataPresenter.get(), SIGNAL(endXChanged(double)), this,
+          SLOT(endXChanged(double)));
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this,
           SLOT(respondToSingleResolutionLoaded()));
@@ -318,6 +321,18 @@ void IndirectFitAnalysisTab::tableExcludeChanged(const std::string & /*unused*/,
                                                  WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum))
     m_spectrumPresenter->displayBinMask();
+}
+
+void IndirectFitAnalysisTab::startXChanged(double startX) {
+  m_plotPresenter->setStartX(startX);
+  m_plotPresenter->updateGuess();
+  m_fittingModel->setStartX(startX, m_plotPresenter->getSelectedDataIndex());
+}
+
+void IndirectFitAnalysisTab::endXChanged(double endX) {
+  m_plotPresenter->setEndX(endX);
+  m_plotPresenter->updateGuess();
+  m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex());
 }
 
 /**

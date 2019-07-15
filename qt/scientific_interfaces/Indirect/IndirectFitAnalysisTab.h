@@ -91,6 +91,8 @@ protected slots:
                         WorkspaceIndex spectrum);
   void tableExcludeChanged(const std::string &exclude, DatasetIndex dataIndex,
                            WorkspaceIndex spectrum);
+  void startXChanged(double startX);
+  void endXChanged(double endX);
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
