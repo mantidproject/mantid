@@ -174,16 +174,16 @@ class HomeTabInstrumentPresenterTest(GuiTest):
         self.assertEqual(self.gui_variable_observer.update.call_count, 3)
 
     def test_that_on_dead_time_unselected_deadtime_model_set_to_none(self):
-        self.view.dead_time_selector.setCurrentIndex(0)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_DATA_FILE)
         self.context.gui_context['DeadTimeSource'] = 'FromFile'
-        self.view.dead_time_selector.setCurrentIndex(3)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_NONE)
 
         self.assertEqual(self.view.dead_time_label_3.text(), self.presenter.dead_time_from_data_text([0.0]))
         self.assertEqual(self.model._data.current_data["DeadTimeTable"], None)
         self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeSource': 'None'})
 
     def test_that_on_deadtime_data_selected_updates_with_no_loaded_data(self):
-        self.view.dead_time_selector.setCurrentIndex(0)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_DATA_FILE)
 
         self.assertEqual(self.view.dead_time_label_3.text(), "No loaded dead time")
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
@@ -204,7 +204,7 @@ class HomeTabInstrumentPresenterTest(GuiTest):
         get_table_names_mock.return_value = ['table_1', 'table_2', 'table_3']
         self.assertTrue(self.view.dead_time_file_selector.isHidden())
 
-        self.view.dead_time_selector.setCurrentIndex(1)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_WORKSPACE)
 
         self.assertEqual(self.view.dead_time_label_3.text(), "From 0.000 to 0.000 (ave. 0.000)")
         self.assertFalse(self.view.dead_time_file_selector.isHidden())
@@ -216,9 +216,9 @@ class HomeTabInstrumentPresenterTest(GuiTest):
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
 
     def test_that_returning_to_None_options_hides_table_workspace_selector(self):
-        self.view.dead_time_selector.setCurrentIndex(1)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_WORKSPACE)
         self.context.gui_context['DeadTimeSource'] = 'FromADS'
-        self.view.dead_time_selector.setCurrentIndex(3)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_NONE)
 
         self.assertEqual(self.view.dead_time_label_3.text(), "From 0.000 to 0.000 (ave. 0.000)")
         self.assertTrue(self.view.dead_time_file_selector.isHidden())
@@ -227,7 +227,7 @@ class HomeTabInstrumentPresenterTest(GuiTest):
     def test_browse_button_displayed_when_from_other_file_selected(self):
         self.assertTrue(self.view.dead_time_browse_button.isHidden())
 
-        self.view.dead_time_selector.setCurrentIndex(2)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_OTHER_FILE)
 
         self.assertFalse(self.view.dead_time_browse_button.isHidden())
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
@@ -237,7 +237,7 @@ class HomeTabInstrumentPresenterTest(GuiTest):
     def test_browse_clicked_displays_warning_popup_if_file_does_not_contain_table(self, load_deadtime_mock):
         self.view.show_file_browser_and_return_selection = mock.MagicMock()
         load_deadtime_mock.return_value = ''
-        self.view.dead_time_selector.setCurrentIndex(2)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_OTHER_FILE)
 
         self.view.dead_time_browse_button.clicked.emit(True)
 
@@ -251,7 +251,7 @@ class HomeTabInstrumentPresenterTest(GuiTest):
         'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
     def test_browse_clicked_does_nothing_if_no_file_selected(self, load_deadtime_mock):
         self.view.show_file_browser_and_return_selection = mock.MagicMock(return_value=[''])
-        self.view.dead_time_selector.setCurrentIndex(2)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_OTHER_FILE)
 
         self.view.dead_time_browse_button.clicked.emit(True)
 
@@ -264,11 +264,11 @@ class HomeTabInstrumentPresenterTest(GuiTest):
     def test_browse_clicked_fails_if_table_not_loaded_into_ADS(self, load_deadtime_mock):
         self.view.show_file_browser_and_return_selection = mock.MagicMock(return_value=['filename'])
         load_deadtime_mock.return_value = 'dead_time_table_name'
-        self.view.dead_time_selector.setCurrentIndex(2)
+        self.view.dead_time_selector.setCurrentIndex(InstrumentWidgetView.DEADTIME_OTHER_FILE)
 
         self.view.dead_time_browse_button.clicked.emit(True)
 
-        self.assertEqual(self.view.dead_time_selector.currentIndex(), 1)
+        self.assertEqual(self.view.dead_time_selector.currentIndex(), InstrumentWidgetView.DEADTIME_WORKSPACE)
         self.view.warning_popup.assert_called_once_with("Dead time table cannot be loaded")
         self.gui_variable_observer.update.assert_not_called()
 
@@ -279,7 +279,7 @@ class HomeTabInstrumentPresenterTest(GuiTest):
 
         self.view.dead_time_browse_button.clicked.emit(True)
 
-        self.assertEqual(self.view.dead_time_selector.currentIndex(), 1)
+        self.assertEqual(self.view.dead_time_selector.currentIndex(), InstrumentWidgetView.DEADTIME_WORKSPACE)
         self.view.warning_popup.assert_not_called()
         self.assertEqual(self.view.dead_time_file_selector.currentText(), 'MUSR00015196_deadTimes')
         self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'DeadTimeTable': mock.ANY})

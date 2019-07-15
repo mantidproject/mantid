@@ -181,7 +181,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             return
 
         # switch the view to the "from table workspace" option
-        self._view.set_dead_time_selection(1)
+        self._view.set_dead_time_selection(self._view.DEADTIME_WORKSPACE)
         is_set = self._view.set_dead_time_file_selection_text(name)
         if not is_set:
             self._view.warning_popup("Dead time table cannot be loaded")
@@ -197,10 +197,10 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.set_dead_time_label("No loaded dead time")
 
         index = self._view.dead_time_selector.currentIndex()
-        if index == 0:
+        if index == self._view.DEADTIME_DATA_FILE:
             self._model.set_dead_time_from_data()
             self._view.dead_time_label_3.setVisible(True)
-        elif index == 1:
+        elif index == self._view.DEADTIME_WORKSPACE:
             self._view.dead_time_label_3.hide()
             self._model.set_user_dead_time_from_ADS()
         else:
