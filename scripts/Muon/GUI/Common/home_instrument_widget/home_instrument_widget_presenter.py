@@ -10,7 +10,7 @@ from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.muon_file_utils import filter_for_extensions
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import DEADTIME_DATA_FILE,\
-    DEADTIME_WORKSPACE, DEADTIME_OTHER_FILE, DEADTIME_NONE
+    DEADTIME_WORKSPACE
 
 
 class InstrumentWidgetPresenter(HomeTabSubWidget):

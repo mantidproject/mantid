@@ -19,6 +19,7 @@ DEADTIME_WORKSPACE = 1
 DEADTIME_OTHER_FILE = 2
 DEADTIME_NONE = 3
 
+
 class InstrumentWidgetView(QtWidgets.QWidget):
     dataChanged = Signal()
 
