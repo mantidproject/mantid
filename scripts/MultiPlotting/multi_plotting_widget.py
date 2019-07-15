@@ -92,7 +92,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def rm_vline(self, subplotName, name):
         self.plots.rm_vline(subplotName, name)
 
-    # gets inital values for quickEdit
+    # gets initial values for quickEdit
     def set_all_values(self):
         names = self.quickEdit.get_selection()
         xrange = list(self._context.subplots[names[0]].xbounds)

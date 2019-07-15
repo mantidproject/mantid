@@ -222,8 +222,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
             return
-        to_plot = deepcopy([det.isChecked()
-                           for det in self.detectors.detectors])
+        to_plot = deepcopy([det.isChecked() for det in self.detectors.detectors])
         if self.plot_window is None and any(to_plot) is False:
             return
         # generate plots - if new run clear old plot(s) and replace it
@@ -241,6 +240,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
         for ws in mantid.mtd[name]:
+            ws.setYUnit('Counts')
             self.plotting.plot(detector, ws.getName())
         # add current selection of lines
         for element in self.ptable.selection:
