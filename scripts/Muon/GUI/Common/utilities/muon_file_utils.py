@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 from mantid.api import FileFinder
+from Muon.GUI.Common.message_box import warning
 from qtpy import PYQT4, QtWidgets
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS", "PSI"]
 allowed_extensions = ["nxs", "bin"]
@@ -58,7 +59,10 @@ def get_current_run_filename(instrument):
             if check_file_exists(FileFinder.getFullPath(file_name)):
                 current_run_filename = file_name
     if current_run_filename == "":
-        raise ValueError("Failed to find latest run")
+        # Default to auto_A (replicates MuonAnalysis 1.0 behaviour)
+        current_run_filename = file_path + instrument_directory + "auto_A.tmp"
+        warning("Failed to find latest run, defaulting to " + current_run_filename)
+
     return current_run_filename
 
 
