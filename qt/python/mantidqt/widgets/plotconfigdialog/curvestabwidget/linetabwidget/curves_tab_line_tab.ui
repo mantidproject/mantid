@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>360</width>
+    <width>387</width>
     <height>213</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -23,147 +23,22 @@
    <item row="0" column="0">
     <layout class="QGridLayout" name="grid_layout">
      <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
+      <enum>QLayout::SetMinimumSize</enum>
      </property>
      <property name="topMargin">
       <number>5</number>
      </property>
-     <item row="1" column="0">
-      <widget class="QLabel" name="line_style_label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Line style</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <spacer name="horizontalSpacer_10">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="2">
-      <widget class="QComboBox" name="line_style_combo_box">
-       <item>
-        <property name="text">
-         <string>None</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>solid</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>dashed</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>dashdot</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>dotted</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="draw_style_label">
-       <property name="text">
-        <string>Draw style</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <spacer name="horizontalSpacer_12">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="0" colspan="2">
-      <widget class="QLabel" name="line_options_label">
-       <property name="minimumSize">
-        <size>
-         <width>79</width>
-         <height>18</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>9</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Line Options</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="2">
-      <widget class="QDoubleSpinBox" name="line_width_spin_box">
-       <property name="decimals">
-        <number>2</number>
-       </property>
-       <property name="value">
-        <double>1.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <spacer name="horizontalSpacer_11">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="color_label">
-       <property name="text">
-        <string>Color (RGBA)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
       <widget class="QComboBox" name="draw_style_combo_box">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>190</width>
+         <width>200</width>
          <height>20</height>
         </size>
        </property>
@@ -194,10 +69,111 @@
        </item>
       </widget>
      </item>
-     <item row="3" column="1">
-      <spacer name="horizontalSpacer_13">
+     <item row="4" column="2">
+      <widget class="QDoubleSpinBox" name="line_width_spin_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="decimals">
+        <number>2</number>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="draw_style_label">
+       <property name="text">
+        <string>Draw style</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="color_label">
+       <property name="text">
+        <string>Color (RGBA)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="width_label">
+       <property name="text">
+        <string>Width</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="line_style_label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>96</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Line style</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QWidget" name="color_selector_dummy_widget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="line_options_label">
+       <property name="minimumSize">
+        <size>
+         <width>79</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Line Options</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <spacer name="horizontalSpacer_14">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -207,27 +183,93 @@
        </property>
       </spacer>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="width_label">
-       <property name="text">
-        <string>Width</string>
+     <item row="3" column="1">
+      <spacer name="horizontalSpacer_15">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-      </widget>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
-     <item row="4" column="2">
-      <widget class="QWidget" name="color_selector_dummy_widget" native="true">
+     <item row="4" column="1">
+      <spacer name="horizontalSpacer_16">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="5" column="1">
+      <spacer name="horizontalSpacer_17">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="2">
+      <widget class="QComboBox" name="line_style_combo_box">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>190</width>
+         <width>200</width>
          <height>20</height>
         </size>
        </property>
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>solid</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>dashed</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>dashdot</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>dotted</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
@@ -247,11 +289,6 @@
    </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>line_style_combo_box</tabstop>
-  <tabstop>draw_style_combo_box</tabstop>
-  <tabstop>line_width_spin_box</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>
