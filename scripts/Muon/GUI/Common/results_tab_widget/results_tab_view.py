@@ -164,5 +164,4 @@ def _create_empty_list_selector(parent, col_zero_width):
     :return: A new presenter that controls the widget
     """
     presenter = ListSelectorPresenter(ListSelectorView(parent), {})
-    presenter.view.item_table_widget.setColumnWidth(0, col_zero_width)
     return presenter
