@@ -7,6 +7,7 @@
 #ifndef CalculateEfficiency2TEST_H_
 #define CalculateEfficiency2TEST_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -28,7 +29,7 @@ public:
   /*
    * Generate fake data for which we know what the result should be
    */
-  void setUpWorkspace() {
+  void setUpWorkspace(bool asEventWorkspace = false) {
     inputWS = "sampledata";
 
     Mantid::DataObjects::Workspace2D_sptr ws =
@@ -58,6 +59,15 @@ public:
     // signal
     auto &Y = ws->mutableY(SANSInstrumentCreationHelper::nMonitors + 5);
     Y[0] = 202.0;
+
+    if (asEventWorkspace) {
+      auto convertToEvents =
+          AlgorithmManager::Instance().create("ConvertToEventWorkspace");
+      convertToEvents->initialize();
+      convertToEvents->setProperty("InputWorkspace", inputWS);
+      convertToEvents->setProperty("OutputWorkspace", inputWS);
+      convertToEvents->execute();
+    }
   }
 
   void testName() { TS_ASSERT_EQUALS(correction.name(), "CalculateEfficiency") }
@@ -70,6 +80,49 @@ public:
   }
 
   void testExecDefault() {
+    setUpWorkspace(true); // create event workspace
+    if (!correction.isInitialized())
+      correction.initialize();
+
+    const std::string outputWS("testExecDefault_result");
+    TS_ASSERT_THROWS_NOTHING(
+        correction.setPropertyValue("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        correction.setPropertyValue("OutputWorkspace", outputWS))
+
+    TS_ASSERT_THROWS_NOTHING(correction.execute())
+    TS_ASSERT(correction.isExecuted())
+
+    Mantid::API::Workspace_sptr ws_out;
+    TS_ASSERT_THROWS_NOTHING(
+        ws_out =
+            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
+    Mantid::DataObjects::Workspace2D_sptr ws2d_out =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
+
+    double tolerance(1e-03);
+    TS_ASSERT_DELTA(ws2d_out->y(1 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    1.0, tolerance);
+    TS_ASSERT_DELTA(
+        ws2d_out->y(15 + SANSInstrumentCreationHelper::nMonitors)[0], 1.0,
+        tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(6 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(1 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    0.5, tolerance);
+    TS_ASSERT_DELTA(
+        ws2d_out->e(15 + SANSInstrumentCreationHelper::nMonitors)[0], 0.5,
+        tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(6 + SANSInstrumentCreationHelper::nMonitors)[0],
+                    0.5, tolerance);
+
+    // Check that pixels that were out of range were masked
+    const auto &oSpecInfo = ws2d_out->spectrumInfo();
+    TS_ASSERT(!oSpecInfo.isMasked(5 + SANSInstrumentCreationHelper::nMonitors));
+    TS_ASSERT(!oSpecInfo.isMasked(1 + SANSInstrumentCreationHelper::nMonitors));
+  }
+
+  void testExecEvent() {
     setUpWorkspace();
     if (!correction.isInitialized())
       correction.initialize();
