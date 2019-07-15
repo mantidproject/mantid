@@ -29,17 +29,20 @@ class HomePlotWidgetModel(object):
         be removed from the graph from the figure window without this class knowing.
         :return:
         """
-        self._plotted_workspaces = [item for item in self._plotted_workspaces if item in self.plot_figure.gca().tracked_workspaces.keys()]
+        self._plotted_workspaces = [item for item in self._plotted_workspaces if item in
+                                    self.plot_figure.gca().tracked_workspaces.keys()]
         return self._plotted_workspaces
 
     @property
     def plotted_workspaces_inverse_binning(self):
-        self._plotted_workspaces_inverse_binning = {key: item for key, item in self._plotted_workspaces_inverse_binning.items() if key in self.plot_figure.gca().tracked_workspaces.keys()}
+        self._plotted_workspaces_inverse_binning = {key: item for key, item in self._plotted_workspaces_inverse_binning.items()
+                                                    if key in self.plot_figure.gca().tracked_workspaces.keys()}
         return self._plotted_workspaces_inverse_binning
 
     @property
     def plotted_fit_workspaces(self):
-        self._plotted_fit_workspaces = [item for item in self._plotted_fit_workspaces if item in self.plot_figure.gca().tracked_workspaces.keys()]
+        self._plotted_fit_workspaces = [item for item in self._plotted_fit_workspaces if item in
+                                        self.plot_figure.gca().tracked_workspaces.keys()]
         return self._plotted_fit_workspaces
 
     @plotted_workspaces.setter
