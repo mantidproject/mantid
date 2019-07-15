@@ -10,9 +10,9 @@ from __future__ import (absolute_import, unicode_literals)
 from qtpy.QtCore import Qt
 
 from mantid import ConfigService
+from mantidqt.interfacemanager import InterfaceManager
 from workbench.widgets.settings.general.presenter import GeneralSettings
 from workbench.widgets.settings.view import SettingsView
-from mantidqt.interfacemanager import InterfaceManager
 
 
 class SettingsPresenter(object):
