@@ -19,6 +19,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 
+#include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <gmock/gmock.h>
@@ -138,8 +139,9 @@ public:
     return false;
   } // namespace
 
+  // check dataset exists in path with attribute value of NX_class.
   bool hasNXDataset(const std::string pathToGroup,
-                    const std::string nx_attribute) {
+                    const std::string nx_attributeVal) {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
@@ -151,7 +153,7 @@ public:
           H5::Attribute attribute = dSet.openAttribute(NX_CLASS);
           std::string attributeValue;
           attribute.read(attribute.getDataType(), attributeValue);
-          if (attributeValue == nx_attribute)
+          if (attributeValue == nx_attributeVal)
             return true;
         }
       }
@@ -159,7 +161,8 @@ public:
     return false;
   }
 
-  bool hasDataset(const std::string pathToGroup, const std::string nx_attribute,
+  // check dataset exists in path with attribute value of attribute name.
+  bool hasDataset(const std::string pathToGroup, const std::string attributeVal,
                   const std::string attrName) {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -172,7 +175,7 @@ public:
           H5::Attribute attribute = dSet.openAttribute(attrName);
           std::string attributeValue;
           attribute.read(attribute.getDataType(), attributeValue);
-          if (attributeValue == nx_attribute)
+          if (attributeValue == attributeVal)
             return true;
         }
       }
@@ -493,8 +496,10 @@ public:
                      std::invalid_argument &);
   }
 
+  // test that if NXtransformation exists in NXdetector, either orientation or
+  // rotation also exists in NXdetector.
   void
-  test_when_nx_detector_groups_have_NX_transformation_attribute_transformation_type_is_specified() {
+  test_when_nx_detector_groups_have_nx_transformation_attribute_transformation_type_is_specified_for_all() {
 
     ScopedFileHandle fileResource(
         "check_nxdetector_groups_have_nx_transformations_test_file.hdf5");
@@ -512,9 +517,11 @@ public:
 
     HDF5FileTestUtility tester(destinationFile);
 
-    bool hasNXtransformation = false;
-    bool hasRotation = false;
-    bool hasTranslation = false;
+    bool hasNXTransformation;
+    bool hasRotation;
+    bool hasTranslation;
+
+    std::vector<std::pair<bool, bool>> hasEitherRotOrTrans;
 
     for (const std::string &name : uniqueDetectorBankNames) {
 
@@ -522,17 +529,34 @@ public:
           "/raw_data_1/" + compInfo.name(compInfo.root()) + "/";
       std::string detPath = instrPath + name;
 
-      if (tester.hasNXDataset(detPath, NX_TRANSFORMATION))
-        hasNXtransformation = true;
+      hasNXTransformation = tester.hasNXDataset(detPath, NX_TRANSFORMATION);
+      if (hasNXTransformation) {
 
-      if (tester.hasDataset(detPath, ROTATION, TRANSFORMATION_TYPE))
-        hasRotation = true;
+        hasTranslation =
+            tester.hasDataset(detPath, TRANSLATION, TRANSFORMATION_TYPE);
 
-      if (tester.hasDataset(detPath, TRANSLATION, TRANSFORMATION_TYPE))
-        hasTranslation = true;
+        hasRotation = tester.hasDataset(detPath, ROTATION, TRANSFORMATION_TYPE);
+
+        // has either rotation or translation. i.e. double false pair not
+        // allowed.
+        hasEitherRotOrTrans.push_back(
+            std::make_pair(hasTranslation, hasRotation));
+      }
     }
 
-    TS_ASSERT(hasNXtransformation && (hasRotation || hasTranslation));
+    // assert that there is no double-false pair in 'hasEitherRotOrTrans';
+    bool noDoubleFalsePairs =
+        std::all_of(hasEitherRotOrTrans.begin(), hasEitherRotOrTrans.end(),
+                    [](const std::pair<bool, bool> &checker) {
+                      return (checker.first || checker.second);
+                    });
+
+    TS_ASSERT(noDoubleFalsePairs);
+  }
+
+  void
+  test_when_nx_source_has_nx_transformation_attribute_transformation_type_is_specified() {
+
   }
 };
 

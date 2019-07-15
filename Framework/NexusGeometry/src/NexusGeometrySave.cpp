@@ -196,7 +196,6 @@ inline void writeXYZPixeloffset(H5::Group &grp,
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
-
   xPixelOffset =
       grp.createDataSet(X_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
   xPixelOffset.write(posx.data(), H5::PredType::NATIVE_DOUBLE, space);
@@ -208,7 +207,6 @@ inline void writeXYZPixeloffset(H5::Group &grp,
   zPixelOffset =
       grp.createDataSet(Z_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
   zPixelOffset.write(posz.data(), H5::PredType::NATIVE_DOUBLE);
-
 }
 
 /*
@@ -513,7 +511,7 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
     writeDetectorNumber(childGroup, compInfo, detInfo);
     writeLocation(childGroup, compInfo, i);
     writeOrientation(childGroup, compInfo, i);
-    writeXYZPixeloffset(childGroup, compInfo, detInfo,i);
+    writeXYZPixeloffset(childGroup, compInfo, detInfo, i);
 
     H5::DataSet localName =
         childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
@@ -600,8 +598,7 @@ void saveInstrument(
 
   // write instrument to file.
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
-  H5::Group root, instrument, sample, source;
-  std::vector<H5::Group> detectors;
+  H5::Group root, instrument;
 
   // create NXentry root group
   root = file.createGroup("/raw_data_1");
