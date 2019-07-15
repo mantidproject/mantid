@@ -22,6 +22,7 @@
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <gmock/gmock.h>
+#include <set>
 
 #include <H5Cpp.h>
 
@@ -33,18 +34,20 @@ namespace {
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
 const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
 
-// NEXUS COMPLIANT ATTRIBUTE NAMES
-const H5std_string SHORT_NAME = "short_name";
-const H5std_string NX_CLASS = "NX_class";
-const H5std_string NX_ENTRY = "NXentry";
-const H5std_string NX_INSTRUMENT = "NXinstrument";
-const H5std_string NX_SOURCE = "NXsource";
-const H5std_string NX_SAMPLE = "NXsample";
-const H5std_string SHAPE = "shape";
+const std::string SHORT_NAME = "short_name";
+const std::string NX_CLASS = "NX_class";
+const std::string NX_ENTRY = "NXentry";
+const std::string NX_INSTRUMENT = "NXinstrument";
+const std::string NX_SOURCE = "NXsource";
+const std::string NX_SAMPLE = "NXsample";
+const std::string SHAPE = "shape";
 
-// NEXUS COMPLIANT ATTRIBUTE VALUES
-const H5std_string NX_TRANSFORMATION = "NXtransformation";
-const H5std_string NX_CHAR = "NX_CHAR";
+const std::string NX_TRANSFORMATION = "NXtransformation";
+const std::string NX_CHAR = "NX_CHAR";
+
+const std::string TRANSFORMATION_TYPE = "transformation_type";
+const std::string ROTATION = "rotation";
+const std::string TRANSLATION = "translation";
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
@@ -135,19 +138,46 @@ public:
     return false;
   } // namespace
 
-  // check if group has matching NX_class attribute value, or if dataype has
-  // matching NX_class attribute value if optional dataset name passed.
-  bool dataSetHasNxClass(std::string dataSetname, const std::string &attrVal,
-                         const std::string &pathToGroup) const {
+  bool hasNXDataset(const std::string pathToGroup,
+                    const std::string nx_attribute) {
 
-    H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
-    H5::DataSet dataSet = parentGroup.openDataSet(dataSetname);
-    attribute = dataSet.openAttribute(NX_CLASS);
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
+    auto numOfChildren = parentGroup.getNumObjs();
+    for (hsize_t i = 0; i < numOfChildren; i++) {
+      if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
+        std::string dSetName = parentGroup.getObjnameByIdx(i);
+        H5::DataSet dSet = parentGroup.openDataSet(dSetName);
+        if (dSet.attrExists(NX_CLASS)) {
+          H5::Attribute attribute = dSet.openAttribute(NX_CLASS);
+          std::string attributeValue;
+          attribute.read(attribute.getDataType(), attributeValue);
+          if (attributeValue == nx_attribute)
+            return true;
+        }
+      }
+    }
+    return false;
+  }
 
-    return attributeValue == attrVal;
+  bool hasDataset(const std::string pathToGroup, const std::string nx_attribute,
+                  const std::string attrName) {
+
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+    auto numOfChildren = parentGroup.getNumObjs();
+    for (hsize_t i = 0; i < numOfChildren; i++) {
+      if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
+        std::string dSetName = parentGroup.getObjnameByIdx(i);
+        H5::DataSet dSet = parentGroup.openDataSet(dSetName);
+        if (dSet.attrExists(NX_CLASS)) {
+          H5::Attribute attribute = dSet.openAttribute(attrName);
+          std::string attributeValue;
+          attribute.read(attribute.getDataType(), attributeValue);
+          if (attributeValue == nx_attribute)
+            return true;
+        }
+      }
+    }
+    return false;
   }
 
   bool groupHasNxClass(const std::string &attrVal,
@@ -160,6 +190,18 @@ public:
     attribute.read(attribute.getDataType(), attributeValue);
 
     return attributeValue == attrVal;
+  }
+
+  bool groupExistsInPath(std::string fullPath) {
+
+    try {
+      H5::Group parentGroup = m_file.openGroup(fullPath);
+    } catch (H5::Exception &) {
+
+      return false;
+    }
+
+    return true;
   }
 
   bool expectedValue(const std::string &dataSetValue,
@@ -182,9 +224,9 @@ public:
                            const std::string &attrName,
                            const std::string &attrVal) {
 
-    H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
-    attribute = parentGroup.openAttribute(attrName);
+
+    H5::Attribute attribute = parentGroup.openAttribute(attrName);
     std::string attributeValue;
     attribute.read(attribute.getDataType(), attributeValue);
 
@@ -192,12 +234,13 @@ public:
   }
 
   bool hasAttributeInDataSet(const std::string &pathToGroup,
+                             const std::string dataSetName,
                              const std::string &attrName,
                              const std::string &attrVal) {
 
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
-    H5::DataSet dataSet = parentGroup.openDataSet(m_dataSetName);
+    H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
     attribute = dataSet.openAttribute(attrName);
     std::string attributeValue;
     attribute.read(attribute.getDataType(), attributeValue);
@@ -352,7 +395,7 @@ public:
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_INSTRUMENT));
   }
 
-  void test_instrument_has_name() {
+  void test_NXinstrument_has_expected_name() {
 
     ScopedFileHandle fileResource("check_instrument_name_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
@@ -363,12 +406,8 @@ public:
     saveInstrument(m_instrument, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    TS_ASSERT(testUtility.expectedValue(
-        expectedInstrumentName, "/raw_data_1/" + expectedInstrumentName));
-
-    TS_ASSERT(testUtility.hasAttributeInDataSet(
-        "/raw_data_1/" + expectedInstrumentName, SHORT_NAME,
-        expectedInstrumentName));
+    TS_ASSERT(
+        testUtility.groupExistsInPath("/raw_data_1/" + expectedInstrumentName));
   }
 
   void test_instrument_without_sample_throws() {
@@ -454,12 +493,46 @@ public:
                      std::invalid_argument &);
   }
 
-  void test_detetctor_bank_location_written_to_file_in_nx_format() {
+  void
+  test_when_nx_detector_groups_have_NX_transformation_attribute_transformation_type_is_specified() {
 
-    // auto instr =
-    // Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument); auto
-    // &compInfo = (*instr.first); auto &detInfo = (*instr.second); detids =
-    // detInfo.detectorIDs(); detid = detids[some_index];
+    ScopedFileHandle fileResource(
+        "check_nxdetector_groups_have_nx_transformations_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    // saveinstrument
+    saveInstrument(m_instrument, destinationFile);
+    auto &compInfo = (*m_instrument.first);
+
+    // get all detector bank names from compInfo
+    std::set<std::string> uniqueDetectorBankNames;
+    auto allDetIdx = compInfo.detectorsInSubtree(compInfo.root());
+    for (const size_t &i : allDetIdx)
+      uniqueDetectorBankNames.insert(compInfo.name(compInfo.parent(i)));
+
+    HDF5FileTestUtility tester(destinationFile);
+
+    bool hasNXtransformation = false;
+    bool hasRotation = false;
+    bool hasTranslation = false;
+
+    for (const std::string &name : uniqueDetectorBankNames) {
+
+      std::string instrPath =
+          "/raw_data_1/" + compInfo.name(compInfo.root()) + "/";
+      std::string detPath = instrPath + name;
+
+      if (tester.hasNXDataset(detPath, NX_TRANSFORMATION))
+        hasNXtransformation = true;
+
+      if (tester.hasDataset(detPath, ROTATION, TRANSFORMATION_TYPE))
+        hasRotation = true;
+
+      if (tester.hasDataset(detPath, TRANSLATION, TRANSFORMATION_TYPE))
+        hasTranslation = true;
+    }
+
+    TS_ASSERT(hasNXtransformation && (hasRotation || hasTranslation));
   }
 };
 
