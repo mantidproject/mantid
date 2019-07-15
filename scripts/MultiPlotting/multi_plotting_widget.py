@@ -28,6 +28,8 @@ class MultiPlotWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.multi_plot.removeSubplotDisonnect()
+        self.multi_plot.plots._ADSObserver.unsubscribe()
+        self.multi_plot.plots._ADSObserver = None
         self.windowClosedSignal.emit()
 
 
