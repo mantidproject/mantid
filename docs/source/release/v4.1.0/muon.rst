@@ -23,6 +23,9 @@ Improvements
 ############
 
 * Phase table and phase Quad options from frequency domain transform tab moved to phase calculations tab.
+
+Removed
+#######
 * Removed the algorithm GetNegMuMuonicXRDDialog as the new Elemental Analysis interface provides the same, improved, functionality.
 
 Bug Fixes
