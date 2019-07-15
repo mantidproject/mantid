@@ -23,6 +23,7 @@ Improvements
 ############
 
 * Phase table and phase Quad options from frequency domain transform tab moved to phase calculations tab.
+* When plotting peaks in the Elemental Analysis interface, different elements will appear in different colours.
 
 Bug Fixes
 #########
@@ -30,3 +31,5 @@ Bug Fixes
 * Muon Analysis (original) no longer crashes when `TF Asymmetry` mode is activated.
 * Muon Analysis (original) can now produce results tables when columns contain both ranges and single values.
 * Issue where imaginary box was reappearing for FFT transforms after being unselected fixed.
+* Elemental Analysis no longer crashes when an ill formatted data file is loaded.
+* Changed the y-axis label in Elemental Analysis to `Counts`.

@@ -8,6 +8,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from collections import OrderedDict
 import unittest
+from mantidqt.utils.qt.testing import GuiTest
 
 from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
@@ -82,7 +83,7 @@ def create_test_fit_parameters(test_parameters, global_parameters=None):
     return FitParameters(parameter_workspace, global_parameters)
 
 
-class FittingContextTest(unittest.TestCase):
+class FittingContextTest(GuiTest):
     def setUp(self):
         self.fitting_context = FittingContext()
 

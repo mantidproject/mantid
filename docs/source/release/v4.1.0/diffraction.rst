@@ -5,41 +5,29 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Powder Diffraction
 ------------------
 
 New Algorithms
 ##############
+
 - New algorithm :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` to save out a sample shape and environment as a single STL file, this can be used to save out pieces with a set rotation or scale, or to assemble multiple stl files into one for viewing purposes.
 
 Improvements
 ############
 
 - The Gem scripts can now be used to automatically generate a .cal file, similar to pearl. They can also adjust a parameter file passed in using the argument "calibration_to_adjust".
-
-- The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
-
-- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has a new property, ``OffsetData``, which adds a constant to the data at the very end of the reduction.
-
 - Added two new options to the HRPD scripts `do_solid_angle_corrections` and `subtract_empty_instrument` allowing setting whether or not these actions should take place.
-
-- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` has a new property, ``RemoveTemp``, which allows the user to inspect temporary workspaces is left unchecked.
-
-- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now correctly takes into account scale for translation. Rotation is now applied before translation to reduce confusion.
-
+- The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
 - The Pearl scripts now automatically disable attenuation on long-mode.
-
 - The Pearl scripts now set now use a spline coefficient of 5 on long-mode due to the increased amount of noise.
-
+- The Pearl scripts now crop to a dspacing of 8 on long-mode to avoid negative values caused by noise after this point.
+- New example mapping files for GEM and POLARIS have been added to the ISIS powder scripts.
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has a new property, ``OffsetData``, which adds a constant to the data at the very end of the reduction.
+- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` has a new property, ``RemoveTemp``, which allows the user to inspect temporary workspaces is left unchecked.
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now correctly takes into account scale for translation. Rotation is now applied before translation to reduce confusion.
 - New IDF have been added for VULCAN.
 
-- The Pearl scripts now crop to a dspacing of 8 on long-mode to avoid negative values caused by noise after this point.
-
-- New example mapping files for GEM and POLARIS have been added to the ISIS powder scripts.
 
 Bug Fixes
 #########
@@ -62,13 +50,9 @@ Bug Fixes
 #########
 
 - Prevented crash caused by canceling algorithms called by GUI.
-
 - Prevented GUI breaking bug caused by entering files from the wrong instrument to calibration.
-
 - Prevented issue with reading CSV files on python 3
-
 - GUI now correctly loads the file browsed to instead of looking for a run number in every folder along the path to that file.
-
 - :ref:`MDNorm <algm-MDNorm>` will not crash if the detector is masked in the flux workspace, but not in the input workspace.
 
 
@@ -84,6 +68,7 @@ New Algorithms
 
 Improvements
 ############
+
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` will load satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` will save satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
 - :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>` finds UB matrix using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace.

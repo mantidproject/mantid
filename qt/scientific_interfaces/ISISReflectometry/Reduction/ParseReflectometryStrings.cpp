@@ -9,6 +9,7 @@
 #include "Common/Parse.h"
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include <boost/algorithm/string.hpp>
 #include <set>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -37,13 +38,16 @@ parseRunNumbersOrWhitespace(std::string const &runNumberString) {
 
 boost::optional<std::string>
 parseRunNumber(std::string const &runNumberString) {
-  auto asInt = parseNonNegativeInt(std::move(runNumberString));
-  if (asInt.is_initialized()) {
-    auto withoutWhitespaceAndDefinatelyPositive = std::to_string(asInt.get());
-    return withoutWhitespaceAndDefinatelyPositive;
-  } else {
+  // We support any workspace name, as well as run numbers, so for just return
+  // the input string, but trimmed of whitespace (or none if the result is
+  // empty)
+  auto result = std::string(runNumberString);
+  boost::trim(result);
+
+  if (result.empty())
     return boost::none;
-  }
+
+  return result;
 }
 
 boost::optional<std::string>

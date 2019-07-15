@@ -59,12 +59,13 @@ Changes
 
    *
 
-- :doc:`Framework <framework>`
-- :doc:`General UI & Usability <ui>`
+- User Interfaces
 
   - :doc:`MantidPlot <mantidplot>`
 
   - :doc:`MantidWorkbench <mantidworkbench>`
+    
+- :doc:`Framework <framework>`
 - :doc:`Diffraction <diffraction>`
 - :doc:`Muon Analysis <muon>`
 - Low Q

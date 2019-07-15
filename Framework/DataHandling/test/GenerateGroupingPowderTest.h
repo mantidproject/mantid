@@ -159,7 +159,7 @@ public:
     auto histogram = m_emptyInstrument->histogram(0);
     MatrixWorkspace_sptr ws =
         create<Workspace2D>(*m_emptyInstrument, 1, histogram);
-    ws->getSpectrum(0).copyInfoFrom(m_emptyInstrument->getSpectrum(7));
+    ws->getSpectrum(0).copyInfoFrom(m_emptyInstrument->getSpectrum(8));
     GenerateGroupingPowder alg;
     alg.setChild(true);
     alg.setRethrows(true);

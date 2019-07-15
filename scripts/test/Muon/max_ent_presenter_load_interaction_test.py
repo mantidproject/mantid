@@ -33,7 +33,7 @@ def retrieve_combobox_info(combo_box):
 
 class MaxEntPresenterTest(GuiTest):
     def setUp(self):
-        self.context = setup_context()
+        self.context = setup_context(True)
 
         self.context.data_context.instrument = 'MUSR'
 

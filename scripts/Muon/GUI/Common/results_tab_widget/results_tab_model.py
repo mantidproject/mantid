@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, unicode_literals)
 
-from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.api import AnalysisDataService as ads, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 from mantid.py3compat import Enum
 
@@ -85,12 +85,11 @@ class ResultsTabModel(object):
         """
         return self._fit_context.fit_function_names()
 
-    def fit_selection(self, existing_selection):
+    def fit_selection(self, to_select):
         """
         Combine the existing selection state of workspaces with the workspace names
         of fits stored here. New workspaces are always checked for inclusion.
-        :param existing_selection: A dict defining any current selection model. The
-        format matches that of the ListSelectorPresenter class' model.
+        :param to_select A list of workspace names to select
         :return: The workspaces that have had fits performed on them along with their selection status. The
         format matches that of the ListSelectorPresenter class' model.
         """
@@ -99,11 +98,7 @@ class ResultsTabModel(object):
             if fit.fit_function_name != self.selected_fit_function():
                 continue
             name = fit.parameters.parameter_workspace_name
-            if name in existing_selection:
-                checked = existing_selection[name][1]
-            else:
-                checked = True
-            selection[name] = [index, checked, True]
+            selection[name] = [index, name in to_select, True]
 
         return selection
 
@@ -144,10 +139,9 @@ class ResultsTabModel(object):
         """
         self._raise_error_on_incompatible_selection(log_selection,
                                                     results_selection)
-
-        results_table = self._create_empty_results_table(
-            log_selection, results_selection)
         all_fits = self._fit_context.fit_list
+        results_table = self._create_empty_results_table(
+            log_selection, results_selection, all_fits)
         for _, position in results_selection:
             fit = all_fits[position]
             fit_parameters = fit.parameters
@@ -158,8 +152,7 @@ class ResultsTabModel(object):
             results_table.addRow(
                 self._add_parameters_to_table(row_dict, fit_parameters))
 
-        AnalysisDataService.Instance().addOrReplace(self.results_table_name(),
-                                                    results_table)
+        ads.Instance().addOrReplace(self.results_table_name(), results_table)
         return results_table
 
     def _add_logs_to_table(self, row_dict, fit, log_selection):
@@ -248,7 +241,7 @@ class ResultsTabModel(object):
                     fit.parameters.parameter_workspace_name, nparams)
             raise RuntimeError(msg)
 
-    def _create_empty_results_table(self, log_selection, results_selection):
+    def _create_empty_results_table(self, log_selection, results_selection, all_fits):
         """
         Create an empty table workspace to store the results.
         :param log_selection: See create_results_table
@@ -257,8 +250,31 @@ class ResultsTabModel(object):
         """
         table = WorkspaceFactory.Instance().createTable()
         table.addColumn('str', 'workspace_name', TableColumnType.NoType.value)
+
+        def float_log(wksp_name, log_name):
+            try:
+                run = ads.Instance().retrieve(wksp_name).run()
+                prop = run.getProperty(log_name)
+                if isinstance(prop, FloatTimeSeriesProperty):
+                    return True
+                try:
+                    float(prop.value)
+                    return True
+                except ValueError:
+                    return False
+            except (TypeError, ValueError):
+                for fit in all_fits:
+                    for input_workspace in fit.input_workspaces:
+                        ws = ads.Instance().retrieve(input_workspace)
+                        if ws.run().hasProperty(log_name):
+                            return float_log(input_workspace, log_name)
+
         for log_name in log_selection:
-            table.addColumn('float', log_name, TableColumnType.X.value)
+            wksp_name = all_fits[0].input_workspaces[0]
+            if float_log(wksp_name, log_name):
+                table.addColumn('float', log_name, TableColumnType.X.value)
+            else:
+                table.addColumn('str', log_name, TableColumnType.X.value)
         # assume all fit functions are the same in fit_selection and take
         # the parameter names from the first fit.
         parameters = self._find_parameters_for_table(results_selection)

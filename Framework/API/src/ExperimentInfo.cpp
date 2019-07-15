@@ -5,9 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -108,8 +106,7 @@ class myContentHandler : public Poco::XML::ContentHandler {
 /** Constructor
  */
 ExperimentInfo::ExperimentInfo()
-    : m_moderatorModel(), m_choppers(), m_parmap(new ParameterMap()),
-      sptr_instrument(new Instrument()) {
+    : m_parmap(new ParameterMap()), sptr_instrument(new Instrument()) {
   m_parmap->setInstrument(sptr_instrument.get());
 }
 
@@ -134,12 +131,6 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   m_sample = other->m_sample;
   m_run = other->m_run;
   this->setInstrument(other->getInstrument());
-  if (other->m_moderatorModel)
-    m_moderatorModel = other->m_moderatorModel->clone();
-  m_choppers.clear();
-  for (const auto &chopper : other->m_choppers) {
-    m_choppers.push_back(chopper->clone());
-  }
   // We do not copy Beamline::SpectrumInfo (which contains detector grouping
   // information) for now:
   // - For MatrixWorkspace, grouping information is still stored in ISpectrum
@@ -491,28 +482,6 @@ void ExperimentInfo::populateInstrumentParameters() {
   // inserted into paramMap via DetectorInfo::setPosition(IComponent *)).
 }
 
-/**
- * Caches a lookup for the detector IDs of the members that are part of the same
- * group
- * @param mapping :: A map between a detector ID and the other IDs that are part
- * of the same
- * group.
- */
-void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
-  populateIfNotLoaded();
-  if (mapping.empty()) {
-    cacheDefaultDetectorGrouping();
-    return;
-  }
-  setNumberOfDetectorGroups(mapping.size());
-  size_t specIndex = 0;
-  for (const auto &item : mapping) {
-    m_det2group[item.first] = specIndex;
-    setDetectorGrouping(specIndex, item.second);
-    specIndex++;
-  }
-}
-
 /** Sets the number of detector groups.
  *
  * This method should not need to be called explicitly. The number of detector
@@ -566,77 +535,6 @@ void ExperimentInfo::updateCachedDetectorGrouping(
   throw std::runtime_error("ExperimentInfo::updateCachedDetectorGrouping: "
                            "Cannot update -- grouping information not "
                            "available");
-}
-
-/**
- * Set an object describing the moderator properties and take ownership
- * @param source :: A pointer to an object describing the source. Ownership is
- * transferred to this object
- */
-void ExperimentInfo::setModeratorModel(ModeratorModel *source) {
-  populateIfNotLoaded();
-  if (!source) {
-    throw std::invalid_argument(
-        "ExperimentInfo::setModeratorModel - NULL source object found.");
-  }
-  m_moderatorModel = boost::shared_ptr<ModeratorModel>(source);
-}
-
-/// Returns a reference to the source properties object
-ModeratorModel &ExperimentInfo::moderatorModel() const {
-  populateIfNotLoaded();
-  if (!m_moderatorModel) {
-    throw std::runtime_error("ExperimentInfo::moderatorModel - No source "
-                             "desciption has been defined");
-  }
-  return *m_moderatorModel;
-}
-
-/**
- * Sets a new chopper description at a given point. The point is given by index
- * where 0 is
- * closest to the source
- * @param chopper :: A pointer to a new chopper object, this class takes
- * ownership of the pointer
- * @param index :: An optional index that specifies which chopper point the
- * chopper belongs to (default=0)
- */
-void ExperimentInfo::setChopperModel(ChopperModel *chopper,
-                                     const size_t index) {
-  populateIfNotLoaded();
-  if (!chopper) {
-    throw std::invalid_argument(
-        "ExperimentInfo::setChopper - NULL chopper object found.");
-  }
-  auto iter = m_choppers.begin();
-  std::advance(iter, index);
-  if (index < m_choppers.size()) // Replacement
-  {
-    (*iter) = boost::shared_ptr<ChopperModel>(chopper);
-  } else // Insert it
-  {
-    m_choppers.insert(iter, boost::shared_ptr<ChopperModel>(chopper));
-  }
-}
-
-/**
- * Returns a const reference to a chopper description
- * @param index :: An optional index giving the point within the instrument this
- * chopper describes (default=0)
- * @return A reference to a const chopper object
- */
-ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
-  populateIfNotLoaded();
-  if (index < m_choppers.size()) {
-    auto iter = m_choppers.begin();
-    std::advance(iter, index);
-    return **iter;
-  } else {
-    std::ostringstream os;
-    os << "ExperimentInfo::chopper - Invalid index=" << index << ". "
-       << m_choppers.size() << " chopper descriptions have been set.";
-    throw std::invalid_argument(os.str());
-  }
 }
 
 /** Get a constant reference to the Sample associated with this workspace.
@@ -1238,24 +1136,6 @@ void ExperimentInfo::cacheDefaultDetectorGrouping() const {
     m_spectrumInfo->setSpectrumDefinition(specIndex, std::move(specDef));
     m_spectrumDefinitionNeedsUpdate.at(specIndex) = 0;
     specIndex++;
-  }
-}
-
-/** Returns the index of the (first) group the detID is part of.
- *
- * The purpose of this method is access to grouping information for
- * MDWorkspaces. */
-size_t ExperimentInfo::groupOfDetectorID(const detid_t detID) const {
-  if (!m_spectrumInfo || (m_spectrumInfo->size() == 0))
-    return detectorInfo().indexOf(detID);
-
-  auto iter = m_det2group.find(detID);
-  if (iter != m_det2group.end()) {
-    return iter->second;
-  } else {
-    throw std::out_of_range(
-        "ExperimentInfo::groupOfDetectorID - Unable to find ID " +
-        std::to_string(detID) + " in lookup");
   }
 }
 

@@ -55,7 +55,7 @@ class SubplotTest(GuiTest):
         self.setup_rm()
         self.subplot._rm()
 
-        self.assertEqual(self.subplot._raise_rm_window.call_count, 1)
+        self.assertEqual(self.subplot._raise_rm_window.call_count, 0)
         self.assertEqual(self.subplot._raise_selector_window.call_count, 0)
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
         self.assertEqual(self.subplot._createSelectWindow.call_count, 0)
@@ -84,9 +84,9 @@ class SubplotTest(GuiTest):
         self.subplot._rm()
 
         self.assertEqual(self.subplot._raise_rm_window.call_count, 0)
-        self.assertEqual(self.subplot._raise_selector_window.call_count, 1)
+        self.assertEqual(self.subplot._raise_selector_window.call_count, 0)
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
-        self.assertEqual(self.subplot._createSelectWindow.call_count, 0)
+        self.assertEqual(self.subplot._createSelectWindow.call_count, 1)
 
     def test_rmTwoPlotsoldRmWindow(self):
         self.subplot._rm_window = mock.Mock()
@@ -97,10 +97,10 @@ class SubplotTest(GuiTest):
         self.setup_rm()
         self.subplot._rm()
 
-        self.assertEqual(self.subplot._raise_rm_window.call_count, 1)
+        self.assertEqual(self.subplot._raise_rm_window.call_count, 0)
         self.assertEqual(self.subplot._raise_selector_window.call_count, 0)
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
-        self.assertEqual(self.subplot._createSelectWindow.call_count, 0)
+        self.assertEqual(self.subplot._createSelectWindow.call_count, 1)
 
     def setup_applyRm(self):
         self.subplot._rm_window = mock.Mock()

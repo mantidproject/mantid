@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentPresenter.h"
+#include "Common/Parse.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "PerThetaDefaultsTableValidator.h"
@@ -188,6 +189,35 @@ ExperimentPresenter::transmissionRunRangeFromView() {
     return range;
 }
 
+std::string ExperimentPresenter::transmissionStitchParamsFromView() {
+  auto stitchParams = m_view->getTransmissionStitchParams();
+  // It's valid if empty
+  if (stitchParams.empty()) {
+    m_view->showTransmissionStitchParamsValid();
+    return stitchParams;
+  }
+
+  // If set, the params should be a list containing an odd number of double
+  // values (as per the Params property of Rebin)
+  auto maybeParamsList = parseList(stitchParams, parseDouble);
+  if (maybeParamsList.is_initialized() && maybeParamsList->size() % 2 != 0) {
+    m_view->showTransmissionStitchParamsValid();
+    return stitchParams;
+  }
+
+  m_view->showTransmissionStitchParamsInvalid();
+  return std::string();
+}
+
+TransmissionStitchOptions
+ExperimentPresenter::transmissionStitchOptionsFromView() {
+  auto transmissionRunRange = transmissionRunRangeFromView();
+  auto stitchParams = transmissionStitchParamsFromView();
+  auto scaleRHS = m_view->getTransmissionScaleRHSWorkspace();
+  return TransmissionStitchOptions(transmissionRunRange, stitchParams,
+                                   scaleRHS);
+}
+
 std::map<std::string, std::string>
 ExperimentPresenter::stitchParametersFromView() {
   auto maybeStitchParameters = parseOptions(m_view->getStitchOptions());
@@ -212,15 +242,15 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
         summationTypeFromString(m_view->getSummationType());
     auto const includePartialBins = m_view->getIncludePartialBins();
     auto const debugOption = m_view->getDebugOption();
-    auto transmissionRunRange = transmissionRunRangeFromView();
+    auto transmissionStitchOptions = transmissionStitchOptionsFromView();
     auto polarizationCorrections = polarizationCorrectionsFromView();
     auto floodCorrections = floodCorrectionsFromView();
     auto stitchParameters = stitchParametersFromView();
     return ExperimentValidationResult(
         Experiment(analysisMode, reductionType, summationType,
                    includePartialBins, debugOption, polarizationCorrections,
-                   floodCorrections, transmissionRunRange, stitchParameters,
-                   perThetaValidationResult.assertValid()));
+                   floodCorrections, transmissionStitchOptions,
+                   stitchParameters, perThetaValidationResult.assertValid()));
   } else {
     return ExperimentValidationResult(
         ExperimentValidationErrors(perThetaValidationResult.assertError()));
@@ -266,13 +296,19 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setIncludePartialBins(m_model.includePartialBins());
   m_view->setDebugOption(m_model.debug());
   m_view->setPerAngleOptions(m_model.perThetaDefaultsArray());
-  if (m_model.transmissionRunRange()) {
-    m_view->setTransmissionStartOverlap(m_model.transmissionRunRange()->min());
-    m_view->setTransmissionEndOverlap(m_model.transmissionRunRange()->max());
+  if (m_model.transmissionStitchOptions().overlapRange()) {
+    m_view->setTransmissionStartOverlap(
+        m_model.transmissionStitchOptions().overlapRange()->min());
+    m_view->setTransmissionEndOverlap(
+        m_model.transmissionStitchOptions().overlapRange()->max());
   } else {
     m_view->setTransmissionStartOverlap(0.0);
     m_view->setTransmissionEndOverlap(0.0);
   }
+  m_view->setTransmissionStitchParams(
+      m_model.transmissionStitchOptions().rebinParameters());
+  m_view->setTransmissionScaleRHSWorkspace(
+      m_model.transmissionStitchOptions().scaleRHS());
   m_view->setPolarizationCorrectionType(polarizationCorrectionTypeToString(
       m_model.polarizationCorrections().correctionType()));
   m_view->setFloodCorrectionType(

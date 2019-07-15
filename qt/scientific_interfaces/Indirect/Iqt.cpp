@@ -261,6 +261,9 @@ void Iqt::setup() {
 
   connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this,
           SLOT(updateEnergyRange(int)));
+
+  m_uiForm.dsInput->isOptional(true);
+  m_uiForm.dsResolution->isOptional(true);
 }
 
 void Iqt::run() {

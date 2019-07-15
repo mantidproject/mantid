@@ -5,17 +5,7 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 :ref:`Release 4.1.0 <v4.1.0>`
-
-- New algorithm :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>`
-- New IDF for ``EQ-SANS``
-- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
-- New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
-- New version of algorithm :ref:`CalculateEfficiency <algm-CalculateEfficiency-v2>`
 
 ISIS SANS Interface
 -------------------
@@ -56,4 +46,18 @@ Bug Fixes
 - The differences between non-compatibility and compatibility modes has been minimised. Compatibility mode can now be turned off in the settings tab. When off, workspaces stay as EventWorkspaces until the penultimate stage of **SANSReductionCore**. Bin masking is not performed until workspace has been converted to a histogram.
 - When adding files, bad proton charges in run logs are identified and automatically corrected.
 - A bug in which a row was added if the only row is the table was erased, has been fixed.
+
+Algorithms
+----------
+
+New
+###
+- New algorithm :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>`
+- New IDF for ``EQ-SANS``
+- New algorithm :ref:`LoadHFIRSANS <algm-LoadHFIRSANS>` and speed improvements to :ref:`LoadSpice2D <algm-LoadSpice2D>`
+- New version of algorithm :ref:`CalculateEfficiency <algm-CalculateEfficiency-v2>`
+
+Improved
+########
+- Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
 

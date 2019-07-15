@@ -55,6 +55,9 @@ IndirectMolDyn::IndirectMolDyn(QWidget *parent)
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsResolution->isOptional(true);
 }
 
 void IndirectMolDyn::setup() {}

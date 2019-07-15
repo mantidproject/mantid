@@ -28,6 +28,10 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
+  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppSlicePreview->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppRawPlot->watchADS(false);
+
   // Property Tree
   m_propTrees["SlicePropTree"] = new QtTreePropertyBrowser();
   m_uiForm.properties->addWidget(m_propTrees["SlicePropTree"]);
@@ -86,7 +90,6 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   // Setup second range
   backgroundRangeSelector->setColour(
       Qt::darkGreen); // Dark green for background
-  backgroundRangeSelector->setRange(peakRangeSelector->getRange());
 
   // SIGNAL/SLOT CONNECTIONS
 
@@ -95,9 +98,9 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(setDefaultInstDetails()));
 
   // Update properties when a range selector is changed
-  connect(peakRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this,
+  connect(peakRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rangeSelectorDropped(double, double)));
-  connect(backgroundRangeSelector, SIGNAL(selectionChangedLazy(double, double)),
+  connect(backgroundRangeSelector, SIGNAL(selectionChanged(double, double)),
           this, SLOT(rangeSelectorDropped(double, double)));
 
   // Update range selctors when a property is changed
@@ -293,23 +296,6 @@ void ISISDiagnostics::setDefaultInstDetails(
   m_dblManager->setValue(m_properties["SpecMin"], spectraMin);
   m_dblManager->setValue(m_properties["SpecMax"], spectraMax);
   m_dblManager->setValue(m_properties["PreviewSpec"], spectraMin);
-
-  // Set peak and background ranges
-  if (instrumentDetails.size() >= 8) {
-    auto const peakStart = getInstrumentDetail(instrumentDetails, "peak-start");
-    auto const peakEnd = getInstrumentDetail(instrumentDetails, "peak-end");
-    auto const backStart = getInstrumentDetail(instrumentDetails, "back-start");
-    auto const backEnd = getInstrumentDetail(instrumentDetails, "back-end");
-
-    setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SlicePeak"),
-                     m_properties["PeakStart"], m_properties["PeakEnd"],
-                     qMakePair(peakStart.toDouble(), peakEnd.toDouble()));
-
-    setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SliceBackground"),
-                     m_properties["BackgroundStart"],
-                     m_properties["BackgroundEnd"],
-                     qMakePair(backStart.toDouble(), backEnd.toDouble()));
-  }
 }
 
 void ISISDiagnostics::handleNewFile() {
@@ -336,23 +322,32 @@ void ISISDiagnostics::handleNewFile() {
           Mantid::API::AnalysisDataService::Instance().retrieve(
               wsname.toStdString()));
 
-  const auto &dataX = input->x(0);
-  QPair<double, double> range(dataX.front(), dataX.back());
+  auto const &dataX = input->x(0);
+  QPair<double, double> const limits(dataX.front(), dataX.back());
   int previewSpec =
       static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"])) -
       specMin;
 
   m_uiForm.ppRawPlot->clear();
-  m_uiForm.ppRawPlot->addSpectrum("Raw", input, previewSpec);
+  m_uiForm.ppRawPlot->addSpectrum("Raw", input->clone(), previewSpec);
 
-  setPlotPropertyRange(m_uiForm.ppRawPlot->getRangeSelector("SlicePeak"),
-                       m_properties["PeakStart"], m_properties["PeakEnd"],
-                       range);
-  setPlotPropertyRange(m_uiForm.ppRawPlot->getRangeSelector("SliceBackground"),
-                       m_properties["BackgroundStart"],
-                       m_properties["BackgroundEnd"], range);
+  QPair<double, double> const peakRange(
+      getInstrumentDetail("peak-start").toDouble(),
+      getInstrumentDetail("peak-end").toDouble());
+  QPair<double, double> const backgroundRange(
+      getInstrumentDetail("back-start").toDouble(),
+      getInstrumentDetail("back-end").toDouble());
+
+  setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SlicePeak"),
+                   m_properties["PeakStart"], m_properties["PeakEnd"], limits,
+                   peakRange);
+
+  setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SliceBackground"),
+                   m_properties["BackgroundStart"],
+                   m_properties["BackgroundEnd"], limits, backgroundRange);
 
   m_uiForm.ppRawPlot->resizeX();
+  m_uiForm.ppRawPlot->replot();
 }
 
 /**

@@ -59,47 +59,67 @@ public:
                      expected);
   }
 
-  void testParseTransmissionRunsError() {
+  void testParseTransmissionRunsWithWorkspaceNames() {
     PerThetaDefaultsValidator validator;
-    auto result = validator({"", "bad", "bad"});
-    std::vector<int> errorCells = {1, 2};
+    auto result = validator({"", "some workspace", "another_workspace"});
+    auto expected = TransmissionRunPair("some workspace", "another_workspace");
+    TS_ASSERT(result.isValid());
+    TS_ASSERT_EQUALS(result.assertValid().transmissionWorkspaceNames(),
+                     expected);
+  }
+
+  void testParseTransmissionProcessingInstructions() {
+    PerThetaDefaultsValidator validator;
+    auto result = validator({"", "", "", "4-7"});
+    TS_ASSERT(result.isValid());
+    TS_ASSERT(result.assertValid()
+                  .transmissionProcessingInstructions()
+                  .is_initialized());
+    TS_ASSERT_EQUALS(
+        result.assertValid().transmissionProcessingInstructions().get(), "4-7");
+  }
+
+  void testParseTransmissionProcessingInstructionsError() {
+    PerThetaDefaultsValidator validator;
+    auto result = validator({"", "", "", "bad"});
+    std::vector<int> errorCells = {3};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
 
   void testParseQRange() {
     PerThetaDefaultsValidator validator;
-    auto result = validator({"", "", "", "0.05", "1.3", "0.02"});
+    auto result = validator({"", "", "", "", "0.05", "1.3", "0.02"});
     TS_ASSERT(result.isValid());
     TS_ASSERT_EQUALS(result.assertValid().qRange(), RangeInQ(0.05, 0.02, 1.3));
   }
 
   void testParseQRangeError() {
     PerThetaDefaultsValidator validator;
-    auto result = validator({"", "", "", "bad", "bad", "bad"});
-    std::vector<int> errorCells = {3, 4, 5};
+    auto result = validator({"", "", "", "", "bad", "bad", "bad"});
+    std::vector<int> errorCells = {4, 5, 6};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
 
   void testParseScaleFactor() {
     PerThetaDefaultsValidator validator;
-    auto result = validator({"", "", "", "", "", "", "1.4"});
+    auto result = validator({"", "", "", "", "", "", "", "1.4"});
     TS_ASSERT(result.isValid());
     TS_ASSERT_EQUALS(result.assertValid().scaleFactor(), 1.4);
   }
 
   void testParseScaleFactorError() {
     PerThetaDefaultsValidator validator;
-    auto result = validator({"", "", "", "", "", "", "bad"});
-    std::vector<int> errorCells = {6};
+    auto result = validator({"", "", "", "", "", "", "", "bad"});
+    std::vector<int> errorCells = {7};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
 
   void testParseProcessingInstructions() {
     PerThetaDefaultsValidator validator;
-    auto result = validator({"", "", "", "", "", "", "", "1-3"});
+    auto result = validator({"", "", "", "", "", "", "", "", "1-3"});
     TS_ASSERT(result.isValid());
     TS_ASSERT(result.assertValid().processingInstructions().is_initialized());
     TS_ASSERT_EQUALS(result.assertValid().processingInstructions().get(),
@@ -108,8 +128,8 @@ public:
 
   void testParseProcessingInstructionsError() {
     PerThetaDefaultsValidator validator;
-    auto result = validator({"", "", "", "", "", "", "", "bad"});
-    std::vector<int> errorCells = {7};
+    auto result = validator({"", "", "", "", "", "", "", "", "bad"});
+    std::vector<int> errorCells = {8};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }

@@ -10,8 +10,6 @@ add_subdirectory(Common)
 add_subdirectory(GUI)
 add_subdirectory(Reduction)
 
-message(${GUI_SRC_FILES})
-
 set(SRC_FILES ${COMMON_SRC_FILES} ${GUI_SRC_FILES} ${REDUCTION_SRC_FILES})
 
 # Include files aren't required, but this makes them appear in Visual Studio

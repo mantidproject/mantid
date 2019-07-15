@@ -14,7 +14,7 @@ Indirect Geometry Changes
 Instrument Definitions
 ----------------------
 
-The IDF of IN16B has been rewritten to properly model the neutronic positions of the pixels as reflections wrt spherical analysers.
+The IDF of IN16B has been rewritten to properly model the neutronic positions of the pixels as reflections with respect to spherical analysers.
 This is needed for the new inverted time-of-flight mode (BATS), but also improves the model for the standard doppler mode.
 Particularly, this will allow to calculate correct absorption corrections before grouping the pixels tube by tube.
 With the new IDF the flight-paths inside the sample will properly take into account the off-plane angle, which was not the case with the previous IDF.
@@ -42,6 +42,7 @@ Improvements
 - :ref:`BASISReduction <algm-BASISReduction>` permits now retaining events only within a time window.
 - :ref:`BASISReduction <algm-BASISReduction>` can output now the powder diffraction spectra.
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between run with old and new DAS.
+- :ref:`Abins <algm-Abins>` permits individual numbered atom contributions to simulated INS spectrum to be specified, alongside the existing option to select by element.
 
 
 Data Analysis Interface
@@ -62,6 +63,7 @@ Bug Fixes
 - Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
 - Fixed a bug where the loaded workspace in Data Analysis doesn't update after being changed on a different
   interface.
+- Fixed a bug with the StartX and EndX selectors seen on the Preview Plots.
 - Fixed a bug causing the errors calculated on Iqt to be too small towards the end of the spectra.
 
 .. figure:: ../../images/Iqt_Errors_Bug.PNG
@@ -95,7 +97,8 @@ Improvements
 ############
 - Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
 - Improved ISISEnergyTransfer by automatically loading the Detailed Balance from the sample logs if available.
-- Removed the obsolete *Plot Raw* button.
+- Removed the obsolete *Plot Raw* button in ISIS Calibration.
+- Improved the validation checks for input data on all tabs.
 
 Bug Fixes
 #########
@@ -136,5 +139,29 @@ Simulations Interface
 
 Bug Fixes
 #########
-- Fixed a crash in MolDyn caused by plotting output data.
+- Fixed a crash in MolDyn when plotting output data.
+
+
+The Workbench
+-------------
+
+- The Indirect Corrections GUI has been added to the Workbench.
+- The Indirect Data Reduction GUI has been added to the Workbench.
+- The Indirect Diffraction GUI has been added to the Workbench.
+- The Indirect Simulations GUI has been added to the Workbench.
+- The Indirect Tools GUI has been added to the Workbench.
+
+.. figure:: ../../images/Indirect_Data_Reduction_Sqw.png
+  :class: screenshot
+  :align: center
+  :figwidth: 90%
+  :alt: The Indirect Data Reduction GUI in the Workbench.
+
+
+Tools Interface
+---------------
+
+Improvements
+############
+- Added a verification for the chemical formula input on the Transmission tab.
 
