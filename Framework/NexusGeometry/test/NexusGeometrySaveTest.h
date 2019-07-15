@@ -291,7 +291,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+    TS_ASSERT_THROWS(saveInstrument(m_instrument, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -303,7 +303,7 @@ public:
     ScopedFileHandle fileResource("progress_report_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    saveInstrument(*m_instrument.first, destinationFile, &progressRep);
+    saveInstrument(m_instrument, destinationFile, &progressRep);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
 
@@ -315,7 +315,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+    TS_ASSERT_THROWS(saveInstrument(m_instrument, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -325,7 +325,7 @@ public:
     std::string destinationFile = fileResource.fullPath();
 
     auto const &compInfo = (*m_instrument.first);
-    saveInstrument(compInfo, destinationFile);
+    saveInstrument(m_instrument, destinationFile);
 
     HDF5FileTestUtility tester(destinationFile);
     std::string dataSetName = compInfo.name(compInfo.root());
@@ -341,7 +341,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    saveInstrument(compInfo, destinationFile);
+    saveInstrument(m_instrument, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
     std::string dataSetName = compInfo.name(compInfo.root());
 
@@ -356,7 +356,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    saveInstrument(compInfo, destinationFile); // saves instrument
+    saveInstrument(m_instrument, destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
     TS_ASSERT(testUtility.expectedValue(
@@ -382,7 +382,7 @@ public:
     TS_ASSERT(compInfo.hasSource());       // rule out throw by no source
     TS_ASSERT(!compInfo.hasSample());      // verify component has no sample
 
-    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+    TS_ASSERT_THROWS(saveInstrument(instr, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -401,7 +401,7 @@ public:
     TS_ASSERT(compInfo.hasSample());       // rule out throw by no sample
     TS_ASSERT(!compInfo.hasSource());      // verify component has no source
 
-    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+    TS_ASSERT_THROWS(saveInstrument(instr, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -414,7 +414,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    saveInstrument(compInfo, destinationFile);
+    saveInstrument(m_instrument, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
     TS_ASSERT(compInfo.hasSource());
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_INSTRUMENT, NX_SOURCE));
@@ -429,7 +429,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    saveInstrument(compInfo, destinationFile);
+    saveInstrument(m_instrument, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
 
     TS_ASSERT(compInfo.hasSample());
@@ -446,11 +446,18 @@ public:
     ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    TS_ASSERT_THROWS(saveInstrument(compInfo, destinationFile),
+    TS_ASSERT_THROWS(saveInstrument(instr, destinationFile),
                      std::invalid_argument &);
   }
 
-  void test_detetctor_bank_has_valid_location() {}
+  void test_detetctor_bank_has_valid_location() {
+
+    // auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    // auto &compInfo = (*instr.first);
+    // auto &detInfo = (*instr.second);
+    // detids = detInfo.detectorIDs();
+    // detid = detids[some_index];
+  }
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

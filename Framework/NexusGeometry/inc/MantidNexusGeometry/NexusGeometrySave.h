@@ -22,12 +22,14 @@ class Quat;
 
 namespace Geometry {
 class ComponentInfo;
+class DetectorInfo;
 }
 
 namespace NexusGeometry {
 
-MANTID_NEXUSGEOMETRY_DLL void
-saveInstrument(const Geometry::ComponentInfo &compInfo,
+MANTID_NEXUSGEOMETRY_DLL void saveInstrument(
+    const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
+                    std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
                const std::string &fullPath,
                Kernel::ProgressBase *reporter = nullptr);
 

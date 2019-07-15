@@ -172,18 +172,11 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
  * @param compInfo : componentInfo object.
  */
 inline void writeDetectorNumber(H5::Group &grp,
-                                const Geometry::ComponentInfo &compInfo) {
+                                const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo) {
 
-  std::vector<hsize_t> detectorIndices;
-  hsize_t ullOne = (hsize_t)1;
-  hsize_t ullZero = (hsize_t)0;
-  for (hsize_t i = compInfo.root(); i > ullZero; --i) {
-    if (compInfo.isDetector(i - ullOne)) {
-      detectorIndices.push_back(i - ullOne);
-    }
-  }
 
-  const hsize_t dsz = (hsize_t)detectorIndices.size();
+  std::vector<int> detIDs = detInfo.detectorIDs();
+  const hsize_t dsz = (hsize_t)detIDs.size();
 
   int rank = 1;
   hsize_t dims[1];
@@ -191,13 +184,9 @@ inline void writeDetectorNumber(H5::Group &grp,
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
-  std::vector<double> data;
-  for (hsize_t i = 0; i < dsz; i++) {
-    data.push_back((double)13.0); // placeholder
-  }
   H5::DataSet detectorNumber =
       grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(&data, H5::PredType::NATIVE_INT, space);
+  detectorNumber.write(&detIDs, H5::PredType::NATIVE_INT, space);
 }
 
 /*
@@ -247,7 +236,7 @@ inline void writeLocation(H5::Group &grp,
 
   // write norm of absolute (normalised) position vector of detector to dataset
   // TODO: these should take the idices of detectors instead of hard-coded zero
-  position = Kernel::toVector3d(compInfo.position(0));
+  position = Kernel::toVector3d(compInfo.position(0)); // of bank
   norm = position.norm();
   position.normalize(); // inline?
   location.write(&norm, H5::PredType::NATIVE_DOUBLE, dspace);
@@ -437,44 +426,52 @@ H5::Group sample(const H5::Group &parent,
 
 /*
  * Function: detector
- * For NXinstrument parent (root group). Produces an NXdetctor group in the
- * parent group, and writes the Nexus compliant datasets and metadata stored in
- * attributes to the new group. The NXdetector group created will be orientation
- * dependent.
+ * For NXinstrument parent (root group). Produces a set of NXdetctor groups in
+ * the parent group, and writes the Nexus compliant datasets and metadata stored
+ * in attributes to the new group. The NXdetector group created will be
+ * orientation dependent. returns vector of NXdetectors
  *
- * @param parent : parent group in which to write the NXinstrument group.
+ * @param parentGroup : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
+ * @
  */
-H5::Group detector(const std::string &name, const H5::Group &parent,
-                   const Geometry::ComponentInfo &compInfo) {
+std::vector<H5::Group> detectors(const H5::Group &parentGroup,
+                                 const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo) {
 
-  H5::Group child;
-  child = parent.createGroup(name);
-  writeStrAttribute(child, NX_CLASS, NX_DETECTOR);
+  std::vector<H5::Group> detectorGroups;
+  for (const size_t &i : compInfo.detectorsInSubtree(compInfo.root())) {
+    auto parentIdx = compInfo.parent(i);
+    std::string name = compInfo.name(parentIdx);
 
-  std::string localNameStr = "INST"; // placeholder
-  H5::StrType localNameStrType = strTypeOfSize(localNameStr);
+    H5::Group childGroup = parentGroup.createGroup(name);
+    writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
-  std::string dependency =
-      forwardCompatibility::getObjName(child) + "/" + ORIENTATION;
-  H5::StrType dependencyStrType = strTypeOfSize(dependency);
+    std::string localNameStr = name; // placeholder
+    H5::StrType localNameStrType = strTypeOfSize(localNameStr);
 
-  writeDetectorNumber(child, compInfo);
-  writeLocation(child, compInfo);
-  writeOrientation(child, compInfo);
+    std::string dependency =
+        forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
+    H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
-  H5::DataSet localName =
-      child.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
-  localName.write(localNameStr, localNameStrType, H5SCALAR);
-  H5::DataSet dependsOn =
-      child.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
-  dependsOn.write(dependency, dependencyStrType, H5SCALAR);
+    writeDetectorNumber(childGroup, compInfo, detInfo);
+    writeLocation(childGroup, compInfo);
+    writeOrientation(childGroup, compInfo);
+
+    H5::DataSet localName =
+        childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
+    localName.write(localNameStr, localNameStrType, H5SCALAR);
+    H5::DataSet dependsOn =
+        childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
+    dependsOn.write(dependency, dependencyStrType, H5SCALAR);
+
+    detectorGroups.push_back(childGroup);
+  }
 
   // TODO: WRITE XY PIXEL OFFSETS RELATIVE TO THE DETECTOR BANK
   // LOCATION/ORIENTATION.
 
-  return child;
-}
+  return detectorGroups;
+} // namespace NexusGeometrySave
 
 /*
  * Function: source
@@ -486,13 +483,13 @@ H5::Group detector(const std::string &name, const H5::Group &parent,
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  */
-H5::Group source(const H5::Group &parent,
+H5::Group source(const H5::Group &parentGroup,
                  const Geometry::ComponentInfo &compInfo) {
 
-  H5::Group child;
-  child = parent.createGroup(compInfo.name(compInfo.source()));
-  writeStrAttribute(child, NX_CLASS, NX_SOURCE);
-  return child;
+  H5::Group childGroup;
+  childGroup = parentGroup.createGroup(compInfo.name(compInfo.source()));
+  writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
+  return childGroup;
 }
 
 } // namespace NexusGeometrySave
@@ -505,16 +502,17 @@ H5::Group source(const H5::Group &parent,
  * @param fullPath : save destination as full path.
  * @param reporter : report to progressBase.
  */
-void saveInstrument(const Geometry::ComponentInfo &compInfo,
-                    const std::string &fullPath,
-                    Kernel::ProgressBase *reporter) {
+void saveInstrument(
+    const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
+                    std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
+    const std::string &fullPath, Kernel::ProgressBase *reporter) {
 
-  /*
-  ==============================================================================================================
-  Exception handling.
-  ==============================================================================================================
-  */
 
+
+  const Geometry::ComponentInfo &compInfo = (*instrPair.first); 
+  const Geometry::DetectorInfo &detInfo = (*instrPair.second);
+
+  /// Exception handling.
   boost::filesystem::path tmp(fullPath);
   if (!boost::filesystem::is_directory(tmp.root_directory())) {
     throw std::invalid_argument(
@@ -544,14 +542,11 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     throw std::invalid_argument("The component has no source.");
   }
 
-  /*
- ==============================================================================================================
- write instrument to file.
- ==============================================================================================================
- */
 
+ // write instrument to file.
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
-  H5::Group root, instrument, sample, detector, source;
+  H5::Group root, instrument, sample, source;
+  std::vector<H5::Group> detectors;
 
   // create NXentry root group
   root = file.createGroup("/raw_data_1");
@@ -561,7 +556,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   instrument = NexusGeometrySave::instrument(root, compInfo);
 
   // NXdetector
-  detector = NexusGeometrySave::detector("detector_0", instrument, compInfo);
+  detectors = NexusGeometrySave::detectors(instrument, compInfo, detInfo);
 
   // NXsource
   source = NexusGeometrySave::source(instrument, compInfo);
