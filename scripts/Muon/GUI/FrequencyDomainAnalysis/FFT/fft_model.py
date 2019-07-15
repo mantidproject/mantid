@@ -66,6 +66,7 @@ class FFTWrapper(object):
             self.model.preAlg(self.preIm)
         if self.FFT is not None:
             self.model.FFTAlg(self.FFT)
+ 
     def output(self):
         return
 
