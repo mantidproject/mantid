@@ -13,9 +13,9 @@
 #include "MantidKernel/ProgressBase.h"
 #include <H5Cpp.h>
 #include <boost/filesystem/operations.hpp>
+#include <set>
 #include <string>
 #include <utility>
-#include <vector>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -42,6 +42,7 @@ const std::string ORIENTATION = "orientation";
 const std::string DEPENDS_ON = "depends_on";
 const std::string X_PIXEL_OFFSET = "x_pixel_offset";
 const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
+const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
 const std::string SOURCE = "source";
 const std::string SAMPLE = "sample";
@@ -162,6 +163,54 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
   attribute.write(dataType, attrVal);
 }
 
+inline void writeXYZPixeloffset(H5::Group &grp,
+                                const Geometry::ComponentInfo &compInfo,
+                                const Geometry::DetectorInfo &detInfo,
+                                size_t idx) {
+
+  H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset;
+  auto childrenDetectors = compInfo.detectorsInSubtree(idx);
+
+  std::vector<double> posx;
+  std::vector<double> posy;
+  std::vector<double> posz;
+
+  for (const size_t &i : childrenDetectors) {
+    Eigen::Vector3d position = Kernel::toVector3d(detInfo.position(i));
+
+    posx.push_back(position[0]);
+    posy.push_back(position[1]);
+    posz.push_back(position[2]);
+  }
+
+  if (!(posx.size() == posy.size() && posx.size() == posz.size())) {
+    throw std::invalid_argument(
+        "unequal number of detector pixel offsets in x, y and z.");
+  }
+
+  const hsize_t dimSize = (hsize_t)posx.size();
+
+  int rank = 1;
+  hsize_t dims[1];
+  dims[0] = dimSize;
+
+  H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+
+
+  xPixelOffset =
+      grp.createDataSet(X_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+  xPixelOffset.write(posx.data(), H5::PredType::NATIVE_DOUBLE, space);
+
+  yPixelOffset =
+      grp.createDataSet(Y_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+  yPixelOffset.write(posy.data(), H5::PredType::NATIVE_DOUBLE);
+
+  zPixelOffset =
+      grp.createDataSet(Z_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+  zPixelOffset.write(posz.data(), H5::PredType::NATIVE_DOUBLE);
+
+}
+
 /*
  * Function: writeDetectorNumber
  * For use with NXdetector group. Finds all detector pixels by index in the
@@ -175,18 +224,20 @@ inline void writeDetectorNumber(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
                                 const Geometry::DetectorInfo &detInfo) {
 
+  H5::DataSet detectorNumber;
+
   std::vector<int> detIDs = detInfo.detectorIDs();
-  const hsize_t dsz = (hsize_t)detIDs.size();
+  const hsize_t dimSize = (hsize_t)detIDs.size();
 
   int rank = 1;
   hsize_t dims[1];
-  dims[0] = dsz;
+  dims[0] = dimSize;
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
-  H5::DataSet detectorNumber =
+  detectorNumber =
       grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(&detIDs, H5::PredType::NATIVE_INT, space);
+  detectorNumber.write(detIDs.data(), H5::PredType::NATIVE_INT, space);
 }
 
 /*
@@ -207,7 +258,7 @@ inline void writeDetectorNumber(H5::Group &grp,
  * @param compInfo : componentInfo object.
  */
 inline void writeLocation(H5::Group &grp,
-                          const Geometry::ComponentInfo &compInfo) {
+                          const Geometry::ComponentInfo &compInfo, size_t idx) {
 
   Eigen::Vector3d position;
   double norm;
@@ -236,7 +287,7 @@ inline void writeLocation(H5::Group &grp,
 
   // write norm of absolute (normalised) position vector of detector to dataset
   // TODO: these should take the idices of detectors instead of hard-coded zero
-  position = Kernel::toVector3d(compInfo.position(0)); // of bank
+  position = Kernel::toVector3d(compInfo.position(idx)); // of bank
   norm = position.norm();
   position.normalize(); // inline?
   location.write(&norm, H5::PredType::NATIVE_DOUBLE, dspace);
@@ -300,7 +351,8 @@ inline void writeLocation(H5::Group &grp,
  * @param compInfo : componentInfo object.
  */
 inline void writeOrientation(H5::Group &grp,
-                             const Geometry::ComponentInfo &compInfo) {
+                             const Geometry::ComponentInfo &compInfo,
+                             size_t idx) {
 
   Eigen::Quaterniond rotation;
   double angle;
@@ -330,7 +382,7 @@ inline void writeOrientation(H5::Group &grp,
       grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, dspace);
 
   // write absolute rotation in degrees of detector bank to dataset
-  rotation = Kernel::toQuaterniond(compInfo.rotation(0));
+  rotation = Kernel::toQuaterniond(compInfo.rotation(idx));
   angle = std::acos(rotation.w()) * (360.0 / M_PI);
   orientation.write(&angle, H5::PredType::NATIVE_DOUBLE, dspace);
 
@@ -370,7 +422,7 @@ inline void writeOrientation(H5::Group &grp,
   strSize = strTypeOfSize(TRANSLATION);
   transformationType =
       orientation.createAttribute(TRANSFORMATION_TYPE, strSize, H5SCALAR);
-  transformationType.write(strSize, TRANSLATION);
+  transformationType.write(strSize, ROTATION);
 
   // dependency attribute
   strSize = strTypeOfSize(dependency);
@@ -439,10 +491,14 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
                                  const Geometry::ComponentInfo &compInfo,
                                  const Geometry::DetectorInfo &detInfo) {
 
+  std::set<size_t> unique_parents;
+  auto allDetIdx = compInfo.detectorsInSubtree(compInfo.root());
+  for (const size_t &i : allDetIdx)
+    unique_parents.insert(compInfo.parent(i));
+
   std::vector<H5::Group> detectorGroups;
-  for (const size_t &i : compInfo.detectorsInSubtree(compInfo.root())) {
-    auto parentIdx = compInfo.parent(i);
-    std::string name = compInfo.name(parentIdx);
+  for (const size_t &i : unique_parents) {
+    std::string name = compInfo.name(i);
 
     H5::Group childGroup = parentGroup.createGroup(name);
     writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
@@ -455,8 +511,9 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
     H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
     writeDetectorNumber(childGroup, compInfo, detInfo);
-    writeLocation(childGroup, compInfo);
-    writeOrientation(childGroup, compInfo);
+    writeLocation(childGroup, compInfo, i);
+    writeOrientation(childGroup, compInfo, i);
+    writeXYZPixeloffset(childGroup, compInfo, detInfo,i);
 
     H5::DataSet localName =
         childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
