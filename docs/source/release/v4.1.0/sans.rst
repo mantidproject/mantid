@@ -44,6 +44,8 @@ Bug Fixes
 - You can now process in **memory** mode with no file type buttons selected. A warning box will open if you process with no file types while in **file** or **both** mode, and processing will not continue.
 - A bug in which the final column in a batch file was sometimes ignored if empty, and therefore impossible to load, has been fixed.
 - A bug in which a row was added if the only row is the table was erased, has been fixed.
+- A bug with the centre of mass beam centre calculation that prevented it running has been fixed.
+- A bug preventing the beam centre finder from plotting workspaces in the workbench has been fixed.
 
 Algorithms
 ----------
