@@ -23,6 +23,7 @@
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <gmock/gmock.h>
+#include <memory>
 #include <set>
 
 #include <H5Cpp.h>
@@ -487,7 +488,6 @@ public:
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
         V3D(0, 0, -10), V3D(0, 0, 2), V3D(0, 0, 10));
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
 
     ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();

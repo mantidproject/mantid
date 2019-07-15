@@ -175,6 +175,10 @@ inline void writeXYZPixeloffset(H5::Group &grp,
   std::vector<double> posy;
   std::vector<double> posz;
 
+  posx.reserve(childrenDetectors.size());
+  posy.reserve(childrenDetectors.size());
+  posz.reserve(childrenDetectors.size());
+
   for (const size_t &i : childrenDetectors) {
     Eigen::Vector3d position = Kernel::toVector3d(detInfo.position(i));
 
@@ -219,7 +223,6 @@ inline void writeXYZPixeloffset(H5::Group &grp,
  * @param compInfo : componentInfo object.
  */
 inline void writeDetectorNumber(H5::Group &grp,
-                                const Geometry::ComponentInfo &compInfo,
                                 const Geometry::DetectorInfo &detInfo) {
 
   H5::DataSet detectorNumber;
@@ -508,7 +511,7 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
         forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
     H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
-    writeDetectorNumber(childGroup, compInfo, detInfo);
+    writeDetectorNumber(childGroup, detInfo);
     writeLocation(childGroup, compInfo, i);
     writeOrientation(childGroup, compInfo, i);
     writeXYZPixeloffset(childGroup, compInfo, detInfo, i);
