@@ -86,6 +86,9 @@ QListView::item {
           <property name="sizeConstraint">
            <enum>QLayout::SetMinimumSize</enum>
           </property>
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
           <item>
            <widget class="QToolButton" name="help_button">
             <property name="text">
