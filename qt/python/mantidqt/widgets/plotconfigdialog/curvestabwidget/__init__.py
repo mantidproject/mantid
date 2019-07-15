@@ -61,9 +61,17 @@ def curve_hidden(curve):
 
 
 def set_errorbars_hidden(container, hide):
-    """Set all lines in an ErrorbarContainer to non-visible"""
+    """
+    Set the visibility on all lines in an ErrorbarContainer.
+
+    :param hide: Whether or not to hide the errors.
+    :type hide: bool
+    """
     if not isinstance(container, ErrorbarContainer):
         return
+
+    # hide gets inverted below, as matplotlib uses `visible`, which has the opposite logic:
+    # if hide is True, visible must be False, and vice-versa
     if container[1]:
         for caps in container[1]:
             caps.set_visible(not hide)
@@ -131,16 +139,6 @@ class CurveProperties(dict):
             if k not in ['hide', 'hide_errors']:
                 kwargs[k] = v
         kwargs['visible'] = not self.hide
-        return kwargs
-
-    @classmethod
-    def get_mpl_plot_kwargs_from_curve(cls, curve):
-        """
-        Return ONLY curve properties that matplotlib recognises.
-        Removes any custom properties appended by this class
-        """
-        kwargs = cls.from_curve(curve)
-        kwargs = {key: value for key, value in kwargs.items() if key not in ['hide', 'hide_errors']}
         return kwargs
 
     @classmethod

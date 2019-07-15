@@ -9,10 +9,10 @@ from __future__ import (absolute_import, division, print_function)
 import matplotlib
 import unittest
 
-matplotlib.use('AGG')
+matplotlib.use('AGG')  # noqa
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 import mantid.api
 import mantid.plots.plotfunctions as funcs

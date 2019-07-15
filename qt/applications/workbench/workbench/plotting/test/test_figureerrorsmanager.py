@@ -11,14 +11,15 @@ from __future__ import (absolute_import, division, print_function,
 
 import matplotlib
 
-matplotlib.use("AGG")
+matplotlib.use("AGG")  # noqa
 
-import matplotlib.pyplot as plt  # noqa: E402
-from qtpy.QtWidgets import QMenu  # noqa: E402
-from mantid.plots import MantidAxes  # noqa: E402
-from mantid.simpleapi import CreateWorkspace  # noqa: E402
-from mantidqt.utils.qt.testing import GuiTest  # noqa: E402
-from workbench.plotting.figureerrorsmanager import FigureErrorsManager  # noqa: E402
+import matplotlib.pyplot as plt
+from qtpy.QtWidgets import QMenu
+# Pulling in the MantidAxes registers the 'mantid' projection
+from mantid.plots import MantidAxes
+from mantid.simpleapi import CreateWorkspace
+from mantidqt.utils.qt.testing import GuiTest
+from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 
 def plot_things(make_them_errors):

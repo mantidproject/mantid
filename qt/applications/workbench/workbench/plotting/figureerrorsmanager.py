@@ -57,8 +57,7 @@ class FigureErrorsManager(object):
                                   partial(self._update_plot_after, self._toggle_all_errors, ax, make_visible=False))
         parent_menu.addMenu(error_bars_menu)
 
-        self.active_lines = CurvesTabWidgetPresenter.get_active_lines(
-            ax, CurvesTabWidgetPresenter.get_errorbars_from_ax(ax))
+        self.active_lines = CurvesTabWidgetPresenter.get_curves_from_ax(ax)
 
         # if there's more than one line plotted, then
         # add a sub menu, containing an action to hide the
@@ -91,27 +90,20 @@ class FigureErrorsManager(object):
 
     @staticmethod
     def toggle_error_bars_for(ax, curve, make_visible=None):
+        # get all curve properties
         curve_props = CurveProperties.from_curve(curve)
-        plot_kwargs = {key: value for key, value in curve_props.items() if key not in ['hide', 'hide_errors']}
-        if isinstance(ax, MantidAxes):
-            try:
-                new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
-            except ValueError:  # ValueError raised if Artist not tracked by Axes
-                # this might not have a creation_args
-                new_curve = CurvesTabWidgetPresenter.replot_curve(ax, curve, plot_kwargs)
-        else:
-            new_curve = CurvesTabWidgetPresenter.replot_curve(ax, curve, plot_kwargs)
+        # and remove the ones that matplotlib doesn't recognise
+        plot_kwargs = curve_props.get_plot_kwargs()
+        new_curve = CurvesTabWidgetPresenter.replot_curve(ax, curve, plot_kwargs)
 
-        setattr(new_curve, 'errorevery', plot_kwargs.get('errorevery', 1))
-
-        # inverts either the current state of hide_errors
+        # Inverts either the current state of hide_errors
         # or the make_visible kwarg that forces a state:
-        # if make visible is True, then hide_errors must be False
+        # If make visible is True, then hide_errors must be False
         # for the intended effect
         curve_props.hide_errors = not curve_props.hide_errors if make_visible is None else not make_visible
 
-        # figure out how to get the correct dictionary for the curve
-        CurvesTabWidgetPresenter.toggle_errors(ax, new_curve, curve_props)
+        CurvesTabWidgetPresenter.toggle_errors(new_curve, curve_props)
+        CurvesTabWidgetPresenter.update_limits_and_legend(ax)
 
     def _update_plot_after(self, func, *args, **kwargs):
         """

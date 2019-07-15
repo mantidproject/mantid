@@ -188,7 +188,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if self.toolbar is not None:
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
-            # self.toolbar.home_clicked.connect(self.on_home_clicked)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
