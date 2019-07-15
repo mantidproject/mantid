@@ -37,7 +37,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
-        ('Print','Print the figure', 'mdi.printer', 'print_figure', None),
+        ('Print', 'Print the figure', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
         ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
         (None, None, None, None, None),

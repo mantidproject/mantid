@@ -86,5 +86,6 @@ Bugfixes
 - Entering an invalid number into a plot's axis editor no longer causes an uncaught error
 - Workbench's scaling of fonts when moved between monitors with different resolutions has been improved
 - The ErrorReporter window is now resizeable
+- The "Fit" button is now visible when plotting a spectrum with error bars
 
 :ref:`Release 4.1.0 <v4.1.0>`
