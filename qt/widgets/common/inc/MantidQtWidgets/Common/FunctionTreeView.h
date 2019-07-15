@@ -344,6 +344,7 @@ protected:
   std::vector<std::string> m_allowedCategories;
   SelectFunctionDialog *m_selectFunctionDialog;
   QtProperty *m_selectedFunctionProperty;
+  bool m_emitParameterValueChange = true;
 
   friend class CreateAttributePropertyForFunctionTreeView;
   friend class SetAttributeFromProperty;

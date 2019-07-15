@@ -14,6 +14,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
@@ -31,19 +32,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-
-namespace {
-class ScopedFalse {
-  bool &m_ref;
-  bool m_oldValue;
-
-public:
-  ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) {
-    m_ref = false;
-  }
-  ~ScopedFalse() { m_ref = m_oldValue; }
-};
-} // namespace
 
 /**
  * Constructor

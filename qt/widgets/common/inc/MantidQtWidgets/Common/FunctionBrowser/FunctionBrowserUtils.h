@@ -45,6 +45,17 @@ splitFunctionPrefix(const QString &prefix);
 EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, std::pair<QString, QString>>
 splitConstraintString(const QString &constraint);
 
+class ScopedFalse {
+  bool &m_ref;
+  bool m_oldValue;
+
+public:
+  ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) {
+    m_ref = false;
+  }
+  ~ScopedFalse() { m_ref = m_oldValue; }
+};
+
 } // namespace MantidWidgets
 } // namespace MantidQt
 

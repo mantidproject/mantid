@@ -538,6 +538,7 @@ void MultiDatasetFit::finishFit(bool error) {
       clearFitStatusInfo();
     }
   }
+  m_functionBrowser->setErrorsEnabled(!error);
 }
 
 /// Update the interface to have the same parameter values as in a function.

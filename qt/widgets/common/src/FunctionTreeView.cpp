@@ -251,7 +251,7 @@ void FunctionTreeView::createActions() {
   connect(m_actionRemoveConstraint, SIGNAL(triggered()), this,
           SLOT(removeConstraint()));
 
-  setErrorsEnabled(true);
+  setErrorsEnabled(false);
 }
 
 /**
@@ -1323,6 +1323,7 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop,
  */
 void FunctionTreeView::setParameter(const QString &paramName, double value) {
   auto prop = getParameterProperty(paramName);
+  ScopedFalse _false(m_emitParameterValueChange);
   m_parameterManager->setValue(prop, value);
 }
 
@@ -1735,7 +1736,10 @@ void FunctionTreeView::parameterPropertyChanged(QtProperty *prop) {
       m_tieManager->setValue(tieProp, newTie);
     }
   }
-  emit parameterChanged(getParameterName(prop));
+  if (m_emitParameterValueChange) {
+    setErrorsEnabled(false);
+    emit parameterChanged(getParameterName(prop));
+  }
 }
 
 /// Called when a tie property changes
