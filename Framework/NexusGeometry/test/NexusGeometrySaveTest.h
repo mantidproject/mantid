@@ -450,13 +450,12 @@ public:
                      std::invalid_argument &);
   }
 
-  void test_detetctor_bank_has_valid_location() {
+  void test_detetctor_bank_location_written_to_file_in_nx_format() {
 
-    // auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    // auto &compInfo = (*instr.first);
-    // auto &detInfo = (*instr.second);
-    // detids = detInfo.detectorIDs();
-    // detid = detids[some_index];
+    // auto instr =
+    // Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument); auto
+    // &compInfo = (*instr.first); auto &detInfo = (*instr.second); detids =
+    // detInfo.detectorIDs(); detid = detids[some_index];
   }
 };
 

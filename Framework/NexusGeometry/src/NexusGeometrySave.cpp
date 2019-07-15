@@ -172,8 +172,8 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
  * @param compInfo : componentInfo object.
  */
 inline void writeDetectorNumber(H5::Group &grp,
-                                const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo) {
-
+                                const Geometry::ComponentInfo &compInfo,
+                                const Geometry::DetectorInfo &detInfo) {
 
   std::vector<int> detIDs = detInfo.detectorIDs();
   const hsize_t dsz = (hsize_t)detIDs.size();
@@ -436,7 +436,8 @@ H5::Group sample(const H5::Group &parent,
  * @
  */
 std::vector<H5::Group> detectors(const H5::Group &parentGroup,
-                                 const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo) {
+                                 const Geometry::ComponentInfo &compInfo,
+                                 const Geometry::DetectorInfo &detInfo) {
 
   std::vector<H5::Group> detectorGroups;
   for (const size_t &i : compInfo.detectorsInSubtree(compInfo.root())) {
@@ -507,9 +508,7 @@ void saveInstrument(
                     std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
     const std::string &fullPath, Kernel::ProgressBase *reporter) {
 
-
-
-  const Geometry::ComponentInfo &compInfo = (*instrPair.first); 
+  const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
   /// Exception handling.
@@ -542,8 +541,7 @@ void saveInstrument(
     throw std::invalid_argument("The component has no source.");
   }
 
-
- // write instrument to file.
+  // write instrument to file.
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
   H5::Group root, instrument, sample, source;
   std::vector<H5::Group> detectors;
