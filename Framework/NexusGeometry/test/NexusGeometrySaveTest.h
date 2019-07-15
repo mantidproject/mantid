@@ -68,6 +68,10 @@ public:
     }
   }
 
+  // check if nx transformations writtern to group properly.
+  // void canGetTransformations(H5::H5File &file, std::string &groupName) {
+  //}
+
   // moves down the index through groups starting at root, and if
   // child has expected CLASS_TYPE, and is in parent group with expected parent
   bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,

@@ -553,14 +553,14 @@ void saveInstrument(
   // NXinstrument
   instrument = NexusGeometrySave::instrument(root, compInfo);
 
-  // NXdetector
-  detectors = NexusGeometrySave::detectors(instrument, compInfo, detInfo);
+  // NXdetectors
+  NexusGeometrySave::detectors(instrument, compInfo, detInfo);
 
   // NXsource
-  source = NexusGeometrySave::source(instrument, compInfo);
+  NexusGeometrySave::source(instrument, compInfo);
 
   // NXsample
-  sample = NexusGeometrySave::sample(root, compInfo);
+  NexusGeometrySave::sample(root, compInfo);
 
   file.close(); // close file
 
