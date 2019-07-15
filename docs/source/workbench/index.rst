@@ -32,6 +32,7 @@ allow us to keep developing the Workbench long after MantidPlot is no longer ava
 
 **Workbench Features**
     * :ref:`WorkbenchMainWindowMenu` Overview of the top-level menus.
+    * :ref:`WorkbenchSettings` The control panel for settings in workbench.
     * :ref:`WorkbenchWorkspaceToolbox` The area in which all workspaces currently loaded into Workbench can be accessed
       and edited from.
     * :ref:`WorkbenchAlgorithmToolbox` shows a list is all of the algorithms available to users to run on workspaces loaded into
