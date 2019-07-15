@@ -16,7 +16,7 @@ matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
 from qtpy.QtWidgets import QMenu
 # Pulling in the MantidAxes registers the 'mantid' projection
-from mantid.plots import MantidAxes
+from mantid.plots import MantidAxes  # noqa:F401
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import GuiTest
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
