@@ -47,7 +47,8 @@ Improvements
   in the number of hard crashes and a much more pleasant and productive experience overall.
 * Added the possibility of choosing the order of a sequential fit.
 * When plotting peaks in the Elemental Analysis interface, lines for different elements will appear in different colours.
-* The Frequency Domain Analysis GUI now allows users to load and group detectors.
+* The Frequency Domain Analysis GUI now allows users to load and group detectors and plotting different types of spectra.
+* Frequency spectra can also be created and a fit made to generate a result table.
 * The tabs for each of the interfaces can be detached and turned into separate windows, making for greater customizability
   of the interface.
 * When fitting data in the Muon Analysis v2 interface it is possible to customize the name assigned to the function
@@ -55,6 +56,8 @@ Improvements
 * The resulting workspaces (in the `Result` tab of Muon Analysis) will appear sorted by fitting function.
 * In the `Result` tab of Muon Analysis it is possible to search for specific log values, exclude specific value or
   display only selected ones.
+* In the `Select data to fit` window it is possible to search the spectra of interest and select the ones to be fitted.
+* The order of a sequential fit can then be chosen by dragging the spectral lines and ordering them
 
 
 Bug Fixes
